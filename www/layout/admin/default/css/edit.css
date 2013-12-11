@@ -1,0 +1,521 @@
+/*
+	= SUBVERSION DATA ===================================================
+	= $HeadURL: svn://svn/development/core_data/php/www/layout/admin/default/css/edit.css $
+	= $LastChangedBy: gullevek $
+	= $LastChangedDate: 2010-09-02 11:58:10 +0900 (Thu, 02 Sep 2010) $
+	= $LastChangedRevision: 3159 $
+	= SUBVERSION DATA ===================================================
+
+	********************************************************************
+	* AUTHOR: Clemens Schwaighofer
+	* DATE: 2005/04/14
+	* DESCRIPTION:
+	* CSS file for edit interface part
+	* HISTORY:
+	* 2005/06/30 (cs) added color for edit interface
+	* 2005/06/23 (cs) start adepting old file
+	********************************************************************
+*/
+
+/* * {
+	margin: 0;
+	padding: 0;
+} */
+
+body
+{
+	background-color: white;
+	color: black;
+	font-size : 8pt;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
+}
+
+.large
+{
+	font-size : 16pt;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
+}
+
+.big
+{
+	font-size : 12pt;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
+}
+
+.normal
+{
+	font-size : 9pt;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
+} 
+
+.small
+{
+	font-size : 8pt;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
+}
+
+.smallbold
+{
+	font-size : 8pt;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+}
+
+a:link
+{
+	color: #FF0000;
+	text-decoration: none;
+}
+
+a:active
+{
+	color: #FFFF00;
+	text-decoration: none;
+}
+
+a:visited
+{
+	color: #550000;
+	text-decoration: none;
+}
+
+a:hover, a.item_loaded:hover, a.item_deleted:hover, a.item_loaded_deleted:hover
+{
+	color: #FF0000;
+	background-color: #e5e5e5;
+	border-bottom: 1px dotted red;
+}
+
+a:focus, a.item_loaded:hover, a.item_deleted:hover, a.item_loaded_deleted:hover
+{
+	color: #ff0000;
+	background-color: #b3b3b3;
+	border-top: 1px dotted red;
+	border-bottom: 1px dotted red;
+}
+
+/* link highlight */
+a.item_loaded
+{
+	font-weight: bold;
+	color: #451010;
+	background-color: #d5d6d6;
+}
+
+a.item_deleted
+{
+	text-decoration: line-through;
+}
+
+a.item_loaded_deleted
+{
+	text-decoration: line-through;
+	font-weight: bold;
+	color: #451010;
+	background-color: #d5d6d6;
+}
+
+/* experimental */
+input[type="text"]
+{
+	border: 1px solid #999999;
+	background-color: #efefef;
+}
+
+input[type="password"]
+{
+	border: 1px solid #999999;
+}
+ 
+input[type="submit"]
+{
+	border: 1px solid #666666;
+}
+ 
+input[type="checkbox"]
+{
+	border: 1px solid #999999;
+}
+ 
+input[type="radio"]
+{
+	border: 1px solid #999999;
+}
+
+input[type="file"]
+{
+	border: 1px solid #999999;
+}
+
+input[type="button"]
+{
+	border: 1px solid #999999;
+}
+ 
+textarea
+{
+	border: 1px solid #999999;
+	background-color: #efefef;
+}
+ 
+select
+{
+	border: 1px solid #999999;
+	background-color: #efefef;
+}
+
+/* mouse over */ 
+input[type=submit]:hover, input[type=button]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="checkbox"]:hover, input[type="radio"]:hover, input[type="file"]:hover, textarea:hover, select:hover
+{
+	border: 1px dashed red;
+}
+
+/* selected */ 
+input[type=submit]:focus, input[type=button]:focus, input[type="password"]:focus, input[type="checkbox"]:focus, input[type="radio"]:focus, input[type="file"]:focus
+{
+	border: 1px solid red;
+	background-color: #ffffff;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus
+{
+	border: 1px solid red;
+	background-color: #ffffff;
+}
+
+/* error & status layouts for messges */
+.error
+{
+	border: 1px solid red;
+	margin: 5px;
+	padding: 2px;
+	color: red;
+	text-align: center;
+}
+
+.warning
+{
+	border: 1px solid #df7700;
+	margin: 5px;
+	padding: 2px;
+	color: #d57200;
+	text-align: center;
+}
+
+.info
+{
+	border: 1px solid #72C47E;
+	margin: 5px;
+	padding: 2px;
+	color: #1D731A;
+	text-align: center;
+}
+
+.div_error
+{
+	border: 1px solid red;
+	margin-top: 1px;
+	margin-bottom: 1px;
+}
+
+.div_warning
+{
+	border: 1px solid #df7700;
+}
+
+/* borders */
+.border_all
+{
+	border: 1px solid black;
+}
+
+.border_bottom_title
+{
+	font-weight: bold;
+	border-bottom: 1px solid black;
+}
+
+.border_top
+{
+	border-top: 1px solid #DCDCCC;
+}
+
+.border_all_error
+{
+	border: 1px solid red;
+}
+
+.border_group
+{
+	border: 1px solid #a89c5a;
+}
+
+.border_master
+{
+	border: 1px solid white;
+}
+
+.border_sub
+{
+	border: 1px solid gray;
+}
+
+.border_sub_sub
+{
+	border: 1px solid #e5ddba;
+}
+
+/* employee hardware/software borders */
+.border_hardware
+{
+	border: 2px solid black;
+	background-color: #e9e9e9;
+}
+
+.border_hardware_usage_end
+{
+	border: 2px solid red;
+	background-color: #e9e9e9;
+}
+
+.border_hardware_line
+{
+	border-left: 2px solid black;
+	border-bottom: 2px solid black;
+}
+
+.border_software
+{
+	border: 2px solid #a89c5a;
+	background-color: #d5d4c8;
+}
+
+.border_software_line
+{
+	border-left: 2px solid #a89c5a;
+	border-bottom: 2px solid #a89c5a;
+}
+
+.border_software_line_left
+{
+	border-left: 2px solid #a89c5a;
+	padding-bottom: 10px;
+}
+
+.border_software_line_bottom
+{
+	border-bottom: 2px solid #a89c5a;
+	padding-left: 2px;
+}
+
+/* highlight */
+.highlight
+{
+	background-color: #e7e7e7;
+	font-weight: bold;
+}
+
+/* hide & show */
+.visible
+{
+	visibility: visible;
+}
+
+.hidden
+{
+	visibility: hidden;
+	display: none;
+}
+
+/* spacer for line break in float elements */
+div.spacer
+{
+	clear: both;
+}
+
+/* unique definitions */
+/* main body */
+/* menu on top */
+.menu
+{
+	border-bottom: 1px solid #a4a4a4;
+	font-size: 10px;
+}
+
+.pagename
+{
+	text-align: center; font-size: 15px;
+	background-color: #e7e7e7;
+	font-weight: bold;
+	padding: 5px;
+}
+
+/* overlay side menu */
+.sidemenu
+{
+	border: 1px solid black;
+	background-color: white;
+}
+
+.buttongroup
+{
+	border: 1px solid #e5ddba;
+}
+
+/* input group field */
+/* normal */
+.input_group
+{
+	border: 1px solid #e5ddba;
+}
+
+/* loaded with id */
+.input_group_id
+{
+	border: 1px solid #8a7d3a;
+}
+
+/* deleted */
+.input_group_deleted
+{
+	border: 1px solid #8a7d3a;
+	background-color: #d5d4c8;
+}
+
+/* header part */
+/* normal */
+.input_group_header
+{
+	background-color: #e9e9e9;
+}
+
+/* loaded with id */
+.input_group_header_id
+{
+	background-color: #d5d5d5;
+}
+
+/* deleted */
+.input_group_header_deleted
+{
+	background-color: #bfb59d;
+}
+
+/* error & warning messages */
+.top_error_message
+{
+	margin: 5px;
+	padding: 10px;
+	border: 2px solid red;
+	font-size: 18px;
+	text-align: center;
+	color: red;
+}
+
+.top_inventory_number
+{
+	margin: 5px;
+	padding: 10px;
+	border: 2px solid orange;
+	font-size: 18px;
+	text-align: center;
+}
+
+.top_info_message
+{
+	border: 2px solid green;
+	margin: 5px;
+	padding: 10px;
+	text-align: center;
+	font-size: 12px;
+}
+
+.debug_message
+{
+	border-top: 1px solid #a4a4a4;
+	color: #a4a4a4;
+	font-size: 8px;
+}
+
+/* ***************************** ADMIN EDIT INTERFACE COLORS ********************************* */
+/* set all colors here and not in the config file */
+/* for edit interface */
+
+.menu_bgcolor
+{
+	background-color: #666666;
+}
+
+.menu_fgcolor
+{
+	background-color: #DDDDDD;
+}
+
+.menu_fgcolor_na
+{
+	background-color: #CCCCCC;
+}
+
+.menu_fgcolor_a
+{
+	background-color: #EEEEEE;
+}
+
+.edit_bgcolor
+{
+	background-color: #666666;
+}
+
+.edit_fgcolor
+{
+	background-color: #FFFFDF;
+}
+
+.edit_fgcolor_mod_a
+{
+	background-color: #CECEB5;
+}
+
+.edit_fgcolor_mod_b
+{
+	background-color: #DEDEC3;
+}
+
+.edit_fgcolor_2
+{
+	background-color: #AADAA2;
+}
+
+.edit_fgcolor_no
+{
+	background-color: #CECEB5;
+}
+
+.edit_fgcolor_alt
+{
+	background-color: #CCCCCC;
+}
+
+.edit_fgcolor_delete
+{
+	background-color: red;
+}
+
+.font_error
+{
+	color: red;
+}
+
+.edit_fgcolor_special
+{
+	background-color: #EEEEEE;
+}
+
+.edit_temp
+{	
+	background-color: #FFDF6F;
+}
+
+/* ***************************** ADMIN EDIT INTERFACE COLORS ********************************* */
+
+/* $Id: edit.css 3159 2010-09-02 02:58:10Z gullevek $ */

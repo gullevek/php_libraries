@@ -1,0 +1,3 @@
+php_value xdebug.profiler_output_dir /home/developer/html/adidas/20081208_catalogue/4dev/xdebug/
+php_value xdebug.profiler_output_name timestamp 
+php_value xdebug.profiler_enable 0

@@ -1,0 +1,122 @@
+{*
+	= SUBVERSION DATA ===================================================
+	= $HeadURL: svn://svn/development/core_data/php/www/layout/admin/default/templates/edit_body.tpl $
+	= $LastChangedBy: gullevek $
+	= $LastChangedDate: 2013-09-10 11:08:58 +0900 (Tue, 10 Sep 2013) $
+	= $LastChangedRevision: 4634 $
+	= SUBVERSION DATA ===================================================
+
+	********************************************************************
+	* AUTHOR: Clemens Schwaighofer
+	* DATE: 2005/06/23
+	* DESCRIPTION:
+	* edit body part
+	* HISTORY:
+	********************************************************************
+*}
+
+<html>
+<head>
+	<title>{$HTML_TITLE}</title>
+	<meta http-equiv="Content-Type" content="text/html; charset={$DEFAULT_ENCODING}">
+	{if $STYLESHEET}
+	<link rel=stylesheet type="text/css" href="{$css}{$STYLESHEET}">
+	{/if}
+	{if $JAVASCRIPT}
+	<script language="JavaScript" src="{$js}{$JAVASCRIPT}"></script>
+	{/if}
+	{if $DATE_JAVASCRIPT}
+	<script language="JavaScript" src="{$JS}{$DATE_JAVASCRIPT}"></script>
+	{/if}
+</head>
+<body>
+<table width="{$table_width}" border="0" cellpadding="0" cellspacing="1">
+<!-- ERROR MSG START //-->
+{foreach from=$form_error_msg item=element key=key name=loop}
+    {include file="edit_error_msg.tpl"}
+{/foreach}
+<!-- ERROR MSG END //-->
+<!-- TOP MENU START //-->
+<tr>
+  <td width="{$table_width}" class="menu_bgcolor" valign="top">
+	 <table width="100%" border="0" cellpadding="2" cellspacing="1">
+	 <form method="post">
+	 <tr>
+		<td bgcolor="{$HEADER_COLOR}" class="normal">
+			Hello <b>{$USER_NAME|upper}</b> [{$EUID}] from the group <b>{$GROUP_NAME}</b> with Access Level <b>{$GROUP_LEVEL}</b>
+		</td>
+		<td bgcolor="{$HEADER_COLOR}" class="normal" align="right">
+			<input type="submit" name="login_logout" value="Logout">
+		</td>
+	 </tr>
+	 </form>
+	 </table>
+	 <table width="100%" border="0" cellpadding="2" cellspacing="1">
+	 <tr>
+	{* foreach menu *}
+	{foreach from=$menu_data item=menu_element}
+	{* if split factor is reached *}
+		{if $menu_element.splitfactor_in}
+	 	<td class="menu_fgcolor" class="small" valign="top">
+		{/if}
+		{if $menu_element.position}
+			<b><a href="{$menu_element.filename}">{$menu_element.pagename}</a></b><br>
+		{else}
+			{if !$menu_element.popup}
+			<a href="{$menu_element.filename}">{$menu_element.pagename}</a><br>
+			{else}
+			<a href="javascript:pop('{$menu_element.filename}','{$menu_element.rand}','status=no,scrollbars=yes,width={$menu_element.width},height={$menu_element.height}');">{$menu_element.pagename}</a><br>
+			{/if}
+		{/if}
+		{if $menu_element.splitfactor_out}
+		</td>
+		{/if}
+	{/foreach}
+	 </tr>
+	 </table>
+	 <table width="100%" border="0" cellpadding="10" cellspacing="1">
+	 <tr>
+		<td class="edit_fgcolor_alt" class="headline" align="center">
+			{$page_name}
+		</td>
+	 </tr>
+	 </table>
+  </td>
+</tr>
+<!-- TOP MENU END //-->
+<tr>
+  <td width="{$table_width}" class="edit_bgcolor">
+	 <form method="post" name="edit_form">
+	 <table width="100%" border="0" cellpadding="2" cellspacing="1">
+	 <!-- LOAD START //-->
+	{include file="edit_load.tpl"}
+	 <!-- LOAD END //-->
+	 <!-- NEW START //-->
+	{include file="edit_new.tpl"}
+	{* $form_create_new*}
+	 <!-- NEW END //-->
+	{if $form_yes}
+		{include file="edit_save_delete.tpl"}
+		{if $form_my_page_name == "edit_pages" && $filename_exist}
+	 <tr>
+		<td class="edit_fgcolor" class="normal">
+			Filename:
+		</td>
+		<td class="edit_fgcolor" class="normal">
+			{$filename}
+			<input type="hidden" name="filename" value="{$filename}">
+		</td>
+	 </tr>
+		{/if}
+		{include file="edit_elements.tpl"}
+		{include file="edit_hidden.tpl"}
+		{include file="edit_save_delete.tpl"}
+	{/if}
+	 </table>
+	 </form>
+  </td>
+</tr>
+</table>
+</body>
+</html>
+{* $Id: edit_body.tpl 4634 2013-09-10 02:08:58Z gullevek $ *}
