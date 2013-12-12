@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Admin.Backend.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-09-10 11:08:58 +0900 (Tue, 10 Sep 2013) $
-	* $LastChangedRevision: 4634 $
+	* $LastChangedDate: 2013-12-12 13:31:02 +0900 (Thu, 12 Dec 2013) $
+	* $LastChangedRevision: 4739 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2006/08/15
@@ -83,9 +83,9 @@
 			$this->class_info["adbBackend"] = array(
 				"class_name" => "Admin Interface Backend",
 				"class_version" => "0.1.0",
-				"class_revision" => '$LastChangedRevision: 4634 $',
+				"class_revision" => '$LastChangedRevision: 4739 $',
 				"class_created" => "2006/08/15",
-				"class_last_changed" => '$LastChangedDate: 2013-09-10 11:08:58 +0900 (Tue, 10 Sep 2013) $',
+				"class_last_changed" => '$LastChangedDate: 2013-12-12 13:31:02 +0900 (Thu, 12 Dec 2013) $',
 				"class_author" => "cs/gullevek/jp"
 			);
 
@@ -148,7 +148,7 @@
 			$q .= "(".$_SESSION['EUID'].", NOW(), '".$this->db_escape_string($event)."', '".$data."', '".$data_binary."', '".$this->page_name."', ";
 			$q .= "'".$_SERVER["REMOTE_ADDR"]."', '".$this->db_escape_string($_SERVER['HTTP_USER_AGENT'])."', '".$this->db_escape_string($_SERVER['HTTP_REFERER'])."', '".$this->db_escape_string($_SERVER['SCRIPT_FILENAME'])."', '".$this->db_escape_string($_SERVER['QUERY_STRING'])."', '".$this->db_escape_string($_SERVER['SERVER_NAME'])."', '".$this->db_escape_string($_SERVER['HTTP_HOST'])."', '".$this->db_escape_string($_SERVER['HTTP_ACCEPT'])."', '".$this->db_escape_string($_SERVER['HTTP_ACCEPT_CHARSET'])."', '".$this->db_escape_string($_SERVER['HTTP_ACCEPT_ENCODING'])."', '".session_id()."', ";
 			$q .= "'".$this->db_escape_string($this->action)."', '".$this->db_escape_string($this->action_id)."', '".$this->db_escape_string($this->action_yes)."', '".$this->db_escape_string($this->action_flag)."', '".$this->db_escape_string($this->action_menu)."', '".$this->db_escape_string($this->action_loaded)."', '".$this->db_escape_string($this->action_value)."', '".$this->db_escape_string($this->action_error)."')";
-			$this->db_exec($q);
+			$this->db_exec($q, 'edit_log_id');
 		}
 
 
@@ -341,5 +341,5 @@
 
 	}
 
-	// $Id: Class.Admin.Backend.inc 4634 2013-09-10 02:08:58Z gullevek $
+	// $Id: Class.Admin.Backend.inc 4739 2013-12-12 04:31:02Z gullevek $
 ?>
