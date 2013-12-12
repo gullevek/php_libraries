@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/db_pgsql.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-10-11 16:54:21 +0900 (Fri, 11 Oct 2013) $
-	* $LastChangedRevision: 4689 $
+	* $LastChangedDate: 2013-12-12 16:28:35 +0900 (Thu, 12 Dec 2013) $
+	* $LastChangedRevision: 4741 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/04/09 
@@ -232,13 +232,31 @@
 			if ($table)
 			{
 				// read from table the PK name
-				$q = "SELECT c.column_name ";
+				// slower version
+/*				$q = "SELECT c.column_name ";
 				$q .= "FROM information_schema.table_constraints tc ";
 				$q .= "JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) ";
 				$q .= "JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name ";
 				$q .= "WHERE constraint_type = 'PRIMARY KEY' and tc.table_name = '".$table."'";
 				if ($schema)
-					$q .= " AND c.table_schema = '".$schema."'";
+					$q .= " AND c.table_schema = '".$schema."'"; */
+				// faster primary key get
+				$q = "SELECT pg_attribute.attname AS column_name, format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type ";
+				$q .= "FROM pg_index, pg_class, pg_attribute";
+				if ($schema)
+					$q .= ", pg_namespace ";
+				$q .= "WHERE ";
+				// regclass translates the OID to the name
+				$q .= "pg_class.oid = '".$table."'::regclass AND ";
+					$q .= "indrelid = pg_class.oid AND ";
+				if ($schema)
+				{
+					$q .= "nspname = '".$schema."' AND ";
+					$q .= "pg_class.relnamespace = pg_namespace.oid AND ";
+				}
+				$q .= "pg_attribute.attrelid = pg_class.oid AND ";
+				$q .= "pg_attribute.attnum = any(pg_index.indkey) ";
+				$q .= "AND indisprimary";
 				$cursor = $this->_db_query($q);
 				return $this->_db_fetch_array($cursor)['column_name'];
 			}
@@ -364,5 +382,5 @@
 		}
 	}
 
-	// $Id: db_pgsql.inc 4689 2013-10-11 07:54:21Z gullevek $
+	// $Id: db_pgsql.inc 4741 2013-12-12 07:28:35Z gullevek $
 ?>

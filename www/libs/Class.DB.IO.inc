@@ -2,8 +2,8 @@
 	/********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.DB.IO.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-10-24 16:05:16 +0900 (Thu, 24 Oct 2013) $
-	* $LastChangedRevision: 4706 $
+	* $LastChangedDate: 2013-12-12 16:28:35 +0900 (Thu, 12 Dec 2013) $
+	* $LastChangedRevision: 4741 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2000/11/23
@@ -369,9 +369,9 @@
 			$this->class_info['db_io']=array(
 				'class_name' => 'DB IO',
 				'class_version' => '4.1.0',
-				'class_revision' => '$LastChangedRevision: 4706 $',
+				'class_revision' => '$LastChangedRevision: 4741 $',
 				'class_created' => '2000-11-23',
-				'class_last_changed' => '$LastChangedDate: 2013-10-24 16:05:16 +0900 (Thu, 24 Oct 2013) $',
+				'class_last_changed' => '$LastChangedDate: 2013-12-12 16:28:35 +0900 (Thu, 12 Dec 2013) $',
 				'class_author' => 'Clemens Schwaighofer'
 			);
 		}
@@ -1049,6 +1049,8 @@
 		// DESC   executes the query and returns & sets the internal cursor
 		//        fruthermore this functions also sets varios other vars 
 		//        like num_rows, num_fields, etc depending on query
+		//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional 
+		//        read from the database for the PK NAME
 		public function db_exec($query = 0, $pk_name = '')
 		{
 			// prepare and check if we can actually run it
@@ -1070,6 +1072,8 @@
 		//        pk_name -> optional primary key name, only used with insert for returning call
 		// RETURN true if async query was sent ok, false if error happened
 		// DESC   executres the query async so other methods can be run during this
+		//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional 
+		//        read from the database for the PK NAME
 		// NEEDS  db_check_async
 		public function db_exec_async($query, $pk_name = '')
 		{
@@ -1257,6 +1261,8 @@
 		// PARAMS $stm_name, $query, $pk_name: optional
 		// RETURN false on error
 		// DESC   prepares a query
+		//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional 
+		//        read from the database for the PK NAME
 		public function db_prepare($stm_name, $query, $pk_name = '')
 		{
 			if (!$query)
@@ -1652,5 +1658,5 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 		}
 	} // end if db class
 
-	// $Id: Class.DB.IO.inc 4706 2013-10-24 07:05:16Z gullevek $
+	// $Id: Class.DB.IO.inc 4741 2013-12-12 07:28:35Z gullevek $
 ?>
