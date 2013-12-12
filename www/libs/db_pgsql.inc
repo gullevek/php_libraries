@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/db_pgsql.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-12-12 16:28:35 +0900 (Thu, 12 Dec 2013) $
-	* $LastChangedRevision: 4741 $
+	* $LastChangedDate: 2013-12-12 18:53:03 +0900 (Thu, 12 Dec 2013) $
+	* $LastChangedRevision: 4743 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/04/09 
@@ -242,7 +242,7 @@
 					$q .= " AND c.table_schema = '".$schema."'"; */
 				// faster primary key get
 				$q = "SELECT pg_attribute.attname AS column_name, format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type ";
-				$q .= "FROM pg_index, pg_class, pg_attribute";
+				$q .= "FROM pg_index, pg_class, pg_attribute ";
 				if ($schema)
 					$q .= ", pg_namespace ";
 				$q .= "WHERE ";
@@ -382,5 +382,5 @@
 		}
 	}
 
-	// $Id: db_pgsql.inc 4741 2013-12-12 07:28:35Z gullevek $
+	// $Id: db_pgsql.inc 4743 2013-12-12 09:53:03Z gullevek $
 ?>
