@@ -1,5 +1,5 @@
 <?
-	// $Id: class_test.php 4706 2013-10-24 07:05:16Z gullevek $
+	// $Id: class_test.php 4793 2014-01-07 02:51:59Z gullevek $
 	$DEBUG_ALL = 1;
 	$PRINT_ALL = 1;
 	$DB_DEBUG = 1;
@@ -11,14 +11,15 @@
 	define('USE_DATABASE', true);
 	// sample config
 	require("config.inc");
+	// set session name
+	DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
+//	session_name(EDIT_SESSION_NAME);
+//	session_start();
 	// basic class test file
 //	require(LIBS."Class.Basic.inc");
 //	require(LIBS."Class.DB.IO.inc");
 	require(LIBS."Class.Login.inc");
 	require(LIBS."Class.Admin.Backend.inc");
-
-	session_name(EDIT_SESSION_NAME);
-	session_start();
 
 	$lang = 'en_utf8';
 

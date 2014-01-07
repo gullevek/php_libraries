@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Basic.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-12-11 15:29:51 +0900 (Wed, 11 Dec 2013) $
-	* $LastChangedRevision: 4737 $
+	* $LastChangedDate: 2014-01-07 11:51:59 +0900 (Tue, 07 Jan 2014) $
+	* $LastChangedRevision: 4793 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/03/24
@@ -61,6 +61,7 @@
 	*   _crc32b -> behaves like the hash("crc32b") in php < 5.2.8. this function will flip the hash like it was (wrong)
 	*              before if a new php version is found
 	*   crypt* -> encrypt and decrypt login string data, used by Login class
+	*   setFormToken/validateFormToken -> form protection with token
 	*
 	* PRIVATE METHODS
 	*	fdebug_fp -> opens and closes file, called from fdebug method
@@ -151,6 +152,13 @@
 		public $cryptIterationCost = 7; // this is for staying backwards compatible with the old ones
 		public $cryptSaltSize = 22; // default 22 chars for blowfish, 2 for STD DES, 8 for MD5,
 
+		// session name
+		private $session_name = '';
+		private $session_id = '';
+
+		// form token (used for form validation)
+		private $form_token = '';
+
 		// METHOD __construct
 		// PARAMS debug_all (0)/1, echo_all (1)/0, print_all (0)/1
 		// RETURN none
@@ -167,9 +175,9 @@
 			$this->class_info["basic"] = array (
 				"class_name" => "Basic",
 				"class_version" => "0.9.0",
-				"class_revision" => '$LastChangedRevision: 4737 $',
+				"class_revision" => '$LastChangedRevision: 4793 $',
 				"class_created" => "2003-03-24",
-				"class_last_changed" => '$LastChangedDate: 2013-12-11 15:29:51 +0900 (Wed, 11 Dec 2013) $',
+				"class_last_changed" => '$LastChangedDate: 2014-01-07 11:51:59 +0900 (Tue, 07 Jan 2014) $',
 				"class_author" => 'Clemens "Gullevek" Schwaighofer (.at)'
 			); 
 
@@ -260,6 +268,22 @@
 				'.*@pipopa\.ne\.jp$' => 'willcom', # willcom paipo! (kids)
 				'.*@([a-z0-9]{2,4}\.)?pdx\.ne\.jp$' => 'willcom' # actually only di,dj,dk,wm -> all others are "wrong", but none also allowed?
 			);
+
+			// initial the session if there is no session running already
+			if (!session_id())
+			{
+				// check if we have an external session name given, else skip this step
+				if (SET_SESSION_NAME)
+				{
+					// set the session name for possible later check
+					$this->session_name = SET_SESSION_NAME;
+					session_name($this->session_name);
+				}
+				// start session
+				session_start();
+				// set internal session id, we can use that later for protection check
+				$this->session_id = session_id();
+			}
 
 			// init crypt settings
 			$this->cryptInit();
@@ -1782,7 +1806,27 @@
 			return htmlentities($string, ENT_COMPAT|ENT_HTML401, 'UTF-8', false);
 		}
 
+		// METHOD: setFormToken
+		// PARAMS: session name, if not set then default is form_token
+		// RETURN: form token
+		// DESC  : sets a form token in a session and returns form token
+		public function setFormToken($name = 'form_token')
+		{
+			// current hard set to sha256
+			$token = uniqid(hash('sha256', rand()));
+			$_SESSION[$name] = $token;
+			return $token;
+		}
+
+		// METHOD: validateFormToken
+		// PARAMS: form token, session name (default form_token)
+		// RETURN: true or false
+		// DESC  : checks if the form token matches the session set form token
+		public function validateFormToken($token, $name = 'form_token')
+		{
+			return $_SESSION[$name] === $token;
+		}
 	}
 
-	// $Id: Class.Basic.inc 4737 2013-12-11 06:29:51Z gullevek $
+	// $Id: Class.Basic.inc 4793 2014-01-07 02:51:59Z gullevek $
 ?>

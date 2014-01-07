@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Login.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-09-10 11:08:58 +0900 (Tue, 10 Sep 2013) $
-	* $LastChangedRevision: 4634 $
+	* $LastChangedDate: 2014-01-07 11:51:59 +0900 (Tue, 07 Jan 2014) $
+	* $LastChangedRevision: 4793 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2000/06/01
@@ -104,6 +104,9 @@
 		// DESC  : cunstroctuor, does ALL, opens db, works through connection checks, closes itself
 		public function __construct($db_config, $lang = 'en_utf8', $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
 		{
+			// create db connection and init base class
+			parent::__construct($db_config, $debug, $db_debug, $echo, $print);
+
 			// no session could be found at all
 			if (!session_id())
 			{
@@ -118,8 +121,6 @@
 			require_once(LIBS."Class.l10n.inc");
 			$this->l = new l10n($lang);
 
-			// create db connection
-			parent::__construct($db_config, $debug, $db_debug, $echo, $print);
 			// if we have a search path we need to set it, to use the correct DB to login
 			// check what schema to use. if there is a login schema use this, else check if there is a schema set in the config, or fall back to DB_SCHEMA if this exists, if this also does not exists use public schema
 			$SCHEMA = defined('LOGIN_DB_SCHEMA') ? LOGIN_DB_SCHEMA : ($db_config['db_schema'] ? $db_config['db_schema'] : (defined('DB_SCHEMA') ? DB_SCHEMA : 'public'));
@@ -171,8 +172,8 @@
 			$this->class_info["login"] = array(
 				"class_name" => "Login",
 				"class_version" => "4.0.0",
-				"class_revision" => '$LastChangedRevision: 4634 $',
-				"class_last_changed" => '$LastChangedDate: 2013-09-10 11:08:58 +0900 (Tue, 10 Sep 2013) $',
+				"class_revision" => '$LastChangedRevision: 4793 $',
+				"class_last_changed" => '$LastChangedDate: 2014-01-07 11:51:59 +0900 (Tue, 07 Jan 2014) $',
 				"class_created" => "2000-06-01",
 				"class_author" => "cs/gullevek/at"
 			);
@@ -971,5 +972,5 @@ EOM;
 
 	} // close class
 
-	// $Id: Class.Login.inc 4634 2013-09-10 02:08:58Z gullevek $
+	// $Id: Class.Login.inc 4793 2014-01-07 02:51:59Z gullevek $
 ?>
