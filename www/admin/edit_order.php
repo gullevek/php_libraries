@@ -31,12 +31,11 @@
 		$ECHO_ALL = 0;
 //		$DEBUG_TMPL = 0;
 	}
-	include(LIBS."Class.DB.IO.inc");
-	include(LIBS."Class.Login.inc");
+	// set session name
+	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
+	require(LIBS."Class.Login.inc");
+	require(LIBS."Class.DB.IO.inc");
 	require(LIBS.'Class.Smarty.Extend.inc');
-	// start session here
-	session_name(EDIT_SESSION_NAME);
-	session_start();
 
 	// default lang
 	if (!$lang)

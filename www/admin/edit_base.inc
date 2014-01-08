@@ -42,13 +42,14 @@
 		$ECHO_ALL = 0;
 //		$DEBUG_TMPL = 0;
 	}
-	include(LIBS."Class.Form.Generate.inc");
-	include(LIBS."Class.Login.inc");
+	// set session name here
+	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
+	// login class
+	require(LIBS."Class.Login.inc");
+	// form generate for edit interface
+	require(LIBS."Class.Form.Generate.inc");
 	// Smarty: and the small extend for l10n calls
 	require(LIBS.'Class.Smarty.Extend.inc');
-	// start session here
-	session_name(EDIT_SESSION_NAME);
-	session_start();
 
 	// set default lang if not set otherwise
 	if (!$lang)

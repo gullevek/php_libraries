@@ -516,7 +516,7 @@
 			if (!$this->acl['info']['admin'])
 			{
 				// this is the base if nothing is set
-				$this->acl['acl']['user'] = DEFAULT_ACL_LEVEL;
+				$this->acl['acl']['user'] = DEFAULT_ACL_LEVEL; // old base ACL
 				$this->acl['acl']['max'] = DEFAULT_ACL_LEVEL;
 				// group ACL 0
 				if ($_SESSION['GROUP_ACL_LEVEL'] != -1)
@@ -566,6 +566,11 @@
 				$this->acl['acl']['edit_access'][$unit['id']] = !$this->acl['info']['admin'] ? ($unit['acl_level'] != -1 ? $unit['acl_level'] : $this->acl['acl']['page']) : 100;
 				$this->acl['info']['edit_access'][$unit['id']] = $unit['name'];
 			}
+			// flag if to show extra edit access drop downs (because user has multiple groups assigned)
+			if (count($_SESSION['UNIT'] > 1))
+				$this->acl['acl']['show_ea_extra'] = 1;
+			else
+				$this->acl['acl']['show_ea_extra'] = 0;
 			// set the default edit access
 			$this->acl['info']['default_edit_access'] = $_SESSION['UNIT_DEFAULT'];
 			// integrate the default_acl list, but only for the keyword -> level

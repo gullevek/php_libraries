@@ -21,6 +21,7 @@
 		$TEMPLATE = DEFAULT_TEMPLATE;
 	$TEMPLATE_DIR = $TEMPLATE.'/';
 	// master template
+	$MASTER_TEMPLATE_NAME = '';
 	if (!$MASTER_TEMPLATE_NAME)
 		$MASTER_TEMPLATE_NAME = MASTER_TEMPLATE_NAME;
 
@@ -40,7 +41,7 @@
 
 	// set include & template names
 	$CONTENT_INCLUDE = str_replace(".php", ".tpl", $cms->page_name);
-	$FORM_NAME = str_replace(".php", "", $cms->page_name);
+	$FORM_NAME = !$FORM_NAME ? str_replace(".php", "", $cms->page_name) : $FORM_NAME;
 	// strip tpl and replace it with inc
 	// php include file per page
 	$cms->INC_TEMPLATE_NAME = str_replace(".tpl", ".inc", $CONTENT_INCLUDE);
@@ -62,6 +63,8 @@
 	$cms->pictures = LAYOUT.$TEMPLATE_DIR.IMAGES."/";
 	$cms->cache_pictures = LAYOUT.$TEMPLATE_DIR.CACHE.IMAGES.'/';
 	$cms->cache_pictures_root = ROOT.$cms->cache_pictures;
+	if (!is_dir($cms->cache_pictures_root))
+		mkdir($cms->cache_pictures_root);
 	$template_set = $TEMPLATE;
 
 	// if we don't find the master template, set the template path back AND set the insert template as absolute path
@@ -107,7 +110,7 @@
 		$smarty->l10n->l10nReloadMOfile($lang, $cms->lang_dir);
 	}
 
-	$cms->debug("LANGUAGE", "L: $lang | ".$cms->lang_dir." | MO File: ".$cms->l->mofile);
+//	$cms->debug("LANGUAGE", "L: $lang | ".$cms->lang_dir." | MO File: ".$cms->l->mofile);
 	$cms->debug("LANGUAGE", "SL: ".$_SESSION['DEFAULT_CHARSET']." | ".$_SESSION['LANG']." | ".$_SESSION['DEFAULT_LANG']);
 	$cms->debug("TEMPLATE", "P: ".$smarty->getTemplateDir()[0]);
 
