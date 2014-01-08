@@ -790,6 +790,15 @@
 			return $this->db_exec($q);
 		}
 
+		// METHOD db_get_schema
+		// PARAMS none
+		// RETURN db_schema current set
+		// DESC   returns the current set db schema
+		public function db_get_schema()
+		{
+			return $this->db_schema;
+		}
+
 		// METHOD db_set_encoding
 		// PARAMS valid encoding name, so the the data gets converted to this encoding
 		// RETURN false, or true of db exec encoding set

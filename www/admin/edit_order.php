@@ -2,8 +2,8 @@
 	/********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/admin/edit_order.php $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-10-22 09:30:40 +0900 (Tue, 22 Oct 2013) $
-	* $LastChangedRevision: 4704 $
+	* $LastChangedDate: 2014-01-08 13:09:19 +0900 (Wed, 08 Jan 2014) $
+	* $LastChangedRevision: 4807 $
 	*********************************************************************
 	* AUTHOR: Clemens Schwaighofer 
 	* CREATED: 2001/07/11
@@ -200,7 +200,7 @@
 
 	// debug data, if DEBUG flag is on, this data is print out
 	$DEBUG_DATA['DEBUG'] = $DEBUG_TMPL;
-	$DEBUG_DATA['Id'] = '$Id: edit_order.php 4704 2013-10-22 00:30:40Z gullevek $';
+	$DEBUG_DATA['Id'] = '$Id: edit_order.php 4807 2014-01-08 04:09:19Z gullevek $';
 
 	// create main data array
 	$CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);
