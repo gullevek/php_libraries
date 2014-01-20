@@ -1,5 +1,5 @@
 <?
-	// $Id: class_test.php 4793 2014-01-07 02:51:59Z gullevek $
+	// $Id: class_test.php 4831 2014-01-20 03:27:10Z gullevek $
 	$DEBUG_ALL = 1;
 	$PRINT_ALL = 1;
 	$DB_DEBUG = 1;
@@ -78,7 +78,7 @@
 	}
 
 	$status = $basic->db_exec("INSERT INTO foo (test) VALUES ('FOO TEST ".time()."') RETURNING test");
-	print "DIREC INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id."<br>";
+	print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id."<br>";
 	print "DIRECT INSERT PREVIOUS INSERTED: ".print_r($basic->db_return_row("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>";
 	$basic->db_prepare("ins_foo", "INSERT INTO foo (test) VALUES ($1)");
 	$status = $basic->db_execute("ins_foo", array('BAR TEST '.time()));
@@ -86,7 +86,7 @@
 	print "PREPARE INSERT PREVIOUS INSERTED: ".print_r($basic->db_return_row("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>";
 
 	# async test queries
-	$basic->db_exec_async("SELECT test FROM foo, (SELECT pg_sleep(10)) as sub WHERE foo_id IN (27, 50, 67, 44, 10)");
+/*	$basic->db_exec_async("SELECT test FROM foo, (SELECT pg_sleep(10)) as sub WHERE foo_id IN (27, 50, 67, 44, 10)");
 	echo "WAITING FOR ASYNC: ";
 	$chars = array('|', '/', '-', '\\');
 	while (($ret = $basic->db_check_async()) === true)
@@ -116,7 +116,7 @@
 		flush();
 	}
 	print "<br>END STATUS: ".$ret." | PK: ".$basic->insert_id."<br>";
-	print "ASYNC PREVIOUS INSERTED: ".print_r($basic->db_return_row("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>";
+	print "ASYNC PREVIOUS INSERTED: ".print_r($basic->db_return_row("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>"; */
 
 	$to_db_version = '9.1.9';
 	print "VERSION DB: ".$basic->db_version()."<br>";
@@ -125,6 +125,16 @@
 	print "DB Version equal $to_db_version: ".$basic->db_compare_version('='.$to_db_version)."<br>";
 	print "DB Version bigger than $to_db_version: ".$basic->db_compare_version('>='.$to_db_version)."<br>";
 	print "DB Version bigger $to_db_version: ".$basic->db_compare_version('>'.$to_db_version)."<br>";
+
+	// search path check
+	$q = "SHOW search_path";
+	$cursor = $basic->db_exec($q);
+	$data = $basic->db_fetch_array($cursor)['search_path'];
+	print "RETURN DATA FOR search_path: ".$data."<br>";
+//	print "RETURN DATA FOR search_path: ".$basic->print_ar($data)."<br>";
+	// insert something into test.schema_test and see if we get the PK back
+	$status = $basic->db_exec("INSERT INTO test.schema_test (contents, id) VALUES ('TIME: ".time()."', ".rand(1, 10).")");
+	print "OTHER SCHEMA INSERT STATUS: ".$status." | PK NAME: ".$basic->pk_name.", PRIMARY KEY: ".$basic->insert_id."<br>";
 
 	// print error messages
 	print $basic->print_error_msg();

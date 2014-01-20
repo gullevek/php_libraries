@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/db_pgsql.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-12-12 18:53:03 +0900 (Thu, 12 Dec 2013) $
-	* $LastChangedRevision: 4743 $
+	* $LastChangedDate: 2014-01-20 12:27:10 +0900 (Mon, 20 Jan 2014) $
+	* $LastChangedRevision: 4831 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/04/09 
@@ -231,15 +231,19 @@
 		{
 			if ($table)
 			{
-				// read from table the PK name
-				// slower version
-/*				$q = "SELECT c.column_name ";
-				$q .= "FROM information_schema.table_constraints tc ";
-				$q .= "JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) ";
-				$q .= "JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name ";
-				$q .= "WHERE constraint_type = 'PRIMARY KEY' and tc.table_name = '".$table."'";
+				// check if schema set is different from schema given, only needed if schema is not empty
+				$table_prefix = '';
 				if ($schema)
-					$q .= " AND c.table_schema = '".$schema."'"; */
+				{   
+					$q = "SHOW search_path";
+					$cursor = $this->_db_query($q);
+					$search_path = $this->_db_fetch_array($cursor)['search_path'];
+					if ($search_path != $schema)
+					{   
+						$table_prefix = $schema.'.';
+					}
+				}
+				// read from table the PK name
 				// faster primary key get
 				$q = "SELECT pg_attribute.attname AS column_name, format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type ";
 				$q .= "FROM pg_index, pg_class, pg_attribute ";
@@ -247,7 +251,7 @@
 					$q .= ", pg_namespace ";
 				$q .= "WHERE ";
 				// regclass translates the OID to the name
-				$q .= "pg_class.oid = '".$table."'::regclass AND ";
+				$q .= "pg_class.oid = '".$table_prefix.$table."'::regclass AND ";
 					$q .= "indrelid = pg_class.oid AND ";
 				if ($schema)
 				{
@@ -258,7 +262,10 @@
 				$q .= "pg_attribute.attnum = any(pg_index.indkey) ";
 				$q .= "AND indisprimary";
 				$cursor = $this->_db_query($q);
-				return $this->_db_fetch_array($cursor)['column_name'];
+				if ($cursor)
+					return $this->_db_fetch_array($cursor)['column_name'];
+				else
+					return false;
 			}
 			else
 			{
@@ -382,5 +389,5 @@
 		}
 	}
 
-	// $Id: db_pgsql.inc 4743 2013-12-12 09:53:03Z gullevek $
+	// $Id: db_pgsql.inc 4831 2014-01-20 03:27:10Z gullevek $
 ?>

@@ -2,8 +2,8 @@
 	/********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.DB.IO.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-08 15:03:09 +0900 (Wed, 08 Jan 2014) $
-	* $LastChangedRevision: 4818 $
+	* $LastChangedDate: 2014-01-20 12:27:10 +0900 (Mon, 20 Jan 2014) $
+	* $LastChangedRevision: 4831 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2000/11/23
@@ -369,9 +369,9 @@
 			$this->class_info['db_io']=array(
 				'class_name' => 'DB IO',
 				'class_version' => '4.1.0',
-				'class_revision' => '$LastChangedRevision: 4818 $',
+				'class_revision' => '$LastChangedRevision: 4831 $',
 				'class_created' => '2000-11-23',
-				'class_last_changed' => '$LastChangedDate: 2014-01-08 15:03:09 +0900 (Wed, 08 Jan 2014) $',
+				'class_last_changed' => '$LastChangedDate: 2014-01-20 12:27:10 +0900 (Mon, 20 Jan 2014) $',
 				'class_author' => 'Clemens Schwaighofer'
 			);
 		}
@@ -677,7 +677,7 @@
 			}
 			// for DEBUG, only on first time ;)
 			if ($this->db_debug)
-				$this->_db_debug('db', $this->query, 'db_exec', 'Q');
+				$this->_db_debug('db', $this->query, '_db_prepare_exec', 'Q');
 			// import protection, md5 needed
 			$md5 = md5($this->query);
 			// if the array index does not exists set it 0
@@ -1667,5 +1667,5 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 		}
 	} // end if db class
 
-	// $Id: Class.DB.IO.inc 4818 2014-01-08 06:03:09Z gullevek $
+	// $Id: Class.DB.IO.inc 4831 2014-01-20 03:27:10Z gullevek $
 ?>
