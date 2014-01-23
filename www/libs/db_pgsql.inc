@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/db_pgsql.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-23 12:03:55 +0900 (Thu, 23 Jan 2014) $
-	* $LastChangedRevision: 4835 $
+	* $LastChangedDate: 2014-01-23 12:57:54 +0900 (Thu, 23 Jan 2014) $
+	* $LastChangedRevision: 4836 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/04/09 
@@ -93,11 +93,10 @@
 		// DESC  : wrapper for pg_get_result
 		public function _db_get_result()
 		{
+			$this->last_error_query = '';
 			$result = pg_get_result($this->dbh);
 			if ($error = pg_result_error($result))
-			{
 				$this->last_error_query = $error;
-			}
 			return $result;
 		}
 
@@ -195,9 +194,9 @@
 				$_table = $array[2];
 				// if there is a dot inside, we need to split
 				if (strstr($_table, '.'))
-				   list($schema, $table) = explode('.', $_table);
+					list($schema, $table) = explode('.', $_table);
 				else
-				   $table = $_table;
+					$table = $_table;
 				// no PK name given at all
 				if (!$pk_name)
 				{
@@ -210,7 +209,6 @@
 				$seq = (($schema) ? $schema.'.' : '').$table."_".$pk_name."_seq";
 				$q = "SELECT CURRVAL('$seq') AS insert_id";
 //				$this->currval_query = $q;
-//echo "Q: $q<Br>";
 				// I have to do manually or I overwrite the original insert internal vars ...
 				if ($q = $this->_db_query($q))
 				{
@@ -222,7 +220,7 @@
 				}
 				return $id;
 			}
-		} 
+		}
 
 		// METHOD: _db_primary_key
 		// PARAMS: table and optional schema
@@ -235,12 +233,12 @@
 				// check if schema set is different from schema given, only needed if schema is not empty
 				$table_prefix = '';
 				if ($schema)
-				{   
+				{
 					$q = "SHOW search_path";
 					$cursor = $this->_db_query($q);
 					$search_path = $this->_db_fetch_array($cursor)['search_path'];
 					if ($search_path != $schema)
-					{   
+					{
 						$table_prefix = $schema.'.';
 					}
 				}
@@ -351,7 +349,7 @@
 		// RETURN: databse version
 		// DESC  : wrapper for pg_version
 		public function _db_version()
-		{   
+		{
 			// array has client, protocol, server
 			// we just need the server
 			$v = pg_version($this->dbh);
@@ -390,5 +388,5 @@
 		}
 	}
 
-	// $Id: db_pgsql.inc 4835 2014-01-23 03:03:55Z gullevek $
+	// $Id: db_pgsql.inc 4836 2014-01-23 03:57:54Z gullevek $
 ?>
