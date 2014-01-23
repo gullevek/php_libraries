@@ -1,5 +1,5 @@
 <?
-	// $Id: class_test.php 4831 2014-01-20 03:27:10Z gullevek $
+	// $Id: class_test.php 4835 2014-01-23 03:03:55Z gullevek $
 	$DEBUG_ALL = 1;
 	$PRINT_ALL = 1;
 	$DB_DEBUG = 1;
@@ -125,6 +125,18 @@
 	print "DB Version equal $to_db_version: ".$basic->db_compare_version('='.$to_db_version)."<br>";
 	print "DB Version bigger than $to_db_version: ".$basic->db_compare_version('>='.$to_db_version)."<br>";
 	print "DB Version bigger $to_db_version: ".$basic->db_compare_version('>'.$to_db_version)."<br>";
+
+	$q = "SELECT FOO FRO BAR";
+//	$q = "Select * from foo";
+	$foo = $basic->db_exec_async($q);
+	print "[ERR] Query: ".$q."<br>";
+	print "[ERR] RESOURCE: $foo<br>";
+	while (($ret = $basic->db_check_async()) === true)
+	{
+		print "[ERR]: $ret<br>";
+		sleep(5);
+	}
+
 
 	// search path check
 	$q = "SHOW search_path";

@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/db_pgsql.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-20 12:27:10 +0900 (Mon, 20 Jan 2014) $
-	* $LastChangedRevision: 4831 $
+	* $LastChangedDate: 2014-01-23 12:03:55 +0900 (Thu, 23 Jan 2014) $
+	* $LastChangedRevision: 4835 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/04/09 
@@ -93,10 +93,11 @@
 		// DESC  : wrapper for pg_get_result
 		public function _db_get_result()
 		{
-			$this->last_error_query = '';
 			$result = pg_get_result($this->dbh);
-			if (pg_result_error($result))
-				$this->last_error_query = $query;
+			if ($error = pg_result_error($result))
+			{
+				$this->last_error_query = $error;
+			}
 			return $result;
 		}
 
@@ -389,5 +390,5 @@
 		}
 	}
 
-	// $Id: db_pgsql.inc 4831 2014-01-20 03:27:10Z gullevek $
+	// $Id: db_pgsql.inc 4835 2014-01-23 03:03:55Z gullevek $
 ?>
