@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Login.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-08 13:09:19 +0900 (Wed, 08 Jan 2014) $
-	* $LastChangedRevision: 4807 $
+	* $LastChangedDate: 2014-01-23 15:09:57 +0900 (Thu, 23 Jan 2014) $
+	* $LastChangedRevision: 4838 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2000/06/01
@@ -172,8 +172,8 @@
 			$this->class_info["login"] = array(
 				"class_name" => "Login",
 				"class_version" => "4.0.0",
-				"class_revision" => '$LastChangedRevision: 4807 $',
-				"class_last_changed" => '$LastChangedDate: 2014-01-08 13:09:19 +0900 (Wed, 08 Jan 2014) $',
+				"class_revision" => '$LastChangedRevision: 4838 $',
+				"class_last_changed" => '$LastChangedDate: 2014-01-23 15:09:57 +0900 (Thu, 23 Jan 2014) $',
 				"class_created" => "2000-06-01",
 				"class_author" => "cs/gullevek/at"
 			);
@@ -567,7 +567,7 @@
 				$this->acl['info']['edit_access'][$unit['id']] = $unit['name'];
 			}
 			// flag if to show extra edit access drop downs (because user has multiple groups assigned)
-			if (count($_SESSION['UNIT'] > 1))
+			if (count($_SESSION['UNIT']) > 1)
 				$this->acl['acl']['show_ea_extra'] = 1;
 			else
 				$this->acl['acl']['show_ea_extra'] = 0;
@@ -977,5 +977,5 @@ EOM;
 
 	} // close class
 
-	// $Id: Class.Login.inc 4807 2014-01-08 04:09:19Z gullevek $
+	// $Id: Class.Login.inc 4838 2014-01-23 06:09:57Z gullevek $
 ?>
