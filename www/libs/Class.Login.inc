@@ -2,8 +2,8 @@
 	/*********************************************************************
 	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Login.inc $
 	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-23 15:09:57 +0900 (Thu, 23 Jan 2014) $
-	* $LastChangedRevision: 4838 $
+	* $LastChangedDate: 2014-01-29 11:36:52 +0900 (Wed, 29 Jan 2014) $
+	* $LastChangedRevision: 4849 $
 	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2000/06/01
@@ -172,8 +172,8 @@
 			$this->class_info["login"] = array(
 				"class_name" => "Login",
 				"class_version" => "4.0.0",
-				"class_revision" => '$LastChangedRevision: 4838 $',
-				"class_last_changed" => '$LastChangedDate: 2014-01-23 15:09:57 +0900 (Thu, 23 Jan 2014) $',
+				"class_revision" => '$LastChangedRevision: 4849 $',
+				"class_last_changed" => '$LastChangedDate: 2014-01-29 11:36:52 +0900 (Wed, 29 Jan 2014) $',
 				"class_created" => "2000-06-01",
 				"class_author" => "cs/gullevek/at"
 			);
@@ -275,22 +275,22 @@
 					else
 					{
 						// check with what kind of prefix the password begins:
-						// $2a$: BLOWFISCH
+						// $2a$ or $2y$: BLOWFISCH
 						// $1$: MD5
 						// $ and one alphanumeric letter, 13 chars long, but nor $ at the end: STD_DESC
 						// if no $ => normal password
 						// NOW, if we have a password encoded, but not the correct encoder available, throw special error
-						if ((preg_match("/^\\$2a\\$/", $res['password']) && CRYPT_BLOWFISH != 1) || (preg_match("/^\\$1\\$/", $res['password']) && CRYPT_MD5 != 1) || (preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && CRYPT_STD_DES != 1))
+						if ((preg_match("/^\\$2(a|y)\\$/", $res['password']) && CRYPT_BLOWFISH != 1) || (preg_match("/^\\$1\\$/", $res['password']) && CRYPT_MD5 != 1) || (preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && CRYPT_STD_DES != 1))
 						{
 							$this->login_error = 9999; // this means password cannot be decrypted because of missing crypt methods
 						}
-						// check passwword as crypted, $2a$ is blowfish start, $1$ is MD5 start, $\w{12} is standard DES
-						elseif ((preg_match("/^\\$2a\\$/", $res['password']) || preg_match("/^\\$1\\$/", $res['password']) || preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password'])) && !$this->verifyCryptString($this->password, $res['password']))
+						// check passwword as crypted, $2a$ or $2y$ is blowfish start, $1$ is MD5 start, $\w{12} is standard DES
+						elseif ((preg_match("/^\\$2(a|y)\\$/", $res['password']) || preg_match("/^\\$1\\$/", $res['password']) || preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password'])) && !$this->verifyCryptString($this->password, $res['password']))
 						{
 							$this->login_error = 1011;
 						}
 						// check old plain password, non case sensitive
-						elseif (!preg_match("/^\\$2a\\$/", $res['password']) && !preg_match("/^\\$1\\$/", $res['password']) && !preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && $res['password'] != $this->password)
+						elseif (!preg_match("/^\\$2(a|y)\\$/", $res['password']) && !preg_match("/^\\$1\\$/", $res['password']) && !preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && $res['password'] != $this->password)
 						{
 							$this->login_error = 1012;
 						}
@@ -977,5 +977,5 @@ EOM;
 
 	} // close class
 
-	// $Id: Class.Login.inc 4838 2014-01-23 06:09:57Z gullevek $
+	// $Id: Class.Login.inc 4849 2014-01-29 02:36:52Z gullevek $
 ?>
