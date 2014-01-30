@@ -137,7 +137,6 @@
 		sleep(5);
 	}
 
-
 	// search path check
 	$q = "SHOW search_path";
 	$cursor = $basic->db_exec($q);
