@@ -1,10 +1,5 @@
 <?
 	/*********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.l10n.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-09-12 11:22:11 +0900 (Thu, 12 Sep 2013) $
-	* $LastChangedRevision: 4640 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2004/11/18
 	* VERSION: 0.1.1
@@ -110,5 +105,4 @@
 	}
 
 //require(LIBS.'locale.php');
-	// $Id: Class.l10n.inc 4640 2013-09-12 02:22:11Z gullevek $
 ?>

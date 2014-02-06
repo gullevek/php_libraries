@@ -1,11 +1,4 @@
 {*
-	= SUBVERSION DATA ===================================================
-	= $HeadURL: svn://svn/html/mailing_tool/branches/version-4/templates/default/edit_elements.tpl $
-	= $LastChangedBy: gullevek $
-	= $LastChangedDate: 2012-06-12 18:58:20 +0900 (Tue, 12 Jun 2012) $
-	= $LastChangedRevision: 4014 $
-	= SUBVERSION DATA ===================================================
-
 	********************************************************************
 	* AUTHOR: Clemens Schwaighofer
 	* DATE: 2005/06/23
@@ -131,4 +124,3 @@
 		</td>
 	</tr>
 {/foreach}
-{* $Id: edit_elements.tpl 4014 2012-06-12 09:58:20Z gullevek $ *}

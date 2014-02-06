@@ -1,11 +1,4 @@
 {*
-	= SUBVERSION DATA ===================================================
-	= $HeadURL: svn://svn/development/core_data/php/www/layout/admin/default/templates/edit_body.tpl $
-	= $LastChangedBy: gullevek $
-	= $LastChangedDate: 2013-09-10 11:08:58 +0900 (Tue, 10 Sep 2013) $
-	= $LastChangedRevision: 4634 $
-	= SUBVERSION DATA ===================================================
-
 	********************************************************************
 	* AUTHOR: Clemens Schwaighofer
 	* DATE: 2005/06/23
@@ -119,4 +112,3 @@
 </table>
 </body>
 </html>
-{* $Id: edit_body.tpl 4634 2013-09-10 02:08:58Z gullevek $ *}

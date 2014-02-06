@@ -1,10 +1,5 @@
 <?
 	/********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.DB.IO.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-20 12:27:10 +0900 (Mon, 20 Jan 2014) $
-	* $LastChangedRevision: 4831 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2000/11/23
 	* VERSION: 4.1.0
@@ -369,9 +364,7 @@
 			$this->class_info['db_io']=array(
 				'class_name' => 'DB IO',
 				'class_version' => '4.1.0',
-				'class_revision' => '$LastChangedRevision: 4831 $',
 				'class_created' => '2000-11-23',
-				'class_last_changed' => '$LastChangedDate: 2014-01-20 12:27:10 +0900 (Mon, 20 Jan 2014) $',
 				'class_author' => 'Clemens Schwaighofer'
 			);
 		}
@@ -1666,6 +1659,4 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 			return $value;
 		}
 	} // end if db class
-
-	// $Id: Class.DB.IO.inc 4831 2014-01-20 03:27:10Z gullevek $
 ?>

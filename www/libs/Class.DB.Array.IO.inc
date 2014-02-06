@@ -1,10 +1,5 @@
 <?
 	/*********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.DB.Array.IO.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-03-13 13:27:49 +0900 (Wed, 13 Mar 2013) $
-	* $LastChangedRevision: 4429 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2002/12/17
 	* VERSION: 0.4.0
@@ -86,9 +81,7 @@
 			$this->class_info["db_array_io"] = array(
 				"class_name" => "DB Array IO",
 				"class_version" => "0.4.0",
-				"class_revision" => '$LastChangedRevision: 4429 $',
 				"class_created" => "2002/12/17",
-				"class_last_changed" => '$LastChangedDate: 2013-03-13 13:27:49 +0900 (Wed, 13 Mar 2013) $',
 				"class_author" => "cs/gullevek/at"
 			);
 		}
@@ -510,6 +503,4 @@ $this->debug('write_check', "[$spalte][".$this->table_array[$spalte]["value"]."]
 			return $this->table_array;
 		}                                           
 	} // end of class
-	
-	// $Id: Class.DB.Array.IO.inc 4429 2013-03-13 04:27:49Z gullevek $
 ?>

@@ -1,10 +1,5 @@
 <?
 	/*********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Basic.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-07 11:51:59 +0900 (Tue, 07 Jan 2014) $
-	* $LastChangedRevision: 4793 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/03/24
 	* VERSION: 0.9.0
@@ -175,9 +170,7 @@
 			$this->class_info["basic"] = array (
 				"class_name" => "Basic",
 				"class_version" => "0.9.0",
-				"class_revision" => '$LastChangedRevision: 4793 $',
 				"class_created" => "2003-03-24",
-				"class_last_changed" => '$LastChangedDate: 2014-01-07 11:51:59 +0900 (Tue, 07 Jan 2014) $',
 				"class_author" => 'Clemens "Gullevek" Schwaighofer (.at)'
 			); 
 
@@ -1827,6 +1820,4 @@
 			return $_SESSION[$name] === $token;
 		}
 	}
-
-	// $Id: Class.Basic.inc 4793 2014-01-07 02:51:59Z gullevek $
 ?>

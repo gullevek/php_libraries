@@ -1,5 +1,4 @@
 <?
-	// $Id: class_test.php 4835 2014-01-23 03:03:55Z gullevek $
 	$DEBUG_ALL = 1;
 	$PRINT_ALL = 1;
 	$DB_DEBUG = 1;

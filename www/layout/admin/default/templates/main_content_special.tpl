@@ -1,11 +1,4 @@
 {*
-	= SUBVERSION DATA ===================================================
-	= $HeadURL: svn://svn/development/core_data/php/www/layout/admin/default/templates/main_content_special.tpl $
-	= $LastChangedBy: gullevek $
-	= $LastChangedDate: 2010-09-02 11:58:10 +0900 (Thu, 02 Sep 2010) $
-	= $LastChangedRevision: 3159 $
-	= SUBVERSION DATA ===================================================
-
 	********************************************************************
 	* AUTHOR: Clemens Schwaighofer
 	* DATE: 2008/04/11
@@ -96,5 +89,3 @@ var load_id = {if $primary_key}{$primary_key}{else}0{/if};
 		</form>
 	</div>
 </div>
-
-{* $Id: main_content_special.tpl 3159 2010-09-02 02:58:10Z gullevek $ *}

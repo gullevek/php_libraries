@@ -1,10 +1,5 @@
 <?
 	/*********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/libs/db_pgsql.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-23 12:57:54 +0900 (Thu, 23 Jan 2014) $
-	* $LastChangedRevision: 4836 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/04/09 
 	* SHORT DESCRIPTION:
@@ -387,6 +382,4 @@
 			return $output;
 		}
 	}
-
-	// $Id: db_pgsql.inc 4836 2014-01-23 03:57:54Z gullevek $
 ?>

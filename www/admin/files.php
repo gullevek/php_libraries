@@ -1,10 +1,5 @@
 <?
 	/********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/admin/files.php $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2010-09-02 11:58:10 +0900 (Thu, 02 Sep 2010) $
-	* $LastChangedRevision: 3159 $
-	*********************************************************************
 	* AUTHOR: Clemens Schwaighofer
 	* CREATED: 2005/07/13
 	* SHORT DESCRIPTION:
@@ -481,7 +476,7 @@ $cms->debug('file_upload', "ERROR: $error | INI FSize: ".ini_get("upload_max_fil
 	//------------------------------ processing data end
 
 	//------------------------------ debug data
-	$DEBUG_DATA['Id'] = '$Id: files.php 3159 2010-09-02 02:58:10Z gullevek $';
+	$DEBUG_DATA['Id'] = '$Id: files.php 4897 2014-02-06 08:16:56Z gullevek $';
 	//------------------------------ debug data
 
 	//------------------------------ smarty start
@@ -492,5 +487,4 @@ $cms->debug('file_upload', "ERROR: $error | INI FSize: ".ini_get("upload_max_fil
 	require("footer.inc");
 	//------------------------------ footer
 		
-	// $Id: files.php 3159 2010-09-02 02:58:10Z gullevek $
 ?>

@@ -1,7 +1,5 @@
 <?php
 
-// $Id: FileUploader.inc 4019 2012-06-13 03:16:34Z gullevek $
-
 /**
  * Handle file uploads via XMLHttpRequest
  */

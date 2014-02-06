@@ -1,10 +1,5 @@
 <?
 	/*********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Admin.Backend.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-12-12 13:31:02 +0900 (Thu, 12 Dec 2013) $
-	* $LastChangedRevision: 4739 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2006/08/15
 	* VERSION: 0.1.0
@@ -83,9 +78,7 @@
 			$this->class_info["adbBackend"] = array(
 				"class_name" => "Admin Interface Backend",
 				"class_version" => "0.1.0",
-				"class_revision" => '$LastChangedRevision: 4739 $',
 				"class_created" => "2006/08/15",
-				"class_last_changed" => '$LastChangedDate: 2013-12-12 13:31:02 +0900 (Thu, 12 Dec 2013) $',
 				"class_author" => "cs/gullevek/jp"
 			);
 
@@ -340,6 +333,4 @@
 		}
 
 	}
-
-	// $Id: Class.Admin.Backend.inc 4739 2013-12-12 04:31:02Z gullevek $
 ?>

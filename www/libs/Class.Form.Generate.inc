@@ -1,10 +1,5 @@
 <?
 	/********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Form.Generate.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-09-10 11:08:58 +0900 (Tue, 10 Sep 2013) $
-	* $LastChangedRevision: 4634 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2002/10/22
 	* VERSION: 2.4.9
@@ -314,8 +309,6 @@
 				"class_name" => "Form create",
 				"class_version" => "2.4.9",
 				"class_created" => "2002-10-22",
-				"class_revision" => '$LastChangedRevision: 4634 $',
-				"class_last_changed" => '$LastChangedDate: 2013-09-10 11:08:58 +0900 (Tue, 10 Sep 2013) $',
 				"class_author" => "cs/gullevek/at"
 			);
 		}
@@ -1629,6 +1622,4 @@
 			return array('output_name' => $output_name, 'type' => $type, 'color' => 'edit_fgcolor', 'data' => $data);
 		}
 	} // end of class
-
-	// $Id: Class.Form.Generate.inc 4634 2013-09-10 02:08:58Z gullevek $
 ?>

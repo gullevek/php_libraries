@@ -1,10 +1,5 @@
 <?
 	/*********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Login.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-29 11:36:52 +0900 (Wed, 29 Jan 2014) $
-	* $LastChangedRevision: 4849 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2000/06/01
 	* VERSION: 4.0.0
@@ -172,8 +167,6 @@
 			$this->class_info["login"] = array(
 				"class_name" => "Login",
 				"class_version" => "4.0.0",
-				"class_revision" => '$LastChangedRevision: 4849 $',
-				"class_last_changed" => '$LastChangedDate: 2014-01-29 11:36:52 +0900 (Wed, 29 Jan 2014) $',
 				"class_created" => "2000-06-01",
 				"class_author" => "cs/gullevek/at"
 			);
@@ -976,6 +969,4 @@ EOM;
 		}
 
 	} // close class
-
-	// $Id: Class.Login.inc 4849 2014-01-29 02:36:52Z gullevek $
 ?>

@@ -1,11 +1,4 @@
 {*
-	= SUBVERSION DATA ===================================================
-	= $HeadURL: svn://svn/html/mailing_tool/branches/version-4/templates/default/edit_save_delete.tpl $
-	= $LastChangedBy: gullevek $
-	= $LastChangedDate: 2006-12-21 11:47:45 +0900 (Thu, 21 Dec 2006) $
-	= $LastChangedRevision: 1636 $
-	= SUBVERSION DATA ===================================================
-
 	********************************************************************
 	* AUTHOR: Clemens Schwaighofer
 	* DATE: 2005/06/23
@@ -37,4 +30,3 @@
 	{/if}
 		</td>
 	</tr>
-{* $Id: edit_save_delete.tpl 1636 2006-12-21 02:47:45Z gullevek $ *}

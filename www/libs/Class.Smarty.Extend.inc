@@ -1,10 +1,5 @@
 <?
 	/********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/libs/Class.Smarty.Extend.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-02-21 17:58:57 +0900 (Thu, 21 Feb 2013) $
-	* $LastChangedRevision: 4389 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2004/12/21
 	* SHORT DESCRIPTION:
@@ -32,6 +27,4 @@
 		}
 
 	}
-
-	// $Id: Class.Smarty.Extend.inc 4389 2013-02-21 08:58:57Z gullevek $
 ?>

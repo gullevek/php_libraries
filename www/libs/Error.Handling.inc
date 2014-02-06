@@ -1,10 +1,5 @@
 <?
     /*********************************************************************
-    * $HeadURL: svn://svn/development/core_data/php/www/libs/Error.Handling.inc $
-    * $LastChangedBy: gullevek $
-    * $LastChangedDate: 2013-10-10 17:14:05 +0900 (Thu, 10 Oct 2013) $
-    * $LastChangedRevision: 4684 $
-    *********************************************************************
     * AUTHOR: Clemens Schwaighofer
     * CREATED: 2011/2/8
 	* DESCRIPTION: pre function to collect all non critical errors into a log file if possible
@@ -105,6 +100,4 @@
 
 	// init the error handler
 	set_error_handler("MyErrorHandler");
-
-	/* $Id: Error.Handling.inc 4684 2013-10-10 08:14:05Z gullevek $ */
 ?>

@@ -1,11 +1,4 @@
 /*
-    = SUBVERSION DATA ===================================================
-    = $HeadURL: svn://svn/development/core_data/php/www/layout/admin/default/javascript/edit.js $
-    = $LastChangedBy: gullevek $
-    = $LastChangedDate: 2010-09-02 11:58:10 +0900 (Thu, 02 Sep 2010) $
-    = $LastChangedRevision: 3159 $
-    = SUBVERSION DATA ===================================================
-
 	AUTHOR: Clemens Schwaighofer
 	DATE: 2006/09/05
 	DESC: edit shop js file
@@ -124,5 +117,3 @@ function le(id)
 	if (document.forms[form_name].action_yes.value == 'true')
 		document.forms[form_name].submit();
 }
-
-/* $Id: edit.js 3159 2010-09-02 02:58:10Z gullevek $ */

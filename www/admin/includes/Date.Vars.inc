@@ -1,10 +1,5 @@
 <?
 	/********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/admin/includes/Date.Vars.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2010-09-02 11:58:10 +0900 (Thu, 02 Sep 2010) $
-	* $LastChangedRevision: 3159 $
-	*********************************************************************
 	* AUTHOR: Clemens Schwaighofer
 	* CREATED: 2005/07/19
 	* SHORT DESCRIPTION:
@@ -55,5 +50,4 @@
 	$month_short[11] = "Nov";
 	$month_short[12] = "Dec";
 
-	// $Id: Date.Vars.inc 3159 2010-09-02 02:58:10Z gullevek $
 ?>

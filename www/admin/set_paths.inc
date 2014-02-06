@@ -1,10 +1,5 @@
 <?
 	/********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/admin/set_paths.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2014-01-08 15:03:09 +0900 (Wed, 08 Jan 2014) $
-	* $LastChangedRevision: 4818 $
-	*********************************************************************
 	* AUTHOR: Clemens Schwaighofer
 	* CREATED: 2007/09/03
 	* SHORT DESCRIPTION:
@@ -113,5 +108,4 @@
 	$cms->debug("LANGUAGE", "SL: ".$_SESSION['DEFAULT_CHARSET']." | ".$_SESSION['LANG']." | ".$_SESSION['DEFAULT_LANG']);
 	$cms->debug("TEMPLATE", "P: ".$smarty->getTemplateDir()[0]);
 
-	// $Id: set_paths.inc 4818 2014-01-08 06:03:09Z gullevek $
 ?>

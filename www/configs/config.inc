@@ -1,10 +1,5 @@
 <?
 	/********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/configs/config.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-02-18 16:27:24 +0900 (Mon, 18 Feb 2013) $
-	* $LastChangedRevision: 4382 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/06/10
 	* SHORT DESCRIPTION:
@@ -232,5 +227,4 @@
 	// any other global definitons here
 //	DEFINE('SOME_ID', <SOME VALUE>);
 	
-	// $Id: config.inc 4382 2013-02-18 07:27:24Z gullevek $	
 ?>

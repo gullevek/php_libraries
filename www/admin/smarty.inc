@@ -1,10 +1,5 @@
 <?
 	/********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/admin/smarty.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-02-18 16:25:12 +0900 (Mon, 18 Feb 2013) $
-	* $LastChangedRevision: 4381 $
-	*********************************************************************
 	* AUTHOR: Clemens Schwaighofer
 	* CREATED: 2005/07/12
 	* SHORT DESCRIPTION:
@@ -91,7 +86,7 @@
 	// debug data, if DEBUG flag is on, this data is print out
 	$cms->DEBUG_DATA['debug_error_msg'] = $cms->running_time();
 	$cms->DEBUG_DATA['DEBUG'] = $DEBUG_TMPL;
-	$cms->DEBUG_DATA['Id'] = '$Id: smarty.inc 4381 2013-02-18 07:25:12Z gullevek $';
+	$cms->DEBUG_DATA['Id'] = '$Id: smarty.inc 4897 2014-02-06 08:16:56Z gullevek $';
 
 	// create main data array
 	$cms->CONTENT_DATA = array_merge($cms->HEADER, $cms->DATA, $cms->DEBUG_DATA);
@@ -102,5 +97,4 @@
 	}
 	$smarty->display($MASTER_TEMPLATE_NAME, $TEMPLATE.$lang, $TEMPLATE.$lang);
 
-	// $Id: smarty.inc 4381 2013-02-18 07:25:12Z gullevek $
 ?>
