@@ -1,6 +1,4 @@
 <?
-	// $Id: array_edit_access.inc 3159 2010-09-02 02:58:10Z gullevek $
-	
 	$edit_access = array (
 		"table_array" => array (
 			"edit_access_id" => array (

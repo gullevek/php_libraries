@@ -1,6 +1,4 @@
 <?
-	// $Id: array_edit_groups.inc 4381 2013-02-18 07:25:12Z gullevek $
-
 	$edit_groups = array (
 
 		"table_array" => array (

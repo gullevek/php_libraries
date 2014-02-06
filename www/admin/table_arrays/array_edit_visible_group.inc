@@ -1,6 +1,4 @@
 <?
-	// $Id: array_edit_visible_group.inc 3159 2010-09-02 02:58:10Z gullevek $
-	
 	$edit_visible_group = array (
 		"table_array" => array (
 			"edit_visible_group_id" => array (

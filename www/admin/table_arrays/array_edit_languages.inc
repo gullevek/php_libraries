@@ -1,6 +1,4 @@
 <?
-	// $Id: array_edit_languages.inc 3159 2010-09-02 02:58:10Z gullevek $
-
    $edit_languages=array(
 
    "table_array" => array(

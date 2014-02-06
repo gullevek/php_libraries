@@ -1,6 +1,4 @@
 <?
-	// $Id: array_edit_menu_group.inc 3159 2010-09-02 02:58:10Z gullevek $
-	
 	$edit_menu_group = array (
 		"table_array" => array (
 			"edit_menu_group_id" => array (

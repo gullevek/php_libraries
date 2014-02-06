@@ -1,6 +1,4 @@
 <?
-	// $Id: array_edit_users.inc 4381 2013-02-18 07:25:12Z gullevek $
-
 	$edit_users = array (
 		"table_array" => array (
 			"edit_user_id" => array (

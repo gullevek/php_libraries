@@ -1,8 +1,5 @@
 <?
-	// $Id: array_edit_schemes.inc 3159 2010-09-02 02:58:10Z gullevek $
-
-   $edit_schemes=array (
-
+   $edit_schemes = array (
 	   "table_array" => array (
 		 "edit_scheme_id" => array (
 		   "value" => $GLOBALS["edit_scheme_id"],
