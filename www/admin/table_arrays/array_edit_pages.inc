@@ -1,6 +1,6 @@
 <?
-	$edit_pages = array(
-		"table_array" => array(
+	$edit_pages = array (
+		"table_array" => array (
 			"edit_page_id" => array (
 				"value" => $GLOBALS["edit_page_id"], 
 				"type" => "hidden",
@@ -94,11 +94,11 @@
 		),
 		"load_query" => "SELECT edit_page_id, filename, name, online, menu, popup FROM edit_page ORDER BY order_number",
 		"table_name" => "edit_page",
-		"show_fields" => array(
-			array(
+		"show_fields" => array (
+			array (
 				"name" => "name"
 			),
-			array(
+			array (
 				"name" => "filename",
 				"before_value" => "Filename: "
 			),

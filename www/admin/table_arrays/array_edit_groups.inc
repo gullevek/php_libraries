@@ -1,6 +1,5 @@
 <?
 	$edit_groups = array (
-
 		"table_array" => array (
 			"edit_group_id" => array (
 				"value" => $GLOBALS["edit_group_id"],

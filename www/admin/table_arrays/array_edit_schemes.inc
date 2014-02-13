@@ -41,11 +41,11 @@
 	   ),
 	   "table_name" => "edit_scheme",
 	   "load_query" => "SELECT edit_scheme_id, name, enabled FROM edit_scheme ORDER BY name",
-	   "show_fields" => array(
-		 array(
+	   "show_fields" => array (
+		 array (
 		   "name" => "name"
 		 ),
-		 array(
+		 array (
 		   "name" => "enabled",
 		   "binary" => array ("Yes", "No"),
 		   "before_value" => "Enabled: " 
