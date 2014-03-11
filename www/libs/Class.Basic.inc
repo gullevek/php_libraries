@@ -716,16 +716,31 @@
 			// _5: (_3) parameters of url or tld part of email
 			// _7: link name/email link name
 			// _9: style sheet class
-			$output = preg_replace("/(href=\")?(\>)?\b($protRegex)([\w\.\-?&=+%#~,;\/]+)\b([\.\-?&=+%#~,;\/]*)(\|([^\||^#]+)(#([^\|]+))?\|)?/e", "\$this->create_url('\\1', '\\2', '\\3', '\\4', '\\5', $target, '\\7', '\\9')", $output);
+			$self = $this;
+//			$this->debug('URL', 'Before: '.$output);
+			$output = preg_replace_callback("/(href=\")?(\>)?\b($protRegex)([\w\.\-?&=+%#~,;\/]+)\b([\.\-?&=+%#~,;\/]*)(\|([^\||^#]+)(#([^\|]+))?\|)?/", 
+				function ($matches) use ($self)
+				{
+					return $self->create_url($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
+				},
+				$output
+			);
 			// find email-addresses, but not mailto prefix ones
-			$output = preg_replace("/(mailto:)?(\>)?\b([\w\.-]+)@([\w\.\-]+)\.([a-zA-Z]{2,4})\b(\|([^\||^#]+)(#([^\|]+))?\|)?/e", "\$this->create_email('\\1', '\\2', '\\3', '\\4', '\\5', '\\7', '\\9')", $output);
+			$output = preg_replace_callback("/(mailto:)?(\>)?\b([\w\.-]+)@([\w\.\-]+)\.([a-zA-Z]{2,4})\b(\|([^\||^#]+)(#([^\|]+))?\|)?/", 
+				function ($matches) use ($self)
+				{
+					return $self->create_email($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
+				}, 
+				$output
+			);
 
-//			$this->debug('URL', "$output");
+			$this->debug('URL', 'After: '.$output);
 //			// we have one slashes after the Protocol -> internal link no domain, strip out the proto
 //			$output = preg_replace("/($protRegex)\/(.*)/e", "\\2", $ouput); 
 //			$this->debug('URL', "$output");
 
 			// post processing
+			$output = str_replace ("{TARGET}", $target, $output);
 			$output = str_replace ("##LT##", "<", $output);
 			$output = str_replace ("##GT##", ">", $output);
 			$output = str_replace ("##QUOT##", "\"", $output);
@@ -742,14 +757,18 @@
 		// DESCRIPTION
 		// internal function, called by the magic url create functions.
 		// checks if title $_4 exists, if not, set url as title
-		private function create_url($href, $atag, $_1, $_2, $_3, $target, $name, $class)
+		private function create_url($href, $atag, $_1, $_2, $_3, $name, $class)
 		{
-//echo "DEBUG: 1: $_1 - 2: $_2 - $_3 - atag: $atag - target: $target - name: $name - class: $class<br>";
+//			$this->debug('URL', "1: $_1 - 2: $_2 - $_3 - atag: $atag - name: $name - class: $class");
 			// if $_1 ends with //, then we strip $_1 complete & target is also blanked (its an internal link)
 			if (preg_match("/\/\/$/", $_1) && preg_match("/^\//", $_2))
 			{
 				$_1 = '';
 				$target  = '';
+			}
+			else
+			{
+				$target = '{TARGET}';
 			}
 			// if it is a link already just return the original link do not touch anything
 			if (!$href && !$atag)

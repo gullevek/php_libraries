@@ -133,7 +133,7 @@
 	while (($ret = $basic->db_check_async()) === true)
 	{
 		print "[ERR]: $ret<br>";
-		sleep(5);
+//		sleep(5);
 	}
 
 	// search path check
@@ -145,6 +145,10 @@
 	// insert something into test.schema_test and see if we get the PK back
 	$status = $basic->db_exec("INSERT INTO test.schema_test (contents, id) VALUES ('TIME: ".time()."', ".rand(1, 10).")");
 	print "OTHER SCHEMA INSERT STATUS: ".$status." | PK NAME: ".$basic->pk_name.", PRIMARY KEY: ".$basic->insert_id."<br>";
+
+	// magic links test
+	print $basic->magic_links('user@bubu.at').'<br>';
+	print $basic->magic_links('http://test.com/foo/bar.php?foo=1').'<br>';
 
 	// print error messages
 	print $basic->print_error_msg();
