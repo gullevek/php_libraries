@@ -1330,6 +1330,16 @@
 			return $string;
 		}
 
+		// METHOD: _sha1_short
+		// PARAMS: string
+		// RETURN: sha1 short (9 chars), but current calls _crc32b
+		// DESC  : replacement for _crc32b call
+		public function _sha1_short($string)
+		{
+//			return substr(hash('sha1', $string), 0, 9);
+			return $this->_crc32b($string);
+		}
+
 		// METHOD: checkPHPVersion
 		// PARAMS: $min_version: minimum version. in format x, x.y or x.y.z
 		//         $max_version: default empty, else in same format as min version
