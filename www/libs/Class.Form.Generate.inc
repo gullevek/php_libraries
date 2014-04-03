@@ -223,6 +223,7 @@
 		public $error; // the error flag set for printing red error msg
 		public $warning; // warning flag, for information (saved, loaded, etc)
 		public $archive_pk_name; // the pk name for the load select form
+		private $int_pk_name; // primary key, only internal usage
 		public $reference_array = array (); // reference arrays -> stored in $this->reference_array[$table_name]=>array();
 		public $element_list; // element list for elements next to each other as a special sub group
 		public $my_page_name; // the name of the page without .php extension
@@ -267,6 +268,7 @@
 			$this->load_query = $config_array["load_query"];
 			$this->archive_pk_name = "a_".$this->pk_name;
 			$this->col_name = str_replace("_id", "", $this->pk_name);
+			$this->int_pk_name = $this->pk_name;
 			// check if reference_arrays are given and proceed them
 			if (is_array($config_array["reference_arrays"]))
 			{
@@ -587,10 +589,10 @@
 				$this->db_exec($this->load_query);
 				while ($res = $this->db_fetch_array())
 				{
-					$pk_ids[] = $res[$this->pk_name];
-					if ($res[$this->pk_name] == $this->table_array[$this->pk_name]["value"])
+					$pk_ids[] = $res[$this->int_pk_name];
+					if ($res[$this->int_pk_name] == $this->table_array[$this->int_pk_name]["value"])
 					{ 
-						$pk_selected = $res[$this->pk_name];
+						$pk_selected = $res[$this->int_pk_name];
 					}
 					unset($t_string);
 					for ($i = 0; $i < count($this->field_array); $i ++)
@@ -645,7 +647,7 @@
 				if ($this->group_level_user <= $this->security_level["save"])
 				{
 					$seclevel_okay = 1;
-					if (!$this->table_array[$this->pk_name]["value"]) 
+					if (!$this->table_array[$this->int_pk_name]["value"]) 
 					{ 
 						$save = $this->l->__("Save");
 					}
@@ -656,12 +658,12 @@
 					// print the old_school hidden if requestet
 					if ($old_school_hidden)
 					{
-						$pk_name = $this->pk_name;
-						$pk_value = $this->table_array[$this->pk_name]["value"];
+						$pk_name = $this->int_pk_name;
+						$pk_value = $this->table_array[$this->int_pk_name]["value"];
 					}
 				} // show save part
 				// show delete part only if pk is set && we want to see the delete
-				if ($this->table_array[$this->pk_name]["value"] && !$hide_delete && $this->group_level_user <= $this->security_level["delete"])
+				if ($this->table_array[$this->int_pk_name]["value"] && !$hide_delete && $this->group_level_user <= $this->security_level["delete"])
 				{
 					$show_delete = 1;
 				}
@@ -892,8 +894,8 @@
 							// check unique, check if field in table is not yet exist
 							case "unique":
 								$q = "SELECT ".$key." FROM ".$this->table_name." WHERE ".$key." = '".addslashes($this->table_array[$key]["value"])."'";
-								if ($this->table_array[$this->pk_name]["value"])
-									$q .= " AND ".$this->pk_name." <> ".$this->table_array[$this->pk_name]["value"];
+								if ($this->table_array[$this->int_pk_name]["value"])
+									$q .= " AND ".$this->int_pk_name." <> ".$this->table_array[$this->int_pk_name]["value"];
 								list($$key) = $this->db_return_row($q);
 								if ($$key)
 									$this->msg .= sprintf($this->l->__("The field <b>%s</b> can be used only once!<br>"), $this->table_array[$key]["output_name"]);
@@ -1071,9 +1073,9 @@
 					if (!$this->table_array[$order_name]["value"])
 						$this->table_array[$order_name]["value"] = 1;
 				}
-				else if ($this->table_array[$this->pk_name]["value"])
+				else if ($this->table_array[$this->int_pk_name]["value"])
 				{
-					$q = "SELECT $order_name FROM ".$this->table_name." WHERE ".$this->pk_name." = ".$this->table_array[$this->pk_name]["value"];
+					$q = "SELECT $order_name FROM ".$this->table_name." WHERE ".$this->int_pk_name." = ".$this->table_array[$this->int_pk_name]["value"];
 					list($this->table_array[$order_name]["value"]) = $this->db_return_row($q);
 				}
 			}
@@ -1130,7 +1132,7 @@
 				while (list($key, $value) = each($this->reference_array))
 				{
 					unset($this->reference_array[$key]["selected"]);
-					$q = "SELECT ".$this->reference_array[$key]["other_table_pk"]." FROM ".$this->reference_array[$key]["table_name"]." WHERE ".$this->pk_name."=".$this->table_array[$this->pk_name]["value"];
+					$q = "SELECT ".$this->reference_array[$key]["other_table_pk"]." FROM ".$this->reference_array[$key]["table_name"]." WHERE ".$this->int_pk_name."=".$this->table_array[$this->int_pk_name]["value"];
 					while ($res = $this->db_return($q))
 						$this->reference_array[$key]["selected"][] = $res[$this->reference_array[$key]["other_table_pk"]];
 				}
@@ -1276,12 +1278,12 @@
 				reset($this->reference_array);
 				foreach ($this->reference_array AS $reference_array)
 				{
-					$q = "DELETE FROM ".$reference_array["table_name"]." WHERE ".$this->pk_name."=".$this->table_array[$this->pk_name]["value"];
+					$q = "DELETE FROM ".$reference_array["table_name"]." WHERE ".$this->int_pk_name."=".$this->table_array[$this->int_pk_name]["value"];
 					$this->db_exec($q);
-					$q = "INSERT INTO ".$reference_array["table_name"]." (".$reference_array["other_table_pk"].", ".$this->pk_name.") VALUES ";
+					$q = "INSERT INTO ".$reference_array["table_name"]." (".$reference_array["other_table_pk"].", ".$this->int_pk_name.") VALUES ";
 					for ($i = 0; $i < count($reference_array["selected"]); $i ++)
 					{
-						$t_q = "(".$reference_array["selected"][$i].", ".$this->table_array[$this->pk_name]["value"].")";
+						$t_q = "(".$reference_array["selected"][$i].", ".$this->table_array[$this->int_pk_name]["value"].")";
 						$this->db_exec($q.$t_q);
 					}
 				} // foreach reference arrays
@@ -1339,7 +1341,7 @@
 							}
 							// write all data (insert/update) because I don't know until all are processed if it is insert or update
 							// don't write primary key backup for update
-//$this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prfx.$el_name][$i]." {".$_POST[$prfx.$el_name]."} | Type: ".$type[$i]." | PK: ".$data_array["pk_id"]." ");
+$this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prfx.$el_name][$i]." {".$_POST[$prfx.$el_name]."} | Type: ".$type[$i]." | PK: ".$data_array["pk_id"]." ");
 							if (!$data_array["pk_id"])
 							{
 								// update
@@ -1390,7 +1392,7 @@
 							}
 							else
 							{
-								$q = $q_begin[$i].$q_names[$i].", ".$this->pk_name.$q_middle[$i].$q_values[$i].", ".$this->table_array[$this->pk_name]["value"].$q_end[$i];
+								$q = $q_begin[$i].$q_names[$i].", ".$this->int_pk_name.$q_middle[$i].$q_values[$i].", ".$this->table_array[$this->int_pk_name]["value"].$q_end[$i];
 							}
 //$this->debug('edit', "Q: ".$q."<br>");
 							// write the dataset
@@ -1415,7 +1417,7 @@
 				reset($this->reference_array);
 				foreach ($this->reference_array AS $reference_array)
 				{
-					$q = "DELETE FROM ".$reference_array["table_name"]." WHERE ".$this->pk_name." = ".$this->table_array[$this->pk_name]["value"];
+					$q = "DELETE FROM ".$reference_array["table_name"]." WHERE ".$this->int_pk_name." = ".$this->table_array[$this->int_pk_name]["value"];
 					$this->db_exec($q);
 				}
 			}
@@ -1425,7 +1427,7 @@
 				reset($this->element_list);
 				while (list($table_name, $data_array) = each($this->element_list))
 				{
-					$q = "DELETE FROM ".$table_name." WHERE ".$this->pk_name." = ".$this->table_array[$this->pk_name]["value"];
+					$q = "DELETE FROM ".$table_name." WHERE ".$this->int_pk_name." = ".$this->table_array[$this->int_pk_name]["value"];
 					$this->db_exec($q);
 				}
 			}
@@ -1555,18 +1557,18 @@
 				$data['type'][$data["prefix"].$this->element_list[$table_name]["read_data"]["name"]] = 'string';	
 				// build the read query
 				$q = "SELECT ";
-//				if (!$this->table_array[$this->pk_name]["value"])
+//				if (!$this->table_array[$this->int_pk_name]["value"])
 //					$q .= "DISTINCT ";
 				// prefix join key with table name
 				$q .= str_replace($this->element_list[$table_name]["read_data"]["pk_id"], $this->element_list[$table_name]["read_data"]["table_name"].".".$this->element_list[$table_name]["read_data"]["pk_id"], implode(", ", $q_select))." ";
-//				if (!$this->table_array[$this->pk_name]["value"] && $this->element_list[$table_name]["read_data"]["order"])
+//				if (!$this->table_array[$this->int_pk_name]["value"] && $this->element_list[$table_name]["read_data"]["order"])
 //					$q .= ", ".$this->element_list[$table_name]["read_data"]["order"]." ";
 				$q .= "FROM ".$this->element_list[$table_name]["read_data"]["table_name"]." ";
 				$q .= "LEFT JOIN ".$table_name." ";
 				$q .= "ON (";
 				$q .= $this->element_list[$table_name]["read_data"]["table_name"].".".$this->element_list[$table_name]["read_data"]["pk_id"]." = ".$table_name.".".$this->element_list[$table_name]["read_data"]["pk_id"]." ";
-//				if ($this->table_array[$this->pk_name]["value"])
-				$q .= "AND ".$this->pk_name." = ".(($this->table_array[$this->pk_name]["value"]) ? $this->table_array[$this->pk_name]["value"] : 'NULL')." ";
+//				if ($this->table_array[$this->int_pk_name]["value"])
+				$q .= "AND ".$this->int_pk_name." = ".(($this->table_array[$this->int_pk_name]["value"]) ? $this->table_array[$this->int_pk_name]["value"] : 'NULL')." ";
 				$q .= ") ";
 				if ($this->element_list[$table_name]["read_data"]["order"])
 					$q .= " ORDER BY ".$this->element_list[$table_name]["read_data"]["order"];
@@ -1574,8 +1576,8 @@
 			else
 			{
 				// only create query if we have a primary key
-				if ($this->table_array[$this->pk_name]["value"])
-					$q = "SELECT ".implode(", ", $q_select)." FROM ".$table_name." WHERE ".$this->pk_name." = ".$this->table_array[$this->pk_name]["value"];
+				if ($this->table_array[$this->int_pk_name]["value"])
+					$q = "SELECT ".implode(", ", $q_select)." FROM ".$table_name." WHERE ".$this->int_pk_name." = ".$this->table_array[$this->int_pk_name]["value"];
 			}
 			// only run if we have query strnig
 			if ($q)
