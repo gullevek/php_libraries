@@ -253,7 +253,7 @@
 					for ($i = 0; $i < count($output); $i ++)
 					{
 						$t_q = "('".$form->db_escape_string($output[$i])."')";
-						$form->db_exec($q.$t_q);
+						$form->db_exec($q.$t_q, 'NULL');
 					}
 					$elements[] = $form->form_create_element("filename");
 				}

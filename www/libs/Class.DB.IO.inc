@@ -600,7 +600,7 @@
 		}
 
 		// METHOD _db_prepare_exec
-		// PARAMS query, primary key
+		// PARAMS query, primary key [if set to NULL no returning will be added]
 		// RETURN md5 OR boolean false on error
 		// DESC   sub function for db_exec and db_exec_async
 		//        * checks query is set
@@ -643,28 +643,31 @@
 			// if we do have an insert, check if there is no RETURNING pk_id, add it if I can get the PK id
 			if ($this->_check_query_for_insert($this->query, true))
 			{
-				if (!$pk_name)
-				{
-					// TODO: get primary key from table name
-					list($schema, $table) = $this->_db_return_table($this->query);
-					if (!$this->pk_name_table[$table])
-					{
-						$this->pk_name_table[$table] = $this->db_functions->_db_primary_key($table, $schema);
-					}
-					$pk_name = $this->pk_name_table[$table];
-				}
 				$this->pk_name = $pk_name;
-				if (!preg_match("/ returning /i", $this->query) && $this->pk_name)
+				if ($pk_name != 'NULL')
 				{
-					$this->query .= " RETURNING ".$this->pk_name;
-					$this->returning_id = true;
-				}
-				elseif (preg_match("/ returning (.*)/i", $this->query, $matches) && $this->pk_name)
-				{
-					if (!preg_match("/$this->pk_name/", $matches[1]))
+					if (!$pk_name)
 					{
-						$this->query .= " , ".$this->pk_name;
+						// TODO: get primary key from table name
+						list($schema, $table) = $this->_db_return_table($this->query);
+						if (!$this->pk_name_table[$table])
+						{
+							$this->pk_name_table[$table] = $this->db_functions->_db_primary_key($table, $schema);
+						}
+						$pk_name = $this->pk_name_table[$table];
+					}
+					if (!preg_match("/ returning /i", $this->query) && $this->pk_name)
+					{
+						$this->query .= " RETURNING ".$this->pk_name;
 						$this->returning_id = true;
+					}
+					elseif (preg_match("/ returning (.*)/i", $this->query, $matches) && $this->pk_name)
+					{
+						if (!preg_match("/$this->pk_name/", $matches[1]))
+						{
+							$this->query .= " , ".$this->pk_name;
+							$this->returning_id = true;
+						}
 					}
 				}
 			}
@@ -731,7 +734,7 @@
 					// if not select do here
 					// count affected rows
 					$this->num_rows = $this->db_functions->_db_affected_rows($this->cursor);
-					if ($this->_check_query_for_insert($this->query, true))
+					if ($this->_check_query_for_insert($this->query, true) && $this->pk_name != 'NULL')
 					{
 						// set insert_id
 						if (!$this->returning_id)
@@ -1047,6 +1050,7 @@
 		//                 (if this was not set, method will quit with a 0 (failure)
 		//        pk_name -> optional primary key name, for insert id return if the pk name is very different
 		//                   if pk name is table name and _id, pk_name is not needed to be set
+		//                   if NULL is given here, no RETURNING will be auto added
 		// RETURN cursor for this query
 		// DESC   executes the query and returns & sets the internal cursor
 		//        fruthermore this functions also sets varios other vars 

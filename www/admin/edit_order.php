@@ -29,7 +29,6 @@
 	// set session name
 	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 	require(LIBS."Class.Login.inc");
-	require(LIBS."Class.DB.IO.inc");
 	require(LIBS.'Class.Smarty.Extend.inc');
 
 	// default lang
