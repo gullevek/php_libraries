@@ -162,6 +162,8 @@
 
 			// get the session pages array
 			$pages = $_SESSION["PAGES"];
+			if (!is_array($pages))
+				$pages = array ();
 
 //$this->debug('pages', $this->print_ar($pages));
 
