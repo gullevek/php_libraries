@@ -315,7 +315,6 @@
 
 	// debug data, if DEBUG flag is on, this data is print out
 	$DEBUG_DATA['DEBUG'] = $DEBUG_TMPL;
-	$DEBUG_DATA['Id'] = '$Id: edit_base.inc 4897 2014-02-06 08:16:56Z gullevek $';
 
 	// create main data array
 	$CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);
