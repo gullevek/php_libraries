@@ -475,10 +475,6 @@ $cms->debug('file_upload', "ERROR: $error | INI FSize: ".ini_get("upload_max_fil
 
 	//------------------------------ processing data end
 
-	//------------------------------ debug data
-	$DEBUG_DATA['Id'] = '$Id: files.php 4897 2014-02-06 08:16:56Z gullevek $';
-	//------------------------------ debug data
-
 	//------------------------------ smarty start
 	require("smarty.inc");
 	//------------------------------ smarty end

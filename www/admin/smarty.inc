@@ -86,7 +86,6 @@
 	// debug data, if DEBUG flag is on, this data is print out
 	$cms->DEBUG_DATA['debug_error_msg'] = $cms->running_time();
 	$cms->DEBUG_DATA['DEBUG'] = $DEBUG_TMPL;
-	$cms->DEBUG_DATA['Id'] = '$Id: smarty.inc 4897 2014-02-06 08:16:56Z gullevek $';
 
 	// create main data array
 	$cms->CONTENT_DATA = array_merge($cms->HEADER, $cms->DATA, $cms->DEBUG_DATA);
