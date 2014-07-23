@@ -68,7 +68,6 @@
 		public $login; // pressed login
 		private $username; // login name
 		private $password; // login password
-		private $current_page_name; // the page from which this login is called
 		private $logout; // logout button
 		private $login_error; // login error code, can be matched to the array login_error_msg, which holds the string
 		private $password_change = false; // if this is set to true, the user can change passwords
@@ -154,9 +153,6 @@
 			$this->pw_new_password_confirm = $_POST['pw_new_password_confirm'];
 			// logout target (from config)
 			$this->logout_target = LOGOUT_TARGET;
-			// get the page name
-			// page_name aus PHP_SELF strippen
-			$this->current_page_name = $this->get_page_name();
 			// disallow user list for password change
 			$this->pw_change_deny_users = array ('admin');
 			// set flag if password change is okay
@@ -432,12 +428,12 @@
 				$q = "SELECT filename ";
 				$q .= "FROM edit_page ep, edit_page_access epa, edit_group eg, edit_user eu ";
 				$q .= "WHERE ep.edit_page_id = epa.edit_page_id AND eg.edit_group_id = epa.edit_group_id AND eg.edit_group_id = eu.edit_group_id ";
-				$q .= "AND eu.edit_user_id = ".$this->euid." AND filename = '".$this->current_page_name."' AND eg.enabled = 1 AND epa.enabled = 1";
+				$q .= "AND eu.edit_user_id = ".$this->euid." AND filename = '".$this->page_name."' AND eg.enabled = 1 AND epa.enabled = 1";
 				$res = $this->db_return_row($q);
 				// unset mem limit if debug is set to 1
 //				if (($GLOBALS["DEBUG_ALL"] || $GLOBALS["DB_DEBUG"] || $_SESSION["DEBUG_ALL"] || $_SESSION["DB_DEBUG"]) && ini_get('memory_limit') != -1)
 //					ini_set('memory_limit', -1);
-				if ($res["filename"] == $this->current_page_name)
+				if ($res["filename"] == $this->page_name)
 				{
 					$this->permission_okay = 1;
 				}
@@ -943,7 +939,7 @@ EOM;
 			$q .= "(username, password, euid, event_date, event, error, data, data_binary, page, ";
 			$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 			$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
-			$q .= "VALUES ('".$this->db_escape_string($username)."', '".$this->db_escape_string($password)."', ".(($this->euid) ? $this->euid : 'NULL').", NOW(), '".$this->db_escape_string($event)."', '".$this->db_escape_string($error)."', '".$this->db_escape_string($data)."', '".$data_binary."', '".$this->current_page_name."', ";
+			$q .= "VALUES ('".$this->db_escape_string($username)."', '".$this->db_escape_string($password)."', ".(($this->euid) ? $this->euid : 'NULL').", NOW(), '".$this->db_escape_string($event)."', '".$this->db_escape_string($error)."', '".$this->db_escape_string($data)."', '".$data_binary."', '".$this->page_name."', ";
 			foreach (array('REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME', 'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT', 'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING') as $server_code)
 			{
 				if (array_key_exists($server_code, $_SERVER))
