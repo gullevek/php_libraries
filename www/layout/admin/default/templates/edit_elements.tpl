@@ -14,6 +14,9 @@
 		</td>
 		<td class="{$element.color}" class="normal">
 		{* here is depending on type the content data *}
+		{if $element.type == 'view'}
+			{$element.data.value}
+		{/if}
 		{if $element.type == 'binary' || $element.type == 'radio_array'}
 			{html_radios values=$element.data.value output=$element.data.output name=$element.data.name selected=$element.data.checked separator=$element.data.separator}
 		{/if}

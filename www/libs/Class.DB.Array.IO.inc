@@ -133,9 +133,9 @@
 		public function db_dump_array($write = 0)
 		{
 			reset($this->table_array);
-			while(list($spalte, $werte_array) = each($this->table_array))
+			while(list($column, $data_array) = each($this->table_array))
 			{
-				$string .= "<b>".$spalte."</b> -> ".$werte_array["value"]."<br>";
+				$string .= "<b>".$column."</b> -> ".$data_array["value"]."<br>";
 			}
 			// add output to internal error_msg
 			if ($write)
@@ -184,12 +184,12 @@
 		public function db_reset_array($reset_pk = 0)
 		{
 			reset($this->table_array);
-			while(list($spalte, $werte_array) = each($this->table_array))
+			while(list($column, $data_array) = each($this->table_array))
 			{
-				if (!$this->table_array[$spalte]["pk"])
-					unset($this->table_array[$spalte]["value"]);
+				if (!$this->table_array[$column]["pk"])
+					unset($this->table_array[$column]["value"]);
 				else if ($reset_pk)
-					unset($this->table_array[$spalte]["value"]);
+					unset($this->table_array[$column]["value"]);
 			}
 		}
 
@@ -208,27 +208,27 @@
 			$q .= $this->pk_name." = ".$this->table_array[$this->pk_name]["value"]." ";
 			// delete files and build FK query
 			reset($this->table_array);
-			while(list($spalte, $werte_array) = each($this->table_array))
+			while(list($column, $data_array) = each($this->table_array))
 			{
 				// suchen nach bildern und löschen ...
-				if ($this->table_array[$spalte]["file"] && file_exists($this->table_array[$spalte]["url"].$this->table_array[$spalte]["value"]))
+				if ($this->table_array[$column]["file"] && file_exists($this->table_array[$column]["url"].$this->table_array[$column]["value"]))
 				{
-					if (file_exists($this->table_array[$spalte]["path"].$this->table_array[$spalte]["value"]))
-						unlink($this->table_array[$spalte]["path"].$this->table_array[$spalte]["value"]);
-					$dateiname = str_replace("_tn", "", $this->table_array[$spalte]["value"]);
-					if (file_exists($this->table_array[$spalte]["path"].$dateiname))
-						unlink($this->table_array[$spalte]["path"].$dateiname);
+					if (file_exists($this->table_array[$column]["path"].$this->table_array[$column]["value"]))
+						unlink($this->table_array[$column]["path"].$this->table_array[$column]["value"]);
+					$dateiname = str_replace("_tn", "", $this->table_array[$column]["value"]);
+					if (file_exists($this->table_array[$column]["path"].$dateiname))
+						unlink($this->table_array[$column]["path"].$dateiname);
 				}
  
-				if ($this->table_array[$spalte]["fk"])
+				if ($this->table_array[$column]["fk"])
 				{
 					// zusammenstellen der FKs
 					if ($q_where) 
 						$q_where .= " AND ";
-					$q_where .= $spalte." = ".$this->table_array[$spalte]["value"];
+					$q_where .= $column." = ".$this->table_array[$column]["value"];
 				}
 				// allgemeines zurücksetzen des arrays
-				unset($this->table_array[$spalte]["value"]);
+				unset($this->table_array[$column]["value"]);
 			}
 
 			// attach fk row if there ...
@@ -257,18 +257,18 @@
 				return $this->table_array;
 			reset($this->table_array);
 			// create select part & addition FK part 
-			while (list($spalte, $werte_array)=each($this->table_array))
+			while (list($column, $data_array)=each($this->table_array))
 			{
 				if ($q_select) 
 					$q_select .= ", "; 
-				$q_select .= $spalte;
+				$q_select .= $column;
 
 				// check FK ...
-				if ($this->table_array[$spalte]["fk"] && $this->table_array[$spalte]["value"])
+				if ($this->table_array[$column]["fk"] && $this->table_array[$column]["value"])
 				{
 					if ($q_where)
 						$q_where .= " AND ";
-					$q_where .= $spalte .= " = ".$this->table_array[$spalte]["value"];
+					$q_where .= $column .= " = ".$this->table_array[$column]["value"];
 				}
 			}
  
@@ -285,23 +285,23 @@
 				if ($res = $this->db_fetch_array())
 				{  
 					reset($this->table_array);
-					while (list($spalte, $werte_array) = each($this->table_array))
+					while (list($column, $data_array) = each($this->table_array))
 					{
 						// wenn "edit" dann gib daten wie in DB zurück, ansonten aufbereiten für ausgabe
 						// ?? sollte das nicht draußen ??? man weis ja net was da drin steht --> is noch zu überlegen
-//						echo "EDIT: $edit | Spalte: $spalte | type: ".$this->table_array[$spalte]["type"]." | Res: ".$res[$spalte]."<br>";
+//						echo "EDIT: $edit | Spalte: $column | type: ".$this->table_array[$column]["type"]." | Res: ".$res[$column]."<br>";
 						if ($edit)
 						{
-							$this->table_array[$spalte]["value"] = $res[$spalte];
+							$this->table_array[$column]["value"] = $res[$column];
 							// if password, also write to hidden
-							if ($this->table_array[$spalte]["type"] == "password")
+							if ($this->table_array[$column]["type"] == "password")
 							{
-								$this->table_array[$spalte]["HIDDEN_value"] = $res[$spalte];
+								$this->table_array[$column]["HIDDEN_value"] = $res[$column];
 							}
 						}
 						else
 						{
-							$this->table_array[$spalte]["value"] = $this->convert_data(nl2br($res[$spalte]));
+							$this->table_array[$column]["value"] = $this->convert_data(nl2br($res[$column]));
 							// had to put out the htmlentities from the line above as it breaks japanese characters
 						}
 					}
@@ -335,58 +335,58 @@
 				$insert = 0;
 
 			reset ($this->table_array);
-			while (list($spalte, $werte_array) = each($this->table_array))
+			while (list($column, $data_array) = each($this->table_array))
 			{
 
 /********************************* START FILE *************************************/
 				// file upload
-				if ($this->table_array[$spalte]["file"])
+				if ($this->table_array[$column]["file"])
 				{
 					// falls was im tmp drinnen, sprich ein upload, datei kopieren, Dateinamen in db schreiben
 					// falls datei schon am server (physischer pfad), dann einfach url in db schreiben (update)
 					// falls in "delete" "ja" dann loeschen (und gibts eh nur beim update)
-					if ($this->table_array[$spalte]["delete"])
+					if ($this->table_array[$column]["delete"])
 					{
-						unset($this->table_array[$spalte]["delete"]);
-						if (file_exists($this->table_array[$spalte]["path"].$this->table_array[$spalte]["value"]))
-							unlink($this->table_array[$spalte]["path"].$this->table_array[$spalte]["value"]);
-						$dateiname = str_replace("_tn", "", $this->table_array[$spalte]["value"]); 
-						if (file_exists($this->table_array[$spalte]["path"].$dateiname))
-							unlink($this->table_array[$spalte]["path"].$dateiname);
-						$this->table_array[$spalte]["value"] = "";
+						unset($this->table_array[$column]["delete"]);
+						if (file_exists($this->table_array[$column]["path"].$this->table_array[$column]["value"]))
+							unlink($this->table_array[$column]["path"].$this->table_array[$column]["value"]);
+						$dateiname = str_replace("_tn", "", $this->table_array[$column]["value"]); 
+						if (file_exists($this->table_array[$column]["path"].$dateiname))
+							unlink($this->table_array[$column]["path"].$dateiname);
+						$this->table_array[$column]["value"] = "";
 					}
 					else
 					{
-						if ($this->table_array[$spalte]["tmp"] != "none" && $this->table_array[$spalte]["tmp"])
+						if ($this->table_array[$column]["tmp"] != "none" && $this->table_array[$column]["tmp"])
 						{
 							// Dateiname zusammenbasteln: org-name + _pkid liste + .ext
-							list($name, $ext) = explode(".",$this->table_array[$spalte]["dn"]);
+							list($name, $ext) = explode(".",$this->table_array[$column]["dn"]);
 
 							// mozilla, patch
-							$fn_name = explode("/", $this->table_array[$spalte]["dn"]);
-							$this->table_array[$spalte]["dn"] = $fn_name[count($fn_name)-1];
-							$filename_parts = explode(".", $this->table_array[$spalte]["dn"]);
+							$fn_name = explode("/", $this->table_array[$column]["dn"]);
+							$this->table_array[$column]["dn"] = $fn_name[count($fn_name)-1];
+							$filename_parts = explode(".", $this->table_array[$column]["dn"]);
 							$ext = end($filename_parts);
 							array_splice($filename_parts, -1, 1);
 							$name = str_replace(" ", "_", implode(".", $filename_parts));
 							//echo "PK: $pk_ids_file<br>";
 							$dateiname = $name.$pk_ids_file.".".$ext;
 							//echo "Dn: $dateiname";
-							copy($this->table_array[$spalte]["tmp"], $this->table_array[$spalte]["path"].$dateiname);
+							copy($this->table_array[$column]["tmp"], $this->table_array[$column]["path"].$dateiname);
 							// automatisch thumbnail generieren, geht nur mit convert (ImageMagic!!!), aber nur bei bild ..
 							if (strtolower($ext) == "jpeg" || strtolower($ext) == "jpg" || strtolower($ext) == "gif" || strtolower($ext) == "png")
 							{ 
 								$dateiname_tn = $name.$pk_ids_file."_tn.".$ext;
-								$eingang = $this->table_array[$spalte]["path"].$dateiname;
-								$ausgang = $this->table_array[$spalte]["path"].$dateiname_tn;
+								$eingang = $this->table_array[$column]["path"].$dateiname;
+								$ausgang = $this->table_array[$column]["path"].$dateiname_tn;
 								$com = "convert -geometry 115 $eingang $ausgang";
 								exec($com);
-								$this->table_array[$spalte]["value"] = $dateiname_tn;
+								$this->table_array[$column]["value"] = $dateiname_tn;
 							}
 							else
-								$this->table_array[$spalte]["value"] = $dateiname;
+								$this->table_array[$column]["value"] = $dateiname;
 						}
-						else if (file_exists($this->table_array[$spalte]["path"].$this->table_array[$spalte]["value"]))
+						else if (file_exists($this->table_array[$column]["path"].$this->table_array[$column]["value"]))
 						{
 							// mach gar nix, wenn bild schon da ???
 						}
@@ -394,16 +394,17 @@
 				} // file IF
 /********************************* END FILE **************************************/
 
-				if (!$this->table_array[$spalte]["pk"] && strlen($spalte) > 0 )
+				// do not write 'pk' (primary key) or 'view' values
+				if (!$this->table_array[$column]["pk"] && $this->table_array[$column]['type'] != 'view' && strlen($column) > 0 )
 				{
 					// for password use hidden value if main is not set
-					if ($this->table_array[$spalte]["type"] == "password" && !$this->table_array[$spalte]["value"])
-						$this->table_array[$spalte]["value"] = $this->table_array[$spalte]["HIDDEN_value"];
+					if ($this->table_array[$column]["type"] == "password" && !$this->table_array[$column]["value"])
+						$this->table_array[$column]["value"] = $this->table_array[$column]["HIDDEN_value"];
 					if (!$insert)
 					{
 						if (strlen($q_data)) 
 							$q_data .= ", ";
-						$q_data .= $spalte." = ";
+						$q_data .= $column." = ";
 					}
 					else
 					// this is insert
@@ -412,19 +413,19 @@
 							$q_data .= ", ";
 						if ($q_vars)
 							$q_vars .= ", ";
-						$q_vars .= $spalte;
+						$q_vars .= $column;
 						
 					}
 					// integer is different
-					if ($this->table_array[$spalte]["int"] || $this->table_array[$spalte]["int_null"])
+					if ($this->table_array[$column]["int"] || $this->table_array[$column]["int_null"])
 					{
-$this->debug('write_check', "[$spalte][".$this->table_array[$spalte]["value"]."] Foo: ".isset($this->table_array[$spalte]["value"])." | ".$this->table_array[$spalte]["int_null"]);
-						if (!$this->table_array[$spalte]["value"] && $this->table_array[$spalte]["int_null"])
+$this->debug('write_check', "[$column][".$this->table_array[$column]["value"]."] Foo: ".isset($this->table_array[$column]["value"])." | ".$this->table_array[$column]["int_null"]);
+						if (!$this->table_array[$column]["value"] && $this->table_array[$column]["int_null"])
 							$_value = 'NULL';
-						elseif (!isset($this->table_array[$spalte]["value"]))
+						elseif (!isset($this->table_array[$column]["value"]))
 							$_value = 0;
 						else
-							$_value = $this->table_array[$spalte]["value"];
+							$_value = $this->table_array[$column]["value"];
 						$q_data .= $_value;
 					}
 					else
@@ -433,9 +434,9 @@ $this->debug('write_check', "[$spalte][".$this->table_array[$spalte]["value"]."]
 						$q_data .= "'";
 						// if add slashes do convert & add slashes else write AS is
 						if ($addslashes)
-							$q_data .= $this->db_escape_string($this->convert_entities($this->table_array[$spalte]["value"]));
+							$q_data .= $this->db_escape_string($this->convert_entities($this->table_array[$column]["value"]));
 						else
-							$q_data .= addslashes($this->table_array[$spalte]["value"]);
+							$q_data .= addslashes($this->table_array[$column]["value"]);
 						$q_data .= "'";
 					}
 				}
@@ -445,14 +446,14 @@ $this->debug('write_check', "[$spalte][".$this->table_array[$spalte]["value"]."]
 			// get it at the end, cause now we can be more sure of no double IDs, etc
 			reset($this->table_array);
 			// create select part & addition FK part 
-			while (list($spalte, $werte_array) = each($this->table_array))
+			while (list($column, $data_array) = each($this->table_array))
 			{
 				// check FK ...
-				if ($this->table_array[$spalte]["fk"] && $this->table_array[$spalte]["value"])
+				if ($this->table_array[$column]["fk"] && $this->table_array[$column]["value"])
 				{
 					if ($q_where)
 						$q_where .= " AND ";
-					$q_where .= $spalte .= " = ".$this->table_array[$spalte]["value"];
+					$q_where .= $column .= " = ".$this->table_array[$column]["value"];
 				}
 			}
 

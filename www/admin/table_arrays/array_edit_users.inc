@@ -32,6 +32,26 @@
 					"0" => "No"
 				)
 			),
+			"strict" => array (
+				"value" => $GLOBALS["strict"],
+				"output_name" => "Strict (Lock after errors)",
+				"type" => "binary",
+				"int" => 1,
+				"element_list" => array (
+					"1" => "Yes",
+					"0" => "No"
+				)
+			),
+			"locked" => array (
+				"value" => $GLOBALS["locked"],
+				"output_name" => "Locked (auto set if strict with errors)",
+				"type" => "binary",
+				"int" => 1,
+				"element_list" => array (
+					"1" => "Yes",
+					"0" => "No"
+				)
+			),
 			"admin" => array (
 				"value" => $GLOBALS["admin"],
 				"output_name" => "Admin",
@@ -98,12 +118,25 @@
 				"type" => "drop_down_db",
 				"query" => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level"
 			),
+			"login_error_count" => array (
+				"output_name" => "Login error count",
+				"value" => $GLOBALS['login_error_count'],
+				"type" => "view",
+				"empty" => "0"
+			),
+			"login_error_date" => array (
+				"output_name" => "Last login error",
+				"value" => $GLOBALS['login_error_date'],
+				"type" => "view",
+				"empty" => "-"
+			),
+			// planned delete lock flag
 			"protected" => array (
 				"value" => $GLOBALS["protected"],
 				"int" => 1
 			)
 		),
-		"load_query" => "SELECT edit_user_id, username, enabled, debug, db_debug FROM edit_user ORDER BY username",
+		"load_query" => "SELECT edit_user_id, username, enabled, debug, db_debug, strict, locked, login_error_count FROM edit_user ORDER BY username",
 		"table_name" => "edit_user",
 		"show_fields" => array (
 			array (
@@ -124,6 +157,20 @@
 				"binary" => array("Yes", "No"),
 				"before_value" => "DB Debug: "
 			),
+			array (
+				"name" => "strict",
+				"binary" => array("Yes", "No"),
+				"before_value" => "Strict: "
+			),
+			array (
+				"name" => "locked",
+				"binary" => array("Yes", "No"),
+				"before_value" => "Locked: "
+			),
+			array (
+				"name" => "login_error_count",
+				"before_value" => "Errors: "
+			)
 		),
 		"element_list" => array (
 			"edit_access_user" => array (

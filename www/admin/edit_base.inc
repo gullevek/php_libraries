@@ -222,12 +222,16 @@
 		switch ($form->my_page_name)
 		{
 			case "edit_users":
+				$elements[] = $form->form_create_element("login_error_count");
+				$elements[] = $form->form_create_element("login_error_date");
 				$elements[] = $form->form_create_element("enabled");
 				$elements[] = $form->form_create_element("username");
 				$elements[] = $form->form_create_element("password");
 				$elements[] = $form->form_create_element("email");
 				$elements[] = $form->form_create_element("edit_group_id");
 				$elements[] = $form->form_create_element("edit_access_right_id");
+				$elements[] = $form->form_create_element("strict");
+				$elements[] = $form->form_create_element("locked");
 				$elements[] = $form->form_create_element("admin");
 				$elements[] = $form->form_create_element("debug");
 				$elements[] = $form->form_create_element("db_debug");

@@ -25,7 +25,8 @@
 	*        "fk" => 1/0 - sets the foreign key (do not use at the moment ... buggy ;)
 	*        "mandatory" => 1/0 - triggers * in output, but nor error check
 	*        "output_name" => "text" - text put as label for the element
-	*        "type" => "text/textarea/date/drop_down_db/drop_down_array/drop_down_db_input/drop_down_db_same_db/radio_array/binary/hidden/file/password"
+	*        "type" => "view/text/textarea/date/drop_down_db/drop_down_array/drop_down_db_input/drop_down_db_same_db/radio_array/binary/hidden/file/password"
+	*					View is special, it just prints out the data as is, will not be saved
 	*                   1) more will come
 	*                   2) keep in mind that binary will not be checked, as it is always set to a value (default is "no")
 	*        ---- the next four fields are only NECESSARY (!!!) for drop_down_db_input
@@ -44,6 +45,7 @@
 	*        "error_check" => "custom/email/date/number/unique" - 1) more will come
 	*        "error_regex" => "regex" - if error_check is custom regex here
 	*        "error_example" => "text" - example input text for error_check (only custom right now) 
+	*        "empty" => "value/text" - ONLY for view. If no data found, set this value
 	*        --- file:
 	*        "save_dir" => "directory where it should be saved to
 	*        "accept_type" => "mime types accepted (mime/text,mime/jpeg ... etc)"
@@ -689,6 +691,11 @@
 				$output_name .= ' *';
 			// create right side depending on "definiton" in table_array
 			$type = $this->table_array[$element_name]["type"];
+			// view only output
+			if ($this->table_array[$element_name]["type"] == "view")
+			{
+				$data['value'] = !$this->table_array[$element_name]["value"] ? $this->table_array[$element_name]['empty'] : $this->table_array[$element_name]["value"];
+			}
 			// binary true/false element
 			if ($this->table_array[$element_name]["type"] == "binary")
 			{

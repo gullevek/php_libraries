@@ -158,6 +158,10 @@
 			// set flag if password change is okay
 			if (defined('PASSWORD_CHANGE'))
 				$this->password_change = PASSWORD_CHANGE;
+			// max login counts before error reporting
+			$this->max_login_error_count = 10;
+			// users that never get locked, even if they are set strict
+			$this->lock_deny_users = array ('admin');
 
 			// internal
 			$this->class_info["login"] = array(
@@ -239,7 +243,7 @@
 				else
 				{
 					// we have to get the themes in here too
-					$q = "SELECT eu.edit_user_id, username, password, eu.edit_group_id, eg.name AS edit_group_name, admin, ";
+					$q = "SELECT eu.edit_user_id, username, password, eu.edit_group_id, eg.name AS edit_group_name, admin, eu.login_error_count, eu.login_error_date, eu.strict, eu.locked, ";
 					$q .= "debug, db_debug, ";
 					$q .= "eareu.level AS user_level, eareu.type AS user_type, ";
 					$q .= "eareg.level AS group_level, eareg.type AS group_type, ";
@@ -269,7 +273,25 @@
 						// $ and one alphanumeric letter, 13 chars long, but nor $ at the end: STD_DESC
 						// if no $ => normal password
 						// NOW, if we have a password encoded, but not the correct encoder available, throw special error
-						if ((preg_match("/^\\$2(a|y)\\$/", $res['password']) && CRYPT_BLOWFISH != 1) || (preg_match("/^\\$1\\$/", $res['password']) && CRYPT_MD5 != 1) || (preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && CRYPT_STD_DES != 1))
+
+						// check flow
+						// - user is enabled
+						// - user is not locked
+						// - password is readable
+						// - encrypted password matches
+						// - plain password matches
+
+						// user is enabled
+						if (!$res["enabled"])
+						{
+							$this->login_error = 104;
+						}
+						// user is locked, either set or auto set
+						elseif ($res['locked'])
+						{
+							$this->login_error = 105;
+						}
+						elseif ((preg_match("/^\\$2(a|y)\\$/", $res['password']) && CRYPT_BLOWFISH != 1) || (preg_match("/^\\$1\\$/", $res['password']) && CRYPT_MD5 != 1) || (preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && CRYPT_STD_DES != 1))
 						{
 							$this->login_error = 9999; // this means password cannot be decrypted because of missing crypt methods
 						}
@@ -282,11 +304,6 @@
 						elseif (!preg_match("/^\\$2(a|y)\\$/", $res['password']) && !preg_match("/^\\$1\\$/", $res['password']) && !preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && $res['password'] != $this->password)
 						{
 							$this->login_error = 1012;
-						}
-						// user is enabled
-						elseif (!$res["enabled"])
-						{
-							$this->login_error = 104;
 						}
 						// nromal user processing
 						else
@@ -312,6 +329,12 @@
 								$_SESSION["LANG"] = $res["lang_short"];
 								$_SESSION["DEFAULT_CHARSET"] = $res["lang_iso"];
 								$_SESSION["DEFAULT_LANG"] = $res["lang_short"].'_'.strtolower(str_replace('-', '', $res["lang_iso"]));
+								// reset any login error count for this user
+								if ($res['login_error_count'] > 0)
+								{
+									$q = "UPDATE edit_user SET login_error_count = 0, login_error_date = NULL WHERE edit_user_id = ".$res['edit_user_id'];
+									$this->db_exec($q);
+								}
 								$pages = array();
 								$edit_page_ids = array();
 								// set pages access
@@ -403,9 +426,24 @@
 								$_SESSION["UNIT"] = $unit_access;
 								$_SESSION["UNIT_ACL_LEVEL"] = $unit_acl;
 								$_SESSION['EAID'] = $eauid;
-								// load edit access list for this user
 							} // user has permission to THIS page
 						} // user was not enabled
+						if ($this->login_error)
+						{
+							// update login error count for this user
+							$q = "UPDATE edit_user SET login_error_count = login_error_count + 1, login_error_date = NOW WHERE edit_user_id = ".$res['edit_user_id'];
+							$this->db_exec($q);
+							if ($res['login_error_count'] + 1 > $this->max_login_error_count)
+							{
+								// do some alert reporting in case this error is too big
+								// if strict is set, lock this user
+								// this needs manual unlocking by an admin user
+								if ($res['strict'] && !in_array($this->username, $this->lock_deny_users))
+								{
+									$q = "UPDATE edit_user SET locked = 1 WHERE edit_user_id = ".$res['edit_user_id'];
+								}
+							}
+						}
 					} // user was not found
 				} // if not username AND password where given
 				// if there was an login error, show login screen
@@ -421,7 +459,7 @@
 		// PARAMS: none
 		// RETUNR none
 		// DESC  : for every page the user access this script checks if he is allowed to do so
-		private function login_check_permissions()
+		public function login_check_permissions()
 		{
 			if ($this->euid && $this->login_error != 103)
 			{
@@ -443,13 +481,15 @@
 					$this->permission_okay = 0;
 				}
 			}
+			// if called from public, so we can check if the permissions are ok
+			return $this->permission_okay;
 		}
 
 		// METHOD: login_logout_user
 		// PARAMS: none
 		// RETURN: none
 		// DESC  : if a user pressed on logout, destroyes session and unsets all global vars
-		private function login_logout_user()
+		public function login_logout_user()
 		{
 			if ($this->logout || $this->login_error)
 			{
@@ -491,7 +531,7 @@
 		//         * if an account ACL is set, set this parallel, account ACL overrides user ACL if it applies
 		//         * if edit access ACL level is set, use this, else use page
 		//         set all base ACL levels as a list keyword -> ACL number
-		private function login_set_acl()
+		public function login_set_acl()
 		{
 			// set the mastser user id
 			$this->acl['info']['euid'] = $_SESSION['EUID'];
@@ -783,6 +823,7 @@
 				"102" => $this->l->__("Fatal Error: <b>Login Failed - Please enter username and password</b>"),
 				"103" => $this->l->__("Fatal Error: <b>You do not have the rights to access this Page</b>"),
 				"104" => $this->l->__("Fatal Error: <b>Login Failed - User not enabled</b>"),
+				"105" => $this->l->__("Fatal Error: <b>Login Failed - User is locked</b>"),
 				"220" => $this->l->__("Fatal Error: <b>Password change - The user could not be found</b>"), // actually this is an illegal user, but I mask it
 				'200' => $this->l->__("Fatal Error: <b>Password change - Please enter username and old password</b>"),
 				"201" => $this->l->__("Fatal Error: <b>Password change - The user could not be found</b>"),
