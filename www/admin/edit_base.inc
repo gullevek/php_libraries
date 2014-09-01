@@ -223,7 +223,8 @@
 		{
 			case "edit_users":
 				$elements[] = $form->form_create_element("login_error_count");
-				$elements[] = $form->form_create_element("login_error_date");
+				$elements[] = $form->form_create_element("login_error_date_last");
+				$elements[] = $form->form_create_element("login_error_date_first");
 				$elements[] = $form->form_create_element("enabled");
 				$elements[] = $form->form_create_element("username");
 				$elements[] = $form->form_create_element("password");

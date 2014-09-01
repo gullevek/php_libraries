@@ -243,7 +243,7 @@
 				else
 				{
 					// we have to get the themes in here too
-					$q = "SELECT eu.edit_user_id, username, password, eu.edit_group_id, eg.name AS edit_group_name, admin, eu.login_error_count, eu.login_error_date, eu.strict, eu.locked, ";
+					$q = "SELECT eu.edit_user_id, username, password, eu.edit_group_id, eg.name AS edit_group_name, admin, eu.login_error_count, eu.login_error_date_last, eu.login_error_date_first, eu.strict, eu.locked, ";
 					$q .= "debug, db_debug, ";
 					$q .= "eareu.level AS user_level, eareu.type AS user_type, ";
 					$q .= "eareg.level AS group_level, eareg.type AS group_type, ";
@@ -267,6 +267,9 @@
 					}
 					else
 					{
+						// if login errors is half of max errors and the last login error was less than 10s ago, forbid any new login try
+
+
 						// check with what kind of prefix the password begins:
 						// $2a$ or $2y$: BLOWFISCH
 						// $1$: MD5
@@ -332,7 +335,7 @@
 								// reset any login error count for this user
 								if ($res['login_error_count'] > 0)
 								{
-									$q = "UPDATE edit_user SET login_error_count = 0, login_error_date = NULL WHERE edit_user_id = ".$res['edit_user_id'];
+									$q = "UPDATE edit_user SET login_error_count = 0, login_error_date_last = NULL, login_error_date_first = NULL WHERE edit_user_id = ".$res['edit_user_id'];
 									$this->db_exec($q);
 								}
 								$pages = array();
@@ -427,12 +430,15 @@
 								$_SESSION["UNIT_ACL_LEVEL"] = $unit_acl;
 								$_SESSION['EAID'] = $eauid;
 							} // user has permission to THIS page
-						} // user was not enabled
+						} // user was not enabled or other login error
 						if ($this->login_error)
 						{
+							if ($res['login_error_count'] == 0)
+								$login_error_date_first = ', login_error_date_first = NOW()';
 							// update login error count for this user
-							$q = "UPDATE edit_user SET login_error_count = login_error_count + 1, login_error_date = NOW WHERE edit_user_id = ".$res['edit_user_id'];
+							$q = "UPDATE edit_user SET login_error_count = login_error_count + 1, login_error_date_last = NOW() $login_error_date_first WHERE edit_user_id = ".$res['edit_user_id'];
 							$this->db_exec($q);
+							// totally lock the user if error max is reached
 							if ($res['login_error_count'] + 1 > $this->max_login_error_count)
 							{
 								// do some alert reporting in case this error is too big

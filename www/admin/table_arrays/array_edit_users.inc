@@ -124,9 +124,15 @@
 				"type" => "view",
 				"empty" => "0"
 			),
-			"login_error_date" => array (
+			"login_error_date_last" => array (
 				"output_name" => "Last login error",
-				"value" => $GLOBALS['login_error_date'],
+				"value" => $GLOBALS['login_error_date_liast'],
+				"type" => "view",
+				"empty" => "-"
+			),
+			"login_error_date_first" => array (
+				"output_name" => "First login error",
+				"value" => $GLOBALS['login_error_date_first'],
 				"type" => "view",
 				"empty" => "-"
 			),
