@@ -826,7 +826,7 @@
 			if ($strip_ext == 1)
 				return $page_temp['filename'];
 			elseif ($strip_ext == 2)
-				return $page_temp['dirname'].'/'.$page_temp['basename'];
+				return $_SERVER['PHP_SELF'];
 			else
 				return $page_temp['basename'];
 		}
