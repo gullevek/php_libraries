@@ -97,6 +97,8 @@
 		public $class_info; // class info var
 
 		public $page_name;
+		public $host_name;
+		public $host_port;
 
 		private $error_id; // error ID for errors in classes
 		private $error_string; // error strings in classes (for error_id)
@@ -176,6 +178,7 @@
 
 			// set the page name
 			$this->page_name = $this->get_page_name();
+			$this->host_name = $this->get_host_name();
 
 			// set the paths matching to the valid file types
 			$this->data_path = array (
@@ -387,7 +390,7 @@
 				$this->fdebug_fp();
 				if ($enter)
 					$string .= "\n";
-				$string = "[".$this->print_time()."] [".$this->get_page_name()."] - ".$string;
+				$string = "[".$this->print_time()."] [".$this->get_page_name(2)."] - ".$string;
 				fwrite($this->debug_fp, $string);
 				$this->fdebug_fp();
 			}
@@ -451,7 +454,7 @@
 				if (!isset($this->error_msg[$level]))
 					$this->error_msg[$level] = '';
 				$error_string = '<div>';
-				$error_string .= '[<span style="font-weight: bold; color: #5e8600;">'.$this->print_time().'</span>] [<span style="font-weight: bold; color: #c56c00;">'.$level.'</span>] [<span style="color: #08b369;">'.$this->get_page_name().'</span>] [<span style="color: #0062A2;">'.$this->running_uid.'</span>] {<span style="font-style: italic; color: #928100;">'.get_class($this).'</span>} - '.$string;
+				$error_string .= '[<span style="font-weight: bold; color: #5e8600;">'.$this->print_time().'</span>] [<span style="font-weight: bold; color: #c56c00;">'.$level.'</span>] [<span style="color: #b000ab;">'.$this->host_name.'</span>] [<span style="color: #08b369;">'.$this->page_name.'</span>] [<span style="color: #0062A2;">'.$this->running_uid.'</span>] {<span style="font-style: italic; color: #928100;">'.get_class($this).'</span>} - '.$string;
 				$error_string .= "</div><!--#BR#-->";
 				if ($strip)
 				{
@@ -461,7 +464,7 @@
 					$string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "", $string);
 				}
 				// same string put for print (no html crap inside)
-				$error_string_print = '['.$this->print_time().'] ['.$this->get_page_name().'] ['.$this->running_uid.'] {'.get_class($this).'} <'.$level.'> - '.$string;
+				$error_string_print = '['.$this->print_time().'] ['.$this->host_name.'] ['.$this->get_page_name(2).'] ['.$this->running_uid.'] {'.get_class($this).'} <'.$level.'> - '.$string;
 				$error_string_print .= "\n";
 				// write to file if set
 				$this->write_error_msg($level, $error_string_print);
@@ -797,8 +800,22 @@
 				return $atag.$email;
 		}
 
+		// METHOD get_host_name
+		// PARAMS none
+		// RETURN host name
+		// DESCRIPTION
+		// get the host name without the port as given by the SELF var
+		public static function get_host_name()
+		{
+			list($host_name, $port) = explode(":", $_SERVER['HTTP_HOST']);
+			$self->host_port = $port;
+			return $host_name;
+		}
+
 		// METHOD get_page_name
-		// PARAMS strip page file name extension, default is no
+		// PARAMS 1: strip page file name extension
+		//        0: keep filename as is
+		//        2: keep filename as is, but add dirname too
 		// RETURN filename
 		// DESCRIPTION
 		// get the page name of the curronte page:
@@ -806,8 +823,10 @@
 		{
 			// get the file info
 			$page_temp = pathinfo($_SERVER["PHP_SELF"]);
-			if ($strip_ext)
+			if ($strip_ext == 1)
 				return $page_temp['filename'];
+			elseif ($strip_ext == 2)
+				return $page_temp['dirname'].'/'.$page_temp['basename'];
 			else
 				return $page_temp['basename'];
 		}

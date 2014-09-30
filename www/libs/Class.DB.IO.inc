@@ -312,7 +312,7 @@
 			$this->db_pwd = $db_config['db_pass'];
 			$this->db_host = $db_config['db_host'];
 			$this->db_port = array_key_exists('db_port', $db_config) ? $db_config['db_port'] : '5432';
-			$this->db_schema = array_key_exists('db_schema', $db_config) ? $db_config['db_schema'] : 'public';
+			$this->db_schema = array_key_exists('db_schema', $db_config) ? $db_config['db_schema'] : ''; // do not set to 'public' if not set, because the default is already public
 			$this->db_encoding = array_key_exists('db_encoding', $db_config) ? $db_config['db_encoding'] : '';
 			$this->db_type = 'db_'.$db_config['db_type'];
 			$this->db_ssl = array_key_exists('db_ssl', $db_config) ? $db_config['db_ssl'] : 'allow';

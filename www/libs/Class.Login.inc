@@ -269,7 +269,6 @@
 					{
 						// if login errors is half of max errors and the last login error was less than 10s ago, forbid any new login try
 
-
 						// check with what kind of prefix the password begins:
 						// $2a$ or $2y$: BLOWFISCH
 						// $1$: MD5
