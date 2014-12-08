@@ -1,39 +1,14 @@
 <?
 	/*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
-	* CREATED: 2003/04/09 
+	* CREATED: 2014/12/3
 	* SHORT DESCRIPTION:
-	* pgsql wrapper calls
+	* pgsql pdo wrapper calls
 	* HISTORY:
-	* 2008/04/16 (cs) wrapper for pg escape string
-	* 2007/01/11 (cs) add prepare/execute for postgres
-	* 2006/09/12 (cs) in case db_query retuns false, save the query and run the query through the send/get procedure to get correct error data from the db
-	* 2006/06/26 (cs) added port for db connection
-	* 2006/04/03 (cs) added meta data for table
-	* 2005/07/25 (cs) removed the plural s remove, not needed and not 100% working
-	* 2005/07/07 (cs) the default it is table_name _ id
-	* 2005/01/19 (cs) changed the pgsql connect, so it dies if it can't connect to the DB
-	* 2004/09/30 (cs) layout cleanup
 	* /
 
   /* collection of PostgreSQL wrappers
-	* REQUIRES 5.x PHP!!!
-	*
-	* pg_prepare
-	* pg_execute
-	* pg_num_rows
-	* pg_num_fields
-	* pg_field_name
-	* pg_affected_rows (*)
-	* pg_fetch_array
-	* pg_query
-	* pg_send_query
-	* pg_get_result
-	* pg_connection_busy
-	* pg_close
-	* pg_connect (*)
-	* pg_meta_data
-	* pg_escape_string
+	* REQUIRES 5.x PHP with compiled pdo pgsql (--with-pdo-pgsql)
 	*
 	*/
 
@@ -41,7 +16,7 @@
 	{
 		private $last_error_query;
 		private $dbh;
-//		public $currval_query;
+		private $cursor;
 
 		// METHOD: __construct
 		// PARAMS: none
@@ -58,7 +33,7 @@
 			else
 				return false;
 		}
-
+		
 		// METHOD: _db_query
 		// PARAMS: query
 		// RETURN: query result
@@ -66,10 +41,10 @@
 		public function _db_query($query)
 		{
 			$this->last_error_query = '';
-			// read out the query status and save the query if needed
+/*			// read out the query status and save the query if needed
 			$result = @pg_query($this->dbh, $query);
 			if (!$result)
-				$this->last_error_query = $query;
+				$this->last_error_query = $query; */
 			return $result;
 		}
 
@@ -79,7 +54,7 @@
 		// DESC  : sends an async query to the server
 		public function _db_send_query($query)
 		{
-			return @pg_send_query($this->dbh, $query);
+//			return @pg_send_query($this->dbh, $query);
 		}
 
 		// METHOD: _db_get_result
@@ -89,9 +64,9 @@
 		public function _db_get_result()
 		{
 			$this->last_error_query = '';
-			$result = pg_get_result($this->dbh);
+/*			$result = pg_get_result($this->dbh);
 			if ($error = pg_result_error($result))
-				$this->last_error_query = $error;
+				$this->last_error_query = $error; */
 			return $result;
 		}
 
@@ -101,18 +76,18 @@
 		// DESC  : wrapper for pg_close
 		public function _db_close()
 		{
-			if (is_resource($this->dbh))
-				if (@pg_connection_status($this->dbh) === PGSQL_CONNECTION_OK)
-					@pg_close($this->dbh);
+			$this->cursor->closeCursor;
+			$this->cursor = null;
+			$this->dbh = null;
 		}
-
+		
 		// METHOD: _db_prepare
 		// PARAMS: prepare name, query
 		// RETURN: prepared statement handler
 		// DESC  : wrapper for pg_prepare
 		public function _db_prepare($name, $query)
 		{
-			return @pg_prepare($this->dbh, $name, $query);
+//			return @pg_prepare($this->dbh, $name, $query);
 		}
 
 		// METHOD: _db_execute
@@ -121,7 +96,7 @@
 		// DESC  : wrapper for pg_execute for running a prepared statement
 		public function _db_execute($name, $data)
 		{
-			return @pg_execute($this->dbh, $name, $data);
+//			return @pg_execute($this->dbh, $name, $data);
 		}
 
 		// METHOD: _db_num_rows
@@ -130,7 +105,7 @@
 		// DESC  : wrapper for pg_num_rows
 		public function _db_num_rows($cursor)
 		{
-			return pg_num_rows($cursor);
+//			return pg_num_rows($cursor);
 		}
 
 		// METHOD: _db_num_fields
@@ -139,7 +114,7 @@
 		// DESC  : wrapper for pg_num_fields
 		public function _db_num_fields($cursor)
 		{
-			return pg_num_fields($cursor);
+//			return pg_num_fields($cursor);
 		}
  
 		// METHOD: _db_field_name
@@ -148,7 +123,7 @@
 		// DESC  : wrapper for pg_field_name
 		public function _db_field_name($cursor, $i)
 		{
-			return pg_field_name($cursor, $i);
+//			return pg_field_name($cursor, $i);
 		}
 
 		// METHOD: _db_fetch_array
@@ -157,7 +132,7 @@
 		// DESC  : wrapper for pg_fetch_array
 		public function _db_fetch_array($cursor)
 		{
-			return pg_fetch_array($cursor);
+//			return pg_fetch_array($cursor);
 		}
 
 		// METHOD: _db_affected_ros
@@ -166,7 +141,7 @@
 		// DESC  : wrapper for pg_affected_rows
 		public function _db_affected_rows($cursor)
 		{
-			return pg_affected_rows($cursor); 
+//			return pg_affected_rows($cursor); 
 		}
 
 		// METHOD: _db_insert_id
@@ -276,11 +251,11 @@
 			{
 				$db_port = 5432;
 			}
-			$this->dbh = @pg_connect("host=".$db_host." port=".$db_port." user=".$db_user." password=".$db_pass." dbname=".$db_name." sslmode=".$db_ssl);
+/*			$this->dbh = @pg_connect("host=".$db_host." port=".$db_port." user=".$db_user." password=".$db_pass." dbname=".$db_name." sslmode=".$db_ssl);
 			if (!$this->dbh)
 			{
 				die("<!-- Can't connect [host=".$db_host." port=".$db_port." user=".$db_user." password=XXXX dbname=".$db_name." sslmode=".$db_ssl."] //-->");
-			}
+			} */
 			return $this->dbh;
 		}
 
@@ -290,7 +265,7 @@
 		// DESC  : reads the last error for this cursor
 		public function _db_print_error($cursor = '')
 		{
-			// run the query again for the error result here
+/*			// run the query again for the error result here
 			if (!$cursor && $this->last_error_query)
 			{
 				pg_send_query($this->dbh, $this->last_error_query);
@@ -298,7 +273,7 @@
 				$cursor = pg_get_result($this->dbh);
 			}
 			if (pg_result_error($cursor))
-				return "<span style=\"color: red;\"><b>-PostgreSQL-Error-></b> ".pg_result_error($cursor)."</span><br>";
+				return "<span style=\"color: red;\"><b>-PostgreSQL-Error-></b> ".pg_result_error($cursor)."</span><br>"; */
 		}
 
 		// METHOD: _db_meta_data
@@ -307,7 +282,7 @@
 		// DESC  : wrapper for pg_emta_data
 		public function _db_meta_data($table)
 		{
-			return @pg_meta_data($this->dbh, $table);
+//			return @pg_meta_data($this->dbh, $table);
 		}
 
 		// METHOD: _db_escape_string
@@ -316,7 +291,7 @@
 		// DESC  : wrapper for pg_escape_string
 		public function _db_escape_string($string)
 		{
-			return pg_escape_string($this->dbh, $string);
+//			return pg_escape_string($this->dbh, $string);
 		}
 
 		// METHOD: _db_escape_bytea
@@ -325,7 +300,7 @@
 		// DESC  : wrapper for pg_escape_bytea
 		public function _db_escape_bytea($bytea)
 		{
-			return pg_escape_bytea($this->dbh, $bytea);
+//			return pg_escape_bytea($this->dbh, $bytea);
 		}
 
 		// METHOD: _db_connection_busy
@@ -334,7 +309,7 @@
 		// DESC  : wrapper for pg_connection_busy
 		public function _db_connection_busy()
 		{
-			return pg_connection_busy($this->dbh);
+//			return pg_connection_busy($this->dbh);
 		}
 	
 		// METHOD: _db_version

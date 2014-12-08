@@ -894,6 +894,9 @@
 								break;
 							case "datetime": // YYYY-MM-DD HH:MM[:SS]
 								break;
+							case "intervalshort": // ony interval n [Y/M/D] only
+								if (preg_match("/^\d{1,3}\ ?[YMDymd]{1}$/", $this->table_array[$key]['value']))
+									$this->msg .= sprintf($this->l->__('Please enter a valid time interval in the format <length> Y|M|D for the <b>%s</b> Field!<br>'), $this->table[$key]['output_name']);
 							case "email":
 								if (!preg_match("/$this->email_regex/", $this->table_array[$key]["value"]))
 									$this->msg .= sprintf($this->l->__("Please enter a valid E-Mail Address for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
@@ -914,7 +917,13 @@
 							case "alphanumeric":
 //$this->debug('edit', 'IN Alphanumeric');
 								if (!preg_match("/^[0-9A-Za-z_-]+$/", $this->table_array[$key]["value"]))
-									$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric (Numbers and Letters only, no spaces) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
+									$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric (Numbers and Letters only also - and _, no spaces) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
+								break;
+							// this one also allows @ and .
+							case "alphanumericextended":
+//$this->debug('edit', 'IN Alphanumeric');
+								if (!preg_match("/^[0-9A-Za-z_-@\.]+$/", $this->table_array[$key]["value"]))
+									$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric extended (Numbers, Letters, -,  _, @ and . only, no spaces) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
 								break;
 							case "password":
 								// password can only be alphanumeric + special chars

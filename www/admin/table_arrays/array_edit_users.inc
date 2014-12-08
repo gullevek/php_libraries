@@ -11,7 +11,7 @@
 				"value" => $GLOBALS["username"], 
 				"output_name" => "Username", 
 				"mandatory" => 1, 
-				"error_check" => "unique|alphanumeric",
+				"error_check" => "unique|alphanumericextended",
 				"type" => "text"
 			),
 			"password" => array (
@@ -20,8 +20,24 @@
 				"CONFIRM_value" => $GLOBALS["CONFIRM_password"],
 				"output_name" => "Password", 
 				"mandatory" => 1, 
-				"type" => "password" // later has to be password for encryption in database
+				"type" => "password", // later has to be password for encryption in database
+				'update' => array ( // connected field updates, and update data
+					'password_change_date' => array ( // db row to update
+						'type' => 'date', // type of field (int/text/date/etc)
+						'value' => 'NOW()' // value [todo: complex reference
+					)
+				)
 			),
+			// password date when first insert and password is set, needs special field with connection to password
+			'password_change_interval' => array (
+				'value' => $GLOBALS['password_change_interval'],
+				'output_name' => 'Password change interval',
+				'error_check' => 'intervalshort', // can be any date length format. n Y/M/D [not H/M/S], only one set, no combination
+				'type' => 'text',
+				'size' => 5, // make it 5 chars long
+				'length' => 5
+			),
+			// password reset force interval, if set, user needs to reset password after X time period
 			"enabled" => array (
 				"value" => $GLOBALS["enabled"], 
 				"output_name" => "Enabled", 

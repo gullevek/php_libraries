@@ -21,6 +21,13 @@ CREATE TABLE edit_user (
 	edit_group_id INT NOT NULL,
 	edit_scheme_id INT,
 	edit_access_right_id INT NOT NULL,
+	login_error_count	INT,
+	login_error_date_last	TIMESTAMP WTIHOUT TIME ZONE,
+	login_error_date_first	TIMESTAMP WTIHOUT TIME ZONE,
+	strict	SMALLINT DEFAULT 0,
+	locked	SMALLINT DEFAULT 0,
+	password_change_date	TIMESTAMP WITHOUT TIME ZONE, -- only when password is first set or changed
+	password_change_interval	INTERVAL, -- null if no change is needed, or d/m/y time interval
 	FOREIGN KEY (edit_language_id) REFERENCES edit_language (edit_language_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,

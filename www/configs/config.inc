@@ -224,6 +224,15 @@
 		}
 	}
 
+	// turn off debug if debug flag is OFF
+	if (DEBUG == false)
+	{
+		$ECHO_ALL = 0;
+		$DEBUG_ALL = 0;
+		$PRINT_ALL = 0;
+		$DB_DEBUG = 0;
+	}
+
 	// any other global definitons here
 //	DEFINE('SOME_ID', <SOME VALUE>);
 	

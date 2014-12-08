@@ -805,10 +805,10 @@
 		// RETURN host name
 		// DESCRIPTION
 		// get the host name without the port as given by the SELF var
-		public static function get_host_name()
+		public function get_host_name()
 		{
 			list($host_name, $port) = explode(":", $_SERVER['HTTP_HOST']);
-			$self->host_port = $port;
+			$this->host_port = $port;
 			return $host_name;
 		}
 
