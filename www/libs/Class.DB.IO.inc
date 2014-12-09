@@ -758,6 +758,29 @@
 		// PUBLIC METHODS
 		// *************************************************************
 
+		// METHOD db_reset_query_called
+		// PARAMS query
+		// RETURN none
+		// DESC   resets the call times for the max query called to 0
+		//        USE CAREFULLY: rather make the query prepare -> execute
+		public function db_reset_query_called($query)
+		{
+			$this->query_called[md5($query)] = 0;
+		}
+
+		// METHOD db_get_query_called
+		// PARAMS query
+		// RETURN count of query called
+		// DESC   gets how often a query was called already
+		public function db_get_query_called($query)
+		{
+			$md5 = md5($query);
+			if ($this->query_called[$md5])
+				return $this->query_called[$md5];
+			else
+				return 0;
+		}
+
 		// METHOD db_close
 		// PARAMS none
 		// RETURN none
