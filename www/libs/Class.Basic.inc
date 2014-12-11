@@ -807,8 +807,11 @@
 		// get the host name without the port as given by the SELF var
 		public function get_host_name()
 		{
-			list($host_name, $port) = explode(":", $_SERVER['HTTP_HOST']);
-			$this->host_port = $port;
+			if ($_SERVER['HTTP_HOST'])
+				list($host_name, $port) = explode(":", $_SERVER['HTTP_HOST']);
+			else
+				$host_name = 'NA';
+			$this->host_port = $port ? $port : 80;
 			return $host_name;
 		}
 
