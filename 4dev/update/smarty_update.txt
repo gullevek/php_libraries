@@ -1,0 +1,9 @@
+The following files need to be copied:
+block.t.php
+block.textform.php
+function.popup.php
+function.popup_init.php
+
+The following files need in code update/or copy:
+function.html_checkboxes.php
+function.html_options.php
