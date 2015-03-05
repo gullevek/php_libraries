@@ -205,7 +205,7 @@
 				// I have to do manually or I overwrite the original insert internal vars ...
 				if ($q = $this->_db_query($q))
 				{
-					list($id) = pg_fetch_array($q);
+					list($id) = $this->_db_fetch_array($q);
 				}
 				else
 				{

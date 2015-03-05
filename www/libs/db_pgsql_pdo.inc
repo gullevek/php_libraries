@@ -16,7 +16,7 @@
 	{
 		private $last_error_query;
 		private $dbh;
-		private $cursor;
+		private $cursor = array();
 
 		// METHOD: __construct
 		// PARAMS: none
@@ -36,8 +36,8 @@
 		
 		// METHOD: _db_query
 		// PARAMS: query
-		// RETURN: query result
-		// DESC  : wrapper for gp_query, catches error and stores it in class var
+		// RETURN: cursor
+		// DESC  : was wrapper for pg_query, now it runs pepare and execute in one set. uses the query md5 as the cursor name
 		public function _db_query($query)
 		{
 			$this->last_error_query = '';
@@ -45,7 +45,20 @@
 			$result = @pg_query($this->dbh, $query);
 			if (!$result)
 				$this->last_error_query = $query; */
-			return $result;
+			$cursor = $this->_db_prepare(md5($query), $query);
+			$result = $this->_db_execute(md5($query), array ());
+			if (!$result)
+				$this->last_error_query = $query;
+			return $cursor;
+		}
+
+		// METHOD: _db_query_result
+		// PARAMS: query
+		// RETURN: result from query
+		// DESC  : only valid for the pdo version here. use with care
+		public function _db_query_result($query)
+		{
+			return $this->dbh->query($query);
 		}
 
 		// METHOD: _db_send_query
@@ -76,8 +89,14 @@
 		// DESC  : wrapper for pg_close
 		public function _db_close()
 		{
-			$this->cursor->closeCursor;
-			$this->cursor = null;
+			if (is_array($this->cursor))
+			{
+				foreach ($this->cursor as $key => $data)
+				{
+					$this->cursor[$key]->closeCursor;
+					$this->cursor[$key] = null;
+				}
+			}
 			$this->dbh = null;
 		}
 		
@@ -88,6 +107,8 @@
 		public function _db_prepare($name, $query)
 		{
 //			return @pg_prepare($this->dbh, $name, $query);
+			$this->cursor[$name] = $this->dbh->prepare($query);
+			return $this->cursor[$name];
 		}
 
 		// METHOD: _db_execute
@@ -97,6 +118,7 @@
 		public function _db_execute($name, $data)
 		{
 //			return @pg_execute($this->dbh, $name, $data);
+			return $this->cursor[$name]->execute($data);
 		}
 
 		// METHOD: _db_num_rows
@@ -106,6 +128,7 @@
 		public function _db_num_rows($cursor)
 		{
 //			return pg_num_rows($cursor);
+			return $cusor->rowCount();
 		}
 
 		// METHOD: _db_num_fields
@@ -115,6 +138,7 @@
 		public function _db_num_fields($cursor)
 		{
 //			return pg_num_fields($cursor);
+			return $cursor->columnCount();
 		}
  
 		// METHOD: _db_field_name
@@ -133,6 +157,7 @@
 		public function _db_fetch_array($cursor)
 		{
 //			return pg_fetch_array($cursor);
+			return $cursor->fetch();
 		}
 
 		// METHOD: _db_affected_ros
@@ -142,6 +167,7 @@
 		public function _db_affected_rows($cursor)
 		{
 //			return pg_affected_rows($cursor); 
+			return $cusor->rowCount();
 		}
 
 		// METHOD: _db_insert_id
@@ -168,7 +194,7 @@
 				// no PK name given at all
 				if (!$pk_name)
 				{
-					// if name is plurar, make it singular
+					// if name is plural, make it singular
 //					if (preg_match("/.*s$/i", $table))
 //						$table = substr($table, 0, -1);
 					// set pk_name to "id"
@@ -176,11 +202,11 @@
 				}
 				$seq = (($schema) ? $schema.'.' : '').$table."_".$pk_name."_seq";
 				$q = "SELECT CURRVAL('$seq') AS insert_id";
-//				$this->currval_query = $q;
 				// I have to do manually or I overwrite the original insert internal vars ...
-				if ($q = $this->_db_query($q))
+				$row = $this->_db_query_result($q);
+				if ($row['insert_id'])
 				{
-					list($id) = pg_fetch_array($q);
+					$id = $row['insert_id'];
 				}
 				else
 				{
@@ -203,8 +229,9 @@
 				if ($schema)
 				{
 					$q = "SHOW search_path";
-					$cursor = $this->_db_query($q);
-					$search_path = $this->_db_fetch_array($cursor)['search_path'];
+//					$cursor = $this->_db_query($q);
+//					$search_path = $this->_db_fetch_array($cursor)['search_path'];
+					$search_path = $this->_db_query_result($q)['search_path'];
 					if ($search_path != $schema)
 					{
 						$table_prefix = $schema.'.';
@@ -228,11 +255,11 @@
 				$q .= "pg_attribute.attrelid = pg_class.oid AND ";
 				$q .= "pg_attribute.attnum = any(pg_index.indkey) ";
 				$q .= "AND indisprimary";
-				$cursor = $this->_db_query($q);
-				if ($cursor)
-					return $this->_db_fetch_array($cursor)['column_name'];
-				else
+				$row = $this->_db_query_result($q);
+				if ($row === FALSE)
 					return false;
+				else
+					return $row['column_name'];
 			}
 			else
 			{
@@ -251,11 +278,15 @@
 			{
 				$db_port = 5432;
 			}
-/*			$this->dbh = @pg_connect("host=".$db_host." port=".$db_port." user=".$db_user." password=".$db_pass." dbname=".$db_name." sslmode=".$db_ssl);
-			if (!$this->dbh)
+			try 
 			{
-				die("<!-- Can't connect [host=".$db_host." port=".$db_port." user=".$db_user." password=XXXX dbname=".$db_name." sslmode=".$db_ssl."] //-->");
-			} */
+				$this->dbh = new PDO('pgsql:host='.$db_host.';dbname='.$db_name.';port='.$db_port.';sslmode='.$db_ssl, $db_user, $db_pass);
+			}
+			catch (PDOException $e)
+			{
+				print "Error!: ".$e->getMessage()."\n";
+				die("<!-- Can't connect [host=".$db_host." port=".$db_port." user=".$db_user." password=XXXX dbname=".$db_name." sslmode=".$db_ssl."]: ".$e->getMEssage()."//-->");
+			}
 			return $this->dbh;
 		}
 

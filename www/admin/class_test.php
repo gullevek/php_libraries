@@ -146,6 +146,9 @@
 	$status = $basic->db_exec("INSERT INTO test.schema_test (contents, id) VALUES ('TIME: ".time()."', ".rand(1, 10).")");
 	print "OTHER SCHEMA INSERT STATUS: ".$status." | PK NAME: ".$basic->pk_name.", PRIMARY KEY: ".$basic->insert_id."<br>";
 
+	// time string thest
+	print "TIME STRING TEST: ".$basic->TimeStringFormat(5887998.33445)."<br>";
+
 	// magic links test
 	print $basic->magic_links('user@bubu.at').'<br>';
 	print $basic->magic_links('http://test.com/foo/bar.php?foo=1').'<br>';

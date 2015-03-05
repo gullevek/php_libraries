@@ -339,6 +339,7 @@
 			$this->error_string['23'] = 'Query Execute failed, data array does not match placeholders';
 			$this->error_string['24'] = 'Missing prepared query entry for execute.';
 			$this->error_string['30'] = 'Query call in a possible endless loop. Was called more than '.$this->MAX_QUERY_CALL.' times';
+			$this->error_string['31'] = 'Could not fetch PK after query insert';
 			$this->error_string['40'] = 'Query async call failed.';
 			$this->error_string['41'] = 'Connection is busy with a different query. Cannot execute.';
 			$this->error_string['42'] = 'Cannot check for async query, none has been started yet.';
@@ -1415,7 +1416,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 				{
 					if (!$this->prepare_cursor[$stm_name]['returning_id'])
 						$this->insert_id = $this->db_functions->_db_insert_id($this->prepare_cursor[$stm_name]['query'], $this->prepare_cursor[$stm_name]['pk_name']);
-					else
+					elseif ($code)
 						$this->insert_id = $this->db_functions->_db_fetch_array($code)[$this->prepare_cursor[$stm_name]['pk_name']];
 					// this error handling is only for pgsql
 					if (is_array($this->insert_id))
@@ -1424,6 +1425,12 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 						$this->_db_error($this->insert_id[1]);
 						$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': Could not get insert id</span>', 'DB_WARNING');
 						unset($this->insert_id);
+					}
+					elseif (!$this->insert_id)
+					{
+						$this->warning_id = 31;
+						$this->_db_error();
+						$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': Could not get insert id</span>', 'DB_WARNING');
 					}
 				}
 				return $code;

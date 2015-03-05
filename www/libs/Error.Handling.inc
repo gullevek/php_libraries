@@ -21,6 +21,10 @@
 	//         if this fails, it will print the data to the window via echo
 	function MyErrorHandler ($type, $message, $file, $line, $context)
 	{
+		if (!(error_reporting() & $type) && !SHOW_ALL_ERRORS) {
+			// This error code is not included in error_reporting
+			return;
+		}
 		// ERROR LEVEL
 		$error_level = array (
 			1 => 'E_ERROR',

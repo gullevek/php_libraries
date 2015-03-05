@@ -1036,32 +1036,27 @@
 		// PARAMS: seconds
 		// RETURN: formated time string
 		// DESC:   formats a timestamp into time from. not a date
-		public static function TimeStringFormat($timestamp, $show_micro = 1)
+		public static function TimeStringFormat($timestamp, $show_micro = true)
 		{
 			// check if the timestamp has any h/m/s/ms inside, if yes skip
 			if (!preg_match("/(h|m|s|ms)/", $timestamp))
 			{
 				$ms = 0;
-				// work on ms timestamp
-				if (strstr($timestamp, " "))
-				{
-					list ($ms, $timestamp) = explode(" ", $timestamp);
-					if (is_numeric($ms)) // special case round
-						$ms = substr(round($ms, 4), 2);
-				}
-				else // if ms is as float
-				{
-					list ($timestamp, $ms) = explode('.', round($timestamp, 4));
-				}
-				$timegroups = array ("86400", "3600", "60", "1");
-				$output = array ();
+				list ($timestamp, $ms) = explode('.', round($timestamp, 4));
+				$timegroups = array ('86400', '3600', '60', '1');
+				$labels = array ('d', 'h', 'm', 's');
+				$time_string = '';
 				for ($i = 0; $i < count($timegroups); $i ++)
 				{
-					array_push($output, floor($timestamp / $timegroups[$i]));
+					$output = floor($timestamp / $timegroups[$i]);
 					$timestamp = $timestamp % $timegroups[$i];
+					// output has days|hours|min|sec
+					if ($output || $time_string)
+						$time_string .= $output.$labels[$i].(($i + 1) != count($timegroups) ? ' ' : '');
 				}
-				# output has days|hours|min|sec(|ms)
-				$time_string = (($output[0]) ? $output[0]."d " : "").(($output[1] || $output[0]) ? $output[1]."h " : "").(($output[2] ||$output[1] || $output[0]) ? $output[2]."m " : "").$output[3]."s".(($show_micro) ? " ".((!$ms) ? 0 : $ms)."ms" : "");
+				// add ms if there
+				if ($show_micro)
+					$time_string .= ' '.(!$ms ? 0 : $ms).'ms';
 			}
 			else
 			{

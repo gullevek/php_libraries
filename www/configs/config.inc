@@ -197,6 +197,7 @@
 //	DEFINE('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);
 //	DEFINE('REDIRECT_URL', $PATHS[TARGET]['redirect_url']);
 	DEFINE('DEBUG', $DEBUG_FLAG[$HOST_NAME]);
+	DEFINE('SHOW_ALL_ERRORS', false); // show all errors if debug_all & show_error_handling are enabled
 
 	/************* GENERAL PAGE TITLE ********/
 	$G_TITLE = '<OVERALL PAGE TITLE>';
