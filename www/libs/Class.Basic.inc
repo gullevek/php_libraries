@@ -50,6 +50,7 @@
 	*	array_search_recursive -> search for a value/key combination in an array of arrays
 	*	ByteStringFormat -> format bytes into KB, MB, GB, ...
 	*	TimeStringFormat -> format a timestamp (seconds) into days, months, ... also with ms
+	*	StringToTime -> reverste a TimeStringFormat to a timestamp
 	*	GenAssocArray -> generactes a new associativ array from an existing array
 	*	CheckDate -> checks if a date is valid
 	*   CompareDate -> compares two dates. -1 if the first is smaller, 0 if they are equal, 1 if the first is bigger
