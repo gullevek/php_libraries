@@ -1043,7 +1043,7 @@
 			{
 				$ms = 0;
 				list ($timestamp, $ms) = explode('.', round($timestamp, 4));
-				$timegroups = array ('86400', '3600', '60', '1');
+				$timegroups = array (86400, 3600, 60, 1);
 				$labels = array ('d', 'h', 'm', 's');
 				$time_string = '';
 				for ($i = 0; $i < count($timegroups); $i ++)
@@ -1063,6 +1063,35 @@
 				$time_string = $timestamp;
 			}
 			return $time_string;
+		}
+
+		// METHOD: StringToTime
+		// PARAMS: TimeStringFormat string
+		// RETURN: timestamp with microseconds
+		// DESC  : does a reverse of the TimeStringFormat and converts the string from
+		//         xd xh xm xs xms to a timestamp.microtime format
+		public static function StringToTime($timestring)
+		{
+			if (preg_match("/(d|h|m|s|ms)/", $timestring))
+			{
+				$timegroups = array (1 => 86400, 3 => 3600, 5 => 60, 7 => 1);
+				preg_match("/^((\d+)d ?)?((\d+)h ?)?((\d+)m ?)?((\d+)s ?)?((\d+)ms)?$/", $timestring, $matches);
+				// multiply the returned matches and sum them up. the last one (ms) is added with .
+				for ($i = 1; $i <= 7; $i += 2)
+				{
+					if ($matches[$i])
+					{
+						$timestamp += ($matches[($i + 1)] * $timegroups[$i]);
+					}
+				}
+				if ($matches[10])
+					$timestamp .= '.'.$matches[10];
+				return $timestamp;
+			}
+			else
+			{
+				return $timestring;
+			}
 		}
 
 		// METHOD: GenAssocArray
