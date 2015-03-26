@@ -147,7 +147,10 @@
 	print "OTHER SCHEMA INSERT STATUS: ".$status." | PK NAME: ".$basic->pk_name.", PRIMARY KEY: ".$basic->insert_id."<br>";
 
 	// time string thest
-	print "TIME STRING TEST: ".$basic->TimeStringFormat(5887998.33445)."<br>";
+	$timestamp = 5887998.33445;
+	$time_string = $basic->TimeStringFormat($timestamp);
+	print "TIME STRING TEST: ".$time_string."<br>";
+	print "REVERSE TIME STRING: ".$basic->StringToTime($time_string);
 
 	// magic links test
 	print $basic->magic_links('user@bubu.at').'<br>';
