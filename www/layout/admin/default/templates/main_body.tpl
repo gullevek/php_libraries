@@ -15,10 +15,6 @@
 	{if $STYLESHEET}
 	<link rel=stylesheet type="text/css" href="{$css}{$STYLESHEET}">
 	{/if}
-	{if $USE_JQUERY}
-	<!-- JQuery -->
-	<script type="text/javascript" src="{$js}/jquery.js"></script>
-	{/if}
 	{if $CSS_INCLUDE}
 	<link rel=stylesheet type="text/css" href="{$CSS_INCLUDE}">
 	{/if}
@@ -26,16 +22,21 @@
 	<link rel=stylesheet type="text/css" href="{$CSS_SPECIAL_INCLUDE}">
 	{/if}
 	<script language="JavaScript" src="{$js}/firebug.js"></script>
-	{if $JAVASCRIPT}
-	<script language="JavaScript" src="{$js}{$JAVASCRIPT}"></script>
+	<script language="JavaScript" src="{$js}/debug.js"></script>
+	{if $USE_JQUERY}
+	<!-- JQuery -->
+	<script type="text/javascript" src="{$js}/jquery.js"></script>
 	{/if}
-	{* declare prototype everywhere *}
 	{if $USE_PROTOTYPE}
 	<script src="{$js}/scriptaculous/prototype.js" type="text/javascript"></script>
 	{/if}
 	{if $USE_SCRIPTACULOUS}
 	<script src="{$js}/scriptaculous/scriptaculous.js" type="text/javascript"></script>
 	{/if}
+	{if $JAVASCRIPT}
+	<script language="JavaScript" src="{$js}{$JAVASCRIPT}"></script>
+	{/if}
+	{* declare prototype everywhere *}
 	{if $JS_INCLUDE}
 	<script language="JavaScript" src="{$JS_INCLUDE}"></script>
 	{/if}

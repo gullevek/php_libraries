@@ -1,11 +1,4 @@
 /*
-	AUTHOR: Clemens Schwaighofer
-	DATE: 2006/09/05
-	DESC: edit shop js file
-	HISTORY:
-*/
-
-/*
 	code is taken and adapted from dokuwiki
 */
 
@@ -62,7 +55,6 @@ function expandTA(ta_id)
 	}
 	ta.rows = numNewRows + theRows.length;
 }
-
 // METHOD: ShowHideMenu
 // PARAMS: status -> show or hide
 //         id -> id to work on
@@ -116,4 +108,103 @@ function le(id)
 	document.forms[form_name].action_menu.value = id;
 	if (document.forms[form_name].action_yes.value == 'true')
 		document.forms[form_name].submit();
+}
+
+// METHOD: getWindowSize
+// PARAMS: none
+// RETURN: array with width/height
+// DESC:   wrapper to get the real window size for the current browser window
+function getWindowSize()
+{
+	var width, height;
+	width = window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth);
+	height = window.innerHeight || (window.document.documentElement.clientHeight || window.document.body.clientHeight);
+	return {width: width, height: height};
+}
+
+// METHOD: getScrollOffset
+// PARAMS: none
+// RETURN: array with x/y px
+// DESC:   wrapper to get the correct scroll offset
+function getScrollOffset()
+{
+	var left, top;
+	left = window.pageXOffset || (window.document.documentElement.scrollLeft || window.document.body.scrollLeft);
+	top = window.pageYOffset || (window.document.documentElement.scrollTop || window.document.body.scrollTop);
+	return {left: left, top: top};
+}   
+
+// METHOD: setCenter
+// PARAMS: id to set center
+// RETURN: none
+// DESC:   centers div to current window size middle
+function setCenter(id, left, top)
+{
+	// get size of id
+	var dimensions = $(id).getDimensions();
+	var viewport = getWindowSize();
+	var offset = getScrollOffset();
+
+	console.log('Id %s, dimensions %s x %s, viewport %s x %s', id, dimensions.width, dimensions.height, viewport.width, viewport.height);
+	console.log('Scrolloffset left: %s, top: %s', offset.left, offset.top);
+	console.log('Left: %s, Top: %s', parseInt((viewport.width / 2) - (dimensions.width / 2)), parseInt((viewport.height / 2) - (dimensions.height / 2)));
+	if (left)
+	{
+		$(id).setStyle ({
+			left: parseInt((viewport.width / 2) - (dimensions.width / 2) + offset.left) + 'px'
+		});
+	}  
+	if (top)
+	{  
+		$(id).setStyle ({
+			top: parseInt((viewport.height / 2) - (dimensions.height / 2) + offset.top) + 'px'
+		});
+	}
+}
+
+// METHOD sh
+// PARAMS: id -> element to hide
+//         showText -> text for the element if shown
+//         hideText -> text for the element if hidden
+// RETURN: returns true if hidden, or false if not
+// DESC:   hides an element, additional writes 1 (show) or 0 (hide) into <id>Flag field
+function sh(id, showText, hideText)
+{
+	flag = id + 'Flag';
+	btn = id + 'Btn';
+	// get status from element (hidden or visible)
+	divStatus = $(id).visible();
+	//console.log('Set flag %s for element %s', divStatus, id);
+	if (divStatus)
+	{
+		// hide the element
+		Effect.BlindUp(id, {duration:0.3});
+		$(flag).value = 0;
+		$(btn).innerHTML = showText;
+	}
+	else if (!divStatus)
+	{
+		// show the element
+		Effect.BlindDown(id, {duration:0.3});
+		$(flag).value = 1;
+		$(btn).innerHTML = hideText;
+	}
+	// return current button status
+	return divStatus;
+}
+
+// METHOD: formatBytes
+// PARAMS: bytes in int
+// RETURN: string in GB/MB/KB
+// DESC:   converts a int number into bytes with prefix in two decimals precision
+//         currently precision is fixed, if dynamic needs check for max/min precision
+function formatBytes(bytes)
+{
+	var i = -1;
+	do {
+		bytes = bytes / 1024;
+		i++;
+	} while (bytes > 99);
+
+	return parseFloat(Math.round(bytes * Math.pow(10, 2)) / Math.pow(10, 2)) + ['kB', 'MB', 'GB', 'TB', 'PB', 'EB'][i];
 }

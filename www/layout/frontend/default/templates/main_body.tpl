@@ -15,6 +15,8 @@
 	{if $STYLESHEET}
 	<link rel=stylesheet type="text/css" href="{$CSS}{$STYLESHEET}">
 	{/if}
+	<script language="JavaScript" src="{$js}/firebug.js"></script>
+	<script language="JavaScript" src="{$js}/debug.js"></script>
 	{if $JAVASCRIPT}
 	<script language="JavaScript" src="{$JS}{$JAVASCRIPT}"></script>
 	{/if}
