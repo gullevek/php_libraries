@@ -9,7 +9,6 @@
 */
 
 // if debug is set to true, console log messages are printed
-var DEBUG = true;
 if (!DEBUG)
 {
 	$($H(window.console)).each(function(w) {
