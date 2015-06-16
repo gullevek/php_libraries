@@ -116,7 +116,7 @@
 	*   $mixed db_fetch_array($cursor=0)
 	*     - mysql_fetch_array, returns a mixed result
 	*   $mixed db_return_row($query)
-	*     - gibt die erste Zeile zurück (als array)
+	*     - gibt die erste Zeile zurÃ¼ck (als array)
 	*   $array_of_hashes db_return_array($query)
 	*      - return an array of hashes with all data    
 	*   db_close()
@@ -225,14 +225,14 @@
 	*   2002-10-18: renamed lesen to db_read, speichern to db_save and 
 	*               loeschen to db_delete
 	*   19.08.2002: 1 convertiert &lt; &gt; &quot; &amp; &#309; in original
-	*               HTML zeichen zurück (für htmlspecialcharsfct)
-	*   09.08.2002: speichern() hat einen dritten parameter für
+	*               HTML zeichen zurÃ¼ck (fÃ¼r htmlspecialcharsfct)
+	*   09.08.2002: speichern() hat einen dritten parameter fÃ¼r
 	*               addslashes (1=ja,0=nein/default)
 	*   04.04.2002: FK added to lesen()
 	*   10.07.2001: simple return row function geschrieben
 	*   03.07.2001: kein Thumbnail erzeugen wenn Datei nicht: 
 	*               JPG/JPEG/GIF/PNG als Endung hat
-	*   22.06.2001: Mozilla Fix für File upload
+	*   22.06.2001: Mozilla Fix fÃ¼r File upload
 	*   10.05.2001: alle fkt haben "db_" als pre zur identifizierung
 	*   10.05.2001: kleines problem mit call zu "convert_data" fkt
 	*   26.04.2001: umschreiben auf classen und einbiden db_io's
@@ -338,6 +338,7 @@
 			$this->error_string['22'] = 'Query Execute failed';
 			$this->error_string['23'] = 'Query Execute failed, data array does not match placeholders';
 			$this->error_string['24'] = 'Missing prepared query entry for execute.';
+			$this->error_string['25'] = 'Prepare query data is not in array format.';
 			$this->error_string['30'] = 'Query call in a possible endless loop. Was called more than '.$this->MAX_QUERY_CALL.' times';
 			$this->error_string['31'] = 'Could not fetch PK after query insert';
 			$this->error_string['40'] = 'Query async call failed.';
@@ -1392,6 +1393,12 @@
 			{
 				$this->error_id = 24;
 				$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': We do not have a prepared query entry for this statement name.</span>', 'DB_ERROR');
+				return FALSE;
+			}
+			if (!is_array($data))
+			{
+				$this->error_id = 25;
+				$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Prepared query Data has to be given in array form.</span>', 'DB_ERROR');
 				return FALSE;
 			}
 			if ($this->prepare_cursor[$stm_name]['count'] != count($data))
