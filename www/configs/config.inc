@@ -150,6 +150,7 @@
 	// each host has a different db_host
 	// development host
 	$DB_HOST['soba'] = "test";
+	$DB_HOST['soba.tokyo.tequila.jp'] = "test";
 	// target host (live)
 //	$DB_TARGET_HOST['soba'] = "<DB ID>";
 	// url redirect database
@@ -157,15 +158,18 @@
 	// location flagging
 	// test/dev/live
 	$LOCATION['soba'] = 'test';
+	$LOCATION['soba.tokyo.tequila.jp'] = 'test';
 	// show DEBUG override
 	// true/false
 	$DEBUG_FLAG['soba'] = true;
+	$DEBUG_FLAG['soba.tokyo.tequila.jp'] = true;
 	// schema names, can also be defined per <DB INFO>
 	DEFINE('PUBLIC_SCHEMA', 'public');
 	DEFINE('DEV_SCHEMA', 'public');
 	DEFINE('TEST_SCHEMA', 'public');
     // and set to domain
     $DB_PATH['soba'] = PUBLIC_SCHEMA;
+    $DB_PATH['soba.tokyo.tequila.jp'] = PUBLIC_SCHEMA;
 
 	// set the USE_DATABASE var, if there is nothing set, we assume TRUE
 	$USE_DATABASE = defined('USE_DATABASE') ? USE_DATABASE : true;
