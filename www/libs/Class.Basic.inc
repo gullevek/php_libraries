@@ -1058,6 +1058,8 @@
 				// add ms if there
 				if ($show_micro)
 					$time_string .= ' '.(!$ms ? 0 : $ms).'ms';
+				elseif (!$time_string)
+					$time_string .= (!$ms ? 0 : $ms).'ms';
 			}
 			else
 			{
