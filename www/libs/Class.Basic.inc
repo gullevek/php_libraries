@@ -1055,6 +1055,8 @@
 					if ($output || $time_string)
 						$time_string .= $output.$labels[$i].(($i + 1) != count($timegroups) ? ' ' : '');
 				}
+				// if we have ms and it has leading zeros, remove them
+				$ms = preg_replace("/^0+/", '', $ms);
 				// add ms if there
 				if ($show_micro)
 					$time_string .= ' '.(!$ms ? 0 : $ms).'ms';
