@@ -1386,13 +1386,15 @@
 		}
 
 		// METHOD: _sha1_short
-		// PARAMS: string
+		// PARAMS: string, flag to use sha
 		// RETURN: sha1 short (9 chars), but current calls _crc32b
 		// DESC  : replacement for _crc32b call
-		public function _sha1_short($string)
+		public function _sha1_short($string, $use_sha = false)
 		{
-//			return substr(hash('sha1', $string), 0, 9);
-			return $this->_crc32b($string);
+			if ($use_sha)
+				return substr(hash('sha1', $string), 0, 9);
+			else
+				return $this->_crc32b($string);
 		}
 
 		// METHOD: checkPHPVersion
