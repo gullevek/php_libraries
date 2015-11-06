@@ -652,7 +652,7 @@
 					{
 						// TODO: get primary key from table name
 						list($schema, $table) = $this->_db_return_table($this->query);
-						if (!$this->pk_name_table[$table])
+						if (!array_key_exists($table, $this->pk_name_table) || !$this->pk_name_table[$table])
 						{
 							$this->pk_name_table[$table] = $this->db_functions->_db_primary_key($table, $schema);
 						}
@@ -1321,7 +1321,7 @@
 				return false;
 			}
 			// check if this was already prepared
-			if (!is_array($this->prepare_cursor[$stm_name]))
+			if (!array_key_exists($stm_name, $this->prepare_cursor) || !is_array($this->prepare_cursor[$stm_name]))
 			{
 				// if this is an insert query, check if we can add a return
 				if ($this->_check_query_for_insert($query, true))

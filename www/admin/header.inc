@@ -91,12 +91,15 @@
 	//------------------------------ page rights ned
 
 	// automatic hide for DEBUG messages on live server
-	if (TARGET == 'live' || TARGET == 'remote')
+	// can be overridden when setting DEBUG_ALL_OVERRIDE on top of the script (for emergency debugging of one page only)
+	if ((TARGET == 'live' || TARGET == 'remote') && !$DEBUG_ALL_OVERRIDE)
 	{
 		$login->debug_output_all = 0;
-		$cms->debug_output_all = 1;
+		$login->echo_output_all = 0;
+		$login->print_output_all = 0;
+		$cms->debug_output_all = 0;
 		$cms->echo_output_all = 0;
-		$cms->print_output_all = 1;
+		$cms->print_output_all = 0;
 	}
 	$cms->DATA['JS_DEBUG'] = DEBUG;
 ?>

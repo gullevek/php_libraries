@@ -1,11 +1,11 @@
 <?
+	$DEBGU_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 	$DEBUG_ALL = 1;
 	$PRINT_ALL = 1;
 	$DB_DEBUG = 1;
 
 	if ($DEBUG_ALL)
 		error_reporting(E_ALL | E_STRICT |  E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-	require('libs/Error.Handling.inc');
 
 	define('USE_DATABASE', true);
 	// sample config

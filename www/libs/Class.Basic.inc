@@ -725,7 +725,7 @@
 			$output = preg_replace_callback("/(href=\")?(\>)?\b($protRegex)([\w\.\-?&=+%#~,;\/]+)\b([\.\-?&=+%#~,;\/]*)(\|([^\||^#]+)(#([^\|]+))?\|)?/", 
 				function ($matches) use ($self)
 				{
-					return $self->create_url($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
+					return @$self->create_url($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
 				},
 				$output
 			);
@@ -733,7 +733,7 @@
 			$output = preg_replace_callback("/(mailto:)?(\>)?\b([\w\.-]+)@([\w\.\-]+)\.([a-zA-Z]{2,4})\b(\|([^\||^#]+)(#([^\|]+))?\|)?/", 
 				function ($matches) use ($self)
 				{
-					return $self->create_email($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
+					return @$self->create_email($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
 				}, 
 				$output
 			);
@@ -808,8 +808,11 @@
 		// get the host name without the port as given by the SELF var
 		public function get_host_name()
 		{
-			if ($_SERVER['HTTP_HOST'])
+			$port = '';
+			if ($_SERVER['HTTP_HOST'] && preg_match("/:/", $_SERVER['HTTP_HOST']))
 				list($host_name, $port) = explode(":", $_SERVER['HTTP_HOST']);
+			elseif ($_SERVER['HTTP_HOST'])
+				$host_name = $_SERVER['HTTP_HOST'];
 			else
 				$host_name = 'NA';
 			$this->host_port = $port ? $port : 80;
@@ -1077,6 +1080,7 @@
 		//         xd xh xm xs xms to a timestamp.microtime format
 		public static function StringToTime($timestring)
 		{
+			$timestamp = '';
 			if (preg_match("/(d|h|m|s|ms)/", $timestring))
 			{
 				$timegroups = array (1 => 86400, 3 => 3600, 5 => 60, 7 => 1);
