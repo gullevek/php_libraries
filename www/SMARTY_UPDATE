@@ -1,0 +1,6 @@
+* copy
+plugins/block.t.php
+plugins/function.popup*.php
+* check & copy
+plugins/function.html_checkboxes.php
+plugins/function.html_options.php
