@@ -10,7 +10,13 @@
 
 	// read in the Smarty class for definition
 	// use smarty BC for backwards compability
-	require_once(SMARTY.'SmartyBC.class.php');
+    // try to include file from LIBS path, or from normal path
+    $include_file = 'SmartyBC.class.php';
+    foreach (array('', SMARTY, __DIR__.'/../'.SMARTY) as $folder)
+    {
+        if (file_exists($folder.$include_file))
+            require_once($folder.$include_file);
+    }
 
 	class SmartyML extends SmartyBC
 	{

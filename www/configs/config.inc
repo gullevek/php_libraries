@@ -236,6 +236,15 @@
 		$DEBUG_ALL = 0;
 		$PRINT_ALL = 0;
 		$DB_DEBUG = 0;
+		$ENABLE_ERROR_HANDLING = 0;
+	}
+	else
+	{
+		$ECHO_ALL = 1;
+		$DEBUG_ALL = 1;
+		$PRINT_ALL = 1;
+		$DB_DEBUG = 1;
+		$ENABLE_ERROR_HANDLING = 1;
 	}
 
 	// any other global definitons here

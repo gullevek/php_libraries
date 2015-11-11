@@ -212,7 +212,13 @@
 	*               save data, loads data, etc
 	*********************************************************************/
 
-	require_once(LIBS."Class.DB.Array.IO.inc");
+	// try to include file from LIBS path, or from normal path
+	$include_file = 'Class.DB.Array.IO.inc';
+	foreach (array('', LIBS, __DIR__.'/') as $folder)
+	{
+		if (file_exists($folder.$include_file))
+			require_once($folder.$include_file);
+	}
 	
 	class form extends db_array_io
 	{

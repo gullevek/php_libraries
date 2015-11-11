@@ -240,7 +240,13 @@
 	*   23.11.2000: erster Test
 	*********************************************************************/
 
-	require_once(LIBS.'Class.Basic.inc');
+	// try to include file from LIBS path, or from normal path
+	$include_file = 'Class.Basic.inc';
+	foreach (array('', LIBS, __DIR__.'/') as $folder)
+	{
+		if (file_exists($folder.$include_file))
+			require_once($folder.$include_file);
+	}
 
 	class db_io extends basic
 	{
