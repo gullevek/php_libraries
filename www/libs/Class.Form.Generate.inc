@@ -259,7 +259,7 @@
 			$this->l = new l10n($lang);
 			// load config array
 			// get table array definitions for current page name
-			include(TABLE_ARRAYS."array_".$this->my_page_name.".inc");
+			_spl_autoload('array_'.$this->my_page_name.'.inc');
 
 			$config_array = ${$this->my_page_name};
 

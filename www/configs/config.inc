@@ -19,14 +19,19 @@
 	DEFINE('DEFAULT_ENCODING', "UTF-8");
 		
 	/************* PATHS *********************/
-	// path to document root of file called
-	DEFINE('ROOT', getcwd()."/");
+	// ** NEW/BETTER DIR DECLARATIONS **
 	// path to original file (if symlink)
 	DEFINE('DIR', __DIR__."/");
 	// libs base path based on DIR
 	DEFINE('LIBDIR', DIR.'libs/');
 	// SMARTY path based on DIR
 	DEFINE('SMARTYDIR', DIR.'Smarty/');
+	// table arrays for Class Form
+	DEFINE('TABLEARRAYDIR', DIR.'table_arrays/');
+
+	// ** OLD DIR DECLARATIONS **
+	// path to document root of file called
+	DEFINE('ROOT', getcwd()."/");
 	// libs path
 	DEFINE('LIBS', "libs/");
 	// includes (strings, arrays for stati, etc)
@@ -255,6 +260,7 @@
 		$dirs = array (
 			LIBDIR, 
 			SMARTYDIR,
+			TABLEARRAYDIR,
 			'',
 			LIBS, 
 			SMARTY, 

@@ -353,7 +353,7 @@
 				$this->db_debug = $GLOBALS['DB_DEBUG'];
 
 			// includes sub class for db type
-			include_once(LIBS.$this->db_type.'.inc');
+			_spl_autoload($this->db_type.'.inc');
 			$this->db_functions = new $this->db_type();
 
 			// connect to DB
