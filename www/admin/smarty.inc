@@ -24,21 +24,25 @@
 		include($cms->includes.$cms->INC_TEMPLATE_NAME);
 	}
 	// additional per page Javascript include
+	$cms->JS_INCLUDE = '';
 	if (file_exists($cms->javascript.$cms->JS_TEMPLATE_NAME) && is_file($cms->javascript.$cms->JS_TEMPLATE_NAME))
 	{
 		$cms->JS_INCLUDE = $cms->javascript.$cms->JS_TEMPLATE_NAME;
 	}
 	// per page css file
+	$cms->CSS_INCLUDE = '';
 	if (file_exists($cms->css.$cms->CSS_TEMPLATE_NAME) && is_file($cms->css.$cms->CSS_TEMPLATE_NAME))
 	{
 		$cms->CSS_INCLUDE = $cms->css.$cms->CSS_TEMPLATE_NAME;
 	}
 	// optional CSS file
+	$cms->CSS_SPECIAL_INCLUDE = '';
 	if (file_exists($cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME) && is_file($cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME))
 	{
 		$cms->CSS_SPECIAL_INCLUDE = $cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME;
 	}
 	// optional JS file
+	$cms->JS_SPECIAL_INCLUDE = '';
 	if (file_exists($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME) && is_file($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME))
 	{
 		$cms->JS_SPECIAL_INCLUDE = $cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME;
@@ -64,7 +68,7 @@
 	$cms->HEADER['STYLESHEET'] = $EDIT_STYLESHEET;
 	$cms->HEADER['JAVASCRIPT'] = $EDIT_JAVASCRIPT;
 	// html title
-	$cms->HEADER['HTML_TITLE'] = ((!$L_TITLE) ? $cms->l->__($G_TITLE) : $cms->l->__($L_TITLE));
+	$cms->HEADER['HTML_TITLE'] = (!isset($L_TITLE) || !$L_TITLE) ? $cms->l->__($G_TITLE) : $cms->l->__($L_TITLE);
 	$cms->DATA['table_width'] = $PAGE_WIDTH ? $PAGE_WIDTH : PAGE_WIDTH;
 
 	// messages = array('msg' =>, 'class' => 'error/warning/...')
@@ -85,7 +89,7 @@
 
 	// debug data, if DEBUG flag is on, this data is print out
 	$cms->DEBUG_DATA['debug_error_msg'] = $cms->running_time();
-	$cms->DEBUG_DATA['DEBUG'] = $DEBUG_TMPL;
+	$cms->DEBUG_DATA['DEBUG'] = @$DEBUG_TMPL;
 
 	// create main data array
 	$cms->CONTENT_DATA = array_merge($cms->HEADER, $cms->DATA, $cms->DEBUG_DATA);

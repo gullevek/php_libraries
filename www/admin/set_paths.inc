@@ -35,7 +35,7 @@
 
 	// set include & template names
 	$CONTENT_INCLUDE = str_replace(".php", ".tpl", $cms->page_name);
-	$FORM_NAME = !$FORM_NAME ? str_replace(".php", "", $cms->page_name) : $FORM_NAME;
+	$FORM_NAME = !isset($FORM_NAME) || !$FORM_NAME ? str_replace(".php", "", $cms->page_name) : $FORM_NAME;
 	// strip tpl and replace it with inc
 	// php include file per page
 	$cms->INC_TEMPLATE_NAME = str_replace(".tpl", ".inc", $CONTENT_INCLUDE);
@@ -44,9 +44,9 @@
 	// css per page
 	$cms->CSS_TEMPLATE_NAME = str_replace(".tpl", ".css", $CONTENT_INCLUDE);
 	// special CSS file
-	$cms->CSS_SPECIAL_TEMPLATE_NAME = $CSS_NAME;
+	$cms->CSS_SPECIAL_TEMPLATE_NAME = @$CSS_NAME;
 	// special JS file
-	$cms->JS_SPECIAL_TEMPLATE_NAME = $JS_NAME;
+	$cms->JS_SPECIAL_TEMPLATE_NAME = @$JS_NAME;
 
 	// set basic template path (tmp)
 	$smarty->setTemplateDir(LAYOUT.$TEMPLATE_DIR.TEMPLATES.'/');

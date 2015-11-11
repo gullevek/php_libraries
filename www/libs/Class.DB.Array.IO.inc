@@ -39,12 +39,7 @@
 	// put into separete function in this class)
 
 	// try to include file from LIBS path, or from normal path
-	$include_file = 'Class.DB.IO.inc';
-	foreach (array('', LIBS, __DIR__.'/') as $folder)
-	{
-		if (file_exists($folder.$include_file))
-			require_once($folder.$include_file);
-	}
+	_spl_autoload('Class.DB.IO.inc');
 
 	// subclass for one array handling
 	class db_array_io extends db_io

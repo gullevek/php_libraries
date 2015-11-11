@@ -19,8 +19,14 @@
 	DEFINE('DEFAULT_ENCODING', "UTF-8");
 		
 	/************* PATHS *********************/
-	// path to document root
+	// path to document root of file called
 	DEFINE('ROOT', getcwd()."/");
+	// path to original file (if symlink)
+	DEFINE('DIR', __DIR__."/");
+	// libs base path based on DIR
+	DEFINE('LIBDIR', DIR.'libs/');
+	// SMARTY path based on DIR
+	DEFINE('SMARTYDIR', DIR.'Smarty/');
 	// libs path
 	DEFINE('LIBS', "libs/");
 	// includes (strings, arrays for stati, etc)
@@ -238,16 +244,32 @@
 		$DB_DEBUG = 0;
 		$ENABLE_ERROR_HANDLING = 0;
 	}
-	else
-	{
-		$ECHO_ALL = 1;
-		$DEBUG_ALL = 1;
-		$PRINT_ALL = 1;
-		$DB_DEBUG = 1;
-		$ENABLE_ERROR_HANDLING = 1;
-	}
 
 	// any other global definitons here
 //	DEFINE('SOME_ID', <SOME VALUE>);
+
+	// function that will be called on top of each class include to load the class
+	function _spl_autoload($include_file)
+	{
+		// where to search for the files to include
+		$dirs = array (
+			LIBDIR, 
+			SMARTYDIR,
+			'',
+			LIBS, 
+			SMARTY, 
+			__DIR__.'/'.LIBS,
+			__DIR__.'/'.SMARTY
+		);
+		// try to find and load the class ifle
+		foreach ($dirs as $folder)
+		{
+			if (file_exists($folder.$include_file))
+			{
+				require_once($folder.$include_file);
+				return;
+			}
+		}
+	}
 	
 ?>

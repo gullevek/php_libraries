@@ -60,12 +60,7 @@
 	*********************************************************************/
 
 	// try to include file from LIBS path, or from normal path
-	$include_file = 'Class.DB.IO.inc';
-	foreach (array('', LIBS, __DIR__.'/') as $folder)
-	{
-		if (file_exists($folder.$include_file))
-			require_once($folder.$include_file);
-	}
+	_spl_autoload('Class.DB.IO.inc');
 
 	class login extends db_io
 	{
@@ -118,7 +113,7 @@
 			$this->file_name_ext = '_login_'.date('Y-m-d').'.log';
 
 			// get the language sub class & init it
-			require_once(LIBS."Class.l10n.inc");
+			_spl_autoload('Class.l10n.inc');
 			$this->l = new l10n($lang);
 
 			// if we have a search path we need to set it, to use the correct DB to login

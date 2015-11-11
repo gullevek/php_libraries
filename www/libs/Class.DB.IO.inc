@@ -241,12 +241,7 @@
 	*********************************************************************/
 
 	// try to include file from LIBS path, or from normal path
-	$include_file = 'Class.Basic.inc';
-	foreach (array('', LIBS, __DIR__.'/') as $folder)
-	{
-		if (file_exists($folder.$include_file))
-			require_once($folder.$include_file);
-	}
+	_spl_autoload('Class.Basic.inc');
 
 	class db_io extends basic
 	{

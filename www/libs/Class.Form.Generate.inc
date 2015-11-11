@@ -213,12 +213,7 @@
 	*********************************************************************/
 
 	// try to include file from LIBS path, or from normal path
-	$include_file = 'Class.DB.Array.IO.inc';
-	foreach (array('', LIBS, __DIR__.'/') as $folder)
-	{
-		if (file_exists($folder.$include_file))
-			require_once($folder.$include_file);
-	}
+	_spl_autoload('Class.DB.Array.IO.inc');
 	
 	class form extends db_array_io
 	{
@@ -260,7 +255,7 @@
 		{
 			$this->my_page_name = $this->get_page_name(1);
 			// init the language class
-			require_once(LIBS."Class.l10n.inc");
+			_spl_autoload('Class.l10n.inc');
 			$this->l = new l10n($lang);
 			// load config array
 			// get table array definitions for current page name

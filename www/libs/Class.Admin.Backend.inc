@@ -26,12 +26,7 @@
 	*********************************************************************/
 
 	// try to include file from LIBS path, or from normal path
-	$include_file = 'Class.DB.IO.inc';
-	foreach (array('', LIBS, __DIR__.'/') as $folder)
-	{
-		if (file_exists($folder.$include_file))
-			require_once($folder.$include_file);
-	}
+	_spl_autoload('Class.DB.IO.inc');
 
 	class AdminBackend extends db_io
 	{
@@ -72,7 +67,7 @@
 		public function __construct($db_config, $lang, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
 		{
 			// get the language sub class & init it
-			require_once(LIBS."Class.l10n.inc");
+			_spl_autoload('Class.l10n.inc');
 
 			$this->l = new l10n($lang);
 
@@ -144,8 +139,8 @@
 			$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 			$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
 			$q .= "VALUES ";
-			$q .= "(".$_SESSION['EUID'].", NOW(), '".$this->db_escape_string($event)."', '".$data."', '".$data_binary."', '".$this->page_name."', ";
-			$q .= "'".$_SERVER["REMOTE_ADDR"]."', '".$this->db_escape_string($_SERVER['HTTP_USER_AGENT'])."', '".$this->db_escape_string($_SERVER['HTTP_REFERER'])."', '".$this->db_escape_string($_SERVER['SCRIPT_FILENAME'])."', '".$this->db_escape_string($_SERVER['QUERY_STRING'])."', '".$this->db_escape_string($_SERVER['SERVER_NAME'])."', '".$this->db_escape_string($_SERVER['HTTP_HOST'])."', '".$this->db_escape_string($_SERVER['HTTP_ACCEPT'])."', '".$this->db_escape_string($_SERVER['HTTP_ACCEPT_CHARSET'])."', '".$this->db_escape_string($_SERVER['HTTP_ACCEPT_ENCODING'])."', '".session_id()."', ";
+			$q .= "(".@$_SESSION['EUID'].", NOW(), '".$this->db_escape_string($event)."', '".$data."', '".$data_binary."', '".$this->page_name."', ";
+			$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->db_escape_string(@$_SERVER['HTTP_USER_AGENT'])."', '".$this->db_escape_string(@$_SERVER['HTTP_REFERER'])."', '".$this->db_escape_string(@$_SERVER['SCRIPT_FILENAME'])."', '".$this->db_escape_string(@$_SERVER['QUERY_STRING'])."', '".$this->db_escape_string(@$_SERVER['SERVER_NAME'])."', '".$this->db_escape_string(@$_SERVER['HTTP_HOST'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_CHARSET'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_ENCODING'])."', '".session_id()."', ";
 			$q .= "'".$this->db_escape_string($this->action)."', '".$this->db_escape_string($this->action_id)."', '".$this->db_escape_string($this->action_yes)."', '".$this->db_escape_string($this->action_flag)."', '".$this->db_escape_string($this->action_menu)."', '".$this->db_escape_string($this->action_loaded)."', '".$this->db_escape_string($this->action_value)."', '".$this->db_escape_string($this->action_error)."')";
 			$this->db_exec($q, 'edit_log_id');
 		}

@@ -15,10 +15,8 @@
 //	session_name(EDIT_SESSION_NAME);
 //	session_start();
 	// basic class test file
-//	require(LIBS."Class.Basic.inc");
-//	require(LIBS."Class.DB.IO.inc");
-	require(LIBS."Class.Login.inc");
-	require(LIBS."Class.Admin.Backend.inc");
+	foreach (array ('Login', 'Admin.Backend') as $class)
+		_spl_autoload('Class.'.$class.'.inc');
 
 	$lang = 'en_utf8';
 

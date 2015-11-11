@@ -26,12 +26,7 @@
 	*********************************************************************/
 
 	// try to include file from LIBS path, or from normal path
-	$include_file = 'Class.Basic.inc';
-	foreach (array('', LIBS, __DIR__.'/') as $folder)
-	{
-		if (file_exists($folder.$include_file))
-			require_once($folder.$include_file);
-	}
+	_spl_autoload('Class.Basic.inc');
 
 	class l10n extends basic
 	{
@@ -42,8 +37,8 @@
 
 		public function __construct($lang = '', $path = '')
 		{
-			require_once(LIBS.'streams.php');
-			require_once(LIBS.'gettext.php');
+			foreach (array('streas.php', 'gettext.php') as $include_file)
+				_spl_autoload($include_file);
 
 			if (!$lang)
 				$this->lang = 'en';
@@ -109,6 +104,4 @@
 			return $this->l10n->ngettext($single, $plural, $number);
 		}
 	}
-
-//require(LIBS.'locale.php');
 ?>

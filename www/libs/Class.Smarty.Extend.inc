@@ -11,12 +11,7 @@
 	// read in the Smarty class for definition
 	// use smarty BC for backwards compability
     // try to include file from LIBS path, or from normal path
-    $include_file = 'SmartyBC.class.php';
-    foreach (array('', SMARTY, __DIR__.'/../'.SMARTY) as $folder)
-    {
-        if (file_exists($folder.$include_file))
-            require_once($folder.$include_file);
-    }
+    _spl_autoload('SmartyBC.class.php');
 
 	class SmartyML extends SmartyBC
 	{
@@ -26,7 +21,7 @@
 		public function __construct($lang)
 		{
 			SmartyBC::__construct();
-			require_once(LIBS."Class.l10n.inc");
+			_spl_autoload('Class.l10.inc');
 			$this->l10n = new l10n($lang);
 			// variable variable register
 			$this->register_modifier('getvar', array(&$this, 'get_template_vars'));

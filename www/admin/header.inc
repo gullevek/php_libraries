@@ -24,12 +24,9 @@
 	require("config.inc");
 	// set the session name
 	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-	// login class
-	require(LIBS."Class.Login.inc");
-	// DB connection & work time class
-	require(LIBS.'Class.Admin.Backend.inc');
-	// Smarty: and the small extend for l10n calls
-	require(LIBS.'Class.Smarty.Extend.inc');
+	// login class, DB connections & Admin class, Smarty extension
+	foreach (array ('Login', 'Admin.Backend', 'Smarty.Extend') as $class)
+		_spl_autoload('Class.'.$class.'.inc');
 	//------------------------------ library include end
 
 	//------------------------------ basic variable settings start
@@ -42,7 +39,7 @@
 	elseif (!$lang)
 		$lang = DEFAULT_LANG;
 	// end the stop of the output flow, but only if we didn't request a csv file download
-	if ($_POST['action'] != 'download_csv')
+	if (array_key_exists('action', $_POST) && $_POST['action'] != 'download_csv')
 	{
 		header("Content-type: text/html; charset=".$encoding);
 		ob_end_flush();
