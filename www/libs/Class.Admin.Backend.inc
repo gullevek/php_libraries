@@ -335,5 +335,71 @@
 			$this->db_exec($q);
 		}
 
+		// METHOD: adbPrintDateTime
+		// PARAMS: year, month, day, hour, min: the date and time values
+		//         suffix: additional info printed after the date time variable in the drop down, also used for ID in the on change JS call
+		//         minute steps, can be 1 (default), 5, 10, etc, if invalid (outside 1h range, it falls back to 1min)
+		// RETURN: HTML formated strings for drop down lists of date and time
+		// DESC:   print the date/time drop downs, used in any queue/send/insert at date/time place
+		public function adbPrintDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1)
+		{
+			// if suffix given, add _ before
+			if ($suffix)
+				$suffix = '_'.$suffix;
+			if ($min_steps < 1 || $min_steps > 59)
+				$min_steps = 1;
+
+			$on_change_call = 'dt_list(\''.$suffix.'\');';
+
+			// always be 1h ahead (for safety)
+			$timestamp = time() + 3600; // in seconds
+
+			// the max year is this year + 1;
+			$max_year = date("Y", $timestamp) + 1;
+
+			// preset year, month, ...
+			$year = (!$year) ? date("Y", $timestamp) : $year;
+			$month = (!$month) ? date("m", $timestamp) : $month;
+			$day = (!$day) ? date("d", $timestamp) : $day;
+			$hour = (!$hour) ? date("H", $timestamp) : $hour;
+			$min = (!$min) ? date("i", $timestamp) : $min; // add to five min?
+			// max days in selected month
+			$days_in_month = date("t", strtotime($year."-".$month."-".$day." ".$hour.":".$min.":0"));
+
+			// from now to ?
+			$string = $this->l->__('Year').' ';
+			$string .= '<select id="year'.$suffix.'" name="year'.$suffix.'" onChange="'.$on_change_call.'">';
+			for ($i = date("Y"); $i <= $max_year; $i ++)
+			{                  $string .= '<option value="'.$i.'" '.(($year == $i) ? 'selected' : '').'>'.$i.'</option>';
+			}
+			$string .= '</select> '.$this->l->__('Month').' ';
+			$string .= '<select id="month'.$suffix.'" name="month'.$suffix.'" onChange="'.$on_change_call.'">';
+			for ($i = 1; $i <= 12; $i ++)
+			{
+				$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($month == $i) ? 'selected' : '').'>'.$i.'</option>';
+			}
+			$string .= '</select> '.$this->l->__('Day').' ';
+			$string .= '<select id="day'.$suffix.'" name="day'.$suffix.'" onChange="'.$on_change_call.'">';
+			for ($i = 1; $i <= $days_in_month; $i ++)
+			{
+				// set weekday text based on current month ($month) and year ($year)
+				$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($day == $i) ? 'selected' : '').'>'.$i.' ('.$this->l->__(date('D', mktime(0, 0, 0, $month, $i, $year))).')</option>';
+			}
+			$string .= '</select> '.$this->l->__('Hour').' ';
+			$string .= '<select id="hour'.$suffix.'" name="hour'.$suffix.'" onChange="'.$on_change_call.'">';
+			for ($i = 0; $i <= 23; $i ++)
+			{
+				$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($hour == $i) ? 'selected' : '').'>'.$i.'</option>';
+			}
+			$string .= '</select> '.$this->l->__('Minute').' ';
+			$string .= '<select id="min'.$suffix.'" name="min'.$suffix.'" onChange="'.$on_change_call.'">';
+			for ( $i = 0; $i <= 59; $i += $min_steps)
+			{
+				$string .= '<option value="'.(( $i < 10) ? '0'.$i : $i).'" '.(($min == $i) ? 'selected' : '').'>'.$i.'</option>';
+			}
+			$string .= '</select>';
+			// return the datetime select string
+			return $string;
+		}
 	}
 ?>
