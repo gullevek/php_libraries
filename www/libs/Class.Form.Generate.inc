@@ -259,7 +259,9 @@
 			$this->l = new l10n($lang);
 			// load config array
 			// get table array definitions for current page name
-			_spl_autoload('array_'.$this->my_page_name.'.inc');
+			// WARNING: auto spl load does not work with this as it is an array and not a function/object
+//			$flag = _spl_autoload('array_'.$this->my_page_name.'.inc');
+			include(TABLE_ARRAYS."array_".$this->my_page_name.".inc");
 
 			$config_array = ${$this->my_page_name};
 
@@ -321,6 +323,8 @@
 		// dumps all values into output (for error msg)
 		public function form_dump_table_array()
 		{
+			if (!is_array($this->table_array))
+				$this->table_array = array ();
 			reset($this->table_array);
 			$string .= "<b>TABLE ARRAY DUMP:</b> ".$this->table_name."<br>";
 			while (list($key, $value) = each($this->table_array))
@@ -383,6 +387,8 @@
 		//        if multiple gets only FIRST
 		public function form_get_col_name_from_key($want_key, $key_value = "")
 		{
+			if (!is_array($this->table_array))
+				$this->table_array = array ();
 			reset($this->table_array);
 			while (list($key, $value) = each($this->table_array))
 			{
@@ -400,6 +406,8 @@
 		public function form_get_col_name_array_from_key($want_key, $key_value = "")
 		{
 			$key_array = array();
+			if (!is_array($this->table_array))
+				$this->table_array = array ();
 			reset($this->table_array);
 			while (list($key, $value) = each($this->table_array))
 			{
@@ -680,7 +688,7 @@
 		//                for drop down, as data comes from a reference table
 		//                for drop_down_text it has to be an array with $key->$value
 		// RETURN element in HTML
-		public function form_create_element ($element_name, $query = "")
+		public function form_create_element($element_name, $query = "")
 		{
 			// special 2nd color for "binary" attribut
 			if ($this->table_array[$element_name]["type"] == "binary" && !$this->table_array[$element_name]["value"])
@@ -867,6 +875,8 @@
 		//           $error=1;
 		public function form_error_check()
 		{
+			if (!is_array($this->table_array))
+				$this->table_array = array ();
 			reset($this->table_array);
 			while (list($key, $value) = each($this->table_array))
 			{
@@ -972,6 +982,8 @@
 			if (is_array($this->reference_array))
 			{
 				// do check for reference tables
+				if (!is_array($this->reference_array))
+					$this->reference_array = array ();
 				reset($this->reference_array);
 				while (list($key, $value) = each($this->reference_array))
 				{
@@ -1106,6 +1118,8 @@
 		public function form_unset_table_array()
 		{
 			unset($this->pk_id);
+			if (!is_array($this->table_array))
+				$this->table_array = array ();
 			reset($this->table_array);
 			while (list($key, $value) = each($this->table_array))
 			{
@@ -1117,6 +1131,8 @@
 			}  
 			if (is_array($this->reference_array))
 			{
+				if (!is_array($this->reference_array))
+					$this->reference_array = array ();
 				reset($this->reference_array);
 				while (list($key, $value) = each($this->reference_array))
 				{
@@ -1138,6 +1154,8 @@
 			$this->table_array = $this->db_read(1);
 
 			// reset all temp fields
+			if (!is_array($this->table_array))
+				$this->table_array = array ();
 			reset($this->table_array);
 			while (list($key, $value) = each($this->table_array))
 				unset($this->table_array[$key]["input_value"]);
@@ -1145,6 +1163,8 @@
 			if (is_array($this->reference_array))
 			{
 				// load each reference_table
+				if (!is_array($this->reference_array))
+					$this->reference_array = array ();
 				reset($this->reference_array);
 				while (list($key, $value) = each($this->reference_array))
 				{
@@ -1167,6 +1187,8 @@
 //       global $_FILES;
 			// for drop_down_db_input check if text field is filled and if, if not yet in db ...
 			// and upload files
+			if (!is_array($this->table_array))
+				$this->table_array = array ();
 			reset($this->table_array);
 			while (list($key, $value) = each($this->table_array))
 			{
@@ -1292,6 +1314,8 @@
 			// write reference array(s) if necessary
 			if (is_array($this->reference_array))
 			{
+				if (!is_array($this->reference_array))
+					$this->reference_array = array ();
 				reset($this->reference_array);
 				foreach ($this->reference_array AS $reference_array)
 				{
@@ -1308,8 +1332,9 @@
 			// write element list
 			if (is_array($this->element_list))
 			{
+				if (!is_array($this->element_list))
+					$this->element_list = array ();
 				reset($this->element_list);
-
 				while (list($table_name, $reference_array) = each($this->element_list))
 				{
 					// get the number of keys from the elements array
@@ -1431,6 +1456,8 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 			// remove any reference arrays
 			if (is_array($this->reference_array))
 			{
+				if (!is_array($this->reference_array))
+					$this->reference_array = array ();
 				reset($this->reference_array);
 				foreach ($this->reference_array AS $reference_array)
 				{
@@ -1441,6 +1468,8 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 			// remove any element list references
 			if (is_array($this->element_list))
 			{
+				if (!is_array($this->element_list))
+					$this->element_list = array ();
 				reset($this->element_list);
 				while (list($table_name, $data_array) = each($this->element_list))
 				{
@@ -1449,6 +1478,8 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 				}
 			}
 			// unlink ALL files
+			if (!is_array($this->table_array))
+				$this->table_array = array ();
 			reset($this->table_array);
 			while (list($key, $value) = each($this->table_array))
 			{
@@ -1466,7 +1497,10 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 		// creates HTML hidden input fields out of an hash array
 		public function form_create_hidden_fields($hidden_array = "")
 		{
-			reset ($this->table_array);
+			$hidden = array ();
+			if (!is_array($this->table_array))
+				$this->table_array = array ();
+			reset($this->table_array);
 			while (list($key, $value) = each($this->table_array))
 			{
 				if ($this->table_array[$key]["type"] == "hidden")
@@ -1474,9 +1508,9 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 					$hidden_array[$key] = $this->table_array[$key]["value"];
 				}
 			}
-			if ($hidden_array)
+			if (is_array($hidden_array))
 			{
-				reset ($hidden_array);
+				reset($hidden_array);
 				while (list($key, $value) = each($hidden_array))
 				{
 					$hidden[] = array('key' => $key, 'value' => $value);
@@ -1530,6 +1564,8 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 			$data['table_name'] = $table_name;
 			$pos = 0; // position in while for overwrite if needed
 			// build the select part
+			if (!is_array($this->element_list[$table_name]["elements"]))
+				$this->element_list[$table_name]["elements"] = array ();
 			reset($this->element_list[$table_name]["elements"]);
 			// generic data read in (counts for all rows)
 			while (list($el_name, $data_array) = each($this->element_list[$table_name]["elements"]))

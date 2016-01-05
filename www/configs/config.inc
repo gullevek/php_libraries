@@ -264,6 +264,7 @@
 			'',
 			LIBS, 
 			SMARTY, 
+			TABLE_ARRAYS,
 			__DIR__.'/'.LIBS,
 			__DIR__.'/'.SMARTY
 		);
@@ -273,9 +274,10 @@
 			if (file_exists($folder.$include_file))
 			{
 				require_once($folder.$include_file);
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 	
 ?>
