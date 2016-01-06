@@ -21,5 +21,3 @@
              <input type="submit" name="new" value="{$new.new_name}">
          </td>
      </tr>
-
-{* $Id: edit_new.tpl 4897 2014-02-06 08:16:56Z gullevek $ *}
