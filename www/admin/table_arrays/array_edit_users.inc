@@ -34,6 +34,7 @@
 				'output_name' => 'Password change interval',
 				'error_check' => 'intervalshort', // can be any date length format. n Y/M/D [not H/M/S], only one set, no combination
 				'type' => 'text',
+				'interval' => 1, // interval needs NULL write for empty
 				'size' => 5, // make it 5 chars long
 				'length' => 5
 			),

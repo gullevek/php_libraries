@@ -429,6 +429,13 @@ $this->debug('write_check', "[$column][".$this->table_array[$column]["value"]."]
 							$_value = $this->table_array[$column]["value"];
 						$q_data .= $_value;
 					}
+					elseif ($this->table_array[$column]["interval"])
+					{
+						// for interval we check if no value, then we set null
+						if (!$this->table_array[$column]["value"])
+							$_value = 'NULL';
+						$q_data .= $_value;
+					}
 					else
 					// normal string
 					{
@@ -500,7 +507,10 @@ $this->debug('write_check', "[$column][".$this->table_array[$column]["value"]."]
 			} 
 			// set primary key
 			if ($insert)
-				$this->ok = $this->table_array[$this->pk_name]["value"] = $this->insert_id;
+			{
+				$this->table_array[$this->pk_name]["value"] = $this->insert_id;
+				$this->ok = $this->insert_id;
+			}
 			// return the table if needed
 			return $this->table_array;
 		}                                           
