@@ -933,7 +933,6 @@
 							// this one also allows @ and .
 							case "alphanumericextended":
 //$this->debug('edit', 'IN Alphanumeric');
-								$this->debug('REGEX CHECK', 'ANE: '.$this->table_array[$key]["value"]);
 								if (!preg_match("/^[0-9A-Za-z_\-@\.]+$/", $this->table_array[$key]["value"]))
 									$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric extended (Numbers, Letters, -,  _, @ and . only, no spaces) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
 								break;

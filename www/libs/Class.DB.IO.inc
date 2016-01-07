@@ -523,7 +523,8 @@
 		//        msg -> optional message
 		// RETURN none
 		// DESC   if error_id set, writes long error string into error_msg
-		private function _db_error($cursor = '', $msg = '')
+		// MARK: needed to make public so it can be called from DB.Array.IO too
+		public function _db_error($cursor = '', $msg = '')
 		{
 			$where_called = $this->get_caller_method();
 			if ($cursor)
