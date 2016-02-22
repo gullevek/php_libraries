@@ -1211,7 +1211,7 @@
 					{
 						// if a where was given, set this key also [dangerous!]
 						
-						// posgres compatible insert
+						// postgreSQL compatible insert
 						$q = "INSERT INTO ".$this->table_array[$key]["table_name"]." (".$this->table_array[$key]["input_name"].") VALUES ('".addslashes($this->table_array[$key]["input_value"])."')";
 						$this->db_exec($q);
 						if ($this->table_array[$key]["where"])
