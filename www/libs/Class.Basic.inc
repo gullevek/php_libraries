@@ -249,21 +249,39 @@
 			$this->mobile_email_type = array (
 				'.*@docomo\.ne\.jp$' => 'docomo',
 				'.*@([a-z0-9]{2}\.)?ezweb\.ne\.jp$' => 'kddi_ezweb', # correct are a[2-4], b2, c[1-9], e[2-9], h[2-4], t[1-9]
-				'.*@(ez[a-j]{1}\.)?ido\.ne\.jp$' => 'kddi', # ez[a-j] or nothing
+				'.*@(ez[a-j]{1}\.)?ido\.ne\.jp$' => 'kddi_ido', # ez[a-j] or nothing
 				'.*@([a-z]{2}\.)?sky\.tu-ka\.ne\.jp$' => 'kddi_tu-ka', # (sky group)
 				'.*@([a-z]{2}\.)?sky\.tk[kc]{1}\.ne\.jp$' => 'kddi_sky', # (sky group) [tkk,tkc only]
-				'.*@([a-z]{2}\.)?sky\.dtg\.ne\.jp$' => 'kddi', # dtg (sky group)
-				'.*@[tkdhcrnsq]{1}\.vodafone\.ne\.jp$' => 'softbank', # old vodafone [t,k,d,h,c,r,n,s,q]
-				'.*@jp-[dhtkrsnqc]{1}\.ne\.jp$' => 'softbank', # very old j-phone (pre vodafone) [d,h,t,k,r,s,n,q,c]
+				'.*@([a-z]{2}\.)?sky\.dtg\.ne\.jp$' => 'kddi_dtg', # dtg (sky group)
+				'.*@[tkdhcrnsq]{1}\.vodafone\.ne\.jp$' => 'softbank_vodafone', # old vodafone [t,k,d,h,c,r,n,s,q]
+				'.*@jp-[dhtkrsnqc]{1}\.ne\.jp$' => 'softbank_j-phone', # very old j-phone (pre vodafone) [d,h,t,k,r,s,n,q,c]
 				'.*@([dhtcrknsq]{1}\.)?softbank\.ne\.jp$' => 'softbank', # add i for iphone also as keitai, others similar to the vodafone group
 				'.*@i{1}\.softbank(\.ne)?\.jp$' => 'softbank_iphone', # add iPhone also as keitai and not as pc
 				'.*@disney\.ne\.jp$' => 'softbank_disney', # (kids)
 				'.*@willcom\.ne\.jp$' => 'willcom',
 				'.*@willcom\.com$' => 'willcom', # new for pdx.ne.jp address
-				'.*@pdx\.ne\.jp$' => 'willcom', # old pdx address for willcom
-				'.*@bandai\.jp$' => 'willcom', # willcom paipo! (kids)
-				'.*@pipopa\.ne\.jp$' => 'willcom', # willcom paipo! (kids)
-				'.*@([a-z0-9]{2,4}\.)?pdx\.ne\.jp$' => 'willcom' # actually only di,dj,dk,wm -> all others are "wrong", but none also allowed?
+				'.*@pdx\.ne\.jp$' => 'willcom_pdx', # old pdx address for willcom
+				'.*@bandai\.jp$' => 'willcom_bandai', # willcom paipo! (kids)
+				'.*@pipopa\.ne\.jp$' => 'willcom_pipopa', # willcom paipo! (kids)
+				'.*@([a-z0-9]{2,4}\.)?pdx\.ne\.jp$' => 'willcom_pdx' # actually only di,dj,dk,wm -> all others are "wrong", but none also allowed?
+			);
+			// short list for mobile email types
+			$this->mobile_email_type_short = array (
+				'docomo' => 'docomo',
+				'kddi_ezweb' => 'kddi',
+				'kddi' => 'kddi',
+				'kddi_tu-ka' => 'kddi',
+				'kddi_sky' => 'kddi',
+				'softbank' => 'softbank',
+				'softbank_iphone' => 'softbank',
+				'softbank_disney' => 'softbank',
+				'softbank_vodafone' => 'softbank',
+				'softbank_j-phone' => 'softbank',
+				'willcom' => 'willcom',
+				'willcom_pdx' => 'willcom',
+				'willcom_bandai' => 'willcom',
+				'willcom_pipopa' => 'willcom',
+				'pc' => 'pc'
 			);
 
 			// initial the session if there is no session running already
@@ -1792,10 +1810,11 @@
 		}
 
 		// METHOD: getEmailType
-		// PARAMS: email
+		// PARAMS: email, short == false
 		// RETURN: string for email type, eg "pc", "docomo", etc
 		// DESC:   guesses the email type (mostly for mobile) from the domain
-		public function getEmailType($email)
+		//         if second is set to true, it will return short naming scheme (only provider)
+		public function getEmailType($email, $short = false)
 		{  
 			// trip if there is no email address
 			if (!$email)
@@ -1804,10 +1823,24 @@
 			foreach ($this->mobile_email_type as $email_regex => $email_type)
 			{  
 				if (preg_match("/$email_regex/", $email))
-					return $email_type;
+				{
+					if ($short)
+						return $this->getShortEmailType($email_type);
+					else
+						return $email_type;
+				}
 			}
 			// if no previous return we assume this is a pc address
 			return "pc";
+		}
+
+		// METHOD: getShortEmailType
+		// PARAMS: long email type (not email)
+		// RETURN: short email type
+		// DESC  : gets the short email type from a long email type
+		public function getShortEmailType($email_type)
+		{
+			return $this->mobile_email_type_short[$email_type];
 		}
 
 		// METHOD: printDateTime
