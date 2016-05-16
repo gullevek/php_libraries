@@ -260,10 +260,16 @@
 				'.*@disney\.ne\.jp$' => 'softbank_disney', # (kids)
 				'.*@willcom\.ne\.jp$' => 'willcom',
 				'.*@willcom\.com$' => 'willcom', # new for pdx.ne.jp address
+				'.*@wcm\.ne\.jp$' => 'willcom', # old willcom wcm.ne.jp
 				'.*@pdx\.ne\.jp$' => 'willcom_pdx', # old pdx address for willcom
 				'.*@bandai\.jp$' => 'willcom_bandai', # willcom paipo! (kids)
 				'.*@pipopa\.ne\.jp$' => 'willcom_pipopa', # willcom paipo! (kids)
-				'.*@([a-z0-9]{2,4}\.)?pdx\.ne\.jp$' => 'willcom_pdx' # actually only di,dj,dk,wm -> all others are "wrong", but none also allowed?
+				'.*@([a-z0-9]{2,4}\.)?pdx\.ne\.jp$' => 'willcom_pdx', # actually only di,dj,dk,wm -> all others are "wrong", but none also allowed?
+				'.*@ymobile([1]{1})?\.ne\.jp$' => 'willcom_ymobile', # ymobile, ymobile1 techincally not willcom, but I group them there
+				'.*@y-mobile\.ne\.jp$' => 'willcom_ymobile', # y-mobile techincally not willcom, but I group them there
+				'.*@emnet\.ne\.jp$' => 'willcom_emnet', # e-mobile, group will willcom
+				'.*@emobile\.ne\.jp$' => 'willcom_emnet', # e-mobile, group will willcom
+				'.*@emobile-s\.ne\.jp$' => 'willcom_emnet' # e-mobile, group will willcom
 			);
 			// short list for mobile email types
 			$this->mobile_email_type_short = array (
@@ -273,7 +279,7 @@
 				'kddi_tu-ka' => 'kddi',
 				'kddi_sky' => 'kddi',
 				'softbank' => 'softbank',
-				'softbank_iphone' => 'softbank',
+				'softbank_iphone' => 'iphone',
 				'softbank_disney' => 'softbank',
 				'softbank_vodafone' => 'softbank',
 				'softbank_j-phone' => 'softbank',
@@ -281,7 +287,9 @@
 				'willcom_pdx' => 'willcom',
 				'willcom_bandai' => 'willcom',
 				'willcom_pipopa' => 'willcom',
-				'pc' => 'pc'
+				'willcom_ymobile' => 'willcom',
+				'willcom_emnet' => 'willcom',
+				'pc_html' => 'pc'
 			);
 
 			// initial the session if there is no session running already
@@ -1831,7 +1839,10 @@
 				}
 			}
 			// if no previous return we assume this is a pc address
-			return "pc";
+			if ($short)
+				return "pc";
+			else
+				return "pc_html";
 		}
 
 		// METHOD: getShortEmailType
