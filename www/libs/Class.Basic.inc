@@ -247,38 +247,57 @@
 			);
 			// the array with the mobile types that are valid
 			$this->mobile_email_type = array (
-				'.*@docomo\.ne\.jp$' => 'docomo',
-				'.*@([a-z0-9]{2}\.)?ezweb\.ne\.jp$' => 'kddi_ezweb', # correct are a[2-4], b2, c[1-9], e[2-9], h[2-4], t[1-9]
-				'.*@(ez[a-j]{1}\.)?ido\.ne\.jp$' => 'kddi_ido', # ez[a-j] or nothing
-				'.*@([a-z]{2}\.)?sky\.tu-ka\.ne\.jp$' => 'kddi_tu-ka', # (sky group)
-				'.*@([a-z]{2}\.)?sky\.tk[kc]{1}\.ne\.jp$' => 'kddi_sky', # (sky group) [tkk,tkc only]
-				'.*@([a-z]{2}\.)?sky\.dtg\.ne\.jp$' => 'kddi_dtg', # dtg (sky group)
-				'.*@[tkdhcrnsq]{1}\.vodafone\.ne\.jp$' => 'softbank_vodafone', # old vodafone [t,k,d,h,c,r,n,s,q]
-				'.*@jp-[dhtkrsnqc]{1}\.ne\.jp$' => 'softbank_j-phone', # very old j-phone (pre vodafone) [d,h,t,k,r,s,n,q,c]
-				'.*@([dhtcrknsq]{1}\.)?softbank\.ne\.jp$' => 'softbank', # add i for iphone also as keitai, others similar to the vodafone group
-				'.*@i{1}\.softbank(\.ne)?\.jp$' => 'softbank_iphone', # add iPhone also as keitai and not as pc
-				'.*@disney\.ne\.jp$' => 'softbank_disney', # (kids)
-				'.*@willcom\.ne\.jp$' => 'willcom',
-				'.*@willcom\.com$' => 'willcom', # new for pdx.ne.jp address
-				'.*@wcm\.ne\.jp$' => 'willcom', # old willcom wcm.ne.jp
-				'.*@pdx\.ne\.jp$' => 'willcom_pdx', # old pdx address for willcom
-				'.*@bandai\.jp$' => 'willcom_bandai', # willcom paipo! (kids)
-				'.*@pipopa\.ne\.jp$' => 'willcom_pipopa', # willcom paipo! (kids)
-				'.*@([a-z0-9]{2,4}\.)?pdx\.ne\.jp$' => 'willcom_pdx', # actually only di,dj,dk,wm -> all others are "wrong", but none also allowed?
-				'.*@ymobile([1]{1})?\.ne\.jp$' => 'willcom_ymobile', # ymobile, ymobile1 techincally not willcom, but I group them there
-				'.*@y-mobile\.ne\.jp$' => 'willcom_ymobile', # y-mobile techincally not willcom, but I group them there
-				'.*@emnet\.ne\.jp$' => 'willcom_emnet', # e-mobile, group will willcom
-				'.*@emobile\.ne\.jp$' => 'willcom_emnet', # e-mobile, group will willcom
-				'.*@emobile-s\.ne\.jp$' => 'willcom_emnet' # e-mobile, group will willcom
+				'.*@docomo\.ne\.jp$' => 'keitai_docomo',
+				'.*@([a-z0-9]{2}\.)?ezweb\.ne\.jp$' => 'keitai_kddi_ezweb', # correct are a[2-4], b2, c[1-9], e[2-9], h[2-4], t[1-9]
+				'.*@(ez[a-j]{1}\.)?ido\.ne\.jp$' => 'keitai_kddi_ido', # ez[a-j] or nothing
+				'.*@([a-z]{2}\.)?sky\.tu-ka\.ne\.jp$' => 'keitai_kddi_tu-ka', # (sky group)
+				'.*@([a-z]{2}\.)?sky\.tk[kc]{1}\.ne\.jp$' => 'keitai_kddi_sky', # (sky group) [tkk,tkc only]
+				'.*@([a-z]{2}\.)?sky\.dtg\.ne\.jp$' => 'keitai_kddi_dtg', # dtg (sky group)
+				'.*@[tkdhcrnsq]{1}\.vodafone\.ne\.jp$' => 'keitai_softbank_vodafone', # old vodafone [t,k,d,h,c,r,n,s,q]
+				'.*@jp-[dhtkrsnqc]{1}\.ne\.jp$' => 'keitai_softbank_j-phone', # very old j-phone (pre vodafone) [d,h,t,k,r,s,n,q,c]
+				'.*@([dhtcrknsq]{1}\.)?softbank\.ne\.jp$' => 'keitai_softbank', # add i for iphone also as keitai, others similar to the vodafone group
+				'.*@i{1}\.softbank(\.ne)?\.jp$' => 'smartphone_softbank_iphone', # add iPhone also as keitai and not as pc
+				'.*@disney\.ne\.jp$' => 'keitai_softbank_disney', # (kids)
+				'.*@willcom\.ne\.jp$' => 'keitai_willcom',
+				'.*@willcom\.com$' => 'keitai_willcom', # new for pdx.ne.jp address
+				'.*@wcm\.ne\.jp$' => 'keitai_willcom', # old willcom wcm.ne.jp
+				'.*@pdx\.ne\.jp$' => 'keitai_willcom_pdx', # old pdx address for willcom
+				'.*@bandai\.jp$' => 'keitai_willcom_bandai', # willcom paipo! (kids)
+				'.*@pipopa\.ne\.jp$' => 'keitai_willcom_pipopa', # willcom paipo! (kids)
+				'.*@([a-z0-9]{2,4}\.)?pdx\.ne\.jp$' => 'keitai_willcom_pdx', # actually only di,dj,dk,wm -> all others are "wrong", but none also allowed?
+				'.*@ymobile([1]{1})?\.ne\.jp$' => 'keitai_willcom_ymobile', # ymobile, ymobile1 techincally not willcom, but I group them there
+				'.*@y-mobile\.ne\.jp$' => 'keitai_willcom_ymobile', # y-mobile techincally not willcom, but I group them there
+				'.*@emnet\.ne\.jp$' => 'keitai_willcom_emnet', # e-mobile, group will willcom
+				'.*@emobile\.ne\.jp$' => 'keitai_willcom_emnet', # e-mobile, group will willcom
+				'.*@emobile-s\.ne\.jp$' => 'keitai_willcom_emnet' # e-mobile, group will willcom
 			);
 			// short list for mobile email types
 			$this->mobile_email_type_short = array (
+				'keitai_docomo' => 'docomo',
+				'keitai_kddi_ezweb' => 'kddi',
+				'keitai_kddi' => 'kddi',
+				'keitai_kddi_tu-ka' => 'kddi',
+				'keitai_kddi_sky' => 'kddi',
+				'keitai_softbank' => 'softbank',
+				'smartphone_softbank_iphone' => 'iphone',
+				'keitai_softbank_disney' => 'softbank',
+				'keitai_softbank_vodafone' => 'softbank',
+				'keitai_softbank_j-phone' => 'softbank',
+				'keitai_willcom' => 'willcom',
+				'keitai_willcom_pdx' => 'willcom',
+				'keitai_willcom_bandai' => 'willcom',
+				'keitai_willcom_pipopa' => 'willcom',
+				'keitai_willcom_ymobile' => 'willcom',
+				'keitai_willcom_emnet' => 'willcom',
+				'pc_html' => 'pc',
+				// old sets -> to be removed later
 				'docomo' => 'docomo',
 				'kddi_ezweb' => 'kddi',
 				'kddi' => 'kddi',
 				'kddi_tu-ka' => 'kddi',
 				'kddi_sky' => 'kddi',
 				'softbank' => 'softbank',
+				'keitai_softbank_iphone' => 'iphone',
 				'softbank_iphone' => 'iphone',
 				'softbank_disney' => 'softbank',
 				'softbank_vodafone' => 'softbank',
@@ -289,7 +308,7 @@
 				'willcom_pipopa' => 'willcom',
 				'willcom_ymobile' => 'willcom',
 				'willcom_emnet' => 'willcom',
-				'pc_html' => 'pc'
+				'pc' => 'pc'
 			);
 
 			// initial the session if there is no session running already
