@@ -253,7 +253,7 @@
 		// only inside
 		// basic vars
 		private $dbh; // the dbh handler
-		private $db_debug; // DB_DEBUG ... (if set prints out debug msgs)
+		public $db_debug; // DB_DEBUG ... (if set prints out debug msgs)
 		private $db_name; // the DB connected to
 		private $db_user; // the username used
 		private $db_pwd; // the password used
