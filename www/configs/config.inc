@@ -145,11 +145,11 @@
 	/************* DB ACCESS *****************/
 	// please be VERY carefull only to change the right side
 	$DB_CONFIG = array(
-		"test" => array (
-			"db_name" => "gullevek",
-			"db_user" => "gullevek",
-			"db_pass" => "gullevek",
-			"db_host" => "db.tokyo.tequila.jp",
+		"<db id>" => array (
+			"db_name" => "<database>",
+			"db_user" => "<user>",
+			"db_pass" => "<password>",
+			"db_host" => "<host>",
 			"db_port" => "5432",
 			"db_schema" => "public",
 			"db_type" => "pgsql",
@@ -166,23 +166,19 @@
 
 	// each host has a different db_host
 	// development host
-	$DB_HOST['soba'] = "test";
-	$DB_HOST['soba.tokyo.tequila.jp'] = "test";
+	$DB_HOST['<host>'] = "<db id>";
 	// target host (live)
-//	$DB_TARGET_HOST['soba'] = "<DB ID>";
+//	$DB_TARGET_HOST['<host>'] = "<DB ID>";
 	// url redirect database
-//	$DB_URL_REDIRECT_HOST['soba'] = "<DB ID>";
+//	$DB_URL_REDIRECT_HOST['<host>'] = "<DB ID>";
 	// location flagging
 	// test/dev/live
-	$LOCATION['soba'] = 'test';
-	$LOCATION['soba.tokyo.tequila.jp'] = 'test';
+	$LOCATION['<host>'] = '<test|live|remote|etc>';
 	// show DEBUG override
 	// true/false
-	$DEBUG_FLAG['soba'] = true;
-	$DEBUG_FLAG['soba.tokyo.tequila.jp'] = true;
+	$DEBUG_FLAG['<host>'] = true;
     // set postgresql paths (schemas)
-    $DB_PATH['soba'] = PUBLIC_SCHEMA;
-    $DB_PATH['soba.tokyo.tequila.jp'] = PUBLIC_SCHEMA;
+    $DB_PATH['<host>'] = PUBLIC_SCHEMA;
 
 	// set the USE_DATABASE var, if there is nothing set, we assume TRUE
 	$USE_DATABASE = defined('USE_DATABASE') ? USE_DATABASE : true;
