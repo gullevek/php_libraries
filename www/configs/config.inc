@@ -258,12 +258,12 @@
 	{
 		// where to search for the files to include
 		$dirs = array (
-			LIBDIR, 
+			LIBDIR,
 			SMARTYDIR,
 			TABLEARRAYDIR,
 			'',
-			LIBS, 
-			SMARTY, 
+			LIBS,
+			SMARTY,
 			TABLE_ARRAYS,
 			__DIR__.'/'.LIBS,
 			__DIR__.'/'.SMARTY
@@ -279,5 +279,4 @@
 		}
 		return false;
 	}
-	
 ?>

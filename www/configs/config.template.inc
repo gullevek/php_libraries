@@ -1,10 +1,5 @@
 <?
 	/********************************************************************
-	* $HeadURL: svn://svn/development/core_data/php/www/configs/config.template.inc $
-	* $LastChangedBy: gullevek $
-	* $LastChangedDate: 2013-02-18 16:27:24 +0900 (Mon, 18 Feb 2013) $
-	* $LastChangedRevision: 4382 $
-	*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/06/10
 	* SHORT DESCRIPTION:
@@ -24,6 +19,17 @@
 	DEFINE('DEFAULT_ENCODING', "UTF-8");
 		
 	/************* PATHS *********************/
+	// ** NEW/BETTER DIR DECLARATIONS **
+	// path to original file (if symlink)
+	DEFINE('DIR', __DIR__."/");
+	// libs base path based on DIR
+	DEFINE('LIBDIR', DIR.'libs/');
+	// SMARTY path based on DIR
+	DEFINE('SMARTYDIR', DIR.'Smarty/');
+	// table arrays for Class Form
+	DEFINE('TABLEARRAYDIR', DIR.'table_arrays/');
+
+	// ** OLD DIR DECLARATIONS **
 	// path to document root
 	DEFINE('ROOT', getcwd()."/");
 	// libs path
@@ -230,6 +236,31 @@
 
 	// any other global definitons here
 //	DEFINE('SOME_ID', <SOME VALUE>);
-	
-	// $Id: config.template.inc 4382 2013-02-18 07:27:24Z gullevek $	
+
+	// function that will be called on top of each class include to load the class
+	function _spl_autoload($include_file)
+	{
+		// where to search for the files to include
+		$dirs = array (
+			LIBDIR,
+			SMARTYDIR,
+			TABLEARRAYDIR,
+			'',
+			LIBS,
+			SMARTY,
+			TABLE_ARRAYS,
+			__DIR__.'/'.LIBS,
+			__DIR__.'/'.SMARTY
+		);
+		// try to find and load the class ifle
+		foreach ($dirs as $folder)
+		{
+			if (file_exists($folder.$include_file))
+			{
+				require_once($folder.$include_file);
+				return true;
+			}
+		}
+		return false;
+	}
 ?>

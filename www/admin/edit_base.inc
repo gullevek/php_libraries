@@ -230,6 +230,8 @@
 				$elements[] = $form->form_create_element("password");
 				$elements[] = $form->form_create_element("password_change_interval");
 				$elements[] = $form->form_create_element("email");
+				$elements[] = $form->form_create_element("last_name");
+				$elements[] = $form->form_create_element("first_name");
 				$elements[] = $form->form_create_element("edit_group_id");
 				$elements[] = $form->form_create_element("edit_access_right_id");
 				$elements[] = $form->form_create_element("strict");

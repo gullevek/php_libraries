@@ -1442,6 +1442,19 @@
 				return $this->_crc32b($string);
 		}
 
+		// METHOD: _hash
+		// PARAMS: string, type of hash to use
+		// RETURN: hashed string
+		// DESC  : replacemend for _crc32b call (alternate)
+		//         defaults to adler 32, fnv132, fnv1a32, joaat
+		//         all that create 8 char long hashes
+		public function _hash($string, $hash_type = 'adler32')
+		{
+			if (!in_array($hash_type, array('adler32', 'fnv132', 'fnv1a32', 'joaat')))
+				$hash_type = 'adler32';
+			return hash($hash_type, $string);
+		}
+
 		// METHOD: checkPHPVersion
 		// PARAMS: $min_version: minimum version. in format x, x.y or x.y.z
 		//         $max_version: default empty, else in same format as min version

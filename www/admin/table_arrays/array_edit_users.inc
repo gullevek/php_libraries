@@ -2,24 +2,24 @@
 	$edit_users = array (
 		"table_array" => array (
 			"edit_user_id" => array (
-				"value" => $GLOBALS["edit_user_id"], 
+				"value" => $GLOBALS["edit_user_id"],
 				"type" => "hidden",
 				"pk" => 1,
 				"int" => 1
 			),
 			"username" => array (
-				"value" => $GLOBALS["username"], 
-				"output_name" => "Username", 
-				"mandatory" => 1, 
+				"value" => $GLOBALS["username"],
+				"output_name" => "Username",
+				"mandatory" => 1,
 				"error_check" => "unique|alphanumericextended",
 				"type" => "text"
 			),
 			"password" => array (
-				"value" => $GLOBALS["password"], 
+				"value" => $GLOBALS["password"],
 				"HIDDEN_value" => $GLOBALS["HIDDEN_password"],
 				"CONFIRM_value" => $GLOBALS["CONFIRM_password"],
-				"output_name" => "Password", 
-				"mandatory" => 1, 
+				"output_name" => "Password",
+				"mandatory" => 1,
 				"type" => "password", // later has to be password for encryption in database
 				'update' => array ( // connected field updates, and update data
 					'password_change_date' => array ( // db row to update
@@ -40,12 +40,12 @@
 			),
 			// password reset force interval, if set, user needs to reset password after X time period
 			"enabled" => array (
-				"value" => $GLOBALS["enabled"], 
-				"output_name" => "Enabled", 
-				"type" => "binary", 
+				"value" => $GLOBALS["enabled"],
+				"output_name" => "Enabled",
+				"type" => "binary",
 				"int" => 1,
 				"element_list" => array (
-					"1" => "Yes", 
+					"1" => "Yes",
 					"0" => "No"
 				)
 			),
@@ -80,28 +80,38 @@
 				)
 			),
 			"debug" => array (
-				"value" => $GLOBALS["debug"], 
-				"output_name" => "Debug", 
-				"type" => "binary", 
+				"value" => $GLOBALS["debug"],
+				"output_name" => "Debug",
+				"type" => "binary",
 				"int" => 1,
 				"element_list" => array (
-					"1" => "Yes", 
+					"1" => "Yes",
 					"0" => "No"
 				)
 			),
 			"db_debug" => array (
-				"value" => $GLOBALS["db_debug"], 
-				"output_name" => "DB Debug", 
-				"type" => "binary", 
+				"value" => $GLOBALS["db_debug"],
+				"output_name" => "DB Debug",
+				"type" => "binary",
 				"int" => 1,
 				"element_list" => array (
-					"1" => "Yes", 
+					"1" => "Yes",
 					"0" => "No"
 				)
 			),
 			"email" => array (
-				"value" => $GLOBALS["email"], 
-				"output_name" => "E-Mail", 
+				"value" => $GLOBALS["email"],
+				"output_name" => "E-Mail",
+				"type" => "text"
+			),
+			"last_name" => array (
+				"value" => $GLOBALS["last_name"],
+				"output_name" => "Last Name",
+				"type" => "text"
+			),
+			"first_name" => array (
+				"value" => $GLOBALS["first_name"],
+				"output_name" => "First Name",
 				"type" => "text"
 			),
 			"edit_language_id" => array (
