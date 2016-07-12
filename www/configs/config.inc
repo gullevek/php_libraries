@@ -85,7 +85,7 @@
 
 	/************* HASH / ACL DEFAULT / ERROR SETTINGS / SMARTY *************/
 	// default hash type
-	DEFINE('DEFAULT_HASH', 'ripemd160');
+	DEFINE('DEFAULT_HASH', 'sha1');
 	// default acl level
 	DEFINE('DEFAULT_ACL_LEVEL', 80);
 	// default levels for certain actions
@@ -97,7 +97,7 @@
 	DEFINE('DEFAULT_ACL_DEL', 80);
 	DEFINE('DEFAULT_ACL_ADMIN', 100); */
 	// SSL host name
-//	DEFINE('SSL_HOST', "www4.adidas.co.jp");
+//	DEFINE('SSL_HOST', "ssl.host.name");
 	// error page strictness, Default is 3
 	// 1: only show error page as the last mesure if really no mid & aid can be loaded and found at all
 	// 2: if template not found, do not search, show error template
@@ -134,6 +134,12 @@
 	// set_live is a per page/per item
 	// live_queue is a global queue system
 //	DEFINE('QUEUE', 'live_queue');
+
+	/************* DB PATHS (PostgreSQL) *****************/
+	// schema names, can also be defined per <DB INFO>
+	DEFINE('PUBLIC_SCHEMA', 'public');
+	DEFINE('DEV_SCHEMA', 'public');
+	DEFINE('TEST_SCHEMA', 'public');
 
 	// non constant part
 	/************* DB ACCESS *****************/
@@ -174,11 +180,7 @@
 	// true/false
 	$DEBUG_FLAG['soba'] = true;
 	$DEBUG_FLAG['soba.tokyo.tequila.jp'] = true;
-	// schema names, can also be defined per <DB INFO>
-	DEFINE('PUBLIC_SCHEMA', 'public');
-	DEFINE('DEV_SCHEMA', 'public');
-	DEFINE('TEST_SCHEMA', 'public');
-    // and set to domain
+    // set postgresql paths (schemas)
     $DB_PATH['soba'] = PUBLIC_SCHEMA;
     $DB_PATH['soba.tokyo.tequila.jp'] = PUBLIC_SCHEMA;
 
