@@ -9,9 +9,9 @@
 
 	/************* SESSION NAMES *************/
 	// backend
-	DEFINE('EDIT_SESSION_NAME', "ADMIN_SESSION_NAME");
+	DEFINE('EDIT_SESSION_NAME', "<ADMIN SESSION NAME>");
 	// frontend
-	DEFINE('SESSION_NAME', "SESSION_NAME");
+	DEFINE('SESSION_NAME', "<SESSION NAME>");
 	
 	/************* LANGUAGE / ENCODING *******/
 	DEFINE('DEFAULT_LANG', "en_utf8");
@@ -34,7 +34,7 @@
 	DEFINE('ROOT', getcwd()."/");
 	// libs path
 	DEFINE('LIBS', "libs/");
-	// includes (strings, arrays for stati, etc)
+	// includes (strings, arrays for static, etc)
 	DEFINE('INCLUDES', "includes/");
 	// layout base path
 	DEFINE('LAYOUT', 'layout/');
@@ -85,7 +85,7 @@
 
 	/************* HASH / ACL DEFAULT / ERROR SETTINGS / SMARTY *************/
 	// default hash type
-	DEFINE('DEFAULT_HASH', 'sha1');
+	DEFINE('DEFAULT_HASH', 'sha256');
 	// default acl level
 	DEFINE('DEFAULT_ACL_LEVEL', 80);
 	// default levels for certain actions
@@ -106,7 +106,7 @@
 //	DEFINE('ERROR_STRICT', 3);
 	// allow page caching in general, set to "FALSE" if you do debugging or development!
 //	DEFINE('ALLOW_SMARTY_CACHE', FALSE);
-	// cache life time, in second', default here is 2 days (172800s)
+	// cache life time, in seconds, default here is 2 days (172800s)
 	// -1 is never expire cache
 //	DEFINE('SMARTY_CACHE_LIFETIME', -1);
 
@@ -151,7 +151,7 @@
 			"db_pass" => "<password>",
 			"db_host" => "<host>",
 			"db_port" => "5432",
-			"db_schema" => "public",
+			"db_schema" => "public", // if not set, uses public
 			"db_type" => "pgsql",
 			"db_encoding" => '',
 			"db_ssl" => 'disable' // allow, disable, require, prefer
@@ -204,7 +204,7 @@
 //	DEFINE('TEST_SCHEMA', $DB_CONFIG[MAIN_DB]['db_schema']);
 //	DEFINE('PUBLIC_SCHEMA', $DB_CONFIG[TARGET_DB]['db_schema']);
 	DEFINE('LOGIN_DB_SCHEMA', 'public'); // where the edit* tables are
-	DEFINE('GLOBAL_DB_SCHEMA', 'public'); // where global tables are that are used by all schemas (eg queue tables for online', etc)
+	DEFINE('GLOBAL_DB_SCHEMA', 'public'); // where global tables are that are used by all schemas (eg queue tables for online, etc)
 	DEFINE('TARGET', $LOCATION[$HOST_NAME]);
 //	DEFINE('CSV_PATH', $PATHS[TARGET]['csv_path']);
 //	DEFINE('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);

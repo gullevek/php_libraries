@@ -30,11 +30,11 @@
 	DEFINE('TABLEARRAYDIR', DIR.'table_arrays/');
 
 	// ** OLD DIR DECLARATIONS **
-	// path to document root
+	// path to document root of file called
 	DEFINE('ROOT', getcwd()."/");
 	// libs path
 	DEFINE('LIBS', "libs/");
-	// includes (strings', arrays for stati, etc)
+	// includes (strings, arrays for static, etc)
 	DEFINE('INCLUDES', "includes/");
 	// layout base path
 	DEFINE('LAYOUT', 'layout/');
@@ -85,7 +85,7 @@
 
 	/************* HASH / ACL DEFAULT / ERROR SETTINGS / SMARTY *************/
 	// default hash type
-	DEFINE('DEFAULT_HASH', 'ripemd160');
+	DEFINE('DEFAULT_HASH', 'sha256');
 	// default acl level
 	DEFINE('DEFAULT_ACL_LEVEL', 80);
 	// default levels for certain actions
@@ -97,7 +97,7 @@
 	DEFINE('DEFAULT_ACL_DEL', 80);
 	DEFINE('DEFAULT_ACL_ADMIN', 100); */
 	// SSL host name
-//	DEFINE('SSL_HOST', "www4.adidas.co.jp");
+//	DEFINE('SSL_HOST', "ssl.host.name");
 	// error page strictness, Default is 3
 	// 1: only show error page as the last mesure if really no mid & aid can be loaded and found at all
 	// 2: if template not found, do not search, show error template
@@ -135,6 +135,12 @@
 	// live_queue is a global queue system
 //	DEFINE('QUEUE', 'live_queue');
 
+	/************* DB PATHS (PostgreSQL) *****************/
+	// schema names, can also be defined per <DB INFO>
+	DEFINE('PUBLIC_SCHEMA', 'public');
+	DEFINE('DEV_SCHEMA', 'public');
+	DEFINE('TEST_SCHEMA', 'public');
+
 	// non constant part
 	/************* DB ACCESS *****************/
 	// please be VERY carefull only to change the right side
@@ -145,8 +151,9 @@
 			"db_pass" => "<DB PASSWORD>",
 			"db_host" => "<DB HOST>",
 			"db_port" => "5432",
-			"db_schema" => "<DB SCHEMA>",
+			"db_schema" => "<DB SCHEMA>", // if not set, uses public
 			"db_type" => "pgsql",
+			"db_encoding" => '',
 			"db_ssl" => 'disable' // allow, disable, require, prefer
 		)
 	);
@@ -166,15 +173,11 @@
 //	$DB_URL_REDIRECT_HOST['<HOST NAME>'] = "<DB ID>";
 	// location flagging
 	// test/dev/live
-	$LOCATION['<HOST NAME>'] = 'test';
+	$LOCATION['<HOST NAME>'] = '<test|live|remote|etc>';
 	// show DEBUG override
 	// true/false
 	$DEBUG_FLAG['<HOST NAME>'] = true;
-	// schema names, can also be defined per <DB INFO>
-	DEFINE('PUBLIC_SCHEMA', 'public');
-	DEFINE('DEV_SCHEMA', 'public');
-	DEFINE('TEST_SCHEMA', 'public');
-    // and set to domain
+    // set postgresql paths (schemas)
     $DB_PATH['<HOST NAME>'] = PUBLIC_SCHEMA;
 
 	// set the USE_DATABASE var, if there is nothing set, we assume TRUE
@@ -207,6 +210,7 @@
 //	DEFINE('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);
 //	DEFINE('REDIRECT_URL', $PATHS[TARGET]['redirect_url']);
 	DEFINE('DEBUG', $DEBUG_FLAG[$HOST_NAME]);
+	DEFINE('SHOW_ALL_ERRORS', false); // show all errors if debug_all & show_error_handling are enabled
 
 	/************* GENERAL PAGE TITLE ********/
 	$G_TITLE = '<OVERALL PAGE TITLE>';
@@ -232,6 +236,16 @@
 			// image magick convert location
 			DEFINE('CONVERT', $path."/convert");
 		}
+	}
+
+	// turn off debug if debug flag is OFF
+	if (DEBUG == false)
+	{
+		$ECHO_ALL = 0;
+		$DEBUG_ALL = 0;
+		$PRINT_ALL = 0;
+		$DB_DEBUG = 0;
+		$ENABLE_ERROR_HANDLING = 0;
 	}
 
 	// any other global definitons here
