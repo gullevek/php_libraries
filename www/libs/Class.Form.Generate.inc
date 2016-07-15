@@ -925,6 +925,11 @@
 								if (!preg_match($this->table_array[$key]["error_regex"], $this->table_array[$key]["value"]))
 									$this->msg .= sprintf($this->l->__("Please enter a valid (%s) input for the <b>%s</b> Field!<br>"), $this->table_array[$key]["error_example"], $this->table_array[$key]["output_name"]);
 								break;
+							case "alphanumericspace":
+//$this->debug('edit', 'IN Alphanumericspace');
+								if (!preg_match("/^[0-9A-Za-z\ ]+$/", $this->table_array[$key]["value"]))
+									$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric (Numbers and Letters, spaces allowed) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
+								break;
 							case "alphanumeric":
 //$this->debug('edit', 'IN Alphanumeric');
 								if (!preg_match("/^[0-9A-Za-z_\-]+$/", $this->table_array[$key]["value"]))
@@ -932,7 +937,7 @@
 								break;
 							// this one also allows @ and .
 							case "alphanumericextended":
-//$this->debug('edit', 'IN Alphanumeric');
+//$this->debug('edit', 'IN Alphanumericextended');
 								if (!preg_match("/^[0-9A-Za-z_\-@\.]+$/", $this->table_array[$key]["value"]))
 									$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric extended (Numbers, Letters, -,  _, @ and . only, no spaces) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
 								break;

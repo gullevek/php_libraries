@@ -10,7 +10,8 @@
 				"value" => $GLOBALS["name"],
 				"output_name" => $this->l->__("Access Group Name"),
 				"mandatory" => 1,
-				"type" => "text"
+				"type" => "text",
+				"error_check" => "alphanumericspace|unique"
 			),
 			"description" => array (
 				"value" => $GLOBALS["description"],
@@ -20,7 +21,7 @@
 			"color" => array (
 				"value" => $GLOBALS["color"],
 				"output_name" => $this->l->__("Color"),
-				"mandatory" => 1,
+				"mandatory" => 0,
 				"type" => "text",
 				"size" => 6,
 				"length" => 6,
@@ -28,7 +29,6 @@
 				"error_regex" => "/[\dA-Fa-f]{6}/",
 				"error_example" => "F6A544"
 			)
-
 		),
 		"table_name" => "edit_access",
 		"load_query" => "SELECT edit_access_id, name FROM edit_access ORDER BY name",
