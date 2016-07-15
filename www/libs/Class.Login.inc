@@ -80,16 +80,7 @@
 		private $login_template = array ('strings' => array (), 'password_change' => '', 'template' => '');
 
 		// acl vars
-		public $acl = array (
-			'acl' => array (
-				'user' => array (),
-				'page' => array (),
-				'edit_access' => array ()
-			),
-			'info' => array (
-				'edit_access' => array ()
-			)
-		);
+		public $acl = array ();
 		public $default_acl_list = array ();
 
 		// METHOD: login
@@ -172,17 +163,17 @@
 				"class_author" => "cs/gullevek/at"
 			);
 
+			// init default ACL list array
+			$_SESSION['DEFAULT_ACL_LIST'] = array ();
 			// read the current edit_access_right list into an array
 			$q = "SELECT level, type, name FROM edit_access_right WHERE level >= 0 ORDER BY level";
 			while ($res = $this->db_return($q))
 			{
-				// level to description format
+				// level to description format (numeric)
 				$this->default_acl_list[$res['level']] = array (
 					'type' => $res['type'],
 					'name' => $res['name']
 				);
-				// format type (eg read) => acl number (eg 20)
-				$this->default_acl_list[$res['type']] = $res['level'];
 			}
 			// write that into the session
 			$_SESSION['DEFAULT_ACL_LIST'] = $this->default_acl_list;
@@ -404,7 +395,7 @@
 								$_SESSION["PAGES"] = $pages;
 								$_SESSION["PAGES_ACL_LEVEL"] = $pages_acl;
 								// load the edit_access user rights
-								$q = "SELECT ea.edit_access_id, level, type, ea.name, ea.color, edit_default ";
+								$q = "SELECT ea.edit_access_id, level, type, ea.name, ea.color, ea.uid, edit_default ";
 								$q .= "FROM edit_access_user eau, edit_access_right ear, edit_access ea ";
 								$q .= "WHERE eau.edit_access_id = ea.edit_access_id AND eau.edit_access_right_id = ear.edit_access_right_id AND eau.enabled = 1 AND edit_user_id = ".$this->euid." ";
 								$q .= "ORDER BY ea.name";
@@ -413,16 +404,28 @@
 								$unit_acl = array();
 								while ($res = $this->db_return($q))
 								{
+									// read edit access data fields and drop them into the unit access array
+									$q_sub ="SELECT name, value FROM edit_access_data WHERE edit_access_id = ".$res['edit_access_id'];
+									$ea_data = array ();
+									while ($res_sub = $this->db_return($q_sub))
+									{
+										$ea_data[$res_sub['name']] = $res['value'];
+									}
+									// build master unit array
 									$unit_access[$res['edit_access_id']] = array (
 										"id" => $res['edit_access_id'],
 										"acl_level" => $res["level"],
 										"acl_type" => $res["type"],
 										"name" => $res["name"],
+										"uid" => $res['uid'],
 										"color" => $res["color"],
-										"default" => $res["edit_default"]
+										"default" => $res["edit_default"],
+										'data' => $ea_data
 									);
+									// set the default unit
 									if ($res['edit_default'])
 										$_SESSION["UNIT_DEFAULT"] = $res['edit_access_id'];
+									// sub arrays for simple access
 									array_push($eauid, $res['edit_access_id']);
 									$unit_acl[$res['edit_access_id']] = $res['level'];
 								}
@@ -460,7 +463,7 @@
 				}
 			} // if he pressed login at least and is not yet loggined in
 		}
-  
+
 		// METHOD: login_check_permission
 		// PARAMS: none
 		// RETUNR none
@@ -482,7 +485,7 @@
 					$this->permission_okay = 1;
 				}
 				else
-				{        
+				{
 					$this->login_error = 103;
 					$this->permission_okay = 0;
 				}
@@ -526,94 +529,110 @@
 		// DESC  : sets all the basic ACLs
 		//         init set the basic acl the user has, based on the following rules
 		//         * init set from config DEFAULT ACL
-		//         * if group ACL is set, it overrides the default ACL
-		//         * if page ACL is set, it overrides the group ACL
-		//         * if user ACL is set, it overrides the page ACL
+		//         * if page ACL is set, it overrides the default ACL
+		//         * if group ACL is set, it overrides the page ACL
+		//         * if user ACL is set, it overrides the group ACL
 		//         set the page ACL
 		//         * default ACL set
 		//         * set group ACL if not default overrides default ACL
 		//         * set page ACL if not default overrides group ACL
-		//         set edit access ACL an set default edit access group
+		//         set edit access ACL and set default edit access group
 		//         * if an account ACL is set, set this parallel, account ACL overrides user ACL if it applies
 		//         * if edit access ACL level is set, use this, else use page
 		//         set all base ACL levels as a list keyword -> ACL number
 		public function login_set_acl()
 		{
-			// set the mastser user id
-			$this->acl['info']['euid'] = $_SESSION['EUID'];
-			// set admin flag, if this is on, all ACLs are set 100
-			if ($_SESSION['ADMIN'])
-				$this->acl['info']['admin'] = 1;
-			else
-				$this->acl['info']['admin'] = 0;
-			$this->acl['acl']['admin'] = $this->acl['info']['admin'];
+			// we start with the default acl
+			$this->acl['base'] = DEFAULT_ACL_LEVEL;
 
-			if (!$this->acl['info']['admin'])
+			// set admin flag and base to 100
+			if ($_SESSION['ADMIN'])
 			{
-				// this is the base if nothing is set
-				$this->acl['acl']['user'] = DEFAULT_ACL_LEVEL; // old base ACL
-				$this->acl['acl']['max'] = DEFAULT_ACL_LEVEL;
+				$this->acl['admin'] = 1;
+				$this->acl['base'] = 100;
+			}
+			else
+			{
+				// now go throw the flow and set the correct ACL
+				// user > page > group
 				// group ACL 0
 				if ($_SESSION['GROUP_ACL_LEVEL'] != -1)
 				{
-					$this->acl['acl']['user'] = $_SESSION['GROUP_ACL_LEVEL'];
-					if ($this->acl['acl']['user'] > $this->acl['acl']['max'])
-						$this->acl['acl']['max'] = $this->acl['acl']['user'];
+					$this->acl['base'] = $_SESSION['GROUP_ACL_LEVEL'];
 				}
-				// page ACL 2
+				// page ACL 1
 				if ($_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1)
 				{
-					$this->acl['acl']['user'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
-					if ($this->acl['acl']['user'] > $this->acl['acl']['max'])
-						$this->acl['acl']['max'] = $this->acl['acl']['user'];
+					$this->acl['base'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
 				}
-				// user ACL 1
+				// user ACL 2
 				if ($_SESSION['USER_ACL_LEVEL'] != -1)
 				{
-					$this->acl['acl']['user'] = $_SESSION['USER_ACL_LEVEL'];
-					if ($this->acl['acl']['user'] > $this->acl['acl']['max'])
-						$this->acl['acl']['max'] = $this->acl['acl']['user'];
+					$this->acl['base'] = $_SESSION['USER_ACL_LEVEL'];
 				}
 			}
-			else
-			{
-				// if admin is on, level is 100 (admin)
-				$this->acl['acl']['user'] = 100;
-				$this->acl['acl']['max'] = 100;
-			}
+
 			// set the current page acl
 			// start with default acl
-			// set group if not -1
-			// set page if not -1, overrides groug
-			$this->acl['acl']['page'] = DEFAULT_ACL_LEVEL;
+			// set group if not -1, overrides default
+			// set page if not -1, overrides group set
+			$this->acl['page'] = DEFAULT_ACL_LEVEL;
 			if ($_SESSION['GROUP_ACL_LEVEL'] != -1)
 			{
-				$this->acl['acl']['page'] = $_SESSION['GROUP_ACL_LEVEL'];
+				$this->acl['page'] = $_SESSION['GROUP_ACL_LEVEL'];
 			}
 			if ($_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1)
 			{
-				$this->acl['acl']['page'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
+				$this->acl['page'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
 			}
+
 			// PER ACCOUNT (UNIT/edit access)->
-			foreach ($_SESSION['UNIT'] as $unit)
+			foreach ($_SESSION['UNIT'] as $ea_id => $unit)
 			{
-				// set edit access acl, unless admin, then it is default 100
-				$this->acl['acl']['edit_access'][$unit['id']] = !$this->acl['info']['admin'] ? ($unit['acl_level'] != -1 ? $unit['acl_level'] : $this->acl['acl']['page']) : 100;
-				$this->acl['info']['edit_access'][$unit['id']] = $unit['name'];
+				// if admin flag is set, all units are set to 100
+				if ($this->acl['admin'])
+				{
+					$this->acl['unit'][$ea_id] = $this->acl['base'];
+				}
+				else
+				{
+					if ($unit['acl_level'] != -1)
+						$this->acl['unit'][$ea_id] = $unit['acl_level'];
+					else
+						$this->acl['unit'][$ea_id] = $this->acl['base'];
+				}
+				// detail name/level set
+				$this->acl['unit_detail'][$ea_id] = array (
+					'name' => $unit['name'],
+					'uid' => $unit['uid'],
+					'level' => $this->default_acl_list[$this->acl['unit'][$ea_id]]['name'],
+					'default' => $unit['default'],
+					'data' => $unit['data']
+				);
+				// set default
+				if ($unit['default'])
+				{
+					$this->acl['unit_id'] = $unit['id'];
+					$this->acl['unit_name'] = $unit['name'];
+					$this->acl['unit_uid'] = $unit['uid'];
+				}
 			}
 			// flag if to show extra edit access drop downs (because user has multiple groups assigned)
 			if (count($_SESSION['UNIT']) > 1)
-				$this->acl['acl']['show_ea_extra'] = 1;
+				$this->acl['show_ea_extra'] = 1;
 			else
-				$this->acl['acl']['show_ea_extra'] = 0;
+				$this->acl['show_ea_extra'] = 0;
 			// set the default edit access
-			$this->acl['info']['default_edit_access'] = $_SESSION['UNIT_DEFAULT'];
-			// integrate the default_acl list, but only for the keyword -> level
-			foreach ($this->default_acl_list as $key => $value)
+			$this->acl['default_edit_access'] = $_SESSION['UNIT_DEFAULT'];
+			// integrate the type acl list, but only for the keyword -> level
+			foreach ($this->default_acl_list as $level => $data)
 			{
-				if (!is_numeric($key))
-					$this->acl['list'][$key] = $value;
+				$this->acl['min'][$data['type']] = $level;
 			}
+			// set the full acl list too
+			$this->acl['acl_list'] = $_SESSION['DEFAULT_ACL_LIST'];
+			// debug
+			$this->debug('ACL', $this->print_ar($this->acl));
 		}
 
 		// METHOD: login_check_edit_access
@@ -657,7 +676,7 @@
 							$data = 'User could not be found';
 						}
 					}
-					// check old passwords match ->  error
+					// check old passwords match -> error
 					if (!$this->login_error)
 					{
 						$q = "SELECT edit_user_id FROM edit_user WHERE enabled = 1 AND username = '".$this->db_escape_string($this->pw_username)."' AND password = '".$this->db_escape_string($this->pw_old_password)."'";

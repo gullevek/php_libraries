@@ -310,6 +310,7 @@
 				$elements[] = $form->form_create_element("name");
 				$elements[] = $form->form_create_element("color");
 				$elements[] = $form->form_create_element("description");
+				// add name/value list here
 			break;
 			default:
 				print "NO NO NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!";
