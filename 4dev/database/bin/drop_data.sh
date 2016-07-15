@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# $Id: drop_data.sh 3158 2010-09-02 02:49:00Z gullevek $
 # quick hack for import
 
 #echo "EXIT";

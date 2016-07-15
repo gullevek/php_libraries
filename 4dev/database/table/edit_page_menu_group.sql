@@ -1,4 +1,3 @@
--- $Id: edit_page_menu_group.sql 3158 2010-09-02 02:49:00Z gullevek $
 -- AUTHOR: Clemens Schwaighofer
 -- DATE: 2005/07/05
 -- DESCRIPTION:

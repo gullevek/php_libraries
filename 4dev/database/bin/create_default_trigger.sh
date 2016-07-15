@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# $Id: create_default_trigger.sh 3158 2010-09-02 02:49:00Z gullevek $
 # creates the default on update trigger for the inherited generic tables (date/name)
 
 orig_file="../tmpl/trigger.tmpl"

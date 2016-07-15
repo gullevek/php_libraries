@@ -1,4 +1,3 @@
--- $Id: update_function.sql 3158 2010-09-02 02:49:00Z gullevek $
 -- adds the created or updated date tags
 
 CREATE OR REPLACE FUNCTION set_generic() RETURNS TRIGGER AS '

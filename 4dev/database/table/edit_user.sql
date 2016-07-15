@@ -1,4 +1,3 @@
--- $Id: edit_user.sql 4226 2012-11-02 07:19:57Z gullevek $
 -- AUTHOR: Clemens Schwaighofer
 -- DATE: 2005/07/06
 -- DESCRIPTION:

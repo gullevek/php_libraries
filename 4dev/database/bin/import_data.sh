@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# $Id: import_data.sh 4382 2013-02-18 07:27:24Z gullevek $
 # quick hack for import
 
 #echo "EXIT";

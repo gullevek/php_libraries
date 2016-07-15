@@ -1,5 +1,3 @@
--- $Id: trg_edit_query_string.sql 3158 2010-09-02 02:49:00Z gullevek $
-
 -- DROP TRIGGER trg_edit_query_string ON edit_query_string;
 CREATE TRIGGER trg_edit_query_string
 BEFORE INSERT OR UPDATE ON edit_query_string
