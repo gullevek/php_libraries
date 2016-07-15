@@ -311,6 +311,8 @@
 				$elements[] = $form->form_create_element("color");
 				$elements[] = $form->form_create_element("description");
 				// add name/value list here
+//				$elements[] = $form->form_show_list_table("edit_access_data");
+			break;
 			break;
 			default:
 				print "NO NO NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!";

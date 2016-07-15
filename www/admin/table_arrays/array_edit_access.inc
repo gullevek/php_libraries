@@ -36,6 +36,41 @@
 			array (
 				"name" => "name"
 			)
+		),
+		"element_list" => array (
+			"edit_access_data" => array (
+				"output_name" => "Edit Access Data",
+				"delete" => 0, // set then reference entries are deleted, else the "enable" flag is only set
+				"prefix" => "ead",
+				"read_data" => array (
+					"table_name" => "edit_access_data",
+					"pk_id" => "edit_acesss_id",
+					"name" => "name"
+				),
+				"elements" => array (
+					"edit_access_data_id" => array (
+						"output_name" => "Activate",
+						"type" => "hidden",
+						"int" => 1,
+						"pk_id" => 1
+					),
+					"name" => array (
+						"type" => "text",
+						"error_check" => "alphanumeric|unique",
+						"output_name" => "Name"
+					),
+					"value" => array (
+						"type" => "text",
+						"output_name" => "Value"
+					),
+					"enabled" => array (
+						"type" => "checkbox",
+						"output_name" => "Activate",
+						"int" => 1,
+						"element_list" => array(1)
+					)
+				)
+			)
 		)
 	);
 ?>
