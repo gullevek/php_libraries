@@ -1765,8 +1765,9 @@ $this->debug('edit', "Pos[$i] => ".$type[$i]." Q: ".$q."<br>");
 				// check if we need to fill fields
 				$element_count = count($data['content']);
 				$missing_empty_count = $this->element_list[$table_name]['max_empty'] - count($data['content']);
-//				$this->debug('CFG MAX', 'Max empty: '.$this->element_list[$table_name]['max_empty'].', Missing: '.$missing_empty_count.', Has: '.$element_count);
-				if ($missing_empty_count < $this->element_list[$table_name]['max_empty'])
+				$this->debug('CFG MAX', 'Max empty: '.$this->element_list[$table_name]['max_empty'].', Missing: '.$missing_empty_count.', Has: '.$element_count);
+				// set if we need more open entries or if we do not have any entries yet
+				if (($missing_empty_count < $this->element_list[$table_name]['max_empty']) || $element_count == 0)
 				{
 					for ($pos = count($data['content']); $pos <= ($this->element_list[$table_name]['max_empty'] + $element_count); $pos ++)
 					{
