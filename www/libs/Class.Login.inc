@@ -409,7 +409,7 @@
 									$ea_data = array ();
 									while ($res_sub = $this->db_return($q_sub))
 									{
-										$ea_data[$res_sub['name']] = $res['value'];
+										$ea_data[$res_sub['name']] = $res_sub['value'];
 									}
 									// build master unit array
 									$unit_access[$res['edit_access_id']] = array (

@@ -64,6 +64,8 @@
 	$cms->menu_show_flag = 'main';
 	// db nfo
 	$cms->db_info();
+	// set acl
+	$cms->acl = $login->acl;
 	//------------------------------ class init end
 
 	//------------------------------ logging start

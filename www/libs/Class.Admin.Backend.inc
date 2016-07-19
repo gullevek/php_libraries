@@ -8,7 +8,6 @@
 	*                   with your name on it ...
 	* DESCRIPTION
 	* Basic Admin interface backend
-	* - sets ACLs
 	* - sets action flags
 	* - menu creation
 	* - array vars for smarty
@@ -45,11 +44,8 @@
 		public $action_loaded;
 		public $action_value;
 		public $action_error;
-		// DEPRICATED -> use login acl
-//		public $page_acl; // the acl the user has on this page
-//		public $default_acl;
-		// DEPRICATED access rights
-//		public $access_rights = array ();
+		// ACL array variable if we want to set acl data from outisde
+		public $acl = array ();
 		// the current active edit access id
 		public $edit_access_id;
 		// error/warning/info messages
