@@ -40,13 +40,9 @@
 		"element_list" => array (
 			"edit_access_data" => array (
 				"output_name" => "Edit Access Data",
-				"delete" => 0, // set then reference entries are deleted, else the "enable" flag is only set
+				"type" => "reference_data", # is not a sub table read and connect, but only a sub table with data
+				"max_empty" => 5, # maxium visible if no data is set, if filled add this number to visible
 				"prefix" => "ead",
-				"read_data" => array (
-					"table_name" => "edit_access_data",
-					"pk_id" => "edit_acesss_id",
-					"name" => "name"
-				),
 				"elements" => array (
 					"edit_access_data_id" => array (
 						"output_name" => "Activate",
@@ -68,7 +64,13 @@
 						"output_name" => "Activate",
 						"int" => 1,
 						"element_list" => array(1)
+					),
+					"edit_access_id" => array (
+						"int" => 1,
+						"type" => "hidden",
+						"fk_id" => 1 # reference main key from master table above
 					)
+
 				)
 			)
 		)

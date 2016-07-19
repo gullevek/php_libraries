@@ -311,14 +311,14 @@
 				$elements[] = $form->form_create_element("color");
 				$elements[] = $form->form_create_element("description");
 				// add name/value list here
-//				$elements[] = $form->form_show_list_table("edit_access_data");
+				$elements[] = $form->form_show_list_table("edit_access_data");
 			break;
 			break;
 			default:
 				print "NO NO NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!";
 			break;
 		}
-//$form->debug('edit', "Elements: <pre>".$form->print_ar($elements));
+//		$form->debug('edit', "Elements: <pre>".$form->print_ar($elements));
 		$DATA['elements'] = $elements;
 		$DATA['hidden'] = $form->form_create_hidden_fields();
 		$DATA['save_delete'] = $form->form_create_save_delete();

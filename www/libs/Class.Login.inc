@@ -632,7 +632,7 @@
 			// set the full acl list too
 			$this->acl['acl_list'] = $_SESSION['DEFAULT_ACL_LIST'];
 			// debug
-			$this->debug('ACL', $this->print_ar($this->acl));
+//			$this->debug('ACL', $this->print_ar($this->acl));
 		}
 
 		// METHOD: login_check_edit_access

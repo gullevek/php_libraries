@@ -444,7 +444,7 @@ $this->debug('write_check', "[$column][".$this->table_array[$column]["value"]."]
 						if ($addslashes)
 							$q_data .= $this->db_escape_string($this->convert_entities($this->table_array[$column]["value"]));
 						else
-							$q_data .= addslashes($this->table_array[$column]["value"]);
+							$q_data .= $this->db_escape_string($this->table_array[$column]["value"]);
 						$q_data .= "'";
 					}
 				}

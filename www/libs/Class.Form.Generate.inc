@@ -886,8 +886,7 @@
 				{
 					// each error check can be a piped seperated value, lets split it
 //$this->debug('edit', $value["error_check"]);
-					$error_checks = explode("|", $value["error_check"]);
-					foreach ($error_checks as $error_check)
+					foreach (explode('|', $value["error_check"]) as $error_check)
 					{
 						switch ($error_check)
 						{ 
@@ -914,7 +913,7 @@
 								break;
 							// check unique, check if field in table is not yet exist
 							case "unique":
-								$q = "SELECT ".$key." FROM ".$this->table_name." WHERE ".$key." = '".addslashes($this->table_array[$key]["value"])."'";
+								$q = "SELECT ".$key." FROM ".$this->table_name." WHERE ".$key." = '".$this->db_escape_string($this->table_array[$key]["value"])."'";
 								if ($this->table_array[$this->int_pk_name]["value"])
 									$q .= " AND ".$this->int_pk_name." <> ".$this->table_array[$this->int_pk_name]["value"];
 								list($$key) = $this->db_return_row($q);
@@ -1003,6 +1002,14 @@
 				// if mandatory, check that at least on pk exists or if at least the mandatory field is filled
 				while (list($table_name, $reference_array) = each($this->element_list))
 				{
+					// set pk/fk id for this
+					foreach ($reference_array['elements'] as $_name => $_data)
+					{
+						if ($_data['pk_id'])
+							$_pk_name = $_name;
+						if ($_data['fk_id'])
+							$_fk_name = $_name;
+					}
 					// get the leasy of keys from the elements array
 					$keys = array_keys($reference_array["elements"]);
 					// prefix
@@ -1030,10 +1037,8 @@
 							{
 								$mand_okay = 1;
 							}
-						// we found a mandatory field. check now if one is set to satisfy the main mandatory
-						// also check, if this field is mandatory and its not set, but any other, throw an error
-//						for ($i = 0; $i < count($_POST[$prfx.$el_name]); $i ++)
-//						{
+							// we found a mandatory field. check now if one is set to satisfy the main mandatory
+							// also check, if this field is mandatory and its not set, but any other, throw an error
 //$this->debug('edit_error_chk', "RG error - Data[".$prfx.$el_name.": ".$_POST[$prfx.$el_name][$i]." | ".$_POST[$prfx.$el_name]." - ".$reference_array['enable_name']." - ".$_POST[$reference_array['enable_name']][$_POST[$prfx.$el_name][$i]]);
 							if ($data_array["mandatory"] && $_POST[$prfx.$el_name][$i])
 							{
@@ -1058,9 +1063,30 @@
 							{
 								$row_okay[$i] = 0;
 							}
-
-//						}
-
+							// do optional error checks like for normal fields
+							// currently active: unique/alphanumeric
+							if ($data_rray['error_check'])
+							{
+								foreach (explode('|', $value["error_check"]) as $error_check)
+								{
+									switch ($error_check)
+									{
+										// check unique, check if field in table is not yet exist
+										case "unique":
+											$q = "SELECT ".$_pk_name." FROM ".$table_name." WHERE ".$el_name." = '".$this->db_escape_string($_POST[$prfx.$el_name][$i])."'";
+											if ($this->table_array[$this->int_pk_name]["value"])
+												$q .= " AND ".$this->int_pk_name." <> ".$this->table_array[$this->int_pk_name]["value"];
+											list($$key) = $this->db_return_row($q);
+											if ($$key)
+												$this->msg .= sprintf($this->l->__("The field <b>%s</b> in row <b>%s</b> can be used only once!<br>"), $reference_array["output_name"], $i);
+											break;
+										case "alphanumericspace":
+											if (!preg_match("/^[0-9A-Za-z\ ]+$/", $_POST[$prfx.$el_name][$i]))
+												$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric (Numbers and Letters, spaces allowed) value for the <b>%s</b> Field and row <b>%s</b>!<br>"), $reference_array["output_name"], $i);
+											break;
+									}
+								}
+							}
 						} // if main mandatory
 					}
 
@@ -1203,7 +1229,7 @@
 				{
 //$this->debug('form', "HERE");
 					// check if this text name already exists (lowercase compare)
-					$q = "SELECT ".$this->table_array[$key]["pk_name"]." FROM ".$this->table_array[$key]["table_name"]." WHERE LCASE(".$this->table_array[$key]["input_name"].") = '".addslashes(strtolower($this->table_array[$key]["input_value"]))."'";
+					$q = "SELECT ".$this->table_array[$key]["pk_name"]." FROM ".$this->table_array[$key]["table_name"]." WHERE LCASE(".$this->table_array[$key]["input_name"].") = '".$this->db_escape_string(strtolower($this->table_array[$key]["input_value"]))."'";
 					// if a where was given, add here
 					if ($this->table_array[$key]["where"])
 						$q .= " AND ".$this->table_array[$key]["where"];      
@@ -1217,7 +1243,7 @@
 						// if a where was given, set this key also [dangerous!]
 						
 						// postgreSQL compatible insert
-						$q = "INSERT INTO ".$this->table_array[$key]["table_name"]." (".$this->table_array[$key]["input_name"].") VALUES ('".addslashes($this->table_array[$key]["input_value"])."')";
+						$q = "INSERT INTO ".$this->table_array[$key]["table_name"]." (".$this->table_array[$key]["input_name"].") VALUES ('".$this->db_escape_string($this->table_array[$key]["input_value"])."')";
 						$this->db_exec($q);
 						if ($this->table_array[$key]["where"])
 						{
@@ -1238,7 +1264,7 @@
 					if ($this->table_array[$key]["input_value"] != $this->table_array[$key]["value"])
 					{
 						// check if "right input" is in DB
-						$q = "SELECT ".$this->table_array[$key]["input_name"]." FROM ".$this->table_array[$key]["table_name"]." WHERE LCASE(".$this->table_array[$key]["input_name"].") = '".strtolower(addslashes($this->table_array[$key]["input_value"]))."'";
+						$q = "SELECT ".$this->table_array[$key]["input_name"]." FROM ".$this->table_array[$key]["table_name"]." WHERE LCASE(".$this->table_array[$key]["input_name"].") = '".strtolower($this->db_escape_string($this->table_array[$key]["input_value"]))."'";
 						// if a where was given, add here
 						if ($this->table_array[$key]["where"])
 							$q .= " AND ".$this->table_array[$key]["where"];
@@ -1357,6 +1383,8 @@
 					// check if there is a hidden key, update, else insert
 					while (list($el_name, $data_array) = each($reference_array["elements"]))
 					{
+						// this is only for reference_data part, at least one of the text fields need to be set for writing
+						$blow_write = array ();
 //$this->debug('edit_error_query', "QUERY: ".$this->print_ar($_POST));
 						// go through all submitted data
 //						for ($i = 0; $i < count($_POST[$el_name]); $i ++)
@@ -1371,6 +1399,16 @@
 							if ($reference_array['enable_name'] && $reference_array['delete'] && !$_POST[$reference_array['enable_name']][$i])
 							{
 								$no_write[$i] = 1;
+							}
+							// flag if data is in the text field and we are in a reference data set
+							if ($reference_array['type'] == 'reference_data' )
+							{
+								if ($data_array['type'] == 'text' && $_POST[$prfx.$el_name][$i])
+									$block_write[$i] = 1;
+							}
+							else
+							{
+								$block_write[$i] = 1;
 							}
 							// set type and boundaries for insert/update
 							if ($data_array["pk_id"] && $_POST[$prfx.$el_name][$i])
@@ -1388,19 +1426,24 @@
 							}
 							// write all data (insert/update) because I don't know until all are processed if it is insert or update
 							// don't write primary key backup for update
-$this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prfx.$el_name][$i]." {".$_POST[$prfx.$el_name]."} | Type: ".$type[$i]." | PK: ".$data_array["pk_id"]." ");
-							if (!$data_array["pk_id"])
+							// for reference_data type, only write if at least one text type field is set
+//$this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prfx.$el_name][$i]." | Type: ".$type[$i]." | PK: ".$data_array["pk_id"].", Block write: ".$block_write[$i]);
+							// only add elements that are not PK or FK flaged
+							if (!$data_array['pk_id'] && !$data_array['fk_id'])
 							{
-								// update
+								// update data list
 								if (strlen($q_data[$i]))
 									$q_data[$i] .= ", ";
-								// insert
+								// insert name part list
 								if ($q_names[$i])
 									$q_names[$i] .= ", ";
-								$q_names[$i] .= $el_name;
+								// insert value part list
 								if (strlen($q_values[$i]))
 									$q_values[$i] .= ", ";
-								// data part
+								// insert column name add
+								$q_names[$i] .= $el_name;
+								// data part, read from where [POST]
+								// radio group selections (only one can be active)
 								if ($data_array['type'] == 'radio_group')
 								{
 									if ($i == $_POST[$prfx.$el_name])
@@ -1412,10 +1455,11 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 								{
 									$_value = $_POST[$prfx.$el_name][$i];
 								}
+								// pre write data set. if int value, unset flagged need to be set null or 0 depending on settings
 								if ($data_array['int'] || $data_array['int_null'])
 								{
 									if (!$_value && $data_array['int_null'])
-										$value = 'NULL';
+										$_value = 'NULL';
 									elseif (!isset($_value))
 										$_value = 0;
 									$q_data[$i] .= $el_name." = ".$_value;
@@ -1423,27 +1467,31 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 								}
 								else
 								{
-									$q_data[$i] .= $el_name." = '".addslashes($_value)."'";
-									$q_values[$i] .= "'".addslashes($_value)."'";
+									// normal data gets escaped
+									$q_data[$i] .= $el_name." = '".$this->db_escape_string($_value)."'";
+									$q_values[$i] .= "'".$this->db_escape_string($_value)."'";
 								}
 							}
 						}
 					} // eche table elements
+					// finalize the queries, add FK key reference for inserts and run the query
 					for ($i = 0; $i < count($type); $i ++)
 					{
+						$q = '';
 						if (!$no_write[$i])
 						{
 							if ($type[$i] == "update")
 							{
 								$q = $q_begin[$i].$q_data[$i].$q_end[$i];
 							}
-							else
+							elseif ($block_write[$i])
 							{
 								$q = $q_begin[$i].$q_names[$i].", ".$this->int_pk_name.$q_middle[$i].$q_values[$i].", ".$this->table_array[$this->int_pk_name]["value"].$q_end[$i];
 							}
-//$this->debug('edit', "Q: ".$q."<br>");
+$this->debug('edit', "Pos[$i] => ".$type[$i]." Q: ".$q."<br>");
 							// write the dataset
-							$this->db_exec($q);
+							if ($q)
+								$this->db_exec($q);
 						}
 					} // for each created query
 				} // each element list
@@ -1549,42 +1597,52 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 		// PARAMS show which element list
 		// RETURN array for output
 		// DESC   create list of elements next to each other for a group of data in an input field
+		//        this currently only works for a list that is filled from a sub table and creates only a connection to this one
+		//        new version will allow a sub list with free input fields to directly fill a sub table to a master table
 		public function form_create_element_list_table($table_name)
 		{
+			// output name for the viewable left table td box, prefixed with * if mandatory
 			$output_name = $this->element_list[$table_name]["output_name"];
 			if ($this->element_list[$table_name]["mandatory"])
 				$output_name .= ' *';
 			// delete button name, if there is one set
 			if ($this->element_list[$table_name]["delete_name"])
 				$data['delete_name'] = $this->element_list[$table_name]["delete_name"];
-			// set the enable checkbox name if there is one
+			// set the enable checkbox for delete, if the delete flag is given if there is one
 			if ($this->element_list[$table_name]["enable_name"])
 			{
 				$data['enable_name'] = $this->element_list[$table_name]["enable_name"];
 				if ($this->element_list[$table_name]["delete"])
 					$data['delete'] = 1;
 			}
+			// prefix for the elements, to not collide with names in the master set
 			if ($this->element_list[$table_name]["prefix"])
 				$data["prefix"] = $this->element_list[$table_name]["prefix"]."_";
+			// the sub data table name
 			$data['table_name'] = $table_name;
-			$pos = 0; // position in while for overwrite if needed
+
 			// build the select part
 			if (!is_array($this->element_list[$table_name]["elements"]))
 				$this->element_list[$table_name]["elements"] = array ();
 			reset($this->element_list[$table_name]["elements"]);
 			// generic data read in (counts for all rows)
+			// visible list data output
 			while (list($el_name, $data_array) = each($this->element_list[$table_name]["elements"]))
 			{
-				$_el_name = $el_name;
-				$el_name = $data["prefix"].$el_name;
+//				$this->debug('CFG', 'El: '.$el_name.' -> '.$this->print_ar($data_array));
 				// if the element name matches the read array, then set the table as a name prefix
-				$q_select[] = $_el_name; // this is for reading the data
+				$q_select[] = $el_name; // this is for reading the data
+				// prefix the name for any further data parts
+				$el_name = $data["prefix"].$el_name;
 				$data['output_name'][$el_name] = $data_array["output_name"]; // this are the output names (if given)
 				$data['type'][$el_name] = $data_array["type"]; /// this is the type of the field
 				// set the primary key name
 				if ($data_array['pk_id'])
 					$data['pk_name'] = $el_name;
-				// if drop down db read data for element list
+				if ($data_array['fk_id'])
+					$data['fk_name'] = $el_name;
+				// if drop down db read data for element list from the given sub table as from the query
+				// only two elements are allowed: pos 0 is key, pso 1 is visible output name
 				if ($data_array['type'] == 'drop_down_db')
 				{
 					$md_q = md5($data_array['query']);
@@ -1599,57 +1657,80 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 						$data['output_data'][$el_name][] = $res[1];
 					}
 				}
-				else
+				elseif ($data_array["element_list"])
 				{
 					$data['element_list'][$el_name] = $data_array["element_list"]; // this is for the checkboxes
 				}
 				$proto[$el_name] = ($this->error) ? $_POST[$el_name][(count($_POST[$el_name]) - 1)] : ''; // this is for the new line
 			}
+//			$this->debug('CFG DATA', 'Data: '.$this->print_ar($data));
+//			$this->debug('CFG PROTO', 'Proto: '.$this->print_ar($proto));
+//			$this->debug('CFG SELECT', 'Proto: '.$this->print_ar($q_select));
 			// query for reading in the data
 //$this->debug('edit_error', "ERR: ".$this->error);
 			// if we got a read data, build the read select for the read, and read out the "selected" data
 			if ($this->element_list[$table_name]["read_data"])
 			{
-				array_unshift($q_select, $this->element_list[$table_name]["read_data"]["name"]);
+				// we need a second one for the query build only
+				// prefix all elements with the $table name
+				foreach ($q_select as $_pos => $element)
+				{
+					$_q_select[$_pos] = $table_name.'.'.$element;
+				}
+				// add the read names in here, prefix them with the table name
+				// earch to read part is split by |
+				if ($this->element_list[$table_name]["read_data"]["name"])
+				{
+					foreach (explode('|', $this->element_list[$table_name]["read_data"]["name"]) as $read_name)
+					{
+						array_unshift($_q_select, $this->element_list[$table_name]["read_data"]["table_name"].'.'.$read_name);
+						array_unshift($q_select, $read_name);
+					}
+				}
 				// set the rest of the data so we can print something out
 				$data['type'][$data["prefix"].$this->element_list[$table_name]["read_data"]["name"]] = 'string';	
 				// build the read query
 				$q = "SELECT ";
 //				if (!$this->table_array[$this->int_pk_name]["value"])
 //					$q .= "DISTINCT ";
-				// prefix join key with table name
-				$q .= str_replace($this->element_list[$table_name]["read_data"]["pk_id"], $this->element_list[$table_name]["read_data"]["table_name"].".".$this->element_list[$table_name]["read_data"]["pk_id"], implode(", ", $q_select))." ";
+				// prefix join key with table name, and implode the query select part
+				$q .= str_replace($table_name.'.'.$this->element_list[$table_name]["read_data"]["pk_id"], $this->element_list[$table_name]["read_data"]["table_name"].'.'.$this->element_list[$table_name]["read_data"]["pk_id"], implode(', ', $_q_select)).' ';
 //				if (!$this->table_array[$this->int_pk_name]["value"] && $this->element_list[$table_name]["read_data"]["order"])
 //					$q .= ", ".$this->element_list[$table_name]["read_data"]["order"]." ";
+				// read from the read table as main, and left join to the sub table to read the actual data
 				$q .= "FROM ".$this->element_list[$table_name]["read_data"]["table_name"]." ";
 				$q .= "LEFT JOIN ".$table_name." ";
 				$q .= "ON (";
 				$q .= $this->element_list[$table_name]["read_data"]["table_name"].".".$this->element_list[$table_name]["read_data"]["pk_id"]." = ".$table_name.".".$this->element_list[$table_name]["read_data"]["pk_id"]." ";
 //				if ($this->table_array[$this->int_pk_name]["value"])
-				$q .= "AND ".$this->int_pk_name." = ".(($this->table_array[$this->int_pk_name]["value"]) ? $this->table_array[$this->int_pk_name]["value"] : 'NULL')." ";
+				$q .= "AND ".$table_name.".".$this->int_pk_name." = ".(($this->table_array[$this->int_pk_name]["value"]) ? $this->table_array[$this->int_pk_name]["value"] : 'NULL')." ";
 				$q .= ") ";
 				if ($this->element_list[$table_name]["read_data"]["order"])
-					$q .= " ORDER BY ".$this->element_list[$table_name]["read_data"]["order"];
+					$q .= " ORDER BY ".$this->element_list[$table_name]["read_data"]["table_name"].'.'.$this->element_list[$table_name]["read_data"]["order"];
 			}
 			else
 			{
 				// only create query if we have a primary key
+				// reads directly from the reference table
 				if ($this->table_array[$this->int_pk_name]["value"])
 					$q = "SELECT ".implode(", ", $q_select)." FROM ".$table_name." WHERE ".$this->int_pk_name." = ".$this->table_array[$this->int_pk_name]["value"];
 			}
+//			$this->debug('CFG QUERY', 'Q: '.$q);
 			// only run if we have query strnig
 			if ($q)
 			{
+				$pos = 0; // position in while for overwrite if needed
 				// read out the list and add the selected data if needed
 				while ($res = $this->db_return($q))
 				{
+					$_data = array ();
 					$prfx = $data["prefix"]; // short
 					// go through each res
 					for ($i = 0; $i < count($q_select); $i ++)
 					{
 						// query select part, set to the element name
 						$el_name = $q_select[$i];
-//$this->debug('edit_error', "[$i] POS[$prfx$el_name]: ".$_POST[$prfx.$el_name][$pos]." | RES: ".$res[$el_name]);
+//$this->debug('edit_error', "[$i] ELNAME: $el_name | POS[$prfx$el_name]: ".$_POST[$prfx.$el_name][$pos]." | RES: ".$res[$el_name]);
 						// if we have an error, we take what we have in the vars, if not we take the data from the db
 						if ($this->error)
 						{
@@ -1674,6 +1755,43 @@ $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prf
 					unset($_data);
 				}
 			}
+			// if this is normal single reference data check the content on the element count
+			// if there is a max_empty is set, then fill up new elements (unfilled) until we reach max empty
+			if ($this->element_list[$table_name]['type'] == 'reference_data' && is_numeric($this->element_list[$table_name]['max_empty']) && $this->element_list[$table_name]['max_empty'] > 0)
+			{
+				// if the max empty is bigger than 10, just cut it to ten at the moment
+				if ($this->element_list[$table_name]['max_empty'] > 10)
+					$this->element_list[$table_name]['max_empty'] = 10;
+				// check if we need to fill fields
+				$element_count = count($data['content']);
+				$missing_empty_count = $this->element_list[$table_name]['max_empty'] - count($data['content']);
+//				$this->debug('CFG MAX', 'Max empty: '.$this->element_list[$table_name]['max_empty'].', Missing: '.$missing_empty_count.', Has: '.$element_count);
+				if ($missing_empty_count < $this->element_list[$table_name]['max_empty'])
+				{
+					for ($pos = count($data['content']); $pos <= ($this->element_list[$table_name]['max_empty'] + $element_count); $pos ++)
+					{
+						$_data = array ();
+
+						// the fields that need to be filled are in data->type array:
+						// pk fields are unfilled
+						// fk fields are filled with the fk_id "int_pk_name" value
+						foreach ($data['type'] as $el_name => $type)
+						{
+							$_data[$el_name] = '';
+							if ($el_name == $data['pk_name'])
+							{
+							}
+							elseif ($el_name == $data['fk_name'])
+							{
+								$_data[$el_name] = $this->table_array[$this->int_pk_name]["value"];
+							}
+						}
+						$data['content'][] = $_data;
+						$data['pos'][] = array(0 => $pos); // this is for the checkboxes
+					}
+				}
+			}
+
 			// push in an empty line of this type, but only if we have a delete key
 			if ($data['delete_name'])
 				$data['content'][] = $proto;
