@@ -1032,6 +1032,8 @@ EOM;
 
 		// METHOD: login_set_edit_access_data
 		// PARAMS: edit access id, key value to search for
+		// RETURN: false for not found or string for found data
+		// DESC  : searchs in the data set for the unit for the data key and returns the value asociated with it
 		public function login_set_edit_access_data($edit_access_id, $data_key)
 		{
 			if (!$_SESSION['UNIT'][$edit_access_id]['data'][$data_key])
