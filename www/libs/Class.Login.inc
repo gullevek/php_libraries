@@ -1030,5 +1030,15 @@ EOM;
 				return $edit_access_id;
 		}
 
+		// METHOD: login_set_edit_access_data
+		// PARAMS: edit access id, key value to search for
+		public function login_set_edit_access_data($edit_access_id, $data_key)
+		{
+			if (!$_SESSION['UNIT'][$edit_access_id]['data'][$data_key])
+				return false;
+			else
+				return $_SESSION['UNIT'][$edit_access_id]['data'][$data_key];
+		}
+
 	} // close class
 ?>
