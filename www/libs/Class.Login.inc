@@ -405,7 +405,7 @@
 								while ($res = $this->db_return($q))
 								{
 									// read edit access data fields and drop them into the unit access array
-									$q_sub ="SELECT name, value FROM edit_access_data WHERE edit_access_id = ".$res['edit_access_id'];
+									$q_sub ="SELECT name, value FROM edit_access_data WHERE enabled = 1 edit_access_id = ".$res['edit_access_id'];
 									$ea_data = array ();
 									while ($res_sub = $this->db_return($q_sub))
 									{

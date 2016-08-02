@@ -1049,17 +1049,17 @@
 		}
 
 		// METHOD: ByteStringFormat
-		// PARAMS: int
+		// PARAMS: int bytes, boolean for space, default is set
 		// RETURN: string
 		// DESC:   converts bytes into formated string with KB, MB, etc
-		public static function ByteStringFormat($number)
+		public static function ByteStringFormat($number, $space = true)
 		{
 			if (is_numeric($number) && $number > 0)
 			{
 				// labels in order of size
 				$labels = array('B', 'KB', 'MB', 'GB', 'TB');
 				// calc file size, round down too two digits, add label based max change
-				return round($number / pow(1024, ($i = floor(log($number, 1024)))), 2).''.$labels[$i];
+				return round($number / pow(1024, ($i = floor(log($number, 1024)))), 2).($space ? ' ' : '').$labels[$i];
 			}
 			return $number;
 		}
