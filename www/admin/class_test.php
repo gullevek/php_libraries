@@ -28,10 +28,12 @@
 	
 	// set + check edit access id
 	$edit_access_id = 3;
+	print "ACL UNIT: ".print_r(array_keys($login->acl['unit']), 1)."<br>";
+	print "ACCESS CHECK: ".$login->login_check_edit_access($edit_access_id)."<br>";
 	if ($login->login_check_edit_access($edit_access_id))
 		$basic->edit_access_id = $edit_access_id;
 	else
-		$basic->edit_access_id = $login->acl['info']['default_edit_access'];
+		$basic->edit_access_id = $login->acl['unit_id'];
 
 //	$basic->debug('SESSION', $basic->print_ar($_SESSION));
 

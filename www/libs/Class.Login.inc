@@ -641,7 +641,7 @@
 		// DESC  : checks if this edit access id is valid
 		public function login_check_edit_access($edit_access_id)
 		{
-			if (array_key_exists($edit_access_id, $this->acl['info']['edit_access']))
+			if (array_key_exists($edit_access_id, $this->acl['unit']))
 				return true;
 			else
 				return false;

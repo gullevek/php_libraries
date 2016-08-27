@@ -1081,6 +1081,20 @@
 			return $number;
 		}
 
+		// METHOD: DateStringFormat
+		// PARAMS: unix timestamp, true/false to show microtime
+		// RETURN: string formated date+time in Y-M-D h:m:s
+		// DESC  : a simple wrapper for the date format
+		public static function DateStringFormat($timestamp, $show_micro = true)
+		{
+			list ($timestamp, $ms) = explode('.', round($timestamp, 4));
+			if ($show_micro)
+				$string = date("Y-m-d H:i:s", $timestamp).' '.$ms.'ms';
+			else
+				$string = date("Y-m-d H:i:s", $timestamp);
+			return $string;
+		}
+
 		// METHOD: TimeStringFormat
 		// PARAMS: seconds
 		// RETURN: formated time string
