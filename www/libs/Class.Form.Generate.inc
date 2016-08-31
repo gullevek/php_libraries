@@ -34,7 +34,7 @@
 	*        "pk_name" => the pk_name of the table for the drop down
 	*        "input_name" => the text field name in the table for the drop down
 	*        "input_value" => the $name of input_name (must be same)
-	*        "order_by" => "order bY" string for drop_down_db(_input) if no query given but fields set      
+	*        "order_by" => "order bY" string for drop_down_db(_input) if no query given but fields set
 	*        "query" => for drop_down_db/array if no outer query given
 	*        "preset" => value to preset when array is unset (available for all types)
 	*        "element_list" => array ( "true", "false") - MUST (!) be set for binary
@@ -44,7 +44,7 @@
 	*        "cols" => "nr" - only available for "textarea"
 	*        "error_check" => "custom/email/date/number/unique" - 1) more will come
 	*        "error_regex" => "regex" - if error_check is custom regex here
-	*        "error_example" => "text" - example input text for error_check (only custom right now) 
+	*        "error_example" => "text" - example input text for error_check (only custom right now)
 	*        "empty" => "value/text" - ONLY for view. If no data found, set this value
 	*        --- file:
 	*        "save_dir" => "directory where it should be saved to
@@ -60,7 +60,7 @@
 	*        "output_name" => "Printed out next to multiple select field",
 	*        "mandatory" => 1/0 for must be selected,
 	*        "select_size" => size of multiple select field,
-	*        "query" => "the query to load the multiple select field 
+	*        "query" => "the query to load the multiple select field
 	*                    (select id, concat_ws(" ",name_a, name_b) from reference_table)",
 	*        "selected" => $var_name for name="xx" in multiple select
 	*      ),
@@ -165,7 +165,7 @@
 	*               delete
 	*   2003-06-12: adapted class to register_global_vars off
 	*   2003-06-10: in procedure_delete function I added "protected" variable clause, so if this field exists
-	*               in the DB and is set, you are not able to delete [at the moment used for admin edit user 
+	*               in the DB and is set, you are not able to delete [at the moment used for admin edit user
 	*               in DB]
 	*   2003-05-30: _temp for drop_down_db was added always and not only for same_db
 	*   2003-05-28: added drop_down_db_same_db for drop down/input combinations going into the same DB.
@@ -201,14 +201,14 @@
 	*   2003-03-04: drop_down_array value for option was left from array and
 	*               not right
 	*   2003-02-27: added another check in unset if reference array exists
-	*   2003-02-26: change form to extend db_array_io and created load, save, 
-	*               delete functions removed all reference table functions, 
+	*   2003-02-26: change form to extend db_array_io and created load, save,
+	*               delete functions removed all reference table functions,
 	*               except show function rewrite config array
 	*               re-wrote the class info vars into array
 	*   2003-02-25: added reference table functions
-	*   2002-10-22: create this class so creating basic and medium form pages 
+	*   2002-10-22: create this class so creating basic and medium form pages
 	*               can be handled easy.
-	*               with a given config file the class handles error checks, 
+	*               with a given config file the class handles error checks,
 	*               save data, loads data, etc
 	*********************************************************************/
 
@@ -268,7 +268,7 @@
 			// start the array_io class which will start db_io ...
 			parent::__construct($db_config, $config_array["table_array"], $config_array["table_name"], $debug, $db_debug, $echo, $print);
 			// here should be a check if the config_array is correct ...
-			// 
+			//
 			$this->field_array = $config_array["show_fields"];
 			$this->load_query = $config_array["load_query"];
 			$this->archive_pk_name = "a_".$this->pk_name;
@@ -281,7 +281,7 @@
 				{
 					$this->reference_array[$key] = $value;
 				}
-			} 
+			}
 			if (is_array($config_array["element_list"]))
 			{
 				while (list($key, $value) = each($config_array["element_list"]))
@@ -479,7 +479,7 @@
 			{
 				$this->form_error_check();
 				if (!$this->error)
-				{  
+				{
 					$this->form_save_table_array();
 				}
 				$this->yes = 1;
@@ -602,7 +602,7 @@
 				{
 					$pk_ids[] = $res[$this->int_pk_name];
 					if ($res[$this->int_pk_name] == $this->table_array[$this->int_pk_name]["value"])
-					{ 
+					{
 						$pk_selected = $res[$this->int_pk_name];
 					}
 					unset($t_string);
@@ -635,7 +635,7 @@
 			if ($this->group_level_user <= $this->security_level["new"])
 			{
 				if ($this->yes && !$hide_new_checkbox)
-				{ 
+				{
 					$show_checkbox = 1;
 				}
 				// set type of new name
@@ -658,12 +658,12 @@
 				if ($this->group_level_user <= $this->security_level["save"])
 				{
 					$seclevel_okay = 1;
-					if (!$this->table_array[$this->int_pk_name]["value"]) 
-					{ 
+					if (!$this->table_array[$this->int_pk_name]["value"])
+					{
 						$save = $this->l->__("Save");
 					}
-					else 
-					{ 
+					else
+					{
 						$save = $this->l->__("Update");
 					}
 					// print the old_school hidden if requestet
@@ -714,7 +714,7 @@
 					$data['output'][] = $this->table_array[$element_name]["element_list"][$i];
 					$data['name'] = $element_name;
 					if (($i && $this->table_array[$element_name]["value"]) || (!$i && !$this->table_array[$element_name]["value"]))
-						$data['checked'] = $this->table_array[$element_name]["value"]; 
+						$data['checked'] = $this->table_array[$element_name]["value"];
 
 					if ($i)
 						$data['separator'] = '';
@@ -839,7 +839,7 @@
 			// for media / not yet implemented
 			if ($this->table_array[$element_name]["type"] == "media")
 			{
-				//media::insert_file($element_name,$this->table_array[$element_name]["value"],$query); 
+				//media::insert_file($element_name,$this->table_array[$element_name]["value"],$query);
 			}
 			// order button
 			if ($this->table_array[$element_name]["type"] == "order")
@@ -889,7 +889,7 @@
 					foreach (explode('|', $value["error_check"]) as $error_check)
 					{
 						switch ($error_check)
-						{ 
+						{
 							case "number":
 								if (!preg_match("/^[0-9]+(['\,','.']?[0-9]+)*$/", $this->table_array[$key]["value"]))
 									$this->msg .= sprintf($this->l->__("Please enter a vailid Number for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
@@ -952,15 +952,15 @@
 					} // for each error to check
 				}
 				// if mandatory && no input
-				else if ($value["mandatory"] && 
+				else if ($value["mandatory"] &&
 							(
-								   // for all "normal" fields
-								   ($this->table_array[$key]["type"] != "password" && $this->table_array[$key]["type"] != "drop_down_db_input" && !$this->table_array[$key]["value"]) || 
-								   // for drop_down_db_input check if one of both fields filled
-								   ($this->table_array[$key]["type"] == "drop_down_db_input" && !$this->table_array[$key]["input_value"] && !$this->table_array[$key]["value"]) ||
-								   // for password
-								   ($this->table_array[$key]["type"] == "password" && !$this->table_array[$key]["value"] && !$this->table_array[$key]["HIDDEN_value"])
-							  )
+								// for all "normal" fields
+								($this->table_array[$key]["type"] != "password" && $this->table_array[$key]["type"] != "drop_down_db_input" && !$this->table_array[$key]["value"]) ||
+								// for drop_down_db_input check if one of both fields filled
+								($this->table_array[$key]["type"] == "drop_down_db_input" && !$this->table_array[$key]["input_value"] && !$this->table_array[$key]["value"]) ||
+								// for password
+								($this->table_array[$key]["type"] == "password" && !$this->table_array[$key]["value"] && !$this->table_array[$key]["HIDDEN_value"])
+							)
 						) // main if end
 				{
 //$this->debug('form', "A: ".$this->table_array[$key]["type"]." -- ".$this->table_array[$key]["input_value"]." -- ".$this->table_array[$key]["value"]);
@@ -994,9 +994,9 @@
 					if ($this->reference_array[$key]["mandatory"] && !$this->reference_array[$key]["selected"][0])
 						$this->msg .= sprintf($this->l->__("Please select at least one Element from field <b>%s</b>!<br>"), $this->reference_array[$key]["output_name"]);
 				}
-			} 
+			}
 //$this->debug('edit_error', "QS: <pre>".print_r($_POST, 1)."</pre>");
-            if (is_array($this->element_list))
+			if (is_array($this->element_list))
 			{
 				// check the mandatory stuff
 				// if mandatory, check that at least on pk exists or if at least the mandatory field is filled
@@ -1159,7 +1159,7 @@
 				// if preset var present preset
 				if (isset($this->table_array[$key]["preset"]))
 					$this->table_array[$key]["value"] = $this->table_array[$key]["preset"];
-			}  
+			}
 			if (is_array($this->reference_array))
 			{
 				if (!is_array($this->reference_array))
@@ -1211,7 +1211,7 @@
 
 		// METHOD form_save_table_array
 		// PARAMS addslashes - if one, passes 1 to the db_write function
-		// RETURN none 
+		// RETURN none
 		// DESC   save a table, reference and all input fields
 		public function form_save_table_array($addslashes = 0)
 		{
@@ -1232,11 +1232,11 @@
 					$q = "SELECT ".$this->table_array[$key]["pk_name"]." FROM ".$this->table_array[$key]["table_name"]." WHERE LCASE(".$this->table_array[$key]["input_name"].") = '".$this->db_escape_string(strtolower($this->table_array[$key]["input_value"]))."'";
 					// if a where was given, add here
 					if ($this->table_array[$key]["where"])
-						$q .= " AND ".$this->table_array[$key]["where"];      
+						$q .= " AND ".$this->table_array[$key]["where"];
 					list($pk_name_temp) = $this->db_return_row($q);
 					if ($this->num_rows >= 1)
 					{
-						$this->table_array[$key]["value"] = $pk_name_temp; 
+						$this->table_array[$key]["value"] = $pk_name_temp;
 					}
 					else
 					{
@@ -1298,7 +1298,7 @@
 							//if a slash at the end (if not add slash)
 							if (!preg_match("|/$|", $this->table_array[$key]["save_dir"]))
 								$this->table_array[$key]["save_dir"] .= "/";
-							if (move_uploaded_file($GLOBALS["_FILES"][$key."_file"]['tmp_name'], $this->table_array[$key]["save_dir"].$GLOBALS["_FILES"][$key."_file"]['name'])) 
+							if (move_uploaded_file($GLOBALS["_FILES"][$key."_file"]['tmp_name'], $this->table_array[$key]["save_dir"].$GLOBALS["_FILES"][$key."_file"]['name']))
 							{
 								// make it unique with a unique number at the beginning
 								$this->table_array[$key]["value"] = uniqid(rand(), 1)."_".$GLOBALS["_FILES"][$key."_file"]['name'];
@@ -1333,7 +1333,7 @@
 					}
 					else
 					{
-//						$this->table_array[$key]["HIDDEN_value"] = 
+//						$this->table_array[$key]["HIDDEN_value"] =
 					}
 				}
 			} // go through each field
@@ -1498,7 +1498,7 @@ $this->debug('edit', "Pos[$i] => ".$type[$i]." Q: ".$q."<br>");
 			}
 			$this->warning = 1;
 			$this->msg = $this->l->__("Dataset has been saved!<Br>");
-		} 
+		}
 
 		// METHOD form_delete_table_array
 		// PARAMS none
@@ -1737,7 +1737,7 @@ $this->debug('edit', "Pos[$i] => ".$type[$i]." Q: ".$q."<br>");
 							// if we have a radio group, set a bit different
 							if ($data['element_list'][$prfx.$el_name] == 'radio_group')
 								$_data[$prfx.$el_name] = ($res[$el_name]) ? ($res[$el_name] - 1) : 0;
-							else	 
+							else	
 								$_data[$prfx.$el_name] = $_POST[$prfx.$el_name][$pos];
 						}
 						else				

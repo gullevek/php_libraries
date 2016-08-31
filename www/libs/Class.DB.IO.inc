@@ -7,13 +7,13 @@
 	*                   but let me know if u made changes, and please don't redistribute it
 	*                   with your name on it ...
 	* SHORT DESCRIPTON:
-	*   2013/10/10, prepare/excute were added, including auto RETURNING primary key if 
-	*   possible for any INSERT query in exec or prepare/execute, better debugging and 
-	*   data dumping. Proper string escape wrapper, special db exec writer for complex 
+	*   2013/10/10, prepare/excute were added, including auto RETURNING primary key if
+	*   possible for any INSERT query in exec or prepare/execute, better debugging and
+	*   data dumping. Proper string escape wrapper, special db exec writer for complex
 	*   array inserts in auto calls. boolean converter from postresql to php
 	*
-	*   2003/12/08, one major change: renamed db_exec_ext to db_return, as it has not 
-	*   much in common with the normal db_exec wrapper, as it was written only for 
+	*   2003/12/08, one major change: renamed db_exec_ext to db_return, as it has not
+	*   much in common with the normal db_exec wrapper, as it was written only for
 	*   SELECT statements and better handling of those.
 	*
 	*   2002/12/20, extended the "simple" functionality to what I wanted
@@ -118,7 +118,7 @@
 	*   $mixed db_return_row($query)
 	*     - gibt die erste Zeile zurück (als array)
 	*   $array_of_hashes db_return_array($query)
-	*      - return an array of hashes with all data    
+	*      - return an array of hashes with all data
 	*   db_close()
 	*     - closes db connection and writes error_msg to global error_msg
 	*	db_cursor_pos($query)
@@ -181,7 +181,7 @@
 	* 2004/07/15 (cs) changed the deconstructor to call _basic deconstructor
 	*   2003-06-20: added a '3' flag to db_return so NO caching is done at all (if array might get too big)
 	*   2003-06-19: made the error messages in DEBUG output red so they are better to see
-	*   2003-06-09: never started class_basic, insert this, for mobile phone detection 
+	*   2003-06-09: never started class_basic, insert this, for mobile phone detection
 	*   2003-04-10: moved the error handling out of the db_pgsql.inc back to db_io class
 	*   2003-04-09: major change as db_io does not hold any DB specific calls anymore,
 	*               those are loaded dynamically during class start, from a include
@@ -193,14 +193,14 @@
 	*               changed the "shape" of class info vars to fit into extend modell
 	*   2003-02-13: in db_exec the setting for the last insert id was still via the function,
 	*               changed this to call the internal PHP mysql command.
-	*   2003-01-28: ugly bug within creating the field_names. The array was not reseted 
+	*   2003-01-28: ugly bug within creating the field_names. The array was not reseted
 	*               before, and so the field for the db_exec where not correct.
 	*   2003-01-16: fixed a "select" check in db_exec,
 	*               added a privet method for checking query of INSERT, UPDATE, DELETE
 	*   2003-01-09: code cleanups and more inline documentation
 	*   2003-01-08: renamed db_exec_ext to db_return for obious reasons
 	*               added a "check for select query" for all db_return* methods
-	*   2003-01-08: db_return gets another functionality: if u use 1 or 2 as reset value, 
+	*   2003-01-08: db_return gets another functionality: if u use 1 or 2 as reset value,
 	*               the cursor will be reset BEFORE the read and no chaced data will be read.
 	*               if you use 2, the md5 array will be kept so next read with no flag is cached,
 	*               wheres with 1, the data gets DESTROYED at the end of the read
@@ -210,9 +210,9 @@
 	*   2003-01-07: fixed a small bug in return_array as he mixed up the order if you used
 	*               SELECT * FROM ...
 	*   2002-12-26: changed strstr to stristr 'couse not everyone types SELECT, etc in capitals
-	*   2002-12-24: moved the debug output in db_return to the call if, 
+	*   2002-12-24: moved the debug output in db_return to the call if,
 	*               so it is only printed once
-	*   2002-12-20: added db_dump_data function for printing out all data in 
+	*   2002-12-20: added db_dump_data function for printing out all data in
 	*               cursor_ext (or from one query in it)
 	*   2002-12-20: testing and implemtenting of session storing the class (not fully tested!)
 	*               documenting all the functions and some code cleenup
@@ -222,7 +222,7 @@
 	*               more complex (array based IO fkts) moved into a seperate file
 	*   2002-12-16: further reconstruction ...
 	*   2002-12-10: further improvment in changing db_mysql to a class
-	*   2002-10-18: renamed lesen to db_read, speichern to db_save and 
+	*   2002-10-18: renamed lesen to db_read, speichern to db_save and
 	*               loeschen to db_delete
 	*   19.08.2002: 1 convertiert &lt; &gt; &quot; &amp; &#309; in original
 	*               HTML zeichen zurück (für htmlspecialcharsfct)
@@ -230,7 +230,7 @@
 	*               addslashes (1=ja,0=nein/default)
 	*   04.04.2002: FK added to lesen()
 	*   10.07.2001: simple return row function geschrieben
-	*   03.07.2001: kein Thumbnail erzeugen wenn Datei nicht: 
+	*   03.07.2001: kein Thumbnail erzeugen wenn Datei nicht:
 	*               JPG/JPEG/GIF/PNG als Endung hat
 	*   22.06.2001: Mozilla Fix für File upload
 	*   10.05.2001: alle fkt haben "db_" als pre zur identifizierung
@@ -266,12 +266,12 @@
 		// FOR BELOW: (This should be private and only readable through some method)
 		// cursor array for cached readings
 		public $cursor_ext; // hash of hashes
-		// per query vars 
+		// per query vars
 		public $cursor; // actual cursor (DBH)
 		public $num_rows; // how many rows have been found
 		public $num_fields; // how many fields has the query
 		public $field_names; // array with the field names of the current query
-		public $insert_id; // last inserted ID 
+		public $insert_id; // last inserted ID
 		// other vars
 		private $nbsp = ''; // used by print_array recursion function
 		// error & warning id
@@ -391,10 +391,10 @@
 		// RETURN: true on successfull connect, false if failed
 		// DESC:
 		// internal connection function. Used to connect to the DB if there is no connection done yet.
-		// Called before any execute 
+		// Called before any execute
 		private function _connect_to_db()
 		{
-			// generate connect string 
+			// generate connect string
 			$this->dbh = $this->db_functions->_db_connect($this->db_host, $this->db_user, $this->db_pwd, $this->db_name, $this->db_port, $this->db_ssl);
 			// if no dbh here, we couldn't connect to the DB itself
 			if (!$this->dbh)
@@ -410,7 +410,7 @@
 				$this->error_id = 15;
 				$this->_db_error();
 				return false;
-			} 
+			}
 			// set search path if needed
 			if ($this->db_schema)
 			{
@@ -511,14 +511,14 @@
 			if ($id)
 				$prefix .= '[<span style="color: #920069;">'.$id.'</span>] ';
 			if ($type)
-				$prefix .= '{<span style="font-style: italic; color: #3f0092;">'.$type.'</span>} '; 
+				$prefix .= '{<span style="font-style: italic; color: #3f0092;">'.$type.'</span>} ';
 			if ($prefix)
 				$prefix .= '- ';
 			$this->debug($debug_id, $prefix.$error_string, true);
 		}
 
 		// METHOD _db_error
-		// PARAMS cursor -> current cursor for pg_result_error, mysql uses dbh, pg_last_error too, 
+		// PARAMS cursor -> current cursor for pg_result_error, mysql uses dbh, pg_last_error too,
 		//                  but pg_result_error is more accurate
 		//        msg -> optional message
 		// RETURN none
@@ -593,7 +593,7 @@
 		// METHOD _db_return_table
 		// PARAMS insert/select/update/delete query
 		// RETURN array with schema and table
-		// DESC   extracts schema and table from the query, if no schema returns just empty string 
+		// DESC   extracts schema and table from the query, if no schema returns just empty string
 		private function _db_return_table($query)
 		{
 			if (preg_match("/^SELECT /i", $query))
@@ -854,7 +854,7 @@
 
 		// METHOD db_dump_data
 		// PARAMS query -> if given, only from this quey (if found)
-		// RETURN formated string with all the data in the array 
+		// RETURN formated string with all the data in the array
 		// DESC   dumps ALL data for this query, OR if no query given all in cursor_ext array
 		public function db_dump_data($query = 0)
 		{
@@ -878,11 +878,11 @@
 		//                 if set to 2, the data will be read new and cached (wheres 1 reads new AND destroys at end of read)
 		//              -> if set to 3, after EACH row, the data will be reset, no caching is done except for basic (count, etc)
 		// RETURN res mixed (array/hash)
-		// DESC   single running function, if called creates md5 from 
+		// DESC   single running function, if called creates md5 from
 		//        query string and so can itself call exec/return calls
 		//        caches data, so next time called with IDENTICAL (!!!!)
 		//        [this means 1:1 bit to bit identical query] returns cached
-		//        data, or with reset flag set calls data from DB again 
+		//        data, or with reset flag set calls data from DB again
 		public function db_return($query, $reset = 0)
 		{
 			if (!$query)
@@ -915,7 +915,7 @@
 				$this->_db_error('', $this->cursor_ext[$md5]['query']);
 				return false;
 			}
- 
+
 			// if it is a call with reset in it we reset the cursor, so we get an uncached return
 			// but only for the FIRST call (pos == 0)
 			if ($reset && !$this->cursor_ext[$md5]['pos'])
@@ -966,7 +966,7 @@
 			} // only go if NO cursor exists
 			
 			// if cursor exists ...
-			if ($this->cursor_ext[$md5]['cursor']) 
+			if ($this->cursor_ext[$md5]['cursor'])
 			{
 				if ($this->cursor_ext[$md5]['firstcall'] == 1)
 				{
@@ -987,7 +987,7 @@
 					$this->cursor_ext[$md5]['read_rows'] = 0;
 				}
 				// read data for further work ... but only if necessarry
-				if ($this->cursor_ext[$md5]['read_rows'] == $this->cursor_ext[$md5]['num_rows']) 
+				if ($this->cursor_ext[$md5]['read_rows'] == $this->cursor_ext[$md5]['num_rows'])
 					$return = 0;
 				else
 					$return = $this->_db_convert_encoding($this->db_functions->_db_fetch_array($this->cursor_ext[$md5]['cursor']));
@@ -1002,7 +1002,7 @@
 						$this->cursor_ext[$md5]['cursor'] = 1;
 						$return = 0;
 					}
-					else 
+					else
 					{
 						// unset return value ...
 						unset($return);
@@ -1012,7 +1012,7 @@
 							$field_value = $this->cursor_ext[$md5][$this->cursor_ext[$md5]['pos']][$this->cursor_ext[$md5]['field_names'][$i]];
 							$return[$i] = $field_value;
 							$return[$this->cursor_ext[$md5]['field_names'][$i]] = $field_value;
-						} 
+						}
 						$this->cursor_ext[$md5]['pos'] ++;
 					}
 				}
@@ -1043,7 +1043,7 @@
 						{
 							while (list($field_name, $data) = each($return))
 							{
-								$temp[$field_name] = $data; 
+								$temp[$field_name] = $data;
 							}
 							$this->cursor_ext[$md5][] = $temp;
 						}
@@ -1073,16 +1073,16 @@
 		}
 
 		// METHOD db_exec
-		// PARAMS query -> the query, if not given, the query class var will be used 
+		// PARAMS query -> the query, if not given, the query class var will be used
 		//                 (if this was not set, method will quit with a 0 (failure)
 		//        pk_name -> optional primary key name, for insert id return if the pk name is very different
 		//                   if pk name is table name and _id, pk_name is not needed to be set
 		//                   if NULL is given here, no RETURNING will be auto added
 		// RETURN cursor for this query
 		// DESC   executes the query and returns & sets the internal cursor
-		//        fruthermore this functions also sets varios other vars 
+		//        fruthermore this functions also sets varios other vars
 		//        like num_rows, num_fields, etc depending on query
-		//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional 
+		//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
 		//        read from the database for the PK NAME
 		public function db_exec($query = 0, $pk_name = '')
 		{
@@ -1105,7 +1105,7 @@
 		//        pk_name -> optional primary key name, only used with insert for returning call
 		// RETURN true if async query was sent ok, false if error happened
 		// DESC   executres the query async so other methods can be run during this
-		//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional 
+		//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
 		//        read from the database for the PK NAME
 		// NEEDS  db_check_async
 		public function db_exec_async($query, $pk_name = '')
@@ -1294,7 +1294,7 @@
 		// PARAMS $stm_name, $query, $pk_name: optional
 		// RETURN false on error
 		// DESC   prepares a query
-		//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional 
+		//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
 		//        read from the database for the PK NAME
 		public function db_prepare($stm_name, $query, $pk_name = '')
 		{
@@ -1469,7 +1469,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 		// RETURN database version as string
 		// DESC   return current database version
 		public function db_version()
-		{   
+		{
 			return $this->db_functions->_db_version();
 		}
 
@@ -1479,7 +1479,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 		// RETURN true/false
 		// DESC   returns boolean true or false if the string matches the database version
 		public function db_compare_version($compare)
-		{   
+		{
 			// compare has =, >, < prefix, and gets stripped, if the rest is not X.Y format then error
 			preg_match("/^([<>=]{1,2})(\d{1,2})\.(\d{1,2})/", $compare, $matches);
 			$compare = $matches[1];
@@ -1496,7 +1496,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 			$return = false;
 			// compare
 			switch ($compare)
-			{   
+			{
 				case '=':
 					if ($to_version == $version)
 						$return = true;
@@ -1662,7 +1662,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 			$seconds = $matches[4] != '00' ? preg_replace('/^0/', '', $matches[4]) : '';
 			$milliseconds = $matches[6];
 
-			return $prefix.($hour ? $hour.'h ' : '').($minutes ? $minutes.'m ' : '').($seconds ? $seconds.'s' : '').($show_micro && $milliseconds? ' '.$milliseconds.'ms' : ''); 
+			return $prefix.($hour ? $hour.'h ' : '').($minutes ? $minutes.'m ' : '').($seconds ? $seconds.'s' : '').($show_micro && $milliseconds? ' '.$milliseconds.'ms' : '');
 		}
 
 		// METHOD: db_array_parse

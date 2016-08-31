@@ -1,7 +1,7 @@
 <?
-    /*********************************************************************
-    * AUTHOR: Clemens Schwaighofer
-    * CREATED: 2011/2/8
+	/*********************************************************************
+	* AUTHOR: Clemens Schwaighofer
+	* CREATED: 2011/2/8
 	* DESCRIPTION: pre function to collect all non critical errors into a log file if possible
 	* include this file at the very beginning of the script to get the notices, strict, etc messages.
 	* error etc will still be written to the log/display
@@ -42,7 +42,7 @@
 			4096 => 'E_RECOVERABLE_ERROR',
 			8192 => 'E_DEPRICATED',
 			16384 => 'E_USER_DEPRICATED',
-			30719  => 'E_ALL'
+			30719 => 'E_ALL'
 		);
 
 		// get the current page name (strip path)
@@ -94,7 +94,7 @@
 			}
 			// if write to log is on
 			// simplified, remove datetime for log file
-			if (ini_get('log_errors')) 
+			if (ini_get('log_errors'))
 				error_log('{'.$page_temp.'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message);
 		}
 		// return true, to avoid that php calls its own error stuff

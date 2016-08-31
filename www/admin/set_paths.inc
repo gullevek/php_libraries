@@ -95,7 +95,7 @@
 	if (!is_dir($cms->pictures))
 		$cms->pictures = LAYOUT.DEFAULT_TEMPLATE.PICTURES.'/';
 	if (!is_dir($cms->cache_pictures))
-	   	$cms->cache_pictures = LAYOUT.DEFAULT_TEMPLATE.CACHE.IMAGES.'/';
+		$cms->cache_pictures = LAYOUT.DEFAULT_TEMPLATE.CACHE.IMAGES.'/';
 
 	// if the template_dir is != DEFAULT_TEMPLATE, then try to make a lang switch
 	// if the default lang is not like the lang given, switch lang

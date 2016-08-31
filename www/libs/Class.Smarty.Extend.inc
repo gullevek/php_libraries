@@ -10,8 +10,8 @@
 
 	// read in the Smarty class for definition
 	// use smarty BC for backwards compability
-    // try to include file from LIBS path, or from normal path
-    _spl_autoload('SmartyBC.class.php');
+	// try to include file from LIBS path, or from normal path
+	_spl_autoload('SmartyBC.class.php');
 
 	class SmartyML extends SmartyBC
 	{

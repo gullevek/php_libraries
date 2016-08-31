@@ -366,7 +366,8 @@
 			$string = $this->l->__('Year').' ';
 			$string .= '<select id="year'.$suffix.'" name="year'.$suffix.'" onChange="'.$on_change_call.'">';
 			for ($i = date("Y"); $i <= $max_year; $i ++)
-			{                  $string .= '<option value="'.$i.'" '.(($year == $i) ? 'selected' : '').'>'.$i.'</option>';
+			{
+				$string .= '<option value="'.$i.'" '.(($year == $i) ? 'selected' : '').'>'.$i.'</option>';
 			}
 			$string .= '</select> '.$this->l->__('Month').' ';
 			$string .= '<select id="month'.$suffix.'" name="month'.$suffix.'" onChange="'.$on_change_call.'">';

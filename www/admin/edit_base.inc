@@ -9,7 +9,7 @@
 	*	 - edit_pages.php
 	*	 - edit_schemes.php
 	*	 - edit_users.php
-	*    - edit_visible_group.php
+	*	 - edit_visible_group.php
 	* HISTORY:
 	* 2005/06/30 (cs) remove color settings, they are in CSS File now
 	* 2005/06/22 (cs) moved load of config array into form class, set lang and lang is must set var for form class; removed the page name setting, moved it into the form class, remove all HTML from main page
@@ -107,15 +107,15 @@
 	}
 
 	// log backend data
-    // data part creation
-    $data = array (
-        '_SESSION' => $_SESSION,
-        '_GET' => $_GET,
-        '_POST' => $_POST,
-        '_FILES' => $_FILES
-    );
-    // log action
-    EditLog('Edit Submit', serialize($data));
+	// data part creation
+	$data = array (
+		'_SESSION' => $_SESSION,
+		'_GET' => $_GET,
+		'_POST' => $_POST,
+		'_FILES' => $_FILES
+	);
+	// log action
+	EditLog('Edit Submit', serialize($data));
 
 	$form->form_procedure_load(${$form->archive_pk_name});
 	$form->form_procedure_new();

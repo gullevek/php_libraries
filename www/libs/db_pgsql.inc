@@ -16,7 +16,7 @@
 	* 2004/09/30 (cs) layout cleanup
 	* /
 
-  /* collection of PostgreSQL wrappers
+	* collection of PostgreSQL wrappers
 	* REQUIRES 5.x PHP!!!
 	*
 	* pg_prepare

@@ -7,7 +7,7 @@
 	* HISTORY:
 	* /
 
-  /* collection of PostgreSQL wrappers
+	/* collection of PostgreSQL wrappers
 	* REQUIRES 5.x PHP with compiled pdo pgsql (--with-pdo-pgsql)
 	*
 	*/

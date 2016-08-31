@@ -36,11 +36,11 @@
 	* PUBLIC METHODS
 	*	debug -> calls with "level", "string" and flag to turn off (0) the newline at the end
 	*	debug_for -> sets debug on/off for a type (error, echo, print) for a certain level
-    *	print_error_msg -> prints out the error message, optional parameter is a header prefix
+	*	print_error_msg -> prints out the error message, optional parameter is a header prefix
 	*	fdebug -> prints line directly to debug_file.log in tmp
 	*
 	* 	print_time -> prints time + microtime, optional flag to turn off (0) microtime printout
-	*	basic  -> constructor  
+	*	basic  -> constructor
 	*	_basic -> desconstructor
 	*	info -> info about that class
 	*	running_time -> prints out the time of start/end (automatically called on created and error printout
@@ -175,7 +175,7 @@
 				"class_version" => "0.9.0",
 				"class_created" => "2003-03-24",
 				"class_author" => 'Clemens "Gullevek" Schwaighofer (.at)'
-			); 
+			);
 
 			// set the page name
 			$this->page_name = $this->get_page_name();
@@ -530,8 +530,8 @@
 			$traces = debug_backtrace();
 			// extended info (later)
 			/*
-			 * $file   = $trace[$level]['file'];
-			 * $line   = $trace[$level]['line'];
+			 * $file = $trace[$level]['file'];
+			 * $line = $trace[$level]['line'];
 			 * $object = $trace[$level]['object'];
 			 * if (is_object($object)) { $object = get_class($object); }
 			 *
@@ -664,7 +664,7 @@
 		//        to use it call with set_error_handler(array("baisc", "ErrorHandler"));
 		//        NOTE: this will only catch any additional erros created AFTER the set_error_hanlder was set, so mostly no strict/notices from the classes are visible
 		public static function ErrorHandler($type, $message, $file, $line, $context)
-		{  
+		{
 			// error levels for PHP
 			// values based on 5.3
 			$error_level = array (
@@ -683,7 +683,7 @@
 				4096 => 'E_RECOVERABLE_ERROR', // since 5.2
 				8192 => 'E_DEPRICATED', // since 5.3
 				16384 => 'E_USER_DEPRICATED', // since 5.3
-				30719  => 'E_ALL' // 6143 in 5.2, 2047 in previous versions
+				30719 => 'E_ALL' // 6143 in 5.2, 2047 in previous versions
 			);
 
 			$fn = ROOT.LOG.'php_errors-'.date('Y-m-d').'.log';
@@ -733,7 +733,7 @@
 		// tries to find mailto:user@bubu.at and changes it into -> <a href="mailto:user@bubu.at">E-Mail senden</a>
 		// or tries to take any url (http, ftp, etc) and transform it into a valid URL
 		// the string is in the format: some url|name#css|, same for email
-		public function magic_links($string, $target = "_blank") 
+		public function magic_links($string, $target = "_blank")
 		{
 			$output = $string;
 			$protList = array("http", "https", "ftp", "news", "nntp");
@@ -761,13 +761,13 @@
 			// _1: URL or email
 			// _2: atag (>)
 			// _3: (_1) part of url or email [main url or email pre @ part]
-			// _4: (_2) parameters of url or email post @ part 
+			// _4: (_2) parameters of url or email post @ part
 			// _5: (_3) parameters of url or tld part of email
 			// _7: link name/email link name
 			// _9: style sheet class
 			$self = $this;
 //			$this->debug('URL', 'Before: '.$output);
-			$output = preg_replace_callback("/(href=\")?(\>)?\b($protRegex)([\w\.\-?&=+%#~,;\/]+)\b([\.\-?&=+%#~,;\/]*)(\|([^\||^#]+)(#([^\|]+))?\|)?/", 
+			$output = preg_replace_callback("/(href=\")?(\>)?\b($protRegex)([\w\.\-?&=+%#~,;\/]+)\b([\.\-?&=+%#~,;\/]*)(\|([^\||^#]+)(#([^\|]+))?\|)?/",
 				function ($matches) use ($self)
 				{
 					return @$self->create_url($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
@@ -775,17 +775,17 @@
 				$output
 			);
 			// find email-addresses, but not mailto prefix ones
-			$output = preg_replace_callback("/(mailto:)?(\>)?\b([\w\.-]+)@([\w\.\-]+)\.([a-zA-Z]{2,4})\b(\|([^\||^#]+)(#([^\|]+))?\|)?/", 
+			$output = preg_replace_callback("/(mailto:)?(\>)?\b([\w\.-]+)@([\w\.\-]+)\.([a-zA-Z]{2,4})\b(\|([^\||^#]+)(#([^\|]+))?\|)?/",
 				function ($matches) use ($self)
 				{
 					return @$self->create_email($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
-				}, 
+				},
 				$output
 			);
 
 			$this->debug('URL', 'After: '.$output);
 //			// we have one slashes after the Protocol -> internal link no domain, strip out the proto
-//			$output = preg_replace("/($protRegex)\/(.*)/e", "\\2", $ouput); 
+//			$output = preg_replace("/($protRegex)\/(.*)/e", "\\2", $ouput);
 //			$this->debug('URL', "$output");
 
 			// post processing
@@ -798,7 +798,7 @@
 		}
 
 		// METHOD create_url [INTERNAL]
-		// PARAMS url link, anchor tag (define both type or url), 
+		// PARAMS url link, anchor tag (define both type or url),
 		//        _1, _2, _3 = part of thel URL, if atag is set, _1 is not used
 		//        target: link target, name: name for the url, if not given _2 + _3 is used
 		//        class: style sheet
@@ -813,7 +813,7 @@
 			if (preg_match("/\/\/$/", $_1) && preg_match("/^\//", $_2))
 			{
 				$_1 = '';
-				$target  = '';
+				$target = '';
 			}
 			else
 			{
@@ -943,7 +943,7 @@
 		//        haystack (search in)
 		//        key: the key to look for in
 		//        path: recursive call for previous path
-		// RETURN all array elements paths where the element  was found
+		// RETURN all array elements paths where the element was found
 		// DESCRIPTION
 		// recursive array search function, which returns all found not only the first one
 		public static function array_search_recursive_all($needle, $haystack, $key, $path = NULL)
@@ -993,20 +993,20 @@
 		// DESCRIPTION
 		// array search simple. looks for key, value combination, if found, returns true
 		public static function array_search_simple($array, $key, $value)
-		{  
+		{
 			if (!is_array($array))
 				$array = array ();
 			foreach ($array as $_key => $_value)
-			{  
+			{
 				// if value is an array, we search
 				if (is_array($_value))
-				{  
+				{
 					// call recursive, and return result if it is true, else continue
 					if (($result = basic::array_search_simple($_value, $key, $value)) !== false)
 						return $result;
 				}
 				elseif ($_key == $key && $_value = $value)
-				{  
+				{
 					return true;
 				}
 			}
@@ -1571,7 +1571,7 @@
 		// RETURN: random string
 		// DESC:   creates a random string from alphanumeric characters: A-Z a-z 0-9 ./
 		private function cryptSaltString($nSize = 22)
-		{  
+		{
 			// A-Z is 65,90
 			// a-z is 97,122
 			// 0-9 is 48,57
@@ -1580,7 +1580,7 @@
 			$max = array (57, 90, 122);
 			$chars = array ();
 			for ($i = 0; $i < count($min); $i ++)
-			{   
+			{
 				for ($j = $min[$i]; $j <= $max[$i]; $j ++)
 				{
 					$chars[] = chr($j);
@@ -1590,9 +1590,9 @@
 			$max_rand = count($chars) - 1;
 			// create the salt part
 			for ($i = 1; $i <= $nSize; $i ++)
-			{   
+			{
 				$salt_string .= $chars[mt_rand(0, $max_rand)];
-			}   
+			}
 			return $salt_string;
 		}
 
@@ -1759,12 +1759,12 @@
 			$L = round((($MAX + $MIN) / 2) * 100);
 
 			if ($MIN == $MAX)
-			{  
+			{
 				// H, S, L
 				return array(0, 0, $L);
 			}
 			else
-			{  
+			{
 				// HUE to 0~360
 				if ($r == $MAX)
 					$HUE = ($g - $b) / ($MAX - $MIN);
@@ -1797,11 +1797,11 @@
 				return array($l * 255, $l * 255, $l * 255);
 			}
 			else
-			{  
+			{
 				$m2 = ($l < 0.5) ? $l * ($s + 1) : ($l + $s) - ($l * $s);
 				$m1 = $l * 2 - $m2;
 				$hue = function ($base) use ($m1, $m2)
-				{  
+				{
 					// base = hue, hue > 360 (1) - 360 (1), else < 0 + 360 (1)
 					$base = ($base < 0) ? $base + 1 : (($base > 1) ? $base - 1 : $base);
 					// 6: 60, 2: 180, 3: 240
@@ -1869,13 +1869,13 @@
 		// DESC:   guesses the email type (mostly for mobile) from the domain
 		//         if second is set to true, it will return short naming scheme (only provider)
 		public function getEmailType($email, $short = false)
-		{  
+		{
 			// trip if there is no email address
 			if (!$email)
 				return "invalid";
 			// loop until we match a mobile type, return this first found type
 			foreach ($this->mobile_email_type as $email_regex => $email_type)
-			{  
+			{
 				if (preg_match("/$email_regex/", $email))
 				{
 					if ($short)

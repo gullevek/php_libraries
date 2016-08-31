@@ -67,7 +67,7 @@
 		$smarty->setTemplateDir(TEMPLATES.DEFAULT_TEMPLATE);
 		$DATA['css'] = CSS.DEFAULT_TEMPLATE;
 		$DATA['js'] = JS.DEFAULT_TEMPLATE;
-    }
+	}
 
 	// order name is _always_ order_number for the edit interface
 

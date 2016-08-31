@@ -102,7 +102,6 @@ class ProgressBar
 				$bar = $this->height;
 				break;
 		}
-    
 		// avoid divison through 0
 		if ($this->max - $this->min == 0)
 			$this->max ++;
@@ -557,7 +556,6 @@ class ProgressBar
 		$this->_setStep($step);
 		
 		$js = '';
-    
 		$new_position = $this->_calculatePosition($this->step);
 		if ($new_position['width'] != $this->position['width'] && ($this->direction == 'right' || $this->direction == 'left'))
 		{
@@ -576,7 +574,6 @@ class ProgressBar
 			$js .= 'PBposition'.$this->code.'("height",'.$new_position['height'].');';
 		}
 		$this->position = $new_position;
-    	
 		foreach($this->label as $name => $data)
 		{
 			if (array_key_exists('type', $data))

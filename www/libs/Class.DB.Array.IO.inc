@@ -15,7 +15,7 @@
 	*   PUBLIC VARIABLES
 	*
 	*   PRIVATE VARIABLES
-	* 
+	*
 	*   PUBLIC METHODS
 	*
 	*   PRIVATE METHODS
@@ -123,14 +123,14 @@
 			$text = str_replace('&gt;', '>', $text);
 			$text = str_replace('&amp;', '&', $text);
 			$text = str_replace('&quot;', '"', $text);
-			$text = str_replace('&#039;', "'", $text); 
+			$text = str_replace('&#039;', "'", $text);
 			return $text;
 		}
 
 		// METHOD db_dump_array
 		// PARAMS none
 		// RETURN returns the current array
-		// DESC   dumps the current data 
+		// DESC   dumps the current data
 		public function db_dump_array($write = 0)
 		{
 			reset($this->table_array);
@@ -220,11 +220,11 @@
 					if (file_exists($this->table_array[$column]["path"].$dateiname))
 						unlink($this->table_array[$column]["path"].$dateiname);
 				}
- 
+
 				if ($this->table_array[$column]["fk"])
 				{
 					// zusammenstellen der FKs
-					if ($q_where) 
+					if ($q_where)
 						$q_where .= " AND ";
 					$q_where .= $column." = ".$this->table_array[$column]["value"];
 				}
@@ -235,13 +235,13 @@
 			// attach fk row if there ...
 			if ($q_where)
 				$q .= " AND ".$q_where;
-			// if 0, error 
+			// if 0, error
 			unset ($this->pk_id);
 			if (!$this->db_exec($q))
 			{
 				$this->error_id=22;
 				$this->_db_error();
-			} 
+			}
 			return $this->table_array;
 		}
 
@@ -257,11 +257,11 @@
 			if (!$this->db_check_pk_set())
 				return $this->table_array;
 			reset($this->table_array);
-			// create select part & addition FK part 
+			// create select part & addition FK part
 			while (list($column, $data_array)=each($this->table_array))
 			{
-				if ($q_select) 
-					$q_select .= ", "; 
+				if ($q_select)
+					$q_select .= ", ";
 				$q_select .= $column;
 
 				// check FK ...
@@ -272,7 +272,7 @@
 					$q_where .= $column .= " = ".$this->table_array[$column]["value"];
 				}
 			}
- 
+
 			$q = "SELECT ";
 			$q .= $q_select;
 			$q .= " FROM ".$this->table_name." WHERE ";
@@ -284,7 +284,7 @@
 			if ($this->db_exec($q))
 			{
 				if ($res = $this->db_fetch_array())
-				{  
+				{
 					reset($this->table_array);
 					while (list($column, $data_array) = each($this->table_array))
 					{
@@ -326,7 +326,7 @@
 		{
 			if (is_array($table_array))
 				$this->table_array = $table_array;
-			// PK ID check 
+			// PK ID check
 //       if ($this->pk_id && !$this->table_array[$this->pk_name]["value"])
 //         $this->table_array[$this->pk_name]["value"]=$this->pk_id;
 			// checken ob PKs gesetzt, wenn alle -> update, wenn keiner -> insert, wenn ein paar -> ERROR!
@@ -351,7 +351,7 @@
 						unset($this->table_array[$column]["delete"]);
 						if (file_exists($this->table_array[$column]["path"].$this->table_array[$column]["value"]))
 							unlink($this->table_array[$column]["path"].$this->table_array[$column]["value"]);
-						$dateiname = str_replace("_tn", "", $this->table_array[$column]["value"]); 
+						$dateiname = str_replace("_tn", "", $this->table_array[$column]["value"]);
 						if (file_exists($this->table_array[$column]["path"].$dateiname))
 							unlink($this->table_array[$column]["path"].$dateiname);
 						$this->table_array[$column]["value"] = "";
@@ -376,7 +376,7 @@
 							copy($this->table_array[$column]["tmp"], $this->table_array[$column]["path"].$dateiname);
 							// automatisch thumbnail generieren, geht nur mit convert (ImageMagic!!!), aber nur bei bild ..
 							if (strtolower($ext) == "jpeg" || strtolower($ext) == "jpg" || strtolower($ext) == "gif" || strtolower($ext) == "png")
-							{ 
+							{
 								$dateiname_tn = $name.$pk_ids_file."_tn.".$ext;
 								$eingang = $this->table_array[$column]["path"].$dateiname;
 								$ausgang = $this->table_array[$column]["path"].$dateiname_tn;
@@ -403,7 +403,7 @@
 						$this->table_array[$column]["value"] = $this->table_array[$column]["HIDDEN_value"];
 					if (!$insert)
 					{
-						if (strlen($q_data)) 
+						if (strlen($q_data))
 							$q_data .= ", ";
 						$q_data .= $column." = ";
 					}
@@ -453,7 +453,7 @@ $this->debug('write_check', "[$column][".$this->table_array[$column]["value"]."]
 			// NOW get PK, and FK settings (FK only for update query)
 			// get it at the end, cause now we can be more sure of no double IDs, etc
 			reset($this->table_array);
-			// create select part & addition FK part 
+			// create select part & addition FK part
 			while (list($column, $data_array) = each($this->table_array))
 			{
 				// check FK ...
@@ -491,7 +491,7 @@ $this->debug('write_check', "[$column][".$this->table_array[$column]["value"]."]
 			{
 				$q = "INSERT INTO ".$this->table_name." ";
 				$q .= "(".$q_vars.") ";
-				$q .=  "VALUES (".$q_data.")";
+				$q .= "VALUES (".$q_data.")";
 				// write primary key too
 /*				if ($q_data)
 					$q .= ", ";
@@ -504,7 +504,7 @@ $this->debug('write_check', "[$column][".$this->table_array[$column]["value"]."]
 			{
 				$this->error_id = 22;
 				$this->_db_error();
-			} 
+			}
 			// set primary key
 			if ($insert)
 			{
@@ -513,6 +513,6 @@ $this->debug('write_check', "[$column][".$this->table_array[$column]["value"]."]
 			}
 			// return the table if needed
 			return $this->table_array;
-		}                                           
+		}
 	} // end of class
 ?>

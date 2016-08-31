@@ -179,7 +179,7 @@
 			$_SESSION['DEFAULT_ACL_LIST'] = $this->default_acl_list;
 
 			// if username & password & !$euid start login
-			$this->login_login_user(); 
+			$this->login_login_user();
 			// checks if $euid given check if user is okay for that side
 			$this->login_check_permissions();
 			// logsout user
@@ -218,7 +218,7 @@
 		{
 			parent::__destruct();
 		}
- 
+
 		// METHOD: login_login_user
 		// PARAMS: none
 		// RETURN: none
@@ -820,11 +820,11 @@
 			else
 			{
 				return true;
-			} 
+			}
 		}
 
 		// METHOD: login_set_templates
-		// PARAMS: 
+		// PARAMS:
 		// RETURN: none
 		// DESC  : checks if there are external templates, if not uses internal fallback ones
 		private function login_set_templates()

@@ -155,7 +155,7 @@
 		if (!$error)
 		{
 			if ($_FILES['file_up']['name'])
-            {
+			{
 				$mime_type = $_FILES['file_up']['type'];
 				$file_size = $_FILES['file_up']['size'];
 				$file_name = $_FILES['file_up']['name'];

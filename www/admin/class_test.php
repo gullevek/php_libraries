@@ -5,7 +5,7 @@
 	$DB_DEBUG = 1;
 
 	if ($DEBUG_ALL)
-		error_reporting(E_ALL | E_STRICT |  E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+		error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 	define('USE_DATABASE', true);
 	// sample config
