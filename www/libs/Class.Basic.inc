@@ -1271,9 +1271,10 @@
 		//         dummy -> empty, or file_type to show an icon instead of nothing if file is not found
 		//         path -> if source start is not ROOT path, if empty ROOT is choosen
 		//         cache -> cache path, if not given TMP is used
+		//         clear cache -> if set to true, will create thumb all the tame
 		// RETURN: thumbnail name
 		// DESC:   converts picture to a thumbnail with max x and max y size
-		public static function CreateThumbnail($pic, $size_x, $size_y, $dummy = "", $path = "", $cache_source = "")
+		public static function CreateThumbnail($pic, $size_x, $size_y, $dummy = "", $path = "", $cache_source = "", $clear_cache = false)
 		{
 			// get image type flags
 			$image_types = array (
@@ -1313,7 +1314,7 @@
 				$thumb = 'thumb_'.$pic.'_'.$size_x.'x'.$size_y.'.'.$image_types[$type];
 				$thumbnail = $tmp_src.$thumb;
 				// check if we already have this picture converted
-				if (!is_file($thumbnail))
+				if (!is_file($thumbnail) || $clear_cache == true)
 				{
 					// convert the picture
 					if ($width > $size_x)
