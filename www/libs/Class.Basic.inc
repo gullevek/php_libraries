@@ -1306,6 +1306,23 @@
 			if (file_exists($filename) && is_file($filename))
 			{
 				list($width, $height, $type) = getimagesize($filename);
+				$convert_prefix = '';
+				// if type is not in the list, but returns as PDF, we need to convert to JPEG before
+				if (!$type)
+				{
+					// is this a PDF, if no, return from here with nothing
+					$convert_prefix = 'png:';
+					# TEMP convert to PNG, we then override the file name
+					$convert_string = CONVERT.' '.$filename.' '.$convert_prefix.$filename.'_TEMP';
+					$status = exec($convert_string, $output, $return);
+					$filename .= '_TEMP';
+					// for delete, in case we need to glob
+					$delete_filename = $filename;
+					// find file, if we can't find base name, use -0 as the first one (ignore other pages in multiple ones)
+					if (!is_file($filename))
+						$filename .= '-0';
+					list($width, $height, $type) = getimagesize($filename);
+				}
 				// if no size given, set size to original
 				if (!$size_x)
 					$size_x = $width;
@@ -1336,6 +1353,11 @@
 					copy($filename, $thumbnail);
 				}
 				$return_data = $thumb;
+				// if we have a delete filename, delete here with glob
+				if ($delete_filename)
+				{
+					array_map('unlink', glob($delete_filename.'*'));
+				}
 			}
 			else
 			{
