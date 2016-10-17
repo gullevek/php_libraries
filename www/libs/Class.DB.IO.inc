@@ -762,6 +762,26 @@
 		// PUBLIC METHODS
 		// *************************************************************
 
+		// METHOD db_set_debug
+		// PARAMS true/false or none
+		// RETURN new set debug flag
+		// DESC   switches the debug flag on or off
+		//        if none given, then the debug flag auto switches from
+		//        the previous setting to either then on or off
+		//        else override with boolean true/false
+		public function db_set_debug($debug = '')
+		{
+			if ($debug === true)
+				$this->db_debug = 1;
+			elseif ($debug === false)
+				$this->db_debug = 0;
+			elseif ($this->db_debug)
+				$this->db_debug = 0;
+			elseif (!$this->db_debug)
+				$this->db_debug = 1;
+			return $this->db_debug;
+		}
+
 		// METHOD db_reset_query_called
 		// PARAMS query
 		// RETURN none
