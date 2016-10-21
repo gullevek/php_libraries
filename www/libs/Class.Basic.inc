@@ -1301,12 +1301,21 @@
 				$tmp = explode('/', $pic);
 				$pic = $tmp[(count($tmp) - 1)];
 			}
-//			echo "[$pic] IN: $filename - ".strstr($pic, '/')." || ".file_exists($filename)." && ".is_file($filename)."<br>";
 			// does this picture exist and is it a picture
 			if (file_exists($filename) && is_file($filename))
 			{
 				list($width, $height, $type) = getimagesize($filename);
 				$convert_prefix = '';
+				$create_file = false;
+				// check if we can skip the PDF creation: if we have size, if do not have type, we assume type png
+				if (!$type && is_numeric($size_x) && is_numeric($size_y))
+				{
+					$check_thumb = $tmp_src.'thumb_'.$pic.'_'.$size_x.'x'.$size_y.'.'.$image_types[3];
+					if (!is_file($check_thumb))
+						$create_file = true;
+					else
+						$type = 3;
+				}
 				// if type is not in the list, but returns as PDF, we need to convert to JPEG before
 				if (!$type)
 				{
@@ -1324,9 +1333,9 @@
 					list($width, $height, $type) = getimagesize($filename);
 				}
 				// if no size given, set size to original
-				if (!$size_x)
+				if (!$size_x || $size_x < 1 || !is_numeric($size_x))
 					$size_x = $width;
-				if (!$size_y)
+				if (!$size_y || $size_y < 1 || !is_numeric($size_y))
 					$size_y = $height;
 				$thumb = 'thumb_'.$pic.'_'.$size_x.'x'.$size_y.'.'.$image_types[$type];
 				$thumbnail = $tmp_src.$thumb;
@@ -1348,7 +1357,7 @@
 						$status = exec($convert_string, $output, $return);
 					}
 				}
-				if (!file_exists($thumbnail))
+				if (!is_file($thumbnail))
 				{
 					copy($filename, $thumbnail);
 				}
