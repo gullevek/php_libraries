@@ -37,7 +37,7 @@
 
 		public function __construct($lang = '', $path = '')
 		{
-			foreach (array('streas.php', 'gettext.php') as $include_file)
+			foreach (array('streams.php', 'gettext.php') as $include_file)
 				_spl_autoload($include_file);
 
 			if (!$lang)
