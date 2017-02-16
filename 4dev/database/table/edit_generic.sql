@@ -9,7 +9,5 @@
 CREATE TABLE edit_generic (
 	eg_status	INT,
 	date_created	TIMESTAMP WITHOUT TIME ZONE DEFAULT clock_timestamp(),
-	date_updated	TIMESTAMP WITHOUT TIME ZONE,
-	user_created	VARCHAR(25) DEFAULT CURRENT_USER,
-	user_updated	VARCHAR(25)
+	date_updated	TIMESTAMP WITHOUT TIME ZONE
 );
