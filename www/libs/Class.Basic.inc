@@ -103,7 +103,7 @@
 
 		private $error_id; // error ID for errors in classes
 		private $error_string; // error strings in classes (for error_id)
-		public $error_msg = array (); // the "connection" to the outside errors
+		private $error_msg = array (); // the "connection" to the outside errors
 
 		public $debug_output; // if this is true, show debug on desconstructor
 		public $debug_output_not;
@@ -115,15 +115,14 @@
 		public $print_output_not;
 		public $print_output_all;
 
-		// file rotate flags, if they are over this, file gets rotated
-		// old files are named print_file_YYYY-MM-DD_ddddd, where ddddd is a per day increasing number
-		public $file_name_ext = ''; // use this for date rotate
-		public $max_filesize = 0; // set in kilobytes
 		// log file name
-		public $print_file = 'error_msg##LEVEL####CLASS####PAGENAME##';
-		public $one_file = 0; // if this is set to true, all log dat is written to one file
-		public $per_page = 0;
-		public $per_class = 0;
+		private $log_file_name_ext = 'log'; // use this for date rotate
+		public $log_max_filesize = 0; // set in kilobytes
+		private $log_print_file = 'error_msg##LEVEL####CLASS####PAGENAME####DATE##';
+		public $log_print_file_date = 1; // if set add Y-m-d and do automatic daily rotation
+		public $log_per_level = 0; // set, it will split per level (first parameter in debug call)
+		public $log_per_class = 0; // set, will split log per class
+		public $log_per_page = 0; // set, will split log per called file
 
 		public $starttime; // start time if time debug is used
 		public $endtime; // end time if time debug is used
@@ -165,9 +164,6 @@
 		{
 			// set per run UID for logging
 			$this->running_uid = hash($this->hash_algo, uniqid(rand(), true));
-			// set core file extension for logging with Y M D date
-			if (!$this->file_name_ext)
-				$this->file_name_ext = '_'.date('Y-m-d').'.log';
 
 			// internal info var
 			$this->class_info["basic"] = array (
@@ -219,19 +215,11 @@
 			if (isset($GLOBALS['PRINT_ALL']))
 				$this->print_output_all = $GLOBALS['PRINT_ALL'];
 
-			if (isset($GLOBALS['FILE_NAME_EXT']) && !$this->file_name_ext)
-				$this->file_name_ext = $GLOBALS['FILE_NAME_EXT'];
 			if (isset($GLOBALS['MAX_FILESIZE']))
 				$this->max_filesize = $GLOBALS['MAX_FILESIZE'];
 
-			// check the file_ext and max size
-			if (!preg_match("/\w/", $this->file_name_ext))
-				$this->file_name_ext = '';
 			if (!preg_match("/\d/", $this->max_filesize))
 				$this->max_filesize = 0;
-			// set default extension
-			if (!$this->file_name_ext)
-				$this->file_name_ext = '.log';
 
 			// set the regex for checking emails
 			$this->email_regex = "^[A-Za-z0-9!#$%&'*+-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+-\/=?^_`{|}~\.]{0,63}@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,6}){1}$";
@@ -610,34 +598,42 @@
 //					$error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "", $error_string);
 					// replace special line break tag
 //					$error_string = str_replace('<!--#BR#-->', "\n", $error_string);
+
 					// init output variable
 					$output = $error_string; // output formated error string to output file
-					$rpl_string = (!$this->one_file) ? '' : '_'.$level; // if request to write to one file
-					$fn = ROOT.LOG.str_replace('##LEVEL##', $rpl_string, $this->print_file.$this->file_name_ext); // create output filename
-					$rpl_string = (!$this->per_class) ? '' : '_'.get_class($this); // set sub class settings
+					// init base file path
+					$fn = ROOT.LOG.$this->log_print_file.'.'.$this->log_file_name_ext;
+
+					$rpl_string = !$this->log_print_file_date ? '' : '_'.date('Y-m-d'); // add date to file
+					$fn = str_replace('##DATE##', $rpl_string, $fn); // create output filename
+
+					$rpl_string = !$this->log_per_level ? '' : '_'.$level; // if request to write to one file
+					$fn = str_replace('##LEVEL##', $rpl_string, $fn); // create output filename
+
+					$rpl_string = !$this->log_per_class ? '' : '_'.get_class($this); // set sub class settings
 					$fn = str_replace('##CLASS##', $rpl_string, $fn); // create output filename
-					$rpl_string = (!$this->per_page) ? '' : '_'.$this->get_page_name(1); // if request to write to one file
+
+					$rpl_string = !$this->log_per_page ? '' : '_'.$this->get_page_name(1); // if request to write to one file
 					$fn = str_replace('##PAGENAME##', $rpl_string, $fn); // create output filename
+
 					// write to file
 					// first check if max file size is is set and file is bigger
-					if ($this->max_filesize > 0 && ((filesize($fn) / 1024) > $this->max_filesize))
+					if ($this->log_max_filesize > 0 && ((filesize($fn) / 1024) > $this->log_max_filesize))
 					{
 						// for easy purpose, rename file only to attach timestamp, nur sequence numbering
 						rename($fn, $fn.'.'.date("YmdHis"));
-						// check list of "fn"* and see if we have alrady an extension one, if not add 00001, if yes, take this and add +1
-/*						if (is_array(glob($fn."*")))
-						{
-							foreach (glob($fn."*") as $_filename)
-							{
-								if (preg_match("/\.(\d{5})$/", $_filename, $matches))
-								{
-								}
-							}
-						} */
 					}
 					$fp = fopen($fn, 'a');
-					fwrite($fp, $output);
-					fclose($fp);
+					if ($fp !== false)
+					{
+						fwrite($fp, $output);
+						fclose($fp);
+					}
+					else
+					{
+						echo "<!-- could not open file: $fn //-->";
+					}
+
 				} // do write to file
 			}
 		}

@@ -56,8 +56,6 @@
 	$smarty = new SmartyML($lang);
 	// create new DB class
 	$cms = new AdminBackend($DB_CONFIG[MAIN_DB], $lang);
-	// set daily rotation
-	$cms->file_name_ext = '_'.date('Y-m-d').'.log';
 	// set search path to the default DB schema
 	$cms->db_exec("SET search_path TO ".DB_SCHEMA);
 	// the menu show flag (what menu to show)

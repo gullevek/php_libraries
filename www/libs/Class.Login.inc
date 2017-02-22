@@ -100,8 +100,8 @@
 				exit;
 			}
 
-			// set log file name
-			$this->file_name_ext = '_login_'.date('Y-m-d').'.log';
+			// log login data for this class only
+			$this->log_per_class = 1;
 
 			// get the language sub class & init it
 			_spl_autoload('Class.l10n.inc');

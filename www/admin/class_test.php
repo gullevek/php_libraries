@@ -54,9 +54,6 @@
 	print "DEBUG OUT ALL: ".$basic->debug_output_all."<br>";	
 	print "ECHO OUT ALL: ".$basic->echo_output_all."<br>";	
 	print "PRINT OUT ALL: ".$basic->print_output_all."<br>";	
-	// file name (logging)
-	print "FILENAME EXT: ".$basic->file_name_ext."<br>";
-	print "MAX FILESIZE: ".$basic->max_filesize."<br>";
 
 	print "CALLER BACKTRACE: ".$basic->get_caller_method()."<br>";
 	$basic->debug('SOME MARK', 'Some error output');
