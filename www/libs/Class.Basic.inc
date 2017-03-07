@@ -215,12 +215,6 @@
 			if (isset($GLOBALS['PRINT_ALL']))
 				$this->print_output_all = $GLOBALS['PRINT_ALL'];
 
-			if (isset($GLOBALS['MAX_FILESIZE']))
-				$this->max_filesize = $GLOBALS['MAX_FILESIZE'];
-
-			if (!preg_match("/\d/", $this->max_filesize))
-				$this->max_filesize = 0;
-
 			// set the regex for checking emails
 			$this->email_regex = "^[A-Za-z0-9!#$%&'*+-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+-\/=?^_`{|}~\.]{0,63}@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,6}){1}$";
 			// this is for error check parts in where the email regex failed
