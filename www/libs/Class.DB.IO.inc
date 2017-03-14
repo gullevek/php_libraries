@@ -272,7 +272,6 @@
 		public $num_fields; // how many fields has the query
 		public $field_names; // array with the field names of the current query
 		public $insert_id; // last inserted ID
-		public $insert_id_r; // if the return is an array
 		// other vars
 		private $nbsp = ''; // used by print_array recursion function
 		// error & warning id
