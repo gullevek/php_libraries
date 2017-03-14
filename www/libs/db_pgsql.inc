@@ -152,12 +152,16 @@
 		}
 
 		// METHOD: _db_fetch_array
-		// PARAMS: cursor
+		// PARAMS: cursor, opt result type
 		// RETURN: row
 		// DESC  : wrapper for pg_fetch_array
-		public function _db_fetch_array($cursor)
+		public function _db_fetch_array($cursor, $result_type = '')
 		{
-			return pg_fetch_array($cursor);
+			// result type is passed on as is [should be checked]
+			if ($result_type)
+				return pg_fetch_array($cursor, NULL, $result_type);
+			else
+				return pg_fetch_array($cursor);
 		}
 
 		// METHOD: _db_fetch_all

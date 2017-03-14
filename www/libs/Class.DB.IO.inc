@@ -272,6 +272,7 @@
 		public $num_fields; // how many fields has the query
 		public $field_names; // array with the field names of the current query
 		public $insert_id; // last inserted ID
+		public $insert_id_ext; // extended insert ID (for data outside only primary key)
 		// other vars
 		private $nbsp = ''; // used by print_array recursion function
 		// error & warning id
@@ -668,11 +669,12 @@
 					}
 					elseif (preg_match("/ returning (.*)/i", $this->query, $matches) && $this->pk_name)
 					{
-						if (preg_match("/$this->pk_name/", $matches[1]))
+						// add the primary key if it is not in the returning set
+						if (!preg_match("/$this->pk_name/", $matches[1]))
 						{
 							$this->query .= " , ".$this->pk_name;
-							$this->returning_id = true;
 						}
+						$this->returning_id = true;
 					}
 				}
 			}
@@ -750,15 +752,33 @@
 						else
 						{
 							$this->insert_id = array ();
+							$this->insert_id_ext = array ();
+//							echo "** PREPARE RETURNING FOR CURSOR: ".$this->cursor."<br>";
 							// we have returning, now we need to check if we get one or many returned
 							// we'll need to loop this, if we have multiple insert_id returns
-							while ($_insert_id = $this->db_functions->_db_fetch_array($this->cursor))
+							while ($_insert_id = $this->db_functions->_db_fetch_array($this->cursor, PGSQL_ASSOC))
 							{
-								$this->insert_id[] = $_insert_id[$this->pk_name];
+//								echo "*** RETURNING: ".print_r($_insert_id, 1)."<br>";
+								$this->insert_id[] = $_insert_id;
 							}
-							// if we have only one, revert from arry to single
+							// if we have only one, revert from array to single
 							if (count($this->insert_id) == 1)
-								$this->insert_id = $this->insert_id[0];
+							{
+//								echo "* SINGLE DATA CONVERT: ".count($this->insert_id[0])." => ".array_key_exists($this->pk_name, $this->insert_id[0])."<br>";
+//								echo "* PK DIRECT: ".$this->insert_id[0][$this->pk_name]."<Br>";
+								// if this has only the pk_name, then only return this, else array of all data (but without the position)
+								// example if insert_id[0]['foo'] && insert_id[0]['bar'] it will become insert_id['foo'] & insert_id['bar']
+								// if only ['foo_id'] and it is the PK then the PK is directly written to the insert_id
+								if (count($this->insert_id[0]) > 1 || !array_key_exists($this->pk_name, $this->insert_id[0]))
+								{
+									$this->insert_id_ext = $this->insert_id[0];
+									$this->insert_id = $this->insert_id[0][$this->pk_name];
+								}
+								elseif ($this->insert_id[0][$this->pk_name])
+								{
+									$this->insert_id = $this->insert_id[0][$this->pk_name];
+								}
+							}
 						}
 						// this warning handling is only for pgsql
 						// we returned an array of PKs instread of a single one
@@ -1389,8 +1409,8 @@
 						if (!preg_match("/{$this->prepare_cursor[$stm_name]['pk_name']}/", $matches[1]))
 						{
 							$query .= " , ".$this->prepare_cursor[$stm_name]['pk_name'];
-							$this->prepare_cursor[$stm_name]['returning_id'] = true;
 						}
+						$this->prepare_cursor[$stm_name]['returning_id'] = true;
 					}
 				}
 				// search for $1, $2, in the query and push it into the control array
@@ -1467,13 +1487,28 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 						$this->insert_id = array ();
 						// we have returning, now we need to check if we get one or many returned
 						// we'll need to loop this, if we have multiple insert_id returns
-						while ($_insert_id = $this->db_functions->_db_fetch_array($this->cursor))
+						while ($_insert_id = $this->db_functions->_db_fetch_array($code, PGSQL_ASSOC))
 						{
-							$this->insert_id[] = $_insert_id[$this->prepare_cursor[$stm_name]['pk_name']];
+							$this->insert_id[] = $_insert_id;
 						}
 						// if we have only one, revert from arry to single
 						if (count($this->insert_id) == 1)
-							$this->insert_id = $this->insert_id[0];
+						{
+//							echo "+ SINGLE DATA CONVERT: ".count($this->insert_id[0])." => ".array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])."<br>";
+//							echo "+ PK DIRECT: ".$this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]."<Br>";
+							// if this has only the pk_name, then only return this, else array of all data (but without the position)
+							// example if insert_id[0]['foo'] && insert_id[0]['bar'] it will become insert_id['foo'] & insert_id['bar']
+							// if only ['foo_id'] and it is the PK then the PK is directly written to the insert_id
+							if (count($this->insert_id[0]) > 1 || !array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0]))
+							{
+								$this->insert_id_ext = $this->insert_id[0];
+								$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
+							}
+							elseif ($this->insert_id[0][$this->pk_name])
+							{
+								$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
+							}
+						}
 					}
 					// this error handling is only for pgsql
 					if (is_array($this->insert_id))

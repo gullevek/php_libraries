@@ -74,16 +74,16 @@
 	}
 
 	$status = $basic->db_exec("INSERT INTO foo (test) VALUES ('FOO TEST ".time()."') RETURNING test");
-	print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id."<br>";
+	print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
 	print "DIRECT INSERT PREVIOUS INSERTED: ".print_r($basic->db_return_row("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>";
 	$basic->db_prepare("ins_foo", "INSERT INTO foo (test) VALUES ($1)");
 	$status = $basic->db_execute("ins_foo", array('BAR TEST '.time()));
-	print "PREPARE INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id."<br>";
+	print "PREPARE INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
 	print "PREPARE INSERT PREVIOUS INSERTED: ".print_r($basic->db_return_row("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>";
 	// returning test with multiple entries
 //	$status = $basic->db_exec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."') RETURNING foo_id");
-	$status = $basic->db_exec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."')");
-	print "DIRECT MULTIPLE INSERT STATUS: $status | PRIMARY KEYS: ".print_r($basic->insert_id, 1)."<br>";
+	$status = $basic->db_exec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."') RETURNING foo_id, test");
+	print "DIRECT MULTIPLE INSERT STATUS: $status | PRIMARY KEYS: ".print_r($basic->insert_id, 1)." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
 
 
 	# async test queries
