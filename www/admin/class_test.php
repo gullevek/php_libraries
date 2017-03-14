@@ -80,6 +80,11 @@
 	$status = $basic->db_execute("ins_foo", array('BAR TEST '.time()));
 	print "PREPARE INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id."<br>";
 	print "PREPARE INSERT PREVIOUS INSERTED: ".print_r($basic->db_return_row("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>";
+	// returning test with multiple entries
+//	$status = $basic->db_exec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."') RETURNING foo_id");
+	$status = $basic->db_exec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."')");
+	print "DIRECT MULTIPLE INSERT STATUS: $status | PRIMARY KEYS: ".print_r($basic->insert_id, 1)."<br>";
+
 
 	# async test queries
 /*	$basic->db_exec_async("SELECT test FROM foo, (SELECT pg_sleep(10)) as sub WHERE foo_id IN (27, 50, 67, 44, 10)");
@@ -122,7 +127,7 @@
 	print "DB Version bigger than $to_db_version: ".$basic->db_compare_version('>='.$to_db_version)."<br>";
 	print "DB Version bigger $to_db_version: ".$basic->db_compare_version('>'.$to_db_version)."<br>";
 
-	$q = "SELECT FOO FRO BAR";
+/*	$q = "SELECT FOO FRO BAR";
 //	$q = "Select * from foo";
 	$foo = $basic->db_exec_async($q);
 	print "[ERR] Query: ".$q."<br>";
@@ -131,7 +136,7 @@
 	{
 		print "[ERR]: $ret<br>";
 //		sleep(5);
-	}
+	} */
 
 	// search path check
 	$q = "SHOW search_path";

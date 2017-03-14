@@ -272,6 +272,7 @@
 		public $num_fields; // how many fields has the query
 		public $field_names; // array with the field names of the current query
 		public $insert_id; // last inserted ID
+		public $insert_id_r; // if the return is an array
 		// other vars
 		private $nbsp = ''; // used by print_array recursion function
 		// error & warning id
@@ -342,6 +343,7 @@
 			$this->error_string['25'] = 'Prepare query data is not in array format.';
 			$this->error_string['30'] = 'Query call in a possible endless loop. Was called more than '.$this->MAX_QUERY_CALL.' times';
 			$this->error_string['31'] = 'Could not fetch PK after query insert';
+			$this->error_string['32'] = 'Multiple PK return as array';
 			$this->error_string['40'] = 'Query async call failed.';
 			$this->error_string['41'] = 'Connection is busy with a different query. Cannot execute.';
 			$this->error_string['42'] = 'Cannot check for async query, none has been started yet.';
@@ -648,9 +650,9 @@
 			if ($this->_check_query_for_insert($this->query, true))
 			{
 				$this->pk_name = $pk_name;
-				if ($pk_name != 'NULL')
+				if ($this->pk_name != 'NULL')
 				{
-					if (!$pk_name)
+					if (!$this->pk_name)
 					{
 						// TODO: get primary key from table name
 						list($schema, $table) = $this->_db_return_table($this->query);
@@ -658,7 +660,7 @@
 						{
 							$this->pk_name_table[$table] = $this->db_functions->_db_primary_key($table, $schema);
 						}
-						$pk_name = $this->pk_name_table[$table];
+						$this->pk_name = $this->pk_name_table[$table];
 					}
 					if (!preg_match("/ returning /i", $this->query) && $this->pk_name)
 					{
@@ -667,7 +669,7 @@
 					}
 					elseif (preg_match("/ returning (.*)/i", $this->query, $matches) && $this->pk_name)
 					{
-						if (!preg_match("/$this->pk_name/", $matches[1]))
+						if (preg_match("/$this->pk_name/", $matches[1]))
 						{
 							$this->query .= " , ".$this->pk_name;
 							$this->returning_id = true;
@@ -741,16 +743,30 @@
 					if ($this->_check_query_for_insert($this->query, true) && $this->pk_name != 'NULL')
 					{
 						// set insert_id
+						// if we do not have a returning, we try to get it via the primary key and another select
 						if (!$this->returning_id)
+						{
 							$this->insert_id = $this->db_functions->_db_insert_id($this->query, $this->pk_name);
+						}
 						else
-							$this->insert_id = $this->db_functions->_db_fetch_array($this->cursor)[$this->pk_name];
-						// this error handling is only for pgsql
+						{
+							$this->insert_id = array ();
+							// we have returning, now we need to check if we get one or many returned
+							// we'll need to loop this, if we have multiple insert_id returns
+							while ($_insert_id = $this->db_functions->_db_fetch_array($this->cursor))
+							{
+								$this->insert_id[] = $_insert_id[$this->pk_name];
+							}
+							// if we have only one, revert from arry to single
+							if (count($this->insert_id) == 1)
+								$this->insert_id = $this->insert_id[0];
+						}
+						// this warning handling is only for pgsql
+						// we returned an array of PKs instread of a single one
 						if (is_array($this->insert_id))
 						{
-							$this->warning_id = 19;
-							$this->_db_error($this->insert_id[1], '[db_exec]');
-							unset($this->insert_id);
+							$this->warning_id = 32;
+							$this->_db_error(print_r($this->insert_id), '[db_exec]');
 						}
 					}
 				}
@@ -1444,16 +1460,28 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 				if ($this->_check_query_for_insert($this->prepare_cursor[$stm_name]['query'], true))
 				{
 					if (!$this->prepare_cursor[$stm_name]['returning_id'])
+					{
 						$this->insert_id = $this->db_functions->_db_insert_id($this->prepare_cursor[$stm_name]['query'], $this->prepare_cursor[$stm_name]['pk_name']);
+					}
 					elseif ($code)
-						$this->insert_id = $this->db_functions->_db_fetch_array($code)[$this->prepare_cursor[$stm_name]['pk_name']];
+					{
+						$this->insert_id = array ();
+						// we have returning, now we need to check if we get one or many returned
+						// we'll need to loop this, if we have multiple insert_id returns
+						while ($_insert_id = $this->db_functions->_db_fetch_array($this->cursor))
+						{
+							$this->insert_id[] = $_insert_id[$this->prepare_cursor[$stm_name]['pk_name']];
+						}
+						// if we have only one, revert from arry to single
+						if (count($this->insert_id) == 1)
+							$this->insert_id = $this->insert_id[0];
+					}
 					// this error handling is only for pgsql
 					if (is_array($this->insert_id))
 					{
-						$this->warning_id = 19;
-						$this->_db_error($this->insert_id[1]);
-						$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': Could not get insert id</span>', 'DB_WARNING');
-						unset($this->insert_id);
+						$this->warning_id = 32;
+						$this->_db_error(print_r($this->insert_id));
+						$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id data returned as array</span>', 'DB_WARNING');
 					}
 					elseif (!$this->insert_id)
 					{

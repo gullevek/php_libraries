@@ -160,6 +160,15 @@
 			return pg_fetch_array($cursor);
 		}
 
+		// METHOD: _db_fetch_all
+		// PARAMS: cursor
+		// RETURN: all rows as array
+		// DESC  : wrapper for pg_fetch_array
+		public function _db_fetch_all($cursor)
+		{
+			return pg_fetch_all($cursor);
+		}
+
 		// METHOD: _db_affected_ros
 		// PARAMS: cursor
 		// RETURN: number for rows
