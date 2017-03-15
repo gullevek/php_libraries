@@ -785,7 +785,7 @@
 						if (is_array($this->insert_id))
 						{
 							$this->warning_id = 32;
-							$this->_db_error(print_r($this->insert_id), '[db_exec]');
+							$this->_db_error($this->cursor, '[db_exec]');
 						}
 					}
 				}
@@ -1514,7 +1514,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 					if (is_array($this->insert_id))
 					{
 						$this->warning_id = 32;
-						$this->_db_error(print_r($this->insert_id));
+						$this->_db_error();
 						$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id data returned as array</span>', 'DB_WARNING');
 					}
 					elseif (!$this->insert_id)
