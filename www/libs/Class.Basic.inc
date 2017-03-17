@@ -119,10 +119,12 @@
 		private $log_file_name_ext = 'log'; // use this for date rotate
 		public $log_max_filesize = 0; // set in kilobytes
 		private $log_print_file = 'error_msg##LEVEL####CLASS####PAGENAME####DATE##';
+		private $log_file_unique_id; // a unique ID set only once for call derived from this class
 		public $log_print_file_date = 1; // if set add Y-m-d and do automatic daily rotation
 		public $log_per_level = 0; // set, it will split per level (first parameter in debug call)
 		public $log_per_class = 0; // set, will split log per class
 		public $log_per_page = 0; // set, will split log per called file
+		public $log_per_run = 0; // create a new log file per run (time stamp + unique ID)
 
 		public $starttime; // start time if time debug is used
 		public $endtime; // end time if time debug is used
@@ -214,6 +216,18 @@
 				$this->echo_output_all = $GLOBALS['ECHO_ALL'];
 			if (isset($GLOBALS['PRINT_ALL']))
 				$this->print_output_all = $GLOBALS['PRINT_ALL'];
+
+			// GLOBAL rules for log writing
+			if (isset($GLOBALS['LOG_PRINT_FILE_DATE']))
+				$this->log_print_file_date = $GLOBALS['LOG_PRINT_FILE_DATE'];
+			if (isset($GLOBALS['LOG_PER_LEVEL']))
+				$this->log_per_level = $GLOBALS['LOG_PER_LEVEL'];
+			if (isset($GLOBALS['LOG_PER_CLASS']))
+				$this->log_per_class = $GLOBALS['LOG_PER_CLASS'];
+			if (isset($GLOBALS['LOG_PER_PAGE']))
+				$this->log_per_page = $GLOBALS['LOG_PER_PAGE'];
+			if (isset($GLOBALS['LOG_PER_RUN']))
+				$this->log_per_run = $GLOBALS['LOG_PER_RUN'];
 
 			// set the regex for checking emails
 			$this->email_regex = "^[A-Za-z0-9!#$%&'*+-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+-\/=?^_`{|}~\.]{0,63}@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,6}){1}$";
@@ -326,7 +340,7 @@
 			// this has to be changed, not returned here, this is the last class to close
 //			return $this->error_msg;
 			// close open file handles
-			$this->fdebug_fp('c');
+//			$this->fdebug_fp('c');
 		}
 
 		// *************************************************************
@@ -598,7 +612,18 @@
 					// init base file path
 					$fn = ROOT.LOG.$this->log_print_file.'.'.$this->log_file_name_ext;
 
-					$rpl_string = !$this->log_print_file_date ? '' : '_'.date('Y-m-d'); // add date to file
+					if ($this->log_per_run)
+					{
+						if ($GLOBALS['LOG_FILE_UNIQUE_ID'])
+							$this->log_file_unique_id = $GLOBALS['LOG_FILE_UNIQUE_ID'];
+						if (!$this->log_file_unique_id)
+							$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id = substr(hash('sha1', uniqid(mt_rand(), true)), 0, 8);
+						$rpl_string = !$this->log_print_file_date ? '' : '_'.date('Y-m-d').'_U_'.$this->log_file_unique_id; // add 8 char unique string
+					}
+					else
+					{
+						$rpl_string = !$this->log_print_file_date ? '' : '_'.date('Y-m-d'); // add date to file
+					}
 					$fn = str_replace('##DATE##', $rpl_string, $fn); // create output filename
 
 					$rpl_string = !$this->log_per_level ? '' : '_'.$level; // if request to write to one file

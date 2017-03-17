@@ -90,6 +90,9 @@
 		// DESC  : cunstroctuor, does ALL, opens db, works through connection checks, closes itself
 		public function __construct($db_config, $lang = 'en_utf8', $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
 		{
+			// log login data for this class only
+			$this->log_per_class = 1;
+
 			// create db connection and init base class
 			parent::__construct($db_config, $debug, $db_debug, $echo, $print);
 
@@ -99,9 +102,6 @@
 				echo "<b>Session not started!</b><br>Use 'session_start();'.<br>For less problems with other session, you can set a session name with 'session_name(\"name\");'.<br>";
 				exit;
 			}
-
-			// log login data for this class only
-			$this->log_per_class = 1;
 
 			// get the language sub class & init it
 			_spl_autoload('Class.l10n.inc');

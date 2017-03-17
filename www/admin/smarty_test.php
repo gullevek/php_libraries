@@ -4,6 +4,7 @@
 	$DEBUG_ALL = 1;
 	$PRINT_ALL = 1;
 	$DB_DEBUG = 1;
+	$LOG_PER_RUN = 1;
 
 	define('USE_DATABASE', true);
 	require("header.inc");
