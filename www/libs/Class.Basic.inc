@@ -617,8 +617,8 @@
 						if ($GLOBALS['LOG_FILE_UNIQUE_ID'])
 							$this->log_file_unique_id = $GLOBALS['LOG_FILE_UNIQUE_ID'];
 						if (!$this->log_file_unique_id)
-							$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id = substr(hash('sha1', uniqid(mt_rand(), true)), 0, 8);
-						$rpl_string = !$this->log_print_file_date ? '' : '_'.date('Y-m-d').'_U_'.$this->log_file_unique_id; // add 8 char unique string
+							$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id = date('Y-m-d_His').'_U_'.substr(hash('sha1', uniqid(mt_rand(), true)), 0, 8);
+						$rpl_string = '_'.$this->log_file_unique_id; // add 8 char unique string
 					}
 					else
 					{

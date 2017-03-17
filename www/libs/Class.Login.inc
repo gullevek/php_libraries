@@ -1015,7 +1015,7 @@ EOM;
 			}
 			$q .= "'".session_id()."', ";
 			$q .= "'".$this->db_escape_string($this->action)."', '".$this->db_escape_string($this->username)."', NULL, '".$this->db_escape_string($this->login_error)."', NULL, NULL, '".$this->db_escape_string($this->permission_okay)."', NULL)";
-			$this->db_exec($q);
+			$this->db_exec($q, 'NULL');
 		}
 
 		// METHOD: login_check_edit_access_id
