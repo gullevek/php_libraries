@@ -1,57 +1,52 @@
 {*
 	********************************************************************
 	* AUTHOR: Clemens Schwaighofer
-	* DATE: 2008/12/24
+	* DATE: 2005/06/23
 	* DESCRIPTION:
-	* main body
+	* edit body part
 	* HISTORY:
 	********************************************************************
 *}
 
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<title>{$HTML_TITLE}</title>
 	<meta http-equiv="Content-Type" content="text/html; charset={$DEFAULT_ENCODING}">
 	{if $STYLESHEET}
-	<link rel=stylesheet type="text/css" href="{$CSS}{$STYLESHEET}">
+	<link rel=stylesheet type="text/css" href="{$css}{$STYLESHEET}">
 	{/if}
-	<script language="JavaScript">
-	<!--
-	var DEBUG = {$JS_DEBUG};
-	//-->
-	</script>
+	{if $CSS_INCLUDE}
+	<link rel=stylesheet type="text/css" href="{$CSS_INCLUDE}">
+	{/if}
+	{if $CSS_SPECIAL_INCLUDE}
+	<link rel=stylesheet type="text/css" href="{$CSS_SPECIAL_INCLUDE}">
+	{/if}
 	<script language="JavaScript" src="{$js}/firebug.js"></script>
-	<script language="JavaScript" src="{$js}/debug.js"></script>
 	{if $JAVASCRIPT}
-	<script language="JavaScript" src="{$JS}{$JAVASCRIPT}"></script>
+	<script language="JavaScript" src="{$js}{$JAVASCRIPT}"></script>
 	{/if}
-	{if $ajax_javascript}
-	<script language="JavaScript">
-	{$ajax_javascript}
-	</script>
+	{* declare prototype everywhere *}
+	<script src="{$js}/scriptaculous/prototype.js" type="text/javascript"></script>
+	{if $USE_SCRIPTACULOUS}
+	<script src="{$js}/scriptaculous/scriptaculous.js" type="text/javascript"></script>
 	{/if}
 	{if $JS_INCLUDE}
 	<script language="JavaScript" src="{$JS_INCLUDE}"></script>
 	{/if}
-{*	{popup_init src="`$js`/overlib/overlib.js"} *}
+	{if $JS_SPECIAL_INCLUDE}
+	<script language="JavaScript" src="{$JS_SPECIAL_INCLUDE}"></script>
+	{/if}
+	{* for including datepickr *}
+	{if $JS_DATEPICKR}
+	<link rel=stylesheet type="text/css" href="{$js}/datepickr/datepickr.min.css">
+	<script language="JavaScript" src="{$js}/datepickr/datepickr.min.js"></script>
+	{/if}
+	{if $USE_OVERLIB}
+	{popup_init src="`$js`/overlib/overlib.js"}
+	{/if}
 </head>
 <body>
-<form name="product_search" method="get">
-<div style="border: 1px solid black; margin: 15px; padding: 5px;">
-{include file="top_menu.tpl"}
-</div>
-<div>
-{include file="$INCLUDE_TEMPLATE"}
-</div>
-</form>
-{* debug info *}
-{if $DEBUG}
-<div style="width:{$table_width}px;" class="debug_message">
-{$Id}<br>
-	<b>{$smarty.now|date_format:"%Y-%m-%d %H:%M:%S"}</b><br>
-{$debug_error_msg}
-</div>
-{/if}
-
+{include file="$TEMPLATE_NAME"}
 </body>
 </html>
