@@ -344,6 +344,7 @@
 			$this->error_string['30'] = 'Query call in a possible endless loop. Was called more than '.$this->MAX_QUERY_CALL.' times';
 			$this->error_string['31'] = 'Could not fetch PK after query insert';
 			$this->error_string['32'] = 'Multiple PK return as array';
+			$this->error_string['33'] = 'returning PK was not found';
 			$this->error_string['40'] = 'Query async call failed.';
 			$this->error_string['41'] = 'Connection is busy with a different query. Cannot execute.';
 			$this->error_string['42'] = 'Cannot check for async query, none has been started yet.';
@@ -778,6 +779,13 @@
 								{
 									$this->insert_id = $this->insert_id[0][$this->pk_name];
 								}
+							}
+							elseif (count($this->insert_id) == 0)
+							{
+								// failed to get insert id
+								$this->insert_id = '';
+								$this->warning_id = 33;
+								$this->_db_error($this->cursor, '[db_exec]');
 							}
 						}
 						// this warning handling is only for pgsql
