@@ -158,6 +158,11 @@
 	print $basic->magic_links('user@bubu.at').'<br>';
 	print $basic->magic_links('http://test.com/foo/bar.php?foo=1').'<br>';
 
+	// compare date
+	$date_1 = '2017/1/5';
+	$date_2 = '2017-01-05';
+	print "COMPARE DATE: ".$basic->CompareDate($date_1, $date_2)."<br>";
+
 	// print error messages
 	print $basic->print_error_msg();
 
