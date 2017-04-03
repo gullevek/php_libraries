@@ -1391,34 +1391,37 @@
 				// if this is an insert query, check if we can add a return
 				if ($this->_check_query_for_insert($query, true))
 				{
-					// set primary key name
-					// current: only via parameter
-					if (!$pk_name)
+					if ($pk_name != 'NULL')
 					{
-						// read the primary key from the table, if we do not have one, we get nothing in return
-						list($schema, $table) = $this->_db_return_table($query);
-						if (!$this->pk_name_table[$table])
+						// set primary key name
+						// current: only via parameter
+						if (!$pk_name)
 						{
-							$this->pk_name_table[$table] = $this->db_functions->_db_primary_key($table, $schema);
+							// read the primary key from the table, if we do not have one, we get nothing in return
+							list($schema, $table) = $this->_db_return_table($query);
+							if (!$this->pk_name_table[$table])
+							{
+								$this->pk_name_table[$table] = $this->db_functions->_db_primary_key($table, $schema);
+							}
+							$pk_name = $this->pk_name_table[$table];
 						}
-						$pk_name = $this->pk_name_table[$table];
-					}
-					if ($pk_name)
-						$this->prepare_cursor[$stm_name]['pk_name'] = $pk_name;
-					// if no returning, then add it
-					if (!preg_match("/ returning /i", $query) && $this->prepare_cursor[$stm_name]['pk_name'])
-					{
-						$query .= " RETURNING ".$this->prepare_cursor[$stm_name]['pk_name'];
-						$this->prepare_cursor[$stm_name]['returning_id'] = true;
-					}
-					// if returning exists but not pk_name, add it
-					else if (preg_match("/ returning (.*)/i", $query, $matches) && $this->prepare_cursor[$stm_name]['pk_name'])
-					{
-						if (!preg_match("/{$this->prepare_cursor[$stm_name]['pk_name']}/", $matches[1]))
+						if ($pk_name)
+							$this->prepare_cursor[$stm_name]['pk_name'] = $pk_name;
+						// if no returning, then add it
+						if (!preg_match("/ returning /i", $query) && $this->prepare_cursor[$stm_name]['pk_name'])
 						{
-							$query .= " , ".$this->prepare_cursor[$stm_name]['pk_name'];
+							$query .= " RETURNING ".$this->prepare_cursor[$stm_name]['pk_name'];
+							$this->prepare_cursor[$stm_name]['returning_id'] = true;
 						}
-						$this->prepare_cursor[$stm_name]['returning_id'] = true;
+						// if returning exists but not pk_name, add it
+						else if (preg_match("/ returning (.*)/i", $query, $matches) && $this->prepare_cursor[$stm_name]['pk_name'])
+						{
+							if (!preg_match("/{$this->prepare_cursor[$stm_name]['pk_name']}/", $matches[1]))
+							{
+								$query .= " , ".$this->prepare_cursor[$stm_name]['pk_name'];
+							}
+							$this->prepare_cursor[$stm_name]['returning_id'] = true;
+						}
 					}
 				}
 				// search for $1, $2, in the query and push it into the control array
@@ -1484,7 +1487,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 					$this->_db_error($this->prepare_cursor[$stm_name]['result']);
 					$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Execution failed</span>', 'DB_ERROR');
 				}
-				if ($this->_check_query_for_insert($this->prepare_cursor[$stm_name]['query'], true))
+				if ($this->_check_query_for_insert($this->prepare_cursor[$stm_name]['query'], true) && $this->prepare_cursor[$stm_name]['pk_name'] != 'NULL')
 				{
 					if (!$this->prepare_cursor[$stm_name]['returning_id'])
 					{
@@ -1493,6 +1496,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 					elseif ($code)
 					{
 						$this->insert_id = array ();
+						$this->insert_id_ext = array ();
 						// we have returning, now we need to check if we get one or many returned
 						// we'll need to loop this, if we have multiple insert_id returns
 						while ($_insert_id = $this->db_functions->_db_fetch_array($code, PGSQL_ASSOC))
@@ -1518,12 +1522,12 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 							}
 						}
 						else
-                        {
+						{
 							// failed to get insert id
 							$this->insert_id = '';
 							$this->warning_id = 33;
 							$this->_db_error('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id returned no data</span>', 'DB_WARNING');
-                        }
+						}
 					}
 					// this error handling is only for pgsql
 					if (is_array($this->insert_id))
