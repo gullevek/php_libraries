@@ -332,7 +332,7 @@
 			$this->error_string['14'] = 'Can\'t connect to DB server';
 			$this->error_string['15'] = 'Can\'t select DB';
 			$this->error_string['16'] = 'No DB Handler found / connect or reconnect failed';
-			$this->error_string['17'] = 'all db_return* methods work only with SELECT statements, please use db_exec for everything else';
+			$this->error_string['17'] = 'All db_return* methods work only with SELECT statements, please use db_exec for everything else';
 			$this->error_string['18'] = 'Query not found in cache. Nothing has been reset';
 			$this->error_string['19'] = 'Wrong PK name given or no PK name given at all, can\'t get Insert ID';
 			$this->error_string['20'] = 'Found given Prepare Statement Name in array, Query not prepared, will use existing one';
@@ -344,7 +344,7 @@
 			$this->error_string['30'] = 'Query call in a possible endless loop. Was called more than '.$this->MAX_QUERY_CALL.' times';
 			$this->error_string['31'] = 'Could not fetch PK after query insert';
 			$this->error_string['32'] = 'Multiple PK return as array';
-			$this->error_string['33'] = 'returning PK was not found';
+			$this->error_string['33'] = 'Returning PK was not found';
 			$this->error_string['40'] = 'Query async call failed.';
 			$this->error_string['41'] = 'Connection is busy with a different query. Cannot execute.';
 			$this->error_string['42'] = 'Cannot check for async query, none has been started yet.';
@@ -1512,11 +1512,18 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 								$this->insert_id_ext = $this->insert_id[0];
 								$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
 							}
-							elseif ($this->insert_id[0][$this->pk_name])
+							elseif ($this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']])
 							{
 								$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
 							}
 						}
+						else
+                        {
+							// failed to get insert id
+							$this->insert_id = '';
+							$this->warning_id = 33;
+							$this->_db_error('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id returned no data</span>', 'DB_WARNING');
+                        }
 					}
 					// this error handling is only for pgsql
 					if (is_array($this->insert_id))
@@ -1525,6 +1532,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 						$this->_db_error();
 						$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id data returned as array</span>', 'DB_WARNING');
 					}
+					// NOTE should we keep this inside
 					elseif (!$this->insert_id)
 					{
 						$this->warning_id = 31;
