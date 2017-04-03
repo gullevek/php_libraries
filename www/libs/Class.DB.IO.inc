@@ -1423,6 +1423,10 @@
 							$this->prepare_cursor[$stm_name]['returning_id'] = true;
 						}
 					}
+					else
+					{
+						$this->prepare_cursor[$stm_name]['pk_name'] = $pk_name;
+					}
 				}
 				// search for $1, $2, in the query and push it into the control array
 				preg_match_all('/(\$[0-9]{1,})/', $query, $match);

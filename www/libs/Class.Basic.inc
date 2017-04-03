@@ -1239,8 +1239,8 @@
 				return FALSE;
 
 			// splits the data up with / or -
-			list ($start_year, $start_month, $start_day) = split('[/-]', $start_date);
-			list ($end_year, $end_month, $end_day) = split('[/-]', $end_date);
+			list ($start_year, $start_month, $start_day) = explode('[/-]', $start_date);
+			list ($end_year, $end_month, $end_day) = explode('[/-]', $end_date);
 			// check that month & day are two digits and then combine
 			foreach (array('start', 'end') as $prefix)
 			{
