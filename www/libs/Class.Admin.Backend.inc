@@ -138,7 +138,7 @@
 			$q .= "(".@$_SESSION['EUID'].", NOW(), '".$this->db_escape_string($event)."', '".$data."', '".$data_binary."', '".$this->page_name."', ";
 			$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->db_escape_string(@$_SERVER['HTTP_USER_AGENT'])."', '".$this->db_escape_string(@$_SERVER['HTTP_REFERER'])."', '".$this->db_escape_string(@$_SERVER['SCRIPT_FILENAME'])."', '".$this->db_escape_string(@$_SERVER['QUERY_STRING'])."', '".$this->db_escape_string(@$_SERVER['SERVER_NAME'])."', '".$this->db_escape_string(@$_SERVER['HTTP_HOST'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_CHARSET'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_ENCODING'])."', '".session_id()."', ";
 			$q .= "'".$this->db_escape_string($this->action)."', '".$this->db_escape_string($this->action_id)."', '".$this->db_escape_string($this->action_yes)."', '".$this->db_escape_string($this->action_flag)."', '".$this->db_escape_string($this->action_menu)."', '".$this->db_escape_string($this->action_loaded)."', '".$this->db_escape_string($this->action_value)."', '".$this->db_escape_string($this->action_error)."')";
-			$this->db_exec($q, 'edit_log_id');
+			$this->db_exec($q, 'NULL');
 		}
 
 
