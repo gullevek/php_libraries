@@ -118,9 +118,10 @@
 		// log file name
 		private $log_file_name_ext = 'log'; // use this for date rotate
 		public $log_max_filesize = 0; // set in kilobytes
-		private $log_print_file = 'error_msg##LEVEL####CLASS####PAGENAME####DATE##';
+		private $log_print_file = 'error_msg##LOGID####LEVEL####CLASS####PAGENAME####DATE##';
 		private $log_file_unique_id; // a unique ID set only once for call derived from this class
 		public $log_print_file_date = 1; // if set add Y-m-d and do automatic daily rotation
+		private $log_file_id = LOG_FILE_ID ? LOG_FILE_ID : ''; // a alphanumeric name that has to be set as global definition
 		public $log_per_level = 0; // set, it will split per level (first parameter in debug call)
 		public $log_per_class = 0; // set, will split log per class
 		public $log_per_page = 0; // set, will split log per called file
@@ -611,6 +612,12 @@
 					$output = $error_string; // output formated error string to output file
 					// init base file path
 					$fn = ROOT.LOG.$this->log_print_file.'.'.$this->log_file_name_ext;
+					// log ID prefix settings, if not valid, replace with empty
+					if (preg_match("/^[A-Za-z0-9]+$/", $this->log_file_id))
+						$rpl_string = '_'.$this->log_file_id;
+					else
+						$rpl_string = '';
+					$fn = str_replace('##LOGID##', $rpl_string, $fn); // log id (like a log file prefix)
 
 					if ($this->log_per_run)
 					{

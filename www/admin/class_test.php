@@ -19,7 +19,8 @@
 		_spl_autoload('Class.'.$class.'.inc');
 
 	$lang = 'en_utf8';
-
+	
+	DEFINE('LOG_FILE_ID', 'classTest');
 	$login = new login($DB_CONFIG[LOGIN_DB], $lang);
 	// init with standard
 //	$basic = new db_io($DB_CONFIG[MAIN_DB]);
