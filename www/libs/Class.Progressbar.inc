@@ -19,6 +19,8 @@ class ProgressBar
 	public $status = 'new';	// current status (new,show,hide)
 	public $step = 0;	// current step
 	public $position = array(); // current bar position
+
+	public $clear_buffer_size = 1024*256; // we need to send this before the lfush to get browser output
 	
 	// public vars
 	
@@ -78,6 +80,13 @@ class ProgressBar
 	
 	// private functions
 	
+	private function _flushCache()
+	{
+		echo str_repeat(' ', $this->clear_buffer_size);
+		ob_flush();
+		flush();
+	}
+
 	private function _calculatePercent($step)
 	{
 		// avoid divison through 0
@@ -298,7 +307,7 @@ class ProgressBar
 			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.align="'.$this->label[$name]['align'].'";';
 			$output .= '</script>'."\n";
 			echo $output;
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -308,7 +317,7 @@ class ProgressBar
 		if ($this->status != 'new')
 		{
 			echo '<script type="text/JavaScript">document.getElementById("plbl'.$name.$this->code.'").style.color="'.$color.'";</script>'."\n";
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -318,7 +327,7 @@ class ProgressBar
 		if ($this->status != 'new')
 		{
 			echo '<script type="text/JavaScript">document.getElementById("plbl'.$name.$this->code.'").style.background="'.$color.'";</script>'."\n";
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -349,7 +358,7 @@ class ProgressBar
 			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.font-weight="'.$this->label[$name]['font-weight'].'";';
 			$output .= '</script>'."\n";
 			echo $output;
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -360,7 +369,7 @@ class ProgressBar
 		if ($this->status != 'new')
 		{
 			echo '<script type="text/JavaScript">PBlabelText'.$this->code.'("'.$name.'","'.$this->label[$name]['value'].'");</script>'."\n";
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -370,7 +379,7 @@ class ProgressBar
 		if ($this->status != 'new')
 		{
 			echo '<script type="text/JavaScript">document.getElementById("pbar'.$this->code.'").style.background="'.$color.'";</script>'."\n";
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -380,7 +389,7 @@ class ProgressBar
 		if ($this->status != 'new')
 		{
 			echo '<script type="text/JavaScript">document.getElementById("pbrd'.$this->code.'").style.background="'.$color.'";</script>'."\n";
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -398,7 +407,7 @@ class ProgressBar
 			echo 'PBposition'.$this->code.'("width",'.$this->position['width'].');';
 			echo 'PBposition'.$this->code.'("height",'.$this->position['height'].');';
 			echo '</script>'."\n";
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -547,7 +556,7 @@ class ProgressBar
 	{
 		$this->status = 'show';
 		echo $this->getHtml();
-		flush();
+		$this->_flushCache();
 	}
 	
 	public function moveStep($step)
@@ -603,7 +612,7 @@ class ProgressBar
 		if ($js != '')
 		{
 			echo '<script type="text/JavaScript">'.$js.'</script>'."\n";
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -627,7 +636,7 @@ class ProgressBar
 			$output .= 'document.getElementById("pbm'.$this->code.'").style.visibility="hidden";document.getElementById("pbm'.$this->code.'").style.display="none";';
 			$output .= '</script>'."\n"; 
 			echo $output;
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
@@ -641,7 +650,7 @@ class ProgressBar
 			$output .= 'document.getElementById("pbm'.$this->code.'").style.visibility="visible";document.getElementById("pbm'.$this->code.'").style.visibility="block";';
 			$output .= '</script>'."\n";
 			echo $output;
-			flush();
+			$this->_flushCache();
 		}
 	}
 	
