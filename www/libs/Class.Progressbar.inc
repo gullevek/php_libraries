@@ -20,7 +20,8 @@ class ProgressBar
 	public $step = 0;	// current step
 	public $position = array(); // current bar position
 
-	public $clear_buffer_size = 1024*256; // we need to send this before the lfush to get browser output
+	public $clear_buffer_size = 1; // we need to send this before the lfush to get browser output
+	public $clear_buffer_size_init = 1024*1024; // if I don't send that junk, it won't send anything
 	
 	// public vars
 	
@@ -76,13 +77,16 @@ class ProgressBar
 			$this->width = $width;
 		if ($height > 0)
 			$this->height = $height;
+		$this->_flushCache($this->clear_buffer_size_init);
 	}
 	
 	// private functions
 	
-	private function _flushCache()
+	private function _flushCache($clear_buffer_size = 0)
 	{
-		echo str_repeat(' ', $this->clear_buffer_size);
+		if (!$clear_buffer_size)
+			$clear_buffer_size = $this->clear_buffer_size;
+		echo str_repeat(' ', $clear_buffer_size);
 		ob_flush();
 		flush();
 	}
