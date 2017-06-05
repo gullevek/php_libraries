@@ -77,6 +77,8 @@ class ProgressBar
 			$this->width = $width;
 		if ($height > 0)
 			$this->height = $height;
+		// needs to be called twice or I do not get any output
+		$this->_flushCache($this->clear_buffer_size_init);
 		$this->_flushCache($this->clear_buffer_size_init);
 	}
 	
