@@ -1530,7 +1530,8 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 							// failed to get insert id
 							$this->insert_id = '';
 							$this->warning_id = 33;
-							$this->_db_error('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id returned no data</span>', 'DB_WARNING');
+							$this->_db_error();
+							$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id returned no data</span>', 'DB_WARNING');
 						}
 					}
 					// this error handling is only for pgsql

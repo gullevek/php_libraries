@@ -112,7 +112,10 @@
 		// DESC  : wrapper for pg_prepare
 		public function _db_prepare($name, $query)
 		{
-			return @pg_prepare($this->dbh, $name, $query);
+			$result = @pg_prepare($this->dbh, $name, $query);
+			if (!$result)
+				$this->last_error_query = $query;
+			return $result;
 		}
 
 		// METHOD: _db_execute
@@ -121,7 +124,10 @@
 		// DESC  : wrapper for pg_execute for running a prepared statement
 		public function _db_execute($name, $data)
 		{
-			return @pg_execute($this->dbh, $name, $data);
+			$result = @pg_execute($this->dbh, $name, $data);
+			if (!$result)
+				$this->last_error_query = $query;
+			return $result;
 		}
 
 		// METHOD: _db_num_rows
