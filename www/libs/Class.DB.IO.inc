@@ -1702,8 +1702,10 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 					$_data = (count($data) >= 1) ? $data[$field] : $GLOBALS[$field];
 					$has_default = $table_data[$field]['has default'];
 					$not_null = $table_data[$field]['not null'];
+					// we detect bool, so we can force a write on "false"
+					$is_bool = $table_data[$field]['type'] == 'bool' ? true : false;
 					// write if the field has to be not null, or if there is no data and the field has no default values or if there is data
-					if (($not_null && !$_data) || (!$has_default && !$_data) || (is_numeric($_data) && isset($_data)) || $_data)
+					if (($not_null && !$_data) || (!$has_default && !$_data) || ($is_bool && !$_data) || (is_numeric($_data) && isset($_data)) || $_data)
 					{
 						if ($q_sub_value && !$primary_key['value'])
 							$q_sub_value .= ', ';
@@ -1720,7 +1722,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 						if (strstr($table_data[$field]['type'], 'int'))
 							$q_sub_data .= (is_numeric($_data) && isset($_data)) ? $_data : ($has_default ? $has_default : 'NULL');
 						else
-							$q_sub_data .= ($_data) ? "'".$this->db_escape_string($_data)."'" : ($has_default ? "'".$this->db_escape_string($has_default)."'" : 'NULL');
+							$q_sub_data .= ($_data ? "'".$this->db_escape_string($_data)."'" : (($primary_key['value'] && $is_bool) ? "'".$this->db_boolean($_data, true)."'" : ($has_default ? "'".$this->db_escape_string($has_default)."'" : 'NULL')));
 					}
 				}
 			}
