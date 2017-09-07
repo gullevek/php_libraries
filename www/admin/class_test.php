@@ -86,6 +86,18 @@
 	$status = $basic->db_exec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."') RETURNING foo_id, test");
 	print "DIRECT MULTIPLE INSERT STATUS: $status | PRIMARY KEYS: ".print_r($basic->insert_id, 1)." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
 
+	# db write class test
+	$table = 'foo';
+	$primary_key = ''; # unset
+	$db_write_table = array ('test');
+	$object_fields_not_touch = array ();
+	$object_fields_not_update = array ();
+	$data = array ('test' => 'SOMETHING '.time());
+	$primary_key = $basic->db_write_data_ext($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
+	print "Wrote to DB tabel $table and got primary key $primary_key<br>";
+	$data = array ('test' => '');
+	$primary_key = $basic->db_write_data_ext($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
+	print "Wrote to DB tabel $table and got primary key $primary_key<br>";
 
 	# async test queries
 /*	$basic->db_exec_async("SELECT test FROM foo, (SELECT pg_sleep(10)) as sub WHERE foo_id IN (27, 50, 67, 44, 10)");

@@ -1667,7 +1667,13 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 		// DESC:   writes into one table based on array of table columns
 		public function db_write_data($write_array, $not_write_array, $primary_key, $table, $data = array ())
 		{
-			$not_write_upodate_array = array ();
+			if (!is_array($write_array))
+				$write_array = array ();
+			if (!is_array($not_write_array))
+				$not_write_array = array ();
+			if (is_array($table))
+				return false;
+			$not_write_update_array = array ();
 			return $this->db_write_data_ext($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
 		}
 		
@@ -1691,7 +1697,9 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 					'value' => $primary_key
 				);
 			}
-
+			// var set for strings
+			$q_sub_value = '';
+			$q_sub_data = '';
 			// get the table layout and row types
 			$table_data = $this->db_show_table_meta_data(($this->db_schema ? $this->db_schema.'.' : '').$table);
 			foreach ($write_array as $field)
@@ -1705,7 +1713,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 					// we detect bool, so we can force a write on "false"
 					$is_bool = $table_data[$field]['type'] == 'bool' ? true : false;
 					// write if the field has to be not null, or if there is no data and the field has no default values or if there is data
-					if (($not_null && !$_data) || (!$has_default && !$_data) || ($is_bool && !$_data) || (is_numeric($_data) && isset($_data)) || $_data)
+					if (($not_null && !$_data) || (!$has_default && !$_data) || ($is_bool && !$_data) || (is_numeric($_data) && isset($_data)) || ($primary_key['value'] && !$_data) || $_data)
 					{
 						if ($q_sub_value && !$primary_key['value'])
 							$q_sub_value .= ', ';

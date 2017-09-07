@@ -581,7 +581,7 @@
 			{
 				$this->acl['page'] = $_SESSION['GROUP_ACL_LEVEL'];
 			}
-			if ($_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1)
+			if (isset($_SESSION['PAGES_ACL_LEVEL'][$this->page_name]) && $_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1)
 			{
 				$this->acl['page'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
 			}

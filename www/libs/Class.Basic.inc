@@ -54,6 +54,7 @@
 	*	GenAssocArray -> generactes a new associativ array from an existing array
 	*	CheckDate -> checks if a date is valid
 	*   CompareDate -> compares two dates. -1 if the first is smaller, 0 if they are equal, 1 if the first is bigger
+	*   CompareDateTime -> compares two dates with time. -1 if the first is smaller, 0 if they are equal, 1 if the first is bigger
 	*   _crc32b -> behaves like the hash("crc32b") in php < 5.2.8. this function will flip the hash like it was (wrong)
 	*              before if a new php version is found
 	*   crypt* -> encrypt and decrypt login string data, used by Login class
@@ -1271,6 +1272,25 @@
 			if ($start_date == $end_date)
 				return 0;
 			if ($start_date > $end_date)
+				return 1;
+		}
+
+		// METHOD: CompareDateTime
+		// PARAMS: start_datetime, end_datetime (both YYYY-MM-DD HH:mm:ss)
+		// RETURN: -1 if the first date is smaller the last, 0 if both are equal, 1 if the end date is bigger than the last
+		// DESC  : compares the two dates + times. if seconds missing in one set, add :00, converts / to -
+		public static function CompareDateTime($start_datetime, $end_datetime)
+		{
+			// pre check for empty or wrong
+			if ($start_date == '--' || $end_date == '--' || !$start_date || !$end_date)
+				return FALSE;
+			$start_timestamp = strtotime($start_datetime);
+			$end_timestamp = strtotime($end_datetime);
+			if ($start_timestamp < $end_timestamp)
+				return -1;
+			if ($start_timestamp == $end_timestamp)
+				return 0;
+			if ($start_timestamp > $end_timestamp)
 				return 1;
 		}
 
