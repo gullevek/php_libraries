@@ -99,7 +99,7 @@
 			// queue key
 			if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action))
 			{
-				$this->queue_key = join('', array_map(create_function('', '$range = $GLOBALS["_KEY_RANGE"]; return $range[rand(0, (count($range) - 1))];'), range(1, 3)));
+				$this->queue_key = join('', array_map(function () { $range = $GLOBALS['_KEY_RANGE']; return $range[rand(0, (count($range) - 1))]; }, range(1, 3)));
 			}
 		}
 		
