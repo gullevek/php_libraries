@@ -1707,13 +1707,17 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 				if ((!$primary_key['value'] || ($primary_key['value'] && !in_array($field, $not_write_update_array))) && !in_array($field, $not_write_array))
 				{
 					// data from external or data field
-					$_data = (count($data) >= 1) ? $data[$field] : $GLOBALS[$field];
+					$_data = null;
+					if (count($data) >= 1 && array_key_exists($field, $data))
+						$_data = $data[$field];
+					elseif (array_key_exists($field, $GLOBALS))
+						$_data = $GLOBALS[$field];
 					$has_default = $table_data[$field]['has default'];
 					$not_null = $table_data[$field]['not null'];
 					// we detect bool, so we can force a write on "false"
 					$is_bool = $table_data[$field]['type'] == 'bool' ? true : false;
-					// write if the field has to be not null, or if there is no data and the field has no default values or if there is data
-					if (($not_null && !$_data) || (!$has_default && !$_data) || ($is_bool && !$_data) || (is_numeric($_data) && isset($_data)) || ($primary_key['value'] && !$_data) || $_data)
+					// write if the field has to be not null, or if there is no data and the field has no default values or if there is data or if this is an update and there is no data (set null)
+					if (($not_null && !$_data) || (!$has_default && !$_data) || (is_numeric($_data) && isset($_data)) || ($primary_key['value'] && !$_data) || $_data)
 					{
 						if ($q_sub_value && !$primary_key['value'])
 							$q_sub_value .= ', ';
@@ -1728,9 +1732,10 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 							$_data = '';
 						// write data into sql string
 						if (strstr($table_data[$field]['type'], 'int'))
-							$q_sub_data .= (is_numeric($_data) && isset($_data)) ? $_data : ($has_default ? $has_default : 'NULL');
+							$q_sub_data .= (is_numeric($_data) && isset($_data)) ? $_data : 'NULL';
 						else
-							$q_sub_data .= ($_data ? "'".$this->db_escape_string($_data)."'" : (($primary_key['value'] && $is_bool) ? "'".$this->db_boolean($_data, true)."'" : ($has_default ? "'".$this->db_escape_string($has_default)."'" : 'NULL')));
+							// if bool -> set bool, else write data
+							$q_sub_data .= $_data ? "'".($is_bool ? $this->db_boolean($_data, true) : $this->db_escape_string($_data))."'" : 'NULL';
 					}
 				}
 			}
