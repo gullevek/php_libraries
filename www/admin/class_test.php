@@ -88,15 +88,22 @@
 
 	# db write class test
 	$table = 'foo';
+	print "TABLE META DATA: ".$basic->print_ar($basic->db_show_table_meta_data($table))."<br>";
 	$primary_key = ''; # unset
-	$db_write_table = array ('test', 'some_bool');
+	$db_write_table = array ('test', 'string_a', 'number_a', 'some_bool');
 //	$db_write_table = array ('test');
 	$object_fields_not_touch = array ();
 	$object_fields_not_update = array ();
-	$data = array ('test' => 'BOOL TEST SOMETHING '.time());
+	$data = array ('test' => 'BOOL TEST SOMETHING '.time(), 'string_a' => 'SOME TEXT', 'number_a' => 5);
 	$primary_key = $basic->db_write_data_ext($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
 	print "Wrote to DB tabel $table and got primary key $primary_key<br>";
-	$data = array ('test' => 'BOOL TEST OFF '.time(), 'some_bool' => 1);
+	$data = array ('test' => 'BOOL TEST ON '.time(), 'string_a' => '', 'number_a' => 0, 'some_bool' => 1);
+	$primary_key = $basic->db_write_data_ext($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
+	print "Wrote to DB tabel $table and got primary key $primary_key<br>";
+	$data = array ('test' => 'BOOL TEST OFF '.time(), 'string_a' => null, 'number_a' => null, 'some_bool' => 0);
+	$primary_key = $basic->db_write_data_ext($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
+	print "Wrote to DB tabel $table and got primary key $primary_key<br>";
+	$data = array ('test' => 'BOOL TEST UNSET '.time());
 	$primary_key = $basic->db_write_data_ext($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
 	print "Wrote to DB tabel $table and got primary key $primary_key<br>";
 
