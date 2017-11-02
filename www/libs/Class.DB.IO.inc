@@ -661,7 +661,7 @@
 						{
 							$this->pk_name_table[$table] = $this->db_functions->_db_primary_key($table, $schema);
 						}
-						$this->pk_name = $this->pk_name_table[$table];
+						$this->pk_name = $this->pk_name_table[$table] ? $this->pk_name_table[$table] : 'NULL';
 					}
 					if (!preg_match("/ returning /i", $this->query) && $this->pk_name)
 					{
