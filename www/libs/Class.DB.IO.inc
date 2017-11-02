@@ -714,7 +714,7 @@
 			if (!$this->cursor || $this->db_functions->_db_last_error_query())
 			{
 				// printout Query if debug is turned on
-				if (!$this->db_debug)
+				if ($this->db_debug)
 					$this->_db_debug('db', $this->query, 'db_exec', 'Q[nc]');
 				// internal error handling
 				$this->error_id = 13;
@@ -1015,7 +1015,7 @@
 				// if still no cursor ...
 				if (!$this->cursor_ext[$md5]['cursor'])
 				{
-					if (!$this->db_debug)
+					if ($this->db_debug)
 						$this->_db_debug('db', $this->cursor_ext[$md5]['query'], 'db_return', 'Q');
 					// internal error handling
 					$this->error_id = 13;
