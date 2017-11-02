@@ -663,12 +663,12 @@
 						}
 						$this->pk_name = $this->pk_name_table[$table] ? $this->pk_name_table[$table] : 'NULL';
 					}
-					if (!preg_match("/ returning /i", $this->query) && $this->pk_name)
+					if (!preg_match("/ returning /i", $this->query) && $this->pk_name && $this->pk_name != 'NULL')
 					{
 						$this->query .= " RETURNING ".$this->pk_name;
 						$this->returning_id = true;
 					}
-					elseif (preg_match("/ returning (.*)/i", $this->query, $matches) && $this->pk_name)
+					elseif (preg_match("/ returning (.*)/i", $this->query, $matches) && $this->pk_name && $this->pk_name != 'NULL')
 					{
 						// add the primary key if it is not in the returning set
 						if (!preg_match("/$this->pk_name/", $matches[1]))
@@ -763,7 +763,7 @@
 								$this->insert_id[] = $_insert_id;
 							}
 							// if we have only one, revert from array to single
-							if (count($this->insert_id) == 1)
+							if (count($this->insert_id) >= 1)
 							{
 //								echo "* SINGLE DATA CONVERT: ".count($this->insert_id[0])." => ".array_key_exists($this->pk_name, $this->insert_id[0])."<br>";
 //								echo "* PK DIRECT: ".$this->insert_id[0][$this->pk_name]."<Br>";
