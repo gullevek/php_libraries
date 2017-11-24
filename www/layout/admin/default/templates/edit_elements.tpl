@@ -24,11 +24,11 @@
 			{html_checkboxes values=$element.data.value output=$element.data.output selected=$element.data.checked}
 		{/if}
 		{if $element.type == 'text'}
-			<input type="text" name="{$element.data.name}" value="{$element.data.value}"{if $element.data.size} size="{$element.data.size}"{/if}{if $element.data.length} maxlength="{$element.data.length}"{/if}>	
+			<input type="text" name="{$element.data.name}" value="{$element.data.value}"{if $element.data.size} size="{$element.data.size}"{/if}{if $element.data.length} maxlength="{$element.data.length}"{/if}>
 		{/if}
 		{if $element.type == 'password'}
 			Password: <input type="password" name="{$element.data.name}" {if $element.data.size} size="{$element.data.size}"{/if}{if $element.data.length} maxlength="{$element.data.length}"{/if}> {if $element.data.HIDDEN_value}{t}Password set{/t}{/if}<br>
-			Confirm: <input type="password" name="CONFIRM_{$element.data.name}" {if $element.data.size} size="{$element.data.size}"{/if}{if $element.data.length} maxlength="{$element.data.length}"{/if}> 
+			Confirm: <input type="password" name="CONFIRM_{$element.data.name}" {if $element.data.size} size="{$element.data.size}"{/if}{if $element.data.length} maxlength="{$element.data.length}"{/if}>
 			<input type="hidden" name="HIDDEN_{$element.data.name}" value="{$element.data.HIDDEN_value}">
 		{/if}
 		{if $element.type == 'date'}
@@ -71,7 +71,7 @@
 			<tr>
 				{* now each line of data *}
 				<td>
-					{$key}: 
+					{$key}:
 				</td>
 				{foreach from=$line item=line_item key=line_key}
 				<td>

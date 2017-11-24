@@ -39,7 +39,7 @@ body
 {
 	font-size : 9pt;
 	font-family: Verdana,Arial,Helvetica,sans-serif;
-} 
+}
 
 .small
 {
@@ -119,17 +119,17 @@ input[type="password"]
 {
 	border: 1px solid #999999;
 }
- 
+
 input[type="submit"]
 {
 	border: 1px solid #666666;
 }
- 
+
 input[type="checkbox"]
 {
 	border: 1px solid #999999;
 }
- 
+
 input[type="radio"]
 {
 	border: 1px solid #999999;
@@ -144,26 +144,26 @@ input[type="button"]
 {
 	border: 1px solid #999999;
 }
- 
+
 textarea
 {
 	border: 1px solid #999999;
 	background-color: #efefef;
 }
- 
+
 select
 {
 	border: 1px solid #999999;
 	background-color: #efefef;
 }
 
-/* mouse over */ 
+/* mouse over */
 input[type=submit]:hover, input[type=button]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="checkbox"]:hover, input[type="radio"]:hover, input[type="file"]:hover, textarea:hover, select:hover
 {
 	border: 1px dashed red;
 }
 
-/* selected */ 
+/* selected */
 input[type=submit]:focus, input[type=button]:focus, input[type="password"]:focus, input[type="checkbox"]:focus, input[type="radio"]:focus, input[type="file"]:focus
 {
 	border: 1px solid red;
@@ -505,7 +505,7 @@ div.spacer
 }
 
 .edit_temp
-{	
+{
 	background-color: #FFDF6F;
 }
 

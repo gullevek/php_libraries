@@ -64,7 +64,7 @@
 	}
 	// smarty template engine (extended Translation version)
 	$smarty = new SmartyML($lang);
-	
+
 	if (TARGET == 'live' || TARGET == 'remote')
 	{
 		// login
@@ -156,7 +156,7 @@
 		if ($PAGES[$i]["menu"] && $PAGES[$i]["online"])
 		{
 			$menuarray[] = $PAGES[$i];
-		} 
+		}
 	}
 
 	// split point for nav points
@@ -182,7 +182,7 @@
 		}
 		if ($menuarray[($i - 1)]["filename"] == $form->get_page_name())
 		{
-			$position = $i - 1; 
+			$position = $i - 1;
 			$menu_data[$j]['position'] = 1;
 		}
 		else
@@ -322,7 +322,7 @@
 		$DATA['elements'] = $elements;
 		$DATA['hidden'] = $form->form_create_hidden_fields();
 		$DATA['save_delete'] = $form->form_create_save_delete();
-	} 
+	}
 
 	// debug data, if DEBUG flag is on, this data is print out
 	$DEBUG_DATA['DEBUG'] = $DEBUG_TMPL;

@@ -30,7 +30,7 @@
 	//------------------------------ library include end
 
 	//------------------------------ basic variable settings start
-	// set encoding 
+	// set encoding
 	if (!isset($encoding))
 		$encoding = DEFAULT_ENCODING;
 	// set the default lang, if not given

@@ -26,7 +26,7 @@
 <table width="{$table_width}" border="0" cellpadding="0" cellspacing="1">
 <!-- ERROR MSG START //-->
 {foreach from=$form_error_msg item=element key=key name=loop}
-    {include file="edit_error_msg.tpl"}
+	{include file="edit_error_msg.tpl"}
 {/foreach}
 <!-- ERROR MSG END //-->
 <!-- TOP MENU START //-->

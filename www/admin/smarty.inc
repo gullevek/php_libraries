@@ -17,7 +17,7 @@
 
 	// set basic template path (tmp)
 	// paths are set in the 'set_paths.inc' file
-	
+
 	// check if we have an external file with the template name
 	if (file_exists($cms->includes.$cms->INC_TEMPLATE_NAME) && is_file($cms->includes.$cms->INC_TEMPLATE_NAME))
 	{

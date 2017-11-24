@@ -52,7 +52,7 @@ var load_id = {if $primary_key}{$primary_key}{else}0{/if};
 				{/foreach}
 				</div>
 			</div>
-	
+
 			<div style="float: left; margin: 2px; padding: 2px; position: relative; width: 570px; min-height: 450px;" class="{$status_color}">
 				{* START CONTENT *}
 				{include file="$CONTENT_INCLUDE"}

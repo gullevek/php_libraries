@@ -261,7 +261,7 @@ $cms->debug('file_upload', "ERROR: $error | INI FSize: ".ini_get("upload_max_fil
 				$cms->db_exec($q);
 			}
 		} // if not error
-	}	
+	}
 	if ($cms->action == 'delete' && $cms->action_yes == 'true')
 	{
 		$file_uid = $cms->action_id;
@@ -332,7 +332,7 @@ $cms->debug('file_upload', "ERROR: $error | INI FSize: ".ini_get("upload_max_fil
 	}
 	// get th max entries
 	$q = "SELECT COUNT(file_uid) FROM file ";
-	$q_search_where = "WHERE type in ('".str_replace(',', "','", $show_type)."') "; 
+	$q_search_where = "WHERE type in ('".str_replace(',', "','", $show_type)."') ";
 	if ($search_what)
 	{
 		$q_search_where .= "AND LOWER(name_en) LIKE '%".addslashes(strtolower($search_what))."%' OR name_ja LIKE '%".addslashes($search_what)."%' OR LOWER(file_name) LIKE '%".addslashes(strtolower($search_what))."%' ";
@@ -429,7 +429,7 @@ $cms->debug('file_upload', "ERROR: $error | INI FSize: ".ini_get("upload_max_fil
 			'size_y' => $res['size_y'],
 			'file_uid' => $res['file_uid'],
 			'file_type' => $res['type'],
-			'picture' => $cms->cache_pictures.$cms->adbCreateThumbnail(DEV_SCHEMA.'_'.$res['file_uid'], 80, 60, $res['type'], '', $cms->cache_pictures_root) 
+			'picture' => $cms->cache_pictures.$cms->adbCreateThumbnail(DEV_SCHEMA.'_'.$res['file_uid'], 80, 60, $res['type'], '', $cms->cache_pictures_root)
 		);
 	}
 
@@ -482,5 +482,5 @@ $cms->debug('file_upload', "ERROR: $error | INI FSize: ".ini_get("upload_max_fil
 	//------------------------------ footer
 	require("footer.inc");
 	//------------------------------ footer
-		
+
 ?>

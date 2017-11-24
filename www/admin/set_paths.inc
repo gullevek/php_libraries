@@ -20,7 +20,7 @@
 		$MASTER_TEMPLATE_NAME = MASTER_TEMPLATE_NAME;
 
 	// just emergency fallback for language
-	// set encoding 
+	// set encoding
 	if ($_SESSION['DEFAULT_CHARSET'])
 		$encoding = $_SESSION['DEFAULT_CHARSET'];
 	elseif (!$encoding)

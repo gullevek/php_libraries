@@ -7,7 +7,7 @@
  */
 var clientPC  = navigator.userAgent.toLowerCase(); // Get client info
 var is_gecko  = ((clientPC.indexOf('gecko') != -1) && (clientPC.indexOf('spoofer') == -1)
-                && (clientPC.indexOf('khtml') == -1) && (clientPC.indexOf('netscape/7.0') == -1));
+				&& (clientPC.indexOf('khtml') == -1) && (clientPC.indexOf('netscape/7.0') == -1));
 var is_safari = ((clientPC.indexOf('AppleWebKit') != -1) && (clientPC.indexOf('spoofer') == -1));
 var is_khtml  = (navigator.vendor == 'KDE' || ( document.childNodes && !document.all && !navigator.taintEnabled ));
 if (clientPC.indexOf('opera') != -1)
@@ -62,18 +62,18 @@ function expandTA(ta_id)
 // DESC:   shows or hides the menu
 function ShowHideMenu(status, id)
 {
-    if (status == 'show')
-    {
-        document.getElementById(id).style.visibility = 'visible';
-        if (document.getElementById('search_results').innerHTML)
-            document.getElementById('search_results').style.visibility = 'visible';
-    }
-    else if (status == 'hide')
-    {
-        document.getElementById(id).style.visibility = 'hidden';
-        if (document.getElementById('search_results').style.visibility == 'visible')
-            document.getElementById('search_results').style.visibility = 'hidden';
-    }
+	if (status == 'show')
+	{
+		document.getElementById(id).style.visibility = 'visible';
+		if (document.getElementById('search_results').innerHTML)
+			document.getElementById('search_results').style.visibility = 'visible';
+	}
+	else if (status == 'hide')
+	{
+		document.getElementById(id).style.visibility = 'hidden';
+		if (document.getElementById('search_results').style.visibility == 'visible')
+			document.getElementById('search_results').style.visibility = 'hidden';
+	}
 }
 
 function ShowHideDiv(id)
@@ -132,7 +132,7 @@ function getScrollOffset()
 	left = window.pageXOffset || (window.document.documentElement.scrollLeft || window.document.body.scrollLeft);
 	top = window.pageYOffset || (window.document.documentElement.scrollTop || window.document.body.scrollTop);
 	return {left: left, top: top};
-}   
+}
 
 // METHOD: setCenter
 // PARAMS: id to set center
@@ -153,9 +153,9 @@ function setCenter(id, left, top)
 		$(id).setStyle ({
 			left: parseInt((viewport.width / 2) - (dimensions.width / 2) + offset.left) + 'px'
 		});
-	}  
+	}
 	if (top)
-	{  
+	{
 		$(id).setStyle ({
 			top: parseInt((viewport.height / 2) - (dimensions.height / 2) + offset.top) + 'px'
 		});

@@ -1,9 +1,9 @@
 <?
 	/********************************************************************
-	* AUTHOR: Clemens Schwaighofer 
+	* AUTHOR: Clemens Schwaighofer
 	* CREATED: 2001/07/11
 	* SHORT DESCRIPTION:
-	* sets the order from a table (edit_) 
+	* sets the order from a table (edit_)
 	* HISTORY:
 	* 2005/07/11 (cs) adept to new edit interface
 	* 2002-10-18: little include changes
@@ -125,7 +125,7 @@
 	// get ...
 	$q = "SELECT ".$table_name."_id, name, order_number FROM ".$table_name." ";
 	if ($where_string)
-		$q .= "WHERE $where_string "; 
+		$q .= "WHERE $where_string ";
 	$q .= "ORDER BY order_number";
 
 	while ($res = $db->db_return($q))

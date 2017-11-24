@@ -1,5 +1,5 @@
 /* vim: set fileencoding=utf-8 expandtab! shiftwidth=2 : */
-/* modified version of firebugx.js which can cope with 
+/* modified version of firebugx.js which can cope with
  * firebug 1.2+ and the webkit console */
 
 var ConsoleSetup = function() {
