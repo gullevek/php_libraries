@@ -14,7 +14,7 @@
 class ProgressBar
 {
 	// private vars
-	
+
 	public $code;	// unique code
 	public $status = 'new';	// current status (new,show,hide)
 	public $step = 0;	// current step
@@ -22,12 +22,12 @@ class ProgressBar
 
 	public $clear_buffer_size = 1; // we need to send this before the lfush to get browser output
 	public $clear_buffer_size_init = 1024*1024; // if I don't send that junk, it won't send anything
-	
+
 	// public vars
-	
+
 	public $min = 0;	// minimal steps
 	public $max = 100;	// maximal steps
-	
+
 	public $left = 5;	// bar position from left
 	public $top = 5;	// bar position from top
 	public $width = 300;	// bar width
@@ -38,9 +38,9 @@ class ProgressBar
 	public $bgr_color_master = '#ffffff';	// master div background color
 	public $border = 1;			// bar border width
 	public $brd_color = '#000000';	// bar border color
-	
+
 	public $direction = 'right';	// direction of motion (right,left,up,down)
-	
+
 	public $frame = array('show' => false);	// ProgressBar Frame
 	/*	'show' => false,	# frame show (true/false)
 		'left' => 200,	# frame position from left
@@ -51,7 +51,7 @@ class ProgressBar
 		'border' => 2,		# frame border
 		'brd_color' => '#dfdfdf #404040 #404040 #dfdfdf'	# frame border color
 	*/
-	
+
 	public $label = array();	// ProgressBar Labels
 	/*	'name' => array(	# label name
 			'type' => 'text',	# label type (text,button,step,percent,crossbar)
@@ -68,7 +68,7 @@ class ProgressBar
 			'bgr_color' => ''	# label background color
 		)
 	*/
-	
+
 	// constructor
 	public function __construct($width = 0, $height = 0)
 	{
@@ -81,9 +81,9 @@ class ProgressBar
 		$this->_flushCache($this->clear_buffer_size_init);
 		$this->_flushCache($this->clear_buffer_size_init);
 	}
-	
+
 	// private functions
-	
+
 	private function _flushCache($clear_buffer_size = 0)
 	{
 		if (!$clear_buffer_size)
@@ -103,7 +103,7 @@ class ProgressBar
 			$percent = 100;
 		return $percent;
 	}
-	
+
 	private function _calculatePosition($step)
 	{
 		switch ($this->direction)
@@ -125,7 +125,7 @@ class ProgressBar
 			$pixel = 0;
 		if ($step >= $this->max)
 			$pixel = $bar - ($this->pedding * 2);
-		
+
 		switch ($this->direction)
 		{
 			case 'right':
@@ -155,7 +155,7 @@ class ProgressBar
 		}
 		return $position;
 	}
-	
+
 	private function _setStep($step)
 	{
 		if ($step > $this->max)
@@ -164,7 +164,7 @@ class ProgressBar
 			$step = $this->min;
 		$this->step = $step;
 	}
-	
+
 	// public functions
 	public function setFrame($width = 0, $height = 0)
 	{
@@ -178,13 +178,13 @@ class ProgressBar
 			'border' => 2,
 			'brd_color' => '#dfdfdf #404040 #404040 #dfdfdf'
 		);
-		
+
 		if ($width > 0)
 			$this->frame['width'] = $width;
 		if ($height > 0)
 			$this->frame['height'] = $height;
 	}
-	
+
 	public function addLabel($type, $name, $value = '&nbsp;')
 	{
 		switch($type)
@@ -280,14 +280,14 @@ class ProgressBar
 				break;
 		}
 	}
-	
+
 	public function addButton($name, $value, $action, $target = 'self')
 	{
 		$this->addLabel('button', $name, $value);
 		$this->label[$name]['action'] = $action;
 		$this->label[$name]['target'] = $target;
 	}
-	
+
 	public function setLabelPosition($name, $left, $top, $width, $height, $align='')
 	{
 //		print "SET POSITION[$name]: $left<br>";
@@ -301,7 +301,7 @@ class ProgressBar
 
 			if ($align != '')
 				$this->label[$name]['align'] = $align;
-		}	
+		}
 		// init
 		if ($this->status != 'new')
 		{
@@ -316,7 +316,7 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function setLabelColor($name, $color)
 	{
 		$this->label[$name]['color'] = $color;
@@ -326,7 +326,7 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function setLabelBackground($name, $color)
 	{
 		$this->label[$name]['bgr_color'] = $color;
@@ -336,7 +336,7 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function setLabelFont($name, $size, $family = '', $weight = '')
 	{
 		// just in case if it is too small
@@ -355,7 +355,7 @@ class ProgressBar
 			$this->label[$name]['font-family'] = $family;
 		if ($weight != '')
 			$this->label[$name]['font-weight'] = $weight;
-		
+
 		if ($this->status != 'new')
 		{
 			$output = '<script type="text/JavaScript">';
@@ -367,7 +367,7 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function setLabelValue($name, $value)
 	{
 		$this->label[$name]['value'] = $value;
@@ -378,7 +378,7 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function setBarColor($color)
 	{
 		$this->color = $color;
@@ -388,7 +388,7 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function setBarBackground($color)
 	{
 		$this->bgr_color = $color;
@@ -398,15 +398,15 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function setBarDirection($direction)
 	{
 		$this->direction = $direction;
-		
+
 		if ($this->status != 'new')
 		{
 			$this->position = $this->_calculatePosition($this->step);
-			
+
 			echo '<script type="text/JavaScript">';
 			echo 'PBposition'.$this->code.'("left",'.$this->position['left'].');';
 			echo 'PBposition'.$this->code.'("top",'.$this->position['top'].');';
@@ -416,13 +416,13 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function getHtml()
 	{
 		$html = '';
 		$js = '';
 		$html_button = '';
-		
+
 		$this->_setStep($this->step);
 		$this->position = $this->_calculatePosition($this->step);
 
@@ -432,7 +432,7 @@ class ProgressBar
 		$style_brd = 'width:'.$this->width.'px;height:'.$this->height.'px;background:'.$this->bgr_color.';';
 		if ($this->border > 0)
 			$style_brd .= 'border:'.$this->border.'px solid; border-color:'.$this->brd_color.'; -webkit-border-radius: 5px 5px 5px 5px; border-radius: 5px 5px 5px 5px; -webkit-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset;';
-		
+
 		$style_bar = 'position:relative;width:'.$this->position['width'].'px;height:'.$this->position['height'].'px;background:'.$this->color.';';
 		if ($this->position['top'] !== false)
 			$style_bar .= 'top:'.$this->position['top'].'px;';
@@ -440,7 +440,7 @@ class ProgressBar
 			$style_bar .= 'left:'.$this->position['left'].'px;';
 		if ($this->border > 0)
 			$style_bar .= '-webkit-border-radius: 5px 5px 5px 5px; border-radius: 5px 5px 5px 5px; -webkit-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset;';
-		
+
 		if ($this->frame['show'] == true)
 		{
 			if ($this->frame['border'] > 0)
@@ -448,12 +448,12 @@ class ProgressBar
 			$html .= '<div id="pfrm'.$this->code.'" style="width:'.$this->frame['width'].'px;height:'.$this->frame['height'].'px;'.$border.'background:'.$this->frame['color'].';">'."\n";
 		}
 
-		// temp write the bar here, we add that later, below all the html + progress %	
+		// temp write the bar here, we add that later, below all the html + progress %
 		$html_bar_top = '<div id="pbrd'.$this->code.'" style="'.$style_brd.($this->frame['show'] == true ? 'margin-left: 2px;margin-bottom:2px;' : '').'">'."\n";
 		$html_bar_top .= '<div id="pbar'.$this->code.'" style="'.$style_bar.'">';
 		// insert single percent there
 		$html_bar_bottom = '</div></div>'."\n";
-		
+
 		$js .= 'function PBposition'.$this->code.'(item,pixel) {'."\n";
 		$js .= ' pixel = parseInt(pixel);'."\n";
 		$js .= ' switch(item) {'."\n";
@@ -479,7 +479,7 @@ class ProgressBar
 				$style_lbl .= 'width:'.$data['width'].'px;';
 			if ($data['height'] > 0)
 				$style_lbl .= 'height:'.$data['height'].'px;';
-			
+
 			if (array_key_exists('font-size', $data))
 				$style_lbl .= 'font-size:'.$data['font-size'].'px;';
 			if (array_key_exists('font-family', $data))
@@ -488,7 +488,7 @@ class ProgressBar
 				$style_lbl .= 'font-weight:'.$data['font-weight'].';';
 			if (array_key_exists('bgr_color', $data) && ($data['bgr_color'] != ''))
 				$style_lbl .= 'background:'.$data['bgr_color'].';';
-			
+
 			if (array_key_exists('type', $data))
 			{
 				switch ($data['type'])
@@ -513,7 +513,7 @@ class ProgressBar
 						break;
 					case 'crossbar':
 						$html .= '<div id="plbl'.$name.$this->code.'" style="'.$style_lbl.'">'.$data['value'].'</div>'."\n";
-						
+
 						$js .= 'function PBrotaryCross'.$name.$this->code.'() {'."\n";
 						$js .= ' cross = document.getElementById("plbl'.$name.$this->code.'").firstChild.nodeValue;'."\n";
 						$js .= ' switch(cross) {'."\n";
@@ -534,42 +534,42 @@ class ProgressBar
 		$html .= $html_percent;
 		$html .= $html_bar_bottom;
 		$html .= $html_button; // any buttons on bottom
-		
+
 		if (count($this->label) > 0)
 		{
-			
+
 			$js .= 'function PBlabelText'.$this->code.'(name,text) {'."\n";
 			$js .= ' name = "plbl" + name + "'.$this->code.'";'."\n";
 			$js .= ' document.getElementById(name).innerHTML=text;'."\n";
 			$js .= '}'."\n";
 		}
-		
+
 		if ($this->frame['show'] == true)
 		{
 			$html .= '</div>'."\n";
 		}
-		
+
 		$html .= '<script type="text/JavaScript">'."\n";
 		$html .= $js;
 		$html .= '</script>'."\n";
 
 		$html .= '</div>';
-		
+
 		return $html;
 	}
-	
+
 	public function show()
 	{
 		$this->status = 'show';
 		echo $this->getHtml();
 		$this->_flushCache();
 	}
-	
+
 	public function moveStep($step)
 	{
 		$last_step = $this->step;
 		$this->_setStep($step);
-		
+
 		$js = '';
 		$new_position = $this->_calculatePosition($this->step);
 		if ($new_position['width'] != $this->position['width'] && ($this->direction == 'right' || $this->direction == 'left'))
@@ -621,37 +621,37 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function moveNext()
 	{
 		$this->moveStep($this->step + 1);
 	}
-	
+
 	public function moveMin()
 	{
 		$this->moveStep($this->min);
 	}
-	
+
 	public function hide()
 	{
 		if ($this->status == 'show')
 		{
 			$this->status = 'hide';
-			
+
 			$output = '<script type="text/JavaScript">';
 			$output .= 'document.getElementById("pbm'.$this->code.'").style.visibility="hidden";document.getElementById("pbm'.$this->code.'").style.display="none";';
-			$output .= '</script>'."\n"; 
+			$output .= '</script>'."\n";
 			echo $output;
 			$this->_flushCache();
 		}
 	}
-	
+
 	public function unhide()
 	{
 		if ($this->status == 'hide')
 		{
 			$this->status = 'show';
-			
+
 			$output = '<script type="text/JavaScript">';
 			$output .= 'document.getElementById("pbm'.$this->code.'").style.visibility="visible";document.getElementById("pbm'.$this->code.'").style.visibility="block";';
 			$output .= '</script>'."\n";
@@ -659,6 +659,6 @@ class ProgressBar
 			$this->_flushCache();
 		}
 	}
-	
+
 }
 ?>

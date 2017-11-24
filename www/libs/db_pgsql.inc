@@ -1,7 +1,7 @@
 <?
 	/*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
-	* CREATED: 2003/04/09 
+	* CREATED: 2003/04/09
 	* SHORT DESCRIPTION:
 	* pgsql wrapper calls
 	* HISTORY:
@@ -147,7 +147,7 @@
 		{
 			return pg_num_fields($cursor);
 		}
- 
+
 		// METHOD: _db_field_name
 		// PARAMS: cursor, field position
 		// RETURN: name of field
@@ -185,7 +185,7 @@
 		// DESC  : wrapper for pg_affected_rows
 		public function _db_affected_rows($cursor)
 		{
-			return pg_affected_rows($cursor); 
+			return pg_affected_rows($cursor);
 		}
 
 		// METHOD: _db_insert_id
@@ -355,7 +355,7 @@
 		{
 			return pg_connection_busy($this->dbh);
 		}
-	
+
 		// METHOD: _db_version
 		// PARAMS: none
 		// RETURN: databse version

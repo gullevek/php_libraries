@@ -33,7 +33,7 @@
 			else
 				return false;
 		}
-		
+
 		// METHOD: _db_query
 		// PARAMS: query
 		// RETURN: cursor
@@ -99,7 +99,7 @@
 			}
 			$this->dbh = null;
 		}
-		
+
 		// METHOD: _db_prepare
 		// PARAMS: prepare name, query
 		// RETURN: prepared statement handler
@@ -140,7 +140,7 @@
 //			return pg_num_fields($cursor);
 			return $cursor->columnCount();
 		}
- 
+
 		// METHOD: _db_field_name
 		// PARAMS: cursor, field position
 		// RETURN: name of field
@@ -166,7 +166,7 @@
 		// DESC  : wrapper for pg_affected_rows
 		public function _db_affected_rows($cursor)
 		{
-//			return pg_affected_rows($cursor); 
+//			return pg_affected_rows($cursor);
 			return $cusor->rowCount();
 		}
 
@@ -278,7 +278,7 @@
 			{
 				$db_port = 5432;
 			}
-			try 
+			try
 			{
 				$this->dbh = new PDO('pgsql:host='.$db_host.';dbname='.$db_name.';port='.$db_port.';sslmode='.$db_ssl, $db_user, $db_pass);
 			}
@@ -342,7 +342,7 @@
 		{
 //			return pg_connection_busy($this->dbh);
 		}
-	
+
 		// METHOD: _db_version
 		// PARAMS: none
 		// RETURN: databse version

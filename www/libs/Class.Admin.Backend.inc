@@ -81,7 +81,7 @@
 
 			// set page name
 			$this->page_name = $this->get_page_name();
-			
+
 			// set the action ids
 			foreach ($this->action_list as $_action)
 			{
@@ -102,7 +102,7 @@
 				$this->queue_key = join('', array_map(function () { $range = $GLOBALS['_KEY_RANGE']; return $range[rand(0, (count($range) - 1))]; }, range(1, 3)));
 			}
 		}
-		
+
 		// deconstructor
 		public function __destruct()
 		{
@@ -110,7 +110,7 @@
 		}
 
 		// INTERNAL METHODS |===============================================>
-		
+
 
 		// PUBLIC METHODS |=================================================>
 

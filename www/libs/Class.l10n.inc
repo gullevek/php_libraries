@@ -11,9 +11,9 @@
 	*	I changed that to a class to be more portable with my style of coding
 	*
 	* PUBLIC VARIABLES
-	*	
+	*
 	* PRIVATE VARIABLES
-	*	
+	*
 	* PUBLIC METHODS
 	*	__:	returns string (translated or original if not found)
 	*	_e:	echos out string (translated or original if not found)
