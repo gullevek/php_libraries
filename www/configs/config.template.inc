@@ -12,12 +12,12 @@
 	DEFINE('EDIT_SESSION_NAME', "<ADMIN SESSION NAME>");
 	// frontend
 	DEFINE('SESSION_NAME', "<SESSION NAME>");
-	
+
 	/************* LANGUAGE / ENCODING *******/
 	DEFINE('DEFAULT_LANG', "en_utf8");
 	// default web page encoding setting
 	DEFINE('DEFAULT_ENCODING', "UTF-8");
-		
+
 	/************* PATHS *********************/
 	// ** NEW/BETTER DIR DECLARATIONS **
 	// path to original file (if symlink)
@@ -58,7 +58,7 @@
 	DEFINE('DOCUMENTS', "documents/");
 	// files (pdfs) (below media)
 	DEFINE('PDFS', "documents/");
-	// css 
+	// css
 	DEFINE('CSS', "css/");
 	// js
 	DEFINE('JS', "javascript/");
@@ -123,7 +123,7 @@
 	DEFINE('USE_PROTOTYPE', true);
 	DEFINE('USE_SCRIPTACULOUS', false);
 	DEFINE('USE_JQUERY', false);
-		
+
 	/************* LAYOUT WIDTHS *************/
 	DEFINE('PAGE_WIDTH', 800);
 	// the default template name
@@ -177,8 +177,8 @@
 	// show DEBUG override
 	// true/false
 	$DEBUG_FLAG['<HOST NAME>'] = true;
-    // set postgresql paths (schemas)
-    $DB_PATH['<HOST NAME>'] = PUBLIC_SCHEMA;
+	// set postgresql paths (schemas)
+	$DB_PATH['<HOST NAME>'] = PUBLIC_SCHEMA;
 
 	// set the USE_DATABASE var, if there is nothing set, we assume TRUE
 	$USE_DATABASE = defined('USE_DATABASE') ? USE_DATABASE : true;
