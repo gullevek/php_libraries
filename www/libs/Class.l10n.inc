@@ -35,7 +35,7 @@
 		private $input;
 		private $l10n;
 
-		public function __construct($lang = '', $path = '')
+		public function __construct($lang = '', $path = DEFAULT_TEMPLATE)
 		{
 			foreach (array('streams.php', 'gettext.php') as $include_file)
 				_spl_autoload($include_file);
@@ -45,12 +45,12 @@
 			else
 				$this->lang = $lang;
 
-			if (!$path)
-				$path = DEFAULT_TEMPLATE;
-			if (!is_dir(LAYOUT.$path.LANG))
+			if (is_dir(LAYOUT.$path.LANG))
+				$path = LAYOUT.$path.LANG;
+			elseif (!is_dir($path))
 				$path = '';
 
-			$this->mofile = LAYOUT.$path.LANG.$this->lang.".mo";
+			$this->mofile = $path.$this->lang.".mo";
 
 			// check if get a readable mofile
 			if (is_readable($this->mofile))
@@ -69,10 +69,12 @@
 
 			$this->lang = $lang;
 
-			if (!is_dir(LAYOUT.$path.LANG))
+			if (is_dir(LAYOUT.$path.LANG))
+				$path = LAYOUT.$path.LANG;
+			elseif (!is_dir($path))
 				$path = '';
 
-			$this->mofile = LAYOUT.$path.LANG.$this->lang.".mo";
+			$this->mofile = $path.$this->lang.".mo";
 
 			// check if get a readable mofile
 			if (is_readable($this->mofile))

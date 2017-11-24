@@ -67,7 +67,7 @@
 		{
 			$this->last_error_query = '';
 			// read out the query status and save the query if needed
-			$result = @pg_query($this->dbh, $query);
+			$result = pg_query($this->dbh, $query);
 			if (!$result)
 				$this->last_error_query = $query;
 			return $result;
@@ -79,7 +79,7 @@
 		// DESC  : sends an async query to the server
 		public function _db_send_query($query)
 		{
-			return @pg_send_query($this->dbh, $query);
+			return pg_send_query($this->dbh, $query);
 		}
 
 		// METHOD: _db_get_result
@@ -102,8 +102,8 @@
 		public function _db_close()
 		{
 			if (is_resource($this->dbh))
-				if (@pg_connection_status($this->dbh) === PGSQL_CONNECTION_OK)
-					@pg_close($this->dbh);
+				if (pg_connection_status($this->dbh) === PGSQL_CONNECTION_OK)
+					pg_close($this->dbh);
 		}
 
 		// METHOD: _db_prepare
@@ -112,7 +112,7 @@
 		// DESC  : wrapper for pg_prepare
 		public function _db_prepare($name, $query)
 		{
-			$result = @pg_prepare($this->dbh, $name, $query);
+			$result = pg_prepare($this->dbh, $name, $query);
 			if (!$result)
 				$this->last_error_query = $query;
 			return $result;
@@ -124,7 +124,7 @@
 		// DESC  : wrapper for pg_execute for running a prepared statement
 		public function _db_execute($name, $data)
 		{
-			$result = @pg_execute($this->dbh, $name, $data);
+			$result = pg_execute($this->dbh, $name, $data);
 			if (!$result)
 				$this->last_error_query = $query;
 			return $result;
@@ -295,7 +295,7 @@
 			{
 				$db_port = 5432;
 			}
-			$this->dbh = @pg_connect("host=".$db_host." port=".$db_port." user=".$db_user." password=".$db_pass." dbname=".$db_name." sslmode=".$db_ssl);
+			$this->dbh = pg_connect("host=".$db_host." port=".$db_port." user=".$db_user." password=".$db_pass." dbname=".$db_name." sslmode=".$db_ssl);
 			if (!$this->dbh)
 			{
 				die("<!-- Can't connect [host=".$db_host." port=".$db_port." user=".$db_user." password=XXXX dbname=".$db_name." sslmode=".$db_ssl."] //-->");
@@ -326,7 +326,7 @@
 		// DESC  : wrapper for pg_emta_data
 		public function _db_meta_data($table)
 		{
-			return @pg_meta_data($this->dbh, $table);
+			return pg_meta_data($this->dbh, $table);
 		}
 
 		// METHOD: _db_escape_string

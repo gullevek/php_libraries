@@ -21,7 +21,7 @@
 		public function __construct($lang)
 		{
 			SmartyBC::__construct();
-			_spl_autoload('Class.l10.inc');
+			_spl_autoload('Class.l10n.inc');
 			$this->l10n = new l10n($lang);
 			// variable variable register
 			$this->register_modifier('getvar', array(&$this, 'get_template_vars'));

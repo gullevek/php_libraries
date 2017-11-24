@@ -763,7 +763,7 @@
 								$this->insert_id[] = $_insert_id;
 							}
 							// if we have only one, revert from array to single
-							if (count($this->insert_id) >= 1)
+							if (count($this->insert_id) == 1)
 							{
 //								echo "* SINGLE DATA CONVERT: ".count($this->insert_id[0])." => ".array_key_exists($this->pk_name, $this->insert_id[0])."<br>";
 //								echo "* PK DIRECT: ".$this->insert_id[0][$this->pk_name]."<Br>";
@@ -780,6 +780,7 @@
 									$this->insert_id = $this->insert_id[0][$this->pk_name];
 								}
 							}
+							// if we have non -> error
 							elseif (count($this->insert_id) == 0)
 							{
 								// failed to get insert id
@@ -787,6 +788,7 @@
 								$this->warning_id = 33;
 								$this->_db_error($this->cursor, '[db_exec]');
 							}
+							// if we have multiple, do not set the insert_id different, keep as array
 						}
 						// this warning handling is only for pgsql
 						// we returned an array of PKs instread of a single one

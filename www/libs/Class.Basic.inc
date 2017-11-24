@@ -203,7 +203,7 @@
 			if (isset($GLOBALS['PRINT']))
 				$this->print_output = $GLOBALS['PRINT'];
 
-			// exclude these ones from output	
+			// exclude these ones from output
 			if (isset($GLOBALS['DEBUG_NOT']))
 				$this->debug_output_not = $GLOBALS['DEBUG_NOT'];
 			if (isset($GLOBALS['ECHO_NOT']))
@@ -232,12 +232,12 @@
 				$this->log_per_run = $GLOBALS['LOG_PER_RUN'];
 
 			// set the regex for checking emails
-			$this->email_regex = "^[A-Za-z0-9!#$%&'*+-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+-\/=?^_`{|}~\.]{0,63}@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,6}){1}$";
+			$this->email_regex = "^[A-Za-z0-9!#$%&'*+-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+-\/=?^_`{|}~\.]{0,63}@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$";
 			// this is for error check parts in where the email regex failed
 			$this->email_regex_check = array (
 				1 => "@(.*)@(.*)", // double @
 				2 => "^[A-Za-z0-9!#$%&'*+-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+-\/=?^_`{|}~\.]{0,63}@", // wrong part before @
-				3 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,6}){1}$", // wrong part after @
+				3 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$", // wrong part after @
 				4 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.", // wrong domain name part
 				5 => "\.([a-zA-Z]{2,6}){1}$", // wrong top level part
 				6 => "@(.*)\.{2,}", // double .. in domain name part
@@ -1698,7 +1698,7 @@
 		// *** COLORS ***
 
 		// METHOD: hex2rgb
-		// PARAMS: hexstring, flag to return as string (true/false), string seperator: default: ,	
+		// PARAMS: hexstring, flag to return as string (true/false), string seperator: default: ,
 		// RETURN: array with RGB or a string with the seperator
 		// DESC:   converts a hex RGB color to the int numbers
 		public static function hex2rgb($hexStr, $returnAsString = false, $seperator = ',')
