@@ -324,7 +324,7 @@
 
 			// set loop protection max count
 			$this->MAX_QUERY_CALL = 20;
-		
+
 			// error & debug stuff, error & warning ids are the same, its just in which var they get written
 			$this->error_string['11'] = 'No Querystring given';
 			$this->error_string['12'] = 'No Cursor given, no correct query perhaps?';
@@ -366,7 +366,7 @@
 				$this->_db_error();
 				return false;
 			}
-			
+
 			$this->class_info['db_io']=array(
 				'class_name' => 'DB IO',
 				'class_version' => '4.1.0',
@@ -1029,7 +1029,7 @@
 					$this->cursor_ext[$md5]['firstcall'] = 1;
 				}
 			} // only go if NO cursor exists
-			
+
 			// if cursor exists ...
 			if ($this->cursor_ext[$md5]['cursor'])
 			{
@@ -1164,7 +1164,7 @@
 			else
 				return $this->cursor;
 		}
-	
+
 		// METHOD db_exec_async
 		// PARAMS query -> query to run
 		//        pk_name -> optional primary key name, only used with insert for returning call
@@ -1248,7 +1248,7 @@
 			}
 			return $this->_db_convert_encoding($this->db_functions->_db_fetch_array($cursor));
 		}
-	
+
 		// METHOD db_return_row
 		// PARAMS query -> the query to be executed
 		// RETURN mixed db result
@@ -1563,7 +1563,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 		{
 			return $this->db_functions->_db_escape_string($string);
 		}
-		
+
 		// METHOD db_escape_bytea
 		// PARAMS $bytea -> bytea to escape
 		// RETURN escaped bytea
@@ -1678,7 +1678,7 @@ $this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[
 			$not_write_update_array = array ();
 			return $this->db_write_data_ext($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
 		}
-		
+
 		// METHOD: db_write_data_ext
 		// PARAMS: write_array -> list of elements to write
 		//         primary_key -> id key to decide if we write insert or update
