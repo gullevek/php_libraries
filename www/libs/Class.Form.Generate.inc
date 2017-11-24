@@ -214,7 +214,7 @@
 
 	// try to include file from LIBS path, or from normal path
 	_spl_autoload('Class.DB.Array.IO.inc');
-	
+
 	class form extends db_array_io
 	{
 		// rest
@@ -539,7 +539,7 @@
 					{
 						// flag var name
 						$flag = $remove_name[$i]."_flag";
-	
+
 						if ($_POST[$flag] == "true")
 						{
 							$q = "DELETE FROM ".$element_list[$i]." WHERE ".$pk_name." = ".$_POST[$id];
@@ -596,7 +596,7 @@
 			{
 				$t_pk_name = $this->archive_pk_name;
 
-			 // lade liste
+				// lade liste
 				$this->db_exec($this->load_query);
 				while ($res = $this->db_fetch_array())
 				{
@@ -1241,7 +1241,6 @@
 					else
 					{
 						// if a where was given, set this key also [dangerous!]
-						
 						// postgreSQL compatible insert
 						$q = "INSERT INTO ".$this->table_array[$key]["table_name"]." (".$this->table_array[$key]["input_name"].") VALUES ('".$this->db_escape_string($this->table_array[$key]["input_value"])."')";
 						$this->db_exec($q);
@@ -1337,7 +1336,7 @@
 					}
 				}
 			} // go through each field
-			
+
 			// set object order (if necessary)
 			$this->form_set_order();
 			// write the object
@@ -1688,7 +1687,7 @@ $this->debug('edit', "Pos[$i] => ".$type[$i]." Q: ".$q."<br>");
 					}
 				}
 				// set the rest of the data so we can print something out
-				$data['type'][$data["prefix"].$this->element_list[$table_name]["read_data"]["name"]] = 'string';	
+				$data['type'][$data["prefix"].$this->element_list[$table_name]["read_data"]["name"]] = 'string';
 				// build the read query
 				$q = "SELECT ";
 //				if (!$this->table_array[$this->int_pk_name]["value"])
@@ -1737,10 +1736,10 @@ $this->debug('edit', "Pos[$i] => ".$type[$i]." Q: ".$q."<br>");
 							// if we have a radio group, set a bit different
 							if ($data['element_list'][$prfx.$el_name] == 'radio_group')
 								$_data[$prfx.$el_name] = ($res[$el_name]) ? ($res[$el_name] - 1) : 0;
-							else	
+							else
 								$_data[$prfx.$el_name] = $_POST[$prfx.$el_name][$pos];
 						}
-						else				
+						else
 						{
 							if ($data["preset"][$prfx.$el_name] && !$res[$el_name])
 								$_data[$prfx.$el_name] = $data["preset"][$el_name];
