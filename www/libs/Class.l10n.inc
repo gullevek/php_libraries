@@ -105,5 +105,15 @@
 		{
 			return $this->l10n->ngettext($single, $plural, $number);
 		}
+
+		public function __get_lang()
+		{
+			return $this->lang;
+		}
+
+		public function __get_mofile()
+		{
+			return $this->mofile;
+		}
 	}
 ?>

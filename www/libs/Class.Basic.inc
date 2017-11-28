@@ -313,7 +313,7 @@
 			if (!session_id())
 			{
 				// check if we have an external session name given, else skip this step
-				if (isset($GLOBALS['SET_SESSION_NAME']))
+				if (SET_SESSION_NAME)
 				{
 					// set the session name for possible later check
 					$this->session_name = SET_SESSION_NAME;
