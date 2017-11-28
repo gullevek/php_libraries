@@ -8,17 +8,17 @@
 			),
 			"enabled" => array (
 				"value" => $GLOBALS["enabled"],
-				"output_name" => "Enabled", 
+				"output_name" => "Enabled",
 				"int" => 1,
-				"type" => "binary", 
+				"type" => "binary",
 				"element_list" => array (
-					"1" => "Yes", 
+					"1" => "Yes",
 					"0" => "No"
 				)
 			),
 			"name" => array (
-				"value" => $GLOBALS["name"], 
-				"output_name" => "Group Name", 
+				"value" => $GLOBALS["name"],
+				"output_name" => "Group Name",
 				"type" => "text",
 				"mandatory" => 1
 			),

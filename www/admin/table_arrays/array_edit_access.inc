@@ -70,7 +70,6 @@
 						"type" => "hidden",
 						"fk_id" => 1 # reference main key from master table above
 					)
-
 				)
 			)
 		)

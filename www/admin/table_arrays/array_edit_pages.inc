@@ -2,7 +2,7 @@
 	$edit_pages = array (
 		"table_array" => array (
 			"edit_page_id" => array (
-				"value" => $GLOBALS["edit_page_id"], 
+				"value" => $GLOBALS["edit_page_id"],
 				"type" => "hidden",
 				"pk" => 1
 			),
@@ -14,13 +14,13 @@
 				"query" => "SELECT DISTINCT temp_files.filename AS id, temp_files.filename AS name FROM temp_files LEFT JOIN edit_page ep ON temp_files.filename = ep.filename WHERE ep.filename IS NULL"
 			),
 			"name" => array (
-				"value" => $GLOBALS["name"], 
-				"output_name" => "Page name", 
-				"mandatory" => 1, 
+				"value" => $GLOBALS["name"],
+				"output_name" => "Page name",
+				"mandatory" => 1,
 				"type" => "text"
 			),
 			"order_number" => array (
-				"value" => $GLOBALS["order_number"], 
+				"value" => $GLOBALS["order_number"],
 				"output_name" => "Page order",
 				"type" => "order",
 				"int" => 1,
@@ -37,57 +37,57 @@
 					"3" => "3",
 					"4" => "4",
 					"5" => "5"
-				) 
+				)
 			),*/
 			"online" => array (
-				"value" => $GLOBALS["online"], 
-				"output_name" => "Online", 
+				"value" => $GLOBALS["online"],
+				"output_name" => "Online",
 				"int" => 1,
-				"type" => "binary", 
+				"type" => "binary",
 				"element_list" => array (
-					"1" => "Yes", 
+					"1" => "Yes",
 					"0" => "No"
 				)
 			),
 			"menu" => array (
 				"value" => $GLOBALS["menu"],
-				"output_name" => "Menu", 
+				"output_name" => "Menu",
 				"int" => 1,
-				"type" => "binary", 
+				"type" => "binary",
 				"element_list" => array (
-					 "1" => "Yes", 
+					 "1" => "Yes",
 					 "0" => "No"
 				)
 			),
 			"popup" => array (
 				"value" => $GLOBALS["popup"],
-				"output_name" => "Popup", 
+				"output_name" => "Popup",
 				"int" => 1,
-				"type" => "binary", 
+				"type" => "binary",
 				"element_list" => array (
-					 "1" => "Yes", 
+					 "1" => "Yes",
 					 "0" => "No"
 				)
-			),    
+			),
 			"popup_x" => array (
-				"value" => $GLOBALS["popup_x"], 
-				"output_name" => "Popup Width", 
+				"value" => $GLOBALS["popup_x"],
+				"output_name" => "Popup Width",
 				"int_null" => 1,
 				"type" => "text",
 				"size" => 4,
 				"length" => 4
 			),
 			"popup_y" => array (
-				"value" => $GLOBALS["popup_y"], 
-				"output_name" => "Popup Height", 
+				"value" => $GLOBALS["popup_y"],
+				"output_name" => "Popup Height",
 				"int_null" => 1,
 				"type" => "text",
 				"size" => 4,
 				"length" => 4
 			)/*,
 			"query_string" => array (
-				"value" => $GLOBALS["query_string"], 
-				"output_name" => "Query String for Link", 
+				"value" => $GLOBALS["query_string"],
+				"output_name" => "Query String for Link",
 				"type" => "text",
 				"size" => "50"
 			)*/
@@ -111,7 +111,7 @@
 				"name" => "menu",
 				"binary" => array("Yes","No"),
 				"before_value" => "Menu: "
-		 	), 
+		 	),
 			array(
 				"name" => "popup",
 				"binary" => array("Yes","No"),

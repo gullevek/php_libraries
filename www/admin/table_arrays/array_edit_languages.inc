@@ -12,7 +12,7 @@
 				"mandatory" => 1,
 				"type" => "text",
 				"size" => 2,
-				"length" => 2       
+				"length" => 2
 			),
 			"long_name" => array (
 				"value" => $GLOBALS["long_name"],
@@ -26,29 +26,29 @@
 				"output_name" => "ISO Code",
 				"mandatory" => 1,
 				"type" => "text"
-			), 
+			),
 			"order_number" => array (
 				"value" => $GLOBALS["order_number"],
 				"int" => 1,
 				"order" => 1
 			),
 			"enabled" => array (
-				"value" => $GLOBALS["enabled"], 
-				"output_name" => "Enabled", 
+				"value" => $GLOBALS["enabled"],
+				"output_name" => "Enabled",
 				"int" => 1,
-				"type" => "binary", 
+				"type" => "binary",
 				"element_list" => array (
-					"1" => "Yes", 
+					"1" => "Yes",
 					"0" => "No"
 				)
 			),
 			"lang_default" => array (
-				"value" => $GLOBALS["lang_default"], 
-				"output_name" => "Default Language", 
+				"value" => $GLOBALS["lang_default"],
+				"output_name" => "Default Language",
 				"int" => 1,
-				"type" => "binary", 
+				"type" => "binary",
 				"element_list" => array (
-					"1" => "Yes", 
+					"1" => "Yes",
 					"0" => "No"
 				)
 			)

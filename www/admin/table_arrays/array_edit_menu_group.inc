@@ -20,7 +20,7 @@
 				"error_check" => "alphanumeric|unique"
 			),
 			"order_number" => array (
-				"value" => $GLOBALS["order_number"], 
+				"value" => $GLOBALS["order_number"],
 				"output_name" => "Group order",
 				"type" => "order",
 				"int" => 1,
