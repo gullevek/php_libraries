@@ -5,9 +5,9 @@
 #echo "EXIT";
 #exit;
 
-db='gullevek';
-host='db.tokyo.tequila.jp';
-user='gullevek';
+db='<db name>';
+host='<db host>';
+user='<db user>';
 #schema="publicv";
 
 for file in `cat ORDER`;

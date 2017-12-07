@@ -5,9 +5,9 @@
 #echo "EXIT";
 #exit;
 
-db='cibavision_jp_cms';
-host='db.tokyo.tequila.jp';
-user='ciba_vision';
+db='<db name>';
+host='<db host>';
+user='<db user>';
 schemas="public dev";
 
 file_prefix="trg";

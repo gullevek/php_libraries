@@ -3,10 +3,10 @@
 # create path
 path=`pwd`"/"$0;
 
-LOCAL_BASE_DIR="";
+LOCAL_BASE_DIR="<local folder>";
 LOCAL_DIR=$LOCAL_BASE_DIR"";
-REMOTE_WEB="";
-TARGET_HOST_WEB="developer@10.76.32.25";
+REMOTE_WEB="<remote folder>";
+TARGET_HOST_WEB="<user>@<host>
 TMP_DIR=$LOCAL_BASE_DIR"/4dev/";
 tmpf_web=$TMP_DIR"tmp.web";
 
