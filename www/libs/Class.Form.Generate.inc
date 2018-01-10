@@ -3,9 +3,7 @@
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2002/10/22
 	* VERSION: 2.4.9
-	* RELEASED LICENSE: BSD style (use it, u don't have to make YOUR source public)
-	*                   but let me know if u made changes, and please don't redistribute it
-	*                   with your name on it ...
+	* RELEASED LICENSE: GNU GPL 3
 	* SHORT DESCRIPTION:
 	*   ~ 2003/02/26: decided to move away from single class and change this
 	*   to extend db_array_io which extends db_io. this is much more efficient

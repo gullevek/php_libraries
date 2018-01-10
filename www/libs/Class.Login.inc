@@ -3,9 +3,7 @@
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2000/06/01
 	* VERSION: 4.0.0
-	* RELEASED LICENSE: BSD style (use it, u don't have to make YOUR source public)
-	*                   but let me know if u made changes, and please don't redistribute it
-	*                   with your name on it ...
+	* RELEASED LICENSE: GNU GPL 3
 	* SHORT DESCRIPTON:
 	*   ~ 2003/03/03: change the whole include file into one class
 	*   advantages are a) can include before actuall call, can control it

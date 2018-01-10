@@ -3,9 +3,7 @@
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2002/12/17
 	* VERSION: 0.4.0
-	* RELEASED LICENSE: BSD style (use it, u don't have to make YOUR source public)
-	*                   but let me know if u made changes, and please don't redistribute it
-	*                   with your name on it ...
+	* RELEASED LICENSE: GNU GPL 3
 	* SHORT DESCRIPTION:
 	*   DB Array IO Class:
 	*   writes, reads or deletes a complete array (one data set) in/out a

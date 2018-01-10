@@ -3,9 +3,7 @@
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2000/11/23
 	* VERSION: 4.1.0
-	* RELEASED LICENSE: BSD style (use it, u don't have to make YOUR source public)
-	*                   but let me know if u made changes, and please don't redistribute it
-	*                   with your name on it ...
+	* RELEASED LICENSE: GNU GPL 3
 	* SHORT DESCRIPTON:
 	*   2013/10/10, prepare/excute were added, including auto RETURNING primary key if
 	*   possible for any INSERT query in exec or prepare/execute, better debugging and

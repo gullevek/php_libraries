@@ -3,9 +3,7 @@
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 	* CREATED: 2003/03/24
 	* VERSION: 0.9.0
-	* RELEASED LICENSE: BSD style (use it, u don't have to make YOUR source public)
-	*                   but let me know if u made changes, and please don't redistribute it
-	*                   with your name on it ...
+	* RELEASED LICENSE: GNU GPL 3
 	* SHORT DESCRIPTION:
 	*   basic class start class for ALL clases, holds basic vars, infos, methods, etc
 	*

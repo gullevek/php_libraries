@@ -1,7 +1,7 @@
 <?
 	/*********************************************************************
 	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
-	* CREATED: 2003/04/09 
+	* CREATED: 2003/04/09
 	* SHORT DESCRIPTION:
 	* pgsq; wrapper calls
 	* HISTORY:
