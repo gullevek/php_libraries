@@ -142,12 +142,13 @@ function setCenter(id, left, top)
 {
 	// get size of id
 	var dimensions = $(id).getDimensions();
+	var type = $(id).getStyle('position');
 	var viewport = getWindowSize();
 	var offset = getScrollOffset();
 
-	console.log('Id %s, dimensions %s x %s, viewport %s x %s', id, dimensions.width, dimensions.height, viewport.width, viewport.height);
-	console.log('Scrolloffset left: %s, top: %s', offset.left, offset.top);
-	console.log('Left: %s, Top: %s', parseInt((viewport.width / 2) - (dimensions.width / 2)), parseInt((viewport.height / 2) - (dimensions.height / 2)));
+	// console.log('Id %s, type: %s, dimensions %s x %s, viewport %s x %s', id, $(id).getStyle('position'), dimensions.width, dimensions.height, viewport.width, viewport.height);
+	// console.log('Scrolloffset left: %s, top: %s', offset.left, offset.top);
+	// console.log('Left: %s, Top: %s (%s)', parseInt((viewport.width / 2) - (dimensions.width / 2) + offset.left), parseInt((viewport.height / 2) - (dimensions.height / 2) + offset.top), parseInt((viewport.height / 2) - (dimensions.height / 2)));
 	if (left)
 	{
 		$(id).setStyle ({
@@ -156,8 +157,10 @@ function setCenter(id, left, top)
 	}
 	if (top)
 	{
+		// if we have fixed, we do not add the offset, else it moves out of the screen
+		var top_pos = type == 'fixed' ? parseInt((viewport.height / 2) - (dimensions.height / 2)) : parseInt((viewport.height / 2) - (dimensions.height / 2) + offset.top);
 		$(id).setStyle ({
-			top: parseInt((viewport.height / 2) - (dimensions.height / 2) + offset.top) + 'px'
+			top: top_pos + 'px'
 		});
 	}
 }
