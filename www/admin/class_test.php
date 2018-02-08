@@ -19,14 +19,14 @@
 		_spl_autoload('Class.'.$class.'.inc');
 
 	$lang = 'en_utf8';
-	
+
 	DEFINE('LOG_FILE_ID', 'classTest');
 	$login = new login($DB_CONFIG[LOGIN_DB], $lang);
 	// init with standard
 //	$basic = new db_io($DB_CONFIG[MAIN_DB]);
 	$basic = new AdminBackend($DB_CONFIG[MAIN_DB], $lang);
 	$basic->db_info(1);
-	
+
 	// set + check edit access id
 	$edit_access_id = 3;
 	print "ACL UNIT: ".print_r(array_keys($login->acl['unit']), 1)."<br>";
@@ -46,15 +46,15 @@
 	print '</form>';
 
 	// print the debug core vars
-	print "DEBUG OUT: ".$basic->debug_output."<br>";	
-	print "ECHO OUT: ".$basic->echo_output."<br>";	
-	print "PRINT OUT: ".$basic->print_output."<br>";	
-	print "NOT DEBUG OUT: ".$basic->debug_output_not."<br>";	
-	print "NOT ECHO OUT: ".$basic->echo_output_not."<br>";	
-	print "NOT PRINT OUT: ".$basic->print_output_not."<br>";	
-	print "DEBUG OUT ALL: ".$basic->debug_output_all."<br>";	
-	print "ECHO OUT ALL: ".$basic->echo_output_all."<br>";	
-	print "PRINT OUT ALL: ".$basic->print_output_all."<br>";	
+	print "DEBUG OUT: ".$basic->debug_output."<br>";
+	print "ECHO OUT: ".$basic->echo_output."<br>";
+	print "PRINT OUT: ".$basic->print_output."<br>";
+	print "NOT DEBUG OUT: ".$basic->debug_output_not."<br>";
+	print "NOT ECHO OUT: ".$basic->echo_output_not."<br>";
+	print "NOT PRINT OUT: ".$basic->print_output_not."<br>";
+	print "DEBUG OUT ALL: ".$basic->debug_output_all."<br>";
+	print "ECHO OUT ALL: ".$basic->echo_output_all."<br>";
+	print "PRINT OUT ALL: ".$basic->print_output_all."<br>";
 
 	print "CALLER BACKTRACE: ".$basic->get_caller_method()."<br>";
 	$basic->debug('SOME MARK', 'Some error output');
@@ -85,6 +85,9 @@
 //	$status = $basic->db_exec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."') RETURNING foo_id");
 	$status = $basic->db_exec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."') RETURNING foo_id, test");
 	print "DIRECT MULTIPLE INSERT STATUS: $status | PRIMARY KEYS: ".print_r($basic->insert_id, 1)." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
+	// no returning, but not needed ;
+	$status = $basic->db_exec("INSERT INTO foo (test) VALUES ('FOO; TEST ".time()."');");
+	print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
 
 	# db write class test
 	$table = 'foo';

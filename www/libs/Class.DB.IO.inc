@@ -663,6 +663,8 @@
 					}
 					if (!preg_match("/ returning /i", $this->query) && $this->pk_name && $this->pk_name != 'NULL')
 					{
+						// check if this query has a ; at the end and remove it
+						$this->query = preg_replace("/(;\s*)$/", '', $this->query);
 						$this->query .= " RETURNING ".$this->pk_name;
 						$this->returning_id = true;
 					}
