@@ -413,7 +413,6 @@
 						if ($q_vars)
 							$q_vars .= ", ";
 						$q_vars .= $column;
-						
 					}
 					// integer is different
 					if ($this->table_array[$column]["int"] || $this->table_array[$column]["int_null"])

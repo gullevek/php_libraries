@@ -937,37 +937,36 @@ h3 { font-size: 18px; }
 <form method="post">
 <table width="500" border="0" cellpadding="2" cellspacing="1">
 <tr>
-  <td class="norm" align="right">
-	 <h3>{TITLE}</h3>
-  </td>
-  <td>&nbsp;</td>
+	<td class="norm" align="right">
+		<h3>{TITLE}</h3>
+	</td>
+	<td>&nbsp;</td>
 </tr>
 <tr>
-  <td class="norm" colspan="2" align="center">
-    {ERROR_MSG}
-  </td>
+	<td class="norm" colspan="2" align="center">
+		{ERROR_MSG}
+	</td>
 </tr>
 <tr>
-  <td align="right" class="norm">{USERNAME}</td>
-  <td><input type="text" name="login_username"></td>
+	<td align="right" class="norm">{USERNAME}</td>
+	<td><input type="text" name="login_username"></td>
 </tr>
 <tr>
-  <td align="right" class="norm">{PASSWORD}</td>
-  <td><input type="password" name="login_password"></td>
+	<td align="right" class="norm">{PASSWORD}</td>
+	<td><input type="password" name="login_password"></td>
 </tr>
 <tr>
-  <td align="right">
-  </td>
-  <td>
-    <input type="submit" name="login_login" value="{LOGIN}">
-    {PASSWORD_CHANGE_BUTTON}
-  </td>
+	<td align="right"></td>
+	<td>
+		<input type="submit" name="login_login" value="{LOGIN}">
+		{PASSWORD_CHANGE_BUTTON}
+	</td>
 </tr>
 <tr>
-  <td align="right">
-	 <br><br>
-  </td>
-  <td>&nbsp;</td>
+	<td align="right">
+		<br><br>
+	</td>
+	<td>&nbsp;</td>
 </tr>
 </table>
 {PASSWORD_CHANGE_DIV}
