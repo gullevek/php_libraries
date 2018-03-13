@@ -433,7 +433,7 @@
 		//         only used by the deconstructor
 		private function _close_db()
 		{
-			if ($this->dbh)
+			if (isset($this->dbh) && $this->dbh)
 			{
 				$this->db_functions->_db_close();
 				unset($this->dbh);
