@@ -561,9 +561,9 @@
 		// prints out the error string
 		public function print_error_msg($string = '')
 		{
+			$string_output = '';
 			if ($this->debug_output_all)
 			{
-				$string_output = '';
 				if ($this->error_msg_prefix)
 					$string = $this->error_msg_prefix;
 				$script_end = $this->running_time();
