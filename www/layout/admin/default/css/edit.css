@@ -15,416 +15,353 @@
 	padding: 0;
 } */
 
-body
-{
+body {
 	background-color: white;
 	color: black;
-	font-size : 8pt;
 	font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-size : 8pt;
 }
 
-.large
-{
+.large {
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size : 16pt;
-	font-family: Verdana,Arial,Helvetica,sans-serif;
 }
 
-.big
-{
+.big {
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size : 12pt;
-	font-family: Verdana,Arial,Helvetica,sans-serif;
 }
 
-.normal
-{
+.normal {
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size : 9pt;
-	font-family: Verdana,Arial,Helvetica,sans-serif;
 }
 
-.small
-{
-	font-size : 8pt;
+.small {
 	font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-size : 8pt;
 }
 
-.smallbold
-{
-	font-size : 8pt;
+.smallbold {
 	font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-size : 8pt;
 	font-weight: bold;
 }
 
-a:link
-{
+a:link {
 	color: #FF0000;
 	text-decoration: none;
 }
 
-a:active
-{
+a:active {
 	color: #FFFF00;
 	text-decoration: none;
 }
 
-a:visited
-{
+a:visited {
 	color: #550000;
 	text-decoration: none;
 }
 
-a:hover, a.item_loaded:hover, a.item_deleted:hover, a.item_loaded_deleted:hover
-{
-	color: #FF0000;
+a:hover, a.item_loaded:hover, a.item_deleted:hover, a.item_loaded_deleted:hover {
 	background-color: #e5e5e5;
 	border-bottom: 1px dotted red;
+	color: #FF0000;
 }
 
-a:focus, a.item_loaded:hover, a.item_deleted:hover, a.item_loaded_deleted:hover
-{
-	color: #ff0000;
+a:focus, a.item_loaded:hover, a.item_deleted:hover, a.item_loaded_deleted:hover {
 	background-color: #b3b3b3;
-	border-top: 1px dotted red;
 	border-bottom: 1px dotted red;
+	border-top: 1px dotted red;
+	color: #ff0000;
 }
 
 /* link highlight */
-a.item_loaded
-{
-	font-weight: bold;
-	color: #451010;
+a.item_loaded {
 	background-color: #d5d6d6;
+	color: #451010;
+	font-weight: bold;
 }
 
-a.item_deleted
-{
+a.item_deleted {
 	text-decoration: line-through;
 }
 
-a.item_loaded_deleted
-{
-	text-decoration: line-through;
-	font-weight: bold;
-	color: #451010;
+a.item_loaded_deleted {
 	background-color: #d5d6d6;
+	color: #451010;
+	font-weight: bold;
+	text-decoration: line-through;
 }
 
 /* experimental */
-input[type="text"]
-{
-	border: 1px solid #999999;
+input[type="text"] {
 	background-color: #efefef;
-}
-
-input[type="password"]
-{
 	border: 1px solid #999999;
 }
 
-input[type="submit"]
-{
+input[type="password"] {
+	border: 1px solid #999999;
+}
+
+input[type="submit"] {
 	border: 1px solid #666666;
 }
 
-input[type="checkbox"]
-{
+input[type="checkbox"] {
 	border: 1px solid #999999;
 }
 
-input[type="radio"]
-{
+input[type="radio"] {
 	border: 1px solid #999999;
 }
 
-input[type="file"]
-{
+input[type="file"] {
 	border: 1px solid #999999;
 }
 
-input[type="button"]
-{
+input[type="button"] {
 	border: 1px solid #999999;
 }
 
-textarea
-{
-	border: 1px solid #999999;
+textarea {
 	background-color: #efefef;
+	border: 1px solid #999999;
 }
 
-select
-{
-	border: 1px solid #999999;
+select {
 	background-color: #efefef;
+	border: 1px solid #999999;
 }
 
 /* mouse over */
-input[type=submit]:hover, input[type=button]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="checkbox"]:hover, input[type="radio"]:hover, input[type="file"]:hover, textarea:hover, select:hover
-{
+input[type=submit]:hover, input[type=button]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="checkbox"]:hover, input[type="radio"]:hover, input[type="file"]:hover, textarea:hover, select:hover {
 	border: 1px dashed red;
 }
 
 /* selected */
-input[type=submit]:focus, input[type=button]:focus, input[type="password"]:focus, input[type="checkbox"]:focus, input[type="radio"]:focus, input[type="file"]:focus
-{
-	border: 1px solid red;
+input[type=submit]:focus, input[type=button]:focus, input[type="password"]:focus, input[type="checkbox"]:focus, input[type="radio"]:focus, input[type="file"]:focus {
 	background-color: #ffffff;
+	border: 1px solid red;
 }
 
-input[type="text"]:focus, textarea:focus, select:focus
-{
-	border: 1px solid red;
+input[type="text"]:focus, textarea:focus, select:focus {
 	background-color: #ffffff;
+	border: 1px solid red;
 }
 
 /* error & status layouts for messges */
-.error
-{
+.error {
 	border: 1px solid red;
-	margin: 5px;
-	padding: 2px;
 	color: red;
+	margin: 5px;
+	padding: 2px;
 	text-align: center;
 }
 
-.warning
-{
+.warning {
 	border: 1px solid #df7700;
-	margin: 5px;
-	padding: 2px;
 	color: #d57200;
-	text-align: center;
-}
-
-.info
-{
-	border: 1px solid #72C47E;
 	margin: 5px;
 	padding: 2px;
-	color: #1D731A;
 	text-align: center;
 }
 
-.div_error
-{
-	border: 1px solid red;
-	margin-top: 1px;
-	margin-bottom: 1px;
+.info {
+	border: 1px solid #72C47E;
+	color: #1D731A;
+	margin: 5px;
+	padding: 2px;
+	text-align: center;
 }
 
-.div_warning
-{
+.div_error {
+	border: 1px solid red;
+	margin-bottom: 1px;
+	margin-top: 1px;
+}
+
+.div_warning {
 	border: 1px solid #df7700;
 }
 
 /* borders */
-.border_all
-{
+.border_all {
 	border: 1px solid black;
 }
 
-.border_bottom_title
-{
-	font-weight: bold;
+.border_bottom_title {
 	border-bottom: 1px solid black;
+	font-weight: bold;
 }
 
-.border_top
-{
+.border_top {
 	border-top: 1px solid #DCDCCC;
 }
 
-.border_all_error
-{
+.border_all_error {
 	border: 1px solid red;
 }
 
-.border_group
-{
+.border_group {
 	border: 1px solid #a89c5a;
 }
 
-.border_master
-{
+.border_master {
 	border: 1px solid white;
 }
 
-.border_sub
-{
+.border_sub {
 	border: 1px solid gray;
 }
 
-.border_sub_sub
-{
+.border_sub_sub {
 	border: 1px solid #e5ddba;
 }
 
 /* employee hardware/software borders */
-.border_hardware
-{
+.border_hardware {
+	background-color: #e9e9e9;
 	border: 2px solid black;
-	background-color: #e9e9e9;
 }
 
-.border_hardware_usage_end
-{
+.border_hardware_usage_end {
+	background-color: #e9e9e9;
 	border: 2px solid red;
-	background-color: #e9e9e9;
 }
 
-.border_hardware_line
-{
-	border-left: 2px solid black;
+.border_hardware_line {
 	border-bottom: 2px solid black;
+	border-left: 2px solid black;
 }
 
-.border_software
-{
-	border: 2px solid #a89c5a;
+.border_software {
 	background-color: #d5d4c8;
+	border: 2px solid #a89c5a;
 }
 
-.border_software_line
-{
-	border-left: 2px solid #a89c5a;
+.border_software_line {
 	border-bottom: 2px solid #a89c5a;
+	border-left: 2px solid #a89c5a;
 }
 
-.border_software_line_left
-{
+.border_software_line_left {
 	border-left: 2px solid #a89c5a;
 	padding-bottom: 10px;
 }
 
-.border_software_line_bottom
-{
+.border_software_line_bottom {
 	border-bottom: 2px solid #a89c5a;
 	padding-left: 2px;
 }
 
 /* highlight */
-.highlight
-{
+.highlight {
 	background-color: #e7e7e7;
 	font-weight: bold;
 }
 
 /* hide & show */
-.visible
-{
+.visible {
 	visibility: visible;
 }
 
-.hidden
-{
-	visibility: hidden;
+.hidden {
 	display: none;
+	visibility: hidden;
 }
 
 /* spacer for line break in float elements */
-div.spacer
-{
+.spacer {
 	clear: both;
 }
 
 /* unique definitions */
 /* main body */
 /* menu on top */
-.menu
-{
+.menu {
 	border-bottom: 1px solid #a4a4a4;
 	font-size: 10px;
 }
 
-.pagename
-{
-	text-align: center; font-size: 15px;
+.pagename {
 	background-color: #e7e7e7;
+	font-size: 15px;
 	font-weight: bold;
 	padding: 5px;
+	text-align: center;
 }
 
 /* overlay side menu */
-.sidemenu
-{
-	border: 1px solid black;
+.sidemenu {
 	background-color: white;
+	border: 1px solid black;
 }
 
-.buttongroup
-{
+.buttongroup {
 	border: 1px solid #e5ddba;
 }
 
 /* input group field */
 /* normal */
-.input_group
-{
+.input_group {
 	border: 1px solid #e5ddba;
 }
 
 /* loaded with id */
-.input_group_id
-{
+.input_group_id {
 	border: 1px solid #8a7d3a;
 }
 
 /* deleted */
-.input_group_deleted
-{
-	border: 1px solid #8a7d3a;
+.input_group_deleted {
 	background-color: #d5d4c8;
+	border: 1px solid #8a7d3a;
 }
 
 /* header part */
 /* normal */
-.input_group_header
-{
+.input_group_header {
 	background-color: #e9e9e9;
 }
 
 /* loaded with id */
-.input_group_header_id
-{
+.input_group_header_id {
 	background-color: #d5d5d5;
 }
 
 /* deleted */
-.input_group_header_deleted
-{
+.input_group_header_deleted {
 	background-color: #bfb59d;
 }
 
 /* error & warning messages */
-.top_error_message
-{
+.top_error_message {
+	border: 2px solid red;
+	color: red;
+	font-size: 18px;
 	margin: 5px;
 	padding: 10px;
-	border: 2px solid red;
-	font-size: 18px;
 	text-align: center;
-	color: red;
 }
 
-.top_inventory_number
-{
-	margin: 5px;
-	padding: 10px;
+.top_inventory_number {
 	border: 2px solid orange;
 	font-size: 18px;
-	text-align: center;
-}
-
-.top_info_message
-{
-	border: 2px solid green;
 	margin: 5px;
 	padding: 10px;
 	text-align: center;
-	font-size: 12px;
 }
 
-.debug_message
-{
+.top_info_message {
+	border: 2px solid green;
+	font-size: 12px;
+	margin: 5px;
+	padding: 10px;
+	text-align: center;
+}
+
+.debug_message {
 	border-top: 1px solid #a4a4a4;
 	color: #a4a4a4;
 	font-size: 8px;
@@ -434,78 +371,63 @@ div.spacer
 /* set all colors here and not in the config file */
 /* for edit interface */
 
-.menu_bgcolor
-{
+.menu_bgcolor {
 	background-color: #666666;
 }
 
-.menu_fgcolor
-{
+.menu_fgcolor {
 	background-color: #DDDDDD;
 }
 
-.menu_fgcolor_na
-{
+.menu_fgcolor_na {
 	background-color: #CCCCCC;
 }
 
-.menu_fgcolor_a
-{
+.menu_fgcolor_a {
 	background-color: #EEEEEE;
 }
 
-.edit_bgcolor
-{
+.edit_bgcolor {
 	background-color: #666666;
 }
 
-.edit_fgcolor
-{
+.edit_fgcolor {
 	background-color: #FFFFDF;
 }
 
-.edit_fgcolor_mod_a
-{
+.edit_fgcolor_mod_a {
 	background-color: #CECEB5;
 }
 
-.edit_fgcolor_mod_b
-{
+.edit_fgcolor_mod_b {
 	background-color: #DEDEC3;
 }
 
-.edit_fgcolor_2
-{
+.edit_fgcolor_2 {
 	background-color: #AADAA2;
 }
 
-.edit_fgcolor_no
-{
+.edit_fgcolor_no {
 	background-color: #CECEB5;
 }
 
-.edit_fgcolor_alt
-{
+.edit_fgcolor_alt {
 	background-color: #CCCCCC;
 }
 
-.edit_fgcolor_delete
-{
+.edit_fgcolor_delete {
 	background-color: red;
 }
 
-.font_error
-{
+.font_error {
 	color: red;
 }
 
-.edit_fgcolor_special
-{
+.edit_fgcolor_special {
 	background-color: #EEEEEE;
 }
 
-.edit_temp
-{
+.edit_temp {
 	background-color: #FFDF6F;
 }
 

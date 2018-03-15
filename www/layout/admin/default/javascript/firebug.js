@@ -10,7 +10,7 @@ var ConsoleSetup = function() {
 
     for (var i = 0; i < names.length; ++i) {
         if (!window.console[names[i]]) {
-            window.console[names[i]] = function() {}
+            window.console[names[i]] = function() {};
         }
     }
 }();

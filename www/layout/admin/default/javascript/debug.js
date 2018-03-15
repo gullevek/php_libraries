@@ -9,9 +9,8 @@
 */
 
 // if debug is set to true, console log messages are printed
-if (!DEBUG)
-{
+if (!DEBUG) {
 	$($H(window.console)).each(function(w) {
-		window.console[w.key] = function() {}
+		window.console[w.key] = function() {};
 	});
 }

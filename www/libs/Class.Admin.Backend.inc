@@ -1,400 +1,410 @@
 <?
-	/*********************************************************************
-	* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
-	* CREATED: 2006/08/15
-	* VERSION: 0.1.0
-	* RELEASED LICENSE: GNU GPL 3
-	* DESCRIPTION
-	* Basic Admin interface backend
-	* - sets action flags
-	* - menu creation
-	* - array vars for smarty
-	*
-	* PUBLIC VARIABLES
-	*
-	* PRIVATE VARIABLES
-	*
-	* PUBLIC METHODS
-	*
-	* PRIVATE METHODS
-	*
-	* HISTORY:
-	*
-	*********************************************************************/
+/*********************************************************************
+* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
+* CREATED: 2006/08/15
+* VERSION: 0.1.0
+* RELEASED LICENSE: GNU GPL 3
+* DESCRIPTION
+* Basic Admin interface backend
+* - sets action flags
+* - menu creation
+* - array vars for smarty
+*
+* PUBLIC VARIABLES
+*
+* PRIVATE VARIABLES
+*
+* PUBLIC METHODS
+*
+* PRIVATE METHODS
+*
+* HISTORY:
+*
+*********************************************************************/
 
-	// try to include file from LIBS path, or from normal path
-	_spl_autoload('Class.DB.IO.inc');
+// try to include file from LIBS path, or from normal path
+_spl_autoload('Class.DB.IO.inc');
 
-	class AdminBackend extends db_io
+class AdminBackend extends db_io
+{
+	// page name
+	public $page_name; // the name of the current page
+	public $menu = array();
+	public $menu_show_flag = 0; // top menu flag (mostly string)
+	// action ids
+	public $action_list = array ('action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag', 'action_menu', 'action_value', 'action_error', 'action_loaded');
+	public $action;
+	public $action_id;
+	public $action_sub_id;
+	public $action_yes;
+	public $action_flag;
+	public $action_menu;
+	public $action_loaded;
+	public $action_value;
+	public $action_error;
+	// ACL array variable if we want to set acl data from outisde
+	public $acl = array ();
+	// the current active edit access id
+	public $edit_access_id;
+	// error/warning/info messages
+	public $messages = array ();
+	public $error = 0;
+	public $warning = 0;
+	public $info = 0;
+	// smarty publics
+	public $DATA;
+	public $HEADER;
+	public $DEBUG_DATA;
+	public $CONTENT_DATA;
+
+	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
+	public function __construct($db_config, $lang, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
 	{
-		// page name
-		public $page_name; // the name of the current page
-		public $menu = array();
-		public $menu_show_flag = 0; // top menu flag (mostly string)
-		// action ids
-		public $action_list = array ('action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag', 'action_menu', 'action_value', 'action_error', 'action_loaded');
-		public $action;
-		public $action_id;
-		public $action_sub_id;
-		public $action_yes;
-		public $action_flag;
-		public $action_menu;
-		public $action_loaded;
-		public $action_value;
-		public $action_error;
-		// ACL array variable if we want to set acl data from outisde
-		public $acl = array ();
-		// the current active edit access id
-		public $edit_access_id;
-		// error/warning/info messages
-		public $messages = array ();
-		public $error = 0;
-		public $warning = 0;
-		public $info = 0;
-		// smarty publics
-		public $DATA;
-		public $HEADER;
-		public $DEBUG_DATA;
-		public $CONTENT_DATA;
+		// get the language sub class & init it
+		_spl_autoload('Class.l10n.inc');
 
-		// CONSTRUCTOR / DECONSTRUCTOR |====================================>
-		public function __construct($db_config, $lang, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
-		{
-			// get the language sub class & init it
-			_spl_autoload('Class.l10n.inc');
+		$this->l = new l10n($lang);
 
-			$this->l = new l10n($lang);
-
-			// init the database class
+		// init the database class
 //			$this->db_io($db_config, $debug, $db_debug, $echo, $print);
-			parent::__construct($db_config, $debug, $db_debug, $echo, $print);
+		parent::__construct($db_config, $debug, $db_debug, $echo, $print);
 
-			// internal
-			$this->class_info["adbBackend"] = array(
-				"class_name" => "Admin Interface Backend",
-				"class_version" => "0.1.0",
-				"class_created" => "2006/08/15",
-				"class_author" => "cs/gullevek/jp"
+		// internal
+		$this->class_info["adbBackend"] = array(
+			"class_name" => "Admin Interface Backend",
+			"class_version" => "0.1.0",
+			"class_created" => "2006/08/15",
+			"class_author" => "cs/gullevek/jp"
+		);
+
+		// set page name
+		$this->page_name = $this->get_page_name();
+
+		// set the action ids
+		foreach ($this->action_list as $_action) {
+			$this->$_action = (isset($_POST[$_action])) ? $_POST[$_action] : '';
+		}
+
+		$this->default_acl = DEFAULT_ACL_LEVEL;
+
+		// random key generation
+		$this->key_range = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
+		$GLOBALS["_KEY_RANGE"] = $this->key_range;
+		$this->one_key_length = count($this->key_range);
+		$this->key_length = 4; // pow($this->one_key_length, 4); // hardcoded, should be more than enought (62*62*62*62)
+
+		// queue key
+		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action)) {
+			$this->queue_key = join(
+				'',
+				array_map(
+					function () {
+						$range = $GLOBALS['_KEY_RANGE'];
+						return $range[rand(0, (count($range) - 1))];
+					},
+					range(1, 3)
+				)
 			);
+		}
+	}
 
-			// set page name
-			$this->page_name = $this->get_page_name();
+	// deconstructor
+	public function __destruct()
+	{
+		parent::__destruct();
+	}
 
-			// set the action ids
-			foreach ($this->action_list as $_action)
-			{
-				$this->$_action = (isset($_POST[$_action])) ? $_POST[$_action] : '';
-			}
+	// INTERNAL METHODS |===============================================>
 
-			$this->default_acl = DEFAULT_ACL_LEVEL;
 
-			// random key generation
-			$this->key_range = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
-			$GLOBALS["_KEY_RANGE"] = $this->key_range;
-			$this->one_key_length = count($this->key_range);
-			$this->key_length = 4; // pow($this->one_key_length, 4); // hardcoded, should be more than enought (62*62*62*62)
+	// PUBLIC METHODS |=================================================>
 
-			// queue key
-			if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action))
-			{
-				$this->queue_key = join('', array_map(function () { $range = $GLOBALS['_KEY_RANGE']; return $range[rand(0, (count($range) - 1))]; }, range(1, 3)));
-			}
+	// METHOD: adbEditLog()
+	// PARAMS: event -> any kind of event description, data -> any kind of data related to that event
+	// RETURN: none
+	// DESC:   writes all action vars plus other info into edit_log table
+	public function adbEditLog($event = '', $data = '', $write_type = 'STRING')
+	{
+		if ($write_type == 'BINARY') {
+			$data_binary = $this->db_escape_bytea(bzcompress(serialize($data)));
+			$data = 'see bzip compressed data_binary field';
+		}
+		if ($write_type == 'STRING') {
+			$data = $this->db_escape_string(serialize($data));
 		}
 
-		// deconstructor
-		public function __destruct()
-		{
-			parent::__destruct();
+		$q = "INSERT INTO ".LOGIN_DB_SCHEMA.".edit_log ";
+		$q .= "(euid, event_date, event, data, data_binary, page, ";
+		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
+		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
+		$q .= "VALUES ";
+		$q .= "(".@$_SESSION['EUID'].", NOW(), '".$this->db_escape_string($event)."', '".$data."', '".$data_binary."', '".$this->page_name."', ";
+		$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->db_escape_string(@$_SERVER['HTTP_USER_AGENT'])."', ";
+		$q .= "'".$this->db_escape_string(@$_SERVER['HTTP_REFERER'])."', '".$this->db_escape_string(@$_SERVER['SCRIPT_FILENAME'])."', ";
+		$q .= "'".$this->db_escape_string(@$_SERVER['QUERY_STRING'])."', '".$this->db_escape_string(@$_SERVER['SERVER_NAME'])."', ";
+		$q .= "'".$this->db_escape_string(@$_SERVER['HTTP_HOST'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT'])."', ";
+		$q .= "'".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_CHARSET'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_ENCODING'])."', ";
+		$q .= "'".session_id()."', ";
+		$q .= "'".$this->db_escape_string($this->action)."', '".$this->db_escape_string($this->action_id)."', ";
+		$q .= "'".$this->db_escape_string($this->action_yes)."', '".$this->db_escape_string($this->action_flag)."', ";
+		$q .= "'".$this->db_escape_string($this->action_menu)."', '".$this->db_escape_string($this->action_loaded)."', ";
+		$q .= "'".$this->db_escape_string($this->action_value)."', '".$this->db_escape_string($this->action_error)."')";
+		$this->db_exec($q, 'NULL');
+	}
+
+
+	// ==================================
+	// ALL THE PAGE RIGHTS/USER RIGHTS/ETC need to fixed and put into one
+	// proper settings have to be done with the defined top down rights flow
+	// ==================================
+	// all ACLs are set in the login class
+
+	// METHOD: adbTopMenu
+	// PARAMS: level
+	// RETURN: returns an array for the top menu with all correct settings
+	// DESC:   menu creater
+	public function adbTopMenu($flag = 0)
+	{
+		if ($this->menu_show_flag) {
+			$flag = $this->menu_show_flag;
 		}
 
-		// INTERNAL METHODS |===============================================>
-
-
-		// PUBLIC METHODS |=================================================>
-
-		// METHOD: adbEditLog()
-		// PARAMS: event -> any kind of event description, data -> any kind of data related to that event
-		// RETURN: none
-		// DESC:   writes all action vars plus other info into edit_log table
-		public function adbEditLog($event = '', $data = '', $write_type = 'STRING')
-		{
-			if ($write_type == 'BINARY')
-			{
-				$data_binary = $this->db_escape_bytea(bzcompress(serialize($data)));
-				$data = 'see bzip compressed data_binary field';
-			}
-			if ($write_type == 'STRING')
-			{
-				$data = $this->db_escape_string(serialize($data));
-			}
-
-			$q = "INSERT INTO ".LOGIN_DB_SCHEMA.".edit_log ";
-			$q .= "(euid, event_date, event, data, data_binary, page, ";
-			$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
-			$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
-			$q .= "VALUES ";
-			$q .= "(".@$_SESSION['EUID'].", NOW(), '".$this->db_escape_string($event)."', '".$data."', '".$data_binary."', '".$this->page_name."', ";
-			$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->db_escape_string(@$_SERVER['HTTP_USER_AGENT'])."', '".$this->db_escape_string(@$_SERVER['HTTP_REFERER'])."', '".$this->db_escape_string(@$_SERVER['SCRIPT_FILENAME'])."', '".$this->db_escape_string(@$_SERVER['QUERY_STRING'])."', '".$this->db_escape_string(@$_SERVER['SERVER_NAME'])."', '".$this->db_escape_string(@$_SERVER['HTTP_HOST'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_CHARSET'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_ENCODING'])."', '".session_id()."', ";
-			$q .= "'".$this->db_escape_string($this->action)."', '".$this->db_escape_string($this->action_id)."', '".$this->db_escape_string($this->action_yes)."', '".$this->db_escape_string($this->action_flag)."', '".$this->db_escape_string($this->action_menu)."', '".$this->db_escape_string($this->action_loaded)."', '".$this->db_escape_string($this->action_value)."', '".$this->db_escape_string($this->action_error)."')";
-			$this->db_exec($q, 'NULL');
+		// get the session pages array
+		$pages = $_SESSION["PAGES"];
+		if (!is_array($pages)) {
+			$pages = array ();
 		}
-
-
-		// ==================================
-		// ALL THE PAGE RIGHTS/USER RIGHTS/ETC need to fixed and put into one
-		// proper settings have to be done with the defined top down rights flow
-		// ==================================
-		// all ACLs are set in the login class
-
-		// METHOD: adbTopMenu
-		// PARAMS: level
-		// RETURN: returns an array for the top menu with all correct settings
-		// DESC:   menu creater
-		public function adbTopMenu($flag = 0)
-		{
-			if ($this->menu_show_flag)
-				$flag = $this->menu_show_flag;
-
-			// get the session pages array
-			$pages = $_SESSION["PAGES"];
-			if (!is_array($pages))
-				$pages = array ();
 
 //$this->debug('pages', $this->print_ar($pages));
 
-			// if flag is 0, then we show all, else, we show only the matching flagges array points
-			// array is already sorted after correct order
-			reset($pages);
-			for ($i = 0; $i < count($pages); $i ++)
-			{
-				$show = 0;
-				// is it visible in the menu & is it online
-				if ($pages[$i]["menu"] && $pages[$i]["online"])
-				{
-					// check if it falls into our flag if we have a flag
-					if ($flag)
-					{
-						foreach ($pages[$i]["visible"] AS $name => $key)
-						{
-							if ($key == $flag)
-								$show = 1;
+		// if flag is 0, then we show all, else, we show only the matching flagges array points
+		// array is already sorted after correct order
+		reset($pages);
+		for ($i = 0; $i < count($pages); $i ++) {
+			$show = 0;
+			// is it visible in the menu & is it online
+			if ($pages[$i]["menu"] && $pages[$i]["online"]) {
+				// check if it falls into our flag if we have a flag
+				if ($flag) {
+					foreach ($pages[$i]["visible"] as $name => $key) {
+						if ($key == $flag) {
+							$show = 1;
 						}
 					}
-					else
-					{
-						// if no flag given, show all menu points
-						$show = 1;
-					}
+				} else {
+					// if no flag given, show all menu points
+					$show = 1;
+				}
 
-					if ($show)
-					{
-						// if it is popup, write popup arrayound
-						if ($pages[$i]["popup"])
-						{
-							$type = "popup";
-						}
-						else
-						{
-							$type = "normal";
-						}
-						$query_string = '';
-						if (count($pages[$i]["query"]))
-						{
-							for ($j = 0; $j < count($pages[$i]["query"]); $j ++)
-							{
-								if (strlen($query_string))
-									$query_string .= "&";
-								$query_string .= $pages[$i]["query"][$j]["name"]."=";
-								if (!$pages[$i]["query"][$j]["dynamic"])
-									$query_string .= urlencode($pages[$i]["query"][$j]["value"]);
-								else
-									$query_string .= (($_GET[$pages[$i]["query"][$j]["value"]]) ? urlencode($_GET[$pages[$i]["query"][$j]["value"]]) : urlencode($_POST[$pages[$i]["query"][$j]["value"]]));
+				if ($show) {
+					// if it is popup, write popup arrayound
+					if ($pages[$i]["popup"]) {
+						$type = "popup";
+					} else {
+						$type = "normal";
+					}
+					$query_string = '';
+					if (count($pages[$i]["query"])) {
+						for ($j = 0; $j < count($pages[$i]["query"]); $j ++) {
+							if (strlen($query_string)) {
+								$query_string .= "&";
+							}
+							$query_string .= $pages[$i]["query"][$j]["name"]."=";
+							if (!$pages[$i]["query"][$j]["dynamic"]) {
+								$query_string .= urlencode($pages[$i]["query"][$j]["value"]);
+							} else {
+								$query_string .= $_GET[$pages[$i]["query"][$j]["value"]] ? urlencode($_GET[$pages[$i]["query"][$j]["value"]]) : urlencode($_POST[$pages[$i]["query"][$j]["value"]]);
 							}
 						}
-						$url = $pages[$i]["filename"];
-						if (strlen($query_string))
-							$url .= "?".$query_string;
-						$name = $pages[$i]["page_name"];
-						// if page name matchs -> set selected flag
-						$selected = 0;
-						if ($this->get_page_name() == $pages[$i]["filename"])
-						{
-							$selected = 1;
-							$this->page_name = $name;
-						}
-						// last check, is this menu point okay to show
-						$enabled = 0;
-						if ($this->adbShowMenuPoint($pages[$i]["filename"]))
-						{
-							$enabled = 1;
-						}
-						// write in to view menu array
-						array_push($this->menu, array("name" => $this->l->__($name), "url" => $url, "selected" => $selected, "enabled" => $enabled, "type" => $type));
-					} // show page
-				} // online and in menu
-			} // for each page
-			return $this->menu;
-		}
+					}
+					$url = $pages[$i]["filename"];
+					if (strlen($query_string)) {
+						$url .= "?".$query_string;
+					}
+					$name = $pages[$i]["page_name"];
+					// if page name matchs -> set selected flag
+					$selected = 0;
+					if ($this->get_page_name() == $pages[$i]["filename"]) {
+						$selected = 1;
+						$this->page_name = $name;
+					}
+					// last check, is this menu point okay to show
+					$enabled = 0;
+					if ($this->adbShowMenuPoint($pages[$i]["filename"])) {
+						$enabled = 1;
+					}
+					// write in to view menu array
+					array_push($this->menu, array("name" => $this->l->__($name), "url" => $url, "selected" => $selected, "enabled" => $enabled, "type" => $type));
+				} // show page
+			} // online and in menu
+		} // for each page
+		return $this->menu;
+	}
 
-		// METHOD: adbShowMenuPoint
-		// PARAMS: filename
-		// RETURN: returns boolean true/false
-		// DESC:   checks if this filename is in the current situation (user id, etc) available
-		public function adbShowMenuPoint($filename)
-		{
-			$enabled = 0;
-			switch ($filename)
-			{
-				default:
-					$enabled = 1;
+	// METHOD: adbShowMenuPoint
+	// PARAMS: filename
+	// RETURN: returns boolean true/false
+	// DESC:   checks if this filename is in the current situation (user id, etc) available
+	public function adbShowMenuPoint($filename)
+	{
+		$enabled = 0;
+		switch ($filename) {
+			default:
+				$enabled = 1;
 				break;
-			};
-			return $enabled;
+		};
+		return $enabled;
+	}
+
+	// REMARK: below function has moved to "Class.Basic"
+	// METHOD: adbAssocArray
+	// PARAMS: db array, key, value part
+	// RETURN: returns and associative array
+	// DESC:   creates out of a normal db_return array an assoc array
+	public function adbAssocArray($db_array, $key, $value)
+	{
+		return $this->GenAssocArray($db_array, $key, $value);
+	}
+
+	// REMARK: below function has moved to "Class.Basic"
+	// METHOD: adbByteStringFormat
+	// PARAMS: int
+	// RETURN: string
+	// DESC:   converts bytes into formated string with KB, MB, etc
+	public function adbByteStringFormat($number)
+	{
+		return $this->ByteStringFormat($number);
+	}
+
+	// REMARK: below function has moved to "Class.Basic"
+	// METHOD: adbCreateThumbnail
+	// PARAMS: id from picture where from we create a thumbnail
+	//         x -> max x size of thumbnail
+	//         y -> max y size of thumbnail
+	//         dummy -> if set to true, then if no images was found we show a dummy image
+	//         path -> if source start is not ROOT path, if empty ROOT is choosen
+	//         cache -> cache path, if not given TMP is used
+	// RETURN: thumbnail name
+	// DESC:   converts picture to a thumbnail with max x and max y size
+	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = false, $path = "", $cache = "")
+	{
+		return $this->CreateThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
+	}
+
+	// METHOD: adbMsg
+	// PARAMS: level -> info/warning/error
+	//         msg -> string, can be printf formated
+	//         var array -> optional data for a possible printf formated msg
+	// RETURN: none
+	// DESC:   wrapper function to fill up the mssages array
+	public function adbMsg($level, $msg, $vars = array ())
+	{
+		if (!preg_match("/^info|warning|error$/", $level)) {
+			$level = "info";
 		}
-
-		// REMARK: below function has moved to "Class.Basic"
-		// METHOD: adbAssocArray
-		// PARAMS: db array, key, value part
-		// RETURN: returns and associative array
-		// DESC:   creates out of a normal db_return array an assoc array
-		public function adbAssocArray($db_array, $key, $value)
-		{
-			return $this->GenAssocArray($db_array, $key, $value);
-		}
-
-		// REMARK: below function has moved to "Class.Basic"
-		// METHOD: adbByteStringFormat
-		// PARAMS: int
-		// RETURN: string
-		// DESC:   converts bytes into formated string with KB, MB, etc
-		public function adbByteStringFormat($number)
-		{
-			return $this->ByteStringFormat($number);
-		}
-
-		// REMARK: below function has moved to "Class.Basic"
-		// METHOD: adbCreateThumbnail
-		// PARAMS: id from picture where from we create a thumbnail
-		//         x -> max x size of thumbnail
-		//         y -> max y size of thumbnail
-		//         dummy -> if set to true, then if no images was found we show a dummy image
-		//         path -> if source start is not ROOT path, if empty ROOT is choosen
-		//         cache -> cache path, if not given TMP is used
-		// RETURN: thumbnail name
-		// DESC:   converts picture to a thumbnail with max x and max y size
-		public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = false, $path = "", $cache = "")
-		{
-			return $this->CreateThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
-		}
-
-		// METHOD: adbMsg
-		// PARAMS: level -> info/warning/error
-		//         msg -> string, can be printf formated
-		//         var array -> optional data for a possible printf formated msg
-		// RETURN: none
-		// DESC:   wrapper function to fill up the mssages array
-		public function adbMsg($level, $msg, $vars = array ())
-		{
-			if (!preg_match("/^info|warning|error$/", $level))
-				$level = "info";
-			$this->messages[] = array (
-				'msg' => sprintf($this->l->__($msg), $vars),
-				'class' => $level
-			);
-			switch ($level)
-			{
-				case 'info': $this->info = 1; break;
-				case 'warning': $this->warning = 1; break;
-				case 'error': $this->error = 1; break;
-			}
-		}
-
-		// METHOD: adbLiveQueue
-		// PARAMS: queue_key -> string to identfy the queue
-		//         type      -> INSERT/UPDATE/DELETE
-		//         target    -> target table to write to
-		//         data      -> SQL part to write, this can include #KEY_VALUE#, #KEY_NAME# for delete sub queries
-		//         key_name  -> key name, mostly used for update search
-		//         key_value -> data for the key
-		//         associate -> NULL for free, LOCK for first insert, group key for reference to first entry
-		//         file      -> string for special file copy actions; mostyle "test#live;..."
-		// RETURN: none
-		// DESC:   writes live queue
-		public function adbLiveQueue($queue_key, $type, $target, $data, $key_name, $key_value, $associate = NULL, $file = NULL)
-		{
-			$q = "INSERT INTO ".GLOBAL_DB_SCHEMA.".live_queue (";
-			$q .= "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file";
-			$q .= ") VALUES (";
-			$q .= "'".$this->db_escape_string($queue_key)."', '".$this->db_escape_string($key_value)."', '".$this->db_escape_string($key_name)."', '".$this->db_escape_string($type)."', '".$this->db_escape_string($target)."', '".$this->db_escape_string($data)."', '".$this->queue_key."', '".$this->action."', '".$this->db_escape_string($associate)."', '".$this->db_escape_string($file)."')";
-			$this->db_exec($q);
-		}
-
-		// METHOD: adbPrintDateTime
-		// PARAMS: year, month, day, hour, min: the date and time values
-		//         suffix: additional info printed after the date time variable in the drop down, also used for ID in the on change JS call
-		//         minute steps, can be 1 (default), 5, 10, etc, if invalid (outside 1h range, it falls back to 1min)
-		// RETURN: HTML formated strings for drop down lists of date and time
-		// DESC:   print the date/time drop downs, used in any queue/send/insert at date/time place
-		public function adbPrintDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1)
-		{
-			// if suffix given, add _ before
-			if ($suffix)
-				$suffix = '_'.$suffix;
-			if ($min_steps < 1 || $min_steps > 59)
-				$min_steps = 1;
-
-			$on_change_call = 'dt_list(\''.$suffix.'\');';
-
-			// always be 1h ahead (for safety)
-			$timestamp = time() + 3600; // in seconds
-
-			// the max year is this year + 1;
-			$max_year = date("Y", $timestamp) + 1;
-
-			// preset year, month, ...
-			$year = (!$year) ? date("Y", $timestamp) : $year;
-			$month = (!$month) ? date("m", $timestamp) : $month;
-			$day = (!$day) ? date("d", $timestamp) : $day;
-			$hour = (!$hour) ? date("H", $timestamp) : $hour;
-			$min = (!$min) ? date("i", $timestamp) : $min; // add to five min?
-			// max days in selected month
-			$days_in_month = date("t", strtotime($year."-".$month."-".$day." ".$hour.":".$min.":0"));
-
-			// from now to ?
-			$string = $this->l->__('Year').' ';
-			$string .= '<select id="year'.$suffix.'" name="year'.$suffix.'" onChange="'.$on_change_call.'">';
-			for ($i = date("Y"); $i <= $max_year; $i ++)
-			{
-				$string .= '<option value="'.$i.'" '.(($year == $i) ? 'selected' : '').'>'.$i.'</option>';
-			}
-			$string .= '</select> '.$this->l->__('Month').' ';
-			$string .= '<select id="month'.$suffix.'" name="month'.$suffix.'" onChange="'.$on_change_call.'">';
-			for ($i = 1; $i <= 12; $i ++)
-			{
-				$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($month == $i) ? 'selected' : '').'>'.$i.'</option>';
-			}
-			$string .= '</select> '.$this->l->__('Day').' ';
-			$string .= '<select id="day'.$suffix.'" name="day'.$suffix.'" onChange="'.$on_change_call.'">';
-			for ($i = 1; $i <= $days_in_month; $i ++)
-			{
-				// set weekday text based on current month ($month) and year ($year)
-				$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($day == $i) ? 'selected' : '').'>'.$i.' ('.$this->l->__(date('D', mktime(0, 0, 0, $month, $i, $year))).')</option>';
-			}
-			$string .= '</select> '.$this->l->__('Hour').' ';
-			$string .= '<select id="hour'.$suffix.'" name="hour'.$suffix.'" onChange="'.$on_change_call.'">';
-			for ($i = 0; $i <= 23; $i ++)
-			{
-				$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($hour == $i) ? 'selected' : '').'>'.$i.'</option>';
-			}
-			$string .= '</select> '.$this->l->__('Minute').' ';
-			$string .= '<select id="min'.$suffix.'" name="min'.$suffix.'" onChange="'.$on_change_call.'">';
-			for ( $i = 0; $i <= 59; $i += $min_steps)
-			{
-				$string .= '<option value="'.(( $i < 10) ? '0'.$i : $i).'" '.(($min == $i) ? 'selected' : '').'>'.$i.'</option>';
-			}
-			$string .= '</select>';
-			// return the datetime select string
-			return $string;
+		$this->messages[] = array (
+			'msg' => sprintf($this->l->__($msg), $vars),
+			'class' => $level
+		);
+		switch ($level) {
+			case 'info':
+				$this->info = 1;
+				break;
+			case 'warning':
+				$this->warning = 1;
+				break;
+			case 'error':
+				$this->error = 1;
+				break;
 		}
 	}
-?>
+
+	// METHOD: adbLiveQueue
+	// PARAMS: queue_key -> string to identfy the queue
+	//         type      -> INSERT/UPDATE/DELETE
+	//         target    -> target table to write to
+	//         data      -> SQL part to write, this can include #KEY_VALUE#, #KEY_NAME# for delete sub queries
+	//         key_name  -> key name, mostly used for update search
+	//         key_value -> data for the key
+	//         associate -> NULL for free, LOCK for first insert, group key for reference to first entry
+	//         file      -> string for special file copy actions; mostyle "test#live;..."
+	// RETURN: none
+	// DESC:   writes live queue
+	public function adbLiveQueue($queue_key, $type, $target, $data, $key_name, $key_value, $associate = null, $file = null)
+	{
+		$q = "INSERT INTO ".GLOBAL_DB_SCHEMA.".live_queue (";
+		$q .= "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file";
+		$q .= ") VALUES (";
+		$q .= "'".$this->db_escape_string($queue_key)."', '".$this->db_escape_string($key_value)."', ";
+		$q .= "'".$this->db_escape_string($key_name)."', '".$this->db_escape_string($type)."', ";
+		$q .= "'".$this->db_escape_string($target)."', '".$this->db_escape_string($data)."', ";
+		$q .= "'".$this->queue_key."', '".$this->action."', '".$this->db_escape_string($associate)."', ";
+		$q .= "'".$this->db_escape_string($file)."')";
+		$this->db_exec($q);
+	}
+
+	// METHOD: adbPrintDateTime
+	// PARAMS: year, month, day, hour, min: the date and time values
+	//         suffix: additional info printed after the date time variable in the drop down, also used for ID in the on change JS call
+	//         minute steps, can be 1 (default), 5, 10, etc, if invalid (outside 1h range, it falls back to 1min)
+	// RETURN: HTML formated strings for drop down lists of date and time
+	// DESC:   print the date/time drop downs, used in any queue/send/insert at date/time place
+	public function adbPrintDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1)
+	{
+		// if suffix given, add _ before
+		if ($suffix) {
+			$suffix = '_'.$suffix;
+		}
+		if ($min_steps < 1 || $min_steps > 59) {
+			$min_steps = 1;
+		}
+
+		$on_change_call = 'dt_list(\''.$suffix.'\');';
+
+		// always be 1h ahead (for safety)
+		$timestamp = time() + 3600; // in seconds
+
+		// the max year is this year + 1;
+		$max_year = date("Y", $timestamp) + 1;
+
+		// preset year, month, ...
+		$year = (!$year) ? date("Y", $timestamp) : $year;
+		$month = (!$month) ? date("m", $timestamp) : $month;
+		$day = (!$day) ? date("d", $timestamp) : $day;
+		$hour = (!$hour) ? date("H", $timestamp) : $hour;
+		$min = (!$min) ? date("i", $timestamp) : $min; // add to five min?
+		// max days in selected month
+		$days_in_month = date("t", strtotime($year."-".$month."-".$day." ".$hour.":".$min.":0"));
+
+		// from now to ?
+		$string = $this->l->__('Year').' ';
+		$string .= '<select id="year'.$suffix.'" name="year'.$suffix.'" onChange="'.$on_change_call.'">';
+		for ($i = date("Y"); $i <= $max_year; $i ++) {
+			$string .= '<option value="'.$i.'" '.(($year == $i) ? 'selected' : '').'>'.$i.'</option>';
+		}
+		$string .= '</select> '.$this->l->__('Month').' ';
+		$string .= '<select id="month'.$suffix.'" name="month'.$suffix.'" onChange="'.$on_change_call.'">';
+		for ($i = 1; $i <= 12; $i ++) {
+			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($month == $i) ? 'selected' : '').'>'.$i.'</option>';
+		}
+		$string .= '</select> '.$this->l->__('Day').' ';
+		$string .= '<select id="day'.$suffix.'" name="day'.$suffix.'" onChange="'.$on_change_call.'">';
+		for ($i = 1; $i <= $days_in_month; $i ++) {
+			// set weekday text based on current month ($month) and year ($year)
+			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($day == $i) ? 'selected' : '').'>'.$i.' ('.$this->l->__(date('D', mktime(0, 0, 0, $month, $i, $year))).')</option>';
+		}
+		$string .= '</select> '.$this->l->__('Hour').' ';
+		$string .= '<select id="hour'.$suffix.'" name="hour'.$suffix.'" onChange="'.$on_change_call.'">';
+		for ($i = 0; $i <= 23; $i ++) {
+			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($hour == $i) ? 'selected' : '').'>'.$i.'</option>';
+		}
+		$string .= '</select> '.$this->l->__('Minute').' ';
+		$string .= '<select id="min'.$suffix.'" name="min'.$suffix.'" onChange="'.$on_change_call.'">';
+		for ($i = 0; $i <= 59; $i += $min_steps) {
+			$string .= '<option value="'.(( $i < 10) ? '0'.$i : $i).'" '.(($min == $i) ? 'selected' : '').'>'.$i.'</option>';
+		}
+		$string .= '</select>';
+		// return the datetime select string
+		return $string;
+	}
+}
