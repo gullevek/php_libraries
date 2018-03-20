@@ -41,7 +41,6 @@ class db_pgsql
 {
 	private $last_error_query;
 	private $dbh;
-//		public $currval_query;
 
 	// METHOD: __construct
 	// PARAMS: none
@@ -227,7 +226,6 @@ class db_pgsql
 			}
 			$seq = (($schema) ? $schema.'.' : '').$table."_".$pk_name."_seq";
 			$q = "SELECT CURRVAL('$seq') AS insert_id";
-			// $this->currval_query = $q;
 			// I have to do manually or I overwrite the original insert internal vars ...
 			if ($q = $this->_db_query($q)) {
 				list($id) = $this->_db_fetch_array($q);
