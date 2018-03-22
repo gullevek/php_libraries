@@ -7,57 +7,55 @@
  */
 
 /**
- * Smarty {html_checkboxes} function plugin
- * File:       function.html_checkboxes.php<br>
+ * Smarty {html_radios} function plugin
+ * File:       function.html_radios.php<br>
  * Type:       function<br>
- * Name:       html_checkboxes<br>
+ * Name:       html_radios<br>
  * Date:       24.Feb.2003<br>
- * Purpose:    Prints out a list of checkbox input types<br>
- * Examples:
- * <pre>
- * {html_checkboxes values=$ids output=$names}
- * {html_checkboxes values=$ids name='box' separator='<br>' output=$names}
- * {html_checkboxes values=$ids checked=$checked separator='<br>' output=$names}
- * </pre>
+ * Purpose:    Prints out a list of radio input types<br>
  * Params:
  * <pre>
- * - name       (optional) - string default "checkbox"
+ * - name       (optional) - string default "radio"
  * - values     (required) - array
- * - options    (optional) - associative array
+ * - options    (required) - associative array
  * - checked    (optional) - array default not set
  * - separator  (optional) - ie <br> or &nbsp;
- * - output     (optional) - the output next to each checkbox
+ * - output     (optional) - the output next to each radio button
  * - assign     (optional) - assign the output as an array to this variable
  * - escape     (optional) - escape the content (not value), defaults to true
  * </pre>
+ * Examples:
+ * <pre>
+ * {html_radios values=$ids output=$names}
+ * {html_radios values=$ids name='box' separator='<br>' output=$names}
+ * {html_radios values=$ids checked=$checked separator='<br>' output=$names}
+ * </pre>
  *
- * @link       http://www.smarty.net/manual/en/language.function.html.checkboxes.php {html_checkboxes}
- *             (Smarty online manual)
- * @author     Christopher Kvarme <christopher.kvarme@flashjab.com>
- * @author     credits to Monte Ohrt <monte at ohrt dot com>
- * @version    1.0
+ * @link    http://smarty.php.net/manual/en/language.function.html.radios.php {html_radios}
+ *          (Smarty online manual)
+ * @author  Christopher Kvarme <christopher.kvarme@flashjab.com>
+ * @author  credits to Monte Ohrt <monte at ohrt dot com>
+ * @version 1.0
  *
- * @param array  $params   parameters
- * @param object $template template object
+ * @param array                    $params   parameters
+ * @param Smarty_Internal_Template $template template object
  *
  * @return string
- * @uses       smarty_function_escape_special_chars()
+ * @uses    smarty_function_escape_special_chars()
  */
-function smarty_function_html_checkboxes($params, $template)
+function smarty_function_html_radios($params, $template)
 {
     require_once(SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php');
 
-    $name = 'checkbox';
+    $name = 'radio';
     $values = null;
     $options = null;
-    $selected = array();
+    $selected = null;
     $separator = '';
     $escape = true;
     $labels = true;
     $label_ids = false;
     $output = null;
-    $pos = null;
-
     $extra = '';
 
     foreach ($params as $_key => $_val) {
@@ -65,6 +63,22 @@ function smarty_function_html_checkboxes($params, $template)
             case 'name':
             case 'separator':
                 $$_key = (string) $_val;
+                break;
+
+            case 'checked':
+            case 'selected':
+                if (is_array($_val)) {
+                    trigger_error('html_radios: the "' . $_key . '" attribute cannot be an array', E_USER_WARNING);
+                } elseif (is_object($_val)) {
+                    if (method_exists($_val, "__toString")) {
+                        $selected = smarty_function_escape_special_chars((string) $_val->__toString());
+                    } else {
+                        trigger_error("html_radios: selected attribute is an object of class '" . get_class($_val) .
+                                      "' without __toString() method", E_USER_NOTICE);
+                    }
+                } else {
+                    $selected = (string) $_val;
+                }
                 break;
 
             case 'escape':
@@ -82,47 +96,13 @@ function smarty_function_html_checkboxes($params, $template)
                 $$_key = array_values((array) $_val);
                 break;
 
-            case 'checked':
-            case 'selected':
-                if (is_array($_val)) {
-                    $selected = array();
-                    foreach ($_val as $_sel) {
-                        if (is_object($_sel)) {
-                            if (method_exists($_sel, "__toString")) {
-                                $_sel = smarty_function_escape_special_chars((string) $_sel->__toString());
-                            } else {
-                                trigger_error("html_checkboxes: selected attribute contains an object of class '" .
-                                              get_class($_sel) . "' without __toString() method", E_USER_NOTICE);
-                                continue;
-                            }
-                        } else {
-                            $_sel = smarty_function_escape_special_chars((string) $_sel);
-                        }
-                        $selected[ $_sel ] = true;
-                    }
-                } elseif (is_object($_val)) {
-                    if (method_exists($_val, "__toString")) {
-                        $selected = smarty_function_escape_special_chars((string) $_val->__toString());
-                    } else {
-                        trigger_error("html_checkboxes: selected attribute is an object of class '" . get_class($_val) .
-                                      "' without __toString() method", E_USER_NOTICE);
-                    }
-                } else {
-                    $selected = smarty_function_escape_special_chars((string) $_val);
-                }
-                break;
-
-            case 'checkboxes':
-                trigger_error('html_checkboxes: the use of the "checkboxes" attribute is deprecated, use "options" instead',
+            case 'radios':
+                trigger_error('html_radios: the use of the "radios" attribute is deprecated, use "options" instead',
                               E_USER_WARNING);
                 $options = (array) $_val;
                 break;
 
             case 'assign':
-                break;
-
-            case 'pos':
-                $$_key = array_values((array)$_val);
                 break;
 
             case 'strict':
@@ -148,32 +128,32 @@ function smarty_function_html_checkboxes($params, $template)
                 if (!is_array($_val)) {
                     $extra .= ' ' . $_key . '="' . smarty_function_escape_special_chars($_val) . '"';
                 } else {
-                    trigger_error("html_checkboxes: extra attribute '$_key' cannot be an array", E_USER_NOTICE);
+                    trigger_error("html_radios: extra attribute '$_key' cannot be an array", E_USER_NOTICE);
                 }
                 break;
         }
     }
 
     if (!isset($options) && !isset($values)) {
+        /* raise error here? */
+
         return '';
-    } /* raise error here? */
+    }
 
     $_html_result = array();
 
     if (isset($options)) {
         foreach ($options as $_key => $_val) {
-            $_pos = isset($pos[ $_key ]) ? $pos[ $_key ] : '';
             $_html_result[] =
-                smarty_function_html_checkboxes_output($name, $_key, $_val, $selected, $extra, $separator, $labels,
-                                                       $label_ids, $_pos, $escape);
+                smarty_function_html_radios_output($name, $_key, $_val, $selected, $extra, $separator, $labels,
+                                                   $label_ids, $escape);
         }
     } else {
         foreach ($values as $_i => $_key) {
             $_val = isset($output[ $_i ]) ? $output[ $_i ] : '';
-            $_pos = isset($pos[ $_i ]) ? $pos[ $_i ] : '';
             $_html_result[] =
-                smarty_function_html_checkboxes_output($name, $_key, $_val, $selected, $extra, $separator, $labels,
-                                                       $label_ids, $_pos, $escape);
+                smarty_function_html_radios_output($name, $_key, $_val, $selected, $extra, $separator, $labels,
+                                                   $label_ids, $escape);
         }
     }
 
@@ -184,8 +164,8 @@ function smarty_function_html_checkboxes($params, $template)
     }
 }
 
-function smarty_function_html_checkboxes_output($name, $value, $output, $selected, $extra, $separator, $labels,
-                                                $label_ids, $pos, $escape = true)
+function smarty_function_html_radios_output($name, $value, $output, $selected, $extra, $separator, $labels, $label_ids,
+                                            $escape)
 {
     $_output = '';
 
@@ -231,17 +211,13 @@ function smarty_function_html_checkboxes_output($name, $value, $output, $selecte
         $output = smarty_function_escape_special_chars($output);
     }
 
-    $_output .= '<input type="checkbox" name="' . $name . '[' . $pos . ']" value="' . $value . '"';
+    $_output .= '<input type="radio" name="' . $name . '" value="' . $value . '"';
 
     if ($labels && $label_ids) {
         $_output .= ' id="' . $_id . '"';
     }
 
-    if (is_array($selected)) {
-        if (isset($selected[ $value ])) {
-            $_output .= ' checked="checked"';
-        }
-    } elseif ($value === $selected) {
+    if ($value === $selected) {
         $_output .= ' checked="checked"';
     }
 
