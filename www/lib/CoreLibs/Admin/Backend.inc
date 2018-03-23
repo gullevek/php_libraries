@@ -69,9 +69,9 @@ class Backend extends \CoreLibs\DB\IO
 		// internal
 		$this->class_info["adbBackend"] = array(
 			"class_name" => "Admin Interface Backend",
-			"class_version" => "0.1.0",
+			"class_version" => "1.0.0",
 			"class_created" => "2006/08/15",
-			"class_author" => "cs/gullevek/jp"
+			"class_author" => "Clemens Schwaighofer"
 		);
 
 		// set page name

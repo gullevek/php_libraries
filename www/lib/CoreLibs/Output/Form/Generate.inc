@@ -2,7 +2,7 @@
 /********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2002/10/22
-* VERSION: 2.4.9
+* VERSION: 3.0.0
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESCRIPTION:
 *   ~ 2003/02/26: decided to move away from single class and change this
@@ -305,9 +305,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// internal
 		$this->class_info["form"] = array(
 			"class_name" => "Form create",
-			"class_version" => "2.4.9",
+			"class_version" => "3.0.0",
 			"class_created" => "2002-10-22",
-			"class_author" => "cs/gullevek/at"
+			"class_author" => "Clemens Schwaighofer"
 		);
 	}
 

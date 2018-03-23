@@ -2,7 +2,7 @@
 /*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2002/12/17
-* VERSION: 0.4.0
+* VERSION: 1.0.0
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESC  :RIPTION:
 *   DB Array IO Class:
@@ -77,9 +77,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// internal
 		$this->class_info["db_array_io"] = array(
 			"class_name" => "DB Array IO",
-			"class_version" => "0.4.0",
+			"class_version" => "1.0.0",
 			"class_created" => "2002/12/17",
-			"class_author" => "cs/gullevek/at"
+			"class_author" => "Clemens Schwaighofer"
 		);
 	}
 

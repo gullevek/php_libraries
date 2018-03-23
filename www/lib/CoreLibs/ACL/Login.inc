@@ -2,7 +2,7 @@
 /*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2000/06/01
-* VERSION: 4.0.0
+* VERSION: 5.0.0
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESCRIPTON:
 *   ~ 2003/03/03: change the whole include file into one class
@@ -162,9 +162,9 @@ class Login extends \CoreLibs\DB\IO
 		// internal
 		$this->class_info["login"] = array(
 			"class_name" => "Login",
-			"class_version" => "4.0.0",
+			"class_version" => "5.0.0",
 			"class_created" => "2000-06-01",
-			"class_author" => "cs/gullevek/at"
+			"class_author" => "Clemens Schwaighofer"
 		);
 
 		// init default ACL list array
