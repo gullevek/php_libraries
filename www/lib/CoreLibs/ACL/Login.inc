@@ -57,10 +57,9 @@
 *   2000-06-01: created basic idea and functions
 *********************************************************************/
 
-// try to include file from LIBS path, or from normal path
-_spl_autoload('Class.DB.IO.inc');
+namespace CoreLibs\ACL;
 
-class login extends db_io
+class Login extends \CoreLibs\DB\IO
 {
 	private $euid; // the user id var
 	private $permission_okay = 0; // is set to one if login okay, or EUID is set and user is okay to access this page
@@ -100,14 +99,12 @@ class login extends db_io
 			exit;
 		}
 
-		// get the language sub class & init it
-		_spl_autoload('Class.l10n.inc');
-		$this->l = new l10n($lang);
+		$this->l = new \CoreLibs\Language\L10n($lang);
 
 		// if we have a search path we need to set it, to use the correct DB to login
 		// check what schema to use. if there is a login schema use this, else check if there is a schema set in the config, or fall back to DB_SCHEMA if this exists, if this also does not exists use public schema
 		$SCHEMA = defined('LOGIN_DB_SCHEMA') ? LOGIN_DB_SCHEMA : ($db_config['db_schema'] ? $db_config['db_schema'] : (defined('DB_SCHEMA') ? DB_SCHEMA : 'public'));
-		$this->db_exec("SET search_path TO ".$SCHEMA);
+		$this->dbExec("SET search_path TO ".$SCHEMA);
 		$this->euid = array_key_exists('EUID', $_SESSION) ? $_SESSION['EUID'] : 0; // if there is none, there is none, saves me POST/GET check
 		// get login vars, are so, can't be changed
 		// prepare
@@ -174,7 +171,7 @@ class login extends db_io
 		$_SESSION['DEFAULT_ACL_LIST'] = array ();
 		// read the current edit_access_right list into an array
 		$q = "SELECT level, type, name FROM edit_access_right WHERE level >= 0 ORDER BY level";
-		while ($res = $this->db_return($q)) {
+		while ($res = $this->dbReturn($q)) {
 			// level to description format (numeric)
 			$this->default_acl_list[$res['level']] = array (
 				'type' => $res['type'],
@@ -185,19 +182,19 @@ class login extends db_io
 		$_SESSION['DEFAULT_ACL_LIST'] = $this->default_acl_list;
 
 		// if username & password & !$euid start login
-		$this->login_login_user();
+		$this->loginLoginUser();
 		// checks if $euid given check if user is okay for that side
-		$this->login_check_permissions();
+		$this->loginCheckPermissions();
 		// logsout user
-		$this->login_logout_user();
+		$this->loginLogoutUser();
 		// if the password change flag is okay, run the password change method
 		if ($this->password_change) {
-			$this->login_password_change();
+			$this->loginPasswordChange();
 		}
 		// if !$euid || permission not okay, print login screan
-		echo $this->login_print_login();
+		echo $this->loginPrintLogin();
 		// closing all connections, depending on error status, exit
-		if (!$this->login_close_class()) {
+		if (!$this->loginCloseClass()) {
 			// do not go anywhere, quit processing here
 			// do something with possible debug data?
 			if (TARGET == 'live' || TARGET == 'remote')	{
@@ -206,14 +203,14 @@ class login extends db_io
 				$this->echo_output_all = 0;
 				$this->print_output_all = DEBUG ? 1 : 0;
 			}
-			$status_msg = $this->print_error_msg();
+			$status_msg = $this->printErrorMsg();
 			if ($this->echo_output_all) {
 				echo $status_msg;
 			}
 			exit;
 		}
 		// set acls for this user/group and this page
-		$this->login_set_acl();
+		$this->loginSetAcl();
 	}
 
 	// METHOD: _login
@@ -225,11 +222,12 @@ class login extends db_io
 		parent::__destruct();
 	}
 
-	// METHOD: login_login_user
+	// METHOD: loginLoginUser
+	// WAS   : login_login_user
 	// PARAMS: none
 	// RETURN: none
 	// DESC  : if user pressed login button this script is called, but only if there is no preview euid set
-	private function login_login_user()
+	private function loginLoginUser()
 	{
 		// have to get the global stuff here for setting it later
 		if (!$this->euid && $this->login) {
@@ -253,7 +251,7 @@ class login extends db_io
 				$q .= "eg.edit_access_right_id = eareg.edit_access_right_id AND ";
 				// password match is done in script, against old plain or new blowfish encypted
 				$q .= "(LOWER(username) = '".strtolower($this->username)."') ";
-				$res = $this->db_return($q);
+				$res = $this->dbReturn($q);
 				// username is wrong, but we throw for wrong username and wrong password the same error
 				if (!$this->cursor_ext[md5($q)]["num_rows"]) {
 					$this->login_error = 1010;
@@ -280,13 +278,24 @@ class login extends db_io
 					} elseif ($res['locked']) {
 						// user is locked, either set or auto set
 						$this->login_error = 105;
-					} elseif ((preg_match("/^\\$2(a|y)\\$/", $res['password']) && CRYPT_BLOWFISH != 1) || (preg_match("/^\\$1\\$/", $res['password']) && CRYPT_MD5 != 1) || (preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && CRYPT_STD_DES != 1)) {
+					} elseif ((preg_match("/^\\$2(a|y)\\$/", $res['password']) && CRYPT_BLOWFISH != 1) ||
+						(preg_match("/^\\$1\\$/", $res['password']) && CRYPT_MD5 != 1) ||
+						(preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && CRYPT_STD_DES != 1)
+					) {
 						// this means password cannot be decrypted because of missing crypt methods
 						$this->login_error = 9999;
-					} elseif ((preg_match("/^\\$2(a|y)\\$/", $res['password']) || preg_match("/^\\$1\\$/", $res['password']) || preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password'])) && !$this->verifyCryptString($this->password, $res['password'])) {
+					} elseif ((preg_match("/^\\$2(a|y)\\$/", $res['password']) ||
+						preg_match("/^\\$1\\$/", $res['password']) ||
+						preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password'])) &&
+						!$this->verifyCryptString($this->password, $res['password'])
+					) {
 						// check passwword as crypted, $2a$ or $2y$ is blowfish start, $1$ is MD5 start, $\w{12} is standard DES
 						$this->login_error = 1011;
-					} elseif (!preg_match("/^\\$2(a|y)\\$/", $res['password']) && !preg_match("/^\\$1\\$/", $res['password']) && !preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && $res['password'] != $this->password) {
+					} elseif (!preg_match("/^\\$2(a|y)\\$/", $res['password']) &&
+						!preg_match("/^\\$1\\$/", $res['password']) &&
+						!preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) &&
+						$res['password'] != $this->password
+					) {
 						// check old plain password, non case sensitive
 						$this->login_error = 1012;
 					} else {
@@ -294,7 +303,7 @@ class login extends db_io
 						// set class var and session var
 						$_SESSION["EUID"] = $this->euid = $res["edit_user_id"];
 						// check if user is okay
-						$this->login_check_permissions();
+						$this->loginCheckPermissions();
 						if (!$this->login_error) {
 							// now set all session vars and read page permissions
 							$GLOBALS["DEBUG_ALL"] = $_SESSION["DEBUG_ALL"] = $res["debug"];
@@ -314,7 +323,7 @@ class login extends db_io
 							// reset any login error count for this user
 							if ($res['login_error_count'] > 0) {
 								$q = "UPDATE edit_user SET login_error_count = 0, login_error_date_last = NULL, login_error_date_first = NULL WHERE edit_user_id = ".$res['edit_user_id'];
-								$this->db_exec($q);
+								$this->dbExec($q);
 							}
 							$pages = array();
 							$edit_page_ids = array();
@@ -324,7 +333,7 @@ class login extends db_io
 							$q .= "WHERE ep.edit_page_id = epa.edit_page_id AND ear.edit_access_right_id = epa.edit_access_right_id ";
 							$q .= "AND epa.enabled = 1 AND epa.edit_group_id = ".$res["edit_group_id"]." ";
 							$q .= "ORDER BY ep.order_number";
-							while ($res = $this->db_return($q)) {
+							while ($res = $this->dbReturn($q)) {
 								// page id array for sub data readout
 								$edit_page_ids[] = $res['edit_page_id'];
 								// create the array for pages
@@ -348,22 +357,26 @@ class login extends db_io
 							} // for each page
 							// get the visible groups for all pages and write them to the pages
 							$_edit_page_id = 0;
-							$q = "SELECT epvg.edit_page_id, name, flag FROM edit_visible_group evp, edit_page_visible_group epvg WHERE evp.edit_visible_group_id = epvg.edit_visible_group_id AND epvg.edit_page_id IN (".join(', ', $edit_page_ids).") ORDER BY epvg.edit_page_id";
-							while ($res = $this->db_return($q)) {
+							$q = "SELECT epvg.edit_page_id, name, flag ";
+							$q .= "FROM edit_visible_group evp, edit_page_visible_group epvg ";
+							$q .= "WHERE evp.edit_visible_group_id = epvg.edit_visible_group_id AND epvg.edit_page_id IN (".join(', ', $edit_page_ids).") ";
+							$q .= "ORDER BY epvg.edit_page_id";
+							while ($res = $this->dbReturn($q)) {
 								if ($res['edit_page_id'] != $_edit_page_id) {
 									// search the pos in the array push
-									$pos = $this->array_search_recursive($res['edit_page_id'], $pages, 'edit_page_id');
+									$pos = $this->arraySearchRecursive($res['edit_page_id'], $pages, 'edit_page_id');
 									$_edit_page_id = $res['edit_page_id'];
 								}
 								$pages[$pos[0]]['visible'][$res['name']] = $res['flag'];
 							}
 							// get the same for the query strings
 							$_edit_page_id = 0;
-							$q = "SELECT eqs.edit_page_id, name, value, dynamic FROM edit_query_string eqs WHERE enabled = 1 AND edit_page_id IN (".join(', ', $edit_page_ids).") ORDER BY eqs.edit_page_id";
-							while ($res = $this->db_return($q))	{
+							$q = "SELECT eqs.edit_page_id, name, value, dynamic FROM edit_query_string eqs ";
+							$q .= "WHERE enabled = 1 AND edit_page_id IN (".join(', ', $edit_page_ids).") ORDER BY eqs.edit_page_id";
+							while ($res = $this->dbReturn($q)) {
 								if ($res['edit_page_id'] != $_edit_page_id)	{
 									// search the pos in the array push
-									$pos = $this->array_search_recursive($res['edit_page_id'], $pages, 'edit_page_id');
+									$pos = $this->arraySearchRecursive($res['edit_page_id'], $pages, 'edit_page_id');
 									$_edit_page_id = $res['edit_page_id'];
 								}
 								$pages[$pos[0]]['query'][] = array (
@@ -378,16 +391,17 @@ class login extends db_io
 							// load the edit_access user rights
 							$q = "SELECT ea.edit_access_id, level, type, ea.name, ea.color, ea.uid, edit_default ";
 							$q .= "FROM edit_access_user eau, edit_access_right ear, edit_access ea ";
-							$q .= "WHERE eau.edit_access_id = ea.edit_access_id AND eau.edit_access_right_id = ear.edit_access_right_id AND eau.enabled = 1 AND edit_user_id = ".$this->euid." ";
+							$q .= "WHERE eau.edit_access_id = ea.edit_access_id AND eau.edit_access_right_id = ear.edit_access_right_id ";
+							$q .= "AND eau.enabled = 1 AND edit_user_id = ".$this->euid." ";
 							$q .= "ORDER BY ea.name";
 							$unit_access = array();
 							$eauid = array();
 							$unit_acl = array();
-							while ($res = $this->db_return($q))	{
+							while ($res = $this->dbReturn($q)) {
 								// read edit access data fields and drop them into the unit access array
 								$q_sub ="SELECT name, value FROM edit_access_data WHERE enabled = 1 AND edit_access_id = ".$res['edit_access_id'];
 								$ea_data = array ();
-								while ($res_sub = $this->db_return($q_sub)) {
+								while ($res_sub = $this->dbReturn($q_sub)) {
 									$ea_data[$res_sub['name']] = $res_sub['value'];
 								}
 								// build master unit array
@@ -419,8 +433,10 @@ class login extends db_io
 							$login_error_date_first = ', login_error_date_first = NOW()';
 						}
 						// update login error count for this user
-						$q = "UPDATE edit_user SET login_error_count = login_error_count + 1, login_error_date_last = NOW() $login_error_date_first WHERE edit_user_id = ".$res['edit_user_id'];
-						$this->db_exec($q);
+						$q = "UPDATE edit_user ";
+						$q .= "SET login_error_count = login_error_count + 1, login_error_date_last = NOW() $login_error_date_first ";
+						$q .= "WHERE edit_user_id = ".$res['edit_user_id'];
+						$this->dbExec($q);
 						// totally lock the user if error max is reached
 						if ($res['login_error_count'] + 1 > $this->max_login_error_count) {
 							// do some alert reporting in case this error is too big
@@ -441,18 +457,19 @@ class login extends db_io
 		} // if he pressed login at least and is not yet loggined in
 	}
 
-	// METHOD: login_check_permission
+	// METHOD: loginCheckPermissions
+	// WAS   : login_check_permission
 	// PARAMS: none
 	// RETUNR none
 	// DESC  : for every page the user access this script checks if he is allowed to do so
-	public function login_check_permissions()
+	public function loginCheckPermissions()
 	{
 		if ($this->euid && $this->login_error != 103) {
 			$q = "SELECT filename ";
 			$q .= "FROM edit_page ep, edit_page_access epa, edit_group eg, edit_user eu ";
 			$q .= "WHERE ep.edit_page_id = epa.edit_page_id AND eg.edit_group_id = epa.edit_group_id AND eg.edit_group_id = eu.edit_group_id ";
 			$q .= "AND eu.edit_user_id = ".$this->euid." AND filename = '".$this->page_name."' AND eg.enabled = 1 AND epa.enabled = 1";
-			$res = $this->db_return_row($q);
+			$res = $this->dbReturnRow($q);
 			// unset mem limit if debug is set to 1
 //				if (($GLOBALS["DEBUG_ALL"] || $GLOBALS["DB_DEBUG"] || $_SESSION["DEBUG_ALL"] || $_SESSION["DB_DEBUG"]) && ini_get('memory_limit') != -1)
 //					ini_set('memory_limit', -1);
@@ -467,11 +484,12 @@ class login extends db_io
 		return $this->permission_okay;
 	}
 
-	// METHOD: login_logout_user
+	// METHOD: loginLogoutUser
+	// WAS   : login_logout_user
 	// PARAMS: none
 	// RETURN: none
 	// DESC  : if a user pressed on logout, destroyes session and unsets all global vars
-	public function login_logout_user()
+	public function loginLogoutUser()
 	{
 		if ($this->logout || $this->login_error) {
 			// unregister and destroy session vars
@@ -495,7 +513,8 @@ class login extends db_io
 		}
 	}
 
-	// METHOD: login_set_acl
+	// METHOD: loginSetAcl
+	// WAS   : login_set_acl
 	// PARAMS: none
 	// RETURN: none
 	// DESC  : sets all the basic ACLs
@@ -512,7 +531,7 @@ class login extends db_io
 	//         * if an account ACL is set, set this parallel, account ACL overrides user ACL if it applies
 	//         * if edit access ACL level is set, use this, else use page
 	//         set all base ACL levels as a list keyword -> ACL number
-	public function login_set_acl()
+	public function loginSetAcl()
 	{
 		// we start with the default acl
 		$this->acl['base'] = DEFAULT_ACL_LEVEL;
@@ -595,11 +614,12 @@ class login extends db_io
 //			$this->debug('ACL', $this->print_ar($this->acl));
 	}
 
-	// METHOD: login_check_edit_access
+	// METHOD: loginCheckEditAccess
+	// WAS   : login_check_edit_access
 	// PARAMS: edit_access_id to check
 	// RETURN: true/false: if the edit access is not in the valid list: false
 	// DESC  : checks if this edit access id is valid
-	public function login_check_edit_access($edit_access_id)
+	public function loginCheckEditAccess($edit_access_id)
 	{
 		if (array_key_exists($edit_access_id, $this->acl['unit'])) {
 			return true;
@@ -608,11 +628,12 @@ class login extends db_io
 		}
 	}
 
-	// METHOD: login_password_change
+	// METHOD: loginPasswordChange
+	// WAS   : login_password_change
 	// PARAMS: none
 	// RETURN: none
 	// DESC  : changes a user password
-	private function login_password_change()
+	private function loginPasswordChange()
 	{
 		if ($this->change_password) {
 			$event = 'Password Change';
@@ -624,8 +645,8 @@ class login extends db_io
 				}
 				// check user exist, if not -> error
 				if (!$this->login_error) {
-					$q = "SELECT edit_user_id FROM edit_user WHERE enabled = 1 AND username = '".$this->db_escape_string($this->pw_username)."'";
-					list ($edit_user_id) = $this->db_return_row($q);
+					$q = "SELECT edit_user_id FROM edit_user WHERE enabled = 1 AND username = '".$this->dbEscapeString($this->pw_username)."'";
+					list ($edit_user_id) = $this->dbReturnRow($q);
 					if (!$edit_user_id) {
 						// username wrong
 						$this->login_error = 201;
@@ -634,8 +655,8 @@ class login extends db_io
 				}
 				// check old passwords match -> error
 				if (!$this->login_error) {
-					$q = "SELECT edit_user_id FROM edit_user WHERE enabled = 1 AND username = '".$this->db_escape_string($this->pw_username)."' AND password = '".$this->db_escape_string($this->pw_old_password)."'";
-					list ($edit_user_id) = $this->db_return_row($q);
+					$q = "SELECT edit_user_id FROM edit_user WHERE enabled = 1 AND username = '".$this->dbEscapeString($this->pw_username)."' AND password = '".$this->dbEscapeString($this->pw_old_password)."'";
+					list ($edit_user_id) = $this->dbReturnRow($q);
 					if (!$edit_user_id) {
 						// old password wrong
 						$this->login_error = 202;
@@ -659,8 +680,8 @@ class login extends db_io
 				// no error change this users password
 				if (!$this->login_error) {
 					// update the user (edit_user_id) with the new password
-					$q = "UPDATE edit_user SET password = '".$this->db_escape_string($this->cryptString($this->pw_new_password))."' WHERE edit_user_id = ".$edit_user_id;
-					$this->db_exec($q);
+					$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($this->cryptString($this->pw_new_password))."' WHERE edit_user_id = ".$edit_user_id;
+					$this->dbExec($q);
 					$data = 'Password change for user "'.$this->pw_username.'" from "'.$this->pw_old_password.'" to "'.$this->pw_new_password.'"';
 				}
 			} else {
@@ -673,15 +694,16 @@ class login extends db_io
 		} // button pressed
 	}
 
-	// METHOD: login_print_login
+	// METHOD: loginPrintLogin
+	// WAS   : login_print_login
 	// PARAMS: none
 	// RETURN: none
 	// DESC  : prints out login html part if no permission (error) is set
-	private function login_print_login()
+	private function loginPrintLogin()
 	{
 		if (!$this->permission_okay) {
 			// set the templates now
-			$this->login_set_templates();
+			$this->loginSetTemplates();
 			// if there is a global logout target ...
 			if (file_exists($this->logout_target) && $this->logout_target) {
 				$LOGOUT_TARGET = $this->logout_target;
@@ -728,11 +750,12 @@ class login extends db_io
 		} // if permission is 0 then print out login
 	}
 
-	// METHOD: login_close_class
+	// METHOD: loginCloseClass
+	// WAS   : login_close_class
 	// PARAMS: none
 	// RETURN: none
 	// DESC  : last function called, writes log and prints out error msg and exists script if permission 0
-	private function login_close_class()
+	private function loginCloseClass()
 	{
 		// write to LOG table ...
 		if ($this->login_error || $this->login || $this->logout) {
@@ -750,9 +773,9 @@ class login extends db_io
 			if ($this->euid) {
 				// get user from user table
 				$q = "SELECT username, password FROM edit_user WHERE edit_user_id = ".$this->euid;
-				list($username, $password) = $this->db_return_row($q);
+				list($username, $password) = $this->dbReturnRow($q);
 			} // if euid is set, get username (or try)
-			$this->write_log($event, '', $this->login_error, $username, $password);
+			$this->writeLog($event, '', $this->login_error, $username, $password);
 		} // write log under certain settings
 		// now close DB connection
 //			$this->error_msg = $this->_login();
@@ -763,11 +786,12 @@ class login extends db_io
 		}
 	}
 
-	// METHOD: login_set_templates
+	// METHOD: loginSetTemplates
+	// WAS   : login_set_templates
 	// PARAMS:
 	// RETURN: none
 	// DESC  : checks if there are external templates, if not uses internal fallback ones
-	private function login_set_templates()
+	private function loginSetTemplates()
 	{
 		$strings = array (
 			'HTML_TITLE' => $this->l->__("LOGIN"),
@@ -911,13 +935,14 @@ EOM;
 		}
 	}
 
-	// METHOD: write_log
+	// METHOD: writeLog
+	// WAS   : write_log
 	// PARAMS: event -> string of what has been done
 	//        data -> data information (id, etc)
 	//        error -> if error, write error string (not enougth data, etc)
 	// RETURN: none
 	// DESC  : writes detailed data into the edit user log table (keep log what user does)
-	private function write_log($event, $data, $error = "", $username = "", $password = "")
+	private function writeLog($event, $data, $error = "", $username = "", $password = "")
 	{
 		if ($this->login) {
 				$this->action = 'Login';
@@ -931,31 +956,32 @@ EOM;
 				'_FILES' => $_FILES,
 				'error' => $this->login_error
 		);
-		$data_binary = $this->db_escape_bytea(bzcompress(serialize($_data_binary)));
+		$data_binary = $this->dbEscapeBytea(bzcompress(serialize($_data_binary)));
 		// SQL querie for log entry
 		$q = "INSERT INTO edit_log ";
 		$q .= "(username, password, euid, event_date, event, error, data, data_binary, page, ";
 		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
-		$q .= "VALUES ('".$this->db_escape_string($username)."', '".$this->db_escape_string($password)."', ".(($this->euid) ? $this->euid : 'NULL').", ";
-		$q .= "NOW(), '".$this->db_escape_string($event)."', '".$this->db_escape_string($error)."', '".$this->db_escape_string($data)."', '".$data_binary."', '".$this->page_name."', ";
+		$q .= "VALUES ('".$this->dbEscapeString($username)."', '".$this->dbEscapeString($password)."', ".(($this->euid) ? $this->euid : 'NULL').", ";
+		$q .= "NOW(), '".$this->dbEscapeString($event)."', '".$this->dbEscapeString($error)."', '".$this->dbEscapeString($data)."', '".$data_binary."', '".$this->page_name."', ";
 		foreach (array('REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME', 'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT', 'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING') as $server_code) {
 			if (array_key_exists($server_code, $_SERVER)) {
-				$q .= "'".$this->db_escape_string($_SERVER[$server_code])."', ";
+				$q .= "'".$this->dbEscapeString($_SERVER[$server_code])."', ";
 			} else {
 				$q .= "NULL, ";
 			}
 		}
 		$q .= "'".session_id()."', ";
-		$q .= "'".$this->db_escape_string($this->action)."', '".$this->db_escape_string($this->username)."', NULL, '".$this->db_escape_string($this->login_error)."', NULL, NULL, '".$this->db_escape_string($this->permission_okay)."', NULL)";
-		$this->db_exec($q, 'NULL');
+		$q .= "'".$this->dbEscapeString($this->action)."', '".$this->dbEscapeString($this->username)."', NULL, '".$this->dbEscapeString($this->login_error)."', NULL, NULL, '".$this->dbEscapeString($this->permission_okay)."', NULL)";
+		$this->dbExec($q, 'NULL');
 	}
 
-	// METHOD: login_check_edit_access_id
+	// METHOD: loginCheckEditAccessId
+	// WAS   : login_check_edit_access_id
 	// PARAMS: edit access id to check
 	// RETURN: same edit access id if ok, or the default edit access id if given one is not valud
 	// DESC  : checks that the given edit access id is valid for this user
-	public function login_check_edit_access_id($edit_access_id)
+	public function loginCheckEditAccessId($edit_access_id)
 	{
 		if (!array_key_exists($edit_access_id, $_SESSION["UNIT"])) {
 			return $_SESSION["UNIT_DEFAULT"];
@@ -964,11 +990,12 @@ EOM;
 		}
 	}
 
-	// METHOD: login_set_edit_access_data
+	// METHOD: loginSetEditAccessData
+	// WAS   : login_set_edit_access_data
 	// PARAMS: edit access id, key value to search for
 	// RETURN: false for not found or string for found data
 	// DESC  : searchs in the data set for the unit for the data key and returns the value asociated with it
-	public function login_set_edit_access_data($edit_access_id, $data_key)
+	public function loginSetEditAccessData($edit_access_id, $data_key)
 	{
 		if (!$_SESSION['UNIT'][$edit_access_id]['data'][$data_key]) {
 			return false;
@@ -977,3 +1004,5 @@ EOM;
 		}
 	}
 } // close class
+
+# __END__

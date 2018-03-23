@@ -2,7 +2,7 @@
 /*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2004/11/18
-* VERSION: 0.1.1
+* VERSION: 1.0.0
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESCRIPTION:
 * 	init class for gettext. Original was just a function & var setting include for wordpress.
@@ -14,7 +14,7 @@
 *
 * PUBLIC METHODS
 *	__:	returns string (translated or original if not found)
-*	_e:	echos out string (translated or original if not found)
+*	__e: echos out string (translated or original if not found)
 *	__ngettext:	should return plural. never tested this.
 *
 *   PRIVATE METHODS
@@ -23,10 +23,12 @@
 * 2005/10/17 (cs) made an on the fly switch method (reload of lang)
 *********************************************************************/
 
-// try to include file from LIBS path, or from normal path
-_spl_autoload('Class.Basic.inc');
+namespace CoreLibs\Language;
 
-class l10n extends basic
+use \CoreLibs\Language\Core\FileReader;
+use \CoreLibs\Language\Core\GetTextReader;
+
+class L10n extends \CoreLibs\Basic
 {
 	private $lang = '';
 	private $mofile = '';
@@ -35,10 +37,6 @@ class l10n extends basic
 
 	public function __construct($lang = '', $path = DEFAULT_TEMPLATE)
 	{
-		foreach (array('streams.php', 'gettext.php') as $include_file) {
-			_spl_autoload($include_file);
-		}
-
 		if (!$lang) {
 			$this->lang = 'en';
 		} else {
@@ -60,7 +58,7 @@ class l10n extends basic
 			$this->input = false;
 		}
 
-		$this->l10n = new gettext_reader($this->input);
+		$this->l10n = new GetTextReader($this->input);
 	}
 
 	// reloads the mofile, if the location of the lang file changes
@@ -82,7 +80,7 @@ class l10n extends basic
 		// check if get a readable mofile
 		if (is_readable($this->mofile)) {
 			$this->input = new FileReader($this->mofile);
-			$this->l10n = new gettext_reader($this->input);
+			$this->l10n = new GetTextReader($this->input);
 		} else {
 			// else fall back to the old ones
 			$this->mofile = $old_mofile;
@@ -95,7 +93,7 @@ class l10n extends basic
 		return $this->l10n->translate($text);
 	}
 
-	public function _e($text)
+	public function __e($text)
 	{
 		echo $this->l10n->translate($text);
 	}
@@ -106,12 +104,12 @@ class l10n extends basic
 		return $this->l10n->ngettext($single, $plural, $number);
 	}
 
-	public function __get_lang()
+	public function __getLang()
 	{
 		return $this->lang;
 	}
 
-	public function __get_mofile()
+	public function __getMoFile()
 	{
 		return $this->mofile;
 	}

@@ -2,9 +2,12 @@
 /********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2000/11/23
-* VERSION: 4.1.0
+* VERSION: 5.0.0
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESCRIPTON:
+*   2018/3/23, the whole class system is transformed to namespaces
+*   also all internal class calls are converted to camel case
+*
 *   2013/10/10, prepare/excute were added, including auto RETURNING primary key if
 *   possible for any INSERT query in exec or prepare/execute, better debugging and
 *   data dumping. Proper string escape wrapper, special db exec writer for complex
@@ -238,10 +241,9 @@
 *   23.11.2000: erster Test
 *********************************************************************/
 
-// try to include file from LIBS path, or from normal path
-_spl_autoload('Class.Basic.inc');
+namespace CoreLibs\DB;
 
-class db_io extends basic
+class IO extends \CoreLibs\Basic
 {
 	// recommend to set private/protected and only allow setting via method
 	// can bet set from outside
@@ -354,20 +356,28 @@ class db_io extends basic
 			$this->db_debug = $GLOBALS['DB_DEBUG'];
 		}
 
-		// includes sub class for db type
-		_spl_autoload($this->db_type.'.inc');
-		$this->db_functions = new $this->db_type();
+		// based on $this->db_type
+		// here we need to load the db pgsql include one
+		// How can we do this dynamic? eg for non PgSQL
+		// OTOH this whole class is so PgSQL specific
+		// that non PgSQL doesn't make much sense anymore
+		if ($this->db_type == 'pg_sql') {
+			$this->db_functions = new \CoreLibs\DB\SQL\PgSQL();
+		} else {
+			// abort error
+			return "Failed to load DB functions for: ".$this->db_type;
+		}
 
 		// connect to DB
-		if (!$this->_connect_to_db()) {
+		if (!$this->__connectToDB()) {
 			$this->error_id = 16;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 
 		$this->class_info['db_io']=array(
 			'class_name' => 'DB IO',
-			'class_version' => '4.1.0',
+			'class_version' => '5.0.0',
 			'class_created' => '2000-11-23',
 			'class_author' => 'Clemens Schwaighofer'
 		);
@@ -379,7 +389,7 @@ class db_io extends basic
 	// DESC:   final desctruct method, closes the DB connection
 	public function __destruct()
 	{
-		$this->_close_db();
+		$this->__closeDB();
 		parent::__destruct();
 	}
 
@@ -387,60 +397,63 @@ class db_io extends basic
 	// PRIVATE METHODS
 	// *************************************************************
 
-	// METHOD: _connect_to_db
+	// METHOD: __connectToDB
+	// WAS   : _connect_to_db
 	// PARAMS: none
 	// RETURN: true on successfull connect, false if failed
-	// DESC:
+	// DESC  :
 	// internal connection function. Used to connect to the DB if there is no connection done yet.
 	// Called before any execute
-	private function _connect_to_db()
+	private function __connectToDB()
 	{
 		// generate connect string
-		$this->dbh = $this->db_functions->_db_connect($this->db_host, $this->db_user, $this->db_pwd, $this->db_name, $this->db_port, $this->db_ssl);
+		$this->dbh = $this->db_functions->__dbConnect($this->db_host, $this->db_user, $this->db_pwd, $this->db_name, $this->db_port, $this->db_ssl);
 		// if no dbh here, we couldn't connect to the DB itself
 		if (!$this->dbh) {
 			$this->error_id = 14;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		// 15 error (cant select to DB is not valid in postgres, as connect is different)
 		// if returns 0 we couldn't select the DB
 		if ($this->dbh == -1) {
 			$this->error_id = 15;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		// set search path if needed
 		if ($this->db_schema) {
-			$this->db_set_schema();
+			$this->dbSetSchema();
 		}
 		// set client encoding
 		if ($this->db_encoding) {
-			$this->db_set_encoding();
+			$this->dbSetEncoding();
 		}
 		// all okay
 		return true;
 	}
 
-	// METHOD: _close_db
+	// METHOD: __closeDB
+	// WAS   : _close_db
 	// PARAMS: none
 	// RETURN: none
 	// DESC  : close db connection
 	//         only used by the deconstructor
-	private function _close_db()
+	private function __closeDB()
 	{
 		if (isset($this->dbh) && $this->dbh) {
-			$this->db_functions->_db_close();
+			$this->db_functions->__dbClose();
 			unset($this->dbh);
 		}
 	}
 
-	// METHOS: _check_query_for_select
+	// METHOD: __checkQueryForSelect
+	// WAS   : _check_query_for_select
 	// PARAMS: query
 	// RETURN: true if matching, false if not
 	// DESC  : checks if query is a SELECT, if not error, 0 return
-	//       : NOTE: Query needs to start with SELECT. if starts with "with" it is ignored
-	private function _check_query_for_select($query)
+	// NOTE  : Query needs to start with SELECT. if starts with "with" it is ignored
+	private function __checkQueryForSelect($query)
 	{
 		// perhaps allow spaces before select ?!?
 		if (!preg_match("/^select /i", $query)) {
@@ -449,13 +462,14 @@ class db_io extends basic
 		return true;
 	}
 
-	// METHOD: _check_query_for_insert
+	// METHOD: __checkQueryForInsert
+	// WAS   : _check_query_for_insert
 	// PARAMS: query, pure flag (boolean)
 	// RETURN: true if matching, flase if not
 	// DESC  : check for DELETE, INSERT, UPDATE
 	//       : if pure is set to true, only when INSERT is set will return true
-	//       : NOTE: Queries need to start with INSERT, UPDATE, DELETE. Anything else is ignored
-	private function _check_query_for_insert($query, $pure = false)
+	// NOTE  : Queries need to start with INSERT, UPDATE, DELETE. Anything else is ignored
+	private function __checkQueryForInsert($query, $pure = false)
 	{
 		if (!preg_match("/^insert /i", $query) && !preg_match("/^update /i", $query) && !preg_match("/^delete /i", $query)) {
 			return false;
@@ -469,19 +483,20 @@ class db_io extends basic
 		}
 	}
 
-	// METHOD: _print_array
+	// METHOD: __printArray
+	// WAS   : _print_array
 	// PARAMS: array to print
 	// RETURN: string with printed and formated array
 	// DESC  : internal funktion that creates the array
-	//       : used in db_dump_data only
-	private function _print_array($array)
+	// NOTE  : used in db_dump_data only
+	private function __printArray($array)
 	{
 		while (list($key, $value) = each($array)) {
 			$string .= $this->nbsp.'<b>'.$key.'</b> => ';
 			if (is_array($value)) {
 				$this->nbsp .= '&nbsp;&nbsp;&nbsp;';
 				$string .= '<br>';
-				$string .= $this->_print_array($value);
+				$string .= $this->__printArray($value);
 			} else {
 				$string .= $value.'<br>';
 			}
@@ -490,14 +505,15 @@ class db_io extends basic
 		return $string;
 	}
 
-	// METHOD _db_debug
-	// PARAMS debug_id -> group id for debug
-	//        error_string -> error message or debug data
-	//        id -> db debug group
-	//        type -> query identifiery (Q, I, etc)
-	// RETURN none
-	// DESC   calls the basic class debug with strip command
-	private function _db_debug($debug_id, $error_string, $id = '', $type = '')
+	// METHOD: __dbDebug
+	// WAS   : _db_debug
+	// PARAMS: debug_id -> group id for debug
+	//         error_string -> error message or debug data
+	//         id -> db debug group
+	//         type -> query identifiery (Q, I, etc)
+	// RETURN: none
+	// DESC  : calls the basic class debug with strip command
+	private function __dbDebug($debug_id, $error_string, $id = '', $type = '')
 	{
 		$prefix = '';
 		if ($id) {
@@ -512,34 +528,35 @@ class db_io extends basic
 		$this->debug($debug_id, $prefix.$error_string, true);
 	}
 
-	// METHOD _db_error
-	// PARAMS cursor -> current cursor for pg_result_error, mysql uses dbh, pg_last_error too,
-	//                  but pg_result_error is more accurate
-	//        msg -> optional message
-	// RETURN none
-	// DESC   if error_id set, writes long error string into error_msg
-	// MARK: needed to make public so it can be called from DB.Array.IO too
-	public function _db_error($cursor = '', $msg = '')
+	// METHOD: __dbError
+	// WAS   : _db_error
+	// PARAMS: cursor -> current cursor for pg_result_error, mysql uses dbh, pg_last_error too,
+	//                   but pg_result_error is more accurate
+	//         msg -> optional message
+	// RETURN: none
+	// DESC  : if error_id set, writes long error string into error_msg
+	// NOTE  : needed to make public so it can be called from DB.Array.IO too
+	public function __dbError($cursor = '', $msg = '')
 	{
 		$where_called = $this->get_caller_method();
 		if ($cursor) {
-			$pg_error_string = $this->db_functions->_db_print_error($cursor);
+			$pg_error_string = $this->db_functions->__dbPrintError($cursor);
 		}
 		if (!$cursor) {
-			$pg_error_string = $this->db_functions->_db_print_error();
+			$pg_error_string = $this->db_functions->__dbPrintError();
 		}
 		if ($pg_error_string) {
-			$this->_db_debug('db', $pg_error_string, 'DB_ERROR', $where_called);
+			$this->__dbDebug('db', $pg_error_string, 'DB_ERROR', $where_called);
 		}
 		// okay, an error occured
 		if ($this->error_id) {
 			// write error msg ...
-			$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> '.$this->error_id.': '.$this->error_string[$this->error_id].($msg ? ', '.$msg : '').'</span>', 'DB_ERROR', $where_called);
+			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$this->error_id.': '.$this->error_string[$this->error_id].($msg ? ', '.$msg : '').'</span>', 'DB_ERROR', $where_called);
 			$this->had_error = $this->error_id;
 			// write detailed error log
 		}
 		if ($this->warning_id) {
-			$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$this->warning_id.': '.$this->error_string[$this->warning_id].($msg ? ', '.$msg : '').'</span>', 'DB_ERROR', $where_called);
+			$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$this->warning_id.': '.$this->error_string[$this->warning_id].($msg ? ', '.$msg : '').'</span>', 'DB_ERROR', $where_called);
 			$this->had_warning = $this->warning_id;
 		}
 		// unset the error/warning vars
@@ -547,11 +564,12 @@ class db_io extends basic
 		$this->warning_id = 0;
 	}
 
-	// METHOD _db_convert_encoding
-	// PARAMS array from fetch_row
-	// RETURN convert fetch_row array
-	// DESC   if there is the 'to_encoding' var set, and the field is in the wrong encoding converts it to the target
-	private function _db_convert_encoding($row)
+	// METHOD: __dbConvertEncoding
+	// WAS   : _db_convert_encoding
+	// PARAMS: array from fetch_row
+	// RETURN: convert fetch_row array
+	// DESC  : if there is the 'to_encoding' var set, and the field is in the wrong encoding converts it to the target
+	private function __dbConvertEncoding($row)
 	{
 		if ($this->to_encoding && $this->db_encoding) {
 			// go through each row and convert the encoding if needed
@@ -566,11 +584,12 @@ class db_io extends basic
 		return $row;
 	}
 
-	// METHOD _db_debug_prepare
-	// PARAMS $stm_name, data array
-	// RETURN query in prepared form
-	// DESC   for debug purpose replaces $1, $2, etc with actual data
-	private function _db_debug_prepare($stm_name, $data = array())
+	// METHOD: __dbDebugPrepare
+	// WAS   : _db_debug_prepare
+	// PARAMS: $stm_name, data array
+	// RETURN: query in prepared form
+	// DESC  : for debug purpose replaces $1, $2, etc with actual data
+	private function __dbDebugPrepare($stm_name, $data = array())
 	{
 		// get the keys from data array
 		$keys = array_keys($data);
@@ -582,11 +601,12 @@ class db_io extends basic
 		return str_replace(array_reverse($keys), array_reverse($data), $this->prepare_cursor[$stm_name]['query']);
 	}
 
-	// METHOD _db_return_table
-	// PARAMS insert/select/update/delete query
-	// RETURN array with schema and table
-	// DESC   extracts schema and table from the query, if no schema returns just empty string
-	private function _db_return_table($query)
+	// METHOD: __dbReturnTable
+	// WAS   : _db_return_table
+	// PARAMS: insert/select/update/delete query
+	// RETURN: array with schema and table
+	// DESC  : extracts schema and table from the query, if no schema returns just empty string
+	private function __dbReturnTable($query)
 	{
 		if (preg_match("/^SELECT /i", $query)) {
 			preg_match("/ (FROM) (([\w_]+)\.)?([\w_]+) /i", $query, $matches);
@@ -596,17 +616,18 @@ class db_io extends basic
 		return array($matches[3], $matches[4]);
 	}
 
-	// METHOD _db_prepare_exec
-	// PARAMS query, primary key [if set to NULL no returning will be added]
-	// RETURN md5 OR boolean false on error
-	// DESC   sub function for db_exec and db_exec_async
-	//        * checks query is set
-	//        * checks there is a database handler
-	//        * checks that here is no other query executing
-	//        * checks for insert if returning is set/pk name
-	//        * sets internal md5 for query
-	//        * checks multiple call count
-	private function _db_prepare_exec($query, $pk_name)
+	// METHOD: __dbPrepareExec
+	// WAS   : _db_prepare_exec
+	// PARAMS: query, primary key [if set to NULL no returning will be added]
+	// RETURN: md5 OR boolean false on error
+	// DESC  : sub function for db_exec and db_exec_async
+	//         * checks query is set
+	//         * checks there is a database handler
+	//         * checks that here is no other query executing
+	//         * checks for insert if returning is set/pk name
+	//         * sets internal md5 for query
+	//         * checks multiple call count
+	private function __dbPrepareExec($query, $pk_name)
 	{
 		// to either use the returning method or the guess method for getting primary keys
 		$this->returning_id = false;
@@ -616,33 +637,33 @@ class db_io extends basic
 		}
 		if (!$this->query) {
 			$this->error_id = 11;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		// if no DB Handler drop out
 		if (!$this->dbh) {
 			// if reconnect fails drop out
-			if (!$this->_connect_to_db()) {
+			if (!$this->__connectToDB()) {
 				$this->error_id = 16;
-				$this->_db_error();
+				$this->__dbError();
 				return false;
 			}
 		}
 		// check that no other query is running right now
-		if ($this->db_functions->_db_connection_busy()) {
+		if ($this->db_functions->__dbConnection_busy()) {
 			$this->error_id = 41;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		// if we do have an insert, check if there is no RETURNING pk_id, add it if I can get the PK id
-		if ($this->_check_query_for_insert($this->query, true)) {
+		if ($this->__checkQueryForInsert($this->query, true)) {
 			$this->pk_name = $pk_name;
 			if ($this->pk_name != 'NULL') {
 				if (!$this->pk_name) {
 					// TODO: get primary key from table name
-					list($schema, $table) = $this->_db_return_table($this->query);
+					list($schema, $table) = $this->__dbReturnTable($this->query);
 					if (!array_key_exists($table, $this->pk_name_table) || !$this->pk_name_table[$table]) {
-						$this->pk_name_table[$table] = $this->db_functions->_db_primary_key($table, $schema);
+						$this->pk_name_table[$table] = $this->db_functions->__dbPrimaryKey($table, $schema);
 					}
 					$this->pk_name = $this->pk_name_table[$table] ? $this->pk_name_table[$table] : 'NULL';
 				}
@@ -662,7 +683,7 @@ class db_io extends basic
 		}
 		// for DEBUG, only on first time ;)
 		if ($this->db_debug) {
-			$this->_db_debug('db', $this->query, '_db_prepare_exec', 'Q');
+			$this->__dbDebug('db', $this->query, '__dbPrepareExec', 'Q');
 		}
 		// import protection, md5 needed
 		$md5 = md5($this->query);
@@ -677,8 +698,8 @@ class db_io extends basic
 		// count up the run, if this is run more than the max_run then exit with error
 		if ($this->query_called[$md5] > $this->MAX_QUERY_CALL) {
 				$this->error_id = 30;
-				$this->_db_error();
-				$this->_db_debug('db', $this->query, 'db_exec', 'Q[nc]');
+				$this->__dbError();
+				$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
 				return false;
 		}
 		$this->query_called[$md5] ++;
@@ -686,51 +707,52 @@ class db_io extends basic
 		return $md5;
 	}
 
-	// METHOD _db_post_exec
-	// PARAMS none
-	// RETURN true on success or false if an error occured
-	// DESC   runs post execute for rows affected, field names, inserted primary key, etc
-	private function _db_post_exec()
+	// METHOD: __dbPostExec
+	// WAS   : _db_post_exec
+	// PARAMS: none
+	// RETURN: true on success or false if an error occured
+	// DESC  : runs post execute for rows affected, field names, inserted primary key, etc
+	private function __dbPostExec()
 	{
 		// if FALSE returned, set error stuff
 		// if either the cursor is false
-		if (!$this->cursor || $this->db_functions->_db_last_error_query()) {
+		if (!$this->cursor || $this->db_functions->__dbLastErrorQuery()) {
 			// printout Query if debug is turned on
 			if ($this->db_debug) {
-				$this->_db_debug('db', $this->query, 'db_exec', 'Q[nc]');
+				$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
 			}
 			// internal error handling
 			$this->error_id = 13;
-			$this->_db_error($this->cursor);
+			$this->__dbError($this->cursor);
 			return false;
 		} else {
 			// if SELECT do here ...
-			if ($this->_check_query_for_select($this->query)) {
+			if ($this->__checkQueryForSelect($this->query)) {
 				// count the rows returned (if select)
-				$this->num_rows = $this->db_functions->_db_num_rows($this->cursor);
+				$this->num_rows = $this->db_functions->__dbNumRows($this->cursor);
 				// count the fields
-				$this->num_fields = $this->db_functions->_db_num_fields($this->cursor);
+				$this->num_fields = $this->db_functions->__dbNumFields($this->cursor);
 				// set field names
 				unset($this->field_names);
 				for ($i = 0; $i < $this->num_fields; $i ++) {
-					$this->field_names[] = $this->db_functions->_db_field_name($this->cursor, $i);
+					$this->field_names[] = $this->db_functions->__dbFieldName($this->cursor, $i);
 				}
-			} elseif ($this->_check_query_for_insert($this->query)) {
+			} elseif ($this->__checkQueryForInsert($this->query)) {
 				// if not select do here
 				// count affected rows
-				$this->num_rows = $this->db_functions->_db_affected_rows($this->cursor);
-				if ($this->_check_query_for_insert($this->query, true) && $this->pk_name != 'NULL') {
+				$this->num_rows = $this->db_functions->__dbAffectedRows($this->cursor);
+				if ($this->__checkQueryForInsert($this->query, true) && $this->pk_name != 'NULL') {
 					// set insert_id
 					// if we do not have a returning, we try to get it via the primary key and another select
 					if (!$this->returning_id) {
-						$this->insert_id = $this->db_functions->_db_insert_id($this->query, $this->pk_name);
+						$this->insert_id = $this->db_functions->__dbInsertId($this->query, $this->pk_name);
 					} else {
 						$this->insert_id = array ();
 						$this->insert_id_ext = array ();
 						// echo "** PREPARE RETURNING FOR CURSOR: ".$this->cursor."<br>";
 						// we have returning, now we need to check if we get one or many returned
 						// we'll need to loop this, if we have multiple insert_id returns
-						while ($_insert_id = $this->db_functions->_db_fetch_array($this->cursor, PGSQL_ASSOC)) {
+						while ($_insert_id = $this->db_functions->__dbFetchArray($this->cursor, PGSQL_ASSOC)) {
 							// echo "*** RETURNING: ".print_r($_insert_id, 1)."<br>";
 							$this->insert_id[] = $_insert_id;
 						}
@@ -752,7 +774,7 @@ class db_io extends basic
 							// failed to get insert id
 							$this->insert_id = '';
 							$this->warning_id = 33;
-							$this->_db_error($this->cursor, '[db_exec]');
+							$this->__dbError($this->cursor, '[db_exec]');
 						}
 						// if we have multiple, do not set the insert_id different, keep as array
 					}
@@ -760,7 +782,7 @@ class db_io extends basic
 					// we returned an array of PKs instread of a single one
 					if (is_array($this->insert_id)) {
 						$this->warning_id = 32;
-						$this->_db_error($this->cursor, '[db_exec]');
+						$this->__dbError($this->cursor, '[db_exec]');
 					}
 				}
 			}
@@ -772,14 +794,15 @@ class db_io extends basic
 	// PUBLIC METHODS
 	// *************************************************************
 
-	// METHOD db_set_debug
-	// PARAMS true/false or none
-	// RETURN new set debug flag
-	// DESC   switches the debug flag on or off
-	//        if none given, then the debug flag auto switches from
-	//        the previous setting to either then on or off
-	//        else override with boolean true/false
-	public function db_set_debug($debug = '')
+	// METHOD: dbSetDebug
+	// WAS   : db_set_debug
+	// PARAMS: true/false or none
+	// RETURN: new set debug flag
+	// DESC  : switches the debug flag on or off
+	//         if none given, then the debug flag auto switches from
+	//         the previous setting to either then on or off
+	//         else override with boolean true/false
+	public function dbSetDebug($debug = '')
 	{
 		if ($debug === true) {
 			$this->db_debug = 1;
@@ -793,21 +816,23 @@ class db_io extends basic
 		return $this->db_debug;
 	}
 
-	// METHOD db_reset_query_called
-	// PARAMS query
-	// RETURN none
-	// DESC   resets the call times for the max query called to 0
-	//        USE CAREFULLY: rather make the query prepare -> execute
-	public function db_reset_query_called($query)
+	// METHOD: dbResetQueryCalled
+	// WAS   : db_reset_query_called
+	// PARAMS: query
+	// RETURN: none
+	// DESC  : resets the call times for the max query called to 0
+	//         USE CAREFULLY: rather make the query prepare -> execute
+	public function dbResetQueryCalled($query)
 	{
 		$this->query_called[md5($query)] = 0;
 	}
 
-	// METHOD db_get_query_called
-	// PARAMS query
-	// RETURN count of query called
-	// DESC   gets how often a query was called already
-	public function db_get_query_called($query)
+	// METHOD: dbGetQueryCalled
+	// WAS   : db_get_query_called
+	// PARAMS: query
+	// RETURN: count of query called
+	// DESC  : gets how often a query was called already
+	public function dbGetQueryCalled($query)
 	{
 		$md5 = md5($query);
 		if ($this->query_called[$md5]) {
@@ -817,24 +842,26 @@ class db_io extends basic
 		}
 	}
 
-	// METHOD db_close
-	// PARAMS none
-	// RETURN none
-	// DESC   closes the db_connection
-	//        normally this is not used, as the class deconstructor closes the connection down
-	public function db_close()
+	// METHOD: dbClose
+	// WAS   : db_close
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : closes the db_connection
+	//         normally this is not used, as the class deconstructor closes the connection down
+	public function dbClose()
 	{
 		if ($this->dbh) {
-			$this->db_functions->_db_close();
+			$this->db_functions->__dbClose();
 			unset($this->dbh);
 		}
 	}
 
-	// METHOD db_set_schema
-	// PARAMS db_schema: if not given tries internal default db schema
-	// RETURN false on failure to find schema values, true of db exec schema set
-	// DESC   sets new db schema
-	public function db_set_schema($db_schema = '')
+	// METHOD: dbSetSchema
+	// WAS   : db_set_schema
+	// PARAMS: db_schema: if not given tries internal default db schema
+	// RETURN: false on failure to find schema values, true of db exec schema set
+	// DESC  : sets new db schema
+	public function dbSetSchema($db_schema = '')
 	{
 		if (!$db_schema && $this->db_schema) {
 			$db_schema = $this->db_schema;
@@ -842,24 +869,26 @@ class db_io extends basic
 		if (!$db_schema) {
 			return false;
 		}
-		$q = "SET search_path TO '".$this->db_escape_string($db_schema)."'";
+		$q = "SET search_path TO '".$this->dbEscapeString($db_schema)."'";
 		return $this->db_exec($q);
 	}
 
-	// METHOD db_get_schema
-	// PARAMS none
-	// RETURN db_schema current set
-	// DESC   returns the current set db schema
-	public function db_get_schema()
+	// METHOD: dbGetSchema
+	// WAS   : db_get_schema
+	// PARAMS: none
+	// RETURN: db_schema current set
+	// DESC  : returns the current set db schema
+	public function dbGetSchema()
 	{
 		return $this->db_schema;
 	}
 
-	// METHOD db_set_encoding
-	// PARAMS valid encoding name, so the the data gets converted to this encoding
-	// RETURN false, or true of db exec encoding set
-	// DESC   sets the client encoding in the postgres database
-	public function db_set_encoding($db_encoding = '')
+	// METHOD: dbSetEncoding
+	// WAS   : db_set_encoding
+	// PARAMS: valid encoding name, so the the data gets converted to this encoding
+	// RETURN: false, or true of db exec encoding set
+	// DESC  : sets the client encoding in the postgres database
+	public function dbSetEncoding($db_encoding = '')
 	{
 		if (!$db_encoding && $this->db_encoding) {
 			$db_encoding = $this->db_encoding;
@@ -867,15 +896,16 @@ class db_io extends basic
 		if (!$db_encoding) {
 			return false;
 		}
-		$q = "SET client_encoding TO '".$this->db_escape_string($db_encoding)."'";
+		$q = "SET client_encoding TO '".$this->dbEscapeString($db_encoding)."'";
 		return $this->db_exec($q);
 	}
 
-	// METHOD db_info
-	// PARAMS show, default 1, if set to 0 won't write to error_msg var
-	// RETURN string with db_connection info
-	// DESC   prints out status info from the connected DB (might be usefull for debug stuff)
-	public function db_info($show = 1)
+	// METHOD: dbInfo
+	// WAS   : db_info
+	// PARAMS: show, default 1, if set to 0 won't write to error_msg var
+	// RETURN: string with db_connection info
+	// DESC  : prints out status info from the connected DB (might be usefull for debug stuff)
+	public function dbInfo($show = 1)
 	{
 		$string = '';
 		$string .= '<b>-DB-info-></b> Connected to db <b>\''.$this->db_name.'\'</b> ';
@@ -886,18 +916,19 @@ class db_io extends basic
 		$string .= 'with ssl mode <b>\''.$this->db_ssl.'\'</b><br>';
 		$string .= '<b>-DB-info-></b> DB IO Class debug output: <b>'.(($this->db_debug) ? 'Yes' : 'No').'</b>';
 		if ($show) {
-			$this->_db_debug('db', '<br>'.$string, 'db_info');
+			$this->__dbDebug('db', $string, 'dbInfo');
 		} else {
-			$string = '<br>'.$string;
+			$string = $string.'<br>';
 		}
 		return $string;
 	}
 
-	// METHOD db_dump_data
-	// PARAMS query -> if given, only from this quey (if found)
-	// RETURN formated string with all the data in the array
-	// DESC   dumps ALL data for this query, OR if no query given all in cursor_ext array
-	public function db_dump_data($query = 0)
+	// METHOD: dbDumpData
+	// WAS   : db_dump_data
+	// PARAMS: query -> if given, only from this quey (if found)
+	// RETURN: formated string with all the data in the array
+	// DESC  : dumps ALL data for this query, OR if no query given all in cursor_ext array
+	public function dbDumpData($query = 0)
 	{
 		// set start array
 		if ($query) {
@@ -907,28 +938,29 @@ class db_io extends basic
 		}
 		if (is_array($array)) {
 			$this->nbps = '';
-			$string .= $this->_print_array($array);
-			$this->_db_debug('db', $string, 'db_dump_data');
+			$string .= $this->__printArray($array);
+			$this->__dbDebug('db', $string, 'dbDumpData');
 		}
 		return $string;
 	}
 
-	// METHOD db_return
-	// PARAMS query -> the query ...
-	//        reset -> if set to 1, at the end of the query (last row returned), the stored array will be deleted ...
-	//                 if set to 2, the data will be read new and cached (wheres 1 reads new AND destroys at end of read)
-	//              -> if set to 3, after EACH row, the data will be reset, no caching is done except for basic (count, etc)
-	// RETURN res mixed (array/hash)
-	// DESC   single running function, if called creates md5 from
-	//        query string and so can itself call exec/return calls
-	//        caches data, so next time called with IDENTICAL (!!!!)
-	//        [this means 1:1 bit to bit identical query] returns cached
-	//        data, or with reset flag set calls data from DB again
-	public function db_return($query, $reset = 0)
+	// METHOD: dbReturn
+	// WAS   : db_return
+	// PARAMS: query -> the query ...
+	//         reset -> if set to 1, at the end of the query (last row returned), the stored array will be deleted ...
+	//                  if set to 2, the data will be read new and cached (wheres 1 reads new AND destroys at end of read)
+	//               -> if set to 3, after EACH row, the data will be reset, no caching is done except for basic (count, etc)
+	// RETURN: res mixed (array/hash)
+	// DESC  : single running function, if called creates md5 from
+	//         query string and so can itself call exec/return calls
+	//         caches data, so next time called with IDENTICAL (!!!!)
+	//         [this means 1:1 bit to bit identical query] returns cached
+	//         data, or with reset flag set calls data from DB again
+	public function dbReturn($query, $reset = 0)
 	{
 		if (!$query) {
 			$this->error_id = 11;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		// create MD5 from query ...
@@ -948,9 +980,9 @@ class db_io extends basic
 		// set the query
 		$this->cursor_ext[$md5]['query'] = $query;
 		// before doing ANYTHING check if query is "SELECT ..." everything else does not work
-		if (!$this->_check_query_for_select($this->cursor_ext[$md5]['query'])) {
+		if (!$this->__checkQueryForSelect($this->cursor_ext[$md5]['query'])) {
 			$this->error_id = 17;
-			$this->_db_error('', $this->cursor_ext[$md5]['query']);
+			$this->__dbError('', $this->cursor_ext[$md5]['query']);
 			return false;
 		}
 
@@ -959,38 +991,38 @@ class db_io extends basic
 		if ($reset && !$this->cursor_ext[$md5]['pos']) {
 			unset($this->cursor_ext[$md5]['cursor']);
 		}
-//			$this->debug('MENU', 'Reset: '.$reset.', Cursor: '.$this->cursor_ext[$md5]['cursor'].', Pos: '.$this->cursor_ext[$md5]['pos'].', Query: '.$query);
+		// $this->debug('MENU', 'Reset: '.$reset.', Cursor: '.$this->cursor_ext[$md5]['cursor'].', Pos: '.$this->cursor_ext[$md5]['pos'].', Query: '.$query);
 
 		// if no cursor yet, execute
 		if (!$this->cursor_ext[$md5]['cursor']) {
 			// for DEBUG, print out each query executed
 			if ($this->db_debug) {
-				$this->_db_debug('db', $this->cursor_ext[$md5]['query'], 'db_return', 'Q');
+				$this->__dbDebug('db', $this->cursor_ext[$md5]['query'], 'dbReturn', 'Q');
 			}
 			// if no DB Handler try to reconnect
 			if (!$this->dbh) {
 				// if reconnect fails drop out
-				if (!$this->_connect_to_db()) {
+				if (!$this->__connectToDB()) {
 					$this->error_id = 16;
-					$this->_db_error();
+					$this->__dbError();
 					return false;
 				}
 			}
 			// check that no other query is running right now
-			if ($this->db_functions->_db_connection_busy()) {
+			if ($this->db_functions->__dbConnection_busy()) {
 				$this->error_id = 41;
-				$this->_db_error();
+				$this->__dbError();
 				return false;
 			}
-			$this->cursor_ext[$md5]['cursor'] = $this->db_functions->_db_query($this->cursor_ext[$md5]['query']);
+			$this->cursor_ext[$md5]['cursor'] = $this->db_functions->__dbQuery($this->cursor_ext[$md5]['query']);
 			// if still no cursor ...
 			if (!$this->cursor_ext[$md5]['cursor']) {
 				if ($this->db_debug) {
-					$this->_db_debug('db', $this->cursor_ext[$md5]['query'], 'db_return', 'Q');
+					$this->__dbDebug('db', $this->cursor_ext[$md5]['query'], 'dbReturn', 'Q');
 				}
 				// internal error handling
 				$this->error_id = 13;
-				$this->_db_error($this->cursor_ext[$md5]['cursor']);
+				$this->__dbError($this->cursor_ext[$md5]['cursor']);
 				return false;
 			} else {
 				$this->cursor_ext[$md5]['firstcall'] = 1;
@@ -1001,12 +1033,12 @@ class db_io extends basic
 		if ($this->cursor_ext[$md5]['cursor']) {
 			if ($this->cursor_ext[$md5]['firstcall'] == 1) {
 				// count the rows returned (if select)
-				$this->cursor_ext[$md5]['num_rows'] = $this->db_functions->_db_num_rows($this->cursor_ext[$md5]['cursor']);
+				$this->cursor_ext[$md5]['num_rows'] = $this->db_functions->__dbNumRows($this->cursor_ext[$md5]['cursor']);
 				// count the fields
-				$this->cursor_ext[$md5]['num_fields'] = $this->db_functions->_db_num_fields($this->cursor_ext[$md5]['cursor']);
+				$this->cursor_ext[$md5]['num_fields'] = $this->db_functions->__dbNumFields($this->cursor_ext[$md5]['cursor']);
 				// set field names
 				for ($i = 0; $i < $this->cursor_ext[$md5]['num_fields']; $i ++) {
-					$this->cursor_ext[$md5]['field_names'][] = $this->db_functions->_db_field_name($this->cursor_ext[$md5]['cursor'], $i);
+					$this->cursor_ext[$md5]['field_names'][] = $this->db_functions->__dbFieldName($this->cursor_ext[$md5]['cursor'], $i);
 				}
 				// reset first call vars
 				$this->cursor_ext[$md5]['firstcall'] = 0;
@@ -1019,7 +1051,7 @@ class db_io extends basic
 			if ($this->cursor_ext[$md5]['read_rows'] == $this->cursor_ext[$md5]['num_rows']) {
 				$return = 0;
 			} else {
-				$return = $this->_db_convert_encoding($this->db_functions->_db_fetch_array($this->cursor_ext[$md5]['cursor']));
+				$return = $this->__dbConvertEncoding($this->db_functions->__dbFetchArray($this->cursor_ext[$md5]['cursor']));
 			}
 			// check if cached call or reset call ...
 			if (!$return && !$reset) {
@@ -1070,74 +1102,77 @@ class db_io extends basic
 		return $return;
 	}
 
-	// METHOD db_cache_reset
-	// PARAMS $query -> The Query whose cache should be cleaned
-	// RETURN 0 if failure (eg no query with this md5 found)
-	//        1 if successfull
-	// DESC   resets all data stored to this query
-	public function db_cache_reset($query)
+	// METHOD: dbCacheReset
+	// WAS   : db_cache_reset
+	// PARAMS: $query -> The Query whose cache should be cleaned
+	// RETURN: 0 if failure (eg no query with this md5 found)
+	//         1 if successfull
+	// DESC  : resets all data stored to this query
+	public function dbCacheReset($query)
 	{
 		$md5 = md5($query);
 		// clears cache for this query
 		if (!$this->cursor_ext[$md5]['query']) {
 			$this->error_id = 18;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		unset($this->cursor_ext[$md5]);
 		return true;
 	}
 
-	// METHOD db_exec
-	// PARAMS query -> the query, if not given, the query class var will be used
-	//                 (if this was not set, method will quit with a 0 (failure)
-	//        pk_name -> optional primary key name, for insert id return if the pk name is very different
-	//                   if pk name is table name and _id, pk_name is not needed to be set
-	//                   if NULL is given here, no RETURNING will be auto added
-	// RETURN cursor for this query
-	// DESC   executes the query and returns & sets the internal cursor
-	//        fruthermore this functions also sets varios other vars
-	//        like num_rows, num_fields, etc depending on query
-	//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
-	//        read from the database for the PK NAME
-	public function db_exec($query = 0, $pk_name = '')
+	// METHOD: dbExec
+	// METHOD: db_exec
+	// PARAMS: query -> the query, if not given, the query class var will be used
+	//                  (if this was not set, method will quit with a 0 (failure)
+	//         pk_name -> optional primary key name, for insert id return if the pk name is very different
+	//                    if pk name is table name and _id, pk_name is not needed to be set
+	//                    if NULL is given here, no RETURNING will be auto added
+	// RETURN: cursor for this query
+	// DESC  : executes the query and returns & sets the internal cursor
+	//         fruthermore this functions also sets varios other vars
+	//         like num_rows, num_fields, etc depending on query
+	//         for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
+	//         read from the database for the PK NAME
+	public function dbExec($query = 0, $pk_name = '')
 	{
 		// prepare and check if we can actually run it
-		if (($md5 = $this->_db_prepare_exec($query, $pk_name)) === false) {
+		if (($md5 = $this->__dbPrepareExec($query, $pk_name)) === false) {
 			// bail if no md5 set
 			return false;
 		}
 		// ** actual db exec call
-		$this->cursor = $this->db_functions->_db_query($this->query);
+		$this->cursor = $this->db_functions->__dbQuery($this->query);
 		// if FALSE returned, set error stuff
 		// run the post exec processing
-		if (!$this->_db_post_exec()) {
+		if (!$this->__dbPostExec()) {
 			return false;
 		} else {
 			return $this->cursor;
 		}
 	}
 
-	// METHOD db_exec_async
-	// PARAMS query -> query to run
-	//        pk_name -> optional primary key name, only used with insert for returning call
-	// RETURN true if async query was sent ok, false if error happened
-	// DESC   executres the query async so other methods can be run during this
-	//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
-	//        read from the database for the PK NAME
-	// NEEDS  db_check_async
-	public function db_exec_async($query, $pk_name = '')
+	// METHOD: dbExecAsync
+	// WAS   : db_exec_async
+	// PARAMS: query -> query to run
+	//         pk_name -> optional primary key name, only used with insert for returning call
+	// RETURN: true if async query was sent ok, false if error happened
+	// DESC  : executres the query async so other methods can be run during this
+	//         for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
+	//         read from the database for the PK NAME
+	// NEEDS : dbCheckAsync
+	public function dbExecAsync($query, $pk_name = '')
 	{
 		// prepare and check if we can actually run the query
-		if (($md5 = $this->_db_prepare_exec($query, $pk_name)) === false) {
+		if (($md5 = $this->__dbPrepareExec($query, $pk_name)) === false) {
 			// bail if no md5 set
 			return false;
 		}
 		// run the async query
-		if (!$this->db_functions->_db_send_query($this->query)) {
+		if (!$this->db_functions->__dbSendQuery($this->query)) {
 			// if failed, process here
 			$this->error_id = 40;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		} else {
 			$this->async_running = $md5;
@@ -1146,23 +1181,24 @@ class db_io extends basic
 		}
 	}
 
-	// METHOD db_check_async
-	// PARAMS none
-	// RETURN true if the query is still running, false if an error occured or cursor of that query
-	// DESC   checks a previous async query and returns data if finished
-	// NEEDS  db_exec_async
-	public function db_check_async()
+	// METHOD: dbCheckAsync
+	// WAS   : db_check_async
+	// PARAMS: none
+	// RETURN: true if the query is still running, false if an error occured or cursor of that query
+	// DESC  : checks a previous async query and returns data if finished
+	// NEEDS : dbExecAsync
+	public function dbCheckAsync()
 	{
 		// if there is actually a async query there
 		if ($this->async_running) {
-			if ($this->db_functions->_db_connection_busy()) {
+			if ($this->db_functions->__dbConnection_busy()) {
 				return true;
 			} else {
 				// get the result/or error
-				$this->cursor = $this->db_functions->_db_get_result();
+				$this->cursor = $this->db_functions->__dbGetResult();
 				$this->async_running = '';
 				// run the post exec processing
-				if (!$this->_db_post_exec()) {
+				if (!$this->__dbPostExec()) {
 					return false;
 				} else {
 					return $this->cursor;
@@ -1171,17 +1207,18 @@ class db_io extends basic
 		} else {
 			// if no async running print error
 			$this->error_id = 42;
-			$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> No async query has been started yet.</span>', 'DB_ERROR');
+			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> No async query has been started yet.</span>', 'DB_ERROR');
 			return false;
 		}
 	}
 
-	// METHOD db_fetch_array
-	// PARAMS cusors -> the cursor from db_exec or pg_query/pg_exec/mysql_query
-	//                  if not set will use internal cursor, if not found, stops with 0 (error)
-	// RETURN a mixed row
-	// DESC   executes a cursor and returns the data, if no more data 0 will be returned
-	public function db_fetch_array($cursor = 0)
+	// METHOD: dbFetchArray
+	// WAS   : db_fetch_array
+	// PARAMS: cusors -> the cursor from db_exec or pg_query/pg_exec/mysql_query
+	//                   if not set will use internal cursor, if not found, stops with 0 (error)
+	// RETURN: a mixed row
+	// DESC  : executes a cursor and returns the data, if no more data 0 will be returned
+	public function dbFetchArray($cursor = 0)
 	{
 		// return false if no query or cursor set ...
 		if (!$cursor) {
@@ -1189,53 +1226,55 @@ class db_io extends basic
 		}
 		if (!$cursor) {
 			$this->error_id = 12;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
-		return $this->_db_convert_encoding($this->db_functions->_db_fetch_array($cursor));
+		return $this->__dbConvertEncoding($this->db_functions->__dbFetchArray($cursor));
 	}
 
-	// METHOD db_return_row
-	// PARAMS query -> the query to be executed
-	// RETURN mixed db result
-	// DESC   returns the FIRST row of the given query
-	public function db_return_row($query)
+	// METHOD: dbReturnRow
+	// WAS   : db_return_row
+	// PARAMS: query -> the query to be executed
+	// RETURN: mixed db result
+	// DESC  : returns the FIRST row of the given query
+	public function dbReturnRow($query)
 	{
 		if (!$query) {
 			$this->error_id = 11;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		// before doing ANYTHING check if query is "SELECT ..." everything else does not work
-		if (!$this->_check_query_for_select($query)) {
+		if (!$this->__checkQueryForSelect($query)) {
 			$this->error_id = 17;
-			$this->_db_error('', $query);
+			$this->__dbError('', $query);
 			return false;
 		}
 		$cursor = $this->db_exec($query);
-		$result = $this->db_fetch_array($cursor);
+		$result = $this->dbFetchArray($cursor);
 		return $result;
 	}
 
-	// METHOD db_return_array
-	// PARAMS query -> the query to be executed, named_only -> if true, only name ref are returned
-	// RETURN array of hashes (row -> fields)
-	// DESC   createds an array of hashes of the query (all data)
-	public function db_return_array($query, $named_only = 0)
+	// METHOD: dbReturnArray
+	// WAS   : db_return_array
+	// PARAMS: query -> the query to be executed, named_only -> if true, only name ref are returned
+	// RETURN: array of hashes (row -> fields)
+	// DESC  : createds an array of hashes of the query (all data)
+	public function dbReturnArray($query, $named_only = 0)
 	{
 		if (!$query) {
 			$this->error_id = 11;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		// before doing ANYTHING check if query is "SELECT ..." everything else does not work
-		if (!$this->_check_query_for_select($query)) {
+		if (!$this->__checkQueryForSelect($query)) {
 			$this->error_id = 17;
-			$this->_db_error('', $query);
+			$this->__dbError('', $query);
 			return false;
 		}
 		$cursor = $this->db_exec($query);
-		while ($res = $this->db_fetch_array($cursor)) {
+		while ($res = $this->dbFetchArray($cursor)) {
 			for ($i = 0; $i < $this->num_fields; $i ++) {
 				// cereated mixed, first name
 				$data[$this->field_names[$i]] = $res[$this->field_names[$i]];
@@ -1249,92 +1288,96 @@ class db_io extends basic
 		return $rows;
 	}
 
-	// METHOD db_cursor_pos
-	// PARAMS $query -> query to find in cursor_ext
-	// RETURN position (int)
-	// DESC   returns the current position the read out
-	public function db_cursor_pos($query)
+	// METHOD: dbCursorPos
+	// WAS   : db_cursor_pos
+	// PARAMS: $query -> query to find in cursor_ext
+	// RETURN: position (int)
+	// DESC  : returns the current position the read out
+	public function dbCursorPos($query)
 	{
 		if (!$query) {
 			$this->error_id = 11;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		$md5 = md5($query);
 		return $this->cursor_ext[$md5]['pos'];
 	}
 
-	// METHOD db_cursor_num_rows
-	// PARAMS $query -> query to find in cursor_ext
-	// RETURN row count (int)
-	// DESC   returns the number of rows for the current select query
-	public function db_cursor_num_rows($query)
+	// METHOD: dbCursorNumRows
+	// WAS   : db_cursor_num_rows
+	// PARAMS: $query -> query to find in cursor_ext
+	// RETURN: row count (int)
+	// DESC  : returns the number of rows for the current select query
+	public function dbCursorNumRows($query)
 	{
 		if (!$query) {
 			$this->error_id = 11;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		$md5 = md5($query);
 		return $this->cursor_ext[$md5]['num_rows'];
 	}
 
-	// METHOD db_show_table_meta_data
-	// PARAMS $table -> table name
-	//        $schema -> optional schema name
-	// RETURN array of table data
-	// DESC   returns an array of the table with columns and values. FALSE on no table found
-	public function db_show_table_meta_data($table, $schema = '')
+	// METHOD: dbShowTableMetaData
+	// WAS   : db_show_table_meta_data
+	// PARAMS: $table -> table name
+	//         $schema -> optional schema name
+	// RETURN: array of table data
+	// DESC  : returns an array of the table with columns and values. FALSE on no table found
+	public function dbShowTableMetaData($table, $schema = '')
 	{
 		$table = ($schema ? $schema.'.' : '').$table;
 
-		$array = $this->db_functions->_db_meta_data($table);
+		$array = $this->db_functions->__dbMetaData($table);
 		if (!is_array($array)) {
 			$array = false;
 		}
 		return $array;
 	}
 
-	// METHOD db_prepare
-	// PARAMS $stm_name, $query, $pk_name: optional
-	// RETURN false on error
-	// DESC   prepares a query
-	//        for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
-	//        read from the database for the PK NAME
-	public function db_prepare($stm_name, $query, $pk_name = '')
+	// METHOD: dbPrepare
+	// WAS   : db_prepare
+	// PARAMS: $stm_name, $query, $pk_name: optional
+	// RETURN: false on error
+	// DESC  : prepares a query
+	//         for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
+	//         read from the database for the PK NAME
+	public function dbPrepare($stm_name, $query, $pk_name = '')
 	{
 		if (!$query) {
 			$this->error_id = 11;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		// if no DB Handler drop out
 		if (!$this->dbh) {
 			// if reconnect fails drop out
-			if (!$this->_connect_to_db()) {
+			if (!$this->__connectToDB()) {
 				$this->error_id = 16;
-				$this->_db_error();
+				$this->__dbError();
 				return false;
 			}
 		}
 		// check that no other query is running right now
-		if ($this->db_functions->_db_connection_busy()) {
+		if ($this->db_functions->__dbConnection_busy()) {
 			$this->error_id = 41;
-			$this->_db_error();
+			$this->__dbError();
 			return false;
 		}
 		// check if this was already prepared
 		if (!array_key_exists($stm_name, $this->prepare_cursor) || !is_array($this->prepare_cursor[$stm_name])) {
 			// if this is an insert query, check if we can add a return
-			if ($this->_check_query_for_insert($query, true)) {
+			if ($this->__checkQueryForInsert($query, true)) {
 				if ($pk_name != 'NULL') {
 					// set primary key name
 					// current: only via parameter
 					if (!$pk_name) {
 						// read the primary key from the table, if we do not have one, we get nothing in return
-						list($schema, $table) = $this->_db_return_table($query);
+						list($schema, $table) = $this->__dbReturnTable($query);
 						if (!$this->pk_name_table[$table]) {
-							$this->pk_name_table[$table] = $this->db_functions->_db_primary_key($table, $schema);
+							$this->pk_name_table[$table] = $this->db_functions->__dbPrimaryKey($table, $schema);
 						}
 						$pk_name = $this->pk_name_table[$table];
 					}
@@ -1360,14 +1403,14 @@ class db_io extends basic
 			preg_match_all('/(\$[0-9]{1,})/', $query, $match);
 			$this->prepare_cursor[$stm_name]['count'] = count($match[1]);
 			$this->prepare_cursor[$stm_name]['query'] = $query;
-			$result = $this->db_functions->_db_prepare($stm_name, $query);
+			$result = $this->db_functions->__dbPrepare($stm_name, $query);
 			if ($result) {
 				$this->prepare_cursor[$stm_name]['result'] = $result;
 				return $result;
 			} else {
 				$this->error_id = 21;
-				$this->_db_error();
-				$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Prepare field with: '.$stm_name.' | '.$query.'</span>', 'DB_ERROR');
+				$this->__dbError();
+				$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Prepare field with: '.$stm_name.' | '.$query.'</span>', 'DB_ERROR');
 				return $result;
 			}
 		} else {
@@ -1377,47 +1420,48 @@ class db_io extends basic
 		}
 	}
 
-	// METHOD db_execute
-	// PARAMS $stm_name, data array
-	// RETURN false on error
-	// DESC   runs a prepare query
-	public function db_execute($stm_name, $data = array())
+	// METHOD: dbExecute
+	// WAS   : db_execute
+	// PARAMS: $stm_name, data array
+	// RETURN: false on error
+	// DESC  : runs a prepare query
+	public function dbExecute($stm_name, $data = array())
 	{
 		// if we do not have no prepare cursor array entry for this statement name, abort
 		if (!is_array($this->prepare_cursor[$stm_name])) {
 			$this->error_id = 24;
-			$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': We do not have a prepared query entry for this statement name.</span>', 'DB_ERROR');
+			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': We do not have a prepared query entry for this statement name.</span>', 'DB_ERROR');
 			return false;
 		}
 		if (!is_array($data)) {
 			$this->error_id = 25;
-			$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Prepared query Data has to be given in array form.</span>', 'DB_ERROR');
+			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Prepared query Data has to be given in array form.</span>', 'DB_ERROR');
 			return false;
 		}
 		if ($this->prepare_cursor[$stm_name]['count'] != count($data)) {
 			$this->error_id = 23;
-			$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Array data count does not match prepared fields. Need: '.$this->prepare_cursor[$stm_name]['count'].', has: '.count($data).'</span>', 'DB_ERROR');
+			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Array data count does not match prepared fields. Need: '.$this->prepare_cursor[$stm_name]['count'].', has: '.count($data).'</span>', 'DB_ERROR');
 			return false;
 		} else {
 			if ($this->db_debug) {
-				$this->_db_debug('db', $this->_db_debug_prepare($stm_name, $data), 'db_exec_prep', 'Q');
+				$this->__dbDebug('db', $this->__dbDebug_prepare($stm_name, $data), 'dbExecPrep', 'Q');
 			}
-			$code = $this->db_functions->_db_execute($stm_name, $data);
+			$code = $this->db_functions->__dbExecute($stm_name, $data);
 			if (!$code) {
 				$this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[$stm_name]['result'].']: '.$this->print_ar($data));
 				$this->error_id = 22;
-				$this->_db_error($this->prepare_cursor[$stm_name]['result']);
-				$this->_db_debug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Execution failed</span>', 'DB_ERROR');
+				$this->__dbError($this->prepare_cursor[$stm_name]['result']);
+				$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Execution failed</span>', 'DB_ERROR');
 			}
-			if ($this->_check_query_for_insert($this->prepare_cursor[$stm_name]['query'], true) && $this->prepare_cursor[$stm_name]['pk_name'] != 'NULL') {
+			if ($this->__checkQueryForInsert($this->prepare_cursor[$stm_name]['query'], true) && $this->prepare_cursor[$stm_name]['pk_name'] != 'NULL') {
 				if (!$this->prepare_cursor[$stm_name]['returning_id']) {
-					$this->insert_id = $this->db_functions->_db_insert_id($this->prepare_cursor[$stm_name]['query'], $this->prepare_cursor[$stm_name]['pk_name']);
+					$this->insert_id = $this->db_functions->__dbInsertId($this->prepare_cursor[$stm_name]['query'], $this->prepare_cursor[$stm_name]['pk_name']);
 				} elseif ($code) {
 					$this->insert_id = array ();
 					$this->insert_id_ext = array ();
 					// we have returning, now we need to check if we get one or many returned
 					// we'll need to loop this, if we have multiple insert_id returns
-					while ($_insert_id = $this->db_functions->_db_fetch_array($code, PGSQL_ASSOC)) {
+					while ($_insert_id = $this->db_functions->__dbFetchArray($code, PGSQL_ASSOC)) {
 						$this->insert_id[] = $_insert_id;
 					}
 					// if we have only one, revert from arry to single
@@ -1437,59 +1481,63 @@ class db_io extends basic
 						// failed to get insert id
 						$this->insert_id = '';
 						$this->warning_id = 33;
-						$this->_db_error();
-						$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id returned no data</span>', 'DB_WARNING');
+						$this->__dbError();
+						$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id returned no data</span>', 'DB_WARNING');
 					}
 				}
 				// this error handling is only for pgsql
 				if (is_array($this->insert_id)) {
 					$this->warning_id = 32;
-					$this->_db_error();
-					$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id data returned as array</span>', 'DB_WARNING');
+					$this->__dbError();
+					$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id data returned as array</span>', 'DB_WARNING');
 				} elseif (!$this->insert_id) {
 					// NOTE should we keep this inside
 					$this->warning_id = 31;
-					$this->_db_error();
-					$this->_db_debug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': Could not get insert id</span>', 'DB_WARNING');
+					$this->__dbError();
+					$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': Could not get insert id</span>', 'DB_WARNING');
 				}
 			}
 			return $code;
 		}
 	}
 
-	// METHOD db_escape_string
-	// PARAMS $string -> string to escape
-	// RETURN escaped string
-	// DESC   neutral function to escape a string for DB writing
-	public function db_escape_string($string)
+	// METHOD: dbEscapeString
+	// WAS   : db_escape_string
+	// PARAMS: $string -> string to escape
+	// RETURN: escaped string
+	// DESC  : neutral function to escape a string for DB writing
+	public function dbEscapeString($string)
 	{
-		return $this->db_functions->_db_escape_string($string);
+		return $this->db_functions->__dbEscapeString($string);
 	}
 
-	// METHOD db_escape_bytea
-	// PARAMS $bytea -> bytea to escape
-	// RETURN escaped bytea
-	// DESC   neutral function to escape a bytea for DB writing
-	public function db_escape_bytea($bytea)
+	// METHOD: dbEscapeBytea
+	// WAS   : db_escape_bytea
+	// PARAMS: $bytea -> bytea to escape
+	// RETURN: escaped bytea
+	// DESC  : neutral function to escape a bytea for DB writing
+	public function dbEscapeBytea($bytea)
 	{
-		return $this->db_functions->_db_escape_bytea($bytea);
+		return $this->db_functions->__dbEscapeBytea($bytea);
 	}
 
-	// METHOD db_version
-	// PARAMS none
-	// RETURN database version as string
-	// DESC   return current database version
-	public function db_version()
+	// METHOD: dbVersion
+	// WAS   : db_version
+	// PARAMS: none
+	// RETURN: database version as string
+	// DESC  : return current database version
+	public function dbVersion()
 	{
-		return $this->db_functions->_db_version();
+		return $this->db_functions->__dbVersion();
 	}
 
-	// METHOD db_compare_version
-	// PARAMS string to which the return will return true or false
+	// METHOD: dbCompareVersion
+	// WAS   : db_compare_version
+	// PARAMS: string to which the return will return true or false
 	//        =X.Y, >X.Y, <X.Y
-	// RETURN true/false
-	// DESC   returns boolean true or false if the string matches the database version
-	public function db_compare_version($compare)
+	// RETURN: true/false
+	// DESC  : returns boolean true or false if the string matches the database version
+	public function dbCompareVersion($compare)
 	{
 		// compare has =, >, < prefix, and gets stripped, if the rest is not X.Y format then error
 		preg_match("/^([<>=]{1,2})(\d{1,2})\.(\d{1,2})/", $compare, $matches);
@@ -1503,7 +1551,7 @@ class db_io extends basic
 		}
 		// db_version can return X.Y.Z
 		// we only compare the first two
-		list ($master, $minor, $_other) = explode('.', $this->db_version());
+		list ($master, $minor, $_other) = explode('.', $this->dbVersion());
 		$version = $master.($minor < 10 ? '0' : '').$minor;
 		$return = false;
 		// compare
@@ -1539,11 +1587,12 @@ class db_io extends basic
 		return $return;
 	}
 
-	// METHOD db_boolean
-	// PARAMS 't' / 'f' or any string
-	// RETURN correct php boolean true/false
-	// DESC   if the input is a single char 't' or 'f' it will return the boolean value instead
-	public function db_boolean($string, $rev = false)
+	// METHOD: dbBoolean
+	// WAS   : db_boolean
+	// PARAMS: 't' / 'f' or any string
+	// RETURN: correct php boolean true/false
+	// DESC  : if the input is a single char 't' or 'f' it will return the boolean value instead
+	public function dbBoolean($string, $rev = false)
 	{
 		if (!$rev) {
 			if ($string == 't' || $string == 'true') {
@@ -1567,14 +1616,15 @@ class db_io extends basic
 	// db_write_data is the old without separate update no write list
 	// db_write_data_ext is the extended with additional array for no write list for update
 
-	// METHOD: db_write_data
+	// METHOD: dbWriteData
+	// WAS   : db_write_data
 	// PARAMS: write_array -> list of elements to write
 	//         not_write_array -> list of elements not to write
 	//         primary_key -> id key to decide if we write insert or update
 	//         table -> name for the target table
 	// RETURN: primary key id
 	// DESC:   writes into one table based on array of table columns
-	public function db_write_data($write_array, $not_write_array, $primary_key, $table, $data = array ())
+	public function dbWriteData($write_array, $not_write_array, $primary_key, $table, $data = array ())
 	{
 		if (!is_array($write_array)) {
 			$write_array = array ();
@@ -1586,21 +1636,24 @@ class db_io extends basic
 			return false;
 		}
 		$not_write_update_array = array ();
-		return $this->db_write_data_ext($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
+		return $this->dbWriteData_ext($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
 	}
 
-	// METHOD: db_write_data_ext
+	// METHOD: dbWriteDataExt
+	// WAS   : db_write_data_ext
 	// PARAMS: write_array -> list of elements to write
 	//         primary_key -> id key to decide if we write insert or update
-	//                     -> alternate the primary key can be an array with 'row' => 'row name', 'value' => 'data' to use a different column as the primary key
+	//                     -> alternate the primary key can be an array with
+	//                        'row' => 'row name', 'value' => 'data' to use a
+	//                        different column as the primary key
 	//         table -> name for the target table
 	// (optional)
 	//         not_write_array -> list of elements not to write
 	//         not_write_update_array -> list of elements not to write during update
 	//         data -> optional array with data, if not _POST vars are used
 	// RETURN: primary key id
-	// DESC:   writes into one table based on array of table columns
-	public function db_write_data_ext($write_array, $primary_key, $table, $not_write_array = array (), $not_write_update_array = array (), $data = array ())
+	// DESC  : writes into one table based on array of table columns
+	public function dbWriteDataExt($write_array, $primary_key, $table, $not_write_array = array (), $not_write_update_array = array (), $data = array ())
 	{
 		if (!is_array($primary_key)) {
 			$primary_key = array (
@@ -1612,7 +1665,7 @@ class db_io extends basic
 		$q_sub_value = '';
 		$q_sub_data = '';
 		// get the table layout and row types
-		$table_data = $this->db_show_table_meta_data(($this->db_schema ? $this->db_schema.'.' : '').$table);
+		$table_data = $this->dbShowTableMetaData(($this->db_schema ? $this->db_schema.'.' : '').$table);
 		foreach ($write_array as $field) {
 			if ((!$primary_key['value'] || ($primary_key['value'] && !in_array($field, $not_write_update_array))) && !in_array($field, $not_write_array)) {
 				// data from external or data field
@@ -1656,7 +1709,7 @@ class db_io extends basic
 						$q_sub_data .= (is_numeric($_data) && isset($_data)) ? $_data : 'NULL';
 					} else {
 						// if bool -> set bool, else write data
-						$q_sub_data .= isset($_data) ? "'".($is_bool ? $this->db_boolean($_data, true) : $this->db_escape_string($_data))."'" : 'NULL';
+						$q_sub_data .= isset($_data) ? "'".($is_bool ? $this->dbBoolean($_data, true) : $this->dbEscapeString($_data))."'" : 'NULL';
 					}
 				}
 			}
@@ -1686,12 +1739,13 @@ class db_io extends basic
 		return $primary_key['value'];
 	}
 
-	// METHOD: db_time_format
+	// METHOD: dbTimeFormat
+	// WAS   : db_time_format
 	// PARAMS: age or datetime difference
 	//         micro on off (default false)
 	// RETURN: Y/M/D/h/m/s formatted string (like TimeStringFormat
-	// DESC:   only for postgres. pretty formats an age or datetime difference string
-	public function db_time_format($age, $show_micro = false)
+	// DESC  :   only for postgres. pretty formats an age or datetime difference string
+	public function dbTimeFormat($age, $show_micro = false)
 	{
 		// in string (datetime diff): 1786 days 22:11:52.87418
 		// or (age): 4 years 10 mons 21 days 12:31:11.87418
@@ -1708,21 +1762,23 @@ class db_io extends basic
 		return $prefix.($hour ? $hour.'h ' : '').($minutes ? $minutes.'m ' : '').($seconds ? $seconds.'s' : '').($show_micro && $milliseconds? ' '.$milliseconds.'ms' : '');
 	}
 
-	// METHOD: db_array_parse
+	// METHOD: dbArrayParse
+	// WAS   : db_array_parse
 	// PARAMS: text: input text to parse to an array
 	// RETURN: PHP array of the parsed data
-	// DESC:   this is only needed for Postgresql. Converts postgresql arrays to PHP
-	public function db_array_parse($text)
+	// DESC  : this is only needed for Postgresql. Converts postgresql arrays to PHP
+	public function dbArrayParse($text)
 	{
-		return $this->db_functions->_db_array_parse($text, $output);
+		return $this->db_functions->__dbArrayParse($text, $output);
 	}
 
-	// METHOD: db_sql_escape
+	// METHOD: dbSqlEscape
+	// WAS   : db_sql_escape
 	// PARAMS: value -> to escape data
-	//         kbn -> escape trigger type
+	//          kbn -> escape trigger type
 	// RETURN: escaped value
 	// DESC  : clear up any data for valid DB insert
-	public function db_sql_escape($value, $kbn = "")
+	public function dbSqlEscape($value, $kbn = "")
 	{
 		switch ($kbn) {
 			case "i":
@@ -1732,15 +1788,279 @@ class db_io extends basic
 				$value = (!isset($value) || $value === "") ? "NULL" : floatval($value);
 				break;
 			case "t":
-				$value = (!isset($value) || $value === "") ? "NULL" : "'".$this->db_escape_string($value)."'";
+				$value = (!isset($value) || $value === "") ? "NULL" : "'".$this->dbEscapeString($value)."'";
 				break;
 			case "d":
-				$value = (!isset($value) || $value === "") ? "NULL" : "'".$this->db_escape_string($value)."'";
+				$value = (!isset($value) || $value === "") ? "NULL" : "'".$this->dbEscapeString($value)."'";
 				break;
 			case "i2":
 				$value = (!isset($value) || $value === "") ? 0 : intval($value);
 				break;
 		}
 		return $value;
+	}
+
+	// *************************************************************
+	// COMPATIBILITY METHODS
+	// those methods are deprecated function call names
+	// they exist for backwards compatibility only
+	// *************************************************************
+
+	private function _connect_to_db()
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__connectToDB();
+	}
+
+	private function _close_db()
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__closeDB();
+	}
+
+	private function _check_query_for_select($query)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__checkQueryForSelect($query);
+	}
+
+	private function _check_query_for_insert($query, $pure = false)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__checkQueryForInsert($query, $pure);
+	}
+
+	private function _print_array($array)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__printArray($array);
+	}
+
+	private function _db_debug($debug_id, $error_string, $id = '', $type = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__dbDebug($debug_id, $error_string, $id, $type);
+	}
+
+	public function _db_error($cursor = '', $msg = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__dbError($cursor, $msg);
+	}
+
+	private function _db_convert_encoding($row)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__dbConvertEncoding($row);
+	}
+
+	private function _db_debug_prepare($stm_name, $data = array())
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__dbDebugPrepare($stm_name, $data);
+	}
+
+	private function _db_return_table($query)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__dbReturnTable($query);
+	}
+
+	private function _db_prepare_exec($query, $pk_name)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__dbPrepareExec($query, $pk_name);
+	}
+
+	private function _db_post_exec()
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__dbPostExec();
+	}
+
+	public function db_set_debug($debug = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbSetDebug($debug);
+	}
+
+	public function db_reset_query_called($query)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbResetQueryCalled($query);
+	}
+
+	public function db_get_query_called($query)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbGetQueryCalled($query);
+	}
+
+	public function db_close()
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbClose();
+	}
+
+	public function db_set_schema($db_schema = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbSetSchema($db_schema);
+	}
+
+	public function db_get_schema()
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbGetSchema();
+	}
+
+	public function db_set_encoding($db_encoding = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbSetEncoding($db_encoding);
+	}
+
+	public function db_info($show = 1)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbInfo($show);
+	}
+
+	public function db_dump_data($query = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbDumpData($query);
+	}
+
+	public function db_return($query, $reset = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbReturn($query, $reset);
+	}
+
+	public function db_cache_reset($query)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbCacheReset($query);
+	}
+
+	public function db_exec_async($query, $pk_name = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbExecAsync($query, $pk_name);
+	}
+
+	public function db_check_async()
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbCheckAsync();
+	}
+
+	public function db_fetch_array($cursor = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbFetchArray($cursor);
+	}
+
+	public function db_return_row($query)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbReturnRow($query);
+	}
+
+	public function db_return_array($query, $named_only = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbReturnArray($query, $named_only);
+	}
+
+	public function db_cursor_pos($query)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbCursorPos($query);
+	}
+
+	public function db_cursor_num_rows($query)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbCursorNumRows($query);
+	}
+
+	public function db_show_table_meta_data($table, $schema = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbShowTableMetaData($table, $schema);
+	}
+
+	public function db_prepare($stm_name, $query, $pk_name = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbPrepare($stm_name, $query, $pk_name);
+	}
+
+	public function db_execute($stm_name, $data = array())
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbExecute($stm_name, $data);
+	}
+
+	public function db_escape_string($string)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbEscapeString($string);
+	}
+
+	public function db_escape_bytea($bytea)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbEscapeBytea($bytea);
+	}
+
+	public function db_version()
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbVersion();
+	}
+
+	public function db_compare_version($compare)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbCompareVersion($compare);
+	}
+
+	public function db_boolean($string, $rev = false)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbBoolean($string, $rev);
+	}
+
+	public function db_write_data($write_array, $not_write_array, $primary_key, $table, $data = array ())
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbWriteData($write_array, $not_write_array, $primary_key, $table, $data);
+	}
+
+	public function db_write_data_ext($write_array, $primary_key, $table, $not_write_array = array (), $not_write_update_array = array (), $data = array ())
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbWriteDataExt($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
+	}
+
+	public function db_time_format($age, $show_micro = false)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbTimeFormat($age, $show_micro);
+	}
+
+	public function db_array_parse($text)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbArrayParse($text);
+	}
+
+	public function db_sql_escape($value, $kbn = "")
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbSqlEscape($value, $kbn);
 	}
 } // end if db class

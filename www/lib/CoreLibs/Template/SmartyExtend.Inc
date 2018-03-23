@@ -8,12 +8,14 @@
 * 2005/06/22 (cs) include smarty class here, so there is no need to include it in the main file
 *********************************************************************/
 
-// read in the Smarty class for definition
-// use smarty BC for backwards compability
-// try to include file from LIBS path, or from normal path
-_spl_autoload('SmartyBC.class.php');
+namespace CoreLibs\Template;
 
-class SmartyML extends SmartyBC
+// I need to manually load Smarty BC here (it is not namespaced)
+require_once(BASE.LIB.SMARTY.'SmartyBC.class.php');
+// So it doesn't start looking around in the wrong naemspace as smarty doesn't have one
+use SmartyBC;
+
+class SmartyExtend extends SmartyBC
 {
 	public $l10n;
 
@@ -21,9 +23,10 @@ class SmartyML extends SmartyBC
 	public function __construct($lang)
 	{
 		SmartyBC::__construct();
-		_spl_autoload('Class.l10n.inc');
-		$this->l10n = new l10n($lang);
+		$this->l10n = new \CoreLibs\Language\L10n($lang);
 		// variable variable register
 		$this->register_modifier('getvar', array(&$this, 'get_template_vars'));
 	}
 }
+
+# __END__

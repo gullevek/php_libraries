@@ -210,10 +210,9 @@
 *               save data, loads data, etc
 *********************************************************************/
 
-// try to include file from LIBS path, or from normal path
-_spl_autoload('Class.DB.Array.IO.inc');
+namespace CoreLibs\Output\Form;
 
-class form extends db_array_io
+class Generate extends \CoreLibs\DB\Extended\ArrayIO
 {
 	// rest
 	public $field_array = array (); // for the load statetment describes which elements from the load query should be shown and i which format
@@ -244,23 +243,20 @@ class form extends db_array_io
 	// now some default error msgs (english)
 	public $language_array = array ();
 
-	// METHOD constructor
-	// PARAMS $db_config -> connect to DB
-	//        $lang -> language code ("en", "ja", etc)
-	//        $table_width -> width of table
-	//        $db_debug -> turns db_io debug on/off (DB_DEBUG as global var does the same)
+	// METHOD: constructor
+	// PARAMS: $db_config -> connect to DB
+	//         $lang -> language code ("en", "ja", etc)
+	//         $table_width -> width of table
+	//         $db_debug -> turns db_io debug on/off (DB_DEBUG as global var does the same)
 	public function __construct($db_config, $lang, $table_width = 750, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
 	{
-		$this->my_page_name = $this->get_page_name(1);
+		$this->my_page_name = $this->getPageName(1);
 		// init the language class
-		_spl_autoload('Class.l10n.inc');
-		$this->l = new l10n($lang);
+		$this->l = new \CoreLibs\Language\L10n($lang);
 		// load config array
 		// get table array definitions for current page name
 		// WARNING: auto spl load does not work with this as it is an array and not a function/object
-//			$flag = _spl_autoload('array_'.$this->my_page_name.'.inc');
 		include(TABLE_ARRAYS."array_".$this->my_page_name.".inc");
-
 		$config_array = ${$this->my_page_name};
 
 		// start the array_io class which will start db_io ...
@@ -316,7 +312,7 @@ class form extends db_array_io
 	}
 
 	// dumps all values into output (for error msg)
-	public function form_dump_table_array()
+	public function formDumpTableArray()
 	{
 		if (!is_array($this->table_array)) {
 			$this->table_array = array ();
@@ -338,49 +334,14 @@ class form extends db_array_io
 		parent::__destruct();
 	}
 
-	/*****************************************************
-		Along here are wrapper functions for the former, old names
-	*/
-
-	public function form_load()
-	{
-		return $this->form_create_load();
-	}
-
-	public function form_new($hide_new_checkbox = 0)
-	{
-		return $this->form_create_new($hide_new_checkbox);
-	}
-
-	public function form_delete_save($hide_delete = 0, $hide_delete_checkbox = 0)
-	{
-		return $this->form_create_save_delete($hide_delete, $hide_delete_checkbox);
-	}
-
-	public function form_error_msg()
-	{
-		return $this->form_print_msg();
-	}
-
-	public function form_show_reference_table($table_name)
-	{
-		return $this->form_create_element_reference_table($table_name);
-	}
-
-	public function form_show_list_table($table_name)
-	{
-		return $this->form_create_element_list_table($table_name);
-	}
-
-	// END wrapper
-
-	// METHOD form_get_col_name_from_key
-	// PARAMS $want_key: the key where u want the data from
-	//        $key_value: if set searches for special right value
-	// RETURN the value of the $want_key array field
-	//        works only with fields that appear only ONCE
-	//        if multiple gets only FIRST
-	public function form_get_col_name_from_key($want_key, $key_value = "")
+	// METHOD: formGetColNameFromKey
+	// WAS   : form_get_col_name_from_key
+	// PARAMS: $want_key: the key where u want the data from
+	//         $key_value: if set searches for special right value
+	// RETURN: the value of the $want_key array field
+	//         works only with fields that appear only ONCE
+	//         if multiple gets only FIRST
+	public function formGetColNameFromKey($want_key, $key_value = "")
 	{
 		if (!is_array($this->table_array)) {
 			$this->table_array = array ();
@@ -395,11 +356,12 @@ class form extends db_array_io
 		}
 	}
 
-	// METHOD form_get_col_name_array_from_key
-	// PARAMS $want_key: the key where u want the data from
-	//        $key_value: if set searches for special right value
-	// RETURN array of fields
-	public function form_get_col_name_array_from_key($want_key, $key_value = "")
+	// METHOD: formGetColNameArrayFromKey
+	// WAS   : form_get_col_name_array_from_key
+	// PARAMS: $want_key: the key where u want the data from
+	//         $key_value: if set searches for special right value
+	// RETURN: array of fields
+	public function formGetColNameArrayFromKey($want_key, $key_value = "")
 	{
 		$key_array = array();
 		if (!is_array($this->table_array)) {
@@ -417,10 +379,11 @@ class form extends db_array_io
 		return $key_array;
 	}
 
-	// METHOD form_print_msg
-	// PARAMS none
-	// RETURN formated output for the error && warning msg
-	public function form_print_msg()
+	// METHOD: formPrintMsg
+	// WAS   : form_print_msg
+	// PARAMS: none
+	// RETURN: formated output for the error && warning msg
+	public function formPrintMsg()
 	{
 		if ($this->error) {
 			$class = "error";
@@ -432,11 +395,12 @@ class form extends db_array_io
 	}
 
 	// next for functions are pre_test fkts for easier default new,load, etc handling
-	// METHOD form_procedure_load
-	// PARAMS archive_id - which ID should be loaded
-	// RETURN none
-	// DESC   default load procedure
-	public function form_procedure_load($archive_id)
+	// METHOD: formProcedureLoad
+	// WAS   : form_procedure_load
+	// PARAMS: archive_id - which ID should be loaded
+	// RETURN: none
+	// DESC  : default load procedure
+	public function formProcedureLoad($archive_id)
 	{
 		if ($this->archive && $archive_id && $this->group_level_user <= $this->security_level["load"]) {
 			$this->form_load_table_array($archive_id);
@@ -444,11 +408,12 @@ class form extends db_array_io
 		}
 	}
 
-	// METHOD form_procedure_new
-	// PARAMS none
-	// RETURN none
-	// DESC   default new procedure
-	public function form_procedure_new()
+	// METHOD: formProcedureNew
+	// WAS   : form_procedure_new
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : default new procedure
+	public function formProcedureNew()
 	{
 		if ($this->new && $this->group_level_user <= $this->security_level["new"]) {
 			if ($this->really_new == "yes") {
@@ -461,11 +426,12 @@ class form extends db_array_io
 		}
 	}
 
-	// METHOD form_procedure_save
-	// PARAMS none
-	// RETURN none
-	// DESC   default save procedure
-	public function form_procedure_save()
+	// METHOD: formProcedureSave
+	// WAS   : form_procedure_save
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : default save procedure
+	public function formProcedureSave()
 	{
 		if ($this->save && $this->group_level_user <= $this->security_level["save"]) {
 			$this->form_error_check();
@@ -476,11 +442,12 @@ class form extends db_array_io
 		}
 	}
 
-	// METHOD form_procedure_delete
-	// PARAMS none
-	// RETURN none
-	// DESC   default delete procedure
-	public function form_procedure_delete()
+	// METHOD: formProcedureDelete
+	// WAS   : form_procedure_delete
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : default delete procedure
+	public function formProcedureDelete()
 	{
 		// delete is also by "protected"
 		if ($this->delete && $this->group_level_user <= $this->security_level["delete"] && !$this->table_array["protected"]["value"]) {
@@ -498,16 +465,17 @@ class form extends db_array_io
 		}
 	}
 
-	// METHOD form_procedure_delete_from_element_list
-	// PARAMS none
-	// RETURN none
-	// DESC   default delete procedure
-	public function form_procedure_delete_from_element_list($element_list, $remove_name)
+	// METHOD: formProcedureDeleteFromElementList
+	// WAS   : form_procedure_delete_from_element_list
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : default delete procedure
+	public function formProcedureDeleteFromElementList($element_list, $remove_name)
 	{
 		// only do if the user is allowed to delete
 		if ($this->group_level_user <= $this->security_level["delete"] && !$this->table_array["protected"]["value"] && !$this->error) {
 			for ($i = 0; $i < count($element_list); $i ++) {
-//$this->debug('form_error', "Array: ".is_array($this->element_list[$element_list[$i]]["read_data"])." | ".$this->element_list[$element_list[$i]]["delete"]);
+				// $this->debug('form_error', "Array: ".is_array($this->element_list[$element_list[$i]]["read_data"])." | ".$this->element_list[$element_list[$i]]["delete"]);
 				// if prefix, set it
 				$prfx = ($this->element_list[$element_list[$i]]["prefix"]) ? $this->element_list[$element_list[$i]]["prefix"]."_" : '';
 				// get the primary key
@@ -540,13 +508,13 @@ class form extends db_array_io
 						}
 					}
 				} elseif (is_array($this->element_list[$element_list[$i]]["read_data"]) && $this->element_list[$element_list[$i]]["delete"]) {
-//$this->debug('form_clean', "ID [$id] [$prfx.$pk_name]");
-//$this->debug('form_clean', "ID arr: ".$this->print_ar($_POST[$id]));
-//$this->debug('form_clean', "PK arr: ".$this->print_ar($_POST[$prfx.$pk_name]));
+					// $this->debug('form_clean', "ID [$id] [$prfx.$pk_name]");
+					// $this->debug('form_clean', "ID arr: ".$this->print_ar($_POST[$id]));
+					// $this->debug('form_clean', "PK arr: ".$this->print_ar($_POST[$prfx.$pk_name]));
 					for ($j = 0; $j < count($_POST[$prfx.$pk_name]); $j ++) {
 						if (!$_POST[$remove_name[$i]][$j] && $_POST[$prfx.$pk_name][$j]) {
 							$q = "DELETE FROM ".$element_list[$i]." WHERE ".$pk_name." = ".$_POST[$prfx.$pk_name][$j];
-//								$this->debug('edit_db', "DEL: $q");
+							// $this->debug('edit_db', "DEL: $q");
 							$this->db_exec($q);
 							$this->msg .= $this->l->__("Deleted deselected entries from list<br>");
 							$this->warning = 1;
@@ -560,10 +528,11 @@ class form extends db_array_io
 		}
 	}
 
-	// METHOD form_create_load
-	// PARAMS none
-	// RETURN string from "load" part of form ...
-	public function form_create_load()
+	// METHOD: formCreateLoad
+	// WAS   : form_create_load
+	// PARAMS: none
+	// RETURN: string from "load" part of form ...
+	public function formCreateLoad()
 	{
 		// when security leve is okay ...
 		if ($this->group_level_user <= $this->security_level["load"]) {
@@ -590,19 +559,17 @@ class form extends db_array_io
 						$t_string .= $res[$this->field_array[$i]["name"]];
 					}
 				}
-/*
-//<? echo $res["question"]." (Lang: ".$res["lang_name"].", Freigeschalten: ".ucfirst($res["enabled"]?"ja":"nein").")"; ?>
-*/
 				$pk_names[] = $t_string;
 			}
 		} // show it at all
 		return array('t_pk_name' => $t_pk_name, 'pk_ids' => $pk_ids, 'pk_names' => $pk_names, 'pk_selected' => $pk_selected);
 	}
 
-	// METHOD form_create_new
-	// PARAMS none
-	// RETURN part for new
-	public function form_create_new($hide_new_checkbox = 0)
+	// METHOD: formCreateNew
+	// WAS   : form_create_new
+	// PARAMS: none
+	// RETURN: part for new
+	public function formCreateNew($hide_new_checkbox = 0)
 	{
 		// when security level is okay
 		if ($this->group_level_user <= $this->security_level["new"]) {
@@ -619,10 +586,11 @@ class form extends db_array_io
 		return array('new_name' => $new_name, 'show_checkbox' => $show_checkbox);
 	}
 
-	// METHOD form_create_save_delete
-	// PARAMS none
-	// RETURN string for delete / save part
-	public function form_create_save_delete($hide_delete = 0, $hide_delete_checkbox = 0)
+	// METHOD: formCreateSaveDelete
+	// WAS   : form_create_save_delete
+	// PARAMS: none
+	// RETURN: string for delete / save part
+	public function formCreateSaveDelete($hide_delete = 0, $hide_delete_checkbox = 0)
 	{
 		if ($this->group_level_user <= $this->security_level["save"] || $this->group_level_user <= $this->security_level["delete"]) {
 			$old_school_hidden = 0;
@@ -647,13 +615,14 @@ class form extends db_array_io
 		return array('seclevel_okay' => $seclevel_okay, 'save' => $save, 'pk_name' => $pk_name, 'pk_value' => $pk_value, 'show_delete' => $show_delete, 'hide_delete_checkbox' => $hide_delete_checkbox);
 	} // end of function
 
-	// METHOD form_create_element
-	// PARAMS $element_name: the name from the array, you want to have build
-	//        $query: can overrule internal query data,
-	//                for drop down, as data comes from a reference table
-	//                for drop_down_text it has to be an array with $key->$value
-	// RETURN element in HTML
-	public function form_create_element($element_name, $query = "")
+	// METHOD: formCreateElement
+	// WAS   : form_create_element
+	// PARAMS: $element_name: the name from the array, you want to have build
+	//         $query: can overrule internal query data,
+	//                 for drop down, as data comes from a reference table
+	//                 for drop_down_text it has to be an array with $key->$value
+	// RETURN: element in HTML
+	public function formCreateElement($element_name, $query = "")
 	{
 		// special 2nd color for "binary" attribut
 		if ($this->table_array[$element_name]["type"] == "binary" && !$this->table_array[$element_name]["value"]) {
@@ -824,13 +793,14 @@ class form extends db_array_io
 		return array('output_name' => $output_name, 'color' => $EDIT_FGCOLOR_T, 'type' => $type, 'data' => $data);
 	}
 
-	// METHOD form_error_check
-	// PARAMS none
-	// RETURNS full error message string for output
+	// METHOD: formErrorCheck
+	// WAS   : form_error_check
+	// PARAMS: none
+	// RETURN: full error message string for output
 	//         should be cought like this ...
 	//         if ($msg=$form->form_error_check())
 	//           $error=1;
-	public function form_error_check()
+	public function formErrorCheck()
 	{
 		if (!is_array($this->table_array)) {
 			$this->table_array = array ();
@@ -841,7 +811,7 @@ class form extends db_array_io
 			// if error value set && somethign input, check if input okay
 			if ($value["error_check"] && $this->table_array[$key]["value"]) {
 				// each error check can be a piped seperated value, lets split it
-//$this->debug('edit', $value["error_check"]);
+				// $this->debug('edit', $value["error_check"]);
 				foreach (explode('|', $value["error_check"]) as $error_check) {
 					switch ($error_check) {
 						case "number":
@@ -889,20 +859,20 @@ class form extends db_array_io
 							}
 							break;
 						case "alphanumericspace":
-//$this->debug('edit', 'IN Alphanumericspace');
+							// $this->debug('edit', 'IN Alphanumericspace');
 							if (!preg_match("/^[0-9A-Za-z\ ]+$/", $this->table_array[$key]["value"])) {
 								$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric (Numbers and Letters, spaces allowed) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
 							}
 							break;
 						case "alphanumeric":
-//$this->debug('edit', 'IN Alphanumeric');
+							// $this->debug('edit', 'IN Alphanumeric');
 							if (!preg_match("/^[0-9A-Za-z_\-]+$/", $this->table_array[$key]["value"])) {
 								$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric (Numbers and Letters only also - and _, no spaces) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
 							}
 							break;
 						// this one also allows @ and .
 						case "alphanumericextended":
-//$this->debug('edit', 'IN Alphanumericextended');
+							// $this->debug('edit', 'IN Alphanumericextended');
 							if (!preg_match("/^[0-9A-Za-z_\-@\.]+$/", $this->table_array[$key]["value"])) {
 								$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric extended (Numbers, Letters, -,  _, @ and . only, no spaces) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
 							}
@@ -928,7 +898,7 @@ class form extends db_array_io
 					// main if end
 					) {
 				// if mandatory && no input
-//$this->debug('form', "A: ".$this->table_array[$key]["type"]." -- ".$this->table_array[$key]["input_value"]." -- ".$this->table_array[$key]["value"]);
+				// $this->debug('form', "A: ".$this->table_array[$key]["type"]." -- ".$this->table_array[$key]["input_value"]." -- ".$this->table_array[$key]["value"]);
 				if (!$this->table_array[$key]["value"] && $this->table_array[$key]["type"] != "binary") {
 					$this->msg .= sprintf($this->l->__("Please enter something into the <b>%s</b> field!<br>"), $this->table_array[$key]["output_name"]);
 				}
@@ -964,7 +934,7 @@ class form extends db_array_io
 				}
 			}
 		}
-//$this->debug('edit_error', "QS: <pre>".print_r($_POST, 1)."</pre>");
+		// $this->debug('edit_error', "QS: <pre>".print_r($_POST, 1)."</pre>");
 		if (is_array($this->element_list)) {
 			// check the mandatory stuff
 			// if mandatory, check that at least on pk exists or if at least the mandatory field is filled
@@ -988,10 +958,10 @@ class form extends db_array_io
 					if (count($_POST[$prfx.$key]) > $max) {
 						$max = count($_POST[$prfx.$key]);
 					}
-//$this->debug('edit_error_chk', "KEY: $prfx$key | count: ".count($_POST[$prfx.$key])." | M: $max");
-//$this->debug('edit_error_chk', "K: ".$_POST[$prfx.$key]." | ".$_POST[$prfx.$key][0]);
+					// $this->debug('edit_error_chk', "KEY: $prfx$key | count: ".count($_POST[$prfx.$key])." | M: $max");
+					// $this->debug('edit_error_chk', "K: ".$_POST[$prfx.$key]." | ".$_POST[$prfx.$key][0]);
 				}
-//$this->debug('post_array', $this->print_ar($_POST));
+				$this->debug('post_array', $this->print_ar($_POST));
 				# check each row
 				for ($i = 0; $i < $max; $i ++) {
 					// either one of the post pks is set, or the mandatory
@@ -1005,18 +975,18 @@ class form extends db_array_io
 						}
 						// we found a mandatory field. check now if one is set to satisfy the main mandatory
 						// also check, if this field is mandatory and its not set, but any other, throw an error
-//$this->debug('edit_error_chk', "RG error - Data[".$prfx.$el_name.": ".$_POST[$prfx.$el_name][$i]." | ".$_POST[$prfx.$el_name]." - ".$reference_array['enable_name']." - ".$_POST[$reference_array['enable_name']][$_POST[$prfx.$el_name][$i]]);
+						// $this->debug('edit_error_chk', "RG error - Data[".$prfx.$el_name.": ".$_POST[$prfx.$el_name][$i]." | ".$_POST[$prfx.$el_name]." - ".$reference_array['enable_name']." - ".$_POST[$reference_array['enable_name']][$_POST[$prfx.$el_name][$i]]);
 						if ($data_array["mandatory"] && $_POST[$prfx.$el_name][$i]) {
 							$mand_okay = 1;
 							$row_okay[$i] = 1;
 						} elseif ($data_array['type'] == 'radio_group' && !isset($_POST[$prfx.$el_name])) {
 							// radio group and set where one not active
-//$this->debug('edit_error_chk', "RADIO GROUP");
+							// $this->debug('edit_error_chk', "RADIO GROUP");
 							$row_okay[$_POST[$prfx.$el_name][$i]] = 0;
 							$default_wrong[$_POST[$prfx.$el_name][$i]] = 1;
 							$error[$_POST[$prfx.$el_name][$i]] = 1;
 						} elseif ($_POST[$prfx.$el_name][$i] && !$error[$i]) {
-//$this->debug('edit_error_chk', "[$i]");
+							// $this->debug('edit_error_chk', "[$i]");
 							$element_set[$i] = 1;
 							$row_okay[$i] = 1;
 						} elseif ($data_array["mandatory"] && !$_POST[$prfx.$el_name][$i]) {
@@ -1068,11 +1038,12 @@ class form extends db_array_io
 		}
 	}
 
-	// METHOD form_set_order
-	// PARAMS none
-	// RETURN the table array
-	// DOES   sets the order to the maximum, if order flag is set in array
-	public function form_set_order()
+	// METHOD: formSetOrder
+	// WAS: form_set_order
+	// PARAMS: none
+	// RETURN: the table array
+	// DESC  : sets the order to the maximum, if order flag is set in array
+	public function formSetOrder()
 	{
 		// get order name
 		$order_name = $this->form_get_col_name_from_key("order");
@@ -1095,11 +1066,12 @@ class form extends db_array_io
 		return $this->table_array;
 	}
 
-	// METHOD form_unsert_table_array
-	// PARAMS none
-	// RETURN none
-	// DOES resets all values in table_array and in the reference tables
-	public function form_unset_table_array()
+	// METHOD: formUnsetTableArray
+	// WAS   : form_unsert_table_array
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : resets all values in table_array and in the reference tables
+	public function formUnsetTableArray()
 	{
 		unset($this->pk_id);
 		if (!is_array($this->table_array)) {
@@ -1127,11 +1099,12 @@ class form extends db_array_io
 		$this->msg = $this->l->__("Cleared for new Dataset!");
 	}
 
-	// METHOD form_load_table_array
-	// PARAMS pk_id - overrule pk_id
-	// RETURN none
-	// DESC   load a table & reference
-	public function form_load_table_array($pk_id = 0)
+	// METHOD: formLoadTableArray
+	// WAS   : form_load_table_array
+	// PARAMS: pk_id - overrule pk_id
+	// RETURN: none
+	// DESC  : load a table & reference
+	public function formLoadTableArray($pk_id = 0)
 	{
 		if ($pk_id) {
 			$this->pk_id = $pk_id;
@@ -1165,11 +1138,12 @@ class form extends db_array_io
 		$this->msg = $this->l->__("Dataset has been loaded!<br>");
 	}
 
-	// METHOD form_save_table_array
-	// PARAMS addslashes - if one, passes 1 to the db_write function
-	// RETURN none
-	// DESC   save a table, reference and all input fields
-	public function form_save_table_array($addslashes = 0)
+	// METHOD: formSaveTableArray
+	// WAS   : form_save_table_array
+	// PARAMS: addslashes - if one, passes 1 to the db_write function
+	// RETURN: none
+	// DESC  : save a table, reference and all input fields
+	public function formSaveTableArray($addslashes = 0)
 	{
 //       global $_FILES;
 		// for drop_down_db_input check if text field is filled and if, if not yet in db ...
@@ -1419,11 +1393,12 @@ class form extends db_array_io
 		$this->msg = $this->l->__("Dataset has been saved!<Br>");
 	}
 
-	// METHOD form_delete_table_array
-	// PARAMS none
-	// RETURN none
-	// DESC   delete a table and reference fields
-	public function form_delete_table_array()
+	// METHOD: formDeleteTableArray
+	// WAS   : form_delete_table_array
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : delete a table and reference fields
+	public function formDeleteTableArray()
 	{
 		// remove any reference arrays
 		if (is_array($this->reference_array)) {
@@ -1462,11 +1437,12 @@ class form extends db_array_io
 		$this->msg = $this->l->__("Dataset has been deleted!");
 	}
 
-	// METHOD form_create_hidden_fields
-	// PARAMS $hidden_array
-	// RETURNS the input fields (html)
-	// creates HTML hidden input fields out of an hash array
-	public function form_create_hidden_fields($hidden_array = "")
+	// METHOD: formCreateHiddenFields
+	// WAS   : form_create_hidden_fields
+	// PARAMS: $hidden_array
+	// RETURN: the input fields (html)
+	// DESC  : creates HTML hidden input fields out of an hash array
+	public function formCreateHiddenFields($hidden_array = "")
 	{
 		$hidden = array ();
 		if (!is_array($this->table_array)) {
@@ -1487,11 +1463,12 @@ class form extends db_array_io
 		return $hidden;
 	}
 
-	// METHOD form_create_element_reference_table
-	// PARAMS show which reference table
-	// RETURN array for output
-	// DESC   creates the multiple select part for a reference_table
-	public function form_create_element_reference_table($table_name)
+	// METHOD: formCreateElementReferenceTable
+	// WAS   : form_create_element_reference_table
+	// PARAMS: show which reference table
+	// RETURN: array for output
+	// DESC  : creates the multiple select part for a reference_table
+	public function formCreateElementReferenceTable($table_name)
 	{
 		$output_name = $this->reference_array[$table_name]["output_name"];
 		if ($this->reference_array[$table_name]["mandatory"]) {
@@ -1508,13 +1485,14 @@ class form extends db_array_io
 		return array('output_name' => $output_name, 'type' => $type, 'color' => 'edit_fgcolor', 'data' => $data);
 	}
 
-	// METHOD form_create_element_list
-	// PARAMS show which element list
-	// RETURN array for output
-	// DESC   create list of elements next to each other for a group of data in an input field
-	//        this currently only works for a list that is filled from a sub table and creates only a connection to this one
-	//        new version will allow a sub list with free input fields to directly fill a sub table to a master table
-	public function form_create_element_list_table($table_name)
+	// METHOD: formCreateElementListTable
+	// WAS   : form_create_element_list
+	// PARAMS: show which element list
+	// RETURN: array for output
+	// DESC  : create list of elements next to each other for a group of data in an input field
+	//         this currently only works for a list that is filled from a sub table and creates only a connection to this one
+	//         new version will allow a sub list with free input fields to directly fill a sub table to a master table
+	public function formCreateElementListTable($table_name)
 	{
 		// output name for the viewable left table td box, prefixed with * if mandatory
 		$output_name = $this->element_list[$table_name]["output_name"];
@@ -1547,7 +1525,7 @@ class form extends db_array_io
 		// generic data read in (counts for all rows)
 		// visible list data output
 		while (list($el_name, $data_array) = each($this->element_list[$table_name]["elements"])) {
-//				$this->debug('CFG', 'El: '.$el_name.' -> '.$this->print_ar($data_array));
+			$this->debug('CFG', 'El: '.$el_name.' -> '.$this->print_ar($data_array));
 			// if the element name matches the read array, then set the table as a name prefix
 			$q_select[] = $el_name; // this is for reading the data
 			// prefix the name for any further data parts
@@ -1566,7 +1544,7 @@ class form extends db_array_io
 			if ($data_array['type'] == 'drop_down_db') {
 				$md_q = md5($data_array['query']);
 				while ($res = $this->db_return($data_array['query'])) {
-//$this->debug('edit', "Q[$md_q] pos: ".$this->cursor_ext[$md_q]["pos"]." | want: ".$data_array["preset"]." | set: ".$data['preset'][$el_name]);
+					$this->debug('edit', "Q[$md_q] pos: ".$this->cursor_ext[$md_q]["pos"]." | want: ".$data_array["preset"]." | set: ".$data['preset'][$el_name]);
 					// first is default for this element
 					if (!$data['preset'][$el_name] && ($this->cursor_ext[$md_q]["pos"] == $data_array['preset'])) {
 						$data['preset'][$el_name] = $res[0];
@@ -1580,11 +1558,11 @@ class form extends db_array_io
 			}
 			$proto[$el_name] = ($this->error) ? $_POST[$el_name][(count($_POST[$el_name]) - 1)] : ''; // this is for the new line
 		}
-//			$this->debug('CFG DATA', 'Data: '.$this->print_ar($data));
-//			$this->debug('CFG PROTO', 'Proto: '.$this->print_ar($proto));
-//			$this->debug('CFG SELECT', 'Proto: '.$this->print_ar($q_select));
+		// $this->debug('CFG DATA', 'Data: '.$this->print_ar($data));
+		// $this->debug('CFG PROTO', 'Proto: '.$this->print_ar($proto));
+		// $this->debug('CFG SELECT', 'Proto: '.$this->print_ar($q_select));
 		// query for reading in the data
-//$this->debug('edit_error', "ERR: ".$this->error);
+		$this->debug('edit_error', "ERR: ".$this->error);
 		// if we got a read data, build the read select for the read, and read out the "selected" data
 		if ($this->element_list[$table_name]["read_data"]) {
 			// we need a second one for the query build only
@@ -1604,18 +1582,18 @@ class form extends db_array_io
 			$data['type'][$data["prefix"].$this->element_list[$table_name]["read_data"]["name"]] = 'string';
 			// build the read query
 			$q = "SELECT ";
-//				if (!$this->table_array[$this->int_pk_name]["value"])
-//					$q .= "DISTINCT ";
+			// if (!$this->table_array[$this->int_pk_name]["value"])
+			// 	$q .= "DISTINCT ";
 			// prefix join key with table name, and implode the query select part
 			$q .= str_replace($table_name.'.'.$this->element_list[$table_name]["read_data"]["pk_id"], $this->element_list[$table_name]["read_data"]["table_name"].'.'.$this->element_list[$table_name]["read_data"]["pk_id"], implode(', ', $_q_select)).' ';
-//				if (!$this->table_array[$this->int_pk_name]["value"] && $this->element_list[$table_name]["read_data"]["order"])
-//					$q .= ", ".$this->element_list[$table_name]["read_data"]["order"]." ";
+			// if (!$this->table_array[$this->int_pk_name]["value"] && $this->element_list[$table_name]["read_data"]["order"])
+			// 	$q .= ", ".$this->element_list[$table_name]["read_data"]["order"]." ";
 			// read from the read table as main, and left join to the sub table to read the actual data
 			$q .= "FROM ".$this->element_list[$table_name]["read_data"]["table_name"]." ";
 			$q .= "LEFT JOIN ".$table_name." ";
 			$q .= "ON (";
 			$q .= $this->element_list[$table_name]["read_data"]["table_name"].".".$this->element_list[$table_name]["read_data"]["pk_id"]." = ".$table_name.".".$this->element_list[$table_name]["read_data"]["pk_id"]." ";
-//				if ($this->table_array[$this->int_pk_name]["value"])
+			// if ($this->table_array[$this->int_pk_name]["value"])
 			$q .= "AND ".$table_name.".".$this->int_pk_name." = ".(($this->table_array[$this->int_pk_name]["value"]) ? $this->table_array[$this->int_pk_name]["value"] : 'NULL')." ";
 			$q .= ") ";
 			if ($this->element_list[$table_name]["read_data"]["order"]) {
@@ -1628,7 +1606,7 @@ class form extends db_array_io
 				$q = "SELECT ".implode(", ", $q_select)." FROM ".$table_name." WHERE ".$this->int_pk_name." = ".$this->table_array[$this->int_pk_name]["value"];
 			}
 		}
-//			$this->debug('CFG QUERY', 'Q: '.$q);
+		// $this->debug('CFG QUERY', 'Q: '.$q);
 		// only run if we have query strnig
 		if ($q) {
 			$pos = 0; // position in while for overwrite if needed
@@ -1640,7 +1618,7 @@ class form extends db_array_io
 				for ($i = 0; $i < count($q_select); $i ++) {
 					// query select part, set to the element name
 					$el_name = $q_select[$i];
-//$this->debug('edit_error', "[$i] ELNAME: $el_name | POS[$prfx$el_name]: ".$_POST[$prfx.$el_name][$pos]." | RES: ".$res[$el_name]);
+					// $this->debug('edit_error', "[$i] ELNAME: $el_name | POS[$prfx$el_name]: ".$_POST[$prfx.$el_name][$pos]." | RES: ".$res[$el_name]);
 					// if we have an error, we take what we have in the vars, if not we take the data from the db
 					if ($this->error) {
 						// if we have a radio group, set a bit different
@@ -1700,8 +1678,10 @@ class form extends db_array_io
 		if ($data['delete_name']) {
 			$data['content'][] = $proto;
 		}
-//$this->debug('edit', "A:<pre>".print_r($data, 1)."</pre>");
+		// $this->debug('edit', "A:<pre>".print_r($data, 1)."</pre>");
 		$type = 'element_list';
 		return array('output_name' => $output_name, 'type' => $type, 'color' => 'edit_fgcolor', 'data' => $data);
 	}
 } // end of class
+
+# __END__

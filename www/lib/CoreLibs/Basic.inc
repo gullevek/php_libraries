@@ -1,10 +1,12 @@
-<?
-/*********************************************************************
+<?/*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2003/03/24
-* VERSION: 0.9.0
+* VERSION: 2.0.0
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESCRIPTION:
+*   2018/3/23, the whole class system is transformed to namespaces
+*   also all internal class calls are converted to camel case
+*
 *   basic class start class for ALL clases, holds basic vars, infos, methods, etc
 *
 * PUBLIC VARIABLES
@@ -31,7 +33,7 @@
 *	error_id
 *	error_string
 *
-* PUBLIC METHODS
+* PUBLIC METHOD:S
 *	debug -> calls with "level", "string" and flag to turn off (0) the newline at the end
 *	debug_for -> sets debug on/off for a type (error, echo, print) for a certain level
 *	print_error_msg -> prints out the error message, optional parameter is a header prefix
@@ -58,7 +60,7 @@
 *   crypt* -> encrypt and decrypt login string data, used by Login class
 *   setFormToken/validateFormToken -> form protection with token
 *
-* PRIVATE METHODS
+* PRIVATE METHOD:S
 *	fdebug_fp -> opens and closes file, called from fdebug method
 *	write_error_msg -> writes error msg to file if requested
 *
@@ -160,9 +162,9 @@ class Basic
 	// form token (used for form validation)
 	private $form_token = '';
 
-	// METHOD __construct
-	// PARAMS debug_all (0)/1, echo_all (1)/0, print_all (0)/1
-	// RETURN none
+	// METHOD: __construct
+	// PARAMS: debug_all (0)/1, echo_all (1)/0, print_all (0)/1
+	// RETURN: none
 	// DESC constructor
 	public function __construct($debug_all = 0, $echo_all = 1, $print_all = 0)
 	{
@@ -172,9 +174,9 @@ class Basic
 		// internal info var
 		$this->class_info["basic"] = array (
 			"class_name" => "Basic",
-			"class_version" => "0.9.0",
+			"class_version" => "2.0.0",
 			"class_created" => "2003-03-24",
-			"class_author" => 'Clemens "Gullevek" Schwaighofer (.at)'
+			"class_author" => 'Clemens Schwaighofer'
 		);
 
 		// set the page name
@@ -344,10 +346,10 @@ class Basic
 		$this->runningTime();
 	}
 
-	// METHOD __destruct
-	// PARAMS none
-	// RETURN if debug is on, return error data
-	// DESC   basic deconstructor (should be called from all deconstructors in higher classes)
+	// METHOD: __destruct
+	// PARAMS: none
+	// RETURN: if debug is on, return error data
+	// DESC  : basic deconstructor (should be called from all deconstructors in higher classes)
 	//        writes out $error_msg to global var
 	public function __destruct()
 	{
@@ -358,163 +360,13 @@ class Basic
 	}
 
 	// *************************************************************
-	// COMPATIBILITY METHODS
-	// those methods are deprecated function call names
-	// they exist for backwards compatibility only
+	// GENERAL METHOD:S
 	// *************************************************************
 
-	public function running_time($simple = false)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->runningTime($simple);
-	}
-
-	public static function print_time($set_microtime = -1)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->printTime($set_microtime);
-	}
-
-	private function fdebug_fp($flag = '')
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->fdebugFP($flag);
-	}
-
-	public function debug_for($type, $flag)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->debugFor($type, $flag);
-	}
-
-	public function get_caller_method($level = 2)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->getCallerMethod($level);
-	}
-
-	public function merge_errors($error_msg = array ())
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->mergeErrors($error_msg);
-	}
-
-	public function print_error_msg($string = '')
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->printErrorMsg($string);
-	}
-
-	private function write_error_msg($level, $error_string)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->writeErrorMsg($level, $error_string);
-	}
-
-	public function reset_error_msg($level = '')
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->resetErrorMsg($level);
-	}
-
-	public static function print_ar($array)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->printAr($array);
-	}
-
-	public function magic_links($string, $target = "_blank")
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->magicLinks($string, $target);
-	}
-
-	private function create_url($href, $atag, $_1, $_2, $_3, $name, $class)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->createUrl($href, $atag, $_1, $_2, $_3, $name, $class);
-	}
-
-	private function create_email($mailto, $atag, $_1, $_2, $_3, $title, $class)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->createEmail($mailto, $atag, $_1, $_2, $_3, $title, $class);
-	}
-
-	public function get_host_name()
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->getHostName();
-	}
-
-	public static function get_page_name($strip_ext = 0)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->getPageName($strip_ext);
-	}
-
-	public static function get_filename_ending($filename)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->getFilenameEnding($filename);
-	}
-
-	public static function array_search_recursive($needle, $haystack, $key_lookin = "")
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->arraySearchRecursive($needle, $haystack, $key_lookin);
-	}
-
-	public static function array_search_recursive_all($needle, $haystack, $key, $path = null)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->arraySearchRecursiveAll($needle, $haystack, $key, $path);
-	}
-
-	public static function array_search_simple($array, $key, $value)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->arraySearchSimple($array, $key, $value);
-	}
-
-	public static function _mb_mime_encode($string, $encoding)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->__mbMimeEncode($string, $encoding);
-	}
-
-	public function _crc32b($string)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->__crc32b($string);
-	}
-
-	public function _sha1_short($string, $use_sha = false)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->__sha1Short($string, $use_sha);
-	}
-
-	public function _hash($string, $hash_type = 'adler32')
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->__hash($string, $hash_type);
-	}
-
-	public static function in_array_any($needle, $haystack)
-	{
-		$this->debug('DEPRECATED CALL', __FUNCTION);
-		$this->inArrayAny($needle, $haystack);
-	}
-
-	// *************************************************************
-	// GENERAL METHODS
-	// *************************************************************
-
-	// METHOD db_io_info
-	// PARAMS show, default 1, if set to 0 won't write to error_msg var
-	// RETURN string with info
-	// DESC   default class info (prints out class info)
+	// METHOD: db_io_info
+	// PARAMS: show, default 1, if set to 0 won't write to error_msg var
+	// RETURN: string with info
+	// DESC  : default class info (prints out class info)
 	public function info($class_name = "basic", $stdio = 0)
 	{
 		unset($string);
@@ -533,12 +385,12 @@ class Basic
 		return $string;
 	}
 
-	// METHOD runningTime
-	// WAS    running_time
-	// PARAMS simple flag true/false, if given print non HTML info
-	// RETURN string with running time for debugging
-	// DESC   prints start or end time in text format. On first call sets start time
-	//        on second call it sends the end time and then also prints the running time
+	// METHOD: runningTime
+	// WAS   : running_time
+	// PARAMS: simple flag true/false, if given print non HTML info
+	// RETURN: string with running time for debugging
+	// DESC  : prints start or end time in text format. On first call sets start time
+	//         on second call it sends the end time and then also prints the running time
 	public function runningTime($simple = false)
 	{
 		list($micro, $timestamp) = explode(" ", microtime());
@@ -557,16 +409,15 @@ class Basic
 			$running_time = $this->endtime - $this->starttime;
 			$string .= ($simple ? 'Run: ' : "<br><b>Script running time</b>: ").$running_time." s";
 		}
-//			$this->debug('info', $string);
+		// $this->debug('info', $string);
 		return $running_time;
 	}
 
-	// METHOD printTime
-	// WAS    print_time
-	// PARAMS $set_microtime, 0 shows none, default (-1) shows all, positive number is for rounding
-	// RETURN formated datetime string
-	// DESCRIPTION
-	// wrapper around microtime function to print out y-m-d h:i:s.ms
+	// METHOD: printTime
+	// WAS   : print_time
+	// PARAMS: $set_microtime, 0 shows none, default (-1) shows all, positive number is for rounding
+	// RETURN: formated datetime string
+	// DESC  : wrapper around microtime function to print out y-m-d h:i:s.ms
 	public static function printTime($set_microtime = -1)
 	{
 		list($microtime, $timestamp) = explode(" ", microtime());
@@ -581,12 +432,11 @@ class Basic
 	}
 
 
-	// METHOD fdebug
-	// PARAMS $string: data to write to file
+	// METHOD: fdebug
+	// PARAMS: $string: data to write to file
 	//        $enter: default on true, if set to false, no linebreak (\n) will be put at the end
-	// RETURN  none
-	// DESCRIPTION
-	// writes a string to a file immediatly, for fast debug output
+	// RETURN:  none
+	// DESC  : writes a string to a file immediatly, for fast debug output
 	public function fdebug($string, $enter = 1)
 	{
 		if ($this->debug_filename) {
@@ -600,12 +450,11 @@ class Basic
 		}
 	}
 
-	// METHOD fdebugFP
-	// WAS    fdebug_fp
-	// PARAMS $flag: default '', 'o' -> open, 'c' -> close
-	// RETURN none
-	// DESCRIPTION
-	// if no debug_fp found, opens a new one; if fp exists close it
+	// METHOD: fdebugFP
+	// WAS   : fdebug_fp
+	// PARAMS: $flag: default '', 'o' -> open, 'c' -> close
+	// RETURN: none
+	// DESC  : if no debug_fp found, opens a new one; if fp exists close it
 	private function fdebugFP($flag = '')
 	{
 		if (!$this->debug_fp || $flag == 'o') {
@@ -616,15 +465,14 @@ class Basic
 		}
 	}
 
-	// METHOD debugFor
-	// WAS    debug_for
-	// PARAMS $type: error, echo, print
-	//        $flag: on/off
-	//        $array of levels to turn on/off debug
-	// RETURN none
-	// DESCRIPTION
-	// passes list of level names, to turn on debug
-	// eg $foo->debug_for('print', 'on', array('LOG', 'DEBUG', 'INFO'));
+	// METHOD: debugFor
+	// WAS   : debug_for
+	// PARAMS: $type: error, echo, print
+	//         $flag: on/off
+	//         $array of levels to turn on/off debug
+	// RETURN: none
+	// DESC  : passes list of level names, to turn on debug
+	//         eg $foo->debug_for('print', 'on', array('LOG', 'DEBUG', 'INFO'));
 	public function debugFor($type, $flag)
 	{
 		$debug_on = func_get_args();
@@ -641,14 +489,13 @@ class Basic
 		}
 	}
 
-	// METHOD debug
-	// PARAMS $level: id for error message, groups messages together
-	//        $string: the actual error message
-	//        $strip: default on false, if set to true, all html tags will be stripped and <br> changed to \n
-	//                this is only used for debug output
-	// RETURN none
-	// DESCRIPTION
-	// write debug data to error_msg array
+	// METHOD: debug
+	// PARAMS: $level: id for error message, groups messages together
+	//         $string: the actual error message
+	//         $strip: default on false, if set to true, all html tags will be stripped and <br> changed to \n
+	//                 this is only used for debug output
+	// RETURN: none
+	// DESC  : write debug data to error_msg array
 	public function debug($level, $string, $strip = false)
 	{
 		if (($this->debug_output[$level] || $this->debug_output_all) && !$this->debug_output_not[$level]) {
@@ -681,12 +528,12 @@ class Basic
 		}
 	}
 
-	// METHOD getCallerMethod
-	// WAS    get_caller_method
-	// PARAMS none (optional later: which level to deb ug)
-	// RETURN null or the function that called the function where this methid is called
-	// DESC   if there is a need to find out which parent method called a child method, eg for debugging, this function does this
-	//        call this method in the child method and you get the parent function that called it
+	// METHOD: getCallerMethod
+	// WAS   : get_caller_method
+	// PARAMS: none (optional later: which level to deb ug)
+	// RETURN: null or the function that called the function where this methid is called
+	// DESC  : if there is a need to find out which parent method called a child method, eg for debugging, this function does this
+	//         call this method in the child method and you get the parent function that called it
 	public function getCallerMethod($level = 2)
 	{
 		$traces = debug_backtrace();
@@ -706,12 +553,12 @@ class Basic
 		return null;
 	}
 
-	// METHOD mergeErrors
-	// WAS    merge_errors
-	// PARAMS error array
-	// RETURN none
-	// DESC   merges the given error array with the one from this class
-	//        only merges visible ones
+	// METHOD: mergeErrors
+	// WAS   : merge_errors
+	// PARAMS: error array
+	// RETURN: none
+	// DESC  : merges the given error array with the one from this class
+	//         only merges visible ones
 	public function mergeErrors($error_msg = array ())
 	{
 		if (!is_array($error_msg)) {
@@ -722,12 +569,11 @@ class Basic
 		}
 	}
 
-	// METHOD printErrorMsg
-	// WAS    print_error_msg
-	// PARAMS $string: prefix string for header
-	// RETURN error msg for all levels
-	// DESCRIPTION
-	// prints out the error string
+	// METHOD: printErrorMsg
+	// WAS   : print_error_msg
+	// PARAMS: $string: prefix string for header
+	// RETURN: error msg for all levels
+	// DESC  : prints out the error string
 	public function printErrorMsg($string = '')
 	{
 		$string_output = '';
@@ -756,12 +602,11 @@ class Basic
 		return $string_output;
 	}
 
-	// METHOD writeErrorMsg
-	// WAS    write_error_msg
-	// PARAMS $level: the level to write
-	// RETURN none
-	// DESCRIPTION
-	// writes error msg data to file for current level
+	// METHOD: writeErrorMsg
+	// WAS   : write_error_msg
+	// PARAMS: $level: the level to write
+	// RETURN: none
+	// DESC  : writes error msg data to file for current level
 	private function writeErrorMsg($level, $error_string)
 	{
 		if (($this->debug_output[$level] || $this->debug_output_all) && !$this->debug_output_not[$level]) {
@@ -824,13 +669,13 @@ class Basic
 		}
 	}
 
-	// METHOD resetErrorMsg
-	// WAS    reset_error_msg
-	// PARAMS level -> optional level
-	// RETURN none
-	// DESC   unsests the error message array
-	//        can be used if writing is primary to file
-	//        if no level given resets all
+	// METHOD: resetErrorMsg
+	// WAS   : reset_error_msg
+	// PARAMS: level -> optional level
+	// RETURN: none
+	// DESC  : unsests the error message array
+	//         can be used if writing is primary to file
+	//         if no level given resets all
 	public function resetErrorMsg($level = '')
 	{
 		if (!$level) {
@@ -840,14 +685,15 @@ class Basic
 		}
 	}
 
-	// METHOD errorHandler
-	// WAS    ErrorHandler
-	// PARAMS none
-	// RETURN none
-	// DESC   catch function to handle all errors that are not handled by php itself
-	//        eg all errors that would be surpressed are written to a log file if this function is enabled
-	//        to use it call with set_error_handler(array("baisc", "ErrorHandler"));
-	//        NOTE: this will only catch any additional erros created AFTER the set_error_hanlder was set, so mostly no strict/notices from the classes are visible
+	// METHOD: errorHandler
+	// WAS   : ErrorHandler
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : catch function to handle all errors that are not handled by php itself
+	//         eg all errors that would be surpressed are written to a log file if this function is enabled
+	//         to use it call with set_error_handler(array("baisc", "ErrorHandler"));
+	// NOTE  : this will only catch any additional erros created AFTER the set_error_hanlder was set,
+	//         so mostly no strict/notices from the classes are visible
 	public static function errorHandler($type, $message, $file, $line, $context)
 	{
 		// error levels for PHP
@@ -872,32 +718,30 @@ class Basic
 		);
 
 		$fn = ROOT.LOG.'php_errors-'.date('Y-m-d').'.log';
-		$output = '['.basic::print_time().'] {'.basic::get_page_name().'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message."\n";
+		$output = '['.Basic::print_time().'] {'.Basic::get_page_name().'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message."\n";
 		$fp = fopen($fn, 'a');
 		fwrite($fp, $output);
 		fclose($fp);
 		return false;
 	}
 
-	// METHOD printAr
-	// WAS    print_ar
-	// PARAMS $array
-	// RETURN string html formatted
-	// DESCRIPTION
-	// prints a html formatted (pre) array
+	// METHOD: printAr
+	// WAS   : print_ar
+	// PARAMS: $array
+	// RETURN: string html formatted
+	// DESC  : prints a html formatted (pre) array
 	public static function printAr($array)
 	{
 		return "<pre>".print_r($array, 1)."</pre>";
 	}
 
-	// METHOD checked
-	// PARAMS haystack (search in), needle (search for), type: 0: returns selected, 1, returns checked
-	//        haystack can be an array or a string
-	// RETURN returns checked or selected, else returns nothing (empty return)
-	// DESCRIPTION
-	// returns 'checked' or 'selected' if okay
-	// $needle is a var, $haystack an array
-	// **** THE RETURN VALUE WILL CHANGE TO A DEFAULT "FALSE" ****
+	// METHOD: checked
+	// PARAMS: haystack (search in), needle (search for), type: 0: returns selected, 1, returns checked
+	//         haystack can be an array or a string
+	// RETURN: returns checked or selected, else returns nothing (empty return)
+	// DESC  : returns 'checked' or 'selected' if okay
+	//         $needle is a var, $haystack an array
+	// **** THE RETURN: VALUE WILL CHANGE TO A DEFAULT "FALSE" ****
 	public static function checked($haystack, $needle, $type = 0)
 	{
 		if (is_array($haystack)) {
@@ -911,14 +755,13 @@ class Basic
 		}
 	}
 
-	// METHOD magicLinks
-	// WAS    magic_links
-	// PARAMS string: data to transform to a valud HTML url, target: default _blank
-	// RETURN correctly formed html url link
-	// DESCRIPTION
-	// tries to find mailto:user@bubu.at and changes it into -> <a href="mailto:user@bubu.at">E-Mail senden</a>
-	// or tries to take any url (http, ftp, etc) and transform it into a valid URL
-	// the string is in the format: some url|name#css|, same for email
+	// METHOD: magicLinks
+	// WAS   : magic_links
+	// PARAMS: string: data to transform to a valud HTML url, target: default _blank
+	// RETURN: correctly formed html url link
+	// DESC  : tries to find mailto:user@bubu.at and changes it into -> <a href="mailto:user@bubu.at">E-Mail senden</a>
+	//         or tries to take any url (http, ftp, etc) and transform it into a valid URL
+	//         the string is in the format: some url|name#css|, same for email
 	public function magicLinks($string, $target = "_blank")
 	{
 		$output = $string;
@@ -951,7 +794,7 @@ class Basic
 		// _7: link name/email link name
 		// _9: style sheet class
 		$self = $this;
-//			$this->debug('URL', 'Before: '.$output);
+		// $this->debug('URL', 'Before: '.$output);
 		$output = preg_replace_callback(
 			"/(href=\")?(\>)?\b($protRegex)([\w\.\-?&=+%#~,;\/]+)\b([\.\-?&=+%#~,;\/]*)(\|([^\||^#]+)(#([^\|]+))?\|)?/",
 			function ($matches) use ($self) {
@@ -969,9 +812,9 @@ class Basic
 		);
 
 		$this->debug('URL', 'After: '.$output);
-//			// we have one slashes after the Protocol -> internal link no domain, strip out the proto
-//			$output = preg_replace("/($protRegex)\/(.*)/e", "\\2", $ouput);
-//			$this->debug('URL', "$output");
+		// we have one slashes after the Protocol -> internal link no domain, strip out the proto
+		// $output = preg_replace("/($protRegex)\/(.*)/e", "\\2", $ouput);
+		// $this->debug('URL', "$output");
 
 		// post processing
 		$output = str_replace("{TARGET}", $target, $output);
@@ -982,19 +825,18 @@ class Basic
 		return $output;
 	}
 
-	// METHOD createUrl [INTERNAL]
-	// WAS    create_url
-	// PARAMS url link, anchor tag (define both type or url),
-	//        _1, _2, _3 = part of thel URL, if atag is set, _1 is not used
-	//        target: link target, name: name for the url, if not given _2 + _3 is used
-	//        class: style sheet
-	// RETURN correct string for url href process
-	// DESCRIPTION
-	// internal function, called by the magic url create functions.
-	// checks if title $_4 exists, if not, set url as title
+	// METHOD: createUrl [INTERNAL]
+	// WAS   : create_url
+	// PARAMS: url link, anchor tag (define both type or url),
+	//         _1, _2, _3 = part of thel URL, if atag is set, _1 is not used
+	//         target: link target, name: name for the url, if not given _2 + _3 is used
+	//         class: style sheet
+	// RETURN: correct string for url href process
+	// DESC  : internal function, called by the magic url create functions.
+	//         checks if title $_4 exists, if not, set url as title
 	private function createUrl($href, $atag, $_1, $_2, $_3, $name, $class)
 	{
-//			$this->debug('URL', "1: $_1 - 2: $_2 - $_3 - atag: $atag - name: $name - class: $class");
+		// $this->debug('URL', "1: $_1 - 2: $_2 - $_3 - atag: $atag - name: $name - class: $class");
 		// if $_1 ends with //, then we strip $_1 complete & target is also blanked (its an internal link)
 		if (preg_match("/\/\/$/", $_1) && preg_match("/^\//", $_2)) {
 			$_1 = '';
@@ -1012,14 +854,13 @@ class Basic
 		}
 	}
 
-	// METHOD createEmail [INTERNAL]
-	// WAS    create_email
-	// PARAMS email address, atag (define type of url)
+	// METHOD: createEmail [INTERNAL]
+	// WAS   : create_email
+	// PARAMS: email address, atag (define type of url)
 	//         _1, _2, _3: parts of the email _1 before @, _2 after @, 3_ tld
 	//         title: name for the link, if not given use email
 	//         class: style sheet
-	// DESCRIPTION
-	// internal function for createing email, returns data to magic_url method
+	// DESC  : internal function for createing email, returns data to magic_url method
 	private function createEmail($mailto, $atag, $_1, $_2, $_3, $title, $class)
 	{
 		$email = $_1."@".$_2.".".$_3;
@@ -1032,12 +873,11 @@ class Basic
 		}
 	}
 
-	// METHOD getHostName
-	// WAS    get_host_name
-	// PARAMS none
-	// RETURN host name
-	// DESCRIPTION
-	// get the host name without the port as given by the SELF var
+	// METHOD: getHostName
+	// WAS   : get_host_name
+	// PARAMS: none
+	// RETURN: host name
+	// DESC  : get the host name without the port as given by the SELF var
 	public function getHostName()
 	{
 		$port = '';
@@ -1052,14 +892,13 @@ class Basic
 		return $host_name;
 	}
 
-	// METHOD getPageName
-	// WAS    get_page_name
-	// PARAMS 1: strip page file name extension
-	//        0: keep filename as is
-	//        2: keep filename as is, but add dirname too
-	// RETURN filename
-	// DESCRIPTION
-	// get the page name of the curronte page:
+	// METHOD: getPageName
+	// WAS   : get_page_name
+	// PARAMS: 1: strip page file name extension
+	//         0: keep filename as is
+	//         2: keep filename as is, but add dirname too
+	// RETURN: filename
+	// DESC  : get the page name of the curronte page:
 	public static function getPageName($strip_ext = 0)
 	{
 		// get the file info
@@ -1073,27 +912,25 @@ class Basic
 		}
 	}
 
-	// METHOD getFilenameEnding
-	// WAS    get_filename_ending
-	// PARAMS filename
-	// RETURN extension of the file name
-	// DESCRIPTION
-	// quick return the extension of the given file name
+	// METHOD: getFilenameEnding
+	// WAS   : get_filename_ending
+	// PARAMS: filename
+	// RETURN: extension of the file name
+	// DESC  : quick return the extension of the given file name
 	public static function getFilenameEnding($filename)
 	{
 		$page_temp = pathinfo($filename);
 		return $page_temp['extension'];
 	}
 
-	// METHOD arraySearchRecursive
-	// WAS    array_search_recursive
-	// PARAMS needle (search for)
-	//        haystack (search in)
-	//        key_lookin: the key to look out for, default empty
-	// RETURN array with the elements where the needle can be found in the haystack array
-	// DESCRIPTION
-	// searches key = value in an array / array
-	// only returns the first one found
+	// METHOD: arraySearchRecursive
+	// WAS   : array_search_recursive
+	// PARAMS: needle (search for)
+	//         haystack (search in)
+	//         key_lookin: the key to look out for, default empty
+	// RETURN: array with the elements where the needle can be found in the haystack array
+	// DESC  : searches key = value in an array / array
+	//         only returns the first one found
 	public static function arraySearchRecursive($needle, $haystack, $key_lookin = "")
 	{
 		$path = null;
@@ -1105,15 +942,11 @@ class Basic
 		} else {
 			foreach ($haystack as $key => $val) {
 				if (is_scalar($val) && $val === $needle && empty($key_lookin)) {
-//echo "BAR FOUND $needle<Br>";
-					$path[] = $key;
 					break;
 				} elseif (is_scalar($val) && !empty($key_lookin) && $key === $key_lookin && $val == $needle) {
-//echo "FOO FOUND $needle | $key | $val<Br>";
 					$path[] = $key;
 					break;
-				} elseif (is_array($val) && $path = basic::arraySearchRecursive($needle, $val, $key_lookin)) {
-//echo "BAS FOUND $needle | ".print_r($path)."<Br>";
+				} elseif (is_array($val) && $path = Basic::arraySearchRecursive($needle, $val, $key_lookin)) {
 					array_unshift($path, $key);
 					break;
 				}
@@ -1122,15 +955,14 @@ class Basic
 		return $path;
 	}
 
-	// METHOD arraySearchRecursiveAll
-	// WAS    array_search_recursive_all
-	// PARAMS needle (search for)
-	//        haystack (search in)
-	//        key: the key to look for in
-	//        path: recursive call for previous path
-	// RETURN all array elements paths where the element was found
-	// DESCRIPTION
-	// recursive array search function, which returns all found not only the first one
+	// METHOD: arraySearchRecursiveAll
+	// WAS   : array_search_recursive_all
+	// PARAMS: needle (search for)
+	//         haystack (search in)
+	//         key: the key to look for in
+	//         path: recursive call for previous path
+	// RETURN: all array elements paths where the element was found
+	// DESC  : recursive array search function, which returns all found not only the first one
 	public static function arraySearchRecursiveAll($needle, $haystack, $key, $path = null)
 	{
 		if (!isset($path['level'])) {
@@ -1159,7 +991,7 @@ class Basic
 				// we will up a level
 				$path['level'] += 1;
 				// call recursive
-				$path = basic::arraySearchRecursiveAll($needle, $_value, $key, $path);
+				$path = Basic::arraySearchRecursiveAll($needle, $_value, $key, $path);
 			}
 		}
 		// cut all that is >= level
@@ -1169,12 +1001,11 @@ class Basic
 		return $path;
 	}
 
-	// METHOD arraySearchSimple
-	// WAS    array_search_simple
-	// PARAMS array (search in), key (key to search in), value (what to find
-	// RETURN true on found, false on not found
-	// DESCRIPTION
-	// array search simple. looks for key, value combination, if found, returns true
+	// METHOD: arraySearchSimple
+	// WAS   : array_search_simple
+	// PARAMS: array (search in), key (key to search in), value (what to find
+	// RETURN: true on found, false on not found
+	// DESC  : array search simple. looks for key, value combination, if found, returns true
 	public static function arraySearchSimple($array, $key, $value)
 	{
 		if (!is_array($array)) {
@@ -1184,7 +1015,7 @@ class Basic
 			// if value is an array, we search
 			if (is_array($_value)) {
 				// call recursive, and return result if it is true, else continue
-				if (($result = basic::arraySearchSimple($_value, $key, $value)) !== false) {
+				if (($result = Basic::arraySearchSimple($_value, $key, $value)) !== false) {
 					return $result;
 				}
 			} elseif ($_key == $key && $_value = $value) {
@@ -1195,12 +1026,11 @@ class Basic
 		return false;
 	}
 
-	// METHOD __mbMimeEncode
-	// WAS    _mb_mime_encode
-	// PARAMS string to encode, encoding to encode in
-	// RETURN encoded string
-	// DESCRIPTION
-	// wrapper function for mb mime convert, for correct conversion with long strings
+	// METHOD: __mbMimeEncode
+	// WAS   : _mb_mime_encode
+	// PARAMS: string to encode, encoding to encode in
+	// RETURN: encoded string
+	// DESC  : wrapper function for mb mime convert, for correct conversion with long strings
 	public static function __mbMimeEncode($string, $encoding)
 	{
 		// set internal encoding, so the mimeheader encode works correctly
@@ -1229,11 +1059,11 @@ class Basic
 		return $string;
 	}
 
-	// METHOD byteStringFormat
-	// WAS    ByteStringFormat
-	// PARAMS int bytes, boolean for space, default is set
-	// RETURN string
-	// DESC   converts bytes into formated string with KB, MB, etc
+	// METHOD: byteStringFormat
+	// WAS   : ByteStringFormat
+	// PARAMS: int bytes, boolean for space, default is set
+	// RETURN: string
+	// DESC  : converts bytes into formated string with KB, MB, etc
 	public static function byteStringFormat($number, $space = true)
 	{
 		if (is_numeric($number) && $number > 0) {
@@ -1245,11 +1075,11 @@ class Basic
 		return $number;
 	}
 
-	// METHOD stringByteFormat
-	// WAS    StringByteFormat
-	// PARAMS string
-	// RETURN int
-	// DESC   calculates the bytes based on a string with nnG, nnM, etc
+	// METHOD: stringByteFormat
+	// WAS   : StringByteFormat
+	// PARAMS: string
+	// RETURN: int
+	// DESC  : calculates the bytes based on a string with nnG, nnM, etc
 	public static function stringByteFormat($number)
 	{
 		$number = trim($number);
@@ -1267,11 +1097,11 @@ class Basic
 		return $number;
 	}
 
-	// METHOD dateStringFormat
-	// WAS    DateStringFormat
-	// PARAMS unix timestamp, true/false to show microtime
-	// RETURN string formated date+time in Y-M-D h:m:s
-	// DESC   a simple wrapper for the date format
+	// METHOD: dateStringFormat
+	// WAS   : DateStringFormat
+	// PARAMS: unix timestamp, true/false to show microtime
+	// RETURN: string formated date+time in Y-M-D h:m:s
+	// DESC  : a simple wrapper for the date format
 	public static function dateStringFormat($timestamp, $show_micro = true)
 	{
 		list ($timestamp, $ms) = explode('.', round($timestamp, 4));
@@ -1283,11 +1113,11 @@ class Basic
 		return $string;
 	}
 
-	// METHOD timeStringFormat
-	// WAS    TimeStringFormat
-	// PARAMS seconds
-	// RETURN formated time string
-	// DESC   formats a timestamp into time from. not a date
+	// METHOD: timeStringFormat
+	// WAS   : TimeStringFormat
+	// PARAMS: seconds
+	// RETURN: formated time string
+	// DESC  : formats a timestamp into time from. not a date
 	public static function timeStringFormat($timestamp, $show_micro = true)
 	{
 		// check if the timestamp has any h/m/s/ms inside, if yes skip
@@ -1319,11 +1149,11 @@ class Basic
 		return $time_string;
 	}
 
-	// METHOD stringToTime
-	// WAS    StringToTime
-	// PARAMS TimeStringFormat string
-	// RETURN timestamp with microseconds
-	// DESC   does a reverse of the TimeStringFormat and converts the string from
+	// METHOD: stringToTime
+	// WAS   : StringToTime
+	// PARAMS: TimeStringFormat string
+	// RETURN: timestamp with microseconds
+	// DESC  : does a reverse of the TimeStringFormat and converts the string from
 	//         xd xh xm xs xms to a timestamp.microtime format
 	public static function stringToTime($timestring)
 	{
@@ -1346,11 +1176,11 @@ class Basic
 		}
 	}
 
-	// METHOD genAssocArray
-	// WAS    GenAssocArray
-	// PARAMS db array, key, value part, flag if set all or only set
-	// RETURN returns and associative array
-	// DESC   creates out of a normal db_return array an assoc array
+	// METHOD: genAssocArray
+	// WAS   : GenAssocArray
+	// PARAMS: db array, key, value part, flag if set all or only set
+	// RETURN: returns and associative array
+	// DESC  : creates out of a normal db_return array an assoc array
 	public static function genAssocArray($db_array, $key, $value, $set_only = 0)
 	{
 		for ($i = 0; $i < count($db_array); $i ++) {
@@ -1366,11 +1196,11 @@ class Basic
 		return $ret_array;
 	}
 
-	// METHOD checkDate
-	// WAS    CheckDate
-	// PARAMS date (YYYY-MM-DD)
-	// RETURN true if valid date, false if date not valid
-	// DESC   splits & checks date, wrap around for check_date function
+	// METHOD: checkDate
+	// WAS   : CheckDate
+	// PARAMS: date (YYYY-MM-DD)
+	// RETURN: true if valid date, false if date not valid
+	// DESC  : splits & checks date, wrap around for check_date function
 	public static function checkDate($date)
 	{
 		list ($year, $month, $day) = preg_split("/[\/-]/", $date);
@@ -1383,11 +1213,11 @@ class Basic
 		return true;
 	}
 
-	// METHOD checkDateTime
-	// WAS    CheckDateTime
-	// PARAMS date (YYYY-MM-DD) + time (HH:MM:SS), SS can be dropped
-	// RETURN true if valid date, false if date not valid
-	// DESC   splits & checks date, wrap around for check_date function
+	// METHOD: checkDateTime
+	// WAS   : CheckDateTime
+	// PARAMS: date (YYYY-MM-DD) + time (HH:MM:SS), SS can be dropped
+	// RETURN: true if valid date, false if date not valid
+	// DESC  : splits & checks date, wrap around for check_date function
 	public static function checkDateTime($datetime)
 	{
 		list ($year, $month, $day, $hour, $min, $sec) = preg_split("/[\/\- :]/", $datetime);
@@ -1406,11 +1236,11 @@ class Basic
 		return true;
 	}
 
-	// METHOD compareDate
-	// WAS    CompareDate
-	// PARAMS start_date, end_date (both: YYYY-MM-DD)
-	// RETURN -1 if the first date is smaller the last, 0 if both are equal, 1 if the end date is bigger than the last
-	// DESC   splits & checks date, wrap around for check_date function
+	// METHOD: compareDate
+	// WAS   : CompareDate
+	// PARAMS: start_date, end_date (both: YYYY-MM-DD)
+	// RETURN: -1 if the first date is smaller the last, 0 if both are equal, 1 if the end date is bigger than the last
+	// DESC  : splits & checks date, wrap around for check_date function
 	public static function compareDate($start_date, $end_date)
 	{
 		// pre check for empty or wrong
@@ -1448,11 +1278,11 @@ class Basic
 		}
 	}
 
-	// METHOD compareDateTime
-	// WAS    CompareDateTime
-	// PARAMS start_datetime, end_datetime (both YYYY-MM-DD HH:mm:ss)
-	// RETURN -1 if the first date is smaller the last, 0 if both are equal, 1 if the end date is bigger than the last
-	// DESC   compares the two dates + times. if seconds missing in one set, add :00, converts / to -
+	// METHOD: compareDateTime
+	// WAS   : CompareDateTime
+	// PARAMS: start_datetime, end_datetime (both YYYY-MM-DD HH:mm:ss)
+	// RETURN: -1 if the first date is smaller the last, 0 if both are equal, 1 if the end date is bigger than the last
+	// DESC  : compares the two dates + times. if seconds missing in one set, add :00, converts / to -
 	public static function compareDateTime($start_datetime, $end_datetime)
 	{
 		// pre check for empty or wrong
@@ -1472,11 +1302,11 @@ class Basic
 		}
 	}
 
-	// METHOD arrayToString
-	// WAS    ArrayToString
-	// PARAMS array, connect char
-	// RETRUN string
-	// DESC   wrapper for join, but checks if input is an array and if not returns null
+	// METHOD: arrayToString
+	// WAS   : ArrayToString
+	// PARAMS: array, connect char
+	// RETRUN: string
+	// DESC  : wrapper for join, but checks if input is an array and if not returns null
 	public static function arrayToString($array, $connect_char)
 	{
 		if (is_array($array)) {
@@ -1486,17 +1316,17 @@ class Basic
 		}
 	}
 
-	// METHOD createThumbnail
-	// WAS    CreateThumbnail
-	// PARAMS pic -> picture where from we create a thumbnail
-	//        x -> max x size of thumbnail
-	//        y -> max y size of thumbnail
-	//        dummy -> empty, or file_type to show an icon instead of nothing if file is not found
-	//        path -> if source start is not ROOT path, if empty ROOT is choosen
-	//        cache -> cache path, if not given TMP is used
-	//        clear cache -> if set to true, will create thumb all the tame
-	// RETURN thumbnail name
-	// DESC   converts picture to a thumbnail with max x and max y size
+	// METHOD: createThumbnail
+	// WAS   : CreateThumbnail
+	// PARAMS: pic -> picture where from we create a thumbnail
+	//         x -> max x size of thumbnail
+	//         y -> max y size of thumbnail
+	//         dummy -> empty, or file_type to show an icon instead of nothing if file is not found
+	//         path -> if source start is not ROOT path, if empty ROOT is choosen
+	//         cache -> cache path, if not given TMP is used
+	//         clear cache -> if set to true, will create thumb all the tame
+	// RETURN: thumbnail name
+	// DESC  : converts picture to a thumbnail with max x and max y size
 	public static function createThumbnail($pic, $size_x, $size_y, $dummy = "", $path = "", $cache_source = "", $clear_cache = false)
 	{
 		// get image type flags
@@ -1610,22 +1440,22 @@ class Basic
 		return $this->checkConvertEncoding($string, $from_encoding, $to_encoding);
 	}
 
-	// METHOD checkConvertEncoding
-	// PARAMS string: string to test
-	//        from_encoding: source encoding of this string
-	//        to_encoding: target encoding of this string
-	// RETURN false if no problem
-	//        on error, return array with characters that failed in the convert
-	// DESC   test if a string can be safely convert between encodings. mostly utf8 to shift jis
-	//        the default compare has a possibility of failure, especially with windows
-	//        it is recommended to the following in the script which uses this method:
-	//        mb_substitute_character(0x2234);
-	//        $class->mbErrorChar = '∴';
-	//        if check to Shift JIS
-	//        if check to ISO-2022-JP
-	//        if check to ISO-2022-JP-MS
-	//        set three dots (∴) as wrong character for correct convert error detect
-	//        (this char is used, because it is one of the least used ones)
+	// METHOD: checkConvertEncoding
+	// PARAMS: string: string to test
+	//         from_encoding: source encoding of this string
+	//         to_encoding: target encoding of this string
+	// RETURN: false if no problem
+	//         on error, return array with characters that failed in the convert
+	// DESC  : test if a string can be safely convert between encodings. mostly utf8 to shift jis
+	//         the default compare has a possibility of failure, especially with windows
+	//         it is recommended to the following in the script which uses this method:
+	//         mb_substitute_character(0x2234);
+	//         $class->mbErrorChar = '∴';
+	//         if check to Shift JIS
+	//         if check to ISO-2022-JP
+	//         if check to ISO-2022-JP-MS
+	//         set three dots (∴) as wrong character for correct convert error detect
+	//         (this char is used, because it is one of the least used ones)
 	public function checkConvertEncoding($string, $from_encoding, $to_encoding)
 	{
 		// convert to target encoding and convert back
@@ -1638,7 +1468,7 @@ class Basic
 				$char = mb_substr($string, $i, 1, $from_encoding);
 				$r_char = mb_substr($compare, $i, 1, $from_encoding);
 				// the ord 194 is a hack to fix the IE7/IE8 bug with line break and illegal character
-//					$this->debug('CHECK CONVERTT', '['.$this->mbErrorChar.'] O: '.$char.', C: '.$r_char);
+				// $this->debug('CHECK CONVERTT', '['.$this->mbErrorChar.'] O: '.$char.', C: '.$r_char);
 				if ((($char != $r_char && !$this->mbErrorChar) || ($char != $r_char && $r_char == $this->mbErrorChar && $this->mbErrorChar)) && ord($char) != 194) {
 					$this->debug('CHARS', "'".$char."'".' == '.$r_char.' ('.ord($char).')');
 					$failed[] = $char;
@@ -1672,11 +1502,11 @@ class Basic
 		return $string;
 	}
 
-	// METHOD __crc32b
-	// WAS    _crc32b
-	// PARAMS string
-	// RETURN old (wrong) crc32b hash
-	// DESC   checks php version and if >=5.2.7 it will flip the string
+	// METHOD: __crc32b
+	// WAS   : _crc32b
+	// PARAMS: string
+	// RETURN: old (wrong) crc32b hash
+	// DESC  : checks php version and if >=5.2.7 it will flip the string
 	public function __crc32b($string)
 	{
 		// do normal hash crc32b
@@ -1689,11 +1519,11 @@ class Basic
 		return $string;
 	}
 
-	// METHOD __sha1Short
-	// WAS    _sha1_short
-	// PARAMS string, flag to use sha
-	// RETURN sha1 short (9 chars), but current calls __crc32b
-	// DESC   replacement for __crc32b call
+	// METHOD: __sha1Short
+	// WAS   : _sha1_short
+	// PARAMS: string, flag to use sha
+	// RETURN: sha1 short (9 chars), but current calls __crc32b
+	// DESC  : replacement for __crc32b call
 	public function __sha1Short($string, $use_sha = false)
 	{
 		if ($use_sha) {
@@ -1703,13 +1533,13 @@ class Basic
 		}
 	}
 
-	// METHOD __hash
-	// WAS    _hash
-	// PARAMS string, type of hash to use
-	// RETURN hashed string
-	// DESC   replacemend for __crc32b call (alternate)
-	//        defaults to adler 32, fnv132, fnv1a32, joaat
-	//        all that create 8 char long hashes
+	// METHOD: __hash
+	// WAS   : _hash
+	// PARAMS: string, type of hash to use
+	// RETURN: hashed string
+	// DESC  : replacemend for __crc32b call (alternate)
+	//         defaults to adler 32, fnv132, fnv1a32, joaat
+	//         all that create 8 char long hashes
 	public function __hash($string, $hash_type = 'adler32')
 	{
 		if (!in_array($hash_type, array('adler32', 'fnv132', 'fnv1a32', 'joaat'))) {
@@ -1718,10 +1548,11 @@ class Basic
 		return hash($hash_type, $string);
 	}
 
-	// METHOD checkPHPVersion
-	// PARAMS $min_version: minimum version. in format x, x.y or x.y.z
-	//        $max_version: default empty, else in same format as min version
-	// RETURN true if ok, false if not matching version
+	// METHOD: checkPHPVersion
+	// PARAMS: $min_version: minimum version. in format x, x.y or x.y.z
+	//         $max_version: default empty, else in same format as min version
+	// RETURN: true if ok, false if not matching version
+	// DESC  : checks if running PHP version matches given PHP version (min or max)
 	public static function checkPHPVersion($min_version, $max_version = '')
 	{
 		// exit with false if the min/max strings are wrong
@@ -1763,12 +1594,12 @@ class Basic
 		return false;
 	}
 
-	// METHOD cryptInit
-	// PARAMS none
-	// RETURN none
-	// DESC   inits crypt settings for the crypt functions
-	//        this function NEEDS (!) to be called BEFORE any of the crypt functions is called
-	//        there is no auto init for this at the moment
+	// METHOD: cryptInit
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : inits crypt settings for the crypt functions
+	//         this function NEEDS (!) to be called BEFORE any of the crypt functions is called
+	//         there is no auto init for this at the moment
 	private function cryptInit()
 	{
 		// SET CRYPT SALT PREFIX:
@@ -1809,10 +1640,10 @@ class Basic
 		}
 	}
 
-	// METHOD cryptSaltString
-	// PARAMS random string length, default is 22 (for blowfish crypt)
-	// RETURN random string
-	// DESC   creates a random string from alphanumeric characters: A-Z a-z 0-9 ./
+	// METHOD: cryptSaltString
+	// PARAMS: random string length, default is 22 (for blowfish crypt)
+	// RETURN: random string
+	// DESC  : creates a random string from alphanumeric characters: A-Z a-z 0-9 ./
 	private function cryptSaltString($nSize = 22)
 	{
 		// A-Z is 65,90
@@ -1836,10 +1667,10 @@ class Basic
 		return $salt_string;
 	}
 
-	// METHOD cryptString
-	// PARAMS string to be crypted (one way)
-	// RETURN encrypted string
-	// DESC   encrypts the string with blowfish and returns the full string + salt part that needs to be stored somewhere (eg DB)
+	// METHOD: cryptString
+	// PARAMS: string to be crypted (one way)
+	// RETURN: encrypted string
+	// DESC  : encrypts the string with blowfish and returns the full string + salt part that needs to be stored somewhere (eg DB)
 	public function cryptString($string)
 	{
 		// the crypt prefix is set in the init of the class
@@ -1847,11 +1678,11 @@ class Basic
 		return crypt($string, $this->cryptSaltPrefix.$this->cryptSaltString($this->cryptSaltSize).$this->cryptSaltSuffix);
 	}
 
-	// METHOD verifyCryptString
-	// PARAMS plain string (eg password)
-	//        full crypted string (from cryptString
-	// RETURN true on matching or false for not matching
-	// DESC   compares the string with the crypted one, is counter method to cryptString
+	// METHOD: verifyCryptString
+	// PARAMS: plain string (eg password)
+	//         full crypted string (from cryptString
+	// RETURN: true on matching or false for not matching
+	// DESC  : compares the string with the crypted one, is counter method to cryptString
 	public function verifyCryptString($string, $crypt)
 	{
 		// the full crypted string needs to be passed on to the salt, so the init (for blowfish) and salt are passed on
@@ -1864,10 +1695,10 @@ class Basic
 
 	// *** COLORS ***
 
-	// METHOD hex2rgb
-	// PARAMS hexstring, flag to return as string (true/false), string seperator: default: ,
-	// RETURN array with RGB or a string with the seperator
-	// DESC   converts a hex RGB color to the int numbers
+	// METHOD: hex2rgb
+	// PARAMS: hexstring, flag to return as string (true/false), string seperator: default: ,
+	// RETURN: array with RGB or a string with the seperator
+	// DESC  : converts a hex RGB color to the int numbers
 	public static function hex2rgb($hexStr, $returnAsString = false, $seperator = ',')
 	{
 		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
@@ -1889,10 +1720,10 @@ class Basic
 		return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
 	}
 
-	// METHOD rgb2hex
-	// PARAMS red, green, blue (0-255)
-	// RETURN string with hex rgb color plus # in front
-	// DESC   converts the rgb values from int data to the valid rgb html hex string
+	// METHOD: rgb2hex
+	// PARAMS: red, green, blue (0-255)
+	// RETURN: string with hex rgb color plus # in front
+	// DESC  : converts the rgb values from int data to the valid rgb html hex string
 	public static function rgb2hex($red, $green, $blue)
 	{
 		$hex_color = '#';
@@ -1903,10 +1734,10 @@ class Basic
 		return $hex_color;
 	}
 
-	// METHOD rgb2hsb
-	// PARAMS red, green, blue (0-255)
-	// RETURN array with hue (0-360), sat (0-100%), brightness/value (0-100%)
-	// DESC   converts RGB to HSB/V values
+	// METHOD: rgb2hsb
+	// PARAMS: red, green, blue (0-255)
+	// RETURN: array with hue (0-360), sat (0-100%), brightness/value (0-100%)
+	// DESC  : converts RGB to HSB/V values
 	public static function rgb2hsb($r, $g, $b)
 	{
 		// check that rgb is from 0 to 255
@@ -1938,10 +1769,10 @@ class Basic
 		return array(round($HUE), round((($MAX - $MIN) / $MAX) * 100), round($MAX * 100));
 	}
 
-	// METHOD hsb2rgb
-	// PARAMS hue (0-360), saturation (0-1), brightness/value (0-1)
-	// RETURN array with red, blue, green
-	// DESC   converts HSB/V to RGB values RGB is full INT
+	// METHOD: hsb2rgb
+	// PARAMS: hue (0-360), saturation (0-1), brightness/value (0-1)
+	// RETURN: array with red, blue, green
+	// DESC  : converts HSB/V to RGB values RGB is full INT
 	public static function hsb2rgb($H, $S, $V)
 	{
 		// check that H is 0 to 359, 360 = 0
@@ -2006,10 +1837,10 @@ class Basic
 		return array(round($red * 255), round($gre * 255), round($blu * 255));
 	}
 
-	// METHOD rgb2hsl
-	// PARAMS red, blue, green (all 0-255)
-	// RETURN array with hue (0-360), saturation (0-100%) and luminance (0-100%)
-	// DESC   converts a RGB (0-255) to HSL
+	// METHOD: rgb2hsl
+	// PARAMS: red, blue, green (all 0-255)
+	// RETURN: array with hue (0-360), saturation (0-100%) and luminance (0-100%)
+	// DESC  : converts a RGB (0-255) to HSL
 	public static function rgb2hsl($r, $g, $b)
 	{
 		// check that rgb is from 0 to 255
@@ -2048,12 +1879,12 @@ class Basic
 		}
 	}
 
-	// METHOD hsl2rgb
-	// PARAMS hue: 0-360 (degrees)
-	//		  saturation: 0-1
-	//		  luminance: 0-1
-	// RETURN array with RGB as full int
-	// DESC   converts an HSL to RGB
+	// METHOD: hsl2rgb
+	// PARAMS: hue: 0-360 (degrees)
+	//		   saturation: 0-1
+	//         luminance: 0-1
+	// RETURN: array with RGB as full int
+	// DESC  : converts an HSL to RGB
 	public static function hsl2rgb($h, $s, $l)
 	{
 		$h = (1 / 360) * $h; // calc to internal convert value for hue
@@ -2085,10 +1916,10 @@ class Basic
 		}
 	}
 
-	// METHOD rgb2html
-	// PARAMS red, green, blue
+	// METHOD: rgb2html
+	// PARAMS: red, green, blue
 	// RETRUN valid # prefix hex html color string
-	// DESC   converts and int RGB to the HTML color string in hex format
+	// DESC  : converts and int RGB to the HTML color string in hex format
 	public static function rgb2html($red, $green, $blue)
 	{
 		// check that each color is between 0 and 255
@@ -2105,12 +1936,13 @@ class Basic
 		return '#'.$red.$green.$blue;
 	}
 
-	// METHOD inArrayAny
-	// WAS    in_array_any
-	// PARAMS needle: array
-	//        haystack: array
-	// RETURN found elements: array
-	// DESC   search for the needle array elements in haystack and return the ones found as an array, is there nothing found, it returns FALSE (boolean)
+	// METHOD: inArrayAny
+	// WAS   : in_array_any
+	// PARAMS: needle: array
+	//         haystack: array
+	// RETURN: found elements: array
+	// DESC  : search for the needle array elements in haystack and return the ones found as an array,
+	//         is there nothing found, it returns FALSE (boolean)
 	public static function inArrayAny($needle, $haystack)
 	{
 		if (!is_array($needle)) {
@@ -2132,11 +1964,11 @@ class Basic
 		}
 	}
 
-	// METHOD getEmailType
-	// PARAMS email, short == false
-	// RETURN string for email type, eg "pc", "docomo", etc
-	// DESC   guesses the email type (mostly for mobile) from the domain
-	//        if second is set to true, it will return short naming scheme (only provider)
+	// METHOD: getEmailType
+	// PARAMS: email, short == false
+	// RETURN: string for email type, eg "pc", "docomo", etc
+	// DESC  : guesses the email type (mostly for mobile) from the domain
+	//         if second is set to true, it will return short naming scheme (only provider)
 	public function getEmailType($email, $short = false)
 	{
 		// trip if there is no email address
@@ -2161,21 +1993,21 @@ class Basic
 		}
 	}
 
-	// METHOD getShortEmailType
-	// PARAMS long email type (not email)
-	// RETURN short email type
-	// DESC   gets the short email type from a long email type
+	// METHOD: getShortEmailType
+	// PARAMS: long email type (not email)
+	// RETURN: short email type
+	// DESC  : gets the short email type from a long email type
 	public function getShortEmailType($email_type)
 	{
 		return $this->mobile_email_type_short[$email_type];
 	}
 
-	// METHOD printDateTime
-	// PARAMS year, month, day, hour, min: the date and time values
-	//        suffix: additional info printed after the date time variable in the drop down, also used for ID in the on change JS call
-	//        min_steps: default is 1 (minute), can set to anything, is used as sum up from 0
-	// RETURN HTML formated strings for drop down lists of date and time
-	// DESC   print the date/time drop downs, used in any queue/send/insert at date/time place
+	// METHOD: printDateTime
+	// PARAMS: year, month, day, hour, min: the date and time values
+	//         suffix: additional info printed after the date time variable in the drop down, also used for ID in the on change JS call
+	//         min_steps: default is 1 (minute), can set to anything, is used as sum up from 0
+	// RETURN: HTML formated strings for drop down lists of date and time
+	// DESC  : print the date/time drop downs, used in any queue/send/insert at date/time place
 	public static function printDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1)
 	{
 		// if suffix given, add _ before
@@ -2232,19 +2064,19 @@ class Basic
 		return $string;
 	}
 
-	// METHOD htmlent
-	// PARAMS string to encode
-	// RETURN encoded string
-	// DESC   full wrapper for html entities
+	// METHOD: htmlent
+	// PARAMS: string to encode
+	// RETURN: encoded string
+	// DESC  : full wrapper for html entities
 	public function htmlent($string)
 	{
 		return htmlentities($string, ENT_COMPAT|ENT_HTML401, 'UTF-8', false);
 	}
 
-	// METHOD setFormToken
-	// PARAMS session name, if not set then default is form_token
-	// RETURN form token
-	// DESC   sets a form token in a session and returns form token
+	// METHOD: setFormToken
+	// PARAMS: session name, if not set then default is form_token
+	// RETURN: form token
+	// DESC  : sets a form token in a session and returns form token
 	public function setFormToken($name = 'form_token')
 	{
 		// current hard set to sha256
@@ -2253,13 +2085,163 @@ class Basic
 		return $token;
 	}
 
-	// METHOD validateFormToken
-	// PARAMS form token, session name (default form_token)
-	// RETURN true or false
-	// DESC   checks if the form token matches the session set form token
+	// METHOD: validateFormToken
+	// PARAMS: form token, session name (default form_token)
+	// RETURN: true or false
+	// DESC  : checks if the form token matches the session set form token
 	public function validateFormToken($token, $name = 'form_token')
 	{
 		return $_SESSION[$name] === $token;
+	}
+
+	// *************************************************************
+	// COMPATIBILITY METHOD:S
+	// those methods are deprecated function call names
+	// they exist for backwards compatibility only
+	// *************************************************************
+
+	public function running_time($simple = false)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->runningTime($simple);
+	}
+
+	public static function print_time($set_microtime = -1)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return Basic::printTime($set_microtime);
+	}
+
+	private function fdebug_fp($flag = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->fdebugFP($flag);
+	}
+
+	public function debug_for($type, $flag)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->debugFor($type, $flag);
+	}
+
+	public function get_caller_method($level = 2)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->getCallerMethod($level);
+	}
+
+	public function merge_errors($error_msg = array ())
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->mergeErrors($error_msg);
+	}
+
+	public function print_error_msg($string = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->printErrorMsg($string);
+	}
+
+	private function write_error_msg($level, $error_string)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->writeErrorMsg($level, $error_string);
+	}
+
+	public function reset_error_msg($level = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->resetErrorMsg($level);
+	}
+
+	public static function print_ar($array)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return Basic::printAr($array);
+	}
+
+	public function magic_links($string, $target = "_blank")
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->magicLinks($string, $target);
+	}
+
+	private function create_url($href, $atag, $_1, $_2, $_3, $name, $class)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->createUrl($href, $atag, $_1, $_2, $_3, $name, $class);
+	}
+
+	private function create_email($mailto, $atag, $_1, $_2, $_3, $title, $class)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->createEmail($mailto, $atag, $_1, $_2, $_3, $title, $class);
+	}
+
+	public function get_host_name()
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->getHostName();
+	}
+
+	public static function get_page_name($strip_ext = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return Basic::getPageName($strip_ext);
+	}
+
+	public static function get_filename_ending($filename)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return Basic::getFilenameEnding($filename);
+	}
+
+	public static function array_search_recursive($needle, $haystack, $key_lookin = "")
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return Basic::arraySearchRecursive($needle, $haystack, $key_lookin);
+	}
+
+	public static function array_search_recursive_all($needle, $haystack, $key, $path = null)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return Basic::arraySearchRecursiveAll($needle, $haystack, $key, $path);
+	}
+
+	public static function array_search_simple($array, $key, $value)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return Basic::arraySearchSimple($array, $key, $value);
+	}
+
+	public static function _mb_mime_encode($string, $encoding)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return Basic::__mbMimeEncode($string, $encoding);
+	}
+
+	public function _crc32b($string)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__crc32b($string);
+	}
+
+	public function _sha1_short($string, $use_sha = false)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__sha1Short($string, $use_sha);
+	}
+
+	public function _hash($string, $hash_type = 'adler32')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->__hash($string, $hash_type);
+	}
+
+	public static function in_array_any($needle, $haystack)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return Basic::inArrayAny($needle, $haystack);
 	}
 }
 

@@ -2,7 +2,7 @@
 /*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2006/08/15
-* VERSION: 0.1.0
+* VERSION: 1.0.0
 * RELEASED LICENSE: GNU GPL 3
 * DESCRIPTION
 * Basic Admin interface backend
@@ -22,10 +22,9 @@
 *
 *********************************************************************/
 
-// try to include file from LIBS path, or from normal path
-_spl_autoload('Class.DB.IO.inc');
+namespace CoreLibs\Admin;
 
-class AdminBackend extends db_io
+class Backend extends \CoreLibs\DB\IO
 {
 	// page name
 	public $page_name; // the name of the current page
@@ -61,9 +60,7 @@ class AdminBackend extends db_io
 	public function __construct($db_config, $lang, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
 	{
 		// get the language sub class & init it
-		_spl_autoload('Class.l10n.inc');
-
-		$this->l = new l10n($lang);
+		$this->l = new \CoreLibs\Language\L10n($lang);
 
 		// init the database class
 //			$this->db_io($db_config, $debug, $db_debug, $echo, $print);
@@ -78,7 +75,7 @@ class AdminBackend extends db_io
 		);
 
 		// set page name
-		$this->page_name = $this->get_page_name();
+		$this->page_name = $this->getPageName();
 
 		// set the action ids
 		foreach ($this->action_list as $_action) {
@@ -122,7 +119,7 @@ class AdminBackend extends db_io
 	// METHOD: adbEditLog()
 	// PARAMS: event -> any kind of event description, data -> any kind of data related to that event
 	// RETURN: none
-	// DESC:   writes all action vars plus other info into edit_log table
+	// DESC  : writes all action vars plus other info into edit_log table
 	public function adbEditLog($event = '', $data = '', $write_type = 'STRING')
 	{
 		if ($write_type == 'BINARY') {
@@ -162,7 +159,7 @@ class AdminBackend extends db_io
 	// METHOD: adbTopMenu
 	// PARAMS: level
 	// RETURN: returns an array for the top menu with all correct settings
-	// DESC:   menu creater
+	// DESC  : menu creater
 	public function adbTopMenu($flag = 0)
 	{
 		if ($this->menu_show_flag) {
@@ -174,9 +171,7 @@ class AdminBackend extends db_io
 		if (!is_array($pages)) {
 			$pages = array ();
 		}
-
-//$this->debug('pages', $this->print_ar($pages));
-
+		// $this->debug('pages', $this->print_ar($pages));
 		// if flag is 0, then we show all, else, we show only the matching flagges array points
 		// array is already sorted after correct order
 		reset($pages);
@@ -244,7 +239,7 @@ class AdminBackend extends db_io
 	// METHOD: adbShowMenuPoint
 	// PARAMS: filename
 	// RETURN: returns boolean true/false
-	// DESC:   checks if this filename is in the current situation (user id, etc) available
+	// DESC  : checks if this filename is in the current situation (user id, etc) available
 	public function adbShowMenuPoint($filename)
 	{
 		$enabled = 0;
@@ -260,7 +255,7 @@ class AdminBackend extends db_io
 	// METHOD: adbAssocArray
 	// PARAMS: db array, key, value part
 	// RETURN: returns and associative array
-	// DESC:   creates out of a normal db_return array an assoc array
+	// DESC  : creates out of a normal db_return array an assoc array
 	public function adbAssocArray($db_array, $key, $value)
 	{
 		return $this->GenAssocArray($db_array, $key, $value);
@@ -270,7 +265,7 @@ class AdminBackend extends db_io
 	// METHOD: adbByteStringFormat
 	// PARAMS: int
 	// RETURN: string
-	// DESC:   converts bytes into formated string with KB, MB, etc
+	// DESC  : converts bytes into formated string with KB, MB, etc
 	public function adbByteStringFormat($number)
 	{
 		return $this->ByteStringFormat($number);
@@ -285,7 +280,7 @@ class AdminBackend extends db_io
 	//         path -> if source start is not ROOT path, if empty ROOT is choosen
 	//         cache -> cache path, if not given TMP is used
 	// RETURN: thumbnail name
-	// DESC:   converts picture to a thumbnail with max x and max y size
+	// DESC  : converts picture to a thumbnail with max x and max y size
 	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = false, $path = "", $cache = "")
 	{
 		return $this->CreateThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
@@ -296,7 +291,7 @@ class AdminBackend extends db_io
 	//         msg -> string, can be printf formated
 	//         var array -> optional data for a possible printf formated msg
 	// RETURN: none
-	// DESC:   wrapper function to fill up the mssages array
+	// DESC  : wrapper function to fill up the mssages array
 	public function adbMsg($level, $msg, $vars = array ())
 	{
 		if (!preg_match("/^info|warning|error$/", $level)) {
@@ -329,7 +324,7 @@ class AdminBackend extends db_io
 	//         associate -> NULL for free, LOCK for first insert, group key for reference to first entry
 	//         file      -> string for special file copy actions; mostyle "test#live;..."
 	// RETURN: none
-	// DESC:   writes live queue
+	// DESC  : writes live queue
 	public function adbLiveQueue($queue_key, $type, $target, $data, $key_name, $key_value, $associate = null, $file = null)
 	{
 		$q = "INSERT INTO ".GLOBAL_DB_SCHEMA.".live_queue (";
@@ -348,7 +343,7 @@ class AdminBackend extends db_io
 	//         suffix: additional info printed after the date time variable in the drop down, also used for ID in the on change JS call
 	//         minute steps, can be 1 (default), 5, 10, etc, if invalid (outside 1h range, it falls back to 1min)
 	// RETURN: HTML formated strings for drop down lists of date and time
-	// DESC:   print the date/time drop downs, used in any queue/send/insert at date/time place
+	// DESC  : print the date/time drop downs, used in any queue/send/insert at date/time place
 	public function adbPrintDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1)
 	{
 		// if suffix given, add _ before
@@ -408,3 +403,5 @@ class AdminBackend extends db_io
 		return $string;
 	}
 }
+
+# __END__

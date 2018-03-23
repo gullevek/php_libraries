@@ -4,7 +4,7 @@
 * CREATED: 2002/12/17
 * VERSION: 0.4.0
 * RELEASED LICENSE: GNU GPL 3
-* SHORT DESCRIPTION:
+* SHORT DESC  :RIPTION:
 *   DB Array IO Class:
 *   writes, reads or deletes a complete array (one data set) in/out a
 *   table from the connected DB.
@@ -14,9 +14,9 @@
 *
 *   PRIVATE VARIABLES
 *
-*   PUBLIC METHODS
+*   PUBLIC METHOD:S
 *
-*   PRIVATE METHODS
+*   PRIVATE METHOD:S
 *
 * HISTORY:
 * 2005/07/07 (cs) updated array class for postgres: set 0 & NULL if int field given, insert uses () values () syntax
@@ -36,11 +36,10 @@
 // as it actually has nothing to do with this one here ? (or at least
 // put into separete function in this class)
 
-// try to include file from LIBS path, or from normal path
-_spl_autoload('Class.DB.IO.inc');
+namespace CoreLibs\DB\Extended;
 
 // subclass for one array handling
-class db_array_io extends db_io
+class ArrayIO extends \CoreLibs\DB\IO
 {
 	// main calss variables
 	public $table_array; // the array from the table to work on
@@ -48,14 +47,14 @@ class db_array_io extends db_io
 	public $pk_name; // the primary key from this table
 	public $pk_id; // the PK id
 
-	// METHOD db_array_io
-	// PARAMS db_config -> db_io class init vars
-	//        table_array -> the array from the table
-	//        table_name -> name of the table (for the array)
-	//        db_debug -> turn on db_io debug output (DB_DEBUG as global var does the same)
-	// RETURN none
-	// DESC   constructor for the array io class, set the
-	//        primary key name automatically (from array)
+	// METHOD: db_array_io
+	// PARAMS: db_config -> db_io class init vars
+	//         table_array -> the array from the table
+	//         table_name -> name of the table (for the array)
+	//         db_debug -> turn on db_io debug output (DB_DEBUG as global var does the same)
+	// RETURN: none
+	// DESC  : constructor for the array io class, set the
+	//         primary key name automatically (from array)
 	public function __construct($db_config, $table_array, $table_name, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
 	{
 		// instance db_io class
@@ -90,14 +89,15 @@ class db_array_io extends db_io
 		parent::__destruct();
 	}
 
-	// METHOD convert_data
-	// PARAMS string -> the string that should be changed
-	// RETURN string -> the altered string
-	// DESC   changes all previously alterd HTML code into visible one,
-	//        works for <b>,<i>, and <a> (thought <a> can be / or should
-	//        be handled with the magic links functions
-	//        used with the read function
-	public function convert_data($text)
+	// METHOD: convertData
+	// WAS   : convert_data
+	// PARAMS: string -> the string that should be changed
+	// RETURN: string -> the altered string
+	// DESC  : changes all previously alterd HTML code into visible one,
+	//         works for <b>,<i>, and <a> (thought <a> can be / or should
+	//         be handled with the magic links functions
+	//         used with the read function
+	public function convertData($text)
 	{
 		$text = str_replace('&lt;b&gt;', '<b>', $text);
 		$text = str_replace('&lt;/b&gt;', '</b>', $text);
@@ -110,11 +110,12 @@ class db_array_io extends db_io
 		return $text;
 	}
 
-	// METHOD convert_entities
-	// PARAMS string -> string to be changed
-	// RETURN string -> altered string
-	// DESC   changeds all HTML entities into non HTML ones
-	public function convert_entities($text)
+	// METHOD: convertEntities
+	// WAS   : convert_entities
+	// PARAMS: string -> string to be changed
+	// RETURN: string -> altered string
+	// DESC  : changeds all HTML entities into non HTML ones
+	public function convertEntities($text)
 	{
 		$text = str_replace('&lt;', '<', $text);
 		$text = str_replace('&gt;', '>', $text);
@@ -124,11 +125,12 @@ class db_array_io extends db_io
 		return $text;
 	}
 
-	// METHOD db_dump_array
-	// PARAMS none
-	// RETURN returns the current array
-	// DESC   dumps the current data
-	public function db_dump_array($write = 0)
+	// METHOD: dbDumpArray
+	// WAS   : db_dump_array
+	// PARAMS: none
+	// RETURN: returns the current array
+	// DESC  : dumps the current data
+	public function dbDumpArray($write = 0)
 	{
 		reset($this->table_array);
 		while (list($column, $data_array) = each($this->table_array)) {
@@ -141,24 +143,12 @@ class db_array_io extends db_io
 		return $string;
 	}
 
-	// METHOD _db_error
-	// PARAMS none
-	// RETURN none
-	// DESC   writes errors to internal error string
-/*     function _db_error()
-	{
-		// if error occured
-		if ($this->error_id)
-		{
-			$this->error_msg['db'] .= "<b>-DB_ARRAY-error-></b> ".$this->error_id.": ".$this->error_string[$this->error_id]." <br>";
-		}
-	} */
-
-	// METHOD db_check_pk_set
-	// PARAMS none
-	// RETURN none
-	// DESC   checks if pk is set and if not, set from pk_id and if this also not set return 0
-	public function db_check_pk_set()
+	// METHOD: dbCheckPkSet
+	// WAS   : db_check_pk_set
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : checks if pk is set and if not, set from pk_id and if this also not set return 0
+	public function dbCheckPkSet()
 	{
 		// if pk_id is set, overrule ...
 		if ($this->pk_id) {
@@ -168,18 +158,19 @@ class db_array_io extends db_io
 		if (!$this->table_array[$this->pk_name]["value"]) {
 			// if no PK found, error ...
 			$this->error_id = 21;
-			$this->_db_error();
+			$this->__dbError();
 			return 0;
 		} else {
 			return 1;
 		}
 	}
 
-	// METHOD db_reset_array
-	// PARAMS reset_pk -> if set reset the pk too
-	// RETURN none
-	// DESC   resets the whole array
-	public function db_reset_array($reset_pk = 0)
+	// METHOD: dbResetArray
+	// WAS   : db_reset_array
+	// PARAMS: reset_pk -> if set reset the pk too
+	// RETURN: none
+	// DESC  : resets the whole array
+	public function dbResetArray($reset_pk = 0)
 	{
 		reset($this->table_array);
 		while (list($column, $data_array) = each($this->table_array)) {
@@ -191,16 +182,17 @@ class db_array_io extends db_io
 		}
 	}
 
-	// METHOD db_delete
-	// PARAMS optional the table_array, if not given uses class var
-	// RETURN 1 for successfull delete or 0 for error
-	// DESC   deletes one dataset
-	public function db_delete($table_array = 0)
+	// METHOD: dbDelete
+	// WAS   : db_delete
+	// PARAMS: optional the table_array, if not given uses class var
+	// RETURN: 1 for successfull delete or 0 for error
+	// DESC  : deletes one dataset
+	public function dbDelete($table_array = 0)
 	{
 		if (is_array($table_array)) {
 			$this->table_array = $table_array;
 		}
-		if (!$this->db_check_pk_set()) {
+		if (!$this->dbCheckPkSet()) {
 			return $this->table_array;
 		}
 		// delete query
@@ -209,7 +201,7 @@ class db_array_io extends db_io
 		// delete files and build FK query
 		reset($this->table_array);
 		while (list($column, $data_array) = each($this->table_array)) {
-			// suchen nach bildern und löschen ...
+			// suchen nach bildern und lschen ...
 			if ($this->table_array[$column]["file"] && file_exists($this->table_array[$column]["url"].$this->table_array[$column]["value"])) {
 				if (file_exists($this->table_array[$column]["path"].$this->table_array[$column]["value"])) {
 					unlink($this->table_array[$column]["path"].$this->table_array[$column]["value"]);
@@ -227,7 +219,7 @@ class db_array_io extends db_io
 				}
 				$q_where .= $column." = ".$this->table_array[$column]["value"];
 			}
-			// allgemeines zurücksetzen des arrays
+			// allgemeines zurcksetzen des arrays
 			unset($this->table_array[$column]["value"]);
 		}
 
@@ -237,24 +229,25 @@ class db_array_io extends db_io
 		}
 		// if 0, error
 		unset($this->pk_id);
-		if (!$this->db_exec($q)) {
+		if (!$this->dbExec($q)) {
 			$this->error_id=22;
-			$this->_db_error();
+			$this->__dbError();
 		}
 		return $this->table_array;
 	}
 
-	// METHOD db_read
-	// PARAMS edit -> if 1 data will not be altered for output, optional the table_array, if not given uses class var
-	// RETURN true or false for reading
-	// DESC   reads one row into the array
-	public function db_read($edit = 0, $table_array = 0)
+	// METHOD: dbRead
+	// WAS   : db_read
+	// PARAMS: edit -> if 1 data will not be altered for output, optional the table_array, if not given uses class var
+	// RETURN: true or false for reading
+	// DESC  : reads one row into the array
+	public function dbRead($edit = 0, $table_array = 0)
 	{
 		// if array give, overrules internal array
 		if (is_array($table_array)) {
 			$this->table_array = $table_array;
 		}
-		if (!$this->db_check_pk_set()) {
+		if (!$this->dbCheckPkSet()) {
 			return $this->table_array;
 		}
 		reset($this->table_array);
@@ -283,12 +276,12 @@ class db_array_io extends db_io
 		}
 
 		// if query was executed okay, else set error
-		if ($this->db_exec($q)) {
-			if ($res = $this->db_fetch_array()) {
+		if ($this->dbExec($q)) {
+			if ($res = $this->dbFetchArray()) {
 				reset($this->table_array);
 				while (list($column, $data_array) = each($this->table_array)) {
-					// wenn "edit" dann gib daten wie in DB zurück, ansonten aufbereiten für ausgabe
-					// ?? sollte das nicht draußen ??? man weis ja net was da drin steht --> is noch zu überlegen
+					// wenn "edit" dann gib daten wie in DB zurck, ansonten aufbereiten fr ausgabe
+					// ?? sollte das nicht drauen ??? man weis ja net was da drin steht --> is noch zu berlegen
 					// echo "EDIT: $edit | Spalte: $column | type: ".$this->table_array[$column]["type"]." | Res: ".$res[$column]."<br>";
 					if ($edit) {
 						$this->table_array[$column]["value"] = $res[$column];
@@ -297,25 +290,26 @@ class db_array_io extends db_io
 							$this->table_array[$column]["HIDDEN_value"] = $res[$column];
 						}
 					} else {
-						$this->table_array[$column]["value"] = $this->convert_data(nl2br($res[$column]));
+						$this->table_array[$column]["value"] = $this->convertData(nl2br($res[$column]));
 						// had to put out the htmlentities from the line above as it breaks japanese characters
 					}
 				}
 			}
-			// possible db_fetch_array errors ...
+			// possible dbFetchArray errors ...
 			$this->pk_id = $this->table_array[$this->pk_name]["value"];
 		} else {
 			$this->error_id = 22;
-			$this->_db_error();
+			$this->__dbError();
 		}
 		return $this->table_array;
 	}
 
-	// METHOD db_write
-	// PARAMS addslashes -> if 1 will make an addslashes for each array field, optional the table_array, if not given uses class var
-	// RETURN true or false on write
-	// DESC   writes on set into DB or updates one set (if PK exists)
-	public function db_write($addslashes = 0, $table_array = 0)
+	// METHOD: dbWrite
+	// WAS   : db_write
+	// PARAMS: addslashes -> if 1 will make an addslashes for each array field, optional the table_array, if not given uses class var
+	// RETURN: true or false on write
+	// DESC  : writes on set into DB or updates one set (if PK exists)
+	public function dbWrite($addslashes = 0, $table_array = 0)
 	{
 		if (is_array($table_array)) {
 			$this->table_array = $table_array;
@@ -427,9 +421,9 @@ class db_array_io extends db_io
 					$q_data .= "'";
 					// if add slashes do convert & add slashes else write AS is
 					if ($addslashes) {
-						$q_data .= $this->db_escape_string($this->convert_entities($this->table_array[$column]["value"]));
+						$q_data .= $this->dbEscapeString($this->convertEntities($this->table_array[$column]["value"]));
 					} else {
-						$q_data .= $this->db_escape_string($this->table_array[$column]["value"]);
+						$q_data .= $this->dbEscapeString($this->table_array[$column]["value"]);
 					}
 					$q_data .= "'";
 				}
@@ -454,7 +448,7 @@ class db_array_io extends db_io
 		if (!$this->table_array[$this->pk_name]["value"]) {
 			// max id, falls INSERT
 			$q = "SELECT MAX(".$this->pk_name.") + 1 AS pk_id FROM ".$this->table_name;
-			$res = $this->db_return_row($q);
+			$res = $this->dbReturnRow($q);
 			if (!$res["pk_id"]) {
 				$res["pk_id"] = 1;
 			}
@@ -482,9 +476,9 @@ class db_array_io extends db_io
 			// $this->pk_id = $this->table_array[$this->pk_name]["value"];
 		}
 		// return success or not
-		if (!$this->db_exec($q)) {
+		if (!$this->dbExec($q)) {
 			$this->error_id = 22;
-			$this->_db_error();
+			$this->__dbError();
 		}
 		// set primary key
 		if ($insert) {
@@ -494,4 +488,60 @@ class db_array_io extends db_io
 		// return the table if needed
 		return $this->table_array;
 	}
+
+	// *************************************************************
+	// COMPATIBILITY METHODS
+	// those methods are deprecated function call names
+	// they exist for backwards compatibility only
+	// *************************************************************
+
+	public function convert_data($text)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->convertData($text);
+	}
+
+	public function convert_entities($text)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->convertEntities($text);
+	}
+
+	public function db_dump_array($write = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbDumpArray($write);
+	}
+
+	public function db_check_pk_set()
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbCheckPkSet();
+	}
+
+	public function db_reset_array($reset_pk = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbResetArray($reset_pk);
+	}
+
+	public function db_delete($table_array = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbDelete($table_array);
+	}
+
+	public function db_read($edit = 0, $table_array = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbRead($edit, $table_array);
+	}
+
+	public function db_write($addslashes = 0, $table_array = 0)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbWrite($addslashes, $table_array);
+	}
 } // end of class
+
+# __END__
