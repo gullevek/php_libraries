@@ -91,7 +91,11 @@ class Login extends \CoreLibs\DB\IO
 		$this->log_per_class = 1;
 
 		// create db connection and init base class
-		parent::__construct($db_config, $debug, $db_debug, $echo, $print);
+		if (!parent::__construct($db_config, $debug, $db_debug, $echo, $print)) {
+			echo "Could not connect to DB<br>";
+			// if I can't connect to the DB to auth exit hard. No access allowed
+			exit;
+		}
 
 		// no session could be found at all
 		if (!session_id()) {
@@ -104,7 +108,10 @@ class Login extends \CoreLibs\DB\IO
 		// if we have a search path we need to set it, to use the correct DB to login
 		// check what schema to use. if there is a login schema use this, else check if there is a schema set in the config, or fall back to DB_SCHEMA if this exists, if this also does not exists use public schema
 		$SCHEMA = defined('LOGIN_DB_SCHEMA') ? LOGIN_DB_SCHEMA : ($db_config['db_schema'] ? $db_config['db_schema'] : (defined('DB_SCHEMA') ? DB_SCHEMA : 'public'));
-		$this->dbExec("SET search_path TO ".$SCHEMA);
+		// set schema if schema differs to schema set in db conneciton
+		if ($this->dbGetSchema() && $this->dbGetSchema() != $SCHEMA) {
+			$this->dbExec("SET search_path TO ".$SCHEMA);
+		}
 		$this->euid = array_key_exists('EUID', $_SESSION) ? $_SESSION['EUID'] : 0; // if there is none, there is none, saves me POST/GET check
 		// get login vars, are so, can't be changed
 		// prepare

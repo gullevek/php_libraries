@@ -308,15 +308,19 @@ class IO extends \CoreLibs\Basic
 	{
 		// start basic class
 		parent::__construct($debug, $echo, $print);
+		// dummy init array for db config if not array
+		if (!is_array($db_config)) {
+			$db_config = array ();
+		}
 		// sets the names (for connect/reconnect)
-		$this->db_name = $db_config['db_name'];
-		$this->db_user = $db_config['db_user'];
-		$this->db_pwd = $db_config['db_pass'];
-		$this->db_host = $db_config['db_host'];
+		$this->db_name = $db_config['db_name'] ?? '';
+		$this->db_user = $db_config['db_user'] ?? '';
+		$this->db_pwd = $db_config['db_pass'] ?? '';
+		$this->db_host = $db_config['db_host'] ?? '';
 		$this->db_port = array_key_exists('db_port', $db_config) ? $db_config['db_port'] : '5432';
 		$this->db_schema = array_key_exists('db_schema', $db_config) ? $db_config['db_schema'] : ''; // do not set to 'public' if not set, because the default is already public
 		$this->db_encoding = array_key_exists('db_encoding', $db_config) ? $db_config['db_encoding'] : '';
-		$this->db_type = 'db_'.$db_config['db_type'];
+		$this->db_type = $db_config['db_type'] ?? '';
 		$this->db_ssl = array_key_exists('db_ssl', $db_config) ? $db_config['db_ssl'] : 'allow';
 
 		// set the target encoding to the DEFAULT_ENCODING if it is one of them: EUC, Shift_JIS, UTF-8
@@ -326,13 +330,14 @@ class IO extends \CoreLibs\Basic
 		$this->MAX_QUERY_CALL = 20;
 
 		// error & debug stuff, error & warning ids are the same, its just in which var they get written
+		$this->error_string['10'] = 'Could not load DB interface functions';
 		$this->error_string['11'] = 'No Querystring given';
 		$this->error_string['12'] = 'No Cursor given, no correct query perhaps?';
 		$this->error_string['13'] = 'Query could not be executed without errors';
 		$this->error_string['14'] = 'Can\'t connect to DB server';
 		$this->error_string['15'] = 'Can\'t select DB';
 		$this->error_string['16'] = 'No DB Handler found / connect or reconnect failed';
-		$this->error_string['17'] = 'All db_return* methods work only with SELECT statements, please use db_exec for everything else';
+		$this->error_string['17'] = 'All dbReturn* methods work only with SELECT statements, please use dbExec for everything else';
 		$this->error_string['18'] = 'Query not found in cache. Nothing has been reset';
 		$this->error_string['19'] = 'Wrong PK name given or no PK name given at all, can\'t get Insert ID';
 		$this->error_string['20'] = 'Found given Prepare Statement Name in array, Query not prepared, will use existing one';
@@ -361,11 +366,13 @@ class IO extends \CoreLibs\Basic
 		// How can we do this dynamic? eg for non PgSQL
 		// OTOH this whole class is so PgSQL specific
 		// that non PgSQL doesn't make much sense anymore
-		if ($this->db_type == 'pg_sql') {
+		if ($this->db_type == 'pgsql') {
 			$this->db_functions = new \CoreLibs\DB\SQL\PgSQL();
 		} else {
 			// abort error
-			return "Failed to load DB functions for: ".$this->db_type;
+			$this->error_id = 10;
+			$this->__dbError();
+			return false;
 		}
 
 		// connect to DB
@@ -381,6 +388,9 @@ class IO extends \CoreLibs\Basic
 			'class_created' => '2000-11-23',
 			'class_author' => 'Clemens Schwaighofer'
 		);
+
+		// all ok return true
+		return true;
 	}
 
 	// METHOD: __destruct
@@ -451,12 +461,12 @@ class IO extends \CoreLibs\Basic
 	// WAS   : _check_query_for_select
 	// PARAMS: query
 	// RETURN: true if matching, false if not
-	// DESC  : checks if query is a SELECT, if not error, 0 return
-	// NOTE  : Query needs to start with SELECT. if starts with "with" it is ignored
+	// DESC  : checks if query is a SELECT or SHOW, if not error, 0 return
+	// NOTE  : Query needs to start with SELECT or SHOW. if starts with "with" it is ignored
 	private function __checkQueryForSelect($query)
 	{
 		// perhaps allow spaces before select ?!?
-		if (!preg_match("/^select /i", $query)) {
+		if (!preg_match("/^(select|show) /i", $query)) {
 			return false;
 		}
 		return true;
@@ -538,11 +548,12 @@ class IO extends \CoreLibs\Basic
 	// NOTE  : needed to make public so it can be called from DB.Array.IO too
 	public function __dbError($cursor = '', $msg = '')
 	{
+		$pg_error_string = '';
 		$where_called = $this->get_caller_method();
 		if ($cursor) {
 			$pg_error_string = $this->db_functions->__dbPrintError($cursor);
 		}
-		if (!$cursor) {
+		if (!$cursor && method_exists($this->db_functions, '__dbPrintError')) {
 			$pg_error_string = $this->db_functions->__dbPrintError();
 		}
 		if ($pg_error_string) {
@@ -620,7 +631,7 @@ class IO extends \CoreLibs\Basic
 	// WAS   : _db_prepare_exec
 	// PARAMS: query, primary key [if set to NULL no returning will be added]
 	// RETURN: md5 OR boolean false on error
-	// DESC  : sub function for db_exec and db_exec_async
+	// DESC  : sub function for dbExec and dbExecAsync
 	//         * checks query is set
 	//         * checks there is a database handler
 	//         * checks that here is no other query executing
@@ -650,7 +661,7 @@ class IO extends \CoreLibs\Basic
 			}
 		}
 		// check that no other query is running right now
-		if ($this->db_functions->__dbConnection_busy()) {
+		if ($this->db_functions->__dbConnectionBusy()) {
 			$this->error_id = 41;
 			$this->__dbError();
 			return false;
@@ -774,7 +785,7 @@ class IO extends \CoreLibs\Basic
 							// failed to get insert id
 							$this->insert_id = '';
 							$this->warning_id = 33;
-							$this->__dbError($this->cursor, '[db_exec]');
+							$this->__dbError($this->cursor, '[dbExec]');
 						}
 						// if we have multiple, do not set the insert_id different, keep as array
 					}
@@ -782,7 +793,7 @@ class IO extends \CoreLibs\Basic
 					// we returned an array of PKs instread of a single one
 					if (is_array($this->insert_id)) {
 						$this->warning_id = 32;
-						$this->__dbError($this->cursor, '[db_exec]');
+						$this->__dbError($this->cursor, '[dbExec]');
 					}
 				}
 			}
@@ -870,7 +881,7 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$q = "SET search_path TO '".$this->dbEscapeString($db_schema)."'";
-		return $this->db_exec($q);
+		return $this->dbExec($q);
 	}
 
 	// METHOD: dbGetSchema
@@ -897,7 +908,16 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$q = "SET client_encoding TO '".$this->dbEscapeString($db_encoding)."'";
-		return $this->db_exec($q);
+		return $this->dbExec($q);
+	}
+
+	// METHOD: dbGetEncoding
+	// PARAMS: none
+	// RETURN: current client encoding
+	// DESC  : returns the current set client encoding from the connected DB
+	public function dbGetEncoding()
+	{
+		return $this->db_return_row('SHOW client_encoding')['client_encoding'];
 	}
 
 	// METHOD: dbInfo
@@ -1009,7 +1029,7 @@ class IO extends \CoreLibs\Basic
 				}
 			}
 			// check that no other query is running right now
-			if ($this->db_functions->__dbConnection_busy()) {
+			if ($this->db_functions->__dbConnectionBusy()) {
 				$this->error_id = 41;
 				$this->__dbError();
 				return false;
@@ -1191,7 +1211,7 @@ class IO extends \CoreLibs\Basic
 	{
 		// if there is actually a async query there
 		if ($this->async_running) {
-			if ($this->db_functions->__dbConnection_busy()) {
+			if ($this->db_functions->__dbConnectionBusy()) {
 				return true;
 			} else {
 				// get the result/or error
@@ -1250,7 +1270,7 @@ class IO extends \CoreLibs\Basic
 			$this->__dbError('', $query);
 			return false;
 		}
-		$cursor = $this->db_exec($query);
+		$cursor = $this->dbExec($query);
 		$result = $this->dbFetchArray($cursor);
 		return $result;
 	}
@@ -1273,7 +1293,7 @@ class IO extends \CoreLibs\Basic
 			$this->__dbError('', $query);
 			return false;
 		}
-		$cursor = $this->db_exec($query);
+		$cursor = $this->dbExec($query);
 		while ($res = $this->dbFetchArray($cursor)) {
 			for ($i = 0; $i < $this->num_fields; $i ++) {
 				// cereated mixed, first name
@@ -1361,7 +1381,7 @@ class IO extends \CoreLibs\Basic
 			}
 		}
 		// check that no other query is running right now
-		if ($this->db_functions->__dbConnection_busy()) {
+		if ($this->db_functions->__dbConnectionBusy()) {
 			$this->error_id = 41;
 			$this->__dbError();
 			return false;
@@ -1444,7 +1464,7 @@ class IO extends \CoreLibs\Basic
 			return false;
 		} else {
 			if ($this->db_debug) {
-				$this->__dbDebug('db', $this->__dbDebug_prepare($stm_name, $data), 'dbExecPrep', 'Q');
+				$this->__dbDebug('db', $this->__dbDebugPrepare($stm_name, $data), 'dbExecPrep', 'Q');
 			}
 			$code = $this->db_functions->__dbExecute($stm_name, $data);
 			if (!$code) {
@@ -1729,7 +1749,7 @@ class IO extends \CoreLibs\Basic
 			$q .= ')';
 			$this->temp_sql = $q;
 		}
-		if (!$this->db_exec($q)) {
+		if (!$this->dbExec($q)) {
 			return false;
 		}
 		if (!$primary_key['value']) {

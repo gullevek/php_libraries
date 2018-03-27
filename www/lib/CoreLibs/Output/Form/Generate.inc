@@ -403,7 +403,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formProcedureLoad($archive_id)
 	{
 		if ($this->archive && $archive_id && $this->group_level_user <= $this->security_level["load"]) {
-			$this->form_load_table_array($archive_id);
+			$this->formLoadTableArray($archive_id);
 			$this->yes = 1;
 		}
 	}
@@ -417,7 +417,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		if ($this->new && $this->group_level_user <= $this->security_level["new"]) {
 			if ($this->really_new == "yes") {
-				$this->form_unset_table_array();
+				$this->formUnsetTablearray();
 			} else {
 				$this->msg .= $this->l->__("You have to select the <b>Checkbox for New</b>!<br>");
 				$this->error = 2;
@@ -434,9 +434,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formProcedureSave()
 	{
 		if ($this->save && $this->group_level_user <= $this->security_level["save"]) {
-			$this->form_error_check();
+			$this->formErrorCheck();
 			if (!$this->error) {
-				$this->form_save_table_array();
+				$this->formSaveTableArray();
 			}
 			$this->yes = 1;
 		}
@@ -456,7 +456,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$this->error = 2;
 			}
 			if ($this->really_delete == "yes") {
-				$this->form_delete_table_array();
+				$this->formDeleteTableArray();
 			} else {
 				$this->msg .= $this->l->__("You have to select the <b>Checkbox for Delete</b>!<br>");
 				$this->error = 2;
@@ -492,7 +492,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 					if ($_POST[$flag] == "true") {
 						$q = "DELETE FROM ".$element_list[$i]." WHERE ".$pk_name." = ".$_POST[$id];
-						$this->db_exec($q);
+						$this->dbExec($q);
 						$this->msg .= $this->l->__("Removed entry from list<br>");
 						$this->warning = 1;
 					} // post okay true -> delete
@@ -502,7 +502,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						if (!$_POST[$remove_name[$i]][$j]) {
 							$q = "UPDATE ".$element_list[$i]." WHERE ".$pk_name." = ".$_POST[$prfx.$pk_name][$j];
 							// $this->debug('edit_db', "UP: $q");
-							// $this->db_exec($q);
+							// $this->dbExec($q);
 							$this->msg .= $this->l->__("Disabled deselected entries from list<br>");
 							$this->warning = 1;
 						}
@@ -515,7 +515,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						if (!$_POST[$remove_name[$i]][$j] && $_POST[$prfx.$pk_name][$j]) {
 							$q = "DELETE FROM ".$element_list[$i]." WHERE ".$pk_name." = ".$_POST[$prfx.$pk_name][$j];
 							// $this->debug('edit_db', "DEL: $q");
-							$this->db_exec($q);
+							$this->dbExec($q);
 							$this->msg .= $this->l->__("Deleted deselected entries from list<br>");
 							$this->warning = 1;
 						}
@@ -539,7 +539,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$t_pk_name = $this->archive_pk_name;
 
 			// lade liste
-			$this->db_exec($this->load_query);
+			$this->dbExec($this->load_query);
 			while ($res = $this->db_fetch_array()) {
 				$pk_ids[] = $res[$this->int_pk_name];
 				if ($res[$this->int_pk_name] == $this->table_array[$this->int_pk_name]["value"]) {
@@ -848,7 +848,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							if ($this->table_array[$this->int_pk_name]["value"]) {
 								$q .= " AND ".$this->int_pk_name." <> ".$this->table_array[$this->int_pk_name]["value"];
 							}
-							list($$key) = $this->db_return_row($q);
+							list($$key) = $this->dbReturnRow($q);
 							if ($$key) {
 								$this->msg .= sprintf($this->l->__("The field <b>%s</b> can be used only once!<br>"), $this->table_array[$key]["output_name"]);
 							}
@@ -1003,7 +1003,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 										if ($this->table_array[$this->int_pk_name]["value"]) {
 											$q .= " AND ".$this->int_pk_name." <> ".$this->table_array[$this->int_pk_name]["value"];
 										}
-										list($$key) = $this->db_return_row($q);
+										list($$key) = $this->dbReturnRow($q);
 										if ($$key) {
 											$this->msg .= sprintf($this->l->__("The field <b>%s</b> in row <b>%s</b> can be used only once!<br>"), $reference_array["output_name"], $i);
 										}
@@ -1046,21 +1046,21 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formSetOrder()
 	{
 		// get order name
-		$order_name = $this->form_get_col_name_from_key("order");
+		$order_name = $this->formGetColNameFromKey("order");
 		if ($order_name) {
 			// first check out of order ...
 
 			if (!$this->table_array[$order_name]["value"]) {
 				// set order (read max)
 				$q = "SELECT MAX(".$order_name.") + 1 AS max_page_order FROM ".$this->table_name;
-				list($this->table_array[$order_name]["value"]) = $this->db_return_row($q);
+				list($this->table_array[$order_name]["value"]) = $this->dbReturnRow($q);
 				// frist element is 0 because NULL gets returned, set to 1
 				if (!$this->table_array[$order_name]["value"]) {
 					$this->table_array[$order_name]["value"] = 1;
 				}
 			} elseif ($this->table_array[$this->int_pk_name]["value"]) {
 				$q = "SELECT $order_name FROM ".$this->table_name." WHERE ".$this->int_pk_name." = ".$this->table_array[$this->int_pk_name]["value"];
-				list($this->table_array[$order_name]["value"]) = $this->db_return_row($q);
+				list($this->table_array[$order_name]["value"]) = $this->dbReturnRow($q);
 			}
 		}
 		return $this->table_array;
@@ -1163,20 +1163,20 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				if ($this->table_array[$key]["where"]) {
 					$q .= " AND ".$this->table_array[$key]["where"];
 				}
-				list($pk_name_temp) = $this->db_return_row($q);
+				list($pk_name_temp) = $this->dbReturnRow($q);
 				if ($this->num_rows >= 1) {
 					$this->table_array[$key]["value"] = $pk_name_temp;
 				} else {
 					// if a where was given, set this key also [dangerous!]
 					// postgreSQL compatible insert
 					$q = "INSERT INTO ".$this->table_array[$key]["table_name"]." (".$this->table_array[$key]["input_name"].") VALUES ('".$this->db_escape_string($this->table_array[$key]["input_value"])."')";
-					$this->db_exec($q);
+					$this->dbExec($q);
 					if ($this->table_array[$key]["where"]) {
 						// make an update on the just inseted data with the where data als update values
 						$q = "UPDATE ".$this->table_array[$key]["table_name"]." SET ";
 						$q .= $this->table_array[$key]["where"]." ";
 						$q .= "WHERE ".$this->table_array[$key]["pk_name"]." = ".$this->insert_id;
-						$this->db_exec($q);
+						$this->dbExec($q);
 					}
 					$this->table_array[$key]["value"] = $this->insert_id;
 				} // set value from DB through select or insert
@@ -1192,7 +1192,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					if ($this->table_array[$key]["where"]) {
 						$q .= " AND ".$this->table_array[$key]["where"];
 					}
-					list($temp) = $this->db_return_row($q);
+					list($temp) = $this->dbReturnRow($q);
 					// nothing found in table, use new inserted key
 					if (!$temp) {
 						$this->table_array[$key]["value"] = $this->table_array[$key]["input_value"];
@@ -1250,9 +1250,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		} // go through each field
 
 		// set object order (if necessary)
-		$this->form_set_order();
+		$this->formSetOrder();
 		// write the object
-		$this->db_write($addslashes);
+		$this->dbWrite($addslashes);
 		// write reference array(s) if necessary
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
@@ -1261,11 +1261,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			reset($this->reference_array);
 			foreach ($this->reference_array as $reference_array) {
 				$q = "DELETE FROM ".$reference_array["table_name"]." WHERE ".$this->int_pk_name."=".$this->table_array[$this->int_pk_name]["value"];
-				$this->db_exec($q);
+				$this->dbExec($q);
 				$q = "INSERT INTO ".$reference_array["table_name"]." (".$reference_array["other_table_pk"].", ".$this->int_pk_name.") VALUES ";
 				for ($i = 0; $i < count($reference_array["selected"]); $i ++) {
 					$t_q = "(".$reference_array["selected"][$i].", ".$this->table_array[$this->int_pk_name]["value"].")";
-					$this->db_exec($q.$t_q);
+					$this->dbExec($q.$t_q);
 				}
 			} // foreach reference arrays
 		} // if reference arrays
@@ -1383,7 +1383,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						$this->debug('edit', "Pos[$i] => ".$type[$i]." Q: ".$q."<br>");
 						// write the dataset
 						if ($q) {
-							$this->db_exec($q);
+							$this->dbExec($q);
 						}
 					}
 				} // for each created query
@@ -1408,7 +1408,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			reset($this->reference_array);
 			foreach ($this->reference_array as $reference_array) {
 				$q = "DELETE FROM ".$reference_array["table_name"]." WHERE ".$this->int_pk_name." = ".$this->table_array[$this->int_pk_name]["value"];
-				$this->db_exec($q);
+				$this->dbExec($q);
 			}
 		}
 		// remove any element list references
@@ -1419,7 +1419,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			reset($this->element_list);
 			while (list($table_name, $data_array) = each($this->element_list)) {
 				$q = "DELETE FROM ".$table_name." WHERE ".$this->int_pk_name." = ".$this->table_array[$this->int_pk_name]["value"];
-				$this->db_exec($q);
+				$this->dbExec($q);
 			}
 		}
 		// unlink ALL files
@@ -1486,7 +1486,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	}
 
 	// METHOD: formCreateElementListTable
-	// WAS   : form_create_element_list
+	// WAS   : form_create_element_list_table
 	// PARAMS: show which element list
 	// RETURN: array for output
 	// DESC  : create list of elements next to each other for a group of data in an input field

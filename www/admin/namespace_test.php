@@ -12,7 +12,7 @@ ob_start();
 require 'config.inc' ;
 DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
 
-echo "CONFIG: ".CONFIG."<br>ROOT: ".ROOT."<br>BASE: ".BASE."<br>";
+echo "DIR: ".DIR."<br>ROOT: ".ROOT."<br>BASE: ".BASE."<br>";
 
 $lang = 'en_utf8';
 $base = new CoreLibs\Admin\Backend($DB_CONFIG[MAIN_DB], $lang);

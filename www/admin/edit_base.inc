@@ -49,7 +49,7 @@ $login = new CoreLibs\ACL\Login($DB_CONFIG[LOGIN_DB], $lang);
 
 // create form class
 $form = new CoreLibs\Output\Form\Generate($DB_CONFIG[MAIN_DB], $lang);
-$form->db_exec("SET search_path TO ".LOGIN_DB_SCHEMA);
+$form->dbExec("SET search_path TO ".LOGIN_DB_SCHEMA);
 if ($form->mobile_phone) {
 	echo "I am sorry, but this page cannot be viewed by a mobile phone";
 	exit;
@@ -121,7 +121,7 @@ $HEADER['JAVASCRIPT'] = $EDIT_JAVASCRIPT;
 $DATA['table_width'] = $table_width;
 
 // write out error / status messages
-$messages[] = $form->formErrorMsg();
+$messages[] = $form->formPrintMsg();
 $DATA['form_error_msg'] = $messages;
 
 // MENU START
@@ -219,7 +219,7 @@ if ($form->yes) {
 			$elements[] = $form->formCreateElement("db_debug");
 			$elements[] = $form->formCreateElement("edit_language_id");
 			$elements[] = $form->formCreateElement("edit_scheme_id");
-			$elements[] = $form->formShowListTable("edit_access_user");
+			$elements[] = $form->formCreateElementListTable("edit_access_user");
 			break;
 		case "edit_schemes":
 			$elements[] = $form->formCreateElement("enabled");
@@ -230,7 +230,7 @@ if ($form->yes) {
 		case "edit_pages":
 			if (!$form->table_array["edit_page_id"]["value"]) {
 				$q = "DELETE FROM temp_files";
-				$form->db_exec($q);
+				$form->dbExec($q);
 				// gets all files in the current dir ending with .php
 				$crap = exec("ls *.php", $output, $status);
 				// now get all that are NOT in de DB
@@ -252,12 +252,12 @@ if ($form->yes) {
 			$elements[] = $form->formCreateElement("order_number");
 			$elements[] = $form->formCreateElement("online");
 			$elements[] = $form->formCreateElement("menu");
-			$elements[] = $form->formShowListTable("edit_query_string");
+			$elements[] = $form->formCreateElementListTable("edit_query_string");
 			$elements[] = $form->formCreateElement("popup");
 			$elements[] = $form->formCreateElement("popup_x");
 			$elements[] = $form->formCreateElement("popup_y");
-			$elements[] = $form->formShowReferenceTable("edit_visible_group");
-			$elements[] = $form->formShowReferenceTable("edit_menu_group");
+			$elements[] = $form->formCreateElementReferenceTable("edit_visible_group");
+			$elements[] = $form->formCreateElementReferenceTable("edit_menu_group");
 			break;
 		case "edit_languages":
 			$elements[] = $form->formCreateElement("enabled");
@@ -270,7 +270,7 @@ if ($form->yes) {
 			$elements[] = $form->formCreateElement("name");
 			$elements[] = $form->formCreateElement("edit_access_right_id");
 			$elements[] = $form->formCreateElement("edit_scheme_id");
-			$elements[] = $form->formShowListTable("edit_page_access");
+			$elements[] = $form->formCreateElementListTable("edit_page_access");
 			break;
 		case "edit_visible_group":
 			$elements[] = $form->formCreateElement("name");
@@ -286,7 +286,7 @@ if ($form->yes) {
 			$elements[] = $form->formCreateElement("color");
 			$elements[] = $form->formCreateElement("description");
 			// add name/value list here
-			$elements[] = $form->formShowListTable("edit_access_data");
+			$elements[] = $form->formCreateElementListTable("edit_access_data");
 			break;
 		default:
 			print "[No valid page definition given]";
