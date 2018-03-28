@@ -122,11 +122,11 @@ class Backend extends \CoreLibs\DB\IO
 	public function adbEditLog($event = '', $data = '', $write_type = 'STRING')
 	{
 		if ($write_type == 'BINARY') {
-			$data_binary = $this->db_escape_bytea(bzcompress(serialize($data)));
+			$data_binary = $this->dbEscapeBytea(bzcompress(serialize($data)));
 			$data = 'see bzip compressed data_binary field';
 		}
 		if ($write_type == 'STRING') {
-			$data = $this->db_escape_string(serialize($data));
+			$data = $this->dbEscapeString(serialize($data));
 		}
 
 		$q = "INSERT INTO ".LOGIN_DB_SCHEMA.".edit_log ";
@@ -134,18 +134,18 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
 		$q .= "VALUES ";
-		$q .= "(".@$_SESSION['EUID'].", NOW(), '".$this->db_escape_string($event)."', '".$data."', '".$data_binary."', '".$this->page_name."', ";
-		$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->db_escape_string(@$_SERVER['HTTP_USER_AGENT'])."', ";
-		$q .= "'".$this->db_escape_string(@$_SERVER['HTTP_REFERER'])."', '".$this->db_escape_string(@$_SERVER['SCRIPT_FILENAME'])."', ";
-		$q .= "'".$this->db_escape_string(@$_SERVER['QUERY_STRING'])."', '".$this->db_escape_string(@$_SERVER['SERVER_NAME'])."', ";
-		$q .= "'".$this->db_escape_string(@$_SERVER['HTTP_HOST'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT'])."', ";
-		$q .= "'".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_CHARSET'])."', '".$this->db_escape_string(@$_SERVER['HTTP_ACCEPT_ENCODING'])."', ";
+		$q .= "(".@$_SESSION['EUID'].", NOW(), '".$this->dbEscapeString($event)."', '".$data."', '".$data_binary."', '".$this->page_name."', ";
+		$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->dbEscapeString(@$_SERVER['HTTP_USER_AGENT'])."', ";
+		$q .= "'".$this->dbEscapeString(@$_SERVER['HTTP_REFERER'])."', '".$this->dbEscapeString(@$_SERVER['SCRIPT_FILENAME'])."', ";
+		$q .= "'".$this->dbEscapeString(@$_SERVER['QUERY_STRING'])."', '".$this->dbEscapeString(@$_SERVER['SERVER_NAME'])."', ";
+		$q .= "'".$this->dbEscapeString(@$_SERVER['HTTP_HOST'])."', '".$this->dbEscapeString(@$_SERVER['HTTP_ACCEPT'])."', ";
+		$q .= "'".$this->dbEscapeString(@$_SERVER['HTTP_ACCEPT_CHARSET'])."', '".$this->dbEscapeString(@$_SERVER['HTTP_ACCEPT_ENCODING'])."', ";
 		$q .= "'".session_id()."', ";
-		$q .= "'".$this->db_escape_string($this->action)."', '".$this->db_escape_string($this->action_id)."', ";
-		$q .= "'".$this->db_escape_string($this->action_yes)."', '".$this->db_escape_string($this->action_flag)."', ";
-		$q .= "'".$this->db_escape_string($this->action_menu)."', '".$this->db_escape_string($this->action_loaded)."', ";
-		$q .= "'".$this->db_escape_string($this->action_value)."', '".$this->db_escape_string($this->action_error)."')";
-		$this->db_exec($q, 'NULL');
+		$q .= "'".$this->dbEscapeString($this->action)."', '".$this->dbEscapeString($this->action_id)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_yes)."', '".$this->dbEscapeString($this->action_flag)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_menu)."', '".$this->dbEscapeString($this->action_loaded)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_value)."', '".$this->dbEscapeString($this->action_error)."')";
+		$this->dbExec($q, 'NULL');
 	}
 
 	// METHOD: adbTopMenu
@@ -211,7 +211,7 @@ class Backend extends \CoreLibs\DB\IO
 					$name = $pages[$i]["page_name"];
 					// if page name matchs -> set selected flag
 					$selected = 0;
-					if ($this->get_page_name() == $pages[$i]["filename"]) {
+					if ($this->getPageName() == $pages[$i]["filename"]) {
 						$selected = 1;
 						$this->page_name = $name;
 					}
@@ -322,11 +322,11 @@ class Backend extends \CoreLibs\DB\IO
 		$q = "INSERT INTO ".GLOBAL_DB_SCHEMA.".live_queue (";
 		$q .= "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file";
 		$q .= ") VALUES (";
-		$q .= "'".$this->db_escape_string($queue_key)."', '".$this->db_escape_string($key_value)."', ";
-		$q .= "'".$this->db_escape_string($key_name)."', '".$this->db_escape_string($type)."', ";
-		$q .= "'".$this->db_escape_string($target)."', '".$this->db_escape_string($data)."', ";
-		$q .= "'".$this->queue_key."', '".$this->action."', '".$this->db_escape_string($associate)."', ";
-		$q .= "'".$this->db_escape_string($file)."')";
+		$q .= "'".$this->dbEscapeString($queue_key)."', '".$this->dbEscapeString($key_value)."', ";
+		$q .= "'".$this->dbEscapeString($key_name)."', '".$this->dbEscapeString($type)."', ";
+		$q .= "'".$this->dbEscapeString($target)."', '".$this->dbEscapeString($data)."', ";
+		$q .= "'".$this->queue_key."', '".$this->action."', '".$this->dbEscapeString($associate)."', ";
+		$q .= "'".$this->dbEscapeString($file)."')";
 		$this->db_exec($q);
 	}
 

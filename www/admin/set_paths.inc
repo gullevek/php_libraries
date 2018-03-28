@@ -41,7 +41,7 @@ $lang_short = substr($lang, 0, 2);
 $CONTENT_INCLUDE = str_replace(".php", ".tpl", $cms->page_name);
 $FORM_NAME = !isset($FORM_NAME) || !$FORM_NAME ? str_replace(".php", "", $cms->page_name) : $FORM_NAME;
 // set local page title
-$L_TITLE = ucfirst(str_replace('_', ' ', $cms->get_page_name(1))).' - '.$G_TITLE;
+$L_TITLE = ucfirst(str_replace('_', ' ', $cms->getPageName(1))).' - '.$G_TITLE;
 // strip tpl and replace it with inc
 // php include file per page
 $cms->INC_TEMPLATE_NAME = str_replace(".tpl", ".inc", $CONTENT_INCLUDE);

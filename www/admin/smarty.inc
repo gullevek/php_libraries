@@ -84,7 +84,7 @@ $cms->DATA['LANG'] = $lang;
 $cms->DATA['TINYMCE_LANG'] = $lang_short;
 
 // debug data, if DEBUG flag is on, this data is print out
-$cms->DEBUG_DATA['debug_error_msg'] = $cms->running_time();
+$cms->DEBUG_DATA['debug_error_msg'] = $cms->runningTime();
 $cms->DEBUG_DATA['DEBUG'] = @$DEBUG_TMPL;
 
 // create main data array

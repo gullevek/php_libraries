@@ -57,7 +57,7 @@ $cms = new CoreLibs\Admin\Backend($DB_CONFIG[MAIN_DB], $lang);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db nfo
-$cms->db_info();
+$cms->dbInfo();
 // set acl
 $cms->acl = $login->acl;
 //------------------------------ class init end
