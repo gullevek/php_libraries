@@ -8,6 +8,8 @@
 *	Update:		Clemens Schwaighofer
 *	Date:		2012.9.5 [stacked output]
 *	Date:		2013.2.21 [proper class formatting]
+*	Date:       2017.4.13 [no output fix with cache overload]
+*	Date:       2018.3.28 [PHPCS + namespace]
 *
 */
 
@@ -302,7 +304,7 @@ class ProgressBar
 
 	public function setLabelPosition($name, $left, $top, $width, $height, $align = '')
 	{
-//		print "SET POSITION[$name]: $left<br>";
+		// print "SET POSITION[$name]: $left<br>";
 		// if this is percent, we ignore anything, it is auto positioned
 		if ($this->label[$name]['type'] != 'percent') {
 			foreach (array('top', 'left', 'width', 'height') as $pos_name) {
@@ -361,7 +363,7 @@ class ProgressBar
 		if ($this->label[$name]['type'] == 'percent') {
 			$this->label[$name]['top'] = round(($this->height - intval($size)) / log($this->height - intval($size), 7), 0) - $this->pedding;
 		}
-//		print "HEIGHT: ".$this->height.", Size: ".intval($size).", Pedding: ".$this->pedding.", Calc: ".round($this->height - intval($size)).", Log: ".log($this->height - intval($size), 7)."<br>";
+		// print "HEIGHT: ".$this->height.", Size: ".intval($size).", Pedding: ".$this->pedding.", Calc: ".round($this->height - intval($size)).", Log: ".log($this->height - intval($size), 7)."<br>";
 		// then set like usual
 		$this->label[$name]['font-size'] = intval($size);
 		if ($family != '') {
@@ -385,7 +387,7 @@ class ProgressBar
 	public function setLabelValue($name, $value)
 	{
 		$this->label[$name]['value'] = $value;
-//		print "NAME[$name], Status: ".$this->status.": ".$value."<Br>";
+		// print "NAME[$name], Status: ".$this->status.": ".$value."<Br>";
 		if ($this->status != 'new') {
 			echo '<script type="text/JavaScript">PBlabelText'.$this->code.'("'.$name.'","'.$this->label[$name]['value'].'");</script>'."\n";
 			$this->__flushCache();
@@ -479,7 +481,7 @@ class ProgressBar
 		$js .= ' }'."\n";
 		$js .= '}'."\n";
 
-//print "DUMP LABEL: <br><pre>".print_r($this->label, 1)."</pre><br>";
+		// print "DUMP LABEL: <br><pre>".print_r($this->label, 1)."</pre><br>";
 		foreach ($this->label as $name => $data) {
 			// set what type of move we do
 			$move_prefix = $data['type'] == 'button' ? 'margin' : 'padding';
@@ -524,7 +526,7 @@ class ProgressBar
 						break;
 					case 'percent':
 						// only one inner percent
-//						print "STYLE[$name]: ".$style_lbl."<br>";
+						// print "STYLE[$name]: ".$style_lbl."<br>";
 						if (!$html_percent) {
 							$html_percent = '<div id="plbl'.$name.$this->code.'" style="'.$style_lbl.'width:'.$data['width'].'px;line-height:1;text-shadow: 0 0 .2em white, 0 0 .5em white;">'.$this->__calculatePercent($this->step).'%</div>'."\n";
 						}
@@ -666,3 +668,6 @@ class ProgressBar
 		}
 	}
 }
+
+# __END__
+

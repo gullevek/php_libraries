@@ -23,11 +23,6 @@ extract($_POST, EXTR_SKIP);
 // set output to quiet for load of classes & session settings
 ob_start();
 require("config.inc");
-
-// login class, DB connections & Admin class, Smarty extension
-foreach (array ('Login', 'Admin.Backend', 'Smarty.Extend') as $class) {
-	_spl_autoload('Class.'.$class.'.inc');
-}
 //------------------------------ library include end
 
 //------------------------------ basic variable settings start
@@ -50,17 +45,15 @@ if (array_key_exists('action', $_POST) && $_POST['action'] != 'download_csv') {
 
 //------------------------------ class init start
 // login & page access check
-$login = new login($DB_CONFIG[LOGIN_DB], $lang);
+$login = new CoreLibs\ACL\Login($DB_CONFIG[LOGIN_DB], $lang);
 // post login lang check
 if ($_SESSION['DEFAULT_LANG']) {
 	$lang = $_SESSION['DEFAULT_LANG'];
 }
 // create smarty object
-$smarty = new SmartyML($lang);
+$smarty = new CoreLibs\Template\SmartyExtend($lang);
 // create new DB class
-$cms = new AdminBackend($DB_CONFIG[MAIN_DB], $lang);
-// set search path to the default DB schema
-$cms->db_exec("SET search_path TO ".DB_SCHEMA);
+$cms = new CoreLibs\Admin\Backend($DB_CONFIG[MAIN_DB], $lang);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db nfo

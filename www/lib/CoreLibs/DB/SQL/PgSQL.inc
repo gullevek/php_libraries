@@ -47,7 +47,7 @@ class PgSQL
 {
 	private $last_error_query;
 	private $dbh;
-//		public $currval_query;
+	// public $currval_query;
 
 	// METHOD: __construct
 	// PARAMS: none

@@ -33,7 +33,7 @@
 *	error_id
 *	error_string
 *
-* PUBLIC METHOD:S
+* PUBLIC METHODS
 *	debug -> calls with "level", "string" and flag to turn off (0) the newline at the end
 *	debug_for -> sets debug on/off for a type (error, echo, print) for a certain level
 *	print_error_msg -> prints out the error message, optional parameter is a header prefix
@@ -60,7 +60,7 @@
 *   crypt* -> encrypt and decrypt login string data, used by Login class
 *   setFormToken/validateFormToken -> form protection with token
 *
-* PRIVATE METHOD:S
+* PRIVATE METHODS
 *	fdebug_fp -> opens and closes file, called from fdebug method
 *	write_error_msg -> writes error msg to file if requested
 *
@@ -130,8 +130,8 @@ class Basic
 	public $log_per_page = 0; // set, will split log per called file
 	public $log_per_run = 0; // create a new log file per run (time stamp + unique ID)
 
-	public $starttime; // start time if time debug is used
-	public $endtime; // end time if time debug is used
+	private $starttime; // start time if time debug is used
+	private $endtime; // end time if time debug is used
 
 	public $email_regex; // regex var for email check
 	public $keitai_email_regex; // regex var for email check
@@ -360,7 +360,7 @@ class Basic
 	}
 
 	// *************************************************************
-	// GENERAL METHOD:S
+	// GENERAL METHODS
 	// *************************************************************
 
 	// METHOD: db_io_info
@@ -413,6 +413,16 @@ class Basic
 		return $running_time;
 	}
 
+	// METHOD: resetRunningtime
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : resets start & end time for runningTime call
+	public function resetRunningTime()
+	{
+		$this->starttime = '';
+		$this->endtime = '';
+	}
+
 	// METHOD: printTime
 	// WAS   : print_time
 	// PARAMS: $set_microtime, 0 shows none, default (-1) shows all, positive number is for rounding
@@ -458,7 +468,7 @@ class Basic
 	private function fdebugFP($flag = '')
 	{
 		if (!$this->debug_fp || $flag == 'o') {
-			$fn = ROOT.LOG.$this->debug_filename;
+			$fn = BASE.LOG.$this->debug_filename;
 			$this->debug_fp = @fopen($fn, 'a');
 		} elseif ($this->debug_fp || $flag == 'c') {
 			fclose($this->debug_fp);
@@ -621,7 +631,7 @@ class Basic
 				// init output variable
 				$output = $error_string; // output formated error string to output file
 				// init base file path
-				$fn = ROOT.LOG.$this->log_print_file.'.'.$this->log_file_name_ext;
+				$fn = BASE.LOG.$this->log_print_file.'.'.$this->log_file_name_ext;
 				// log ID prefix settings, if not valid, replace with empty
 				if (preg_match("/^[A-Za-z0-9]+$/", $this->log_file_id)) {
 					$rpl_string = '_'.$this->log_file_id;
@@ -691,10 +701,11 @@ class Basic
 	// RETURN: none
 	// DESC  : catch function to handle all errors that are not handled by php itself
 	//         eg all errors that would be surpressed are written to a log file if this function is enabled
-	//         to use it call with set_error_handler(array("baisc", "ErrorHandler"));
-	// NOTE  : this will only catch any additional erros created AFTER the set_error_hanlder was set,
+	//         to use it call with set_error_handler(array("Basic", "ErrorHandler"));
+	// NOTE  : this will only catch any additional erros created AFTER the set_error_handler was set,
 	//         so mostly no strict/notices from the classes are visible
-	public static function errorHandler($type, $message, $file, $line, $context)
+	//         also, this currently returns true, which will invoke the standard PHP error reporter too
+	public static function errorHandler($type, $message, $file, $line)
 	{
 		// error levels for PHP
 		// values based on 5.3
@@ -717,11 +728,12 @@ class Basic
 			30719 => 'E_ALL' // 6143 in 5.2, 2047 in previous versions
 		);
 
-		$fn = ROOT.LOG.'php_errors-'.date('Y-m-d').'.log';
+		$fn = BASE.LOG.'php_errors-'.date('Y-m-d').'.log';
 		$output = '['.Basic::print_time().'] {'.Basic::get_page_name().'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message."\n";
 		$fp = fopen($fn, 'a');
 		fwrite($fp, $output);
 		fclose($fp);
+		// if set to false the PHP error reporter will be called after this
 		return false;
 	}
 
@@ -1018,12 +1030,60 @@ class Basic
 				if (($result = Basic::arraySearchSimple($_value, $key, $value)) !== false) {
 					return $result;
 				}
-			} elseif ($_key == $key && $_value = $value) {
+			} elseif ($_key == $key && $_value == $value) {
 				return true;
 			}
 		}
 		// no true returned, not found
 		return false;
+	}
+
+	// METHOD: inArrayAny
+	// WAS   : in_array_any
+	// PARAMS: needle: array
+	//         haystack: array
+	// RETURN: found elements: array
+	// DESC  : search for the needle array elements in haystack and return the ones found as an array,
+	//         is there nothing found, it returns FALSE (boolean)
+	public static function inArrayAny($needle, $haystack)
+	{
+		if (!is_array($needle)) {
+			return false;
+		}
+		if (!is_array($haystack)) {
+			return false;
+		}
+		$found = array ();
+		foreach ($needle as $element) {
+			if (in_array($element, $haystack)) {
+				$found[] = $element;
+			}
+		}
+		if (count($found) == 0) {
+			return false;
+		} else {
+			return $found;
+		}
+	}
+
+	// METHOD: genAssocArray
+	// WAS   : GenAssocArray
+	// PARAMS: db array, key, value part, flag if set all or only set
+	// RETURN: returns and associative array
+	// DESC  : creates out of a normal db_return array an assoc array
+	public static function genAssocArray($db_array, $key, $value, $set_only = 0)
+	{
+		for ($i = 0; $i < count($db_array); $i ++) {
+			// if no key then we make an order reference
+			if ($key && $value && (($set_only && $db_array[$i][$value]) || (!$set_only))) {
+				$ret_array[$db_array[$i][$key]] = $db_array[$i][$value];
+			} elseif (!$key && $value) {
+				$ret_array[] = $db_array[$i][$value];
+			} elseif ($key && !$value) {
+				$ret_array[$db_array[$i][$key]] = $i;
+			}
+		}
+		return $ret_array;
 	}
 
 	// METHOD: __mbMimeEncode
@@ -1085,6 +1145,9 @@ class Basic
 		$number = trim($number);
 		$last = strtolower($number[strlen($number) - 1]);
 		switch ($last) {
+			case 't':
+				$number *= 1024;
+				// no break, calc down next level
 			case 'g':
 				$number *= 1024;
 				// no break: if we have giga we do first multiplication before the others
@@ -1105,10 +1168,9 @@ class Basic
 	public static function dateStringFormat($timestamp, $show_micro = true)
 	{
 		list ($timestamp, $ms) = explode('.', round($timestamp, 4));
+		$string = date("Y-m-d H:i:s", $timestamp);
 		if ($show_micro) {
-			$string = date("Y-m-d H:i:s", $timestamp).' '.$ms.'ms';
-		} else {
-			$string = date("Y-m-d H:i:s", $timestamp);
+			$string .= ' '.$ms.'ms';
 		}
 		return $string;
 	}
@@ -1174,26 +1236,6 @@ class Basic
 		} else {
 			return $timestring;
 		}
-	}
-
-	// METHOD: genAssocArray
-	// WAS   : GenAssocArray
-	// PARAMS: db array, key, value part, flag if set all or only set
-	// RETURN: returns and associative array
-	// DESC  : creates out of a normal db_return array an assoc array
-	public static function genAssocArray($db_array, $key, $value, $set_only = 0)
-	{
-		for ($i = 0; $i < count($db_array); $i ++) {
-			// if no key then we make an order reference
-			if ($key && $value && (($set_only && $db_array[$i][$value]) || (!$set_only))) {
-				$ret_array[$db_array[$i][$key]] = $db_array[$i][$value];
-			} elseif (!$key && $value) {
-				$ret_array[] = $db_array[$i][$value];
-			} elseif ($key && !$value) {
-				$ret_array[$db_array[$i][$key]] = $i;
-			}
-		}
-		return $ret_array;
 	}
 
 	// METHOD: checkDate
@@ -1339,12 +1381,12 @@ class Basic
 		if ($cache_source) {
 			$tmp_src = $cache_source;
 		} else {
-			$tmp_src = ROOT.TMP;
+			$tmp_src = BASE.TMP;
 		}
 		// check if pic has a path, and override next sets
 		if (strstr($pic, '/') === false) {
 			if (!$path) {
-				$path = ROOT;
+				$path = BASE;
 			}
 			$filename = $path.MEDIA.PICTURES.$pic;
 		} else {
@@ -1430,14 +1472,6 @@ class Basic
 			}
 		}
 		return $return_data;
-	}
-
-	// *** DEPRICATED CALL ***
-	// should be removed later
-	public function checkConvert($string, $from_encoding, $to_encoding)
-	{
-		$this->debug('DEPRICATED CALL', 'Depricated call for method: checkConvert [NOW: checkConvertEncoding]');
-		return $this->checkConvertEncoding($string, $from_encoding, $to_encoding);
 	}
 
 	// METHOD: checkConvertEncoding
@@ -1936,34 +1970,6 @@ class Basic
 		return '#'.$red.$green.$blue;
 	}
 
-	// METHOD: inArrayAny
-	// WAS   : in_array_any
-	// PARAMS: needle: array
-	//         haystack: array
-	// RETURN: found elements: array
-	// DESC  : search for the needle array elements in haystack and return the ones found as an array,
-	//         is there nothing found, it returns FALSE (boolean)
-	public static function inArrayAny($needle, $haystack)
-	{
-		if (!is_array($needle)) {
-			return false;
-		}
-		if (!is_array($haystack)) {
-			return false;
-		}
-		$found = array ();
-		foreach ($needle as $element) {
-			if (in_array($element, $haystack)) {
-				$found[] = $element;
-			}
-		}
-		if (count($found) == 0) {
-			return false;
-		} else {
-			return $found;
-		}
-	}
-
 	// METHOD: getEmailType
 	// PARAMS: email, short == false
 	// RETURN: string for email type, eg "pc", "docomo", etc
@@ -2004,15 +2010,21 @@ class Basic
 
 	// METHOD: printDateTime
 	// PARAMS: year, month, day, hour, min: the date and time values
-	//         suffix: additional info printed after the date time variable in the drop down, also used for ID in the on change JS call
+	//         suffix: additional info printed after the date time variable in the drop down,
+	//         also used for ID in the on change JS call
 	//         min_steps: default is 1 (minute), can set to anything, is used as sum up from 0
+	//         name_pos_back: default false, if set to true, the name will be printend
+	//                        after the drop down and not before the drop down
 	// RETURN: HTML formated strings for drop down lists of date and time
 	// DESC  : print the date/time drop downs, used in any queue/send/insert at date/time place
-	public static function printDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1)
+	public static function printDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1, $name_pos_back = false)
 	{
 		// if suffix given, add _ before
 		if ($suffix) {
 			$suffix = '_'.$suffix;
+		}
+		if ($min_steps < 1 || $min_steps > 59) {
+			$min_steps = 1;
 		}
 
 		$on_change_call = 'dt_list(\''.$suffix.'\');';
@@ -2033,33 +2045,62 @@ class Basic
 		$days_in_month = date("t", strtotime($year."-".$month."-".$day." ".$hour.":".$min.":0"));
 
 		// from now to ?
-		$string = 'Year ';
+		if ($name_pos_back === false) {
+			$string = 'Year ';
+		}
 		$string .= '<select id="year'.$suffix.'" name="year'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = date("Y"); $i <= $max_year; $i ++) {
 			$string .= '<option value="'.$i.'" '.(($year == $i) ? 'selected' : '').'>'.$i.'</option>';
 		}
-		$string .= '</select> Month ';
+		$string .= '</select> ';
+		if ($name_pos_back === true) {
+			$string .= 'Year ';
+		}
+		if ($name_pos_back === false) {
+			$string .= 'Month ';
+		}
 		$string .= '<select id="month'.$suffix.'" name="month'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = 1; $i <= 12; $i ++) {
 			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($month == $i) ? 'selected' : '').'>'.$i.'</option>';
 		}
-		$string .= '</select> Day ';
+		$string .= '</select> ';
+		if ($name_pos_back === true) {
+			$string .= 'Month ';
+		}
+		if ($name_pos_back === false) {
+			$string .= 'Day ';
+		}
 		$string .= '<select id="day'.$suffix.'" name="day'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = 1; $i <= $days_in_month; $i ++) {
 			// set weekday text based on current month ($month) and year ($year)
-			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($day == $i) ? 'selected' : '').'>'.$i.' ('.$this->l->__(date('D', mktime(0, 0, 0, $month, $i, $year))).')</option>';
+			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($day == $i) ? 'selected' : '').'>'.$i.' ('.date('D', mktime(0, 0, 0, $month, $i, $year)).')</option>';
 		}
-		$string .= '</select> Hour ';
+		$string .= '</select> ';
+		if ($name_pos_back === true) {
+			$string .= 'Day ';
+		}
+		if ($name_pos_back === false) {
+			$string .= 'Hour ';
+		}
 		$string .= '<select id="hour'.$suffix.'" name="hour'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = 0; $i <= 23; $i += $min_steps) {
 			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($hour == $i) ? 'selected' : '').'>'.$i.'</option>';
 		}
-		$string .= '</select> Minute ';
+		$string .= '</select> ';
+		if ($name_pos_back === true) {
+			$string .= 'Hour ';
+		}
+		if ($name_pos_back === false) {
+			$string .= 'Minute ';
+		}
 		$string .= '<select id="min'.$suffix.'" name="min'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = 0; $i <= 59; $i ++) {
 			$string .= '<option value="'.(( $i < 10) ? '0'.$i : $i).'" '.(($min == $i) ? 'selected' : '').'>'.$i.'</option>';
 		}
 		$string .= '</select>';
+		if ($name_pos_back === true) {
+			$string .= ' Minute ';
+		}
 		// return the datetime select string
 		return $string;
 	}
@@ -2095,7 +2136,17 @@ class Basic
 	}
 
 	// *************************************************************
-	// COMPATIBILITY METHOD:S
+	// *** DEPRICATED CALL ***
+	// *************************************************************
+	// should be removed later
+	public function checkConvert($string, $from_encoding, $to_encoding)
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->checkConvertEncoding($string, $from_encoding, $to_encoding);
+	}
+
+	// *************************************************************
+	// *** COMPATIBILITY METHODS ***
 	// those methods are deprecated function call names
 	// they exist for backwards compatibility only
 	// *************************************************************

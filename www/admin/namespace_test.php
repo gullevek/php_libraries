@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
 $PRINT_ALL = 1;
@@ -14,18 +16,26 @@ DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
 
 echo "DIR: ".DIR."<br>ROOT: ".ROOT."<br>BASE: ".BASE."<br>";
 
-$lang = 'en_utf8';
+$lang = 'ja_utf8';
 $base = new CoreLibs\Admin\Backend($DB_CONFIG[MAIN_DB], $lang);
+ob_end_flush();
 
+print "Start time: ".$base->runningTime()."<br>";
 print "ByteStringFormat: ".$base->ByteStringFormat(1234567.12)."<br>";
 print "byteStringFormat: ".$base->byteStringFormat(1234567.12)."<br>";
 print "get_page_name: ".$base->get_page_name()."<br>";
 print "getPageName: ".$base->getPageName()."<br>";
 
-print "DB Info: ".$base->dbInfo(1);
+print "DB Info: ".$base->dbInfo(1)."<br>";
 
-ob_end_flush();
 
+print "End Time: ".$base->runningTime()."<br>";
+print "Run Time: ".$base->runningTime()."<br>";
+
+print "Lang: ".$base->l->__getLang().", MO File: ".$base->l->__getMoFile()."<br>";
+print "Translate test: Year -> ".$base->l->__('Year')."<br>";
+
+// end error print
 print $base->printErrorMsg();
 
 # __END__

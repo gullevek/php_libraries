@@ -63,7 +63,6 @@ class Backend extends \CoreLibs\DB\IO
 		$this->l = new \CoreLibs\Language\L10n($lang);
 
 		// init the database class
-//			$this->db_io($db_config, $debug, $db_debug, $echo, $print);
 		parent::__construct($db_config, $debug, $db_debug, $echo, $print);
 
 		// internal
@@ -148,13 +147,6 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "'".$this->db_escape_string($this->action_value)."', '".$this->db_escape_string($this->action_error)."')";
 		$this->db_exec($q, 'NULL');
 	}
-
-
-	// ==================================
-	// ALL THE PAGE RIGHTS/USER RIGHTS/ETC need to fixed and put into one
-	// proper settings have to be done with the defined top down rights flow
-	// ==================================
-	// all ACLs are set in the login class
 
 	// METHOD: adbTopMenu
 	// PARAMS: level
@@ -258,7 +250,7 @@ class Backend extends \CoreLibs\DB\IO
 	// DESC  : creates out of a normal db_return array an assoc array
 	public function adbAssocArray($db_array, $key, $value)
 	{
-		return $this->GenAssocArray($db_array, $key, $value);
+		return $this->genAssocArray($db_array, $key, $value);
 	}
 
 	// REMARK: below function has moved to "Class.Basic"
@@ -268,7 +260,7 @@ class Backend extends \CoreLibs\DB\IO
 	// DESC  : converts bytes into formated string with KB, MB, etc
 	public function adbByteStringFormat($number)
 	{
-		return $this->ByteStringFormat($number);
+		return $this->byteStringFormat($number);
 	}
 
 	// REMARK: below function has moved to "Class.Basic"
@@ -283,7 +275,7 @@ class Backend extends \CoreLibs\DB\IO
 	// DESC  : converts picture to a thumbnail with max x and max y size
 	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = false, $path = "", $cache = "")
 	{
-		return $this->CreateThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
+		return $this->createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
 	}
 
 	// METHOD: adbMsg
@@ -340,67 +332,30 @@ class Backend extends \CoreLibs\DB\IO
 
 	// METHOD: adbPrintDateTime
 	// PARAMS: year, month, day, hour, min: the date and time values
-	//         suffix: additional info printed after the date time variable in the drop down, also used for ID in the on change JS call
-	//         minute steps, can be 1 (default), 5, 10, etc, if invalid (outside 1h range, it falls back to 1min)
+	//         suffix: additional info printed after the date time variable in the drop down,
+	//         also used for ID in the on change JS call
+	//         minute steps: can be 1 (default), 5, 10, etc, if invalid (outside 1h range,
+	//         it falls back to 1min)
+	//         name pos back: default false, if set to true, the name will be printend
+	//                        after the drop down and not before the drop down
 	// RETURN: HTML formated strings for drop down lists of date and time
 	// DESC  : print the date/time drop downs, used in any queue/send/insert at date/time place
-	public function adbPrintDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1)
+	// NOTE  : Basic class holds exact the same, except the Year/Month/Day/etc strings
+	//         are translated in this call
+	public function adbPrintDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1, $name_pos_back = false)
 	{
-		// if suffix given, add _ before
-		if ($suffix) {
-			$suffix = '_'.$suffix;
+		// get the build layout
+		$html_time = $this->printDateTime($year, $month, $day, $hour, $min, $suffix, $min_steps, $name_pos_back);
+		// translate the strings inside
+		foreach (array('Year ', 'Month ', 'Day ', 'Hour ', 'Minute ') as $_time) {
+			$html_time = str_replace($_time, $this->l->__(str_replace(' ', '', $_time)).' ', $html_time);
 		}
-		if ($min_steps < 1 || $min_steps > 59) {
-			$min_steps = 1;
+		// replace week days in short
+		foreach (array('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun') as $_date) {
+			$html_time = str_replace('('.$_date.')', '('.$this->l->__($_date).')', $html_time);
 		}
-
-		$on_change_call = 'dt_list(\''.$suffix.'\');';
-
-		// always be 1h ahead (for safety)
-		$timestamp = time() + 3600; // in seconds
-
-		// the max year is this year + 1;
-		$max_year = date("Y", $timestamp) + 1;
-
-		// preset year, month, ...
-		$year = (!$year) ? date("Y", $timestamp) : $year;
-		$month = (!$month) ? date("m", $timestamp) : $month;
-		$day = (!$day) ? date("d", $timestamp) : $day;
-		$hour = (!$hour) ? date("H", $timestamp) : $hour;
-		$min = (!$min) ? date("i", $timestamp) : $min; // add to five min?
-		// max days in selected month
-		$days_in_month = date("t", strtotime($year."-".$month."-".$day." ".$hour.":".$min.":0"));
-
-		// from now to ?
-		$string = $this->l->__('Year').' ';
-		$string .= '<select id="year'.$suffix.'" name="year'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = date("Y"); $i <= $max_year; $i ++) {
-			$string .= '<option value="'.$i.'" '.(($year == $i) ? 'selected' : '').'>'.$i.'</option>';
-		}
-		$string .= '</select> '.$this->l->__('Month').' ';
-		$string .= '<select id="month'.$suffix.'" name="month'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 1; $i <= 12; $i ++) {
-			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($month == $i) ? 'selected' : '').'>'.$i.'</option>';
-		}
-		$string .= '</select> '.$this->l->__('Day').' ';
-		$string .= '<select id="day'.$suffix.'" name="day'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 1; $i <= $days_in_month; $i ++) {
-			// set weekday text based on current month ($month) and year ($year)
-			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($day == $i) ? 'selected' : '').'>'.$i.' ('.$this->l->__(date('D', mktime(0, 0, 0, $month, $i, $year))).')</option>';
-		}
-		$string .= '</select> '.$this->l->__('Hour').' ';
-		$string .= '<select id="hour'.$suffix.'" name="hour'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 0; $i <= 23; $i ++) {
-			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($hour == $i) ? 'selected' : '').'>'.$i.'</option>';
-		}
-		$string .= '</select> '.$this->l->__('Minute').' ';
-		$string .= '<select id="min'.$suffix.'" name="min'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 0; $i <= 59; $i += $min_steps) {
-			$string .= '<option value="'.(( $i < 10) ? '0'.$i : $i).'" '.(($min == $i) ? 'selected' : '').'>'.$i.'</option>';
-		}
-		$string .= '</select>';
-		// return the datetime select string
-		return $string;
+		// return the datetime select string with strings translated
+		return $html_time;
 	}
 }
 

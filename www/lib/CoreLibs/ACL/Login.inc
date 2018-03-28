@@ -478,8 +478,8 @@ class Login extends \CoreLibs\DB\IO
 			$q .= "AND eu.edit_user_id = ".$this->euid." AND filename = '".$this->page_name."' AND eg.enabled = 1 AND epa.enabled = 1";
 			$res = $this->dbReturnRow($q);
 			// unset mem limit if debug is set to 1
-//				if (($GLOBALS["DEBUG_ALL"] || $GLOBALS["DB_DEBUG"] || $_SESSION["DEBUG_ALL"] || $_SESSION["DB_DEBUG"]) && ini_get('memory_limit') != -1)
-//					ini_set('memory_limit', -1);
+			// if (($GLOBALS["DEBUG_ALL"] || $GLOBALS["DB_DEBUG"] || $_SESSION["DEBUG_ALL"] || $_SESSION["DB_DEBUG"]) && ini_get('memory_limit') != -1)
+			// 	ini_set('memory_limit', -1);
 			if ($res["filename"] == $this->page_name) {
 				$this->permission_okay = 1;
 			} else {
