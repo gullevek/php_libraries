@@ -327,6 +327,8 @@ class basic
 			if (SET_SESSION_NAME) {
 				// set the session name for possible later check
 				$this->session_name = SET_SESSION_NAME;
+			}
+			if ($this->session_name) {
 				session_name($this->session_name);
 			}
 			// start session
@@ -1010,7 +1012,7 @@ class basic
 				if (($result = basic::array_search_simple($_value, $key, $value)) !== false) {
 					return $result;
 				}
-			} elseif ($_key == $key && $_value = $value) {
+			} elseif ($_key == $key && $_value == $value) {
 				return true;
 			}
 		}

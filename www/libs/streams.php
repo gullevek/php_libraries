@@ -64,7 +64,7 @@ class StringReader
 	{
 		$data = substr($this->_str, $this->_pos, $bytes);
 		$this->_pos += $bytes;
-		if (strlen($this->_str)<$this->_pos) {
+		if (strlen($this->_str) < $this->_pos) {
 			$this->_pos = strlen($this->_str);
 		}
 
@@ -74,7 +74,7 @@ class StringReader
 	public function seekto($pos)
 	{
 		$this->_pos = $pos;
-		if (strlen($this->_str)<$this->_pos) {
+		if (strlen($this->_str) < $this->_pos) {
 			$this->_pos = strlen($this->_str);
 		}
 		return $this->_pos;
@@ -101,7 +101,7 @@ class FileReader
 	public function __construct($filename)
 	{
 		if (file_exists($filename)) {
-			$this->_length=filesize($filename);
+			$this->_length = filesize($filename);
 			$this->_pos = 0;
 			$this->_fd = fopen($filename, 'rb');
 			if (!$this->_fd) {
@@ -165,7 +165,7 @@ class CachedFileReader extends StringReader
 	public function __construct($filename)
 	{
 		if (file_exists($filename)) {
-			$length=filesize($filename);
+			$length = filesize($filename);
 			$fd = fopen($filename, 'rb');
 
 			if (!$fd) {

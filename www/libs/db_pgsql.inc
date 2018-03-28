@@ -172,7 +172,7 @@ class db_pgsql
 	{
 		// result type is passed on as is [should be checked]
 		if ($result_type) {
-			return pg_fetch_array($cursor, NULL, $result_type);
+			return pg_fetch_array($cursor, null, $result_type);
 		} else {
 			return pg_fetch_array($cursor);
 		}
