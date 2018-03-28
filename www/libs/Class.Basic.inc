@@ -2023,7 +2023,7 @@ class basic
 		$string .= '<select id="day'.$suffix.'" name="day'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = 1; $i <= $days_in_month; $i ++) {
 			// set weekday text based on current month ($month) and year ($year)
-			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($day == $i) ? 'selected' : '').'>'.$i.' ('.$this->l->__(date('D', mktime(0, 0, 0, $month, $i, $year))).')</option>';
+			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($day == $i) ? 'selected' : '').'>'.$i.' ('.date('D', mktime(0, 0, 0, $month, $i, $year)).')</option>';
 		}
 		$string .= '</select> Hour ';
 		$string .= '<select id="hour'.$suffix.'" name="hour'.$suffix.'" onChange="'.$on_change_call.'">';
