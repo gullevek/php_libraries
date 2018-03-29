@@ -35,27 +35,25 @@
 *
 * PUBLIC METHODS
 *	debug -> calls with "level", "string" and flag to turn off (0) the newline at the end
-*	debug_for -> sets debug on/off for a type (error, echo, print) for a certain level
-*	print_error_msg -> prints out the error message, optional parameter is a header prefix
+*	debugFor -> sets debug on/off for a type (error, echo, print) for a certain level
+*	printErrorMsg -> prints out the error message, optional parameter is a header prefix
 *	fdebug -> prints line directly to debug_file.log in tmp
 *
-* 	print_time -> prints time + microtime, optional flag to turn off (0) microtime printout
-*	basic  -> constructor
-*	_basic -> desconstructor
+* 	printTime -> prints time + microtime, optional flag to turn off (0) microtime printout
 *	info -> info about that class
-*	running_time -> prints out the time of start/end (automatically called on created and error printout
+*	runningTime -> prints out the time of start/end (automatically called on created and error printout
 *	checked -> returnes checked or selected for var & array
-*	magic_links -> parses text and makes <a href> out of links
-*	get_page_name -> get the filename of the current page
-*	array_search_recursive -> search for a value/key combination in an array of arrays
-*	ByteStringFormat -> format bytes into KB, MB, GB, ...
-*	TimeStringFormat -> format a timestamp (seconds) into days, months, ... also with ms
-*	StringToTime -> reverste a TimeStringFormat to a timestamp
-*	GenAssocArray -> generactes a new associativ array from an existing array
-*	CheckDate -> checks if a date is valid
-*   CompareDate -> compares two dates. -1 if the first is smaller, 0 if they are equal, 1 if the first is bigger
-*   CompareDateTime -> compares two dates with time. -1 if the first is smaller, 0 if they are equal, 1 if the first is bigger
-*   _crc32b -> behaves like the hash("crc32b") in php < 5.2.8. this function will flip the hash like it was (wrong)
+*	magicLinks -> parses text and makes <a href> out of links
+*	getPageName -> get the filename of the current page
+*	arraySearchRecursive -> search for a value/key combination in an array of arrays
+*	byteStringFormat -> format bytes into KB, MB, GB, ...
+*	timeStringFormat -> format a timestamp (seconds) into days, months, ... also with ms
+*	stringToTime -> reverste a TimeStringFormat to a timestamp
+*	genAssocArray -> generactes a new associativ array from an existing array
+*	checkDate -> checks if a date is valid
+*   compareDate -> compares two dates. -1 if the first is smaller, 0 if they are equal, 1 if the first is bigger
+*   compareDateTime -> compares two dates with time. -1 if the first is smaller, 0 if they are equal, 1 if the first is bigger
+*   __crc32b -> behaves like the hash("crc32b") in php < 5.2.8. this function will flip the hash like it was (wrong)
 *              before if a new php version is found
 *   crypt* -> encrypt and decrypt login string data, used by Login class
 *   setFormToken/validateFormToken -> form protection with token

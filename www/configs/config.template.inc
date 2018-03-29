@@ -248,4 +248,7 @@ if (DEBUG == false) {
 // any other global definitons here
 //	DEFINE('SOME_ID', <SOME VALUE>);
 
+// read auto loader
+require BASE.LIB.'autoloader.php';
+
 # __END__
