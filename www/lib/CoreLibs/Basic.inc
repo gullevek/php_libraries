@@ -621,10 +621,10 @@ class Basic
 			// only write if write is requested
 			if (($this->print_output[$level] || $this->print_output_all) && !$this->print_output_not[$level]) {
 				// replace all html tags
-					// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "##\\2##", $error_string);
-					// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "", $error_string);
+				// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "##\\2##", $error_string);
+				// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "", $error_string);
 				// replace special line break tag
-					// $error_string = str_replace('<!--#BR#-->', "\n", $error_string);
+				// $error_string = str_replace('<!--#BR#-->', "\n", $error_string);
 
 				// init output variable
 				$output = $error_string; // output formated error string to output file
@@ -654,7 +654,7 @@ class Basic
 				$rpl_string = !$this->log_per_level ? '' : '_'.$level; // if request to write to one file
 				$fn = str_replace('##LEVEL##', $rpl_string, $fn); // create output filename
 
-				$rpl_string = !$this->log_per_class ? '' : '_'.get_class($this); // set sub class settings
+				$rpl_string = !$this->log_per_class ? '' : '_'.str_replace('\\', '-', get_class($this)); // set sub class settings
 				$fn = str_replace('##CLASS##', $rpl_string, $fn); // create output filename
 
 				$rpl_string = !$this->log_per_page ? '' : '_'.$this->getPageName(1); // if request to write to one file

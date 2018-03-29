@@ -213,7 +213,7 @@ if ($cms->action == 'save') {
 			$error = move_uploaded_file($_FILES['file_up']['tmp_name'], $upload_file);
 
 			$cms->debug('file_upload', "UP: $upload_file");
-			$cms->debug('file_upload', "Orig: ".$cms->print_ar($_FILES['file_up']));
+			$cms->debug('file_upload', "Orig: ".$cms->printAr($_FILES['file_up']));
 
 			// because I get bogus error info from move_uploaded_file ...
 			$error = 0;

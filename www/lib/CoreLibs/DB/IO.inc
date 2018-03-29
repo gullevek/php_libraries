@@ -1964,6 +1964,12 @@ class IO extends \CoreLibs\Basic
 		return $this->dbCacheReset($query);
 	}
 
+	public function db_exec($query = 0, $pk_name = '')
+	{
+		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		return $this->dbExec($query, $pk_name);
+	}
+
 	public function db_exec_async($query, $pk_name = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
