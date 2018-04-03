@@ -307,7 +307,12 @@ $CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);
 while (list($key, $value) = each($CONTENT_DATA)) {
 	$smarty->assign($key, $value);
 }
-
+if (is_dir(BASE.TEMPLATES_C)) {
+	$smarty->setCompileDir(BASE.TEMPLATES_C);
+}
+if (is_dir(BASE.CACHE)) {
+	$smarty->setCacheDir(BASE.CACHE);
+}
 $smarty->display('edit_body.tpl');
 
 // debug output

@@ -202,10 +202,10 @@ if ($cms->action == 'save') {
 		$file = DEV_SCHEMA."_".$file_uid;
 		// now upload the file
 		if ($_FILES['file_up']['name']) {
-			$upload_file = ROOT.MEDIA.$cms->data_path[$file_type].$file;
+			$upload_file = BASE.MEDIA.$cms->data_path[$file_type].$file;
 			// wipe out any old tmp data for this new upload
-			if (is_array(glob(ROOT.TMP."thumb_".$file."*"))) {
-				foreach (glob(ROOT.TMP."thumb_".$file."*") as $filename) {
+			if (is_array(glob(BASE.TMP."thumb_".$file."*"))) {
+				foreach (glob(BASE.TMP."thumb_".$file."*") as $filename) {
 					@unlink($filename);
 				}
 			}
@@ -242,7 +242,7 @@ if ($cms->action == 'save') {
 			}
 			$q .= ") VALUES ('".$cms->queue_name."', '".$file_uid."', 'file_uid', '".$sql_action."', 'file', '".$cms->db_escape_string($sql_data)."', '".$cms->queue_key."', '".$cms->action."'";
 			if ($_FILES['file_up']['name']) {
-				$q .= ", '".ROOT.MEDIA.$cms->data_path[$file_type].$file."#".ROOT.MEDIA.$cms->data_path[$file_type].PUBLIC_SCHEMA."_".$file_uid."'";
+				$q .= ", '".BASE.MEDIA.$cms->data_path[$file_type].$file."#".BASE.MEDIA.$cms->data_path[$file_type].PUBLIC_SCHEMA."_".$file_uid."'";
 			}
 			$q .= ")";
 			$cms->db_exec($q);
@@ -262,9 +262,9 @@ if ($cms->action == 'delete' && $cms->action_yes == 'true') {
 	}
 	if (QUEUE == 'live_queue') {
 		$q = "INSERT INTO ".GLOBAL_DB_SCHEMA.".live_queue (queue_key, key_value, key_name, type, target, data, group_key, action, file) VALUES (";
-		$q .= "'".$cms->queue_name."', '".$file_uid."', 'file_uid', 'DELETE', 'file', '', '".$cms->queue_key."', '".$cms->action."', '".ROOT.MEDIA.$cms->data_path[$file_type].PUBLIC_SCHEMA."_".$file_uid."')";
+		$q .= "'".$cms->queue_name."', '".$file_uid."', 'file_uid', 'DELETE', 'file', '', '".$cms->queue_key."', '".$cms->action."', '".BASE.MEDIA.$cms->data_path[$file_type].PUBLIC_SCHEMA."_".$file_uid."')";
 	}
-	@unlink(ROOT.MEDIA.$cms->data_path[$file_type].DEV_SCHEMA."_".$file_uid);
+	@unlink(BASE.MEDIA.$cms->data_path[$file_type].DEV_SCHEMA."_".$file_uid);
 	unset($file_uid);
 	unset($file_id);
 	$delete_done = 1;
@@ -296,7 +296,7 @@ if ($cms->action_flag == 'set_live' && $cms->action = 'set_delete') {
 	while ($res = $cms->db_return($q)) {
 		$q_del = "DELETE FROM ".PUBLIC_SCHEMA.".file WHERE file_uid = '".$res['pkid'].'"';
 		$cms->db_exec($q_del);
-		@unlink(ROOT.MEDIA.$cms->data_path[$res['type']].PUBLIC_SCHEMA."_".$res['file_uid']);
+		@unlink(BASE.MEDIA.$cms->data_path[$res['type']].PUBLIC_SCHEMA."_".$res['file_uid']);
 	}
 	$q = "DELETE FROM ".LOGIN_DB_SCHEMA.".set_live WHERE table_name = '".$cms->page_name."' AND delete_flag = 't'";
 	$cms->db_exec($q);

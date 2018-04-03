@@ -93,4 +93,10 @@ $cms->CONTENT_DATA = array_merge($cms->HEADER, $cms->DATA, $cms->DEBUG_DATA);
 while (list($key, $value) = each($cms->CONTENT_DATA)) {
 	$smarty->assign($key, $value);
 }
+if (is_dir(BASE.TEMPLATES_C)) {
+	$smarty->setCompileDir(BASE.TEMPLATES_C);
+}
+if (is_dir(BASE.CACHE)) {
+	$smarty->setCacheDir(BASE.CACHE);
+}
 $smarty->display($MASTER_TEMPLATE_NAME, $TEMPLATE.$lang, $TEMPLATE.$lang);
