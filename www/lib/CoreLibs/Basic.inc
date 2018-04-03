@@ -1,4 +1,5 @@
-<?/*********************************************************************
+<?php
+/*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2003/03/24
 * VERSION: 2.0.0
@@ -590,7 +591,7 @@ class Basic
 				$string = $this->error_msg_prefix;
 			}
 			$script_end = $this->runningTime();
-			while (list($level, $temp_debug_output) = each($this->error_msg)) {
+			foreach ($this->error_msg as $level => $temp_debug_output) {
 				if (($this->debug_output[$level] || $this->debug_output_all) && !$this->debug_output_not[$level]) {
 					if (($this->echo_output[$level] || $this->echo_output_all) && !$this->echo_output_not[$level]) {
 						$string_output .= '<div style="font-size: 12px;">[<span style="font-style: italic; color: #c56c00;">'.$level.'</span>] '.(($string) ? "<b>**** ".$this->htmlent($string)." ****</b>\n" : "").'</div>';
@@ -1071,7 +1072,8 @@ class Basic
 	// DESC  : creates out of a normal db_return array an assoc array
 	public static function genAssocArray($db_array, $key, $value, $set_only = 0)
 	{
-		for ($i = 0; $i < count($db_array); $i ++) {
+		// do this to only run count once
+		for ($i = 0, $iMax = count($db_array); $i < $iMax; $i ++) {
 			// if no key then we make an order reference
 			if ($key && $value && (($set_only && $db_array[$i][$value]) || (!$set_only))) {
 				$ret_array[$db_array[$i][$key]] = $db_array[$i][$value];
@@ -1187,7 +1189,7 @@ class Basic
 			$timegroups = array (86400, 3600, 60, 1);
 			$labels = array ('d', 'h', 'm', 's');
 			$time_string = '';
-			for ($i = 0; $i < count($timegroups); $i ++) {
+			for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i ++) {
 				$output = floor($timestamp / $timegroups[$i]);
 				$timestamp = $timestamp % $timegroups[$i];
 				// output has days|hours|min|sec
@@ -1496,7 +1498,7 @@ class Basic
 		// if string does not match anymore we have a convert problem
 		if ($string != $compare) {
 			// go through each character and find the ones that do not match
-			for ($i = 0; $i < mb_strlen($string, $from_encoding); $i ++) {
+			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i ++) {
 				$char = mb_substr($string, $i, 1, $from_encoding);
 				$r_char = mb_substr($compare, $i, 1, $from_encoding);
 				// the ord 194 is a hack to fix the IE7/IE8 bug with line break and illegal character
@@ -1544,7 +1546,7 @@ class Basic
 		// do normal hash crc32b
 		$string = hash('crc32b', $string);
 		// if bigger than 5.2.7, we need to "unfix" the fix
-		if ($this->checkPHPVersion('5.2.7')) {
+		if (self::checkPHPVersion('5.2.7')) {
 			// flip it back to old (two char groups)
 			$string = preg_replace("/^([a-z0-9]{2})([a-z0-9]{2})([a-z0-9]{2})([a-z0-9]{2})$/", "$4$3$2$1", $string);
 		}
@@ -1640,10 +1642,10 @@ class Basic
 		// WARNING: des is very bad, only first 6 chars get used for the password
 		// MD5 is a bit better but is already broken
 		// problem with PHP < 5.3 is that you mostly don't have access to blowfish
-		if (CRYPT_BLOWFISH == 1 || $this->checkPHPVersion('5.3.0')) {
+		if (CRYPT_BLOWFISH == 1 || self::checkPHPVersion('5.3.0')) {
 			// blowfish salt prefix
 			// for < 5.3.7 use the old one for anything newer use the new version
-			if ($this->checkPHPVersion('5.3.7')) {
+			if (self::checkPHPVersion('5.3.7')) {
 				$this->cryptSaltPrefix = '$2y$';
 			} else {
 				$this->cryptSaltPrefix = '$2a$';
@@ -1685,7 +1687,7 @@ class Basic
 		$min = array (46, 65, 97);
 		$max = array (57, 90, 122);
 		$chars = array ();
-		for ($i = 0; $i < count($min); $i ++) {
+		for ($i = 0, $iMax = count($min); $i < $iMax; $i ++) {
 			for ($j = $min[$i]; $j <= $max[$i]; $j ++) {
 				$chars[] = chr($j);
 			}

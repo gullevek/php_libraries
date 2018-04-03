@@ -1,4 +1,4 @@
-<?
+<?php
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
 $PRINT_ALL = 1;

@@ -1,4 +1,4 @@
-<?
+<?php
 /*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2004/11/18

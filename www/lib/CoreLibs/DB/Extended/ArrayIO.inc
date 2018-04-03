@@ -1,4 +1,4 @@
-<?
+<?php
 /*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2002/12/17
@@ -68,7 +68,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 		// set primary key for given table_array
 		if ($this->table_array) {
-			while (list($key, $value) = each($table_array)) {
+			foreach ($table_array as $key => $value) {
 				if ($value["pk"]) {
 					$this->pk_name = $key;
 				}
@@ -133,7 +133,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function dbDumpArray($write = 0)
 	{
 		reset($this->table_array);
-		while (list($column, $data_array) = each($this->table_array)) {
+		foreach ($this->table_array as $column => $data_array) {
 			$string .= "<b>".$column."</b> -> ".$data_array["value"]."<br>";
 		}
 		// add output to internal error_msg
@@ -173,7 +173,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function dbResetArray($reset_pk = 0)
 	{
 		reset($this->table_array);
-		while (list($column, $data_array) = each($this->table_array)) {
+		foreach ($this->table_array as $column => $data_array) {
 			if (!$this->table_array[$column]["pk"]) {
 				unset($this->table_array[$column]["value"]);
 			} elseif ($reset_pk) {
@@ -200,7 +200,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		$q .= $this->pk_name." = ".$this->table_array[$this->pk_name]["value"]." ";
 		// delete files and build FK query
 		reset($this->table_array);
-		while (list($column, $data_array) = each($this->table_array)) {
+		foreach ($this->table_array as $column => $data_array) {
 			// suchen nach bildern und lschen ...
 			if ($this->table_array[$column]["file"] && file_exists($this->table_array[$column]["url"].$this->table_array[$column]["value"])) {
 				if (file_exists($this->table_array[$column]["path"].$this->table_array[$column]["value"])) {
@@ -252,7 +252,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		reset($this->table_array);
 		// create select part & addition FK part
-		while (list($column, $data_array)=each($this->table_array)) {
+		foreach ($this->table_array as $column => $data_array) {
 			if ($q_select) {
 				$q_select .= ", ";
 			}
@@ -279,7 +279,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		if ($this->dbExec($q)) {
 			if ($res = $this->dbFetchArray()) {
 				reset($this->table_array);
-				while (list($column, $data_array) = each($this->table_array)) {
+				foreach ($this->table_array as $column => $data_array) {
 					// wenn "edit" dann gib daten wie in DB zurck, ansonten aufbereiten fr ausgabe
 					// ?? sollte das nicht drauen ??? man weis ja net was da drin steht --> is noch zu berlegen
 					// echo "EDIT: $edit | Spalte: $column | type: ".$this->table_array[$column]["type"]." | Res: ".$res[$column]."<br>";
@@ -326,8 +326,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 
 		reset($this->table_array);
-		while (list($column, $data_array) = each($this->table_array)) {
-
+		foreach ($this->table_array as $column => $data_array) {
 /********************************* START FILE *************************************/
 			// file upload
 			if ($this->table_array[$column]["file"]) {
@@ -434,7 +433,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// get it at the end, cause now we can be more sure of no double IDs, etc
 		reset($this->table_array);
 		// create select part & addition FK part
-		while (list($column, $data_array) = each($this->table_array)) {
+		foreach ($this->table_array as $column => $data_array) {
 			// check FK ...
 			if ($this->table_array[$column]["fk"] && $this->table_array[$column]["value"]) {
 				if ($q_where) {

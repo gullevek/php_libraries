@@ -1,4 +1,4 @@
-<?
+<?php
 /*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2006/08/15
@@ -167,7 +167,7 @@ class Backend extends \CoreLibs\DB\IO
 		// if flag is 0, then we show all, else, we show only the matching flagges array points
 		// array is already sorted after correct order
 		reset($pages);
-		for ($i = 0; $i < count($pages); $i ++) {
+		for ($i = 0, $iMax = count($pages); $i < $iMax; $i ++) {
 			$show = 0;
 			// is it visible in the menu & is it online
 			if ($pages[$i]["menu"] && $pages[$i]["online"]) {
@@ -192,7 +192,7 @@ class Backend extends \CoreLibs\DB\IO
 					}
 					$query_string = '';
 					if (count($pages[$i]["query"])) {
-						for ($j = 0; $j < count($pages[$i]["query"]); $j ++) {
+						for ($j = 0, $jMax = count($pages[$i]["query"]); $j < $jMax; $j ++) {
 							if (strlen($query_string)) {
 								$query_string .= "&";
 							}

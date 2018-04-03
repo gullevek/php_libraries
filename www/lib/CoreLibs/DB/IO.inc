@@ -1,4 +1,4 @@
-<?
+<?php
 /********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2000/11/23
@@ -605,7 +605,7 @@ class IO extends \CoreLibs\Basic
 		// get the keys from data array
 		$keys = array_keys($data);
 		// because the placeholders start with $ and at 1, we need to increase each key and prefix it with a $ char
-		for ($i = 0; $i < count($keys); $i ++) {
+		for ($i = 0, $iMax = count($keys); $i < $iMax; $i ++) {
 			$keys[$i] = '$'.($keys[$i] + 1);
 		}
 		// simply replace the $1, $2, ... with the actual data and return it
