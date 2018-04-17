@@ -1,4 +1,5 @@
-<?
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2000/11/23
@@ -1744,3 +1745,5 @@ class db_io extends basic
 		return $value;
 	}
 } // end if db class
+
+# __END__

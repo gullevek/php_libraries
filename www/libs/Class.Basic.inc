@@ -1,4 +1,4 @@
-<?
+<?php
 /*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2003/03/24
@@ -2070,3 +2070,5 @@ class basic
 		return $_SESSION[$name] === $token;
 	}
 }
+
+# __END__

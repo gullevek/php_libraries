@@ -1,4 +1,5 @@
-<?
+<?php
+
 /*********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2003/04/09
@@ -393,3 +394,5 @@ class db_pgsql
 		return $output;
 	}
 }
+
+# __END__
