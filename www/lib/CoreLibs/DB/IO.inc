@@ -549,7 +549,7 @@ class IO extends \CoreLibs\Basic
 	public function __dbError($cursor = '', $msg = '')
 	{
 		$pg_error_string = '';
-		$where_called = $this->get_caller_method();
+		$where_called = $this->getCallerMethod();
 		if ($cursor) {
 			$pg_error_string = $this->db_functions->__dbPrintError($cursor);
 		}
