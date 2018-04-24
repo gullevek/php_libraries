@@ -10,16 +10,16 @@ if ($DEBUG_ALL) {
 
 ob_start();
 
+// basic class test file
 define('USE_DATABASE', true);
 // sample config
 require("config.inc");
 // set session name
 DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
-// basic class test file
-// set language for l10n
-$lang = 'en_utf8';
 // define log file id
 DEFINE('LOG_FILE_ID', 'classTest');
+// set language for l10n
+$lang = 'en_utf8';
 // init login & backend class
 $login = new CoreLibs\ACL\Login($DB_CONFIG[LOGIN_DB], $lang);
 $basic = new CoreLibs\Admin\Backend($DB_CONFIG[MAIN_DB], $lang);

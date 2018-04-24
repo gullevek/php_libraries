@@ -1497,7 +1497,7 @@ class IO extends \CoreLibs\Basic
 						} elseif ($this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]) {
 							$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
 						}
-					} else {
+					} elseif (count($this->insert_id) == 0) {
 						// failed to get insert id
 						$this->insert_id = '';
 						$this->warning_id = 33;
