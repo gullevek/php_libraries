@@ -14,7 +14,7 @@ There are three branches:
 
 ### master
 
-This is currently the legacy branch set live. This will change to the namespace branch once development is finished
+The active branch, which is the namespace branch
 
 ### legacy
 
@@ -22,4 +22,4 @@ The old non namepsace format layout. This will only get bug fixes and no new dev
 
 ### namespace
 
-The new namespace branch. Once development is finished this branch will be removed or renamed to development only branch
+The new namespace branch. This is the development area for the master branch
