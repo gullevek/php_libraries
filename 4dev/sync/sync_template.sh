@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # create path
-path=`pwd`"/"$0;
+path=$(pwd)"/"$0;
 
 LOCAL_BASE_DIR="<local folder>";
 LOCAL_DIR=$LOCAL_BASE_DIR"";
 REMOTE_WEB="<remote folder>";
-TARGET_HOST_WEB="<user>@<host>
+TARGET_HOST_WEB="<user>@<host>";
 TMP_DIR=$LOCAL_BASE_DIR"/4dev/";
 tmpf_web=$TMP_DIR"tmp.web";
 

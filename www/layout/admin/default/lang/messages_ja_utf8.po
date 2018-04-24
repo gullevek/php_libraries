@@ -1,6 +1,6 @@
 #********************************************************************
 # AUTHOR: Clemens Schwaighofer
-# CREATED: 2007/04/18
+# CREATED: 2018/03/28
 # SHORT DESCRIPTION:
 # Backend Japanese Messages file for gettext
 # to craete: msgfmt -o ja.mo messages_ja.po
@@ -10,14 +10,54 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Project Version\n"
-"Report-Msgid-Bugs-To: clemens.schwaighofer@e-graphics.com\n"
-"POT-Creation-Date: 2007-04-18 17:40+0900\n"
+"Report-Msgid-Bugs-To: clemens.schwaighofer@egplusww.com\n"
+"POT-Creation-Date: 2018-03-28 10:40+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
-"Language-Team: E-GRAPHICS COMMUNICATIONS Japan <info.jp@e-graphics.com>\n"
+"Language-Team: E-GRAPHICS COMMUNICATIONS Japan <info.jp@egplusww.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Yes"
-msgstr ""
+msgstr "はい"
+
+msgid "No"
+msgstr "いいえ"
+
+# Basic date info
+msgid "Year"
+msgstr "年"
+
+msgid "Month"
+msgstr "月"
+
+msgid "Day"
+msgstr "日"
+
+msgid "Hour"
+msgstr "時"
+
+msgid "Minute"
+msgstr "分"
+
+msgid "Mon"
+msgstr "月"
+
+msgid "Tue"
+msgstr "火"
+
+msgid "Wed"
+msgstr "水"
+
+msgid "Thu"
+msgstr "木"
+
+msgid "Fri"
+msgstr "金"
+
+msgid "Sat"
+msgstr "土"
+
+msgid "Sun"
+msgstr "日"

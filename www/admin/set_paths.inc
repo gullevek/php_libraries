@@ -1,4 +1,4 @@
-<?
+<?php
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2007/09/03
@@ -15,7 +15,7 @@ if ($_SESSION['TEMPLATE']) {
 } else {
 	$TEMPLATE = DEFAULT_TEMPLATE;
 }
-$TEMPLATE_DIR = $TEMPLATE.'/';
+$TEMPLATE_DIR = $TEMPLATE;
 // master template
 if (!$MASTER_TEMPLATE_NAME) {
 	$MASTER_TEMPLATE_NAME = MASTER_TEMPLATE_NAME;
@@ -41,7 +41,7 @@ $lang_short = substr($lang, 0, 2);
 $CONTENT_INCLUDE = str_replace(".php", ".tpl", $cms->page_name);
 $FORM_NAME = !isset($FORM_NAME) || !$FORM_NAME ? str_replace(".php", "", $cms->page_name) : $FORM_NAME;
 // set local page title
-$L_TITLE = ucfirst(str_replace('_', ' ', $cms->get_page_name(1))).' - '.$G_TITLE;
+$L_TITLE = ucfirst(str_replace('_', ' ', $cms->getPageName(1))).' - '.$G_TITLE;
 // strip tpl and replace it with inc
 // php include file per page
 $cms->INC_TEMPLATE_NAME = str_replace(".tpl", ".inc", $CONTENT_INCLUDE);
@@ -55,13 +55,13 @@ $cms->CSS_SPECIAL_TEMPLATE_NAME = @$CSS_NAME;
 $cms->JS_SPECIAL_TEMPLATE_NAME = @$JS_NAME;
 
 // set basic template path (tmp)
-$smarty->setTemplateDir(LAYOUT.$TEMPLATE_DIR.TEMPLATES.'/');
-$cms->lang_dir = LAYOUT.$TEMPLATE_DIR.LANG."/";
-$cms->includes = LAYOUT.$TEMPLATE_DIR.INCLUDES."/";
-$cms->javascript = LAYOUT.$TEMPLATE_DIR.JS."/";
-$cms->css = LAYOUT.$TEMPLATE_DIR.CSS."/";
-$cms->pictures = LAYOUT.$TEMPLATE_DIR.IMAGES."/";
-$cms->cache_pictures = LAYOUT.$TEMPLATE_DIR.CACHE.IMAGES.'/';
+$smarty->setTemplateDir(LAYOUT.$TEMPLATE_DIR.TEMPLATES);
+$cms->lang_dir = LAYOUT.$TEMPLATE_DIR.LANG;
+$cms->includes = LAYOUT.$TEMPLATE_DIR.INCLUDES;
+$cms->javascript = LAYOUT.$TEMPLATE_DIR.JS;
+$cms->css = LAYOUT.$TEMPLATE_DIR.CSS;
+$cms->pictures = LAYOUT.$TEMPLATE_DIR.IMAGES;
+$cms->cache_pictures = LAYOUT.$TEMPLATE_DIR.CACHE.IMAGES;
 $cms->cache_pictures_root = ROOT.$cms->cache_pictures;
 if (!is_dir($cms->cache_pictures_root)) {
 	mkdir($cms->cache_pictures_root);
@@ -69,13 +69,13 @@ if (!is_dir($cms->cache_pictures_root)) {
 $template_set = $TEMPLATE;
 
 // if we don't find the master template, set the template path back AND set the insert template as absolute path
-if (!file_exists(ROOT.$smarty->getTemplateDir()[0]."/".MASTER_TEMPLATE_NAME)) {
-	if (file_exists(ROOT.$smarty->getTemplateDir()[0]."/".$TEMPLATE_NAME)) {
-		$TEMPLATE_NAME = ROOT.$smarty->getTemplateDir()[0]."/".$TEMPLATE_NAME;
+if (!file_exists(ROOT.$smarty->getTemplateDir()[0].DS.MASTER_TEMPLATE_NAME)) {
+	if (file_exists(ROOT.$smarty->getTemplateDir()[0].DS.$TEMPLATE_NAME)) {
+		$TEMPLATE_NAME = ROOT.$smarty->getTemplateDir()[0].DS.$TEMPLATE_NAME;
 	}
 	$smarty->setTemplateDir(LAYOUT.DEFAULT_TEMPLATE.TEMPLATES);
 	$template_set = DEFAULT_TEMPLATE;
-} elseif (!file_exists(ROOT.$smarty->getTemplateDir()[0]."/".$TEMPLATE_NAME)) {
+} elseif (!file_exists(ROOT.$smarty->getTemplateDir()[0].DS.$TEMPLATE_NAME)) {
 	// check if the template exists in the template path, if not, set path to to default
 	$smarty->setTemplateDir(LAYOUT.DEFAULT_TEMPLATE.TEMPLATES);
 	$template_set = DEFAULT_TEMPLATE;
@@ -85,25 +85,25 @@ if (!file_exists(ROOT.$smarty->getTemplateDir()[0]."/".MASTER_TEMPLATE_NAME)) {
 
 // check if the javascript folder exists in the template path, if not fall back to default
 if (!is_dir($cms->javascript)) {
-	$cms->javascript = LAYOUT.DEFAULT_TEMPLATE.JS."/";
+	$cms->javascript = LAYOUT.DEFAULT_TEMPLATE.JS;
 }
 // check if lang_dir folder exists in the template path, if not fall back to default
 if (!is_dir($cms->lang_dir)) {
-	$cms->lang_dir = LAYOUT.DEFAULT_TEMPLATE.LANG."/";
+	$cms->lang_dir = LAYOUT.DEFAULT_TEMPLATE.LANG;
 }
 // check if include folder exists in the template path, if not fall back to default
 if (!is_dir($cms->includes)) {
-	$cms->includes = LAYOUT.DEFAULT_TEMPLATE.INCLUDES."/";
+	$cms->includes = LAYOUT.DEFAULT_TEMPLATE.INCLUDES;
 }
 // check if css folder exists in the template path, if not fall back to default
 if (!is_dir($cms->css)) {
-	$cms->css = LAYOUT.DEFAULT_TEMPLATE.CSS."/";
+	$cms->css = LAYOUT.DEFAULT_TEMPLATE.CSS;
 }
 if (!is_dir($cms->pictures)) {
-	$cms->pictures = LAYOUT.DEFAULT_TEMPLATE.PICTURES.'/';
+	$cms->pictures = LAYOUT.DEFAULT_TEMPLATE.PICTURES;
 }
 if (!is_dir($cms->cache_pictures)) {
-	$cms->cache_pictures = LAYOUT.DEFAULT_TEMPLATE.CACHE.IMAGES.'/';
+	$cms->cache_pictures = LAYOUT.DEFAULT_TEMPLATE.CACHE.IMAGES;
 }
 
 // if the template_dir is != DEFAULT_TEMPLATE, then try to make a lang switch

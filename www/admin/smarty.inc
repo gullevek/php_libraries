@@ -1,4 +1,4 @@
-<?
+<?php
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2005/07/12
@@ -84,7 +84,7 @@ $cms->DATA['LANG'] = $lang;
 $cms->DATA['TINYMCE_LANG'] = $lang_short;
 
 // debug data, if DEBUG flag is on, this data is print out
-$cms->DEBUG_DATA['debug_error_msg'] = $cms->running_time();
+$cms->DEBUG_DATA['debug_error_msg'] = $cms->runningTime();
 $cms->DEBUG_DATA['DEBUG'] = @$DEBUG_TMPL;
 
 // create main data array
@@ -92,5 +92,11 @@ $cms->CONTENT_DATA = array_merge($cms->HEADER, $cms->DATA, $cms->DEBUG_DATA);
 // data is 1:1 mapping (all vars, values, etc)
 while (list($key, $value) = each($cms->CONTENT_DATA)) {
 	$smarty->assign($key, $value);
+}
+if (is_dir(BASE.TEMPLATES_C)) {
+	$smarty->setCompileDir(BASE.TEMPLATES_C);
+}
+if (is_dir(BASE.CACHE)) {
+	$smarty->setCacheDir(BASE.CACHE);
 }
 $smarty->display($MASTER_TEMPLATE_NAME, $TEMPLATE.$lang, $TEMPLATE.$lang);

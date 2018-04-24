@@ -1,4 +1,4 @@
-<?
+<?php
 /********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2003/06/10
@@ -28,22 +28,15 @@ define(REL_PATH, '');
 
 ob_start();
 include("config.inc");
+// set session name here
+define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 // overrride debug flags
 if (!DEBUG)	{
 	$DEBUG_ALL = 0;
 	$PRINT_ALL = 0;
 	$DB_DEBUG = 0;
 	$ECHO_ALL = 0;
-//		$DEBUG_TMPL = 0;
 }
-// set session name here
-define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-// login class
-require(LIBS."Class.Login.inc");
-// form generate for edit interface
-require(LIBS."Class.Form.Generate.inc");
-// Smarty: and the small extend for l10n calls
-require(LIBS.'Class.Smarty.Extend.inc');
 
 // set default lang if not set otherwise
 if (!$lang) {
@@ -52,17 +45,17 @@ if (!$lang) {
 // should be utf8
 header("Content-type: text/html; charset=".DEFAULT_ENCODING);
 ob_end_flush();
-$login = new login($DB_CONFIG[LOGIN_DB], $lang);
+$login = new CoreLibs\ACL\Login($DB_CONFIG[LOGIN_DB], $lang);
 
 // create form class
-$form = new form($DB_CONFIG[MAIN_DB], $lang);
-$form->db_exec("SET search_path TO ".LOGIN_DB_SCHEMA);
+$form = new CoreLibs\Output\Form\Generate($DB_CONFIG[MAIN_DB], $lang);
+$form->dbExec("SET search_path TO ".LOGIN_DB_SCHEMA);
 if ($form->mobile_phone) {
 	echo "I am sorry, but this page cannot be viewed by a mobile phone";
 	exit;
 }
 // smarty template engine (extended Translation version)
-$smarty = new SmartyML($lang);
+$smarty = new CoreLibs\Template\SmartyExtend($lang);
 
 if (TARGET == 'live' || TARGET == 'remote') {
 	// login
@@ -98,7 +91,7 @@ function EditLog($event = '', $data = '')
 {
 	$q = "INSERT INTO edit_log ";
 	$q .= "(euid, event_date, ip, event, data, page) ";
-	$q .= "VALUES (".$_SESSION['EUID'].", NOW(), '".$_SERVER["REMOTE_ADDR"]."', '".$GLOBALS['form']->db_escape_string($event)."', '".$GLOBALS['form']->db_escape_string($data)."', '".$GLOBALS['form']->get_page_name()."')";
+	$q .= "VALUES (".$_SESSION['EUID'].", NOW(), '".$_SERVER["REMOTE_ADDR"]."', '".$GLOBALS['form']->dbEscapeString($event)."', '".$GLOBALS['form']->dbEscapeString($data)."', '".$GLOBALS['form']->getPageName()."')";
 }
 
 // log backend data
@@ -112,11 +105,11 @@ $data = array (
 // log action
 EditLog('Edit Submit', serialize($data));
 
-$form->form_procedure_load(${$form->archive_pk_name});
-$form->form_procedure_new();
-$form->form_procedure_save();
-$form->form_procedure_delete();
-$form->form_procedure_delete_from_element_list($element_list, $remove_name);
+$form->formProcedureLoad(${$form->archive_pk_name});
+$form->formProcedureNew();
+$form->formProcedureSave();
+$form->formProcedureDelete();
+$form->formProcedureDeleteFromElementList($element_list, $remove_name);
 
 // define all needed smarty stuff for the general HTML/page building
 $HEADER['CSS'] = CSS;
@@ -128,7 +121,7 @@ $HEADER['JAVASCRIPT'] = $EDIT_JAVASCRIPT;
 $DATA['table_width'] = $table_width;
 
 // write out error / status messages
-$messages[] = $form->form_error_msg();
+$messages[] = $form->formPrintMsg();
 $DATA['form_error_msg'] = $messages;
 
 // MENU START
@@ -172,7 +165,7 @@ for ($i = 1; $i <= count($menuarray); $i ++) {
 	if ($i == 1 || !(($i - 1) % $SPLIT_FACTOR)) {
 		$menu_data[$j]['splitfactor_in'] = 1;
 	}
-	if ($menuarray[($i - 1)]["filename"] == $form->get_page_name()) {
+	if ($menuarray[($i - 1)]["filename"] == $form->getPageName()) {
 		$position = $i - 1;
 		$menu_data[$j]['position'] = 1;
 	} else {
@@ -197,103 +190,103 @@ $L_TITLE = $DATA['page_name'];
 $HEADER['HTML_TITLE'] = ((!$L_TITLE) ? $form->l->__($G_TITLE) : $form->l->__($L_TITLE));
 // END MENU
 // LOAD AND NEW
-$DATA['load'] = $form->form_create_load();
-$DATA['new'] = $form->form_create_new();
+$DATA['load'] = $form->formCreateLoad();
+$DATA['new'] = $form->formCreateNew();
 // SHOW DATA PART
 if ($form->yes) {
 	$DATA['form_yes'] = $form->yes;
 	$DATA['form_my_page_name'] = $form->my_page_name;
 
-	// depending on the "get_page_name()" I show different stuff
+	// depending on the "getPageName()" I show different stuff
 	switch ($form->my_page_name) {
 		case "edit_users":
-			$elements[] = $form->form_create_element("login_error_count");
-			$elements[] = $form->form_create_element("login_error_date_last");
-			$elements[] = $form->form_create_element("login_error_date_first");
-			$elements[] = $form->form_create_element("enabled");
-			$elements[] = $form->form_create_element("username");
-			$elements[] = $form->form_create_element("password");
-			$elements[] = $form->form_create_element("password_change_interval");
-			$elements[] = $form->form_create_element("email");
-			$elements[] = $form->form_create_element("last_name");
-			$elements[] = $form->form_create_element("first_name");
-			$elements[] = $form->form_create_element("edit_group_id");
-			$elements[] = $form->form_create_element("edit_access_right_id");
-			$elements[] = $form->form_create_element("strict");
-			$elements[] = $form->form_create_element("locked");
-			$elements[] = $form->form_create_element("admin");
-			$elements[] = $form->form_create_element("debug");
-			$elements[] = $form->form_create_element("db_debug");
-			$elements[] = $form->form_create_element("edit_language_id");
-			$elements[] = $form->form_create_element("edit_scheme_id");
-			$elements[] = $form->form_show_list_table("edit_access_user");
+			$elements[] = $form->formCreateElement("login_error_count");
+			$elements[] = $form->formCreateElement("login_error_date_last");
+			$elements[] = $form->formCreateElement("login_error_date_first");
+			$elements[] = $form->formCreateElement("enabled");
+			$elements[] = $form->formCreateElement("username");
+			$elements[] = $form->formCreateElement("password");
+			$elements[] = $form->formCreateElement("password_change_interval");
+			$elements[] = $form->formCreateElement("email");
+			$elements[] = $form->formCreateElement("last_name");
+			$elements[] = $form->formCreateElement("first_name");
+			$elements[] = $form->formCreateElement("edit_group_id");
+			$elements[] = $form->formCreateElement("edit_access_right_id");
+			$elements[] = $form->formCreateElement("strict");
+			$elements[] = $form->formCreateElement("locked");
+			$elements[] = $form->formCreateElement("admin");
+			$elements[] = $form->formCreateElement("debug");
+			$elements[] = $form->formCreateElement("db_debug");
+			$elements[] = $form->formCreateElement("edit_language_id");
+			$elements[] = $form->formCreateElement("edit_scheme_id");
+			$elements[] = $form->formCreateElementListTable("edit_access_user");
 			break;
 		case "edit_schemes":
-			$elements[] = $form->form_create_element("enabled");
-			$elements[] = $form->form_create_element("name");
-			$elements[] = $form->form_create_element("header_color");
-			$elements[] = $form->form_create_element("template");
+			$elements[] = $form->formCreateElement("enabled");
+			$elements[] = $form->formCreateElement("name");
+			$elements[] = $form->formCreateElement("header_color");
+			$elements[] = $form->formCreateElement("template");
 			break;
 		case "edit_pages":
 			if (!$form->table_array["edit_page_id"]["value"]) {
 				$q = "DELETE FROM temp_files";
-				$form->db_exec($q);
+				$form->dbExec($q);
 				// gets all files in the current dir ending with .php
 				$crap = exec("ls *.php", $output, $status);
 				// now get all that are NOT in de DB
 				$q = "INSERT INTO temp_files VALUES ";
 				for ($i = 0; $i < count($output); $i ++) {
-					$t_q = "('".$form->db_escape_string($output[$i])."')";
-					$form->db_exec($q.$t_q, 'NULL');
+					$t_q = "('".$form->dbEscapeString($output[$i])."')";
+					$form->dbExec($q.$t_q, 'NULL');
 				}
-				$elements[] = $form->form_create_element("filename");
+				$elements[] = $form->formCreateElement("filename");
 			} else {
 				// show file menu
 				// just show name of file ...
 				$DATA['filename_exist'] = 1;
 				$DATA['filename'] = $form->table_array["filename"]["value"];
 			} // File Name View IF
-			$elements[] = $form->form_create_element("name");
-			// $elements[] = $form->form_create_element("tag");
-			// $elements[] = $form->form_create_element("min_acl");
-			$elements[] = $form->form_create_element("order_number");
-			$elements[] = $form->form_create_element("online");
-			$elements[] = $form->form_create_element("menu");
-			$elements[] = $form->form_show_list_table("edit_query_string");
-			$elements[] = $form->form_create_element("popup");
-			$elements[] = $form->form_create_element("popup_x");
-			$elements[] = $form->form_create_element("popup_y");
-			$elements[] = $form->form_show_reference_table("edit_visible_group");
-			$elements[] = $form->form_show_reference_table("edit_menu_group");
+			$elements[] = $form->formCreateElement("name");
+			// $elements[] = $form->formCreateElement("tag");
+			// $elements[] = $form->formCreateElement("min_acl");
+			$elements[] = $form->formCreateElement("order_number");
+			$elements[] = $form->formCreateElement("online");
+			$elements[] = $form->formCreateElement("menu");
+			$elements[] = $form->formCreateElementListTable("edit_query_string");
+			$elements[] = $form->formCreateElement("popup");
+			$elements[] = $form->formCreateElement("popup_x");
+			$elements[] = $form->formCreateElement("popup_y");
+			$elements[] = $form->formCreateElementReferenceTable("edit_visible_group");
+			$elements[] = $form->formCreateElementReferenceTable("edit_menu_group");
 			break;
 		case "edit_languages":
-			$elements[] = $form->form_create_element("enabled");
-			$elements[] = $form->form_create_element("short_name");
-			$elements[] = $form->form_create_element("long_name");
-			$elements[] = $form->form_create_element("iso_name");
+			$elements[] = $form->formCreateElement("enabled");
+			$elements[] = $form->formCreateElement("short_name");
+			$elements[] = $form->formCreateElement("long_name");
+			$elements[] = $form->formCreateElement("iso_name");
 			break;
 		case "edit_groups":
-			$elements[] = $form->form_create_element("enabled");
-			$elements[] = $form->form_create_element("name");
-			$elements[] = $form->form_create_element("edit_access_right_id");
-			$elements[] = $form->form_create_element("edit_scheme_id");
-			$elements[] = $form->form_show_list_table("edit_page_access");
+			$elements[] = $form->formCreateElement("enabled");
+			$elements[] = $form->formCreateElement("name");
+			$elements[] = $form->formCreateElement("edit_access_right_id");
+			$elements[] = $form->formCreateElement("edit_scheme_id");
+			$elements[] = $form->formCreateElementListTable("edit_page_access");
 			break;
 		case "edit_visible_group":
-			$elements[] = $form->form_create_element("name");
-			$elements[] = $form->form_create_element("flag");
+			$elements[] = $form->formCreateElement("name");
+			$elements[] = $form->formCreateElement("flag");
 			break;
 		case "edit_menu_group":
-			$elements[] = $form->form_create_element("name");
-			$elements[] = $form->form_create_element("flag");
-			$elements[] = $form->form_create_element("order_number");
+			$elements[] = $form->formCreateElement("name");
+			$elements[] = $form->formCreateElement("flag");
+			$elements[] = $form->formCreateElement("order_number");
 			break;
 		case "edit_access":
-			$elements[] = $form->form_create_element("name");
-			$elements[] = $form->form_create_element("color");
-			$elements[] = $form->form_create_element("description");
+			$elements[] = $form->formCreateElement("name");
+			$elements[] = $form->formCreateElement("color");
+			$elements[] = $form->formCreateElement("description");
 			// add name/value list here
-			$elements[] = $form->form_show_list_table("edit_access_data");
+			$elements[] = $form->formCreateElementListTable("edit_access_data");
 			break;
 		default:
 			print "[No valid page definition given]";
@@ -301,8 +294,8 @@ if ($form->yes) {
 	}
 //		$form->debug('edit', "Elements: <pre>".$form->print_ar($elements));
 	$DATA['elements'] = $elements;
-	$DATA['hidden'] = $form->form_create_hidden_fields();
-	$DATA['save_delete'] = $form->form_create_save_delete();
+	$DATA['hidden'] = $form->formCreateHiddenFields();
+	$DATA['save_delete'] = $form->formCreateSaveDelete();
 }
 
 // debug data, if DEBUG flag is on, this data is print out
@@ -314,11 +307,16 @@ $CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);
 while (list($key, $value) = each($CONTENT_DATA)) {
 	$smarty->assign($key, $value);
 }
-
-//	$smarty->assign('popup_page', 'mt_popup_'.$body_part.'.tpl');
-
+if (is_dir(BASE.TEMPLATES_C)) {
+	$smarty->setCompileDir(BASE.TEMPLATES_C);
+}
+if (is_dir(BASE.CACHE)) {
+	$smarty->setCacheDir(BASE.CACHE);
+}
 $smarty->display('edit_body.tpl');
 
 // debug output
-echo $login->print_error_msg();
-echo $form->print_error_msg();
+echo $login->printErrorMsg();
+echo $form->printErrorMsg();
+
+# __END__

@@ -11,6 +11,6 @@ CREATE TABLE edit_access_data (
 	edit_access_id INT NOT NULL,
 	name	VARCHAR,
 	value	VARCHAR,
-	enabled	SMALLINT NOT NULL DEFAULT 0, 
-	FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE 
+	enabled	SMALLINT NOT NULL DEFAULT 0,
+	FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
 ) INHERITS (edit_generic) WITHOUT OIDS;

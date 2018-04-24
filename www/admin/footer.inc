@@ -1,4 +1,4 @@
-<?
+<?php
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2008/08/14
@@ -8,5 +8,5 @@
 *********************************************************************/
 
 // print debug messages
-echo $login->print_error_msg();
-echo $cms->print_error_msg();
+echo $login->printErrorMsg();
+echo $cms->printErrorMsg();

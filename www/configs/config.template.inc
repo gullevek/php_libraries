@@ -1,4 +1,4 @@
-<?
+<?php
 /********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2003/06/10
@@ -21,67 +21,66 @@ DEFINE('DEFAULT_LANG', "en_utf8");
 DEFINE('DEFAULT_ENCODING', "UTF-8");
 
 /************* PATHS *********************/
+// directory seperator
+DEFINE('DS', DIRECTORY_SEPARATOR);
 // ** NEW/BETTER DIR DECLARATIONS **
 // path to original file (if symlink)
-DEFINE('DIR', __DIR__."/");
-// libs base path based on DIR
-DEFINE('LIBDIR', DIR.'libs/');
-// SMARTY path based on DIR
-DEFINE('SMARTYDIR', DIR.'Smarty/');
-// table arrays for Class Form
-DEFINE('TABLEARRAYDIR', DIR.'table_arrays/');
+DEFINE('DIR', __DIR__.DS);
+// base dir root folder level
+DEFINE('BASE', str_replace('configs', '', __DIR__));
 
 // ** OLD DIR DECLARATIONS **
 // path to document root of file called
-DEFINE('ROOT', getcwd()."/");
+DEFINE('ROOT', getcwd().DS);
 // libs path
-DEFINE('LIBS', "libs/");
+DEFINE('LIB', 'lib'.DS);
+DEFINE('LIBS', 'lib'.DS);
 // includes (strings, arrays for static, etc)
-DEFINE('INCLUDES', "includes/");
+DEFINE('INCLUDES', 'includes'.DS);
 // layout base path
-DEFINE('LAYOUT', 'layout/');
+DEFINE('LAYOUT', 'layout'.DS);
 // pic-root (compatible to CMS)
-DEFINE('PICTURES', "images/");
+DEFINE('PICTURES', "images".DS);
 // images
-DEFINE('IMAGES', "images/");
+DEFINE('IMAGES', "images".DS);
 // icons (below the images/ folder)
-DEFINE('ICONS', 'icons/');
+DEFINE('ICONS', 'icons'.DS);
 // media
-DEFINE('MEDIA', "media/");
+DEFINE('MEDIA', "media".DS);
 // flash-root (below media)
-DEFINE('FLASH', "flash/");
+DEFINE('FLASH', "flash".DS);
 // uploads (anything to keep)
-DEFINE('UPLOADS', "uploads/");
+DEFINE('UPLOADS', "uploads".DS);
 // files (binaries) (below media)
-DEFINE('BINARIES', "binaries/");
+DEFINE('BINARIES', "binaries".DS);
 // files (videos) (below media)
-DEFINE('VIDEOS', "videos/");
+DEFINE('VIDEOS', "videos".DS);
 // files (documents) (below media)
-DEFINE('DOCUMENTS', "documents/");
+DEFINE('DOCUMENTS', "documents".DS);
 // files (pdfs) (below media)
-DEFINE('PDFS', "documents/");
+DEFINE('PDFS', "documents".DS);
 // css
-DEFINE('CSS', "css/");
+DEFINE('CSS', "css".DS);
 // js
-DEFINE('JS', "javascript/");
+DEFINE('JS', "javascript".DS);
 // table arrays
-DEFINE('TABLE_ARRAYS', "table_arrays/");
+DEFINE('TABLE_ARRAYS', "table_arrays".DS);
 // smarty libs path
-DEFINE('SMARTY', "Smarty/");
+DEFINE('SMARTY', "Smarty".DS);
 // po langs
-DEFINE('LANG', "lang/");
+DEFINE('LANG', "lang".DS);
 // cache path
-DEFINE('CACHE', "cache/");
+DEFINE('CACHE', "cache".DS);
 // temp path
-DEFINE('TMP', "tmp/");
+DEFINE('TMP', "tmp".DS);
 // log files
-DEFINE('LOG', 'log/');
+DEFINE('LOG', 'log'.DS);
 // template base
-DEFINE('TEMPLATES', "templates/");
+DEFINE('TEMPLATES', "templates".DS);
 // frontend template dir', only for admin
-DEFINE('TEMPLATES_FRONTEND', "templates_frontend/");
+DEFINE('TEMPLATES_FRONTEND', "templates_frontend".DS);
 // default template
-DEFINE('DEFAULT_TEMPLATE', "default/");
+DEFINE('DEFAULT_TEMPLATE', "default".DS);
 // default template file
 DEFINE('DEFAULT_TEMPLATE_FILE', 'default.tpl');
 
@@ -249,27 +248,7 @@ if (DEBUG == false) {
 // any other global definitons here
 //	DEFINE('SOME_ID', <SOME VALUE>);
 
-// function that will be called on top of each class include to load the class
-function _spl_autoload($include_file)
-{
-	// where to search for the files to include
-	$dirs = array (
-		LIBDIR,
-		SMARTYDIR,
-		TABLEARRAYDIR,
-		'',
-		LIBS,
-		SMARTY,
-		TABLE_ARRAYS,
-		__DIR__.'/'.LIBS,
-		__DIR__.'/'.SMARTY
-	);
-	// try to find and load the class ifle
-	foreach ($dirs as $folder) {
-		if (file_exists($folder.$include_file)) {
-			require_once($folder.$include_file);
-			return true;
-		}
-	}
-	return false;
-}
+// read auto loader
+require BASE.LIB.'autoloader.php';
+
+# __END__
