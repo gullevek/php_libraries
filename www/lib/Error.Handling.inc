@@ -8,7 +8,13 @@
 *********************************************************************/
 
 // define the base working directory outside because in the function it might return undefined
-DEFINE('CURRENT_WORKING_DIR', getcwd().'/');
+// if we have config set BASE use this
+if (defined('BASE')) {
+	DEFINE('CURRENT_WORKING_DIR', BASE);
+} else {
+	// else we set. We fully assuem that Error.Handling is where it should be, in lib dir
+	DEFINE('CURRENT_WORKING_DIR', str_replace('lib', '', __DIR__));
+}
 
 // METHOD: MyErrorHandler
 // PARAMS: $type: the error code from PHP
