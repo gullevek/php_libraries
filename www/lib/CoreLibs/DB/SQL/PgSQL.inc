@@ -1,6 +1,6 @@
 <?php
 /*********************************************************************
-* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
+* AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/04/09
 * SHORT DESCRIPTION:
 *   2018/3/23, the whole class system is transformed to namespaces

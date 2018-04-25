@@ -1,6 +1,6 @@
 <?php
 /*********************************************************************
-* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
+* AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/03/24
 * VERSION: 2.0.0
 * RELEASED LICENSE: GNU GPL 3

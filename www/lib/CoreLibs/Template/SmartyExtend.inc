@@ -1,6 +1,6 @@
 <?php
 /********************************************************************
-* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
+* AUTHOR: Clemens Schwaighofer
 * CREATED: 2004/12/21
 * SHORT DESCRIPTION:
 *	extends smarty with the l10n class so I can use __(, etc calls

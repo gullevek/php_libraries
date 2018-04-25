@@ -670,4 +670,3 @@ class ProgressBar
 }
 
 # __END__
-
