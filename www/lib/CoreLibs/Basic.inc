@@ -148,12 +148,13 @@ class Basic
 	// error char for the char conver
 	public $mbErrorChar;
 
-	// crypt saslt prefix
+	// [!!! DEPRECATED !!!] crypt saslt prefix
 	public $cryptSaltPrefix = '';
 	public $cryptSaltSuffix = '';
 	public $cryptIterationCost = 7; // this is for staying backwards compatible with the old ones
 	public $cryptSaltSize = 22; // default 22 chars for blowfish, 2 for STD DES, 8 for MD5,
-
+	// new better password management
+	protected $password_options = array ();
 	// session name
 	private $session_name = '';
 	private $session_id = '';
@@ -340,8 +341,10 @@ class Basic
 			$this->session_id = session_id();
 		}
 
-		// init crypt settings
+		// [!!! DEPRECATED !!!] init crypt settings
 		$this->cryptInit();
+		// new better password init
+		$this->passwordInit();
 
 		// start logging running time
 		$this->runningTime();
@@ -1630,6 +1633,11 @@ class Basic
 		return false;
 	}
 
+	// [!!! DEPRECATED !!!]
+	// ALL crypt* methids are DEPRECATED and SHALL NOT BE USED
+	// use the new password* instead
+
+	// [!!! DEPRECATED !!!] -> passwordInit
 	// METHOD: cryptInit
 	// PARAMS: none
 	// RETURN: none
@@ -1676,6 +1684,7 @@ class Basic
 		}
 	}
 
+	// [!!! DEPRECATED !!!] -> not needed
 	// METHOD: cryptSaltString
 	// PARAMS: random string length, default is 22 (for blowfish crypt)
 	// RETURN: random string
@@ -1703,6 +1712,7 @@ class Basic
 		return $salt_string;
 	}
 
+	// [!!! DEPRECATED !!!] -> passwordSet
 	// METHOD: cryptString
 	// PARAMS: string to be crypted (one way)
 	// RETURN: encrypted string
@@ -1714,6 +1724,7 @@ class Basic
 		return crypt($string, $this->cryptSaltPrefix.$this->cryptSaltString($this->cryptSaltSize).$this->cryptSaltSuffix);
 	}
 
+	// [!!! DEPRECATED !!!] -> passwordVerify
 	// METHOD: verifyCryptString
 	// PARAMS: plain string (eg password)
 	//         full crypted string (from cryptString
@@ -1727,6 +1738,61 @@ class Basic
 		} else {
 			return false;
 		}
+	}
+
+	// *** BETTER PASSWORD OPTIONS, must be used ***
+	// METHOD: passwordInit
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : inits the password options set
+	//         currently this is et empty, and the default options are used
+	private function passwordInit()
+	{
+		// set default password cost: use default set automatically
+		$this->password_options = array (
+			// 'cost' => PASSWORD_BCRYPT_DEFAULT_COST
+		);
+	}
+
+	// METHOD: passwordSet
+	// PARAMS: password
+	// RETURN: hashed password
+	// DESC  : creates the password hash
+	public function passwordSet($password)
+	{
+		// always use the PHP default for the password
+		// password options ca be set in the password init, but should be kept as default
+		return password_hash($password, PASSWORD_DEFAULT, $this->password_options);
+	}
+
+	// METHOD: passwordVerify
+	// PARAMS: password and hash
+	// RETURN: true or false
+	// DESC  : checks if the entered password matches the hash
+	public function passwordVerify($password, $hash)
+	{
+		if (password_verify($password, $hash)) {
+			return true;
+		} else {
+			return false;
+		}
+		// in case something strange, return false on default
+		return false;
+	}
+
+	// METHOD: passwordRehashCheck
+	// PARAMS: hash
+	// RETURN: true or false
+	// DESC  : checks if the password needs to be rehashed
+	public function passwordRehashCheck($hash)
+	{
+		if (password_needs_rehash($hash, PASSWORD_DEFAULT, $this->password_options)) {
+			return true;
+		} else {
+			return false;
+		}
+		// in case of strange, force re-hash
+		return true;
 	}
 
 	// *** COLORS ***

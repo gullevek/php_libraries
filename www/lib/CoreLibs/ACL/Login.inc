@@ -294,10 +294,19 @@ class Login extends \CoreLibs\DB\IO
 					} elseif ((preg_match("/^\\$2(a|y)\\$/", $res['password']) ||
 						preg_match("/^\\$1\\$/", $res['password']) ||
 						preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password'])) &&
+						// old password have $07$ so we check this
+						preg_match("/\\$07\\$/", $res['password']) &&
 						!$this->verifyCryptString($this->password, $res['password'])
 					) {
 						// check passwword as crypted, $2a$ or $2y$ is blowfish start, $1$ is MD5 start, $\w{12} is standard DES
+						// this is only for OLD $07$ password
 						$this->login_error = 1011;
+					} elseif (preg_match("/^\\$2y\\$/", $res['password']) &&
+						!preg_match("/\\$07\\$/", $res['password']) &&
+						!$this->passwordVerify($this->password, $res['password'])
+					) {
+						// this is the new password hash methid, is only $2y$
+						$this->login_error = 1013;
 					} elseif (!preg_match("/^\\$2(a|y)\\$/", $res['password']) &&
 						!preg_match("/^\\$1\\$/", $res['password']) &&
 						!preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) &&
@@ -306,6 +315,14 @@ class Login extends \CoreLibs\DB\IO
 						// check old plain password, non case sensitive
 						$this->login_error = 1012;
 					} else {
+						// check if the current password is an invalid hash and do a rehash and set password
+						// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '.(password_verify($this->password, $res['password']) ? 'OK' : 'FAIL').' => HASH: '.(password_needs_rehash($res['password'], PASSWORD_DEFAULT, $this->password_options) ? 'NEW NEEDED' : 'OK'));
+						if (password_needs_rehash($res['password'], PASSWORD_DEFAULT, $this->password_options)) {
+							$new_hash = password_hash($this->password, PASSWORD_DEFAULT, $this->password_options);
+							// update password hash to new one now
+							$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($new_hash)."' WHERE edit_user_id = ".$res['edit_user_id'];
+							$this->dbExec($q);
+						}
 						// normal user processing
 						// set class var and session var
 						$_SESSION["EUID"] = $this->euid = $res["edit_user_id"];
@@ -548,6 +565,7 @@ class Login extends \CoreLibs\DB\IO
 			$this->acl['admin'] = 1;
 			$this->acl['base'] = 100;
 		} else {
+			$this->acl['admin'] = 0;
 			// now go throw the flow and set the correct ACL
 			// user > page > group
 			// group ACL 0
@@ -618,7 +636,7 @@ class Login extends \CoreLibs\DB\IO
 		// set the full acl list too
 		$this->acl['acl_list'] = $_SESSION['DEFAULT_ACL_LIST'];
 		// debug
-//			$this->debug('ACL', $this->print_ar($this->acl));
+		// $this->debug('ACL', $this->print_ar($this->acl));
 	}
 
 	// METHOD: loginCheckEditAccess
@@ -785,7 +803,7 @@ class Login extends \CoreLibs\DB\IO
 			$this->writeLog($event, '', $this->login_error, $username, $password);
 		} // write log under certain settings
 		// now close DB connection
-//			$this->error_msg = $this->_login();
+		// $this->error_msg = $this->_login();
 		if (!$this->permission_okay) {
 			return false;
 		} else {
@@ -816,6 +834,7 @@ class Login extends \CoreLibs\DB\IO
 			"1010" => $this->l->__("Fatal Error: <b>Login Failed - Wrong Username or Password</b>"), // user not found
 			"1011" => $this->l->__("Fatal Error: <b>Login Failed - Wrong Username or Password</b>"), // blowfish password wrong
 			"1012" => $this->l->__("Fatal Error: <b>Login Failed - Wrong Username or Password</b>"), // fallback md5 password wrong
+			"1013" => $this->l->__("Fatal Error: <b>Login Failed - Wrong Username or Password</b>"), // new password_hash wrong
 			"102" => $this->l->__("Fatal Error: <b>Login Failed - Please enter username and password</b>"),
 			"103" => $this->l->__("Fatal Error: <b>You do not have the rights to access this Page</b>"),
 			"104" => $this->l->__("Fatal Error: <b>Login Failed - User not enabled</b>"),

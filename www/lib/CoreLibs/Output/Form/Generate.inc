@@ -887,16 +887,16 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					} // switch
 				} // for each error to check
 			} elseif ($value["mandatory"] &&
-						(
-							// for all "normal" fields
-							($this->table_array[$key]["type"] != "password" && $this->table_array[$key]["type"] != "drop_down_db_input" && !$this->table_array[$key]["value"]) ||
-							// for drop_down_db_input check if one of both fields filled
-							($this->table_array[$key]["type"] == "drop_down_db_input" && !$this->table_array[$key]["input_value"] && !$this->table_array[$key]["value"]) ||
-							// for password
-							($this->table_array[$key]["type"] == "password" && !$this->table_array[$key]["value"] && !$this->table_array[$key]["HIDDEN_value"])
-						)
-					// main if end
-					) {
+				(
+					// for all "normal" fields
+					($this->table_array[$key]["type"] != "password" && $this->table_array[$key]["type"] != "drop_down_db_input" && !$this->table_array[$key]["value"]) ||
+					// for drop_down_db_input check if one of both fields filled
+					($this->table_array[$key]["type"] == "drop_down_db_input" && !$this->table_array[$key]["input_value"] && !$this->table_array[$key]["value"]) ||
+					// for password
+					($this->table_array[$key]["type"] == "password" && !$this->table_array[$key]["value"] && !$this->table_array[$key]["HIDDEN_value"])
+				)
+			// main if end
+			) {
 				// if mandatory && no input
 				// $this->debug('form', "A: ".$this->table_array[$key]["type"]." -- ".$this->table_array[$key]["input_value"]." -- ".$this->table_array[$key]["value"]);
 				if (!$this->table_array[$key]["value"] && $this->table_array[$key]["type"] != "binary") {
@@ -1145,7 +1145,6 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// DESC  : save a table, reference and all input fields
 	public function formSaveTableArray($addslashes = 0)
 	{
-//       global $_FILES;
 		// for drop_down_db_input check if text field is filled and if, if not yet in db ...
 		// and upload files
 		if (!is_array($this->table_array)) {
@@ -1154,9 +1153,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		reset($this->table_array);
 		while (list($key, $value) = each($this->table_array)) {
 			// drop_down_db with input + reference table
-//$this->debug('form', "A: ".$this->table_array[$key]["type"]." --- ".$this->table_array[$key]["input_value"]);
+			// $this->debug('form', "A: ".$this->table_array[$key]["type"]." --- ".$this->table_array[$key]["input_value"]);
 			if ($this->table_array[$key]["type"] == "drop_down_db_input" && $this->table_array[$key]["input_value"]) {
-//$this->debug('form', "HERE");
+				// $this->debug('form', "HERE");
 				// check if this text name already exists (lowercase compare)
 				$q = "SELECT ".$this->table_array[$key]["pk_name"]." FROM ".$this->table_array[$key]["table_name"]." WHERE LCASE(".$this->table_array[$key]["input_name"].") = '".$this->db_escape_string(strtolower($this->table_array[$key]["input_value"]))."'";
 				// if a where was given, add here
@@ -1208,10 +1207,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// if smth in $$key_file -> save or overwrite
 				// if smth in $key && $$key_delete && !$$key_file-> delte
 				// if smth in $key, keep as is
-//           $_file=$key."_file";
-//           $_delete=$key."_delete";
-//$this->debug('form', "UF: ".$GLOBALS["_FILES"][$key."_file"]['name']);
-//$this->debug('form', "delete: ".$key."_delete => ".$GLOBALS[$key.'_delete']);
+				// $_file=$key."_file";
+				// $_delete=$key."_delete";
+				// $this->debug('form', "UF: ".$GLOBALS["_FILES"][$key."_file"]['name']);
+				// $this->debug('form', "delete: ".$key."_delete => ".$GLOBALS[$key.'_delete']);
 				if ($GLOBALS["_FILES"][$key."_file"]['name']) {
 					// check if dir exists
 					if (is_dir($this->table_array[$key]["save_dir"])) {
@@ -1240,11 +1239,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// for password crypt it as blowfish, or if not available MD5
 			if ($this->table_array[$key]['type'] == 'password') {
 				if ($this->table_array[$key]["value"]) {
-					// password is stored in blowfish format, or in the format supported by this PHP version
-					$this->table_array[$key]["value"] = $this->cryptString($this->table_array[$key]["value"]);
+					// use the better new passwordSet instead of crypt based
+					$this->table_array[$key]['value'] = $this->passwordSet($this->table_array[$key]['value']);
 					$this->table_array[$key]["HIDDEN_value"] = $this->table_array[$key]["value"];
 				} else {
-//						$this->table_array[$key]["HIDDEN_value"] =
+					// $this->table_array[$key]["HIDDEN_value"] =
 				}
 			}
 		} // go through each field
@@ -1287,14 +1286,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						$max = count($_POST[$prfx.$key]);
 					}
 				}
-//$this->debug('edit_error', "MAX: $max");
+				// $this->debug('edit_error', "MAX: $max");
 				// check if there is a hidden key, update, else insert
 				while (list($el_name, $data_array) = each($reference_array["elements"])) {
 					// this is only for reference_data part, at least one of the text fields need to be set for writing
 					$blow_write = array ();
-//$this->debug('edit_error_query', "QUERY: ".$this->print_ar($_POST));
+					// $this->debug('edit_error_query', "QUERY: ".$this->print_ar($_POST));
 					// go through all submitted data
-//						for ($i = 0; $i < count($_POST[$el_name]); $i ++)
+					// for ($i = 0; $i < count($_POST[$el_name]); $i ++)
 					for ($i = 0; $i < $max; $i ++) {
 						// if we have enable name & delete set, then only insert/update those which are flagged as active
 						// check if mandatory field is set, if not set "do not write flag"
@@ -1326,7 +1325,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						// write all data (insert/update) because I don't know until all are processed if it is insert or update
 						// don't write primary key backup for update
 						// for reference_data type, only write if at least one text type field is set
-//$this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prfx.$el_name][$i]." | Type: ".$type[$i]." | PK: ".$data_array["pk_id"].", Block write: ".$block_write[$i]);
+						// $this->debug('edit_error', "I: $i | EL Name: $prfx$el_name | Data: ".$_POST[$prfx.$el_name][$i]." | Type: ".$type[$i]." | PK: ".$data_array["pk_id"].", Block write: ".$block_write[$i]);
 						// only add elements that are not PK or FK flaged
 						if (!$data_array['pk_id'] && !$data_array['fk_id']) {
 							// update data list
