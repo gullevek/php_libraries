@@ -316,9 +316,9 @@ class Login extends \CoreLibs\DB\IO
 						$this->login_error = 1012;
 					} else {
 						// check if the current password is an invalid hash and do a rehash and set password
-						// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '.(password_verify($this->password, $res['password']) ? 'OK' : 'FAIL').' => HASH: '.(password_needs_rehash($res['password'], PASSWORD_DEFAULT, $this->password_options) ? 'NEW NEEDED' : 'OK'));
-						if (password_needs_rehash($res['password'], PASSWORD_DEFAULT, $this->password_options)) {
-							$new_hash = password_hash($this->password, PASSWORD_DEFAULT, $this->password_options);
+						// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '.($this->passwordVerify($this->password, $res['password']) ? 'OK' : 'FAIL').' => HASH: '.($this->passwordRehashCheck($res['password']) ? 'NEW NEEDED' : 'OK'));
+						if ($this->passwordRehashCheck($res['password'])) {
+							$new_hash = $this->passwordSet($this->password);
 							// update password hash to new one now
 							$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($new_hash)."' WHERE edit_user_id = ".$res['edit_user_id'];
 							$this->dbExec($q);
