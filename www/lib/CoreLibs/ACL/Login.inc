@@ -318,9 +318,8 @@ class Login extends \CoreLibs\DB\IO
 						// check if the current password is an invalid hash and do a rehash and set password
 						// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '.($this->passwordVerify($this->password, $res['password']) ? 'OK' : 'FAIL').' => HASH: '.($this->passwordRehashCheck($res['password']) ? 'NEW NEEDED' : 'OK'));
 						if ($this->passwordRehashCheck($res['password'])) {
-							$new_hash = $this->passwordSet($this->password);
 							// update password hash to new one now
-							$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($new_hash)."' WHERE edit_user_id = ".$res['edit_user_id'];
+							$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($this->passwordSet($this->password))."' WHERE edit_user_id = ".$res['edit_user_id'];
 							$this->dbExec($q);
 						}
 						// normal user processing
