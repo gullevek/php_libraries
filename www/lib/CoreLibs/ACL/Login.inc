@@ -69,7 +69,16 @@ class Login extends \CoreLibs\DB\IO
 	private $logout; // logout button
 	private $login_error; // login error code, can be matched to the array login_error_msg, which holds the string
 	private $password_change = false; // if this is set to true, the user can change passwords
+	private $password_change_ok = false; // password change was successful
 	private $pw_change_deny_users = array (); // array of users for which the password change is forbidden
+
+	// if we have password change we need to define some rules
+	private $password_min_length = 8;
+	// can have several regexes, if nothing set, all is ok
+	private $password_valid_chars = array (
+		// '^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$',
+		// '^(?.*(\pL)u)(?=.*(\pN)u)(?=.*([^\pL\pN])u).{8,}',
+	);
 
 	// all possible login error conditions
 	private $login_error_msg = array ();
@@ -229,6 +238,55 @@ class Login extends \CoreLibs\DB\IO
 		parent::__destruct();
 	}
 
+	// METHOD: loginPasswordCheck
+	// PARAMS: hash, optional password, to override
+	// RETURN: true or false
+	// DESC  : checks if password is valid, sets internal error login variable
+	private function loginPasswordCheck($hash, $password = '')
+	{
+		$password_ok = false;
+		if (!$password) {
+			$password = $this->password;
+		}
+		if ((preg_match("/^\\$2(a|y)\\$/", $hash) && CRYPT_BLOWFISH != 1) ||
+			(preg_match("/^\\$1\\$/", $hash) && CRYPT_MD5 != 1) ||
+			(preg_match("/^\\$[0-9A-Za-z.]{12}$/", $hash) && CRYPT_STD_DES != 1)
+		) {
+			// this means password cannot be decrypted because of missing crypt methods
+			$this->login_error = 9999;
+			$password_ok = false;
+		} elseif ((preg_match("/^\\$2(a)\\$/", $hash) ||
+			// old password have $07$ so we check this
+			(preg_match("/^\\$2(y)\\$/", $hash) && preg_match("/\\$07\\$/", $hash)) ||
+			preg_match("/^\\$1\\$/", $hash) ||
+			preg_match("/^\\$[0-9A-Za-z.]{12}$/", $hash)) &&
+			!$this->verifyCryptString($password, $hash)
+		) {
+			// check passwword as crypted, $2a$ or $2y$ is blowfish start, $1$ is MD5 start, $\w{12} is standard DES
+			// this is only for OLD $07$ password
+			$this->login_error = 1011;
+			$password_ok = false;
+		} elseif (preg_match("/^\\$2y\\$/", $hash) &&
+			!$this->passwordVerify($password, $hash)
+		) {
+			// this is the new password hash methid, is only $2y$
+			$this->login_error = 1013;
+			$password_ok = false;
+		} elseif (!preg_match("/^\\$2(a|y)\\$/", $hash) &&
+			!preg_match("/^\\$1\\$/", $hash) &&
+			!preg_match("/^\\$[0-9A-Za-z.]{12}$/", $hash) &&
+			$hash != $password
+		) {
+			// check old plain password, non case sensitive
+			$this->login_error = 1012;
+			$password_ok = false;
+		} else {
+			// all ok
+			$password_ok = true;
+		}
+		return $password_ok;
+	}
+
 	// METHOD: loginLoginUser
 	// WAS   : login_login_user
 	// PARAMS: none
@@ -285,35 +343,8 @@ class Login extends \CoreLibs\DB\IO
 					} elseif ($res['locked']) {
 						// user is locked, either set or auto set
 						$this->login_error = 105;
-					} elseif ((preg_match("/^\\$2(a|y)\\$/", $res['password']) && CRYPT_BLOWFISH != 1) ||
-						(preg_match("/^\\$1\\$/", $res['password']) && CRYPT_MD5 != 1) ||
-						(preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) && CRYPT_STD_DES != 1)
-					) {
-						// this means password cannot be decrypted because of missing crypt methods
-						$this->login_error = 9999;
-					} elseif ((preg_match("/^\\$2(a|y)\\$/", $res['password']) ||
-						preg_match("/^\\$1\\$/", $res['password']) ||
-						preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password'])) &&
-						// old password have $07$ so we check this
-						preg_match("/\\$07\\$/", $res['password']) &&
-						!$this->verifyCryptString($this->password, $res['password'])
-					) {
-						// check passwword as crypted, $2a$ or $2y$ is blowfish start, $1$ is MD5 start, $\w{12} is standard DES
-						// this is only for OLD $07$ password
-						$this->login_error = 1011;
-					} elseif (preg_match("/^\\$2y\\$/", $res['password']) &&
-						!preg_match("/\\$07\\$/", $res['password']) &&
-						!$this->passwordVerify($this->password, $res['password'])
-					) {
-						// this is the new password hash methid, is only $2y$
-						$this->login_error = 1013;
-					} elseif (!preg_match("/^\\$2(a|y)\\$/", $res['password']) &&
-						!preg_match("/^\\$1\\$/", $res['password']) &&
-						!preg_match("/^\\$[0-9A-Za-z.]{12}$/", $res['password']) &&
-						$res['password'] != $this->password
-					) {
-						// check old plain password, non case sensitive
-						$this->login_error = 1012;
+					} elseif (!$this->loginPasswordCheck($res['password'])) {
+						// none to be set, set in login password check
 					} else {
 						// check if the current password is an invalid hash and do a rehash and set password
 						// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '.($this->passwordVerify($this->password, $res['password']) ? 'OK' : 'FAIL').' => HASH: '.($this->passwordRehashCheck($res['password']) ? 'NEW NEEDED' : 'OK'));
@@ -652,6 +683,28 @@ class Login extends \CoreLibs\DB\IO
 		}
 	}
 
+	// METHOD: loginPasswordChangeValidPassword
+	// PARAMS: the new password
+	// RETURN: true or false
+	// DESC  : checks if the password is in a valid format
+	private function loginPasswordChangeValidPassword($password)
+	{
+		$is_valid_password = true;
+		// check for valid in regex arrays in list
+		if (is_array($this->password_valid_chars)) {
+			foreach ($this->password_valid_chars as $password_valid_chars) {
+				if (!preg_match("/$password_valid_chars/", $password)) {
+					$is_valid_password = false;
+				}
+			}
+		}
+		// check for min length
+		if (strlen($password) < $this->password_min_length) {
+			$is_valid_password = false;
+		}
+		return $is_valid_password;
+	}
+
 	// METHOD: loginPasswordChange
 	// WAS   : login_password_change
 	// PARAMS: none
@@ -663,7 +716,7 @@ class Login extends \CoreLibs\DB\IO
 			$event = 'Password Change';
 			// check that given username is NOT in the deny list, else silent skip (with error log)
 			if (!in_array($this->pw_username, $this->pw_change_deny_users)) {
-				if (!$this->pw_username || !$this->pw_password) {
+				if (!$this->pw_username || !$this->pw_old_password) {
 					$this->login_error = 200;
 					$data = 'Missing username or old password.';
 				}
@@ -679,9 +732,9 @@ class Login extends \CoreLibs\DB\IO
 				}
 				// check old passwords match -> error
 				if (!$this->login_error) {
-					$q = "SELECT edit_user_id FROM edit_user WHERE enabled = 1 AND username = '".$this->dbEscapeString($this->pw_username)."' AND password = '".$this->dbEscapeString($this->pw_old_password)."'";
-					list ($edit_user_id) = $this->dbReturnRow($q);
-					if (!$edit_user_id) {
+					$q = "SELECT edit_user_id, password FROM edit_user WHERE enabled = 1 AND username = '".$this->dbEscapeString($this->pw_username)."'";
+					list ($edit_user_id, $old_password_hash) = $this->dbReturnRow($q);
+					if (!$edit_user_id || !$this->loginPasswordCheck($old_password_hash, $this->pw_old_password)) {
 						// old password wrong
 						$this->login_error = 202;
 						$data = 'The old password does not match';
@@ -698,15 +751,23 @@ class Login extends \CoreLibs\DB\IO
 				if (!$this->login_error) {
 					if ($this->pw_new_password != $this->pw_new_password_confirm) {
 						$this->login_error = 204;
-						$data = 'The new passwords do not match: '.$this->pw_new_password.' == '.$this->pw_new_password_confirm;
+						$data = 'The new passwords do not match';
+					}
+				}
+				// password shall match to something in minimum length or form
+				if (!$this->login_error) {
+					if (!$this->loginPasswordChangeValidPassword($this->pw_new_password)) {
+						$this->login_error = 205;
+						$data = 'The new password string is not valid';
 					}
 				}
 				// no error change this users password
 				if (!$this->login_error) {
 					// update the user (edit_user_id) with the new password
-					$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($this->cryptString($this->pw_new_password))."' WHERE edit_user_id = ".$edit_user_id;
+					$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($this->passwordSet($this->pw_new_password))."' WHERE edit_user_id = ".$edit_user_id;
 					$this->dbExec($q);
-					$data = 'Password change for user "'.$this->pw_username.'" from "'.$this->pw_old_password.'" to "'.$this->pw_new_password.'"';
+					$data = 'Password change for user "'.$this->pw_username.'"';
+					$this->password_change_ok = true;
 				}
 			} else {
 				// illegal user error
@@ -714,7 +775,7 @@ class Login extends \CoreLibs\DB\IO
 				$data = 'Illegal user for password change: '.$this->pw_username;
 			}
 			// log this password change attempt
-			$this->write_log($event, $data, $this->login_error, $pw_username, $pw_old_password);
+			$this->writeLog($event, $data, $this->login_error, $this->pw_username);
 		} // button pressed
 	}
 
@@ -744,29 +805,43 @@ class Login extends \CoreLibs\DB\IO
 				// pre change the data in the PASSWORD_CHANGE_DIV first
 				foreach ($this->login_template['strings'] as $string => $data) {
 					if ($data) {
-						$html_string_password_change = str_replace("{".$string."}", $data, $html_string_password_change);
+						$html_string_password_change = str_replace('{'.$string.'}', $data, $html_string_password_change);
 					}
+				}
+				// print error messagae
+				if ($this->login_error) {
+					$html_string_password_change = str_replace('{ERROR_MSG}', $this->login_error_msg[$this->login_error].'<br>', $html_string_password_change);
+				} else {
+					$html_string_password_change = str_replace('{ERROR_MSG}', '<br>', $html_string_password_change);
+				}
+				// if pw change action, show the float again
+				if ($this->change_password && !$this->password_change_ok) {
+					$html_string_password_change = str_replace('{PASSWORD_CHANGE_SHOW}', '<script language="JavaScript">ShowHideDiv(\'pw_change_div\');</script>', $html_string_password_change);
+				} else {
+					$html_string_password_change = str_replace('{PASSWORD_CHANGE_SHOW}', '', $html_string_password_change);
 				}
 				$this->login_template['strings']['PASSWORD_CHANGE_DIV'] = $html_string_password_change;
 			}
 
 			// put in the logout redirect string
 			if ($this->logout && $LOGOUT_TARGET) {
-				$html_string = str_replace("{LOGOUT_TARGET}", '<meta http-equiv="refresh" content="0; URL='.$LOGOUT_TARGET.'">', $html_string);
+				$html_string = str_replace('{LOGOUT_TARGET}', '<meta http-equiv="refresh" content="0; URL='.$LOGOUT_TARGET.'">', $html_string);
 			} else {
-				$html_string = str_replace("{LOGOUT_TARGET}", '', $html_string);
+				$html_string = str_replace('{LOGOUT_TARGET}', '', $html_string);
 			}
 
 			// print error messagae
 			if ($this->login_error) {
-				$html_string = str_replace("{ERROR_MSG}", $this->login_error_msg[$this->login_error]."<br>", $html_string);
+				$html_string = str_replace('{ERROR_MSG}', $this->login_error_msg[$this->login_error].'<br>', $html_string);
+			} elseif ($this->password_change_ok && $this->password_change) {
+				$html_string = str_replace('{ERROR_MSG}', $this->login_error_msg[300].'<br>', $html_string);
 			} else {
-				$html_string = str_replace("{ERROR_MSG}", "<br>", $html_string);
+				$html_string = str_replace('{ERROR_MSG}', '<br>', $html_string);
 			}
 
 			// create the replace array context
 			foreach ($this->login_template['strings'] as $string => $data) {
-				$html_string = str_replace("{".$string."}", $data, $html_string);
+				$html_string = str_replace('{'.$string.'}', $data, $html_string);
 			}
 
 			// return the created HTML here
@@ -799,7 +874,7 @@ class Login extends \CoreLibs\DB\IO
 				$q = "SELECT username, password FROM edit_user WHERE edit_user_id = ".$this->euid;
 				list($username, $password) = $this->dbReturnRow($q);
 			} // if euid is set, get username (or try)
-			$this->writeLog($event, '', $this->login_error, $username, $password);
+			$this->writeLog($event, '', $this->login_error, $username);
 		} // write log under certain settings
 		// now close DB connection
 		// $this->error_msg = $this->_login();
@@ -844,6 +919,8 @@ class Login extends \CoreLibs\DB\IO
 			"202" => $this->l->__("Fatal Error: <b>Password change - The old password is not correct</b>"),
 			"203" => $this->l->__("Fatal Error: <b>Password change - Please fill out both new password fields</b>"),
 			"204" => $this->l->__("Fatal Error: <b>Password change - The new passwords do not match</b>"),
+			"205" => $this->l->__("Fatal Error: <b>Password change - The new password is not in a valid format</b>"), // we should also not here WHAT is valid
+			"300" => $this->l->__("Success: <b>Password change successful</b>"), // for OK password change
 			"9999" => $this->l->__("Fatal Error: <b>necessary crypt engine could not be found</b>. Login is impossible") // this is bad bad error
 		);
 
@@ -870,6 +947,7 @@ class Login extends \CoreLibs\DB\IO
 <tr><td></td><td><input type="submit" name="change_password" value="{PASSWORD_CHANGE_BUTTON_VALUE}"><input type="button" name="pw_change" value="{CLOSE}" OnClick="ShowHideDiv('pw_change_div');"></td></tr>
 </table>
 </div>
+{PASSWORD_CHANGE_SHOW}
 EOM;
 		} else {
 			$strings = array_merge($strings, array (
@@ -967,12 +1045,14 @@ EOM;
 	//        error -> if error, write error string (not enougth data, etc)
 	// RETURN: none
 	// DESC  : writes detailed data into the edit user log table (keep log what user does)
-	private function writeLog($event, $data, $error = "", $username = "", $password = "")
+	private function writeLog($event, $data, $error = '', $username = '')
 	{
 		if ($this->login) {
 				$this->action = 'Login';
 		} elseif ($this->logout) {
 				$this->action = 'Logout';
+		} else {
+			$this->action = '';
 		}
 		$_data_binary = array (
 				'_SESSION' => $_SESSION,
@@ -987,7 +1067,7 @@ EOM;
 		$q .= "(username, password, euid, event_date, event, error, data, data_binary, page, ";
 		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
-		$q .= "VALUES ('".$this->dbEscapeString($username)."', '".$this->dbEscapeString($password)."', ".(($this->euid) ? $this->euid : 'NULL').", ";
+		$q .= "VALUES ('".$this->dbEscapeString($username)."', 'PASSWORD', ".(($this->euid) ? $this->euid : 'NULL').", ";
 		$q .= "NOW(), '".$this->dbEscapeString($event)."', '".$this->dbEscapeString($error)."', '".$this->dbEscapeString($data)."', '".$data_binary."', '".$this->page_name."', ";
 		foreach (array('REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME', 'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT', 'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING') as $server_code) {
 			if (array_key_exists($server_code, $_SERVER)) {
