@@ -917,16 +917,16 @@ class form extends db_array_io
 					} // switch
 				} // for each error to check
 			} elseif ($value["mandatory"] &&
-						(
-							// for all "normal" fields
-							($this->table_array[$key]["type"] != "password" && $this->table_array[$key]["type"] != "drop_down_db_input" && !$this->table_array[$key]["value"]) ||
-							// for drop_down_db_input check if one of both fields filled
-							($this->table_array[$key]["type"] == "drop_down_db_input" && !$this->table_array[$key]["input_value"] && !$this->table_array[$key]["value"]) ||
-							// for password
-							($this->table_array[$key]["type"] == "password" && !$this->table_array[$key]["value"] && !$this->table_array[$key]["HIDDEN_value"])
-						)
-					// main if end
-					) {
+				(
+					// for all "normal" fields
+					($this->table_array[$key]["type"] != "password" && $this->table_array[$key]["type"] != "drop_down_db_input" && !$this->table_array[$key]["value"]) ||
+					// for drop_down_db_input check if one of both fields filled
+					($this->table_array[$key]["type"] == "drop_down_db_input" && !$this->table_array[$key]["input_value"] && !$this->table_array[$key]["value"]) ||
+					// for password
+					($this->table_array[$key]["type"] == "password" && !$this->table_array[$key]["value"] && !$this->table_array[$key]["HIDDEN_value"])
+				)
+			// main if end
+			) {
 				// if mandatory && no input
 //$this->debug('form', "A: ".$this->table_array[$key]["type"]." -- ".$this->table_array[$key]["input_value"]." -- ".$this->table_array[$key]["value"]);
 				if (!$this->table_array[$key]["value"] && $this->table_array[$key]["type"] != "binary") {
@@ -1171,7 +1171,6 @@ class form extends db_array_io
 	// DESC   save a table, reference and all input fields
 	public function form_save_table_array($addslashes = 0)
 	{
-//       global $_FILES;
 		// for drop_down_db_input check if text field is filled and if, if not yet in db ...
 		// and upload files
 		if (!is_array($this->table_array)) {
@@ -1234,8 +1233,8 @@ class form extends db_array_io
 				// if smth in $$key_file -> save or overwrite
 				// if smth in $key && $$key_delete && !$$key_file-> delte
 				// if smth in $key, keep as is
-//           $_file=$key."_file";
-//           $_delete=$key."_delete";
+				// $_file=$key."_file";
+				// $_delete=$key."_delete";
 //$this->debug('form', "UF: ".$GLOBALS["_FILES"][$key."_file"]['name']);
 //$this->debug('form', "delete: ".$key."_delete => ".$GLOBALS[$key.'_delete']);
 				if ($GLOBALS["_FILES"][$key."_file"]['name']) {
@@ -1266,11 +1265,11 @@ class form extends db_array_io
 			// for password crypt it as blowfish, or if not available MD5
 			if ($this->table_array[$key]['type'] == 'password') {
 				if ($this->table_array[$key]["value"]) {
-					// password is stored in blowfish format, or in the format supported by this PHP version
-					$this->table_array[$key]["value"] = $this->cryptString($this->table_array[$key]["value"]);
+					// use the better new passwordSet instead of crypt based
+					$this->table_array[$key]['value'] = $this->passwordSet($this->table_array[$key]['value']);
 					$this->table_array[$key]["HIDDEN_value"] = $this->table_array[$key]["value"];
 				} else {
-//						$this->table_array[$key]["HIDDEN_value"] =
+					// $this->table_array[$key]["HIDDEN_value"] =
 				}
 			}
 		} // go through each field
