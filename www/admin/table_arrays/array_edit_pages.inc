@@ -1,4 +1,4 @@
-<?
+<?php
 $edit_pages = array (
 	"table_array" => array (
 		"edit_page_id" => array (
@@ -26,7 +26,7 @@ $edit_pages = array (
 			"int" => 1,
 			"order" => 1
 		),
-/*			"flag" => array (
+		/* "flag" => array (
 			"value" => $GLOBALS["flag"],
 			"output_name" => "Page Flag",
 			"type" => "drop_down_array",
@@ -175,3 +175,5 @@ $edit_pages = array (
 		) // query_string element list
 	) // element list
 );
+
+# __END__

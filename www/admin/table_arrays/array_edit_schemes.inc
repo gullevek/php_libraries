@@ -1,4 +1,4 @@
-<?
+<?php
 $edit_schemes = array (
 	"table_array" => array (
 		"edit_scheme_id" => array (
@@ -53,3 +53,4 @@ $edit_schemes = array (
 	)
 ); // main array
 
+# __END__

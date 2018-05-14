@@ -1,4 +1,4 @@
-<?
+<?php
 $edit_users = array (
 	"table_array" => array (
 		"edit_user_id" => array (
@@ -251,3 +251,5 @@ $edit_users = array (
 		) // edit pages ggroup
 	)
 );
+
+# __END__

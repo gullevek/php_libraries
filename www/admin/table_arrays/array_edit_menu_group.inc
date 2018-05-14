@@ -1,4 +1,4 @@
-<?
+<?php
 $edit_menu_group = array (
 	"table_array" => array (
 		"edit_menu_group_id" => array (
@@ -35,3 +35,5 @@ $edit_menu_group = array (
 		)
 	)
 );
+
+# __END__

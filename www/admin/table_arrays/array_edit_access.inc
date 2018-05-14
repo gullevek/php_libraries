@@ -1,4 +1,4 @@
-<?
+<?php
 $edit_access = array (
 	"table_array" => array (
 		"edit_access_id" => array (
@@ -74,3 +74,5 @@ $edit_access = array (
 		)
 	)
 );
+
+# __END__
