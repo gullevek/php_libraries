@@ -958,14 +958,14 @@ EOM;
 		}
 
 		// first check if all strings are set from outside, if not, set with default ones
-		while (list($string, $data) = each($strings)) {
+		foreach ($strings as $string => $data) {
 			if (!array_key_exists($string, $this->login_template['strings'])) {
 				$this->login_template['strings'][$string] = $data;
 			}
 		}
 
 		// error msgs the same
-		while (list($code, $data) = each($error_msgs)) {
+		foreach ($error_msgs as $code => $data) {
 			if (!array_key_exists($code, $this->login_error_msg)) {
 				$this->login_error_msg[$code] = $data;
 			}

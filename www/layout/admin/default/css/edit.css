@@ -272,7 +272,7 @@ input[type="text"]:focus, textarea:focus, select:focus {
 }
 
 /* spacer for line break in float elements */
-.spacer {
+.clr, .spacer {
 	clear: both;
 }
 

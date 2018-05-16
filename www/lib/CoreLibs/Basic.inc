@@ -123,7 +123,7 @@ class Basic
 	private $log_print_file = 'error_msg##LOGID####LEVEL####CLASS####PAGENAME####DATE##';
 	private $log_file_unique_id; // a unique ID set only once for call derived from this class
 	public $log_print_file_date = 1; // if set add Y-m-d and do automatic daily rotation
-	private $log_file_id = LOG_FILE_ID ? LOG_FILE_ID : ''; // a alphanumeric name that has to be set as global definition
+	private $log_file_id = ''; // a alphanumeric name that has to be set as global definition
 	public $log_per_level = 0; // set, it will split per level (first parameter in debug call)
 	public $log_per_class = 0; // set, will split log per class
 	public $log_per_page = 0; // set, will split log per called file
@@ -179,9 +179,30 @@ class Basic
 			"class_author" => 'Clemens Schwaighofer'
 		);
 
+		// before we start any work, we should check that all MUST constants are defined
+		$abort = false;
+		foreach (array(
+			'DS', 'DIR', 'BASE', 'ROOT', 'LIB', 'INCLUDES', 'LAYOUT', 'PICTURES', 'FLASH', 'VIDEOS', 'DOCUMENTS', 'PDFS', 'BINARIES', 'ICONS',
+			'UPLOADS', 'CSV', 'JS', 'CSS', 'TABLE_ARRAYS', 'SMARTY', 'LANG', 'CACHE', 'TMP', 'LOG', 'TEMPLATES', 'TEMPLATES_C',
+			'TEMPLATES_FRONTEND', 'DEFAULT_TEMPLATE', 'DEFAULT_TEMPLATE_FILE', 'DEFAULT_LANG', 'DEFAULT_ENCODING', 'DEFAULT_HASH',
+			'DEFAULT_ACL_LEVEL', 'LOGOUT_TARGET', 'PASSWORD_CHANGE', 'AJAX_REQUEST_TYPE', 'USE_PROTOTYPE', 'USE_SCRIPTACULOUS', 'USE_JQUERY',
+			'PAGE_WIDTH', 'MASTER_TEMPLATE_NAME', 'PUBLIC_SCHEMA', 'TEST_SCHEMA', 'DEV_SCHEMA', 'LOGIN_DB', 'MAIN_DB', 'DB_SCHEMA',
+			'LOGIN_DB_SCHEMA', 'GLOBAL_DB_SCHEMA', 'TARGET', 'DEBUG', 'SHOW_ALL_ERRORS'
+		) as $constant) {
+			if (!defined($constant)) {
+				echo "Constant $constant misssing<br>";
+				$abort = true;
+			}
+		}
+		if ($abort === true) {
+			die('Core Constant missing. Check config file.');
+		}
+
 		// set the page name
 		$this->page_name = $this->getPageName();
 		$this->host_name = $this->getHostName();
+		// init the log file id
+		$this->log_file_id = defined('LOG_FILE_ID') ? LOG_FILE_ID : '';
 
 		// set the paths matching to the valid file types
 		$this->data_path = array (
@@ -328,7 +349,7 @@ class Basic
 		// initial the session if there is no session running already
 		if (!session_id()) {
 			// check if we have an external session name given, else skip this step
-			if (SET_SESSION_NAME) {
+			if (defined('SET_SESSION_NAME')) {
 				// set the session name for possible later check
 				$this->session_name = SET_SESSION_NAME;
 			}
@@ -434,7 +455,7 @@ class Basic
 	// DESC  : wrapper around microtime function to print out y-m-d h:i:s.ms
 	public static function printTime($set_microtime = -1)
 	{
-		list($microtime, $timestamp) = explode(" ", microtime());
+		list($microtime, $timestamp) = explode(' ', microtime());
 		$string = date("Y-m-d H:i:s", $timestamp);
 		// if microtime flag is -1 no round, if 0, no microtime, if >= 1, round that size
 		if ($set_microtime == -1) {

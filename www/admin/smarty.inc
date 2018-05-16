@@ -90,7 +90,7 @@ $cms->DEBUG_DATA['DEBUG'] = @$DEBUG_TMPL;
 // create main data array
 $cms->CONTENT_DATA = array_merge($cms->HEADER, $cms->DATA, $cms->DEBUG_DATA);
 // data is 1:1 mapping (all vars, values, etc)
-while (list($key, $value) = each($cms->CONTENT_DATA)) {
+foreach ($cms->CONTENT_DATA as $key => $value) {
 	$smarty->assign($key, $value);
 }
 if (is_dir(BASE.TEMPLATES_C)) {

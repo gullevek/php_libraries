@@ -501,7 +501,7 @@ class IO extends \CoreLibs\Basic
 	// NOTE  : used in db_dump_data only
 	private function __printArray($array)
 	{
-		while (list($key, $value) = each($array)) {
+		foreach ($array as $key => $value) {
 			$string .= $this->nbsp.'<b>'.$key.'</b> => ';
 			if (is_array($value)) {
 				$this->nbsp .= '&nbsp;&nbsp;&nbsp;';
@@ -1111,7 +1111,7 @@ class IO extends \CoreLibs\Basic
 					$this->cursor_ext[$md5]['read_rows'] ++;
 					// if reset is <3 caching is done, else no
 					if ($reset < 3) {
-						while (list($field_name, $data) = each($return)) {
+						foreach ($return as $field_name => $data) {
 							$temp[$field_name] = $data;
 						}
 						$this->cursor_ext[$md5][] = $temp;
