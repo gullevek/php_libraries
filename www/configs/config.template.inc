@@ -1,6 +1,6 @@
 <?php
 /********************************************************************
-* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
+* AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/06/10
 * SHORT DESCRIPTION:
 *   configuration file
@@ -59,6 +59,8 @@ DEFINE('VIDEOS', "videos".DS);
 DEFINE('DOCUMENTS', "documents".DS);
 // files (pdfs) (below media)
 DEFINE('PDFS', "documents".DS);
+// CSV
+DEFINE('CSV', 'csv'.DS);
 // css
 DEFINE('CSS', "css".DS);
 // js
@@ -75,6 +77,8 @@ DEFINE('CACHE', "cache".DS);
 DEFINE('TMP', "tmp".DS);
 // log files
 DEFINE('LOG', 'log'.DS);
+// compiled template folder
+DEFINE('TEMPLATES_C', 'templates_c'.DS);
 // template base
 DEFINE('TEMPLATES', "templates".DS);
 // frontend template dir', only for admin
@@ -141,6 +145,7 @@ DEFINE('MASTER_TEMPLATE_NAME', 'main_body.tpl');
 DEFINE('PUBLIC_SCHEMA', 'public');
 DEFINE('DEV_SCHEMA', 'public');
 DEFINE('TEST_SCHEMA', 'public');
+DEFINE('LIVE_SCHEMA', 'public');
 
 // non constant part
 /************* DB ACCESS *****************/
