@@ -52,6 +52,9 @@ if (!$show_type) {
 	$show_type = 'P';
 }
 
+// set edit access array
+$edit_access_ids = array_keys($cms->user_unit);
+
 // yes no list (online)
 $yesno_list['f'] = 'No';
 $yesno_list['t'] = 'Yes';
@@ -262,9 +265,16 @@ if ($cms->action == 'delete' && $cms->action_yes == 'true') {
 	}
 	if (QUEUE == 'live_queue') {
 		$q = "INSERT INTO ".GLOBAL_DB_SCHEMA.".live_queue (queue_key, key_value, key_name, type, target, data, group_key, action, file) VALUES (";
-		$q .= "'".$cms->queue_name."', '".$file_uid."', 'file_uid', 'DELETE', 'file', '', '".$cms->queue_key."', '".$cms->action."', '".BASE.MEDIA.$cms->data_path[$file_type].PUBLIC_SCHEMA."_".$file_uid."')";
+		$q .= "'".$cms->queue_name."', '".$file_uid."', 'file_uid', 'DELETE', 'file', '', '".$cms->queue_key."', '".$cms->action."', '".
+		$q .= BASE.MEDIA.$cms->data_path[$file_type].PUBLIC_SCHEMA."_".$file_uid."')";
 	}
 	@unlink(BASE.MEDIA.$cms->data_path[$file_type].DEV_SCHEMA."_".$file_uid);
+	// wipe out any old cache data for this new upload
+	if (is_array(glob($cms->cache_pictures."thumb_".TEST_SCHEMA."_".$file_uid."*"))) {
+		foreach (glob($cms->cache_pictures."thumb_".TEST_SCHEMA."_".$file_uid."*") as $filename) {
+			@unlink($filename);
+		}
+	}
 	unset($file_uid);
 	unset($file_id);
 	$delete_done = 1;
@@ -297,6 +307,12 @@ if ($cms->action_flag == 'set_live' && $cms->action = 'set_delete') {
 		$q_del = "DELETE FROM ".PUBLIC_SCHEMA.".file WHERE file_uid = '".$res['pkid'].'"';
 		$cms->db_exec($q_del);
 		@unlink(BASE.MEDIA.$cms->data_path[$res['type']].PUBLIC_SCHEMA."_".$res['file_uid']);
+		// wipe out any old cache data for this new upload
+		if (is_array(glob($cms->cache_pictures."thumb_".LIVE_SCHEMA."_".$file_uid."*"))) {
+			foreach (glob($cms->cache_pictures."thumb_".LIVE_SCHEMA."_".$file_uid."*") as $filename) {
+				@unlink($filename);
+			}
+		}
 	}
 	$q = "DELETE FROM ".LOGIN_DB_SCHEMA.".set_live WHERE table_name = '".$cms->page_name."' AND delete_flag = 't'";
 	$cms->db_exec($q);
@@ -304,13 +320,21 @@ if ($cms->action_flag == 'set_live' && $cms->action = 'set_delete') {
 if (DEV_SCHEMA != PUBLIC_SCHEMA) {
 	// read out possible deleted, to add "delete from live"
 	$q = "SELECT pkid FROM ".LOGIN_DB_SCHEMA.".set_live WHERE table_name = '".$cms->page_name."' AND delete_flag = 't'";
+	if ($cms->access_rights['base_acl'] < 90) {
+		$q .= "AND edit_access_id IN (".join(',', $edit_access_ids).") ";
+	}
 	while ($res = $cms->db_return($q, 3)) {
 		$cms->DATA['set_delete'][]['pkid'] = $res['pkid'];
 	}
 }
 // get th max entries
 $q = "SELECT COUNT(file_uid) FROM file ";
-$q_search_where = "WHERE type in ('".str_replace(',', "','", $show_type)."') ";
+$q_search_where = "WHERE ";
+// only for current edit_access id, unless it is an admin user, then he can see all of them
+if ($cms->access_rights['base_acl'] < 90) {
+	$q_search_where .= "edit_access_id IN (".join(',', $edit_access_ids).") AND ";
+}
+$q_search_where .= "type in ('".str_replace(',', "','", $show_type)."') ";
 if ($search_what) {
 	$q_search_where .= "AND LOWER(name_en) LIKE '%".addslashes(strtolower($search_what))."%' OR name_ja LIKE '%".addslashes($search_what)."%' OR LOWER(file_name) LIKE '%".addslashes(strtolower($search_what))."%' ";
 }

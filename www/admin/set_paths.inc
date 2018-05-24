@@ -117,3 +117,5 @@ if (false === strstr(LAYOUT.DEFAULT_TEMPLATE.LANG, $cms->lang_dir) || strcasecmp
 //	$cms->debug("LANGUAGE", "L: $lang | ".$cms->lang_dir." | MO File: ".$cms->l->mofile);
 $cms->debug("LANGUAGE", "SL: ".$_SESSION['DEFAULT_CHARSET']." | ".$_SESSION['LANG']." | ".$_SESSION['DEFAULT_LANG']);
 $cms->debug("TEMPLATE", "P: ".$smarty->getTemplateDir()[0]);
+
+# __END__
