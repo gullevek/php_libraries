@@ -567,7 +567,7 @@ class IO extends \CoreLibs\Basic
 			// write detailed error log
 		}
 		if ($this->warning_id) {
-			$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$this->warning_id.': '.$this->error_string[$this->warning_id].($msg ? ', '.$msg : '').'</span>', 'DB_ERROR', $where_called);
+			$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$this->warning_id.': '.$this->error_string[$this->warning_id].($msg ? ', '.$msg : '').'</span>', 'DB_WARNING', $where_called);
 			$this->had_warning = $this->warning_id;
 		}
 		// unset the error/warning vars

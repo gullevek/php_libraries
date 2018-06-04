@@ -108,7 +108,8 @@ class Login extends \CoreLibs\DB\IO
 
 		// no session could be found at all
 		if (!session_id()) {
-			echo "<b>Session not started!</b><br>Use 'session_start();'.<br>For less problems with other session, you can set a session name with 'session_name(\"name\");'.<br>";
+			echo "<b>Session not started!</b><br>Use 'session_start();'.<br>";
+			echo "For less problems with other session, you can set a session name with 'session_name(\"name\");'.<br>";
 			exit;
 		}
 
@@ -116,7 +117,15 @@ class Login extends \CoreLibs\DB\IO
 
 		// if we have a search path we need to set it, to use the correct DB to login
 		// check what schema to use. if there is a login schema use this, else check if there is a schema set in the config, or fall back to DB_SCHEMA if this exists, if this also does not exists use public schema
-		$SCHEMA = defined('LOGIN_DB_SCHEMA') ? LOGIN_DB_SCHEMA : ($db_config['db_schema'] ? $db_config['db_schema'] : (defined('DB_SCHEMA') ? DB_SCHEMA : 'public'));
+		if (defined('LOGIN_DB_SCHEMA')) {
+			$SCHEMA = LOGIN_DB_SCHEMA;
+		} elseif ($db_config['db_schema']) {
+			$SCHEMA = $db_config['db_schema'];
+		} elseif (defined('DB_SCHEMA')) {
+			$SCHEMA = DB_SCHEMA;
+		} else {
+			$SCHEMA = 'public';
+		}
 		// set schema if schema differs to schema set in db conneciton
 		if ($this->dbGetSchema() && $this->dbGetSchema() != $SCHEMA) {
 			$this->dbExec("SET search_path TO ".$SCHEMA);
@@ -244,6 +253,12 @@ class Login extends \CoreLibs\DB\IO
 	// DESC  : checks if password is valid, sets internal error login variable
 	private function loginPasswordCheck($hash, $password = '')
 	{
+		// check with what kind of prefix the password begins:
+		// $2a$ or $2y$: BLOWFISCH
+		// $1$: MD5
+		// $ and one alphanumeric letter, 13 chars long, but nor $ at the end: STD_DESC
+		// if no $ => normal password
+		// NOW, if we have a password encoded, but not the correct encoder available, throw special error
 		$password_ok = false;
 		if (!$password) {
 			$password = $this->password;
@@ -277,7 +292,7 @@ class Login extends \CoreLibs\DB\IO
 			!preg_match("/^\\$[0-9A-Za-z.]{12}$/", $hash) &&
 			$hash != $password
 		) {
-			// check old plain password, non case sensitive
+			// check old plain password, case sensitive
 			$this->login_error = 1012;
 			$password_ok = false;
 		} else {
@@ -300,11 +315,13 @@ class Login extends \CoreLibs\DB\IO
 				$this->login_error = 102;
 			} else {
 				// we have to get the themes in here too
-				$q = "SELECT eu.edit_user_id, username, password, eu.edit_group_id, eg.name AS edit_group_name, admin, eu.login_error_count, eu.login_error_date_last, eu.login_error_date_first, eu.strict, eu.locked, ";
+				$q = "SELECT eu.edit_user_id, username, password, eu.edit_group_id, eg.name AS edit_group_name, admin, ";
+				$q .= "eu.login_error_count, eu.login_error_date_last, eu.login_error_date_first, eu.strict, eu.locked, ";
 				$q .= "debug, db_debug, ";
 				$q .= "eareu.level AS user_level, eareu.type AS user_type, ";
 				$q .= "eareg.level AS group_level, eareg.type AS group_type, ";
-				$q .= "eu.enabled, el.short_name AS lang_short, el.iso_name AS lang_iso, first.header_color AS first_header_color, second.header_color AS second_header_color, second.template ";
+				$q .= "eu.enabled, el.short_name AS lang_short, el.iso_name AS lang_iso, first.header_color AS first_header_color, ";
+				$q .= "second.header_color AS second_header_color, second.template ";
 				$q .= "FROM edit_user eu ";
 				$q .= "LEFT JOIN edit_scheme second ON (second.edit_scheme_id = eu.edit_scheme_id AND second.enabled = 1), ";
 				$q .= "edit_language el, edit_group eg, ";
@@ -322,13 +339,6 @@ class Login extends \CoreLibs\DB\IO
 					$this->login_error = 1010;
 				} else {
 					// if login errors is half of max errors and the last login error was less than 10s ago, forbid any new login try
-
-					// check with what kind of prefix the password begins:
-					// $2a$ or $2y$: BLOWFISCH
-					// $1$: MD5
-					// $ and one alphanumeric letter, 13 chars long, but nor $ at the end: STD_DESC
-					// if no $ => normal password
-					// NOW, if we have a password encoded, but not the correct encoder available, throw special error
 
 					// check flow
 					// - user is enabled
@@ -382,7 +392,8 @@ class Login extends \CoreLibs\DB\IO
 							$pages = array();
 							$edit_page_ids = array();
 							// set pages access
-							$q = "SELECT ep.edit_page_id, filename, ep.name AS edit_page_name, ep.order_number AS edit_page_order, menu, popup, popup_x, popup_y, online, ear.level, ear.type ";
+							$q = "SELECT ep.edit_page_id, filename, ep.name AS edit_page_name, ep.order_number AS edit_page_order, menu, ";
+							$q .= "popup, popup_x, popup_y, online, ear.level, ear.type ";
 							$q .= "FROM edit_page ep, edit_page_access epa, edit_access_right ear ";
 							$q .= "WHERE ep.edit_page_id = epa.edit_page_id AND ear.edit_access_right_id = epa.edit_access_right_id ";
 							$q .= "AND epa.enabled = 1 AND epa.edit_group_id = ".$res["edit_group_id"]." ";
@@ -1069,7 +1080,9 @@ EOM;
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
 		$q .= "VALUES ('".$this->dbEscapeString($username)."', 'PASSWORD', ".(($this->euid) ? $this->euid : 'NULL').", ";
 		$q .= "NOW(), '".$this->dbEscapeString($event)."', '".$this->dbEscapeString($error)."', '".$this->dbEscapeString($data)."', '".$data_binary."', '".$this->page_name."', ";
-		foreach (array('REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME', 'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT', 'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING') as $server_code) {
+		foreach (array(
+			'REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME', 'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT', 'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING'
+		) as $server_code) {
 			if (array_key_exists($server_code, $_SERVER)) {
 				$q .= "'".$this->dbEscapeString($_SERVER[$server_code])."', ";
 			} else {

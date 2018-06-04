@@ -16,7 +16,9 @@ define('USE_DATABASE', true);
 // sample config
 require("config.inc");
 // set session name
-DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
+if (!defined('SET_SESSION_NAME')) {
+	DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
+}
 // define log file id
 DEFINE('LOG_FILE_ID', 'classTest');
 // set language for l10n
@@ -182,8 +184,14 @@ print "OTHER SCHEMA INSERT STATUS: ".$status." | PK NAME: ".$basic->pk_name.", P
 // time string thest
 $timestamp = 5887998.33445;
 $time_string = $basic->timeStringFormat($timestamp);
+print "PLANE TIME STRING: ".$timestamp."<br>";
 print "TIME STRING TEST: ".$time_string."<br>";
-print "REVERSE TIME STRING: ".$basic->stringToTime($time_string);
+print "REVERSE TIME STRING: ".$basic->stringToTime($time_string)."<br>";
+if (round($timestamp, 4) == $basic->stringToTime($time_string)) {
+	print "REVERSE TIME STRING MATCH<br>";
+} else {
+	print "REVERSE TRIME STRING DO NOT MATCH<br>";
+}
 
 // magic links test
 print $basic->magicLinks('user@bubu.at').'<br>';

@@ -1245,17 +1245,20 @@ class Basic
 	//         xd xh xm xs xms to a timestamp.microtime format
 	public static function stringToTime($timestring)
 	{
-		$timestamp = '';
+		$timestamp = 0;
 		if (preg_match("/(d|h|m|s|ms)/", $timestring)) {
-			$timegroups = array (1 => 86400, 3 => 3600, 5 => 60, 7 => 1);
+			// pos for preg match read + multiply factor
+			$timegroups = array (2 => 86400, 4 => 3600, 6 => 60, 8 => 1);
+			// preg match: 0: full strsing
+			// 2, 4, 6, 8 are the to need values
 			preg_match("/^((\d+)d ?)?((\d+)h ?)?((\d+)m ?)?((\d+)s ?)?((\d+)ms)?$/", $timestring, $matches);
 			// multiply the returned matches and sum them up. the last one (ms) is added with .
-			for ($i = 1; $i <= 7; $i += 2) {
-				if ($matches[$i]) {
-					$timestamp += ($matches[($i + 1)] * $timegroups[$i]);
+			foreach ($timegroups as $i => $time_multiply) {
+				if (is_numeric($matches[$i])) {
+					$timestamp += $matches[$i] * $time_multiply;
 				}
 			}
-			if ($matches[10]) {
+			if (is_numeric($matches[10])) {
 				$timestamp .= '.'.$matches[10];
 			}
 			return $timestamp;
