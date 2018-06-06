@@ -1112,6 +1112,37 @@ class Basic
 		return $ret_array;
 	}
 
+	// METHOD: arrayToString
+	// WAS   : ArrayToString
+	// PARAMS: array, connect char
+	// RETRUN: string
+	// DESC  : wrapper for join, but checks if input is an array and if not returns null
+	public static function arrayToString($array, $connect_char)
+	{
+		if (is_array($array)) {
+			return join($connect_char, $array);
+		} else {
+			return false;
+		}
+	}
+
+	// METHOD: flattenArray
+	// PARAMS: array in multi dimensions
+	// RETURN: returns a flatten array
+	// DESC  : converts multi dimensional array to a flat array
+	//         does NOT preserve keys
+	public static function flattenArray(array $array)
+	{
+		$return = array();
+		array_walk_recursive(
+			$array,
+			function ($a) use (&$return) {
+				$return[] = $a;
+			}
+		);
+		return $return;
+	}
+
 	// METHOD: __mbMimeEncode
 	// WAS   : _mb_mime_encode
 	// PARAMS: string to encode, encoding to encode in
@@ -1370,20 +1401,6 @@ class Basic
 		}
 		if ($start_timestamp > $end_timestamp) {
 			return 1;
-		}
-	}
-
-	// METHOD: arrayToString
-	// WAS   : ArrayToString
-	// PARAMS: array, connect char
-	// RETRUN: string
-	// DESC  : wrapper for join, but checks if input is an array and if not returns null
-	public static function arrayToString($array, $connect_char)
-	{
-		if (is_array($array)) {
-			return join($connect_char, $array);
-		} else {
-			return false;
 		}
 	}
 
