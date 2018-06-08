@@ -1,6 +1,6 @@
 <?
 /********************************************************************
-* AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
+* AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/06/10
 * SHORT DESCRIPTION:
 *   configuration file
@@ -9,16 +9,16 @@
 
 /************* SESSION NAMES *************/
 // backend
-DEFINE('EDIT_SESSION_NAME', "<ADMIN SESSION NAME>");
+DEFINE('EDIT_SESSION_NAME', '<ADMIN SESSION NAME>');
 // frontend
-DEFINE('SESSION_NAME', "<SESSION NAME>");
+DEFINE('SESSION_NAME', '<SESSION NAME>');
 // set the session name
 define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 
 /************* LANGUAGE / ENCODING *******/
-DEFINE('DEFAULT_LANG', "en_utf8");
+DEFINE('DEFAULT_LANG', 'en_utf8');
 // default web page encoding setting
-DEFINE('DEFAULT_ENCODING', "UTF-8");
+DEFINE('DEFAULT_ENCODING', 'UTF-8');
 
 /************* PATHS *********************/
 // directory seperator
@@ -40,51 +40,51 @@ DEFINE('INCLUDES', 'includes'.DS);
 // layout base path
 DEFINE('LAYOUT', 'layout'.DS);
 // pic-root (compatible to CMS)
-DEFINE('PICTURES', "images".DS);
+DEFINE('PICTURES', 'images'.DS);
 // images
-DEFINE('IMAGES', "images".DS);
+DEFINE('IMAGES', 'images'.DS);
 // icons (below the images/ folder)
 DEFINE('ICONS', 'icons'.DS);
 // media
-DEFINE('MEDIA', "media".DS);
+DEFINE('MEDIA', 'media'.DS);
 // flash-root (below media)
-DEFINE('FLASH', "flash".DS);
+DEFINE('FLASH', 'flash'.DS);
 // uploads (anything to keep)
-DEFINE('UPLOADS', "uploads".DS);
+DEFINE('UPLOADS', 'uploads'.DS);
 // files (binaries) (below media)
-DEFINE('BINARIES', "binaries".DS);
+DEFINE('BINARIES', 'binaries'.DS);
 // files (videos) (below media)
-DEFINE('VIDEOS', "videos".DS);
+DEFINE('VIDEOS', 'videos'.DS);
 // files (documents) (below media)
-DEFINE('DOCUMENTS', "documents".DS);
+DEFINE('DOCUMENTS', 'documents'.DS);
 // files (pdfs) (below media)
-DEFINE('PDFS', "documents".DS);
+DEFINE('PDFS', 'documents'.DS);
 // CSV
 DEFINE('CSV', 'csv'.DS);
 // css
-DEFINE('CSS', "css".DS);
+DEFINE('CSS', 'css'.DS);
 // js
-DEFINE('JS', "javascript".DS);
+DEFINE('JS', 'javascript'.DS);
 // table arrays
-DEFINE('TABLE_ARRAYS', "table_arrays".DS);
+DEFINE('TABLE_ARRAYS', 'table_arrays'.DS);
 // smarty libs path
-DEFINE('SMARTY', "Smarty".DS);
+DEFINE('SMARTY', 'Smarty'.DS);
 // po langs
-DEFINE('LANG', "lang".DS);
+DEFINE('LANG', 'lang'.DS);
 // cache path
-DEFINE('CACHE', "cache".DS);
+DEFINE('CACHE', 'cache'.DS);
 // temp path
-DEFINE('TMP', "tmp".DS);
+DEFINE('TMP', 'tmp'.DS);
 // log files
 DEFINE('LOG', 'log'.DS);
 // compiled template folder
 DEFINE('TEMPLATES_C', 'templates_c'.DS);
 // template base
-DEFINE('TEMPLATES', "templates".DS);
+DEFINE('TEMPLATES', 'templates'.DS);
 // frontend template dir', only for admin
-DEFINE('TEMPLATES_FRONTEND', "templates_frontend".DS);
+DEFINE('TEMPLATES_FRONTEND', 'templates_frontend'.DS);
 // default template
-DEFINE('DEFAULT_TEMPLATE', "default".DS);
+DEFINE('DEFAULT_TEMPLATE', 'default'.DS);
 // default template file
 DEFINE('DEFAULT_TEMPLATE_FILE', 'default.tpl');
 
@@ -102,14 +102,14 @@ DEFINE('DEFAULT_ACL_SEND', 70);
 DEFINE('DEFAULT_ACL_DEL', 80);
 DEFINE('DEFAULT_ACL_ADMIN', 100); */
 // SSL host name
-//	DEFINE('SSL_HOST', "ssl.host.name");
+//	DEFINE('SSL_HOST', 'ssl.host.name');
 // error page strictness, Default is 3
 // 1: only show error page as the last mesure if really no mid & aid can be loaded and found at all
 // 2: if template not found, do not search, show error template
 // 3: if default template is not found, show error template, do not fall back to default tree
 // 4: very strict, even on normal fixable errors through error
 //	DEFINE('ERROR_STRICT', 3);
-// allow page caching in general, set to "FALSE" if you do debugging or development!
+// allow page caching in general, set to 'FALSE' if you do debugging or development!
 //	DEFINE('ALLOW_SMARTY_CACHE', FALSE);
 // cache life time, in seconds, default here is 2 days (172800s)
 // -1 is never expire cache
@@ -134,6 +134,11 @@ DEFINE('PAGE_WIDTH', 800);
 // the default template name
 DEFINE('MASTER_TEMPLATE_NAME', 'main_body.tpl');
 
+// below two can be defined here, but they should be
+// defined in either the header file or the file itself
+/************* LOGGING *******************/
+// DEFINE('LOG_FILE_ID', '');
+
 /************* QUEUE TABLE *************/
 // if we have a dev/live system
 // set_live is a per page/per item
@@ -151,32 +156,32 @@ DEFINE('LIVE_SCHEMA', 'public');
 /************* DB ACCESS *****************/
 // please be VERY carefull only to change the right side
 $DB_CONFIG = array (
-	"<db id>" => array (
-		"db_name" => "<database>",
-		"db_user" => "<user>",
-		"db_pass" => "<password>",
-		"db_host" => "<host>",
-		"db_port" => "5432",
-		"db_schema" => "public", // if not set, uses public
-		"db_type" => "pgsql",
-		"db_encoding" => '',
-		"db_ssl" => 'disable' // allow, disable, require, prefer
+	'<db id>' => array (
+		'db_name' => '<database>',
+		'db_user' => '<user>',
+		'db_pass' => '<password>',
+		'db_host' => '<host>',
+		'db_port' => '5432',
+		'db_schema' => 'public', // if not set, uses public
+		'db_type' => 'pgsql',
+		'db_encoding' => '',
+		'db_ssl' => 'disable' // allow, disable, require, prefer
 	)
 );
 
 // File and Folder paths
 // ID is TARGET (first array element)
-//	$PATHS["test"]["csv_path"] = "";
-//	$PATHS["test"]["perl_bin"] = "";
-//	$PATHS["test"]["redirect_url"] = "";
+//	$PATHS['test']['csv_path'] = '';
+//	$PATHS['test']['perl_bin'] = '';
+//	$PATHS['test']['redirect_url'] = '';
 
 // each host has a different db_host
 // development host
-$DB_HOST['<host>'] = "<db id>";
+$DB_HOST['<host>'] = '<db id>';
 // target host (live)
-//	$DB_TARGET_HOST['<host>'] = "<DB ID>";
+//	$DB_TARGET_HOST['<host>'] = '<DB ID>';
 // url redirect database
-//	$DB_URL_REDIRECT_HOST['<host>'] = "<DB ID>";
+//	$DB_URL_REDIRECT_HOST['<host>'] = '<DB ID>';
 // location flagging
 // test/dev/live
 $LOCATION['<host>'] = '<test|live|remote|etc>';
@@ -192,9 +197,9 @@ $USE_DATABASE = defined('USE_DATABASE') ? USE_DATABASE : true;
 // live frontend pages
 // ** missing live domains **
 // get the name without the port
-list($HOST_NAME, $PORT) = array_pad(explode(":", $_SERVER['HTTP_HOST'], 2), 2, null);
+list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 if (!$DB_HOST[$HOST_NAME] && $USE_DATABASE) {
-	echo "No matching DB config found. Contact Admin<br>";
+	echo 'No matching DB config found. Contact Admin<br>';
 	exit -1;
 }
 
@@ -221,11 +226,11 @@ DEFINE('SHOW_ALL_ERRORS', false); // show all errors if debug_all & show_error_h
 $G_TITLE = '<OVERALL PAGE TITLE>';
 
 /************ STYLE SHEETS / JS **********/
-$EDIT_STYLESHEET = "edit.css";
-$EDIT_JAVASCRIPT = "edit.js";
+$EDIT_STYLESHEET = 'edit.css';
+$EDIT_JAVASCRIPT = 'edit.js';
 
-$STYLESHEET = "frontend.css";
-$JAVASCRIPT = "frontend.js";
+$STYLESHEET = 'frontend.css';
+$JAVASCRIPT = 'frontend.js';
 
 /************* CONVERT *******************/
 $paths = array (
@@ -235,14 +240,14 @@ $paths = array (
 );
 // find convert
 foreach ($paths as $path) {
-	if (file_exists($path."/convert") && is_file($path."/convert")) {
+	if (file_exists($path.DS.'convert') && is_file($path.DS.'convert')) {
 		// image magick convert location
-		DEFINE('CONVERT', $path."/convert");
+		DEFINE('CONVERT', $path.DS.'convert');
 	}
 }
 
 // turn off debug if debug flag is OFF
-if (DEBUG == false) {
+if (defined('DEBUG') && DEBUG == false) {
 	$ECHO_ALL = 0;
 	$DEBUG_ALL = 0;
 	$PRINT_ALL = 0;
@@ -255,3 +260,5 @@ if (DEBUG == false) {
 
 // read auto loader
 require BASE.LIB.'autoloader.php';
+
+# __END__
