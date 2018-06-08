@@ -18,7 +18,9 @@ The active branch, which is the namespace branch
 
 ### legacy
 
-The old non namepsace format layout. This will only get bug fixes and no new development
+The old non namepsace format layout.
+This is fully deprecated and will no longer be maintaned.
+last tested PHP 5.6 and PHP 7.0
 
 ### namespace
 
