@@ -332,7 +332,7 @@ class Login extends \CoreLibs\DB\IO
 				$q .= "eu.edit_access_right_id = eareu.edit_access_right_id AND ";
 				$q .= "eg.edit_access_right_id = eareg.edit_access_right_id AND ";
 				// password match is done in script, against old plain or new blowfish encypted
-				$q .= "(LOWER(username) = '".strtolower($this->username)."') ";
+				$q .= "(LOWER(username) = '".$this->dbEscapeString(strtolower($this->username))."') ";
 				$res = $this->dbReturn($q);
 				// username is wrong, but we throw for wrong username and wrong password the same error
 				if (!$this->cursor_ext[md5($q)]["num_rows"]) {

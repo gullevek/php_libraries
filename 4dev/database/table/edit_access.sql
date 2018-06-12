@@ -8,7 +8,7 @@
 -- DROP TABLE edit_access;
 CREATE TABLE edit_access (
 	edit_access_id	SERIAL PRIMARY KEY,
-	name	VARCHAR(255) UNIQUE,
+	name	VARCHAR UNIQUE,
 	description	VARCHAR,
 	COLOR	VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;

@@ -8,8 +8,8 @@
 -- DROP TABLE edit_visible_group;
 CREATE TABLE edit_visible_group (
 	edit_visible_group_id	SERIAL PRIMARY KEY,
-	name	VARCHAR(255),
-	flag	VARCHAR(50)
+	name	VARCHAR,
+	flag	VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;
 
 DELETE FROM edit_visible_group;

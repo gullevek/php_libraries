@@ -8,8 +8,8 @@
 -- DROP TABLE edit_query_string;
 CREATE TABLE edit_query_string (
 	edit_query_string_id	SERIAL PRIMARY KEY,
-	name	VARCHAR(255),
-	value	VARCHAR(255),
+	name	VARCHAR,
+	value	VARCHAR,
 	enabled	SMALLINT NOT NULL DEFAULT 0,
 	dynamic	SMALLINT NOT NULL DEFAULT 0,
 	edit_page_id	INT NOT NULL,

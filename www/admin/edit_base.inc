@@ -24,7 +24,7 @@ extract($_POST, EXTR_SKIP);
 
 $table_width = 750;
 // this is for certain CMS modules that set a relative path
-define(REL_PATH, '');
+define('REL_PATH', '');
 
 ob_start();
 include("config.inc");
@@ -137,7 +137,7 @@ $DATA['GROUP_NAME'] = $_SESSION["GROUP_NAME"];
 $DATA['GROUP_LEVEL'] = $_SESSION["GROUP_LEVEL"];
 $PAGES = $_SESSION["PAGES"];
 
-//$form->debug('menu', $form->print_ar($PAGES));
+//$form->debug('menu', $form->printAr($PAGES));
 
 // baue nav aus $PAGES ...
 for ($i = 0; $i < count($PAGES); $i ++) {
@@ -292,7 +292,7 @@ if ($form->yes) {
 			print "[No valid page definition given]";
 			break;
 	}
-//		$form->debug('edit', "Elements: <pre>".$form->print_ar($elements));
+//		$form->debug('edit', "Elements: <pre>".$form->printAr($elements));
 	$DATA['elements'] = $elements;
 	$DATA['hidden'] = $form->formCreateHiddenFields();
 	$DATA['save_delete'] = $form->formCreateSaveDelete();
@@ -304,7 +304,7 @@ $DEBUG_DATA['DEBUG'] = $DEBUG_TMPL;
 // create main data array
 $CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);
 // data is 1:1 mapping (all vars, values, etc)
-while (list($key, $value) = each($CONTENT_DATA)) {
+foreach ($CONTENT_DATA as $key => $value) {
 	$smarty->assign($key, $value);
 }
 if (is_dir(BASE.TEMPLATES_C)) {
