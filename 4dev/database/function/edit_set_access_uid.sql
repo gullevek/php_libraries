@@ -1,6 +1,6 @@
 -- add uid add for edit_access table
 
-CREATE OR REPLACE FUNCTION set_edit_access_uid() RETURNS TRIGGER AS 
+CREATE OR REPLACE FUNCTION set_edit_access_uid() RETURNS TRIGGER AS
 $$
 	DECLARE
 		myrec RECORD;

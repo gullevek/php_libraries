@@ -70,6 +70,8 @@ class Login extends \CoreLibs\DB\IO
 	private $login_error; // login error code, can be matched to the array login_error_msg, which holds the string
 	private $password_change = false; // if this is set to true, the user can change passwords
 	private $password_change_ok = false; // password change was successful
+	private $password_forgot = false; // can we reset password and mail to user with new password set screen
+	private $password_forgot_ok = false; // password forgot mail send ok
 	private $pw_change_deny_users = array (); // array of users for which the password change is forbidden
 
 	// if we have password change we need to define some rules
@@ -83,7 +85,11 @@ class Login extends \CoreLibs\DB\IO
 	// all possible login error conditions
 	private $login_error_msg = array ();
 	// this is an array holding all strings & templates passed from the outside (translation)
-	private $login_template = array ('strings' => array (), 'password_change' => '', 'template' => '');
+	private $login_template = array (
+		'strings' => array (),
+		'password_change' => '',
+		'template' => ''
+	);
 
 	// acl vars
 	public $acl = array ();
@@ -179,6 +185,10 @@ class Login extends \CoreLibs\DB\IO
 		if (defined('PASSWORD_CHANGE')) {
 			$this->password_change = PASSWORD_CHANGE;
 		}
+		// NOTE: forgot password flow with email
+		if (defined('PASSWORD_FORGOT')) {
+			$this->password_forgot = PASSWORD_FORGOT;
+		}
 		// max login counts before error reporting
 		$this->max_login_error_count = 10;
 		// users that never get locked, even if they are set strict
@@ -215,6 +225,10 @@ class Login extends \CoreLibs\DB\IO
 		// if the password change flag is okay, run the password change method
 		if ($this->password_change) {
 			$this->loginPasswordChange();
+		}
+		// password forgot
+		if ($this->password_forgot) {
+			$this->loginPasswordForgot();
 		}
 		// if !$euid || permission not okay, print login screan
 		echo $this->loginPrintLogin();
@@ -386,7 +400,9 @@ class Login extends \CoreLibs\DB\IO
 							$_SESSION["DEFAULT_LANG"] = $res["lang_short"].'_'.strtolower(str_replace('-', '', $res["lang_iso"]));
 							// reset any login error count for this user
 							if ($res['login_error_count'] > 0) {
-								$q = "UPDATE edit_user SET login_error_count = 0, login_error_date_last = NULL, login_error_date_first = NULL WHERE edit_user_id = ".$res['edit_user_id'];
+								$q = "UPDATE edit_user ";
+								$q .= "SET login_error_count = 0, login_error_date_last = NULL, login_error_date_first = NULL ";
+								$q .= "WHERE edit_user_id = ".$res['edit_user_id'];
 								$this->dbExec($q);
 							}
 							$pages = array();
@@ -573,7 +589,7 @@ class Login extends \CoreLibs\DB\IO
 			unset($_SESSION["GROUP_NAME"]);
 			unset($_SESSION["HEADER_COLOR"]);
 			session_destroy();
-			// he prints the login screen again
+			// then prints the login screen again
 			$this->permission_okay = 0;
 		}
 	}
@@ -596,88 +612,91 @@ class Login extends \CoreLibs\DB\IO
 	//         * if an account ACL is set, set this parallel, account ACL overrides user ACL if it applies
 	//         * if edit access ACL level is set, use this, else use page
 	//         set all base ACL levels as a list keyword -> ACL number
-	public function loginSetAcl()
+	private function loginSetAcl()
 	{
-		// we start with the default acl
-		$this->acl['base'] = DEFAULT_ACL_LEVEL;
+		// only set acl if we have permission okay
+		if ($this->permission_okay) {
+			// we start with the default acl
+			$this->acl['base'] = DEFAULT_ACL_LEVEL;
 
-		// set admin flag and base to 100
-		if ($_SESSION['ADMIN']) {
-			$this->acl['admin'] = 1;
-			$this->acl['base'] = 100;
-		} else {
-			$this->acl['admin'] = 0;
-			// now go throw the flow and set the correct ACL
-			// user > page > group
-			// group ACL 0
-			if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = $_SESSION['GROUP_ACL_LEVEL'];
-			}
-			// page ACL 1
-			if ($_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1) {
-				$this->acl['base'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
-			}
-			// user ACL 2
-			if ($_SESSION['USER_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = $_SESSION['USER_ACL_LEVEL'];
-			}
-		}
-
-		// set the current page acl
-		// start with default acl
-		// set group if not -1, overrides default
-		// set page if not -1, overrides group set
-		$this->acl['page'] = DEFAULT_ACL_LEVEL;
-		if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
-			$this->acl['page'] = $_SESSION['GROUP_ACL_LEVEL'];
-		}
-		if (isset($_SESSION['PAGES_ACL_LEVEL'][$this->page_name]) && $_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1) {
-			$this->acl['page'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
-		}
-
-		// PER ACCOUNT (UNIT/edit access)->
-		foreach ($_SESSION['UNIT'] as $ea_id => $unit) {
-			// if admin flag is set, all units are set to 100
-			if ($this->acl['admin']) {
-				$this->acl['unit'][$ea_id] = $this->acl['base'];
+			// set admin flag and base to 100
+			if ($_SESSION['ADMIN']) {
+				$this->acl['admin'] = 1;
+				$this->acl['base'] = 100;
 			} else {
-				if ($unit['acl_level'] != -1) {
-					$this->acl['unit'][$ea_id] = $unit['acl_level'];
-				} else {
-					$this->acl['unit'][$ea_id] = $this->acl['base'];
+				$this->acl['admin'] = 0;
+				// now go throw the flow and set the correct ACL
+				// user > page > group
+				// group ACL 0
+				if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
+					$this->acl['base'] = $_SESSION['GROUP_ACL_LEVEL'];
+				}
+				// page ACL 1
+				if ($_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1) {
+					$this->acl['base'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
+				}
+				// user ACL 2
+				if ($_SESSION['USER_ACL_LEVEL'] != -1) {
+					$this->acl['base'] = $_SESSION['USER_ACL_LEVEL'];
 				}
 			}
-			// detail name/level set
-			$this->acl['unit_detail'][$ea_id] = array (
-				'name' => $unit['name'],
-				'uid' => $unit['uid'],
-				'level' => $this->default_acl_list[$this->acl['unit'][$ea_id]]['name'],
-				'default' => $unit['default'],
-				'data' => $unit['data']
-			);
-			// set default
-			if ($unit['default']) {
-				$this->acl['unit_id'] = $unit['id'];
-				$this->acl['unit_name'] = $unit['name'];
-				$this->acl['unit_uid'] = $unit['uid'];
+
+			// set the current page acl
+			// start with default acl
+			// set group if not -1, overrides default
+			// set page if not -1, overrides group set
+			$this->acl['page'] = DEFAULT_ACL_LEVEL;
+			if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
+				$this->acl['page'] = $_SESSION['GROUP_ACL_LEVEL'];
 			}
+			if (isset($_SESSION['PAGES_ACL_LEVEL'][$this->page_name]) && $_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1) {
+				$this->acl['page'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
+			}
+
+			// PER ACCOUNT (UNIT/edit access)->
+			foreach ($_SESSION['UNIT'] as $ea_id => $unit) {
+				// if admin flag is set, all units are set to 100
+				if ($this->acl['admin']) {
+					$this->acl['unit'][$ea_id] = $this->acl['base'];
+				} else {
+					if ($unit['acl_level'] != -1) {
+						$this->acl['unit'][$ea_id] = $unit['acl_level'];
+					} else {
+						$this->acl['unit'][$ea_id] = $this->acl['base'];
+					}
+				}
+				// detail name/level set
+				$this->acl['unit_detail'][$ea_id] = array (
+					'name' => $unit['name'],
+					'uid' => $unit['uid'],
+					'level' => $this->default_acl_list[$this->acl['unit'][$ea_id]]['name'],
+					'default' => $unit['default'],
+					'data' => $unit['data']
+				);
+				// set default
+				if ($unit['default']) {
+					$this->acl['unit_id'] = $unit['id'];
+					$this->acl['unit_name'] = $unit['name'];
+					$this->acl['unit_uid'] = $unit['uid'];
+				}
+			}
+			// flag if to show extra edit access drop downs (because user has multiple groups assigned)
+			if (count($_SESSION['UNIT']) > 1) {
+				$this->acl['show_ea_extra'] = 1;
+			} else {
+				$this->acl['show_ea_extra'] = 0;
+			}
+			// set the default edit access
+			$this->acl['default_edit_access'] = $_SESSION['UNIT_DEFAULT'];
+			// integrate the type acl list, but only for the keyword -> level
+			foreach ($this->default_acl_list as $level => $data) {
+				$this->acl['min'][$data['type']] = $level;
+			}
+			// set the full acl list too
+			$this->acl['acl_list'] = $_SESSION['DEFAULT_ACL_LIST'];
+			// debug
+			// $this->debug('ACL', $this->print_ar($this->acl));
 		}
-		// flag if to show extra edit access drop downs (because user has multiple groups assigned)
-		if (count($_SESSION['UNIT']) > 1) {
-			$this->acl['show_ea_extra'] = 1;
-		} else {
-			$this->acl['show_ea_extra'] = 0;
-		}
-		// set the default edit access
-		$this->acl['default_edit_access'] = $_SESSION['UNIT_DEFAULT'];
-		// integrate the type acl list, but only for the keyword -> level
-		foreach ($this->default_acl_list as $level => $data) {
-			$this->acl['min'][$data['type']] = $level;
-		}
-		// set the full acl list too
-		$this->acl['acl_list'] = $_SESSION['DEFAULT_ACL_LIST'];
-		// debug
-		// $this->debug('ACL', $this->print_ar($this->acl));
 	}
 
 	// METHOD: loginCheckEditAccess
@@ -793,7 +812,7 @@ class Login extends \CoreLibs\DB\IO
 	// METHOD: loginPrintLogin
 	// WAS   : login_print_login
 	// PARAMS: none
-	// RETURN: none
+	// RETURN: html data for login page
 	// DESC  : prints out login html part if no permission (error) is set
 	private function loginPrintLogin()
 	{
@@ -863,7 +882,7 @@ class Login extends \CoreLibs\DB\IO
 	// METHOD: loginCloseClass
 	// WAS   : login_close_class
 	// PARAMS: none
-	// RETURN: none
+	// RETURN: true on permission ok, false on permission wrong
 	// DESC  : last function called, writes log and prints out error msg and exists script if permission 0
 	private function loginCloseClass()
 	{
@@ -882,8 +901,8 @@ class Login extends \CoreLibs\DB\IO
 			// prepare for log
 			if ($this->euid) {
 				// get user from user table
-				$q = "SELECT username, password FROM edit_user WHERE edit_user_id = ".$this->euid;
-				list($username, $password) = $this->dbReturnRow($q);
+				$q = "SELECT username FROM edit_user WHERE edit_user_id = ".$this->euid;
+				list($username) = $this->dbReturnRow($q);
 			} // if euid is set, get username (or try)
 			$this->writeLog($event, '', $this->login_error, $username);
 		} // write log under certain settings
@@ -898,50 +917,50 @@ class Login extends \CoreLibs\DB\IO
 
 	// METHOD: loginSetTemplates
 	// WAS   : login_set_templates
-	// PARAMS:
+	// PARAMS: none
 	// RETURN: none
 	// DESC  : checks if there are external templates, if not uses internal fallback ones
 	private function loginSetTemplates()
 	{
 		$strings = array (
-			'HTML_TITLE' => $this->l->__("LOGIN"),
-			'TITLE' => $this->l->__("LOGIN"),
-			'USERNAME' => $this->l->__("Username"),
-			'PASSWORD' => $this->l->__("Password"),
-			'LOGIN' => $this->l->__("Login"),
+			'HTML_TITLE' => $this->l->__('LOGIN'),
+			'TITLE' => $this->l->__('LOGIN'),
+			'USERNAME' => $this->l->__('Username'),
+			'PASSWORD' => $this->l->__('Password'),
+			'LOGIN' => $this->l->__('Login'),
 			'ERROR_MSG' => '',
 			'LOGOUT_TARGET' => '',
 			'PASSWORD_CHANGE_BUTTON_VALUE' => $this->l->__('Change Password')
 		);
 
 		$error_msgs = array (
-			"100" => $this->l->__("Fatal Error: <b>[EUID] came in as GET/POST!</b>"), // actually obsolete
-			"1010" => $this->l->__("Fatal Error: <b>Login Failed - Wrong Username or Password</b>"), // user not found
-			"1011" => $this->l->__("Fatal Error: <b>Login Failed - Wrong Username or Password</b>"), // blowfish password wrong
-			"1012" => $this->l->__("Fatal Error: <b>Login Failed - Wrong Username or Password</b>"), // fallback md5 password wrong
-			"1013" => $this->l->__("Fatal Error: <b>Login Failed - Wrong Username or Password</b>"), // new password_hash wrong
-			"102" => $this->l->__("Fatal Error: <b>Login Failed - Please enter username and password</b>"),
-			"103" => $this->l->__("Fatal Error: <b>You do not have the rights to access this Page</b>"),
-			"104" => $this->l->__("Fatal Error: <b>Login Failed - User not enabled</b>"),
-			"105" => $this->l->__("Fatal Error: <b>Login Failed - User is locked</b>"),
-			"220" => $this->l->__("Fatal Error: <b>Password change - The user could not be found</b>"), // actually this is an illegal user, but I mask it
-			'200' => $this->l->__("Fatal Error: <b>Password change - Please enter username and old password</b>"),
-			"201" => $this->l->__("Fatal Error: <b>Password change - The user could not be found</b>"),
-			"202" => $this->l->__("Fatal Error: <b>Password change - The old password is not correct</b>"),
-			"203" => $this->l->__("Fatal Error: <b>Password change - Please fill out both new password fields</b>"),
-			"204" => $this->l->__("Fatal Error: <b>Password change - The new passwords do not match</b>"),
-			"205" => $this->l->__("Fatal Error: <b>Password change - The new password is not in a valid format</b>"), // we should also not here WHAT is valid
-			"300" => $this->l->__("Success: <b>Password change successful</b>"), // for OK password change
-			"9999" => $this->l->__("Fatal Error: <b>necessary crypt engine could not be found</b>. Login is impossible") // this is bad bad error
+			'100' => $this->l->__('Fatal Error: <b>[EUID] came in as GET/POST!</b>'), // actually obsolete
+			'1010' => $this->l->__('Fatal Error: <b>Login Failed - Wrong Username or Password</b>'), // user not found
+			'1011' => $this->l->__('Fatal Error: <b>Login Failed - Wrong Username or Password</b>'), // blowfish password wrong
+			'1012' => $this->l->__('Fatal Error: <b>Login Failed - Wrong Username or Password</b>'), // fallback md5 password wrong
+			'1013' => $this->l->__('Fatal Error: <b>Login Failed - Wrong Username or Password</b>'), // new password_hash wrong
+			'102' => $this->l->__('Fatal Error: <b>Login Failed - Please enter username and password</b>'),
+			'103' => $this->l->__('Fatal Error: <b>You do not have the rights to access this Page</b>'),
+			'104' => $this->l->__('Fatal Error: <b>Login Failed - User not enabled</b>'),
+			'105' => $this->l->__('Fatal Error: <b>Login Failed - User is locked</b>'),
+			'220' => $this->l->__('Fatal Error: <b>Password change - The user could not be found</b>'), // actually this is an illegal user, but I mask it
+			'200' => $this->l->__('Fatal Error: <b>Password change - Please enter username and old password</b>'),
+			'201' => $this->l->__('Fatal Error: <b>Password change - The user could not be found</b>'),
+			'202' => $this->l->__('Fatal Error: <b>Password change - The old password is not correct</b>'),
+			'203' => $this->l->__('Fatal Error: <b>Password change - Please fill out both new password fields</b>'),
+			'204' => $this->l->__('Fatal Error: <b>Password change - The new passwords do not match</b>'),
+			'205' => $this->l->__('Fatal Error: <b>Password change - The new password is not in a valid format</b>'), // we should also not here WHAT is valid
+			'300' => $this->l->__('Success: <b>Password change successful</b>'), // for OK password change
+			'9999' => $this->l->__('Fatal Error: <b>necessary crypt engine could not be found</b>. Login is impossible') // this is bad bad error
 		);
 
 		// if password change is okay
 		if ($this->password_change) {
 			$strings = array_merge($strings, array (
 				'TITLE_PASSWORD_CHANGE' => 'Change Password for User',
-				'OLD_PASSWORD' => $this->l->__("Old Password"),
-				'NEW_PASSWORD' => $this->l->__("New Password"),
-				'NEW_PASSWORD_CONFIRM' => $this->l->__("New Password confirm"),
+				'OLD_PASSWORD' => $this->l->__('Old Password'),
+				'NEW_PASSWORD' => $this->l->__('New Password'),
+				'NEW_PASSWORD_CONFIRM' => $this->l->__('New Password confirm'),
 				'CLOSE' => $this->l->__('Close'),
 				'JS_SHOW_HIDE' => "function ShowHideDiv(id) { element = document.getElementById(id); if (element.className == 'visible' || !element.className) element.className = 'hidden'; else element.className = 'visible'; }",
 				'PASSWORD_CHANGE_BUTTON' => '<input type="button" name="pw_change" value="'.$strings['PASSWORD_CHANGE_BUTTON_VALUE'].'" OnClick="ShowHideDiv(\'pw_change_div\');">'
@@ -960,7 +979,10 @@ class Login extends \CoreLibs\DB\IO
 </div>
 {PASSWORD_CHANGE_SHOW}
 EOM;
-		} else {
+		}
+		if ($this->password_forgot) {
+		}
+		if (!$this->password_change && !$this->password_forgot) {
 			$strings = array_merge($strings, array (
 				'JS_SHOW_HIDE' => '',
 				'PASSWORD_CHANGE_BUTTON' => '',
