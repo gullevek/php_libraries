@@ -29,6 +29,7 @@ $edit_users = array (
 			)
 		),
 		// password date when first insert and password is set, needs special field with connection to password
+		// password reset force interval, if set, user needs to reset password after X time period
 		'password_change_interval' => array (
 			'value' => $GLOBALS['password_change_interval'],
 			'output_name' => 'Password change interval',
@@ -38,7 +39,6 @@ $edit_users = array (
 			'size' => 5, // make it 5 chars long
 			'length' => 5
 		),
-		// password reset force interval, if set, user needs to reset password after X time period
 		"enabled" => array (
 			"value" => $GLOBALS["enabled"],
 			"output_name" => "Enabled",

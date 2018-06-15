@@ -28,6 +28,21 @@ $edit_access = array (
 			"error_check" => "custom",
 			"error_regex" => "/[\dA-Fa-f]{6}/",
 			"error_example" => "F6A544"
+		),
+		"enabled" => array (
+			"value" => $GLOBALS["enabled"],
+			"output_name" => "Enabled",
+			"type" => "binary",
+			"int" => 1,
+			"element_list" => array (
+				"1" => "Yes",
+				"0" => "No"
+			)
+		),
+		// planned delete lock flag
+		"protected" => array (
+			"value" => $GLOBALS["protected"],
+			"int" => 1
 		)
 	),
 	"table_name" => "edit_access",
