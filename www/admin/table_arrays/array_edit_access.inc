@@ -39,10 +39,15 @@ $edit_access = array (
 				"0" => "No"
 			)
 		),
-		// planned delete lock flag
 		"protected" => array (
 			"value" => $GLOBALS["protected"],
-			"int" => 1
+			"output_name" => "Protected",
+			"type" => "binary",
+			"int" => 1,
+			"element_list" => array (
+				"1" => "Yes",
+				"0" => "No"
+			)
 		)
 	),
 	"table_name" => "edit_access",

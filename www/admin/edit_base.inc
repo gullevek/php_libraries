@@ -204,6 +204,7 @@ if ($form->yes) {
 			$elements[] = $form->formCreateElement("login_error_date_last");
 			$elements[] = $form->formCreateElement("login_error_date_first");
 			$elements[] = $form->formCreateElement("enabled");
+			$elements[] = $form->formCreateElement("protected");
 			$elements[] = $form->formCreateElement("username");
 			$elements[] = $form->formCreateElement("password");
 			$elements[] = $form->formCreateElement("password_change_interval");
@@ -283,6 +284,8 @@ if ($form->yes) {
 			break;
 		case "edit_access":
 			$elements[] = $form->formCreateElement("name");
+			$elements[] = $form->formCreateElement("enabled");
+			$elements[] = $form->formCreateElement("protected");
 			$elements[] = $form->formCreateElement("color");
 			$elements[] = $form->formCreateElement("description");
 			// add name/value list here

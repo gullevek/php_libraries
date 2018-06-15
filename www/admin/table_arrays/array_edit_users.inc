@@ -163,10 +163,15 @@ $edit_users = array (
 			"type" => "view",
 			"empty" => "-"
 		),
-		// planned delete lock flag
 		"protected" => array (
 			"value" => $GLOBALS["protected"],
-			"int" => 1
+			"output_name" => "Protected",
+			"type" => "binary",
+			"int" => 1,
+			"element_list" => array (
+				"1" => "Yes",
+				"0" => "No"
+			)
 		)
 	),
 	"load_query" => "SELECT edit_user_id, username, enabled, debug, db_debug, strict, locked, login_error_count FROM edit_user ORDER BY username",
