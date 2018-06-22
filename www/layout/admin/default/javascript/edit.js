@@ -223,6 +223,7 @@ const cel = (tag, id = '', content = '', css = [], options = {}) =>
 	element = {
 		tag: tag,
 		id: id,
+		name: options.name, // override name if set [name gets ignored in tree build anyway]
 		content: content,
 		css: css,
 		options: options,
@@ -279,7 +280,7 @@ function phfo(tree)
 		line += ' id="' + tree.id + '"';
 		// if anything input (input, textarea, select then add name too)
 		if (['input', 'textarea', 'select'].includes(tree.tag)) {
-			line += ' name="' + tree.id + '"';
+			line += ' name="' + (tree.name ? tree.name : tree.id) + '"';
 		}
 	}
 	// second CSS
@@ -322,3 +323,58 @@ function phfo(tree)
 	// combine to string
 	return content.join('');
 }
+
+// BLOCK: html wrappers for quickly creating html data blocks
+// METHOD: html_options
+// PARAMS: name/id, array for the options, selected item uid
+//         options_only: if this is true, it will not print the select part
+//         return_string, return as string and not as element
+// RETURN: html with build options block
+// DESC  : creates an select/options drop down block.
+//         the array needs to be key -> value format. key is for the option id and value is for the data output
+function html_options(name, data, selected = '', options_only = false, return_string = false)
+{
+	let content = [];
+	let element_select;
+	let element_option;
+	// set outside select, gets stripped on return if options only is true
+	element_select = cel('select', name);
+	// console.log('Call for %s, options: %s', name, options_only);
+	$H(data).each(function(t) {
+		console.log('options: key: %s, value: %s', t.key, t.value);
+		// basic options init
+		let options = {
+			'label': t.value,
+			'value': t.key
+		};
+		// add selected if matching
+		if (selected == t.key) {
+			options.selected = '';
+		}
+		// create the element option
+		element_option = cel('option', '', t.value, '', options);
+		// attach it to the select element
+		ael(element_select, element_option);
+	});
+	// if with select part, convert to text
+	if (!options_only) {
+		if (return_string) {
+			content.push(phfo(element_select));
+			return content.join('');
+		} else {
+			return element_select;
+		}
+	} else {
+		// strip select part
+		if (return_string) {
+			element.sub.each(function(t) {
+				content.push(phfo(t));
+			});
+			return content.join('');
+		} else {
+			return element_select.sub;
+		}
+	}
+}
+
+/* END */
