@@ -516,8 +516,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					}
 				} elseif (is_array($this->element_list[$element_list[$i]]["read_data"]) && $this->element_list[$element_list[$i]]["delete"]) {
 					// $this->debug('form_clean', "ID [$id] [$prfx.$pk_name]");
-					// $this->debug('form_clean', "ID arr: ".$this->print_ar($_POST[$id]));
-					// $this->debug('form_clean', "PK arr: ".$this->print_ar($_POST[$prfx.$pk_name]));
+					// $this->debug('form_clean', "ID arr: ".$this->printAr($_POST[$id]));
+					// $this->debug('form_clean', "PK arr: ".$this->printAr($_POST[$prfx.$pk_name]));
 					for ($j = 0, $j_max = count($_POST[$prfx.$pk_name]); $j < $j_max; $j ++) {
 						if (!$_POST[$remove_name[$i]][$j] && $_POST[$prfx.$pk_name][$j]) {
 							$q = "DELETE FROM ".$element_list[$i]." WHERE ".$pk_name." = ".$_POST[$prfx.$pk_name][$j];
@@ -975,7 +975,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					// $this->debug('edit_error_chk', "KEY: $prfx$key | count: ".count($_POST[$prfx.$key])." | M: $max");
 					// $this->debug('edit_error_chk', "K: ".$_POST[$prfx.$key]." | ".$_POST[$prfx.$key][0]);
 				}
-				$this->debug('post_array', $this->print_ar($_POST));
+				$this->debug('post_array', $this->printAr($_POST));
 				# check each row
 				for ($i = 0; $i < $max; $i ++) {
 					// either one of the post pks is set, or the mandatory
@@ -1305,7 +1305,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				foreach ($reference_array["elements"] as $el_name => $data_array) {
 					// this is only for reference_data part, at least one of the text fields need to be set for writing
 					$blow_write = array ();
-					// $this->debug('edit_error_query', "QUERY: ".$this->print_ar($_POST));
+					// $this->debug('edit_error_query', "QUERY: ".$this->printAr($_POST));
 					// go through all submitted data
 					// for ($i = 0; $i < count($_POST[$el_name]); $i ++)
 					for ($i = 0; $i < $max; $i ++) {
@@ -1542,7 +1542,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// generic data read in (counts for all rows)
 		// visible list data output
 		foreach ($this->element_list[$table_name]["elements"] as $el_name => $data_array) {
-			$this->debug('CFG', 'El: '.$el_name.' -> '.$this->print_ar($data_array));
+			$this->debug('CFG', 'El: '.$el_name.' -> '.$this->printAr($data_array));
 			// if the element name matches the read array, then set the table as a name prefix
 			$q_select[] = $el_name; // this is for reading the data
 			// prefix the name for any further data parts
@@ -1587,9 +1587,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 			// $proto[$el_name] = $this->error ? $_POST[$el_name][(count($_POST[$el_name]) - 1)] : '';
 		}
-		// $this->debug('CFG DATA', 'Data: '.$this->print_ar($data));
-		// $this->debug('CFG PROTO', 'Proto: '.$this->print_ar($proto));
-		// $this->debug('CFG SELECT', 'Proto: '.$this->print_ar($q_select));
+		// $this->debug('CFG DATA', 'Data: '.$this->printAr($data));
+		// $this->debug('CFG PROTO', 'Proto: '.$this->printAr($proto));
+		// $this->debug('CFG SELECT', 'Proto: '.$this->printAr($q_select));
 		// query for reading in the data
 		$this->debug('edit_error', "ERR: ".$this->error);
 		// if we got a read data, build the read select for the read, and read out the "selected" data

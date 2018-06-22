@@ -139,8 +139,11 @@ $PAGES = $_SESSION["PAGES"];
 
 //$form->debug('menu', $form->printAr($PAGES));
 
-// baue nav aus $PAGES ...
-for ($i = 0; $i < count($PAGES); $i ++) {
+// build nav from $PAGES ...
+if (!is_array($PAGES)) {
+	$PAGES = array ();
+}
+for ($i = 0, $i_max = count($PAGES); $i < $i_max; $i ++) {
 	if ($PAGES[$i]["menu"] && $PAGES[$i]["online"]) {
 		$menuarray[] = $PAGES[$i];
 	}

@@ -18,3 +18,4 @@ CREATE TABLE edit_access (
 
 DELETE FROM edit_access;
 INSERT INTO edit_access (name, enabled, protected) VALUES ('Admin Access', 't', 1);
+INSERT INTO edit_access (name, enabled, protected) VALUES ('User Access', 't', 1);

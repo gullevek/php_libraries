@@ -1,5 +1,7 @@
 # functions
 function/update_function.sql
+function/random_string.sql
+function/edit_set_access_uid.sql
 # generic tables
 table/edit_temp_files.sql
 table/edit_generic.sql
@@ -33,3 +35,4 @@ trigger/trg_edit_scheme.sql
 trigger/trg_edit_user.sql
 trigger/trg_edit_visible_group.sql
 trigger/trg_edit_menu_group.sql
+trigger/trg_set_edit_access_uid.sql

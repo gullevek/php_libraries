@@ -18,3 +18,4 @@ CREATE TABLE edit_language (
 ) INHERITS (edit_generic) WITHOUT OIDS;
 
 INSERT INTO edit_language (short_name, long_name, iso_name, order_number, enabled, lang_default) VALUES ('en', 'English', 'UTF-8', 1, 1, 1);
+INSERT INTO edit_language (short_name, long_name, iso_name, order_number, enabled, lang_default) VALUES ('ja', 'Japanese', 'UTF-8', 2, 1, 0);

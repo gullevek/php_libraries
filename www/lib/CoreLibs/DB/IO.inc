@@ -1656,7 +1656,7 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$not_write_update_array = array ();
-		return $this->dbWriteData_ext($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
+		return $this->dbWriteDataExt($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
 	}
 
 	// METHOD: dbWriteDataExt

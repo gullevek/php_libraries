@@ -3,3 +3,27 @@
 	color: #a4a4a4;
 	font-size: 8px;
 }
+
+/* NEW VERSION with CSS key frame animation */
+.progress {
+	width: 100px;
+	height: 100px;
+	background: rgba(255, 255, 255, 0.6);
+	border: 20px solid rgba(255, 255, 255 ,0.25);
+	border-left-color: rgba(3, 155, 229 ,1);
+	border-top-color: rgba(3, 155, 229 ,1);
+	border-radius: 50%;
+	display: inline-block;
+	animation: rotate 600ms infinite linear;
+	/* align */
+	left: 0;
+	top: 0;
+	position: absolute;
+	z-index: 100;
+}
+/* Animation for above progress */
+@keyframes rotate {
+	to {
+		transform: rotate(1turn)
+	}
+}

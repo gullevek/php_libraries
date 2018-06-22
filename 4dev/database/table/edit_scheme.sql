@@ -18,3 +18,4 @@ CREATE TABLE edit_scheme (
 INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('Default Scheme', 'E0E2FF', 1);
 INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('Admin', 'CC7E7E', 1);
 INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('Visitor', 'B0C4B3', 1);
+INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('User', '1E789E', 1);

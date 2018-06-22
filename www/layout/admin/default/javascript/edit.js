@@ -2,6 +2,8 @@
 	code is taken and adapted from dokuwiki
 */
 
+/* jshint esversion: 6 */
+
 /**
  * Some browser detection
  */
@@ -206,4 +208,117 @@ function formatBytes(bytes)
 	} while (bytes > 99);
 
 	return parseFloat(Math.round(bytes * Math.pow(10, 2)) / Math.pow(10, 2)) + ['kB', 'MB', 'GB', 'TB', 'PB', 'EB'][i];
+}
+
+// *** DOM MANAGEMENT FUNCTIONS
+// METHOD: cel [create element]
+// PARAMS: tag: must set tag (div, span, etc)
+//         id: optional set for id, if input, select will be used for name
+//         content: text content inside, is skipped if sub elements exist
+//         css: array for css tags
+//         options: anything else (value, placeholder, OnClick, style)
+// RETURN: object
+// DESC  : creates object for DOM element creation flow
+const cel = (tag, id = '', content = '', css = [], options = {}) =>
+	element = {
+		tag: tag,
+		id: id,
+		content: content,
+		css: css,
+		options: options,
+		sub: []
+	};
+
+// METHOD: ael [attach element]
+// PARAMS: base: object where to attach/search
+//         attach: the object to be attached
+//         id: optional id, if given search in base for this id and attach there
+// RETURN: "none", technically there is no return needed
+// DESC  : attach a cel created object to another to create a basic DOM tree
+function ael(base, attach, id = '')
+{
+	if (id) {
+		// base id match already
+		if (base.id == id) {
+			base.sub.push(attach);
+		} else {
+			// sub check
+			if (base.sub.length > 0) {
+				base.sub.each(function(t) {
+					// recursive call to sub element
+					ael(t, attach, id);
+				});
+			}
+		}
+	} else {
+		base.sub.push(attach);
+	}
+	return base;
+}
+
+// METHOD: rel [rese element]
+// PARAMS: cel created element
+// RETURN: "none", is self change, but returns base.sub
+// DESC  : resets the sub elements of the base element given
+const rel = (base) => base.sub = [];
+
+// METHOD: phfo [produce html from object]
+// PARAMS: object tree with dom element declarations
+// RETURN: HTML string that can be used as innerHTML
+// DESC  : parses the object tree created with cel/ael
+//         and converts it into an HTML string that can
+//         be inserted into the page
+function phfo(tree)
+{
+	// holds the elements
+	let content = [];
+	// main part line
+	let line = '<' + tree.tag;
+	// first id, if set
+	if (tree.id) {
+		line += ' id="' + tree.id + '"';
+		// if anything input (input, textarea, select then add name too)
+		if (['input', 'textarea', 'select'].includes(tree.tag)) {
+			line += ' name="' + tree.id + '"';
+		}
+	}
+	// second CSS
+	if (tree.css.length > 0) {
+		line += ' class="';
+		tree.css.each(function(t) {
+			line += t + ' ';
+		});
+		// strip last space
+		line = line.slice(0, -1);
+		line += '"';
+	}
+	// options is anything key = "data"
+	if (tree.options) {
+		// ignores id, name, class as key
+		for (const [key, item] of Object.entries(tree.options)) {
+			if (!['id', 'name', 'class'].includes(key)) {
+				line += ' ' + key + '="' + item + '"';
+			}
+		}
+	}
+	// finish open tag
+	line += '>';
+	// push finished line
+	content.push(line);
+	// dive into sub tree to attach sub nodes
+	// NOTES: we cannot have content (text) AND sub nodes at the same level
+	// NODE takes preference over content
+	if (tree.sub.length > 0) {
+		tree.sub.each(function(t) {
+			content.push(phfo(t));
+		});
+	} else if (tree.content) {
+		content.push(tree.content);
+	}
+	// if not input close
+	if (tree.tag != 'input') {
+		content.push('</' + tree.tag + '>');
+	}
+	// combine to string
+	return content.join('');
 }

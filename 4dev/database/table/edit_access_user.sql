@@ -19,4 +19,8 @@ CREATE TABLE edit_access_user (
 ) INHERITS (edit_generic) WITHOUT OIDS;
 
 DELETE FROM edit_access_user;
-INSERT INTO edit_access_user (edit_default, edit_access_id, edit_user_id, edit_access_right_id) VALUES (1, 1, 1, 8);
+INSERT INTO edit_access_user (edit_default, edit_access_id, edit_user_id, edit_access_right_id) VALUES (1,
+	(SELECT edit_access_id FROM edit_access WHERE uid = 'AdminAccess')
+	(SELECT edit_user_id FROM edit_user WHERE username = 'admin')
+	(SELECT edit_access_right_id FROM edit_access_right WHERE type = 'admin')
+);
