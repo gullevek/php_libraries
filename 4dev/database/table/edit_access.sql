@@ -15,7 +15,3 @@ CREATE TABLE edit_access (
 	enabled	BOOLEAN DEFAULT 'true',
 	protected INT
 ) INHERITS (edit_generic) WITHOUT OIDS;
-
-DELETE FROM edit_access;
-INSERT INTO edit_access (name, enabled, protected) VALUES ('Admin Access', 't', 1);
-INSERT INTO edit_access (name, enabled, protected) VALUES ('User Access', 't', 1);

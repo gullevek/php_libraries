@@ -15,12 +15,3 @@ CREATE TABLE edit_group (
 	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
 ) INHERITS (edit_generic) WITHOUT OIDS;
-
-INSERT INTO edit_group (name, enabled, edit_scheme_id, edit_access_right_id) VALUES ('Admin', 1,
-	(SELECT edit_scheme_id FROM edit_scheme WHERE name = 'Admin'),
-	(SELECT edit_access_right_id FROM edit_access_right WHERE type = 'admin')
-);
-INSERT INTO edit_group (name, enabled, edit_scheme_id, edit_access_right_id) VALUES ('User', 1,
-	(SELECT edit_scheme_id FROM edit_scheme WHERE name = 'User'),
-	(SELECT edit_access_right_id FROM edit_access_right WHERE type = 'write')
-);

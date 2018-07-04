@@ -263,6 +263,30 @@ function ael(base, attach, id = '')
 // DESC  : resets the sub elements of the base element given
 const rel = (base) => base.sub = [];
 
+// METHOD: rcssel [remove a css from the element]
+// PARAMS: element, style sheet to remove
+// RETURN: "none", in place because of reference
+// DESC  : searches and removes style from css array
+function rcssel(element, css)
+{
+	let css_index = element.css.indexOf(css);
+	if (css_index > -1) {
+		element.css.splice(css_index, 1);
+	}
+}
+
+// METHOD acssel [add css element]
+// PARAMS: element, style sheet to add
+// RETURN: "none", in place add because of reference
+// DESC  : adds a new style sheet to the element given
+function acssel(element, css)
+{
+	let css_index = element.css.indexOf(css);
+	if (css_index > -1) {
+		element.css.push(css);
+	}
+}
+
 // METHOD: phfo [produce html from object]
 // PARAMS: object tree with dom element declarations
 // RETURN: HTML string that can be used as innerHTML

@@ -1621,6 +1621,12 @@ class IO extends \CoreLibs\Basic
 			if ($string == 'f' || $string == 'false') {
 				return false;
 			}
+			// fallback in case top is not t/f, default on set unset
+			if ($string) {
+				return true;
+			} else {
+				return false;
+			}
 		} else {
 			if ($string) {
 				return 't';

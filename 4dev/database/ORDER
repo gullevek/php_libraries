@@ -20,9 +20,11 @@ table/edit_user.sql
 table/edit_log.sql
 table/edit_access.sql
 table/edit_access_user.sql
+table/edit_access_data.sql
 # all triggers (after all tables have been created)
 trigger/trg_edit_access_right.sql
 trigger/trg_edit_access.sql
+trigger/trg_edit_access_data.sql
 trigger/trg_edit_access_user.sql
 trigger/trg_edit_generic.sql
 trigger/trg_edit_group.sql
@@ -36,3 +38,5 @@ trigger/trg_edit_user.sql
 trigger/trg_edit_visible_group.sql
 trigger/trg_edit_menu_group.sql
 trigger/trg_set_edit_access_uid.sql
+# insert data
+data/edit_tables.sql

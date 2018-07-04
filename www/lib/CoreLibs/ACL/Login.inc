@@ -75,7 +75,9 @@ class Login extends \CoreLibs\DB\IO
 	private $pw_change_deny_users = array (); // array of users for which the password change is forbidden
 
 	// if we have password change we need to define some rules
-	private $password_min_length = 8;
+	private $password_min_length = PASSWORD_MIN_LENGTH;
+	// max length is fixed as 255 (for input type max), if set highter, it will be set back to 255
+	private $password_max_length = PASSWORD_MAX_LENGTH;
 	// can have several regexes, if nothing set, all is ok
 	private $password_valid_chars = array (
 		// '^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$',
@@ -116,6 +118,16 @@ class Login extends \CoreLibs\DB\IO
 		if (!session_id()) {
 			echo "<b>Session not started!</b><br>Use 'session_start();'.<br>";
 			echo "For less problems with other session, you can set a session name with 'session_name(\"name\");'.<br>";
+			exit;
+		}
+
+		// pre-check that password min/max lengths are inbetween 1 and 255;
+		if ($this->password_max_length > 255) {
+			echo "<b>Settings problem</b> PMaL<br>";
+			exit;
+		}
+		if ($this->password_min_length < 1) {
+			echo "<b>Settings problem</b> PMiL<br>";
 			exit;
 		}
 
@@ -729,10 +741,26 @@ class Login extends \CoreLibs\DB\IO
 			}
 		}
 		// check for min length
-		if (strlen($password) < $this->password_min_length) {
+		if (strlen($password) < $this->password_min_length || strlen($password) > $this->password_max_length) {
 			$is_valid_password = false;
 		}
 		return $is_valid_password;
+	}
+
+	// METHOD: loginSetPasswordMinLength
+	// PARAMS: set the minimum length
+	// RETURN: true/false on success
+	// DESC  : sets the minium length and checks on valid
+	public function loginSetPasswordMinLength($length)
+	{
+		// check that numeric, positive numeric, not longer than max input string lenght
+		// and not short than min password length
+		if (is_numeric($length) && $length >= PASSWORD_MIN_LENGTH && $length <= $this->password_max_length) {
+			$this->password_min_length = $length;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	// METHOD: loginPasswordChange

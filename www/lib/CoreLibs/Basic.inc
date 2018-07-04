@@ -1341,7 +1341,7 @@ class Basic
 	// METHOD: compareDate
 	// WAS   : CompareDate
 	// PARAMS: start_date, end_date (both: YYYY-MM-DD)
-	// RETURN: -1 if the first date is smaller the last, 0 if both are equal, 1 if the end date is bigger than the last
+	// RETURN: -1 if the first date is smaller the last, 0 if both are equal, 1 if the first date is bigger than the last
 	// DESC  : splits & checks date, wrap around for check_date function
 	public static function compareDate($start_date, $end_date)
 	{

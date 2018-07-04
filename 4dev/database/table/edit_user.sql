@@ -8,10 +8,13 @@
 -- DROP TABLE edit_user;
 CREATE TABLE edit_user (
 	edit_user_id	SERIAL PRIMARY KEY,
+	connect_edit_user_id	INT, -- possible reference to other user
 	username	VARCHAR UNIQUE,
 	password	VARCHAR,
 	first_name	VARCHAR,
 	last_name	VARCHAR,
+	first_name_furigana	VARCHAR,
+	last_name_furigana	VARCHAR,
 	enabled	SMALLINT NOT NULL DEFAULT 0,
 	debug	SMALLINT NOT NULL DEFAULT 0,
 	db_debug	SMALLINT NOT NULL DEFAULT 0,
@@ -29,17 +32,9 @@ CREATE TABLE edit_user (
 	locked	SMALLINT DEFAULT 0,
 	password_change_date	TIMESTAMP WITHOUT TIME ZONE, -- only when password is first set or changed
 	password_change_interval	INTERVAL, -- null if no change is needed, or d/m/y time interval
+	FOREIGN KEY (connect_edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_language_id) REFERENCES edit_language (edit_language_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
 ) INHERITS (edit_generic) WITHOUT OIDS;
-
--- inserts admin user so basic users can be created
-DELETE FROM edit_user;
-INSERT INTO edit_user (username, password, enabled, debug, db_debug, email, protected, admin, edit_language_id, edit_group_id, edit_scheme_id, edit_access_right_id) VALUES ('admin', 'admin', 1, 1, 1, '', 1, 1,
-	(SELECT edit_language_id FROM edit_language WHERE short_name = 'en'),
-	(SELECT edit_group_id FROM edit_group WHERE name = 'Admin'),
-	(SELECT edit_scheme_id FROM edit_scheme WHERE name = 'Admin')
-	(SELECT edit_access_right_id FROM edit_access_right WHERE type = 'admin')
-);

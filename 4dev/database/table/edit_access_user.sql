@@ -17,10 +17,3 @@ CREATE TABLE edit_access_user (
 	FOREIGN KEY (edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
 ) INHERITS (edit_generic) WITHOUT OIDS;
-
-DELETE FROM edit_access_user;
-INSERT INTO edit_access_user (edit_default, edit_access_id, edit_user_id, edit_access_right_id) VALUES (1,
-	(SELECT edit_access_id FROM edit_access WHERE uid = 'AdminAccess')
-	(SELECT edit_user_id FROM edit_user WHERE username = 'admin')
-	(SELECT edit_access_right_id FROM edit_access_right WHERE type = 'admin')
-);
