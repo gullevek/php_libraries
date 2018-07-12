@@ -466,7 +466,7 @@ class IO extends \CoreLibs\Basic
 	private function __checkQueryForSelect($query)
 	{
 		// perhaps allow spaces before select ?!?
-		if (!preg_match("/^(select|show) /i", $query)) {
+		if (!preg_match("/^(select|show|with) /i", $query)) {
 			return false;
 		}
 		return true;
