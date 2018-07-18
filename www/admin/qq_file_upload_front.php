@@ -68,7 +68,7 @@ $base->debug('UPLOADED FRONT', 'With max size: '.$MAX_UPLOAD_SIZE);
 	var MAX_UPLOAD_SIZE = <?=$MAX_UPLOAD_SIZE;?>;
 	// function to add an AJAX uploadeder to the set
 	function createUploaderSin(divName, divNumber) {
-		divID = divName + divNumber;
+		divID = divName + '_' + divNumber;
 		console.log('Div: %s, Number: %s => ID: %s', divName, divNumber, divID);
 
 		var uploader = new qq.FileUploaderBasic({
@@ -82,29 +82,30 @@ $base->debug('UPLOADED FRONT', 'With max size: '.$MAX_UPLOAD_SIZE);
 			name: divID,
 			params: {
 				'file_pos': divNumber, // we need to add here ID or something
-				'action': 'upload'
+				'action': 'upload',
+				'task_uid': divNumber // -> test for some internal uid
 			},
 			onSubmit: function(id, filename, target) {
 				console.log('File upload: "%s", ID: "%s" => "%s"', filename, id, target);
 				// remove any assigned error classes and flags
-				if ($(target + 'Progress').hasClassName('uploadError'))
+				if ($(target + '_Progress').hasClassName('uploadError'))
 				{
-					$(target + 'Progress').className = '';
-					$(target + 'Error').value = 0;
+					$(target + '_Progress').className = '';
+					$(target + '_Error').value = 0;
 				}
-				$(target + 'Progress').innerHTML = 'Start uploading file: ' + filename;
+				$(target + '_Progress').innerHTML = 'Start uploading file: ' + filename;
 				// disabled stuff here
 			},
 			onProgress: function(id, filename, loaded, total, target) {
 				console.log('Progress for file: "%s", ID: "%s", loaded: "%s", total: "%s" => "%s"', id, filename, loaded, total, target);
 				var percent = Math.round((loaded / total) * 100);
-				$(target + 'Progress').innerHTML = 'Uploading: ' + filename + ', ' + percent + '%' + ' (' + formatBytes(loaded) + '/' + formatBytes(total) + ')';
+				$(target + '_Progress').innerHTML = 'Uploading: ' + filename + ', ' + percent + '%' + ' (' + formatBytes(loaded) + '/' + formatBytes(total) + ')';
 			},
 			onComplete: function(id, filename, responseJSON, target) {
 				console.log('File upload for file "%s", id "%s" done with status "%s" => "%s", And success: %s', filename, id, responseJSON, target, responseJSON.result.success);
 				if (responseJSON.result.success)
 				{
-					$(target + 'Progress').innerHTML = 'Uploaded: ' + filename + ' (' + responseJSON.filesize_formated + ')';
+					$(target + '_Progress').innerHTML = 'Uploaded: ' + filename + ' (' + responseJSON.filesize_formated + ')';
 					// also write hidden vars for this (file name, etc)
 					// for that we replace the divName part from the target and get just the pos number ?
 					// $(target + 'Name').value = filename;
@@ -115,11 +116,11 @@ $base->debug('UPLOADED FRONT', 'With max size: '.$MAX_UPLOAD_SIZE);
 				else
 				{
 					// set the error class
-					$(target + 'Progress').className = 'uploadError';
+					$(target + '_Progress').className = 'uploadError';
 					// flag error
-					$(target + 'Error').value = 1;
+					$(target + '_Error').value = 1;
 					// and write the error
-					$(target + 'Progress').innerHTML = 'UPLOAD FAILED FOR FILE: ' + filename;
+					$(target + '_Progress').innerHTML = 'UPLOAD FAILED FOR FILE: ' + filename;
 				}
 				// renable stuff here
 			},
@@ -138,22 +139,22 @@ $base->debug('UPLOADED FRONT', 'With max size: '.$MAX_UPLOAD_SIZE);
 <div id="masterGroup">
 	<div>File upload via AJAX</div>
 	<div class="flx-s">
-		<div id="Uploader1" class="normal qq-file-upload-button">Upload File</div>
-		<div id="Uploader1Progress"></div>
-		<input type="hidden" name="Uploader1Error" id="Uploader1Error" value="">
+		<div id="Uploader_3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_MF5tISORiay7" class="normal qq-file-upload-button">Upload File</div>
+		<div id="Uploader_3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_MF5tISORiay7_Progress"></div>
+		<input type="hidden" name="Uploader_3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_MF5tISORiay7_Error" id="Uploader_3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_MF5tISORiay7_Error" value="">
 	</div>
 	<div class="flx-s">
-		<div id="Uploader2" class="normal qq-file-upload-button">Upload File</div>
-		<div id="Uploader2Progress"></div>
-		<input type="hidden" name="Uploader2Error" id="Uploader2Error" value="">
+		<div id="Uploader_3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_Ww9iWKrl3Xou" class="normal qq-file-upload-button">Upload File</div>
+		<div id="Uploader_3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_Ww9iWKrl3Xou_Progress"></div>
+		<input type="hidden" name="Uploader_3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_Ww9iWKrl3Xou_Error" id="Uploader_3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_Ww9iWKrl3Xou_Error" value="">
 	</div>
 </div>
 </body>
 </html>
 <script type="text/javascript">
 // attach uploader to div areas
-createUploaderSin('Uploader', '1');
-createUploaderSin('Uploader', '2');
+createUploaderSin('Uploader', '3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_MF5tISORiay7');
+createUploaderSin('Uploader', '3WD7MAFmjAux_dlvvu13tezNj_XeSO0Ovauli0_Ww9iWKrl3Xou');
 </script>
 <?php
 $base->printErrorMsg();
