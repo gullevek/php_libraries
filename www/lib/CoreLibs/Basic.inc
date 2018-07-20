@@ -1133,13 +1133,29 @@ class Basic
 	//         does NOT preserve keys
 	public static function flattenArray(array $array)
 	{
-		$return = array();
+		$return = array ();
 		array_walk_recursive(
 			$array,
 			function ($a) use (&$return) {
 				$return[] = $a;
 			}
 		);
+		return $return;
+	}
+
+	// METHOD: flattenArrayKey
+	// PARAMS: the array to flatten
+	// RETURN: flattened array with array keys as values in order of tree
+	// DESC  : note: the second parameter $return is automatically set
+	//         will loop through an array recursivly and write the array keys back
+	public static function flattenArrayKey(array $array, array $return = array ())
+	{
+		foreach ($array as $key => $sub) {
+			$return[] = $key;
+			if (count($sub) > 0) {
+				$return = Basic::flattenArrayKey($sub, $return);
+			}
+		}
 		return $return;
 	}
 

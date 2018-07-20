@@ -202,6 +202,9 @@ $date_1 = '2017/1/5';
 $date_2 = '2017-01-05';
 print "COMPARE DATE: ".$basic->compareDate($date_1, $date_2)."<br>";
 
+
+// array re
+
 // print error messages
 print $login->printErrorMsg();
 print $basic->printErrorMsg();

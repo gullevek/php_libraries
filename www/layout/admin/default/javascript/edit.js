@@ -257,6 +257,20 @@ function ael(base, attach, id = '')
 	return base;
 }
 
+// METHOD: aelx [attach n elements]
+// PARAMS: base: object to where we attach the elements
+//         attach 1..n: attach directly to the base element those attachments
+// RETURN: "none", technically there is no return needed
+// DESC  : directly attach n elements to one master base element
+//         this type does not support attach with optional id
+function aelx(base, ...attach)
+{
+	attach.each(function(t) {
+		base.sub.push(Object.assign({}, t));
+	});
+	return base;
+}
+
 // METHOD: rel [rese element]
 // PARAMS: cel created element
 // RETURN: "none", is self change, but returns base.sub
@@ -282,7 +296,7 @@ function rcssel(element, css)
 function acssel(element, css)
 {
 	let css_index = element.css.indexOf(css);
-	if (css_index > -1) {
+	if (css_index == -1) {
 		element.css.push(css);
 	}
 }
