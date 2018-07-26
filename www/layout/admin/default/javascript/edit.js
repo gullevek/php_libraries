@@ -301,6 +301,17 @@ function acssel(element, css)
 	}
 }
 
+// METHOD: scssel
+// PARAMS: element, style to remove, style to add
+// RETURN: "none", in place add because of reference
+// DESC  : removes one css and adds another
+//         is a wrapper around rcssel/acssel
+function scssel(element, rcss, acss)
+{
+	rcssel(element, rcss);
+	acssel(element, acss);
+}
+
 // METHOD: phfo [produce html from object]
 // PARAMS: object tree with dom element declarations
 // RETURN: HTML string that can be used as innerHTML

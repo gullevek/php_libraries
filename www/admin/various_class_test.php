@@ -10,6 +10,8 @@ require 'config.inc' ;
 DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
 $base = new CoreLibs\Basic();
 
+print "THIS HOST: ".HOST_NAME.", with PROTOCOL: ".HOST_PROTOCOL." is running SSL: ".HOST_SSL."<br>";
+
 // $test = array (
 // 	'A' => array (
 // 		'B' => array (),
@@ -31,6 +33,9 @@ $base->debug('ARRAY', $base->printAr($test));
 
 function rec($pre, $cur, $node = array ())
 {
+	if (!is_array($node)) {
+		$node = array ();
+	}
 	print "<div style='color: green;'>#### PRE: ".$pre.", CUR: ".$cur.", N-c: ".count($node)." [".join('|', array_keys($node))."]</div>";
 	if (!$pre) {
 		print "** <span style='color: red;'>NEW</span><br>";

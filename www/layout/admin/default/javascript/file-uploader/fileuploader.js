@@ -275,6 +275,9 @@ qq.FileUploaderBasic = function(o){
             emptyError: "{file} is empty, please select files again without it.",
             onLeave: "The files are being uploaded, if you leave now the upload will be cancelled."
         },
+        classes: {
+            cancel: 'qq-upload-cancel'
+        },
         showMessage: function(message){
             alert(message);
         }
@@ -290,6 +293,8 @@ qq.FileUploaderBasic = function(o){
     }
 
     this._preventLeaveInProgress();
+    this._classes = this._options.classes;
+    this._bindCancelEvent();
 };
 
 qq.FileUploaderBasic.prototype = {
@@ -364,6 +369,8 @@ qq.FileUploaderBasic.prototype = {
     },
     _onSubmit: function(id, fileName){
         this._filesInProgress++;
+        // get current upload id for cancel
+        this.qqFileId = id;
     },
     _onProgress: function(id, fileName, loaded, total){
     },
@@ -374,6 +381,7 @@ qq.FileUploaderBasic.prototype = {
         }
     },
     _onCancel: function(id, fileName){
+        // console.log('CORE CANCEL: %s', id);
         this._filesInProgress--;
     },
     _onInputChange: function(input){
@@ -401,6 +409,7 @@ qq.FileUploaderBasic.prototype = {
         var id = this._handler.add(fileContainer);
         var fileName = this._handler.getName(id);
 
+        // console.log('UPLOAD FILE: %s, FN: %s', id, fileName);
 		if (this._options.button)
 		{
 			if (this._options.onSubmit(id, fileName, this._options.button.id) !== false){
@@ -485,6 +494,24 @@ qq.FileUploaderBasic.prototype = {
         } while (bytes > 99);
 
         return Math.max(bytes, 0.1).toFixed(1) + ['kB', 'MB', 'GB', 'TB', 'PB', 'EB'][i];
+    },
+    /**
+     * delegate click event for cancel link
+    **/
+    _bindCancelEvent: function(){
+        var self = this,
+            list = this._options.cancel;
+        qq.attach(list, 'click', function(e){
+            e = e || window.event;
+            var target = e.target || e.srcElement;
+
+            if (qq.hasClass(target, self._classes.cancel)){
+                qq.preventDefault(e);
+                console.log('Item: %s', self.qqFileId);
+                self._handler.cancel(self.qqFileId);
+                console.log('## IN PROGRESS: %s', self.getInProgress());
+            }
+        });
     }
 };
 
@@ -895,7 +922,9 @@ qq.UploadHandlerAbstract.prototype = {
      * Adds file or file input to the queue
      * @returns id
      **/
-    add: function(file){},
+    add: function(file){
+        console.log('FILE: %s', file);
+    },
     /**
      * Sends the file identified by id and additional query params to the server
      */
@@ -915,6 +944,7 @@ qq.UploadHandlerAbstract.prototype = {
      * Cancels file upload by id
      */
     cancel: function(id){
+        // console.log('CANCEL: %s', id);
         this._cancel(id);
         this._dequeue(id);
     },
@@ -955,10 +985,11 @@ qq.UploadHandlerAbstract.prototype = {
      */
     _dequeue: function(id){
         var i = qq.indexOf(this._queue, id);
+        // console.log('==> Dequeue: %s with %s', id, i);
         this._queue.splice(i, 1);
 
         var max = this._options.maxConnections;
-
+        // console.log('==> Dequeue next: %s, max: %s', this._queue.length, max);
         if (this._queue.length >= max && i < max){
             var nextId = this._queue[max-1];
             this._upload(nextId, this._params[nextId]);
@@ -998,7 +1029,6 @@ qq.extend(qq.UploadHandlerForm.prototype, {
     },
     _cancel: function(id){
         this._options.onCancel(id, this.getName(id));
-
         delete this._inputs[id];
 
         var iframe = document.getElementById(id);
@@ -1013,7 +1043,7 @@ qq.extend(qq.UploadHandlerForm.prototype, {
     },
     _upload: function(id, params){
         var input = this._inputs[id];
-//		console.log('IFRAME upload: %s', id);
+		// console.log('IFRAME upload: %s', id);
 
         if (!input){
             throw new Error('file with passed id was not added, or already uploaded or cancelled');
@@ -1270,6 +1300,7 @@ qq.extend(qq.UploadHandlerXhr.prototype, {
         this._dequeue(id);
     },
     _cancel: function(id){
+        // console.log('CANCEL EXT: %s', id);
         this._options.onCancel(id, this.getName(id));
 
         this._files[id] = null;
