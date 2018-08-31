@@ -65,7 +65,6 @@ INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('Default Scheme', 
 INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('Admin', 'CC7E7E', 1);
 INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('Visitor', 'B0C4B3', 1);
 INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('User', '1E789E', 1);
-INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('Client', '479e61', 1);
 
 -- edit language
 DELETE FROM edit_language;
@@ -75,7 +74,6 @@ INSERT INTO edit_language (short_name, long_name, iso_name, order_number, enable
 -- edit group
 DELETE FROM edit_group;
 INSERT INTO edit_group (name, enabled, edit_scheme_id, edit_access_right_id) VALUES ('Admin', 1, (SELECT edit_scheme_id FROM edit_scheme WHERE name = 'Admin'), (SELECT edit_access_right_id FROM edit_access_right WHERE type = 'admin'));
-INSERT INTO edit_group (name, enabled, edit_scheme_id, edit_access_right_id) VALUES ('Client', 1, (SELECT edit_scheme_id FROM edit_scheme WHERE name = 'Client'), (SELECT edit_access_right_id FROM edit_access_right WHERE type = 'del'));
 INSERT INTO edit_group (name, enabled, edit_scheme_id, edit_access_right_id) VALUES ('User', 1, (SELECT edit_scheme_id FROM edit_scheme WHERE name = 'User'), (SELECT edit_access_right_id FROM edit_access_right WHERE type = 'write'));
 
 -- edit page access

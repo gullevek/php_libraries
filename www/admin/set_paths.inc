@@ -111,7 +111,34 @@ if (!is_dir($cms->cache_pictures)) {
 if (false === strstr(LAYOUT.DEFAULT_TEMPLATE.LANG, $cms->lang_dir) || strcasecmp(DEFAULT_LANG, $lang)) {
 	$cms->debug('LANG', 'Orig: '.LAYOUT.DEFAULT_TEMPLATE.LANG.', New: '.$cms->lang_dir.' | Orig Lang: '.DEFAULT_LANG.', New Lang: '.$lang);
 	$cms->l->l10nReloadMOfile($lang, $cms->lang_dir);
-	$smarty->l10n->l10nReloadMOfile($lang, $cms->lang_dir);
+		// if we have login class
+	if ($login) {
+		$login->l->l10nReloadMOfile($lang, $cms->lang_dir);
+	}
+	// if we have smarty template class
+	if ($smarty) {
+		$smarty->l10n->l10nReloadMOfile($lang, $cms->lang_dir);
+	}
+}
+
+// javascrip translate data as template for auto translate
+if (!$TEMPLATE_TRANSLATE) {
+	$cms->debug('LANG', 'Load lang: '.$lang.', for page file jsTranslate_'.$lang.'.tpl');
+	$TEMPLATE_TRANSLATE = 'jsTranslate_'.$lang.'.tpl';
+} else {
+	// we assume we have some fixed set
+	// we must add _<$lang>
+	// if .tpl, put before .tpl
+	// if not .tpl, add _<$lang>.tpl
+	if (strpos($TEMPLATE_TRANSLATE, '.tpl')) {
+		$TEMPLATE_TRANSLATE = str_replace('.tpl', '_'.$lang.'.tpl', $TEMPLATE_TRANSLATE);
+	} else {
+		$TEMPLATE_TRANSLATE .= '_'.$lang.'.tpl';
+	}
+}
+// if we can't find it, dump it
+if (!file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_TRANSLATE)) {
+	unset($TEMPLATE_TRANSLATE);
 }
 
 //	$cms->debug("LANGUAGE", "L: $lang | ".$cms->lang_dir." | MO File: ".$cms->l->mofile);
