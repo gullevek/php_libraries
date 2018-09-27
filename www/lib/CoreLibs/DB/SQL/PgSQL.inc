@@ -350,7 +350,8 @@ class PgSQL
 	// DESC  : wrapper for pg_emta_data
 	public function __dbMetaData($table)
 	{
-		return pg_meta_data($this->dbh, $table);
+		// needs to prefixed with @ or it throws a warning on not existing table
+		return @pg_meta_data($this->dbh, $table);
 	}
 
 	// METHOD: __dbEscapeString

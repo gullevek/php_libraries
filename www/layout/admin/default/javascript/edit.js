@@ -356,9 +356,12 @@ function phfo(tree)
 	// push finished line
 	content.push(line);
 	// dive into sub tree to attach sub nodes
-	// NOTES: we cannot have content (text) AND sub nodes at the same level
-	// NODE takes preference over content
+	// NOTES: we can have content (text) AND sub nodes at the same level
+	// CONTENT (TEXT) takes preference over SUB NODE in order
 	if (tree.sub.length > 0) {
+		if (tree.content) {
+			content.push(tree.content);
+		}
 		tree.sub.each(function(t) {
 			content.push(phfo(t));
 		});
@@ -416,7 +419,7 @@ function html_options(name, data, selected = '', options_only = false, return_st
 	} else {
 		// strip select part
 		if (return_string) {
-			element.sub.each(function(t) {
+			element_select.sub.each(function(t) {
 				content.push(phfo(t));
 			});
 			return content.join('');

@@ -202,7 +202,14 @@ class Basic
 		$this->page_name = $this->getPageName();
 		$this->host_name = $this->getHostName();
 		// init the log file id
-		$this->log_file_id = defined('LOG_FILE_ID') ? LOG_FILE_ID : '';
+		// * GLOBALS
+		// * CONSTANT
+		// can be overridden with basicSetLogFileId
+		if (isset($GLOBALS['LOG_FILE_ID'])) {
+			$this->basicSetLogId($GLOBALS['LOG_FILE_ID']);
+		} elseif (defined('LOG_FILE_ID')) {
+			$this->basicSetLogId(LOG_FILE_ID);
+		}
 
 		// set the paths matching to the valid file types
 		$this->data_path = array (
@@ -387,6 +394,22 @@ class Basic
 	// *************************************************************
 	// GENERAL METHODS
 	// *************************************************************
+
+	// METHOD: basicSetLogId
+	// PARAMS: string
+	// RETURN: current set string
+	// DESC  : sets the log file prefix id
+	//         must be alphanumeric only (\w)
+	public function basicSetLogId($string)
+	{
+		if (!isset($log_file_id)) {
+			$log_file_id = '';
+		}
+		if (isset($string) && preg_match("/^\w+$/", $string)) {
+			$this->log_file_id = $string;
+		}
+		return $log_file_id;
+	}
 
 	// METHOD: db_io_info
 	// PARAMS: show, default 1, if set to 0 won't write to error_msg var

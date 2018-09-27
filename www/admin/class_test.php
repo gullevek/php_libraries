@@ -97,6 +97,9 @@ print "DIRECT MULTIPLE INSERT STATUS: $status | PRIMARY KEYS: ".print_r($basic->
 // no returning, but not needed ;
 $status = $basic->dbExec("INSERT INTO foo (test) VALUES ('FOO; TEST ".time()."');");
 print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
+// UPDATE WITH RETURNING
+$status = $basic->dbExec("UPDATE foo SET test = 'SOMETHING DIFFERENT' WHERE foo_id = 3688452 RETURNING test");
+print "UPDATE STATUS: $status | RETURNING EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
 
 # db write class test
 $table = 'foo';

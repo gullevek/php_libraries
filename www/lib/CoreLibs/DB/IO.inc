@@ -461,15 +461,15 @@ class IO extends \CoreLibs\Basic
 	// WAS   : _check_query_for_select
 	// PARAMS: query
 	// RETURN: true if matching, false if not
-	// DESC  : checks if query is a SELECT or SHOW, if not error, 0 return
-	// NOTE  : Query needs to start with SELECT or SHOW. if starts with "with" it is ignored
+	// DESC  : checks if query is a SELECT, SHOW or WITH, if not error, 0 return
+	// NOTE  : Query needs to start with SELECT, SHOW or WITH. if starts with "with" it is ignored
 	private function __checkQueryForSelect($query)
 	{
 		// perhaps allow spaces before select ?!?
-		if (!preg_match("/^(select|show|with) /i", $query)) {
-			return false;
+		if (preg_match("/^(select|show|with) /i", $query)) {
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	// METHOD: __checkQueryForInsert
@@ -481,16 +481,26 @@ class IO extends \CoreLibs\Basic
 	// NOTE  : Queries need to start with INSERT, UPDATE, DELETE. Anything else is ignored
 	private function __checkQueryForInsert($query, $pure = false)
 	{
-		if (!preg_match("/^insert /i", $query) && !preg_match("/^update /i", $query) && !preg_match("/^delete /i", $query)) {
-			return false;
-		}
-		if (!$pure) {
+		if ($pure && preg_match("/^insert /i", $query)) {
 			return true;
-		} elseif (preg_match("/^insert /i", $query)) {
-			return true;
-		} else {
-			return false;
 		}
+		if (!$pure && preg_match("/^(insert|update|delete) /i", $query)) {
+			return true;
+		}
+		return false;
+	}
+
+	// METHOD: __checkQueryForUpdate
+	// PARAMS: query
+	// RETURN: true if UPDATE, else false
+	// DESC  : returns true if the query starts with UPDATE
+	// NOTE  : query NEEDS to start with UPDATE
+	private function __checkQueryForUpdate($query)
+	{
+		if (preg_match("/^update /i", $query)) {
+			return true;
+		}
+		return false;
 	}
 
 	// METHOD: __printArray
@@ -683,15 +693,22 @@ class IO extends \CoreLibs\Basic
 					$this->query = preg_replace("/(;\s*)$/", '', $this->query);
 					$this->query .= " RETURNING ".$this->pk_name;
 					$this->returning_id = true;
-				} elseif (preg_match("/ returning (.*)/i", $this->query, $matches) && $this->pk_name && $this->pk_name != 'NULL') {
-					// add the primary key if it is not in the returning set
-					if (!preg_match("/$this->pk_name/", $matches[1])) {
-						$this->query .= " , ".$this->pk_name;
+				} elseif (preg_match("/ returning (.*)/i", $this->query, $matches)) {
+					if ($this->pk_name && $this->pk_name != 'NULL') {
+						// add the primary key if it is not in the returning set
+						if (!preg_match("/$this->pk_name/", $matches[1])) {
+							$this->query .= " , ".$this->pk_name;
+						}
 					}
 					$this->returning_id = true;
 				}
 			}
 		}
+		// if we have an UPDATE and RETURNING, flag for true, but do not add anything
+		if ($this->__checkQueryForUpdate($this->query) && preg_match("/ returning (.*)/i", $this->query, $matches)) {
+			$this->returning_id = true;
+		}
+		// $this->debug('DB IO', 'Q: '.$this->query.', RETURN: '.$this->returning_id);
 		// for DEBUG, only on first time ;)
 		if ($this->db_debug) {
 			$this->__dbDebug('db', $this->query, '__dbPrepareExec', 'Q');
@@ -752,7 +769,9 @@ class IO extends \CoreLibs\Basic
 				// if not select do here
 				// count affected rows
 				$this->num_rows = $this->db_functions->__dbAffectedRows($this->cursor);
-				if ($this->__checkQueryForInsert($this->query, true) && $this->pk_name != 'NULL') {
+				if (($this->__checkQueryForInsert($this->query, true) && $this->pk_name != 'NULL') ||
+					($this->__checkQueryForUpdate($this->query) && $this->returning_id)
+				) {
 					// set insert_id
 					// if we do not have a returning, we try to get it via the primary key and another select
 					if (!$this->returning_id) {
@@ -770,14 +789,16 @@ class IO extends \CoreLibs\Basic
 						// if we have only one, revert from array to single
 						if (count($this->insert_id) == 1) {
 							// echo "* SINGLE DATA CONVERT: ".count($this->insert_id[0])." => ".array_key_exists($this->pk_name, $this->insert_id[0])."<br>";
-							// echo "* PK DIRECT: ".$this->insert_id[0][$this->pk_name]."<Br>";
+							// echo "* PK DIRECT: ".(isset($this->insert_id[0][$this->pk_name]) ? $this->insert_id[0][$this->pk_name] : '[NO PK NAME SET]' )."<Br>";
 							// if this has only the pk_name, then only return this, else array of all data (but without the position)
 							// example if insert_id[0]['foo'] && insert_id[0]['bar'] it will become insert_id['foo'] & insert_id['bar']
 							// if only ['foo_id'] and it is the PK then the PK is directly written to the insert_id
 							if (count($this->insert_id[0]) > 1 || !array_key_exists($this->pk_name, $this->insert_id[0])) {
 								$this->insert_id_ext = $this->insert_id[0];
-								$this->insert_id = $this->insert_id[0][$this->pk_name];
-							} elseif ($this->insert_id[0][$this->pk_name]) {
+								if (isset($this->insert_id[0][$this->pk_name])) {
+									$this->insert_id = $this->insert_id[0][$this->pk_name];
+								}
+							} elseif (isset($this->insert_id[0][$this->pk_name])) {
 								$this->insert_id = $this->insert_id[0][$this->pk_name];
 							}
 						} elseif (count($this->insert_id) == 0) {
