@@ -1427,7 +1427,7 @@ class Basic
 	public static function compareDateTime($start_datetime, $end_datetime)
 	{
 		// pre check for empty or wrong
-		if ($start_date == '--' || $end_date == '--' || !$start_date || !$end_date) {
+		if ($start_datetime == '--' || $end_datetime == '--' || !$start_datetime || !$end_datetime) {
 			return false;
 		}
 		$start_timestamp = strtotime($start_datetime);

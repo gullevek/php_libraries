@@ -379,35 +379,51 @@ function phfo(tree)
 // BLOCK: html wrappers for quickly creating html data blocks
 // METHOD: html_options
 // PARAMS: name/id, array for the options, selected item uid
-//         options_only: if this is true, it will not print the select part
-//         return_string, return as string and not as element
+//         options_only [def false] if this is true, it will not print the select part
+//         return_string [def false]: return as string and not as element
+//         sort [def '']: if empty as is, else allowed 'keys', 'values' all others are ignored
 // RETURN: html with build options block
 // DESC  : creates an select/options drop down block.
 //         the array needs to be key -> value format. key is for the option id and value is for the data output
-function html_options(name, data, selected = '', options_only = false, return_string = false)
+function html_options(name, data, selected = '', options_only = false, return_string = false, sort = '')
 {
 	let content = [];
 	let element_select;
 	let element_option;
+	let data_list = []; // for sorted output
 	// set outside select, gets stripped on return if options only is true
 	element_select = cel('select', name);
-	// console.log('Call for %s, options: %s', name, options_only);
-	$H(data).each(function(t) {
-		console.log('options: key: %s, value: %s', t.key, t.value);
-		// basic options init
-		let options = {
-			'label': t.value,
-			'value': t.key
-		};
-		// add selected if matching
-		if (selected == t.key) {
-			options.selected = '';
+	if (isObject(data)) {
+		// console.log('Call for %s, options: %s', name, options_only);
+		// console.log('Call for %s, options: %s', name, options_only);
+		if (sort == 'keys') {
+			data_list = Object.keys(data).sort();
+		} else if (sort == 'values') {
+			data_list = Object.keys(data).sort((a, b) => ('' + data[a]).localeCompare(data[b]));
+		} else {
+			data_list = Object.keys(data);
 		}
-		// create the element option
-		element_option = cel('option', '', t.value, '', options);
-		// attach it to the select element
-		ael(element_select, element_option);
-	});
+		// console.log('ORDER: %s', data_list);
+		// use the previously sorted list
+		// for (const [key, value] of Object.entries(data)) {
+		for (const key of data_list) {
+			let value = data[key];
+			console.log('options: key: %s, value: %s', key, value);
+			// basic options init
+			let options = {
+				'label': value,
+				'value': key
+			};
+			// add selected if matching
+			if (selected == key) {
+				options.selected = '';
+			}
+			// create the element option
+			element_option = cel('option', '', value, '', options);
+			// attach it to the select element
+			ael(element_select, element_option);
+		}
+	}
 	// if with select part, convert to text
 	if (!options_only) {
 		if (return_string) {

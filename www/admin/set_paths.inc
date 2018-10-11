@@ -32,7 +32,7 @@ if ($_SESSION['DEFAULT_CHARSET']) {
 if ($_SESSION['DEFAULT_LANG']) {
 	$lang = $_SESSION['DEFAULT_LANG'];
 } elseif (!$lang) {
-	$lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;;
+	$lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
 }
 // create the char lang encoding
 $lang_short = substr($lang, 0, 2);
@@ -108,8 +108,8 @@ if (!is_dir($cms->cache_pictures)) {
 
 // if the template_dir is != DEFAULT_TEMPLATE, then try to make a lang switch
 // if the default lang is not like the lang given, switch lang
-if (false === strstr(LAYOUT.DEFAULT_TEMPLATE.LANG, $cms->lang_dir) || strcasecmp(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;, $lang)) {
-	$cms->debug('LANG', 'Orig: '.LAYOUT.DEFAULT_TEMPLATE.LANG.', New: '.$cms->lang_dir.' | Orig Lang: '.(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;).', New Lang: '.$lang);
+if (false === strstr(LAYOUT.DEFAULT_TEMPLATE.LANG, $cms->lang_dir) || strcasecmp(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG, $lang)) {
+	$cms->debug('LANG', 'Orig: '.LAYOUT.DEFAULT_TEMPLATE.LANG.', New: '.$cms->lang_dir.' | Orig Lang: '.(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG).', New Lang: '.$lang);
 	$cms->l->l10nReloadMOfile($lang, $cms->lang_dir);
 		// if we have login class
 	if ($login) {
