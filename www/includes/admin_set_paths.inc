@@ -55,13 +55,13 @@ $cms->CSS_SPECIAL_TEMPLATE_NAME = @$CSS_NAME;
 $cms->JS_SPECIAL_TEMPLATE_NAME = @$JS_NAME;
 
 // set basic template path (tmp)
-$smarty->setTemplateDir(LAYOUT.$TEMPLATE_DIR.TEMPLATES);
-$cms->lang_dir = LAYOUT.$TEMPLATE_DIR.LANG;
-$cms->includes = LAYOUT.$TEMPLATE_DIR.INCLUDES;
+$smarty->setTemplateDir(LAYOUT.$TEMPLATE_DIR.TEMPLATES); // no outside
+$cms->lang_dir = LAYOUT.$TEMPLATE_DIR.LANG; // no outside
+$cms->includes = BASE.INCLUDES; // no longer in templates, only global
 $cms->javascript = LAYOUT.$TEMPLATE_DIR.JS;
 $cms->css = LAYOUT.$TEMPLATE_DIR.CSS;
 $cms->pictures = LAYOUT.$TEMPLATE_DIR.IMAGES;
-$cms->cache_pictures = LAYOUT.$TEMPLATE_DIR.CACHE.IMAGES;
+$cms->cache_pictures = LAYOUT.$TEMPLATE_DIR.CACHE;
 $cms->cache_pictures_root = ROOT.$cms->cache_pictures;
 if (!is_dir($cms->cache_pictures_root)) {
 	mkdir($cms->cache_pictures_root);
@@ -80,20 +80,13 @@ if (!file_exists(ROOT.$smarty->getTemplateDir()[0].DS.MASTER_TEMPLATE_NAME)) {
 	$smarty->setTemplateDir(LAYOUT.DEFAULT_TEMPLATE.TEMPLATES);
 	$template_set = DEFAULT_TEMPLATE;
 }
-// loop to check if dir exists
-// check if file exists, if not reset to default path
-
-// check if the javascript folder exists in the template path, if not fall back to default
-if (!is_dir($cms->javascript)) {
-	$cms->javascript = LAYOUT.DEFAULT_TEMPLATE.JS;
-}
 // check if lang_dir folder exists in the template path, if not fall back to default
 if (!is_dir($cms->lang_dir)) {
 	$cms->lang_dir = LAYOUT.DEFAULT_TEMPLATE.LANG;
 }
-// check if include folder exists in the template path, if not fall back to default
-if (!is_dir($cms->includes)) {
-	$cms->includes = LAYOUT.DEFAULT_TEMPLATE.INCLUDES;
+// check if the javascript folder exists in the template path, if not fall back to default
+if (!is_dir($cms->javascript)) {
+	$cms->javascript = LAYOUT.DEFAULT_TEMPLATE.JS;
 }
 // check if css folder exists in the template path, if not fall back to default
 if (!is_dir($cms->css)) {
@@ -103,12 +96,15 @@ if (!is_dir($cms->pictures)) {
 	$cms->pictures = LAYOUT.DEFAULT_TEMPLATE.PICTURES;
 }
 if (!is_dir($cms->cache_pictures)) {
-	$cms->cache_pictures = LAYOUT.DEFAULT_TEMPLATE.CACHE.IMAGES;
+	$cms->cache_pictures = LAYOUT.DEFAULT_TEMPLATE.CACHE;
+	$cms->cache_pictures_root = ROOT.$cms->cache_pictures;
 }
 
 // if the template_dir is != DEFAULT_TEMPLATE, then try to make a lang switch
 // if the default lang is not like the lang given, switch lang
-if (false === strstr(LAYOUT.DEFAULT_TEMPLATE.LANG, $cms->lang_dir) || strcasecmp(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG, $lang)) {
+if (false === strstr(LAYOUT.DEFAULT_TEMPLATE.LANG, $cms->lang_dir) ||
+	strcasecmp(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG, $lang)
+) {
 	$cms->debug('LANG', 'Orig: '.LAYOUT.DEFAULT_TEMPLATE.LANG.', New: '.$cms->lang_dir.' | Orig Lang: '.(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG).', New Lang: '.$lang);
 	$cms->l->l10nReloadMOfile($lang, $cms->lang_dir);
 		// if we have login class

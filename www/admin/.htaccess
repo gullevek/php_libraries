@@ -1,3 +1,7 @@
-php_value xdebug.profiler_output_dir /home/developer/html/adidas/20081208_catalogue/4dev/xdebug/
-php_value xdebug.profiler_output_name timestamp 
-php_value xdebug.profiler_enable 0
+# php_value xdebug.profiler_output_dir /home/developer/xdebug/
+# php_value xdebug.profiler_output_name timestamp
+# php_value xdebug.profiler_enable 0
+# all .inc files are denied access from outside
+<Files "*.inc">
+	Require all denied
+</Files>

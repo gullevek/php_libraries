@@ -11,7 +11,7 @@ $DB_DEBUG = 1;
 ob_start();
 
 // admin class tests
-require 'config.inc' ;
+require 'config.php';
 DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
 
 echo "DIR: ".DIR."<br>ROOT: ".ROOT."<br>BASE: ".BASE."<br>";

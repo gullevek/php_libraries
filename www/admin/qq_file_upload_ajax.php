@@ -5,7 +5,7 @@ $ECHO_ALL = 0;
 $PRINT_ALL = 1;
 
 // load the Basic && qq file uploader here
-require 'config.inc';
+require 'config.php';
 // class load
 $base = new CoreLibs\Basic();
 $base->debug('AJAX UPLOAD', 'START Backend');

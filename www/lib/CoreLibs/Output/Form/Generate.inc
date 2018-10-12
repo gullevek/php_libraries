@@ -256,7 +256,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// load config array
 		// get table array definitions for current page name
 		// WARNING: auto spl load does not work with this as it is an array and not a function/object
-		include(TABLE_ARRAYS."array_".$this->my_page_name.".inc");
+		// check if this is the old path or the new path
+		if (is_dir(TABLE_ARRAYS)) {
+			include(TABLE_ARRAYS."array_".$this->my_page_name.".inc");
+		} else {
+			include(BASE.INCLUDES.TABLE_ARRAYS.'array_'.$this->my_page_name.'.inc');
+		}
 		$config_array = ${$this->my_page_name};
 
 		// start the array_io class which will start db_io ...

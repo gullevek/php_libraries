@@ -6,7 +6,7 @@ $PRINT_ALL = 1;
 
 // test file for qqFileUploader (HTML side)
 // load the Basic class here
-require 'config.inc';
+require 'config.php';
 $base = new CoreLibs\Basic();
 // set max upload size
 $MAX_UPLOAD_SIZE = $base->StringByteFormat(ini_get('upload_max_filesize'));

@@ -7,14 +7,16 @@ $DB_DEBUG = 1;
 $LOG_PER_RUN = 1;
 
 define('USE_DATABASE', true);
-require("header.inc");
+define('USE_HEADER', true);
+require 'config.php';
+require BASE.INCLUDES.'admin_header.inc';
 $MASTER_TEMPLATE_NAME = 'main_body.tpl';
 $TEMPLATE_NAME = 'smarty_test.tpl';
 $PAGE_WIDTH = 750;
-require("set_paths.inc");
+require BASE.INCLUDES.'admin_set_paths.inc';
 
 // smarty test
 $cms->DATA['SMARTY_TEST'] = 'Test Data';
 
-require("smarty.inc");
-require("footer.inc");
+require BASE.INCLUDES.'admin_smarty.inc';
+require BASE.INCLUDES.'admin_footer.inc';

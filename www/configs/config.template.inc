@@ -8,17 +8,19 @@
 *********************************************************************/
 
 /************* SESSION NAMES *************/
+// server name HASH
+DEFINE('SERVER_NAME_HASH', hash('crc32b', $_SERVER['HTTP_HOST']));
 // backend
-DEFINE('EDIT_SESSION_NAME', "<ADMIN SESSION NAME>");
+DEFINE('EDIT_SESSION_NAME', '<ADMIN SESSION NAME>'.SERVER_NAME_HASH);
 // frontend
-DEFINE('SESSION_NAME', "<SESSION NAME>");
-// set the session name
-define('SET_SESSION_NAME', EDIT_SESSION_NAME);
+DEFINE('SESSION_NAME', '<SESSION NAME>'.SERVER_NAME_HASH);
+// SET_SESSION_NAME should be set in the header if a special session name is needed
+// DEFINE('SET_SESSION_NAME', SESSION_NAME);
 
 /************* LANGUAGE / ENCODING *******/
-DEFINE('DEFAULT_LANG', "en_utf8");
+DEFINE('DEFAULT_LANG', 'en_utf8');
 // default web page encoding setting
-DEFINE('DEFAULT_ENCODING', "UTF-8");
+DEFINE('DEFAULT_ENCODING', 'UTF-8');
 
 /************* PATHS *********************/
 // directory seperator
@@ -35,56 +37,58 @@ DEFINE('ROOT', getcwd().DS);
 // libs path
 DEFINE('LIB', 'lib'.DS);
 DEFINE('LIBS', 'lib'.DS);
+// configs folder
+DEFINE('CONFIGS', 'configs'.DS);
 // includes (strings, arrays for static, etc)
 DEFINE('INCLUDES', 'includes'.DS);
 // layout base path
 DEFINE('LAYOUT', 'layout'.DS);
 // pic-root (compatible to CMS)
-DEFINE('PICTURES', "images".DS);
+DEFINE('PICTURES', 'images'.DS);
 // images
-DEFINE('IMAGES', "images".DS);
+DEFINE('IMAGES', 'images'.DS);
 // icons (below the images/ folder)
 DEFINE('ICONS', 'icons'.DS);
 // media
-DEFINE('MEDIA', "media".DS);
+DEFINE('MEDIA', 'media'.DS);
 // flash-root (below media)
-DEFINE('FLASH', "flash".DS);
+DEFINE('FLASH', 'flash'.DS);
 // uploads (anything to keep)
-DEFINE('UPLOADS', "uploads".DS);
+DEFINE('UPLOADS', 'uploads'.DS);
 // files (binaries) (below media)
-DEFINE('BINARIES', "binaries".DS);
+DEFINE('BINARIES', 'binaries'.DS);
 // files (videos) (below media)
-DEFINE('VIDEOS', "videos".DS);
+DEFINE('VIDEOS', 'videos'.DS);
 // files (documents) (below media)
-DEFINE('DOCUMENTS', "documents".DS);
+DEFINE('DOCUMENTS', 'documents'.DS);
 // files (pdfs) (below media)
-DEFINE('PDFS', "documents".DS);
+DEFINE('PDFS', 'documents'.DS);
 // CSV
 DEFINE('CSV', 'csv'.DS);
 // css
-DEFINE('CSS', "css".DS);
+DEFINE('CSS', 'css'.DS);
 // js
-DEFINE('JS', "javascript".DS);
+DEFINE('JS', 'javascript'.DS);
 // table arrays
-DEFINE('TABLE_ARRAYS', "table_arrays".DS);
+DEFINE('TABLE_ARRAYS', 'table_arrays'.DS);
 // smarty libs path
-DEFINE('SMARTY', "Smarty".DS);
+DEFINE('SMARTY', 'Smarty'.DS);
 // po langs
-DEFINE('LANG', "lang".DS);
+DEFINE('LANG', 'lang'.DS);
 // cache path
-DEFINE('CACHE', "cache".DS);
+DEFINE('CACHE', 'cache'.DS);
 // temp path
-DEFINE('TMP', "tmp".DS);
+DEFINE('TMP', 'tmp'.DS);
 // log files
 DEFINE('LOG', 'log'.DS);
 // compiled template folder
 DEFINE('TEMPLATES_C', 'templates_c'.DS);
 // template base
-DEFINE('TEMPLATES', "templates".DS);
+DEFINE('TEMPLATES', 'templates'.DS);
 // frontend template dir', only for admin
-DEFINE('TEMPLATES_FRONTEND', "templates_frontend".DS);
+DEFINE('TEMPLATES_FRONTEND', 'templates_frontend'.DS);
 // default template
-DEFINE('DEFAULT_TEMPLATE', "default".DS);
+DEFINE('DEFAULT_TEMPLATE', 'default'.DS);
 // default template file
 DEFINE('DEFAULT_TEMPLATE_FILE', 'default.tpl');
 
@@ -102,14 +106,14 @@ DEFINE('DEFAULT_ACL_SEND', 70);
 DEFINE('DEFAULT_ACL_DEL', 80);
 DEFINE('DEFAULT_ACL_ADMIN', 100); */
 // SSL host name
-//	DEFINE('SSL_HOST', "ssl.host.name");
+//	DEFINE('SSL_HOST', 'ssl.host.name');
 // error page strictness, Default is 3
 // 1: only show error page as the last mesure if really no mid & aid can be loaded and found at all
 // 2: if template not found, do not search, show error template
 // 3: if default template is not found, show error template, do not fall back to default tree
 // 4: very strict, even on normal fixable errors through error
 //	DEFINE('ERROR_STRICT', 3);
-// allow page caching in general, set to "FALSE" if you do debugging or development!
+// allow page caching in general, set to 'FALSE' if you do debugging or development!
 //	DEFINE('ALLOW_SMARTY_CACHE', FALSE);
 // cache life time, in seconds, default here is 2 days (172800s)
 // -1 is never expire cache
@@ -120,6 +124,9 @@ DEFINE('DEFAULT_ACL_ADMIN', 100); */
 DEFINE('LOGOUT_TARGET', '');
 // password change allowed
 DEFINE('PASSWORD_CHANGE', false);
+// min/max password length
+DEFINE('PASSWORD_MIN_LENGTH', 8);
+DEFINE('PASSWORD_MAX_LENGTH', 255);
 
 /************* AJAX / ACCESS *************/
 // ajax request type
@@ -134,6 +141,11 @@ DEFINE('PAGE_WIDTH', 800);
 // the default template name
 DEFINE('MASTER_TEMPLATE_NAME', 'main_body.tpl');
 
+// below two can be defined here, but they should be
+// defined in either the header file or the file itself
+/************* LOGGING *******************/
+// DEFINE('LOG_FILE_ID', '');
+
 /************* QUEUE TABLE *************/
 // if we have a dev/live system
 // set_live is a per page/per item
@@ -147,44 +159,56 @@ DEFINE('DEV_SCHEMA', 'public');
 DEFINE('TEST_SCHEMA', 'public');
 DEFINE('LIVE_SCHEMA', 'public');
 
-// non constant part
-/************* DB ACCESS *****************/
-// please be VERY carefull only to change the right side
-$DB_CONFIG = array (
-	"<DB ID>" => array (
-		"db_name" => "<DB NAME>",
-		"db_user" => "<DB USER>",
-		"db_pass" => "<DB PASSWORD>",
-		"db_host" => "<DB HOST>",
-		"db_port" => "5432",
-		"db_schema" => "<DB SCHEMA>", // if not set, uses public
-		"db_type" => "pgsql",
-		"db_encoding" => '',
-		"db_ssl" => 'disable' // allow, disable, require, prefer
-	)
-);
-
+/************* OTHER PATHS *****************/
 // File and Folder paths
 // ID is TARGET (first array element)
-//	$PATHS["test"]["csv_path"] = "";
-//	$PATHS["test"]["perl_bin"] = "";
-//	$PATHS["test"]["redirect_url"] = "";
+//	$PATHS['test']['csv_path'] = '';
+//	$PATHS['test']['perl_bin'] = '';
+//	$PATHS['test']['redirect_url'] = '';
 
-// each host has a different db_host
-// development host
-$DB_HOST['<HOST NAME>'] = "<DB ID>";
-// target host (live)
-//	$DB_TARGET_HOST['<HOST NAME>'] = "<DB ID>";
-// url redirect database
-//	$DB_URL_REDIRECT_HOST['<HOST NAME>'] = "<DB ID>";
-// location flagging
-// test/dev/live
-$LOCATION['<HOST NAME>'] = '<test|live|remote|etc>';
-// show DEBUG override
-// true/false
-$DEBUG_FLAG['<HOST NAME>'] = true;
-// set postgresql paths (schemas)
-$DB_PATH['<HOST NAME>'] = PUBLIC_SCHEMA;
+// non constant part
+/************* DB ACCESS *****************/
+if (file_exists(BASE.CONFIGS.'config.db.inc')) {
+	require BASE.CONFIGS.'config.db.inc';
+}
+// -> below in config.db.inc
+// *** START ***
+// // please be VERY carefull only to change the right side
+// $DB_CONFIG = array (
+// 	'<DB ID>' => array (
+// 		'db_name' => '<DB NAME>',
+// 		'db_user' => '<DB USER>',
+// 		'db_pass' => '<DB PASSWORD>',
+// 		'db_host' => '<DB HOST>',
+// 		'db_port' => '5432',
+// 		'db_schema' => '<DB SCHEMA>', // if not set, uses public
+// 		'db_type' => 'pgsql',
+// 		'db_encoding' => '',
+// 		'db_ssl' => 'disable' // allow, disable, require, prefer
+// 	)
+// );
+// *** END ***
+if (file_exists(BASE.CONFIGS.'config.host.inc')) {
+	require BASE.CONFIGS.'config.host.inc';
+}
+// // -> below in config.host.inc
+// *** START ***
+// // each host has a different db_host
+// // development host
+// $DB_HOST['<HOST NAME>'] = '<DB ID>';
+// // target host (live)
+// //	$DB_TARGET_HOST['<HOST NAME>'] = '<DB ID>';
+// // url redirect database
+// //	$DB_URL_REDIRECT_HOST['<HOST NAME>'] = '<DB ID>';
+// // location flagging
+// // test/dev/live
+// $LOCATION['<HOST NAME>'] = '<test|live|remote|etc>';
+// // show DEBUG override
+// // true/false
+// $DEBUG_FLAG['<HOST NAME>'] = true;
+// // set postgresql paths (schemas)
+// $DB_PATH['<HOST NAME>'] = PUBLIC_SCHEMA;
+// *** END ***
 
 // set the USE_DATABASE var, if there is nothing set, we assume TRUE
 $USE_DATABASE = defined('USE_DATABASE') ? USE_DATABASE : true;
@@ -192,12 +216,22 @@ $USE_DATABASE = defined('USE_DATABASE') ? USE_DATABASE : true;
 // live frontend pages
 // ** missing live domains **
 // get the name without the port
-list($HOST_NAME, $PORT) = array_pad(explode(":", $_SERVER['HTTP_HOST'], 2), 2, null);
+list($HOST_NAME, $PORT) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 if (!$DB_HOST[$HOST_NAME] && $USE_DATABASE) {
-	echo "No matching DB config found. Contact Admin<br>";
+	echo 'No matching DB config found. Contact Admin<br>';
 	exit -1;
 }
-
+// set HOST name
+DEFINE('HOST_NAME', $HOST_NAME);
+// set SSL on
+if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+	$_SERVER['SERVER_PORT'] == 443) {
+	DEFINE('HOST_SSL', true);
+	DEFINE('HOST_PROTOCOL', 'https://');
+} else {
+	DEFINE('HOST_SSL', false);
+	DEFINE('HOST_PROTOCOL', 'http://');
+}
 // define the static names
 DEFINE('LOGIN_DB', $DB_HOST[$HOST_NAME]);
 DEFINE('MAIN_DB', $DB_HOST[$HOST_NAME]);
@@ -221,11 +255,11 @@ DEFINE('SHOW_ALL_ERRORS', false); // show all errors if debug_all & show_error_h
 $G_TITLE = '<OVERALL PAGE TITLE>';
 
 /************ STYLE SHEETS / JS **********/
-$EDIT_STYLESHEET = "edit.css";
-$EDIT_JAVASCRIPT = "edit.js";
+$EDIT_STYLESHEET = 'edit.css';
+$EDIT_JAVASCRIPT = 'edit.js';
 
-$STYLESHEET = "frontend.css";
-$JAVASCRIPT = "frontend.js";
+$STYLESHEET = 'frontend.css';
+$JAVASCRIPT = 'frontend.js';
 
 /************* CONVERT *******************/
 $paths = array (
@@ -235,9 +269,9 @@ $paths = array (
 );
 // find convert
 foreach ($paths as $path) {
-	if (file_exists($path."/convert") && is_file($path."/convert")) {
+	if (file_exists($path.'/convert') && is_file($path.'/convert')) {
 		// image magick convert location
-		DEFINE('CONVERT', $path."/convert");
+		DEFINE('CONVERT', $path.'/convert');
 	}
 }
 

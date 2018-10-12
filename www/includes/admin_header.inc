@@ -10,7 +10,7 @@
 //------------------------------ variable init start
 // for dev test we set full error reporting; writes everything, except E_ERROR into logs/php_error-<day>.log
 if ($DEBUG_ALL && $ENABLE_ERROR_HANDLING) {
-	include("libs/Error.Handling.inc");
+	include("../lib/Error.Handling.inc");
 }
 // predefine vars
 $lang = '';
@@ -22,7 +22,6 @@ extract($_POST, EXTR_SKIP);
 //------------------------------ library include start
 // set output to quiet for load of classes & session settings
 ob_start();
-require("config.inc");
 //------------------------------ library include end
 
 //------------------------------ basic variable settings start

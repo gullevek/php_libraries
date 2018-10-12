@@ -16,7 +16,7 @@ $DB_DEBUG = 1;
 extract($_GET, EXTR_SKIP);
 extract($_POST, EXTR_SKIP);
 
-include("config.inc");
+require 'config.php';
 // set session name
 define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 // overrride debug flags

@@ -14,7 +14,8 @@ ob_start();
 // basic class test file
 define('USE_DATABASE', true);
 // sample config
-require("config.inc");
+// require("config.inc");
+require 'config.php';
 // set session name
 if (!defined('SET_SESSION_NAME')) {
 	DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);

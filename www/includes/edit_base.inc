@@ -27,7 +27,7 @@ $table_width = 750;
 define('REL_PATH', '');
 
 ob_start();
-include("config.inc");
+require 'config.php';
 // set session name here
 define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 // overrride debug flags
