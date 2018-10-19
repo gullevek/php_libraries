@@ -26,8 +26,8 @@ CREATE TABLE edit_user (
 	edit_scheme_id INT,
 	edit_access_right_id INT NOT NULL,
 	login_error_count	INT,
-	login_error_date_last	TIMESTAMP WTIHOUT TIME ZONE,
-	login_error_date_first	TIMESTAMP WTIHOUT TIME ZONE,
+	login_error_date_last	TIMESTAMP WITHOUT TIME ZONE,
+	login_error_date_first	TIMESTAMP WITHOUT TIME ZONE,
 	strict	SMALLINT DEFAULT 0,
 	locked	SMALLINT DEFAULT 0,
 	password_change_date	TIMESTAMP WITHOUT TIME ZONE, -- only when password is first set or changed

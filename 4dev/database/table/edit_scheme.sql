@@ -12,5 +12,5 @@ CREATE TABLE edit_scheme (
 	name	VARCHAR,
 	header_color	VARCHAR,
 	css_file	VARCHAR,
-	template	VARCHARs
+	template	VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;

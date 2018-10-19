@@ -55,7 +55,10 @@ $cms->CSS_SPECIAL_TEMPLATE_NAME = @$CSS_NAME;
 $cms->JS_SPECIAL_TEMPLATE_NAME = @$JS_NAME;
 
 // set basic template path (tmp)
-$smarty->setTemplateDir(LAYOUT.$TEMPLATE_DIR.TEMPLATES); // no outside
+$cms->template_path = LAYOUT.$TEMPLATE_DIR.TEMPLATES;
+if ($smarty) {
+	$smarty->setTemplateDir($cms->template_path);
+}
 $cms->lang_dir = LAYOUT.$TEMPLATE_DIR.LANG; // no outside
 $cms->includes = BASE.INCLUDES; // no longer in templates, only global
 $cms->javascript = LAYOUT.$TEMPLATE_DIR.JS;
