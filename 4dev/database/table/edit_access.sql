@@ -12,6 +12,7 @@ CREATE TABLE edit_access (
 	description	VARCHAR,
 	color	VARCHAR,
 	uid	VARCHAR,
-	enabled	BOOLEAN DEFAULT 'true',
-	protected INT
+	enabled	SMALLINT NOT NULL DEFAULT 0,
+	protected INT,
+	deleted	SMALLINT DEFAULT 0
 ) INHERITS (edit_generic) WITHOUT OIDS;

@@ -136,7 +136,7 @@ INSERT INTO edit_user (username, password, enabled, debug, db_debug, email, prot
 
 -- edit access
 DELETE FROM edit_access;
-INSERT INTO edit_access (name, enabled, protected) VALUES ('Admin Access', 't', 1);
+INSERT INTO edit_access (name, enabled, protected) VALUES ('Admin Access', 1, 1);
 
 -- edit access user
 DELETE FROM edit_access_user;

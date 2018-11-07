@@ -79,7 +79,7 @@
 <!-- TOP MENU END //-->
 <tr>
   <td width="{$table_width}" class="edit_bgcolor">
-	 <form method="post" name="edit_form">
+	 <form method="post" name="edit_form" style="margin-block-end: 0em;">
 	 <table width="100%" border="0" cellpadding="2" cellspacing="1">
 	 <!-- LOAD START //-->
 	{include file="edit_load.tpl"}

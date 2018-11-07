@@ -879,8 +879,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							break;
 						case "alphanumericspace":
 							// $this->debug('edit', 'IN Alphanumericspace');
-							if (!preg_match("/^[0-9A-Za-z\ ]+$/", $this->table_array[$key]["value"])) {
-								$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric (Numbers and Letters, spaces allowed) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
+							if (!preg_match("/^[0-9A-Za-z_\-\ ]+$/", $this->table_array[$key]["value"])) {
+								$this->msg .= sprintf($this->l->__("Please enter a valid alphanumeric (Numbers and Letters, -, _ and spaces allowed) value for the <b>%s</b> Field!<br>"), $this->table_array[$key]["output_name"]);
 							}
 							break;
 						case "alphanumeric":

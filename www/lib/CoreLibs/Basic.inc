@@ -2259,7 +2259,11 @@ class Basic
 	// DESC  : full wrapper for html entities
 	public function htmlent($string)
 	{
-		return htmlentities($string, ENT_COMPAT|ENT_HTML401, 'UTF-8', false);
+		if (is_string($string)) {
+			return htmlentities($string, ENT_COMPAT|ENT_HTML401, 'UTF-8', false);
+		} else {
+			return $string;
+		}
 	}
 
 	// METHOD: setFormToken

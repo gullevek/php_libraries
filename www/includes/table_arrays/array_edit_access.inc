@@ -33,7 +33,7 @@ $edit_access = array (
 			"value" => $GLOBALS["enabled"],
 			"output_name" => "Enabled",
 			"type" => "binary",
-			"int" => 1,
+			"int" => 1, // OR "bool" => 1
 			"element_list" => array (
 				"1" => "Yes",
 				"0" => "No"

@@ -71,6 +71,9 @@ if (defined('LAYOUT')) {
 //               there are the POSITION stored, that should CHANGE there order (up/down)
 // $row_data_id ... has ALL ids from the sorting part
 // $row_data_order ... has ALL order positions from the soirting part
+if (!is_array($position)) {
+	$position = array ();
+}
 if (count($position)) {
 	$original_id = $row_data_id;
 
@@ -146,9 +149,12 @@ if ($error) {
 $DATA['form_error_msg'] = $messages;
 
 // all the row data
-$options_id = array();
-$options_name = array();
-$options_selected = array();
+$options_id = array ();
+$options_name = array ();
+$options_selected = array ();
+if (!is_array($row_data)) {
+	$row_data = array ();
+}
 for ($i = 0; $i < count($row_data); $i ++) {
 	$options_id[] = $i;
 	$options_name[] = $row_data[$i]["name"];
@@ -165,8 +171,8 @@ $DATA['options_name'] = $options_name;
 $DATA['options_selected'] = $options_selected;
 
 // hidden list for the data (id, order number)
-$row_data_id = array();
-$row_data_order = array();
+$row_data_id = array ();
+$row_data_order = array ();
 for ($i = 0; $i < count($row_data); $i++) {
 	$row_data_id[] = $row_data[$i]["id"];
 	$row_data_order[] = $row_data[$i]["order"];
@@ -184,7 +190,7 @@ $DEBUG_DATA['DEBUG'] = $DEBUG_TMPL;
 // create main data array
 $CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);
 // data is 1:1 mapping (all vars, values, etc)
-while (list($key, $value) = each($CONTENT_DATA)) {
+foreach ($CONTENT_DATA as $key => $value) {
 	$smarty->assign($key, $value);
 }
 $smarty->display('edit_order.tpl');
@@ -192,5 +198,4 @@ $smarty->display('edit_order.tpl');
 echo $login->printErrorMsg();
 echo $db->printErrorMsg();
 
-# __END__
-
+// __END__

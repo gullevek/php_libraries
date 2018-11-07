@@ -22,7 +22,7 @@ $DB_DEBUG = 1;
 
 extract($_POST, EXTR_SKIP);
 
-$table_width = 750;
+$table_width = '100%';
 // this is for certain CMS modules that set a relative path
 define('REL_PATH', '');
 
