@@ -845,63 +845,77 @@ class Login extends \CoreLibs\DB\IO
 	private function loginPrintLogin()
 	{
 		if (!$this->permission_okay) {
-			// set the templates now
-			$this->loginSetTemplates();
-			// if there is a global logout target ...
-			if (file_exists($this->logout_target) && $this->logout_target) {
-				$LOGOUT_TARGET = $this->logout_target;
+			// get global AJAX page trigger
+			// if true, return error ajax
+			global $AJAX_PAGE;
+			if ($AJAX_PAGE === true) {
+				$data = array (
+					'status' => 'error',
+					'error_code' => $this->loging_error,
+					'msg' =>  array (
+						'level' => 'error',
+						'str' => $this->l->__('Login necessary')
+					)
+				);
+				$html_string = json_encode($data);
 			} else {
-				$LOGOUT_TARGET = "";
-			}
-
-			$html_string = $this->login_template['template'];
-
-			// if password change is okay
-			if ($this->password_change) {
-				$html_string_password_change = $this->login_template['password_change'];
-
-				// pre change the data in the PASSWORD_CHANGE_DIV first
-				foreach ($this->login_template['strings'] as $string => $data) {
-					if ($data) {
-						$html_string_password_change = str_replace('{'.$string.'}', $data, $html_string_password_change);
-					}
+				// set the templates now
+				$this->loginSetTemplates();
+				// if there is a global logout target ...
+				if (file_exists($this->logout_target) && $this->logout_target) {
+					$LOGOUT_TARGET = $this->logout_target;
+				} else {
+					$LOGOUT_TARGET = "";
 				}
+
+				$html_string = $this->login_template['template'];
+
+				// if password change is okay
+				if ($this->password_change) {
+					$html_string_password_change = $this->login_template['password_change'];
+
+					// pre change the data in the PASSWORD_CHANGE_DIV first
+					foreach ($this->login_template['strings'] as $string => $data) {
+						if ($data) {
+							$html_string_password_change = str_replace('{'.$string.'}', $data, $html_string_password_change);
+						}
+					}
+					// print error messagae
+					if ($this->login_error) {
+						$html_string_password_change = str_replace('{ERROR_MSG}', $this->login_error_msg[$this->login_error].'<br>', $html_string_password_change);
+					} else {
+						$html_string_password_change = str_replace('{ERROR_MSG}', '<br>', $html_string_password_change);
+					}
+					// if pw change action, show the float again
+					if ($this->change_password && !$this->password_change_ok) {
+						$html_string_password_change = str_replace('{PASSWORD_CHANGE_SHOW}', '<script language="JavaScript">ShowHideDiv(\'pw_change_div\');</script>', $html_string_password_change);
+					} else {
+						$html_string_password_change = str_replace('{PASSWORD_CHANGE_SHOW}', '', $html_string_password_change);
+					}
+					$this->login_template['strings']['PASSWORD_CHANGE_DIV'] = $html_string_password_change;
+				}
+
+				// put in the logout redirect string
+				if ($this->logout && $LOGOUT_TARGET) {
+					$html_string = str_replace('{LOGOUT_TARGET}', '<meta http-equiv="refresh" content="0; URL='.$LOGOUT_TARGET.'">', $html_string);
+				} else {
+					$html_string = str_replace('{LOGOUT_TARGET}', '', $html_string);
+				}
+
 				// print error messagae
 				if ($this->login_error) {
-					$html_string_password_change = str_replace('{ERROR_MSG}', $this->login_error_msg[$this->login_error].'<br>', $html_string_password_change);
+					$html_string = str_replace('{ERROR_MSG}', $this->login_error_msg[$this->login_error].'<br>', $html_string);
+				} elseif ($this->password_change_ok && $this->password_change) {
+					$html_string = str_replace('{ERROR_MSG}', $this->login_error_msg[300].'<br>', $html_string);
 				} else {
-					$html_string_password_change = str_replace('{ERROR_MSG}', '<br>', $html_string_password_change);
+					$html_string = str_replace('{ERROR_MSG}', '<br>', $html_string);
 				}
-				// if pw change action, show the float again
-				if ($this->change_password && !$this->password_change_ok) {
-					$html_string_password_change = str_replace('{PASSWORD_CHANGE_SHOW}', '<script language="JavaScript">ShowHideDiv(\'pw_change_div\');</script>', $html_string_password_change);
-				} else {
-					$html_string_password_change = str_replace('{PASSWORD_CHANGE_SHOW}', '', $html_string_password_change);
+
+				// create the replace array context
+				foreach ($this->login_template['strings'] as $string => $data) {
+					$html_string = str_replace('{'.$string.'}', $data, $html_string);
 				}
-				$this->login_template['strings']['PASSWORD_CHANGE_DIV'] = $html_string_password_change;
 			}
-
-			// put in the logout redirect string
-			if ($this->logout && $LOGOUT_TARGET) {
-				$html_string = str_replace('{LOGOUT_TARGET}', '<meta http-equiv="refresh" content="0; URL='.$LOGOUT_TARGET.'">', $html_string);
-			} else {
-				$html_string = str_replace('{LOGOUT_TARGET}', '', $html_string);
-			}
-
-			// print error messagae
-			if ($this->login_error) {
-				$html_string = str_replace('{ERROR_MSG}', $this->login_error_msg[$this->login_error].'<br>', $html_string);
-			} elseif ($this->password_change_ok && $this->password_change) {
-				$html_string = str_replace('{ERROR_MSG}', $this->login_error_msg[300].'<br>', $html_string);
-			} else {
-				$html_string = str_replace('{ERROR_MSG}', '<br>', $html_string);
-			}
-
-			// create the replace array context
-			foreach ($this->login_template['strings'] as $string => $data) {
-				$html_string = str_replace('{'.$string.'}', $data, $html_string);
-			}
-
 			// return the created HTML here
 			return $html_string;
 		} // if permission is 0 then print out login

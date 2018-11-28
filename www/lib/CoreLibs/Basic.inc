@@ -1238,7 +1238,7 @@ class Basic
 	// DESC  : calculates the bytes based on a string with nnG, nnM, etc
 	public static function stringByteFormat($number)
 	{
-		$number = trim($number);
+		$number = (int)trim($number);
 		$last = strtolower($number[strlen($number) - 1]);
 		switch ($last) {
 			case 't':
@@ -2264,6 +2264,15 @@ class Basic
 		} else {
 			return $string;
 		}
+	}
+
+	// METHOD: removeLB
+	// PARAMS: string, optional replace character
+	// RETURN: string with line breaks removed
+	// DESC  : strips out all line breaks or replaced with given string
+	public function removeLB($string, $replace = ' ')
+	{
+		return str_replace(array("\r", "\n"), $replace, $string);
 	}
 
 	// METHOD: setFormToken

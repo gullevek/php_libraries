@@ -410,6 +410,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 					}
 					$q_data .= $_value;
 				} elseif ($this->table_array[$column]['bool']) {
+					// boolean storeage (reverse check on ifset)
 					$q_data .= "'".$this->dbBoolean($this->table_array[$column]["value"], true)."'";
 				} elseif ($this->table_array[$column]["interval"]) {
 					// for interval we check if no value, then we set null

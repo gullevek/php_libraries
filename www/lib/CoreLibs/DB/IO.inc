@@ -124,7 +124,7 @@
 *     - closes db connection and writes error_msg to global error_msg
 *	db_cursor_pos($query)
 *	  - returns the current position the db_return
-*	$array_of_hashes db_show_table_meta_Data($table_name)
+*	$array_of_hashes db_show_table_meta_data($table_name)
 *	  - returns an hashed array of table column data
 *	function db_prepare($stm_name, $query)
 *     - prepares a query with the given stm name, returns false on error
@@ -317,11 +317,11 @@ class IO extends \CoreLibs\Basic
 		$this->db_user = $db_config['db_user'] ?? '';
 		$this->db_pwd = $db_config['db_pass'] ?? '';
 		$this->db_host = $db_config['db_host'] ?? '';
-		$this->db_port = array_key_exists('db_port', $db_config) ? $db_config['db_port'] : '5432';
-		$this->db_schema = array_key_exists('db_schema', $db_config) ? $db_config['db_schema'] : ''; // do not set to 'public' if not set, because the default is already public
-		$this->db_encoding = array_key_exists('db_encoding', $db_config) ? $db_config['db_encoding'] : '';
+		$this->db_port = !empty($db_config['db_port']) ? $db_config['db_port'] : '5432';
+		$this->db_schema = !empty($db_config['db_schema']) ? $db_config['db_schema'] : ''; // do not set to 'public' if not set, because the default is already public
+		$this->db_encoding = !empty($db_config['db_encoding']) ? $db_config['db_encoding'] : '';
 		$this->db_type = $db_config['db_type'] ?? '';
-		$this->db_ssl = array_key_exists('db_ssl', $db_config) ? $db_config['db_ssl'] : 'allow';
+		$this->db_ssl = !empty($db_config['db_ssl']) ? $db_config['db_ssl'] : 'allow';
 
 		// set the target encoding to the DEFAULT_ENCODING if it is one of them: EUC, Shift_JIS, UTF-8
 		// @ the moment set only from outside
@@ -938,7 +938,7 @@ class IO extends \CoreLibs\Basic
 	// DESC  : returns the current set client encoding from the connected DB
 	public function dbGetEncoding()
 	{
-		return $this->db_return_row('SHOW client_encoding')['client_encoding'];
+		return $this->dbReturnRow('SHOW client_encoding')['client_encoding'];
 	}
 
 	// METHOD: dbInfo
