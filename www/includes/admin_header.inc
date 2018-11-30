@@ -10,7 +10,7 @@
 //------------------------------ variable init start
 // for dev test we set full error reporting; writes everything, except E_ERROR into logs/php_error-<day>.log
 if ($DEBUG_ALL && $ENABLE_ERROR_HANDLING) {
-	include("../lib/Error.Handling.inc");
+	include(BASE.LIBS."Error.Handling.inc");
 }
 // predefine vars
 $lang = '';

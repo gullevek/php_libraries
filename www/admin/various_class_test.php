@@ -17,6 +17,15 @@ print "BASE: ".BASE."<br>";
 print "ROOT: ".ROOT."<br>";
 print "HOST: ".$HOST_NAME." => DB HOST: ".$DB_HOST[$HOST_NAME]." => ".MAIN_DB."<br>";
 
+$text = 'I am some text
+with some
+line breaks
+in there. Theis 
+is sucky';
+
+print "LB remove: ".$base->removeLB($text)."<br>";
+print "LB remove: ".$base->removeLB($text, '##BR##')."<br>";
+
 // $test = array (
 // 	'A' => array (
 // 		'B' => array (),
