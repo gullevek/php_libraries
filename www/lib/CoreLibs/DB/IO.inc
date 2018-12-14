@@ -2117,3 +2117,5 @@ class IO extends \CoreLibs\Basic
 		return $this->dbSqlEscape($value, $kbn);
 	}
 } // end if db class
+
+// __END__

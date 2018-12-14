@@ -57,7 +57,6 @@ class L10n extends \CoreLibs\Basic
 		} else {
 			$this->input = false;
 		}
-
 		$this->l10n = new GetTextReader($this->input);
 	}
 
@@ -114,3 +113,5 @@ class L10n extends \CoreLibs\Basic
 		return $this->mofile;
 	}
 }
+
+// __END__

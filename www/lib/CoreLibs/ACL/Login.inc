@@ -72,6 +72,11 @@ class Login extends \CoreLibs\DB\IO
 	private $password_change_ok = false; // password change was successful
 	private $password_forgot = false; // can we reset password and mail to user with new password set screen
 	private $password_forgot_ok = false; // password forgot mail send ok
+	private $change_password;
+	private $pw_username;
+	private $pw_old_password;
+	private $pw_new_password;
+	private $pw_new_password_confirm;
 	private $pw_change_deny_users = array (); // array of users for which the password change is forbidden
 
 	// if we have password change we need to define some rules
@@ -179,12 +184,12 @@ class Login extends \CoreLibs\DB\IO
 			$_POST['pw_new_password_confirm'] = '';
 		}
 		// pass on vars to Object vars
-		$this->login = $_POST["login_login"];
-		$this->username = $_POST["login_username"];
-		$this->password = $_POST["login_password"];
-		$this->logout = $_POST["login_logout"];
+		$this->login = $_POST['login_login'];
+		$this->username = $_POST['login_username'];
+		$this->password = $_POST['login_password'];
+		$this->logout = $_POST['login_logout'];
 		// password change vars
-		$this->change_password = $_POST["change_password"];
+		$this->change_password = $_POST['change_password'];
 		$this->pw_username = $_POST['pw_username'];
 		$this->pw_old_password = $_POST['pw_old_password'];
 		$this->pw_new_password = $_POST['pw_new_password'];

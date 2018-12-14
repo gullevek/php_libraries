@@ -10,7 +10,7 @@ if ($DEBUG_ALL) {
 }
 
 // sample config
-require("config.inc");
+require 'config.php';
 echo "FILE: ".BASE.LIB."Error.Handling.inc<br>";
 require(BASE.LIB."Error.Handling.inc");
 

@@ -32,7 +32,7 @@ ob_end_flush();
 
 // set + check edit access id
 $edit_access_id = 3;
-if (array_key_exists('unit', $login->acl)) {
+if (isset($login) && is_object($login) && isset($login->acl['unit'])) {
 	print "ACL UNIT: ".print_r(array_keys($login->acl['unit']), 1)."<br>";
 	print "ACCESS CHECK: ".$login->loginCheckEditAccess($edit_access_id)."<br>";
 	if ($login->loginCheckEditAccess($edit_access_id)) {
@@ -68,14 +68,16 @@ print "CALLER BACKTRACE: ".$basic->getCallerMethod()."<br>";
 $basic->debug('SOME MARK', 'Some error output');
 
 print "EDIT ACCESS ID: ".$basic->edit_access_id."<br>";
-//	print "ACL: <br>".$basic->print_ar($login->acl)."<br>";
-$basic->debug('ACL', "ACL: ".$basic->printAr($login->acl));
-//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
-//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
-//	$result = array_flip(array_filter(array_flip($login->default_acl_list), function ($key) { if (is_numeric($key)) return $key; }));
-//	print "DEFAULT ACL: <br>".$basic->print_ar($result)."<br>";
-// DEPRICATED CALL
-//	$basic->adbSetACL($login->acl);
+if (isset($login)) {
+	//	print "ACL: <br>".$basic->print_ar($login->acl)."<br>";
+	$basic->debug('ACL', "ACL: ".$basic->printAr($login->acl));
+	//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
+	//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
+	//	$result = array_flip(array_filter(array_flip($login->default_acl_list), function ($key) { if (is_numeric($key)) return $key; }));
+	//	print "DEFAULT ACL: <br>".$basic->print_ar($result)."<br>";
+	// DEPRICATED CALL
+	//	$basic->adbSetACL($login->acl);
+}
 
 // DB client encoding
 print "DB Client encoding: ".$basic->dbGetEncoding()."<br>";
@@ -210,7 +212,7 @@ print "COMPARE DATE: ".$basic->compareDate($date_1, $date_2)."<br>";
 // array re
 
 // print error messages
-print $login->printErrorMsg();
+// print $login->printErrorMsg();
 print $basic->printErrorMsg();
 
 print "</body></html>";
