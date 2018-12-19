@@ -2275,6 +2275,38 @@ class Basic
 		return str_replace(array("\r", "\n"), $replace, $string);
 	}
 
+	// METHOD: fceil
+	// PARAMS: number, round decimals (default 10)
+	// RETURN: correct ceil number
+	// DESC  : some float numbers will be rounded up even if they have no decimal entries
+	public function fceil($number, $precision = 10)
+	{
+		return ceil(round($number, $precision));
+	}
+
+	// METHOD floorp
+	// PARAMS: number, round to
+	// RETURN: floor number but with tround to
+	// DESC  : eg 48767 with -2 -> 48700
+	public function floorp($number, $precision = -2)
+	{
+		$mult = pow(10, $precision); // Can be cached in lookup table
+		return floor($number * $mult) / $mult;
+	}
+
+	// METHOD: initNumeric
+	// PARAMS: any value
+	// RETURN: if not numeric, sets to 0, else returns value already set
+	// DESC  : inits input to 0, if value is not numeric
+	public function initNumeric($number)
+	{
+		if (!is_numeric($number)) {
+			return 0;
+		} else {
+			return $number;
+		}
+	}
+
 	// METHOD: setFormToken
 	// PARAMS: session name, if not set then default is form_token
 	// RETURN: form token
