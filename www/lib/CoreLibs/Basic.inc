@@ -307,8 +307,8 @@ class Basic
 			'.*@bandai\.jp$' => 'keitai_willcom_bandai', # willcom paipo! (kids)
 			'.*@pipopa\.ne\.jp$' => 'keitai_willcom_pipopa', # willcom paipo! (kids)
 			'.*@([a-z0-9]{2,4}\.)?pdx\.ne\.jp$' => 'keitai_willcom_pdx', # actually only di,dj,dk,wm -> all others are "wrong", but none also allowed?
-			'.*@ymobile([1]{1})?\.ne\.jp$' => 'keitai_willcom_ymobile', # ymobile, ymobile1 techincally not willcom, but I group them there
-			'.*@y-mobile\.ne\.jp$' => 'keitai_willcom_ymobile', # y-mobile techincally not willcom, but I group them there
+			'.*@ymobile([1]{1})?\.ne\.jp$' => 'keitai_willcom_ymobile', # ymobile, ymobile1 techincally not willcom, but I group them there (softbank sub)
+			'.*@y-mobile\.ne\.jp$' => 'keitai_willcom_ymobile', # y-mobile techincally not willcom, but I group them there (softbank sub)
 			'.*@emnet\.ne\.jp$' => 'keitai_willcom_emnet', # e-mobile, group will willcom
 			'.*@emobile\.ne\.jp$' => 'keitai_willcom_emnet', # e-mobile, group will willcom
 			'.*@emobile-s\.ne\.jp$' => 'keitai_willcom_emnet' # e-mobile, group will willcom
@@ -484,7 +484,8 @@ class Basic
 		if ($set_microtime == -1) {
 			$string .= substr($microtime, 1);
 		} elseif ($set_microtime >= 1) {
-			$string .= substr(round($microtime, $set_microtime), 1);
+			// in round case we run this through number format to always get the same amount of digits
+			$string .= substr(number_format(round($microtime, $set_microtime), $set_microtime), 1);
 		}
 		return $string;
 	}

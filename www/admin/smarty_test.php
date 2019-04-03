@@ -18,5 +18,24 @@ require BASE.INCLUDES.'admin_set_paths.inc';
 // smarty test
 $cms->DATA['SMARTY_TEST'] = 'Test Data';
 
+// drop down test with optgroups
+$options = array (
+	'' => '選択してください',
+	'4/25(木)' => array (
+		'4/25(木) 11:00-11:50' => '4/25(木) 11:00-11:50',
+		'4/25(木) 12:20-13:00' => '4/25(木) 12:20-13:00'
+	),
+	'4/26(金)' => array (
+		'4/26(金) 11:00-11:50' => '4/26(金) 11:00-11:50',
+		'4/26(金) 12:20-13:00' => '4/26(金) 12:20-13:00'
+	),
+	'4/27(土)' => array (
+		'4/27(土) 11:00-11:50' => '4/27(土) 11:00-11:50',
+		'4/27(土) 12:20-13:00' => '4/27(土) 12:20-13:00'
+	)
+);
+
+$cms->DATA['drop_down_test'] = $options;
+
 require BASE.INCLUDES.'admin_smarty.inc';
 require BASE.INCLUDES.'admin_footer.inc';

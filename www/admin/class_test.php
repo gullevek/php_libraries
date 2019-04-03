@@ -167,14 +167,14 @@ print "DB Version bigger than $to_db_version: ".$basic->dbCompareVersion('>='.$t
 print "DB Version bigger $to_db_version: ".$basic->dbCompareVersion('>'.$to_db_version)."<br>";
 
 /*	$q = "SELECT FOO FRO BAR";
-//	$q = "Select * from foo";
+// $q = "Select * from foo";
 $foo = $basic->dbExecAsync($q);
 print "[ERR] Query: ".$q."<br>";
 print "[ERR] RESOURCE: $foo<br>";
 while (($ret = $basic->dbCheckAsync()) === true)
 {
 	print "[ERR]: $ret<br>";
-//		sleep(5);
+	sleep(5);
 } */
 
 // search path check
