@@ -1,4 +1,5 @@
 <?php
+
 $edit_visible_group = array (
 	"table_array" => array (
 		"edit_visible_group_id" => array (
@@ -29,4 +30,4 @@ $edit_visible_group = array (
 	)
 );
 
-# __END__
+// __END__

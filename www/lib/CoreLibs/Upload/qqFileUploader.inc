@@ -109,4 +109,4 @@ class qqFileUploader
 	}
 }
 
-# __END__
+// __END__

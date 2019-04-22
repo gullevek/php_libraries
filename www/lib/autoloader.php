@@ -54,4 +54,4 @@ if (class_exists('Autoload', false) === false) {
 	spl_autoload_register('Autoloader\Autoload::load', true, true);
 } // end check for already defined
 
-# __END__
+// __END__

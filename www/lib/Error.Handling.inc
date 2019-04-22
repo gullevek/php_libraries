@@ -108,3 +108,5 @@ function MyErrorHandler($type, $message, $file, $line, $context)
 
 // init the error handler
 set_error_handler("MyErrorHandler");
+
+// __END__

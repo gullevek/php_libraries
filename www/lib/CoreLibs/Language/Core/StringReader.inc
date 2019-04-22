@@ -64,4 +64,4 @@ class StringReader
 	}
 }
 
-# __END__
+// __END__

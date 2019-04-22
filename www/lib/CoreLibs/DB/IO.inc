@@ -511,6 +511,7 @@ class IO extends \CoreLibs\Basic
 	// NOTE  : used in db_dump_data only
 	private function __printArray($array)
 	{
+		$string = '';
 		foreach ($array as $key => $value) {
 			$string .= $this->nbsp.'<b>'.$key.'</b> => ';
 			if (is_array($value)) {
@@ -977,6 +978,7 @@ class IO extends \CoreLibs\Basic
 		} else {
 			$array = $this->cursor_ext;
 		}
+		$string = '';
 		if (is_array($array)) {
 			$this->nbps = '';
 			$string .= $this->__printArray($array);
@@ -1816,6 +1818,7 @@ class IO extends \CoreLibs\Basic
 	// DESC  : this is only needed for Postgresql. Converts postgresql arrays to PHP
 	public function dbArrayParse($text)
 	{
+		$output = array ();
 		return $this->db_functions->__dbArrayParse($text, $output);
 	}
 

@@ -1,4 +1,5 @@
 <?php
+
 $edit_users = array (
 	"table_array" => array (
 		"edit_user_id" => array (
@@ -257,4 +258,4 @@ $edit_users = array (
 	)
 );
 
-# __END__
+// __END__

@@ -101,4 +101,4 @@ if (is_dir(BASE.CACHE)) {
 }
 $smarty->display($MASTER_TEMPLATE_NAME, $TEMPLATE.$lang, $TEMPLATE.$lang);
 
-# __END__
+// __END__

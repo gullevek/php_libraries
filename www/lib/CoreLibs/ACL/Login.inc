@@ -1192,4 +1192,4 @@ EOM;
 	}
 } // close class
 
-# __END__
+// __END__

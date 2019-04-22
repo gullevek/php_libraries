@@ -144,4 +144,4 @@ if (!file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_TRANSLATE)) {
 $cms->debug("LANGUAGE", "SL: ".$_SESSION['DEFAULT_CHARSET']." | ".$_SESSION['LANG']." | ".$_SESSION['DEFAULT_LANG']);
 $cms->debug("TEMPLATE", "P: ".$smarty->getTemplateDir()[0]);
 
-# __END__
+// __END__

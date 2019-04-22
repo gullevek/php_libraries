@@ -419,6 +419,7 @@ class Basic
 	{
 		unset($string);
 		list($major, $minor, $patchlvl) = explode(".", $this->class_info[$class_name]["class_version"]);
+		$string = '';
 		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Name: <b>".$this->class_info[$class_name]["class_name"]."</b><br>";
 		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Author: <b>".$this->class_info[$class_name]["class_author"]."</b><br>";
 		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Version: <b>".$this->class_info[$class_name]["class_version"]."</b><br>";
@@ -1196,6 +1197,7 @@ class Basic
 		$pos = 0;
 		$split = 36; // after 36 single bytes characters, if then comes MB, it is broken
 					 // has to 2 x 36 < 74 so the mb_encode_mimeheader 74 hardcoded split does not get triggered
+		$_string = '';
 		while ($pos < mb_strlen($string, $encoding)) {
 			$output = mb_strimwidth($string, $pos, $split, "", $encoding);
 			$pos += mb_strlen($output, $encoding);
@@ -1786,6 +1788,7 @@ class Basic
 		}
 		// max should be 63 for this case
 		$max_rand = count($chars) - 1;
+		$salt_string = '';
 		// create the salt part
 		for ($i = 1; $i <= $nSize; $i ++) {
 			$salt_string .= $chars[mt_rand(0, $max_rand)];
@@ -2490,4 +2493,4 @@ class Basic
 	}
 }
 
-# __END__
+// __END__

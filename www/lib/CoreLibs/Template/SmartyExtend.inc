@@ -29,4 +29,4 @@ class SmartyExtend extends SmartyBC
 	}
 }
 
-# __END__
+// __END__

@@ -1,4 +1,5 @@
 <?php
+
 $edit_pages = array (
 	"table_array" => array (
 		"edit_page_id" => array (
@@ -176,4 +177,4 @@ $edit_pages = array (
 	) // element list
 );
 
-# __END__
+// __END__

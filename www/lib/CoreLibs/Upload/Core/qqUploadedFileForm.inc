@@ -28,4 +28,4 @@ class qqUploadedFileForm
 	}
 }
 
-# __END__
+// __END__

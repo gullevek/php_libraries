@@ -94,3 +94,5 @@ if ((TARGET == 'live' || TARGET == 'remote') && !$DEBUG_ALL_OVERRIDE) {
 	$cms->print_output_all = 0;
 }
 $cms->DATA['JS_DEBUG'] = DEBUG;
+
+// __END__

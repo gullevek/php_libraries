@@ -133,6 +133,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function dbDumpArray($write = 0)
 	{
 		reset($this->table_array);
+		$string = '';
 		foreach ($this->table_array as $column => $data_array) {
 			$string .= "<b>".$column."</b> -> ".$data_array["value"]."<br>";
 		}
@@ -200,20 +201,21 @@ class ArrayIO extends \CoreLibs\DB\IO
 		$q .= $this->pk_name." = ".$this->table_array[$this->pk_name]["value"]." ";
 		// delete files and build FK query
 		reset($this->table_array);
+		$q_where = '';
 		foreach ($this->table_array as $column => $data_array) {
 			// suchen nach bildern und lschen ...
 			if ($this->table_array[$column]["file"] && file_exists($this->table_array[$column]["url"].$this->table_array[$column]["value"])) {
 				if (file_exists($this->table_array[$column]["path"].$this->table_array[$column]["value"])) {
 					unlink($this->table_array[$column]["path"].$this->table_array[$column]["value"]);
 				}
-				$dateiname = str_replace("_tn", "", $this->table_array[$column]["value"]);
-				if (file_exists($this->table_array[$column]["path"].$dateiname)) {
-					unlink($this->table_array[$column]["path"].$dateiname);
+				$file_name = str_replace("_tn", "", $this->table_array[$column]["value"]);
+				if (file_exists($this->table_array[$column]["path"].$file_name)) {
+					unlink($this->table_array[$column]["path"].$file_name);
 				}
 			}
-
+			// if we have a foreign key
 			if ($this->table_array[$column]["fk"]) {
-				// zusammenstellen der FKs
+				// create FK constraint checks
 				if ($q_where) {
 					$q_where .= " AND ";
 				}
@@ -251,6 +253,8 @@ class ArrayIO extends \CoreLibs\DB\IO
 			return $this->table_array;
 		}
 		reset($this->table_array);
+		$q_select = '';
+		$q_where = '';
 		// create select part & addition FK part
 		foreach ($this->table_array as $column => $data_array) {
 			if ($q_select) {
@@ -326,6 +330,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 
 		reset($this->table_array);
+		$q_data = '';
+		$q_vars = '';
+		$q_where = '';
 		foreach ($this->table_array as $column => $data_array) {
 /********************************* START FILE *************************************/
 			// file upload
@@ -338,9 +345,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 					if (file_exists($this->table_array[$column]["path"].$this->table_array[$column]["value"])) {
 						unlink($this->table_array[$column]["path"].$this->table_array[$column]["value"]);
 					}
-					$dateiname = str_replace("_tn", "", $this->table_array[$column]["value"]);
-					if (file_exists($this->table_array[$column]["path"].$dateiname)) {
-						unlink($this->table_array[$column]["path"].$dateiname);
+					$file_name = str_replace("_tn", "", $this->table_array[$column]["value"]);
+					if (file_exists($this->table_array[$column]["path"].$file_name)) {
+						unlink($this->table_array[$column]["path"].$file_name);
 					}
 					$this->table_array[$column]["value"] = "";
 				} else {
@@ -355,20 +362,19 @@ class ArrayIO extends \CoreLibs\DB\IO
 						$ext = end($filename_parts);
 						array_splice($filename_parts, -1, 1);
 						$name = str_replace(" ", "_", implode(".", $filename_parts));
-						//echo "PK: $pk_ids_file<br>";
-						$dateiname = $name.$pk_ids_file.".".$ext;
-						//echo "Dn: $dateiname";
-						copy($this->table_array[$column]["tmp"], $this->table_array[$column]["path"].$dateiname);
+						$file_name = $name.".".$ext;
+						//echo "Dn: $file_name";
+						copy($this->table_array[$column]["tmp"], $this->table_array[$column]["path"].$file_name);
 						// automatisch thumbnail generieren, geht nur mit convert (ImageMagic!!!), aber nur bei bild ..
 						if (strtolower($ext) == "jpeg" || strtolower($ext) == "jpg" || strtolower($ext) == "gif" || strtolower($ext) == "png") {
-							$dateiname_tn = $name.$pk_ids_file."_tn.".$ext;
-							$eingang = $this->table_array[$column]["path"].$dateiname;
-							$ausgang = $this->table_array[$column]["path"].$dateiname_tn;
+							$file_name_tn = $name."_tn.".$ext;
+							$eingang = $this->table_array[$column]["path"].$file_name;
+							$ausgang = $this->table_array[$column]["path"].$file_name_tn;
 							$com = "convert -geometry 115 $eingang $ausgang";
 							exec($com);
-							$this->table_array[$column]["value"] = $dateiname_tn;
+							$this->table_array[$column]["value"] = $file_name_tn;
 						} else {
-							$this->table_array[$column]["value"] = $dateiname;
+							$this->table_array[$column]["value"] = $file_name;
 						}
 					} elseif (file_exists($this->table_array[$column]["path"].$this->table_array[$column]["value"])) {
 						// mach gar nix, wenn bild schon da ???
@@ -546,4 +552,4 @@ class ArrayIO extends \CoreLibs\DB\IO
 	}
 } // end of class
 
-# __END__
+// __END__

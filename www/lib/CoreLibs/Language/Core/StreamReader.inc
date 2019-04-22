@@ -51,4 +51,4 @@ class StreamReader
 	}
 }
 
-# __END__
+// __END__

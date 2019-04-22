@@ -359,4 +359,4 @@ class Backend extends \CoreLibs\DB\IO
 	}
 }
 
-# __END__
+// __END__

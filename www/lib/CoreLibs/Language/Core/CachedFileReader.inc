@@ -45,4 +45,4 @@ class CachedFileReader extends CoreLibs\Language\Core\StringReader
 	}
 }
 
-# __END__
+// __END__

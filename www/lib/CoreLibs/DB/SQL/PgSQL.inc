@@ -148,7 +148,7 @@ class PgSQL
 	{
 		$result = pg_execute($this->dbh, $name, $data);
 		if (!$result) {
-			$this->last_error_query = $query;
+			$this->last_error_query = $name;
 		}
 		return $result;
 	}
@@ -428,4 +428,4 @@ class PgSQL
 	}
 }
 
-# __END__
+// __END__

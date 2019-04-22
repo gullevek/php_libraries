@@ -325,4 +325,4 @@ $smarty->display('edit_body.tpl');
 echo $login->printErrorMsg();
 echo $form->printErrorMsg();
 
-# __END__
+// __END__

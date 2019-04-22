@@ -88,4 +88,4 @@ class FileReader
 	}
 }
 
-# __END__
+// __END__

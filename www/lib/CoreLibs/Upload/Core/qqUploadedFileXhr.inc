@@ -43,4 +43,4 @@ class qqUploadedFileXhr
 	}
 }
 
-# __END__
+// __END__

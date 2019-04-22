@@ -323,7 +323,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$this->table_array = array ();
 		}
 		reset($this->table_array);
-		$string .= "<b>TABLE ARRAY DUMP:</b> ".$this->table_name."<br>";
+		$string = "<b>TABLE ARRAY DUMP:</b> ".$this->table_name."<br>";
 		foreach ($this->table_array as $key => $value) {
 			$string .= "<b>$key</b>: ".$value["value"]."<br>";
 		}
@@ -557,7 +557,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				if ($res[$this->int_pk_name] == $this->table_array[$this->int_pk_name]["value"]) {
 					$pk_selected = $res[$this->int_pk_name];
 				}
-				unset($t_string);
+				$t_string = '';
 				for ($i = 0, $i_max = count($this->field_array); $i < $i_max; $i ++) {
 					if ($t_string) {
 						$t_string .= ", ";
@@ -1013,7 +1013,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						}
 						// do optional error checks like for normal fields
 						// currently active: unique/alphanumeric
-						if ($data_rray['error_check']) {
+						if ($data_array['error_check']) {
 							foreach (explode('|', $value["error_check"]) as $error_check) {
 								switch ($error_check) {
 									// check unique, check if field in table is not yet exist
@@ -1314,6 +1314,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					// go through all submitted data
 					// for ($i = 0; $i < count($_POST[$el_name]); $i ++)
 					for ($i = 0; $i < $max; $i ++) {
+						$q_data[$i] = '';
+						$q_names[$i] = '';
+						$q_values[$i] = '';
 						// if we have enable name & delete set, then only insert/update those which are flagged as active
 						// check if mandatory field is set, if not set "do not write flag"
 						if ($data_array["mandatory"] && !$_POST[$prfx.$el_name][$i]) {
@@ -1718,4 +1721,4 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	}
 } // end of class
 
-# __END__
+// __END__

@@ -527,7 +527,7 @@ class ProgressBar
 					case 'percent':
 						// only one inner percent
 						// print "STYLE[$name]: ".$style_lbl."<br>";
-						if (!$html_percent) {
+						if (!isset($html_percent)) {
 							$html_percent = '<div id="plbl'.$name.$this->code.'" style="'.$style_lbl.'width:'.$data['width'].'px;line-height:1;text-shadow: 0 0 .2em white, 0 0 .5em white;">'.$this->__calculatePercent($this->step).'%</div>'."\n";
 						}
 						break;
@@ -669,4 +669,4 @@ class ProgressBar
 	}
 }
 
-# __END__
+// __END__

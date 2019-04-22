@@ -1,4 +1,5 @@
 <?php
+
 $edit_languages=array (
 	"table_array" => array (
 		"edit_language_id" => array (
@@ -71,4 +72,4 @@ $edit_languages=array (
 	"table_name" => "edit_language"
 );
 
-# __END__
+// __END__
