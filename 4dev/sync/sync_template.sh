@@ -7,8 +7,8 @@ LOCAL_BASE_DIR="<local folder>";
 LOCAL_DIR=$LOCAL_BASE_DIR"";
 REMOTE_WEB="<remote folder>";
 TARGET_HOST_WEB="<user>@<host>";
-TMP_DIR=$LOCAL_BASE_DIR"/4dev/";
-tmpf_web=$TMP_DIR"tmp.web";
+TMP_DIR=$LOCAL_BASE_DIR"/4dev/tmp/";
+tmpf_web=$TMP_DIR"sync.exclude.tmp";
 
 # for web (ika)
 rm -f $tmpf_web;
