@@ -193,6 +193,12 @@ $CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);
 foreach ($CONTENT_DATA as $key => $value) {
 	$smarty->assign($key, $value);
 }
+if (is_dir(BASE.TEMPLATES_C)) {
+	$smarty->setCompileDir(BASE.TEMPLATES_C);
+}
+if (is_dir(BASE.CACHE)) {
+	$smarty->setCacheDir(BASE.CACHE);
+}
 $smarty->display('edit_order.tpl');
 
 echo $login->printErrorMsg();
