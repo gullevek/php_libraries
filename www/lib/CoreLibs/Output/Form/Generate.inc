@@ -1294,6 +1294,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $reference_array) {
+				// init arrays
+				$q_names = array ();
+				$q_data = array ();
+				$q_values = array ();
 				// get the number of keys from the elements array
 				$keys = array_keys($reference_array["elements"]);
 				// element prefix name
@@ -1314,9 +1318,6 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					// go through all submitted data
 					// for ($i = 0; $i < count($_POST[$el_name]); $i ++)
 					for ($i = 0; $i < $max; $i ++) {
-						$q_data[$i] = '';
-						$q_names[$i] = '';
-						$q_values[$i] = '';
 						// if we have enable name & delete set, then only insert/update those which are flagged as active
 						// check if mandatory field is set, if not set "do not write flag"
 						if ($data_array["mandatory"] && !$_POST[$prfx.$el_name][$i]) {
@@ -1355,7 +1356,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 								$q_data[$i] .= ", ";
 							}
 							// insert name part list
-							if ($q_names[$i]) {
+							if (strlen($q_names[$i])) {
 								$q_names[$i] .= ", ";
 							}
 							// insert value part list

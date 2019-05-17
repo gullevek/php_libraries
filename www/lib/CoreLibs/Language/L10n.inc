@@ -63,6 +63,7 @@ class L10n extends \CoreLibs\Basic
 	// reloads the mofile, if the location of the lang file changes
 	public function l10nReloadMOfile($lang, $path = DEFAULT_TEMPLATE)
 	{
+		$success = false;
 		$old_mofile = $this->mofile;
 		$old_lang = $this->lang;
 
@@ -80,11 +81,14 @@ class L10n extends \CoreLibs\Basic
 		if (is_readable($this->mofile)) {
 			$this->input = new FileReader($this->mofile);
 			$this->l10n = new GetTextReader($this->input);
+			// we successfully loaded
+			$success = true;
 		} else {
 			// else fall back to the old ones
 			$this->mofile = $old_mofile;
 			$this->lang = $old_lang;
 		}
+		return $success;
 	}
 
 	public function __($text)
