@@ -30,7 +30,7 @@
 	<script language="JavaScript" src="{$js}/debug.js"></script>
 	{if $USE_JQUERY}
 	<!-- JQuery -->
-	<script type="text/javascript" src="{$js}/jquery.js"></script>
+	<script type="text/javascript" src="{$js}/jquery.min.js"></script>
 	{/if}
 	{if $USE_PROTOTYPE}
 	<script src="{$js}/scriptaculous/prototype.js" type="text/javascript"></script>
@@ -96,10 +96,7 @@
 	<div style="position: relative; height: 20px;" class="menu">
 		<div style="position: absolute; width: 200px;">{t 1=$USER_NAME|upper}Hello %1{/t}</div>
 		<div style="position: absolute; text-align: right; right: 0px; width: 120px;">
-			<form method="post" name="loginlogout">
-				<a href="javascript:document.loginlogout.login_logout.value='Logout';document.loginlogout.submit();">{t}Logout{/t}</a>
-				<input type="hidden" name="login_logout" value="">
-			</form>
+			<a href="#" OnClick="loginLogout(); return false;">{t}Logout{/t}</a>
 		</div>
 	</div>
 	<div style="margin-bottom: 5px;" class="menu">

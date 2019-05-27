@@ -122,8 +122,8 @@ if (false === strstr(LAYOUT.DEFAULT_TEMPLATE.LANG, $cms->lang_dir) ||
 
 // javascrip translate data as template for auto translate
 if (!$TEMPLATE_TRANSLATE) {
-	$cms->debug('LANG', 'Load lang: '.$lang.', for page file jsTranslate_'.$lang.'.tpl');
 	$TEMPLATE_TRANSLATE = 'jsTranslate_'.$lang.'.tpl';
+	$cms->debug('LANG', 'Load lang: '.$lang.', for page file '.$TEMPLATE_TRANSLATE);
 } else {
 	// we assume we have some fixed set
 	// we must add _<$lang>

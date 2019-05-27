@@ -8,7 +8,7 @@
 
 // if debug is set to true, console log messages are printed
 if (!DEBUG) {
-	$($H(window.console)).each(function(w) {
-		window.console[w.key] = function() {};
-	});
+	for (var prop in window.console) {
+		window.console[prop] = function () {};
+	}
 }

@@ -8,13 +8,13 @@
 *********************************************************************/
 
 // trigger flags
-$cms->HEADER['USE_PROTOTYPE'] = USE_PROTOTYPE;
+$cms->HEADER['USE_PROTOTYPE'] = isset($USE_PROTOTYPE) ? $USE_PROTOTYPE : USE_PROTOTYPE;
 // scriptacolous, can only be used with prototype
-if (USE_PROTOTYPE) {
-	$cms->HEADER['USE_SCRIPTACULOUS'] = USE_SCRIPTACULOUS;
+if ($cms->HEADER['USE_PROTOTYPE']) {
+	$cms->HEADER['USE_SCRIPTACULOUS'] = isset($USE_SCRIPTACULOUS) ? $USE_SCRIPTACULOUS : USE_SCRIPTACULOUS;
 }
 // jquery and prototype should not be used together
-$cms->HEADER['USE_JQUERY'] = USE_JQUERY; // don't use either of those two toger
+$cms->HEADER['USE_JQUERY'] = isset($USE_JQUERY) ? $USE_JQUERY : USE_JQUERY; // don't use either of those two toger
 
 // set basic template path (tmp)
 // paths are set in the 'set_paths.inc' file

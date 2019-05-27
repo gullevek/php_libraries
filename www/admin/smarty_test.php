@@ -12,7 +12,17 @@ require 'config.php';
 require BASE.INCLUDES.'admin_header.inc';
 $MASTER_TEMPLATE_NAME = 'main_body.tpl';
 $TEMPLATE_NAME = 'smarty_test.tpl';
-$PAGE_WIDTH = 750;
+$CSS_NAME = 'smart_test.css';
+$USE_PROTOTYPE = false;
+$USE_JQUERY = true;
+if ($USE_PROTOTYPE) {
+	$EDIT_JAVASCRIPT = 'edit.pt.js';
+	$JS_NAME = 'prototype.test.js';
+} else if ($USE_JQUERY) {
+	$EDIT_JAVASCRIPT = 'edit.jq.js';
+	$JS_NAME = 'jquery.test.js';
+}
+$PAGE_WIDTH = "100%";
 require BASE.INCLUDES.'admin_set_paths.inc';
 
 // smarty test
