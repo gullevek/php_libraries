@@ -1,0 +1,7 @@
+RewriteEngine on
+# not a file
+RewriteCond %{REQUEST_FILENAME}       !-f
+# not a directory
+RewriteCond %{REQUEST_FILENAME}       !-d
+# throw the whole path to the url as form parameter
+RewriteRule (.*)                      index.php?path=$1  [QSA,L]

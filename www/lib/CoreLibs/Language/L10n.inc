@@ -43,10 +43,17 @@ class L10n extends \CoreLibs\Basic
 			$this->lang = $lang;
 		}
 
-		if (is_dir(LAYOUT.$path.LANG)) {
-			$path = LAYOUT.$path.LANG;
-		} elseif (!is_dir($path)) {
-			$path = '';
+		if (USE_DEPRECATED_TEMPLATE_FOLDERS === true) {
+			if (is_dir(LAYOUT.$path.LANG)) {
+				$path = LAYOUT.$path.LANG;
+			} elseif (!is_dir($path)) {
+				$path = '';
+			}
+		} else {
+			// override path check
+			if (!is_dir($path)) {
+				$path = INCLUDES.LANG.CONTENT_PATH;
+			}
 		}
 
 		$this->mofile = $path.$this->lang.".mo";
@@ -69,10 +76,17 @@ class L10n extends \CoreLibs\Basic
 
 		$this->lang = $lang;
 
-		if (is_dir(LAYOUT.$path.LANG)) {
-			$path = LAYOUT.$path.LANG;
-		} elseif (!is_dir($path)) {
-			$path = '';
+		if (USE_DEPRECATED_TEMPLATE_FOLDERS === true) {
+			if (is_dir(LAYOUT.$path.LANG)) {
+				$path = LAYOUT.$path.LANG;
+			} elseif (!is_dir($path)) {
+				$path = '';
+			}
+		} else {
+			// override path check
+			if (!is_dir($path)) {
+				$path = INCLUDES.LANG.CONTENT_PATH;
+			}
 		}
 
 		$this->mofile = $path.$this->lang.".mo";

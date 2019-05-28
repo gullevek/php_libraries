@@ -6,9 +6,11 @@
 		{html_options options=$drop_down_test selected=$drop_down_test_selected}
 	</select>
 </div>
-<div id="jq-test" class="jp-test">
-	<div id="test-div" class="test-div">
-		Some content ehre or asdfasdfasf
+<div class="jq-container">
+	<div id="jq-test" class="jp-test">
+		<div id="test-div" class="test-div">
+			Some content ehre or asdfasdfasf
+		</div>
 	</div>
 </div>
 {* progresss indicator *}

@@ -82,8 +82,6 @@ DEFINE('TEMPLATES_FRONTEND', 'templates_frontend'.DS);
 DEFINE('USE_DEPRECATED_TEMPLATE_FOLDERS', false);
 // default template
 DEFINE('DEFAULT_TEMPLATE', 'default'.DS);
-// default template file
-DEFINE('DEFAULT_TEMPLATE_FILE', 'default.tpl');
 
 /************* HASH / ACL DEFAULT / ERROR SETTINGS / SMARTY *************/
 // default hash type

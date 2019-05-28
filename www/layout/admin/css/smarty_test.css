@@ -1,13 +1,19 @@
 /* smart test CSS */
 
+.jq-container {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
 .jp-test {
 	width: 100%;
-	margin: 20px;
+	padding: 20px;
 	box-sizing: border-box;
 }
 
 .test-div {
-	margin: 20px;
+	padding: 20px;
 }
 
 /* CORE overlay, progress elements */
