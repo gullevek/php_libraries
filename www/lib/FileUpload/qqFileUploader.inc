@@ -1,9 +1,9 @@
 <?php
 
-namespace CoreLibs\Upload;
+namespace FileUpload;
 
-use \CoreLibs\Upload\Core\qqUploadedFileForm;
-use \CoreLibs\Upload\Core\qqUploadedFileXhr;
+use \FileUpload\Core\qqUploadedFileForm;
+use \FileUpload\Core\qqUploadedFileXhr;
 
 class qqFileUploader
 {

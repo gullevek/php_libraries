@@ -1,6 +1,6 @@
 <?php
 
-namespace CoreLibs\Upload\Core;
+namespace FileUpload\Core;
 
 /**
  * Handle file uploads via XMLHttpRequest
