@@ -282,7 +282,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (isset($config_array['show_fields']) && is_array($config_array['show_fields'])) {
 			$this->field_array = $config_array['show_fields'];
 		}
-		if (isset($config_array['load_query']) && is_array($config_array['load_query'])) {
+		if (isset($config_array['load_query']) && $config_array['load_query']) {
 			$this->load_query = $config_array['load_query'];
 		}
 		$this->archive_pk_name = 'a_'.$this->pk_name;
@@ -313,7 +313,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->remove_button = $_POST['remove_button'];
 
 		// security settings
-		$this->group_level_user = $_SESSION['GROUP_LEVEL'];
+		$this->group_level_user = isset($_SESSION['GROUP_ACL_LEVEL']) ? $_SESSION['GROUP_ACL_LEVEL'] : 0;
 		// security levels for buttons/actions
 		// if array does not exists create basic
 		if (!is_array($config_array['security_level']) || count($config_array['security_level']) < 4) {
@@ -565,7 +565,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if ($this->group_level_user <= $this->security_level['load']) {
 			$t_pk_name = $this->archive_pk_name;
 
-			// lade liste
+			// load list data
 			$this->dbExec($this->load_query);
 			while ($res = $this->dbFetchArray()) {
 				$pk_ids[] = $res[$this->int_pk_name];

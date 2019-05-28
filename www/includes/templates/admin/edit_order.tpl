@@ -32,15 +32,15 @@
 <!-- BODY START //-->
 <tr>
   <td class="edit_bgcolor">
-	 <table width="100%" border="0" cellpadding="2" cellspacing="1">
-	 <!-- ANFANG Neu //-->
-	 <form method="post" enctype="multipart/form-data">
-	 <tr>
+	<table width="100%" border="0" cellpadding="2" cellspacing="1">
+	<!-- ANFANG Neu //-->
+	<form method="post" enctype="multipart/form-data">
+	<tr>
 		<td class="edit_fgcolor_alt" class="normal" colspan="2">
 			Order
 		</td>
-	 </tr>
-	 <tr>
+	</tr>
+	<tr>
 		<td class="edit_fgcolor" class="normal" width="80%">
 			<select name="position[]" size="20" multiple>
 				{html_options values=$options_id output=$options_name selected=$options_selected}
@@ -65,15 +65,15 @@
 			<input type="hidden" name="where_string" value="{$where_string}">
 			<!-- single hiddens //-->
 		</td>
-	 </tr>
-	 <tr>
+	</tr>
+	<tr>
 		<td class="edit_fgcolor_alt" class="normal" colspan="2">
-			<input type="button" name="close" value="Close" OnClick="self.close();"> 
+			<input type="button" name="close" value="Close" OnClick="self.close();">
 		</td>
-	 </tr>
-	 </form>
-	 <!-- ENDE FOOTER //-->
-	 </table>
+	</tr>
+	</form>
+<!-- ENDE FOOTER //-->
+	</table>
   </td>
 </tr>
 <!-- BODY END //-->

@@ -18,6 +18,7 @@
 *********************************************************************/
 
 $DEBUG_ALL = 1;
+$PRINT_ALL = 1;
 $DB_DEBUG = 1;
 
 // TODO: only extract _POST data that is needed
