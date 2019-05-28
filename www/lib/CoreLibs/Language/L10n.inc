@@ -35,7 +35,7 @@ class L10n extends \CoreLibs\Basic
 	private $input;
 	private $l10n;
 
-	public function __construct($lang = '', $path = DEFAULT_TEMPLATE)
+	public function __construct($lang = '', $path = '')
 	{
 		if (!$lang) {
 			$this->lang = 'en';
@@ -43,17 +43,9 @@ class L10n extends \CoreLibs\Basic
 			$this->lang = $lang;
 		}
 
-		if (USE_DEPRECATED_TEMPLATE_FOLDERS === true) {
-			if (is_dir(LAYOUT.$path.LANG)) {
-				$path = LAYOUT.$path.LANG;
-			} elseif (!is_dir($path)) {
-				$path = '';
-			}
-		} else {
-			// override path check
-			if (!is_dir($path)) {
-				$path = INCLUDES.LANG.CONTENT_PATH;
-			}
+		// override path check
+		if (!is_dir($path)) {
+			$path = INCLUDES.LANG.CONTENT_PATH;
 		}
 
 		$this->mofile = $path.$this->lang.".mo";
@@ -68,7 +60,7 @@ class L10n extends \CoreLibs\Basic
 	}
 
 	// reloads the mofile, if the location of the lang file changes
-	public function l10nReloadMOfile($lang, $path = DEFAULT_TEMPLATE)
+	public function l10nReloadMOfile($lang, $path = '')
 	{
 		$success = false;
 		$old_mofile = $this->mofile;
@@ -76,17 +68,9 @@ class L10n extends \CoreLibs\Basic
 
 		$this->lang = $lang;
 
-		if (USE_DEPRECATED_TEMPLATE_FOLDERS === true) {
-			if (is_dir(LAYOUT.$path.LANG)) {
-				$path = LAYOUT.$path.LANG;
-			} elseif (!is_dir($path)) {
-				$path = '';
-			}
-		} else {
-			// override path check
-			if (!is_dir($path)) {
-				$path = INCLUDES.LANG.CONTENT_PATH;
-			}
+		// override path check
+		if (!is_dir($path)) {
+			$path = INCLUDES.LANG.CONTENT_PATH;
 		}
 
 		$this->mofile = $path.$this->lang.".mo";

@@ -70,18 +70,6 @@ DEFINE('LOG', 'log'.DS);
 DEFINE('TEMPLATES_C', 'templates_c'.DS);
 // template base
 DEFINE('TEMPLATES', 'templates'.DS);
-// frontend template dir', only for admin
-DEFINE('TEMPLATES_FRONTEND', 'templates_frontend'.DS);
-
-// if below is turned to true then the old folder format is ued
-// www/layout/<admin|frontend>/<template name>/...
-// in the new layout the "<template name>" is dropped and only frontend
-// data is visible there: js, css, images
-// language files are moved into www/includes/lang/<admin/frontend>/*.mo
-// the language .po files are in 4dev/lang/<admin/frontend>/*.po
-DEFINE('USE_DEPRECATED_TEMPLATE_FOLDERS', false);
-// default template
-DEFINE('DEFAULT_TEMPLATE', 'default'.DS);
 
 /************* HASH / ACL DEFAULT / ERROR SETTINGS / SMARTY *************/
 // default hash type
