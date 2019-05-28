@@ -7,7 +7,6 @@
 * HISTORY:
 *********************************************************************/
 
-
 // master template
 if (!isset($MASTER_TEMPLATE_NAME)) {
 	$MASTER_TEMPLATE_NAME = MASTER_TEMPLATE_NAME;

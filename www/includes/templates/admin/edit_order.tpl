@@ -23,7 +23,7 @@
 	{/if}
 </head>
 <body>
-<table width="{$table_width}" border="0" cellpadding="0" cellspacing="1">
+<table width="100%" border="0" cellpadding="0" cellspacing="1">
 <!-- ERROR MSG START //-->
 {foreach from=$form_error_msg item=element key=key name=loop}
     {include file="edit_error_msg.tpl"}

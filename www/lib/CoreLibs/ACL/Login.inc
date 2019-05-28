@@ -114,25 +114,25 @@ class Login extends \CoreLibs\DB\IO
 
 		// create db connection and init base class
 		if (!parent::__construct($db_config, $debug, $db_debug, $echo, $print)) {
-			echo "Could not connect to DB<br>";
+			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
 			exit;
 		}
 
 		// no session could be found at all
 		if (!session_id()) {
-			echo "<b>Session not started!</b><br>Use 'session_start();'.<br>";
-			echo "For less problems with other session, you can set a session name with 'session_name(\"name\");'.<br>";
+			echo '<b>Session not started!</b><br>Use \'session_start();\'.<br>';
+			echo 'For less problems with other session, you can set a session name with \'session_name("name");\'.<br>';
 			exit;
 		}
 
 		// pre-check that password min/max lengths are inbetween 1 and 255;
 		if ($this->password_max_length > 255) {
-			echo "<b>Settings problem</b> PMaL<br>";
+			echo '<b>Settings problem</b> PMaL<br>';
 			exit;
 		}
 		if ($this->password_min_length < 1) {
-			echo "<b>Settings problem</b> PMiL<br>";
+			echo '<b>Settings problem</b> PMiL<br>';
 			exit;
 		}
 
@@ -212,11 +212,11 @@ class Login extends \CoreLibs\DB\IO
 		$this->lock_deny_users = array ('admin');
 
 		// internal
-		$this->class_info["login"] = array(
-			"class_name" => "Login",
-			"class_version" => "5.0.0",
-			"class_created" => "2000-06-01",
-			"class_author" => "Clemens Schwaighofer"
+		$this->class_info['login'] = array(
+			'class_name' => 'Login',
+			'class_version' => '5.0.0',
+			'class_created' => '2000-06-01',
+			'class_author' => 'Clemens Schwaighofer'
 		);
 
 		// init default ACL list array
@@ -378,7 +378,7 @@ class Login extends \CoreLibs\DB\IO
 					// - encrypted password matches
 					// - plain password matches
 
-					if (!$res["enabled"]) {
+					if (!$res['enabled']) {
 						// user is enabled
 						$this->login_error = 104;
 					} elseif ($res['locked']) {
@@ -396,25 +396,26 @@ class Login extends \CoreLibs\DB\IO
 						}
 						// normal user processing
 						// set class var and session var
-						$_SESSION["EUID"] = $this->euid = $res["edit_user_id"];
+						$_SESSION['EUID'] = $this->euid = $res['edit_user_id'];
 						// check if user is okay
 						$this->loginCheckPermissions();
 						if (!$this->login_error) {
 							// now set all session vars and read page permissions
-							$GLOBALS["DEBUG_ALL"] = $_SESSION["DEBUG_ALL"] = $res["debug"];
-							$GLOBALS["DB_DEBUG"] = $_SESSION["DB_DEBUG"] = $res["db_debug"];
-							$_SESSION["USER_NAME"] = $res["username"];
-							$_SESSION["ADMIN"] = $res["admin"];
-							$_SESSION["GROUP_NAME"] = $res["edit_group_name"];
-							$_SESSION["USER_ACL_LEVEL"] = $res["user_level"];
-							$_SESSION["USER_ACL_TYPE"] = $res["user_type"];
-							$_SESSION["GROUP_ACL_LEVEL"] = $res["group_level"];
-							$_SESSION["GROUP_ACL_TYPE"] = $res["group_type"];
-							$_SESSION["TEMPLATE"] = ($res["template"]) ? $res["template"] : DEFAULT_TEMPLATE;
-							$_SESSION["HEADER_COLOR"] = ($res["second_header_color"]) ? $res["second_header_color"] : $res["first_header_color"];
-							$_SESSION["LANG"] = $res["lang_short"];
-							$_SESSION["DEFAULT_CHARSET"] = $res["lang_iso"];
-							$_SESSION["DEFAULT_LANG"] = $res["lang_short"].'_'.strtolower(str_replace('-', '', $res["lang_iso"]));
+							$GLOBALS['DEBUG_ALL'] = $_SESSION['DEBUG_ALL'] = $res['debug'];
+							$GLOBALS['DB_DEBUG'] = $_SESSION['DB_DEBUG'] = $res['db_debug'];
+							$_SESSION['USER_NAME'] = $res['username'];
+							$_SESSION['ADMIN'] = $res['admin'];
+							$_SESSION['GROUP_NAME'] = $res['edit_group_name'];
+							$_SESSION['USER_ACL_LEVEL'] = $res['user_level'];
+							$_SESSION['USER_ACL_TYPE'] = $res['user_type'];
+							$_SESSION['GROUP_ACL_LEVEL'] = $res['group_level'];
+							$_SESSION['GROUP_ACL_TYPE'] = $res['group_type'];
+							// deprecated TEMPLATE setting
+							$_SESSION['TEMPLATE'] = ($res['template']) ? $res['template'] : '';
+							$_SESSION['HEADER_COLOR'] = ($res['second_header_color']) ? $res['second_header_color'] : $res['first_header_color'];
+							$_SESSION['LANG'] = $res['lang_short'];
+							$_SESSION['DEFAULT_CHARSET'] = $res['lang_iso'];
+							$_SESSION['DEFAULT_LANG'] = $res['lang_short'].'_'.strtolower(str_replace('-', '', $res['lang_iso']));
 							// reset any login error count for this user
 							if ($res['login_error_count'] > 0) {
 								$q = "UPDATE edit_user ";
@@ -436,22 +437,22 @@ class Login extends \CoreLibs\DB\IO
 								$edit_page_ids[] = $res['edit_page_id'];
 								// create the array for pages
 								array_push($pages, array (
-									"edit_page_id" => $res["edit_page_id"],
-									"filename" => $res["filename"],
-									"page_name" => $res["edit_page_name"],
-									"order" => $res['edit_page_order'],
-									"menu" => $res["menu"],
-									"popup" => $res["popup"],
-									"popup_x" => $res["popup_x"],
-									"popup_y" => $res["popup_y"],
-									"online" => $res["online"],
-									"acl_level" => $res["level"],
-									"acl_type" => $res["type"],
-									"query" => array (),
-									"visible" => array ()
+									'edit_page_id' => $res['edit_page_id'],
+									'filename' => $res['filename'],
+									'page_name' => $res['edit_page_name'],
+									'order' => $res['edit_page_order'],
+									'menu' => $res['menu'],
+									'popup' => $res['popup'],
+									'popup_x' => $res['popup_x'],
+									'popup_y' => $res['popup_y'],
+									'online' => $res['online'],
+									'acl_level' => $res['level'],
+									'acl_type' => $res['type'],
+									'query' => array (),
+									'visible' => array ()
 								));
 								// make reference filename -> level
-								$pages_acl[$res["filename"]] = $res["level"];
+								$pages_acl[$res['filename']] = $res['level'];
 							} // for each page
 							// get the visible groups for all pages and write them to the pages
 							$_edit_page_id = 0;
@@ -478,14 +479,14 @@ class Login extends \CoreLibs\DB\IO
 									$_edit_page_id = $res['edit_page_id'];
 								}
 								$pages[$pos[0]]['query'][] = array (
-									"name" => $res['name'],
-									"value" => $res['value'],
-									"dynamic" => $res['dynamic']
+									'name' => $res['name'],
+									'value' => $res['value'],
+									'dynamic' => $res['dynamic']
 								);
 							}
 
-							$_SESSION["PAGES"] = $pages;
-							$_SESSION["PAGES_ACL_LEVEL"] = $pages_acl;
+							$_SESSION['PAGES'] = $pages;
+							$_SESSION['PAGES_ACL_LEVEL'] = $pages_acl;
 							// load the edit_access user rights
 							$q = "SELECT ea.edit_access_id, level, type, ea.name, ea.color, ea.uid, edit_default ";
 							$q .= "FROM edit_access_user eau, edit_access_right ear, edit_access ea ";
@@ -504,25 +505,25 @@ class Login extends \CoreLibs\DB\IO
 								}
 								// build master unit array
 								$unit_access[$res['edit_access_id']] = array (
-									"id" => $res['edit_access_id'],
-									"acl_level" => $res["level"],
-									"acl_type" => $res["type"],
-									"name" => $res["name"],
-									"uid" => $res['uid'],
-									"color" => $res["color"],
-									"default" => $res["edit_default"],
+									'id' => $res['edit_access_id'],
+									'acl_level' => $res['level'],
+									'acl_type' => $res['type'],
+									'name' => $res['name'],
+									'uid' => $res['uid'],
+									'color' => $res['color'],
+									'default' => $res['edit_default'],
 									'data' => $ea_data
 								);
 								// set the default unit
 								if ($res['edit_default']) {
-									$_SESSION["UNIT_DEFAULT"] = $res['edit_access_id'];
+									$_SESSION['UNIT_DEFAULT'] = $res['edit_access_id'];
 								}
 								// sub arrays for simple access
 								array_push($eauid, $res['edit_access_id']);
 								$unit_acl[$res['edit_access_id']] = $res['level'];
 							}
-							$_SESSION["UNIT"] = $unit_access;
-							$_SESSION["UNIT_ACL_LEVEL"] = $unit_acl;
+							$_SESSION['UNIT'] = $unit_access;
+							$_SESSION['UNIT_ACL_LEVEL'] = $unit_acl;
 							$_SESSION['EAID'] = $eauid;
 						} // user has permission to THIS page
 					} // user was not enabled or other login error
@@ -571,7 +572,7 @@ class Login extends \CoreLibs\DB\IO
 			// unset mem limit if debug is set to 1
 			// if (($GLOBALS["DEBUG_ALL"] || $GLOBALS["DB_DEBUG"] || $_SESSION["DEBUG_ALL"] || $_SESSION["DB_DEBUG"]) && ini_get('memory_limit') != -1)
 			// 	ini_set('memory_limit', -1);
-			if ($res["filename"] == $this->page_name) {
+			if ($res['filename'] == $this->page_name) {
 				$this->permission_okay = 1;
 			} else {
 				$this->login_error = 103;
@@ -591,20 +592,20 @@ class Login extends \CoreLibs\DB\IO
 	{
 		if ($this->logout || $this->login_error) {
 			// unregister and destroy session vars
-			unset($_SESSION["EUID"]);
-			unset($_SESSION["GROUP_LEVEL"]);
-			unset($_SESSION["PAGES"]);
-			unset($_SESSION["USER_NAME"]);
-			unset($_SESSION["UNIT"]);
-			unset($_SESSION["DEBUG_ALL"]);
-			unset($_SESSION["DB_DEBUG"]);
-			unset($GLOBALS["DEBUG_ALL"]);
-			unset($GLOBALS["DB_DEBUG"]);
-			unset($_SESSION["LANG"]);
-			unset($_SESSION["DEFAULT_CHARSET"]);
-			unset($_SESSION["DEFAULT_LANG"]);
-			unset($_SESSION["GROUP_NAME"]);
-			unset($_SESSION["HEADER_COLOR"]);
+			unset($_SESSION['EUID']);
+			unset($_SESSION['GROUP_LEVEL']);
+			unset($_SESSION['PAGES']);
+			unset($_SESSION['USER_NAME']);
+			unset($_SESSION['UNIT']);
+			unset($_SESSION['DEBUG_ALL']);
+			unset($_SESSION['DB_DEBUG']);
+			unset($GLOBALS['DEBUG_ALL']);
+			unset($GLOBALS['DB_DEBUG']);
+			unset($_SESSION['LANG']);
+			unset($_SESSION['DEFAULT_CHARSET']);
+			unset($_SESSION['DEFAULT_LANG']);
+			unset($_SESSION['GROUP_NAME']);
+			unset($_SESSION['HEADER_COLOR']);
 			session_destroy();
 			// then prints the login screen again
 			$this->permission_okay = 0;
@@ -939,11 +940,11 @@ class Login extends \CoreLibs\DB\IO
 			$password = '';
 			// set event
 			if ($this->login) {
-				$event = "Login";
+				$event = 'Login';
 			} elseif ($this->logout) {
-				$event = "Logout";
+				$event = 'Logout';
 			} else {
-				$event = "No Permission";
+				$event = 'No Permission';
 			}
 			// prepare for log
 			if ($this->euid) {
