@@ -1,24 +1,11 @@
-<?
+<?php
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/06/10
 * SHORT DESCRIPTION:
-*   configuration file
+* configuration file
 * HISTORY:
 *********************************************************************/
-
-/************* SESSION NAMES *************/
-// backend
-DEFINE('EDIT_SESSION_NAME', '<ADMIN SESSION NAME>');
-// frontend
-DEFINE('SESSION_NAME', '<SESSION NAME>');
-// set the session name
-define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-
-/************* LANGUAGE / ENCODING *******/
-DEFINE('DEFAULT_LANG', 'en_utf8');
-// default web page encoding setting
-DEFINE('DEFAULT_ENCODING', 'UTF-8');
 
 /************* PATHS *********************/
 // directory seperator
@@ -27,7 +14,7 @@ DEFINE('DS', DIRECTORY_SEPARATOR);
 // path to original file (if symlink)
 DEFINE('DIR', __DIR__.DS);
 // base dir root folder level
-DEFINE('BASE', str_replace('configs', '', __DIR__));
+DEFINE('BASE', str_replace('/configs', '', __DIR__).DS);
 
 // ** OLD DIR DECLARATIONS **
 // path to document root of file called
@@ -35,6 +22,8 @@ DEFINE('ROOT', getcwd().DS);
 // libs path
 DEFINE('LIB', 'lib'.DS);
 DEFINE('LIBS', 'lib'.DS);
+// configs folder
+DEFINE('CONFIGS', 'configs'.DS);
 // includes (strings, arrays for static, etc)
 DEFINE('INCLUDES', 'includes'.DS);
 // layout base path
@@ -83,6 +72,14 @@ DEFINE('TEMPLATES_C', 'templates_c'.DS);
 DEFINE('TEMPLATES', 'templates'.DS);
 // frontend template dir', only for admin
 DEFINE('TEMPLATES_FRONTEND', 'templates_frontend'.DS);
+
+// if below is turned to true then the old folder format is ued
+// www/layout/<admin|frontend>/<template name>/...
+// in the new layout the "<template name>" is dropped and only frontend
+// data is visible there: js, css, images
+// language files are moved into www/includes/lang/<admin/frontend>/*.mo
+// the language .po files are in 4dev/lang/<admin/frontend>/*.po
+DEFINE('USE_DEPRECATED_TEMPLATE_FOLDERS', false);
 // default template
 DEFINE('DEFAULT_TEMPLATE', 'default'.DS);
 // default template file
@@ -111,7 +108,7 @@ DEFINE('DEFAULT_ACL_ADMIN', 100); */
 //	DEFINE('ERROR_STRICT', 3);
 // allow page caching in general, set to 'FALSE' if you do debugging or development!
 //	DEFINE('ALLOW_SMARTY_CACHE', FALSE);
-// cache life time, in seconds, default here is 2 days (172800s)
+// cache life time, in second', default here is 2 days (172800s)
 // -1 is never expire cache
 //	DEFINE('SMARTY_CACHE_LIFETIME', -1);
 
@@ -120,6 +117,9 @@ DEFINE('DEFAULT_ACL_ADMIN', 100); */
 DEFINE('LOGOUT_TARGET', '');
 // password change allowed
 DEFINE('PASSWORD_CHANGE', false);
+// min/max password length
+DEFINE('PASSWORD_MIN_LENGTH', 8);
+DEFINE('PASSWORD_MAX_LENGTH', 255);
 
 /************* AJAX / ACCESS *************/
 // ajax request type
@@ -133,6 +133,21 @@ DEFINE('USE_JQUERY', false);
 DEFINE('PAGE_WIDTH', 800);
 // the default template name
 DEFINE('MASTER_TEMPLATE_NAME', 'main_body.tpl');
+
+/************* SESSION NAMES *************/
+// server name HASH
+DEFINE('SERVER_NAME_HASH', hash('crc32b', $_SERVER['HTTP_HOST']));
+// backend
+DEFINE('EDIT_SESSION_NAME', 'ADMIN_SESSION_NAME'.SERVER_NAME_HASH);
+// frontend
+DEFINE('SESSION_NAME', 'SESSION_NAME'.SERVER_NAME_HASH);
+// SET_SESSION_NAME should be set in the header if a special session name is needed
+// DEFINE('SET_SESSION_NAME', SESSION_NAME);
+
+/************* LANGUAGE / ENCODING *******/
+DEFINE('DEFAULT_LANG', 'en_utf8');
+// default web page encoding setting
+DEFINE('DEFAULT_ENCODING', 'UTF-8');
 
 // below two can be defined here, but they should be
 // defined in either the header file or the file itself
@@ -152,44 +167,21 @@ DEFINE('DEV_SCHEMA', 'public');
 DEFINE('TEST_SCHEMA', 'public');
 DEFINE('LIVE_SCHEMA', 'public');
 
-// non constant part
-/************* DB ACCESS *****************/
-// please be VERY carefull only to change the right side
-$DB_CONFIG = array (
-	'<db id>' => array (
-		'db_name' => '<database>',
-		'db_user' => '<user>',
-		'db_pass' => '<password>',
-		'db_host' => '<host>',
-		'db_port' => '5432',
-		'db_schema' => 'public', // if not set, uses public
-		'db_type' => 'pgsql',
-		'db_encoding' => '',
-		'db_ssl' => 'disable' // allow, disable, require, prefer
-	)
-);
-
+/************* OTHER PATHS *****************/
 // File and Folder paths
 // ID is TARGET (first array element)
 //	$PATHS['test']['csv_path'] = '';
 //	$PATHS['test']['perl_bin'] = '';
 //	$PATHS['test']['redirect_url'] = '';
 
-// each host has a different db_host
-// development host
-$DB_HOST['<host>'] = '<db id>';
-// target host (live)
-//	$DB_TARGET_HOST['<host>'] = '<DB ID>';
-// url redirect database
-//	$DB_URL_REDIRECT_HOST['<host>'] = '<DB ID>';
-// location flagging
-// test/dev/live
-$LOCATION['<host>'] = '<test|live|remote|etc>';
-// show DEBUG override
-// true/false
-$DEBUG_FLAG['<host>'] = true;
-// set postgresql paths (schemas)
-$DB_PATH['<host>'] = PUBLIC_SCHEMA;
+/************* DB ACCESS *****************/
+if (file_exists(BASE.CONFIGS.'config.db.inc')) {
+	require BASE.CONFIGS.'config.db.inc';
+}
+/************* CORE HOST SETTINGS *****************/
+if (file_exists(BASE.CONFIGS.'config.host.inc')) {
+	require BASE.CONFIGS.'config.host.inc';
+}
 
 // set the USE_DATABASE var, if there is nothing set, we assume TRUE
 $USE_DATABASE = defined('USE_DATABASE') ? USE_DATABASE : true;
@@ -198,29 +190,41 @@ $USE_DATABASE = defined('USE_DATABASE') ? USE_DATABASE : true;
 // ** missing live domains **
 // get the name without the port
 list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
-if (!$DB_HOST[$HOST_NAME] && $USE_DATABASE) {
+if (!isset($DB_HOST[$HOST_NAME]) && $USE_DATABASE) {
 	echo 'No matching DB config found. Contact Admin<br>';
 	exit -1;
 }
-
+// set HOST name
+DEFINE('HOST_NAME', $HOST_NAME);
+// set SSL on
+if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+	$_SERVER['SERVER_PORT'] == 443) {
+	DEFINE('HOST_SSL', true);
+	DEFINE('HOST_PROTOCOL', 'https://');
+} else {
+	DEFINE('HOST_SSL', false);
+	DEFINE('HOST_PROTOCOL', 'http://');
+}
 // define the static names
 DEFINE('LOGIN_DB', $DB_HOST[$HOST_NAME]);
 DEFINE('MAIN_DB', $DB_HOST[$HOST_NAME]);
 DEFINE('DB_SCHEMA', $DB_PATH[$HOST_NAME]);
-//	DEFINE('TARGET_DB', $DB_TARGET_HOST[$HOST_NAME]);
-//	DEFINE('URL_REDIRECT_DB', $DB_URL_REDIRECT_HOST[$HOST_NAME]);
+// DEFINE('TARGET_DB', $DB_TARGET_HOST[$HOST_NAME]);
+// DEFINE('URL_REDIRECT_DB', $DB_URL_REDIRECT_HOST[$HOST_NAME]);
 // next three if top is not set
-//	DEFINE('DEV_SCHEMA', $DB_CONFIG[MAIN_DB]['db_schema']);
-//	DEFINE('TEST_SCHEMA', $DB_CONFIG[MAIN_DB]['db_schema']);
-//	DEFINE('PUBLIC_SCHEMA', $DB_CONFIG[TARGET_DB]['db_schema']);
-DEFINE('LOGIN_DB_SCHEMA', 'public'); // where the edit* tables are
-DEFINE('GLOBAL_DB_SCHEMA', 'public'); // where global tables are that are used by all schemas (eg queue tables for online, etc)
+// DEFINE('TEST_SCHEMA', $DB_CONFIG[MAIN_DB]['db_schema']);
+// DEFINE('DEV_SCHEMA', $DB_CONFIG[MAIN_DB]['db_schema']);
+// DEFINE('PUBLIC_SCHEMA', $DB_CONFIG[TARGET_DB]['db_schema']);
+DEFINE('LOGIN_DB_SCHEMA', PUBLIC_SCHEMA); // where the edit* tables are
+DEFINE('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA); // where global tables are that are used by all schemas (eg queue tables for online, etc)
 DEFINE('TARGET', $LOCATION[$HOST_NAME]);
-//	DEFINE('CSV_PATH', $PATHS[TARGET]['csv_path']);
-//	DEFINE('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);
-//	DEFINE('REDIRECT_URL', $PATHS[TARGET]['redirect_url']);
+// DEFINE('CSV_PATH', $PATHS[TARGET]['csv_path']);
+// DEFINE('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);
+// DEFINE('REDIRECT_URL', $PATHS[TARGET]['redirect_url']);
 DEFINE('DEBUG', $DEBUG_FLAG[$HOST_NAME]);
-DEFINE('SHOW_ALL_ERRORS', false); // show all errors if debug_all & show_error_handling are enabled
+DEFINE('SITE_LANG', $SITE_LANG[$HOST_NAME]);
+
+DEFINE('SHOW_ALL_ERRORS', true); // show all errors if debug_all & show_error_handling are enabled
 
 /************* GENERAL PAGE TITLE ********/
 $G_TITLE = '<OVERALL PAGE TITLE>';
@@ -231,6 +235,11 @@ $EDIT_JAVASCRIPT = 'edit.js';
 
 $STYLESHEET = 'frontend.css';
 $JAVASCRIPT = 'frontend.js';
+
+// anything optional
+/************* INTERNAL ******************/
+// any other global definitons here
+//	DEFINE('SOME_ID', <SOME VALUE>);
 
 /************* CONVERT *******************/
 $paths = array (
@@ -253,12 +262,14 @@ if (defined('DEBUG') && DEBUG == false) {
 	$PRINT_ALL = 0;
 	$DB_DEBUG = 0;
 	$ENABLE_ERROR_HANDLING = 0;
+} else {
+	$ECHO_ALL = 0;
+	$DEBUG_ALL = 1;
+	$PRINT_ALL = 1;
+	$DB_DEBUG = 1;
 }
-
-// any other global definitons here
-//	DEFINE('SOME_ID', <SOME VALUE>);
 
 // read auto loader
 require BASE.LIB.'autoloader.php';
 
-# __END__
+// __END__
