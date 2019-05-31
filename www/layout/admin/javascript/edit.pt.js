@@ -295,7 +295,7 @@ if (!String.prototype.unescapeHTML) {
 // DESC  : returns current timestamp (unix timestamp)
 function getTimestamp()
 {
-	let date = new Date();
+	var date = new Date();
 	return date.getTime();
 }
 
@@ -506,7 +506,7 @@ function aelx(base, ...attach)
 
 // METHOD: rel [reset element]
 // PARAMS: cel created element
-// RETURN: returns sub reset base element
+// RETURN: returns reset base element
 // DESC  : resets the sub elements of the base element given
 const rel = (base) => {
 	base.sub = [];
@@ -515,37 +515,40 @@ const rel = (base) => {
 
 // METHOD: rcssel [remove a css from the element]
 // PARAMS: element, style sheet to remove
-// RETURN: "none", in place because of reference
+// RETURN: returns full element
 // DESC  : searches and removes style from css array
 function rcssel(_element, css)
 {
-	let css_index = _element.css.indexOf(css);
+	var css_index = _element.css.indexOf(css);
 	if (css_index > -1) {
 		_element.css.splice(css_index, 1);
 	}
+	return _element;
 }
 
 // METHOD: acssel [add css element]
 // PARAMS: element, style sheet to add
-// RETURN: "none", in place add because of reference
+// RETURN: returns full element
 // DESC  : adds a new style sheet to the element given
 function acssel(_element, css)
 {
-	let css_index = _element.css.indexOf(css);
+	var css_index = _element.css.indexOf(css);
 	if (css_index == -1) {
 		_element.css.push(css);
 	}
+	return _element;
 }
 
 // METHOD: scssel
 // PARAMS: element, style to remove, style to add
-// RETURN: "none", in place add because of reference
+// RETURN: returns full element
 // DESC  : removes one css and adds another
 //         is a wrapper around rcssel/acssel
 function scssel(_element, rcss, acss)
 {
 	rcssel(_element, rcss);
 	acssel(_element, acss);
+	return _element;
 }
 
 // METHOD: phfo [produce html from object]
@@ -557,9 +560,9 @@ function scssel(_element, rcss, acss)
 function phfo(tree)
 {
 	// holds the elements
-	let content = [];
+	var content = [];
 	// main part line
-	let line = '<' + tree.tag;
+	var line = '<' + tree.tag;
 	// first id, if set
 	if (tree.id) {
 		line += ' id="' + tree.id + '"';
@@ -624,10 +627,12 @@ function phfo(tree)
 //         the array needs to be key -> value format. key is for the option id and value is for the data output
 function html_options(name, data, selected = '', options_only = false, return_string = false, sort = '')
 {
-	let content = [];
-	let element_select;
-	let element_option;
-	let data_list = []; // for sorted output
+	var content = [];
+	var element_select;
+	var element_option;
+	var data_list = []; // for sorted output
+	var value;
+	var options;
 	// set outside select, gets stripped on return if options only is true
 	element_select = cel('select', name);
 	// console.log('Call for %s, options: %s', name, options_only);
@@ -642,10 +647,10 @@ function html_options(name, data, selected = '', options_only = false, return_st
 	// use the previously sorted list
 	// for (const [key, value] of Object.entries(data)) {
 	for (const key of data_list) {
-		let value = data[key];
+		value = data[key];
 		console.log('create [%s] options: key: %s, value: %s', name, key, value);
 		// basic options init
-		let options = {
+		options = {
 			'label': value,
 			'value': key
 		};
@@ -686,9 +691,10 @@ function html_options(name, data, selected = '', options_only = false, return_st
 // DESC  : refills a select box with options and keeps the selected
 function html_options_refill(name, data, sort = '')
 {
-	let element_option;
-	let option_selected;
-	let data_list = []; // for sorted output
+	var element_option;
+	var option_selected;
+	var data_list = []; // for sorted output
+	var value;
 	// skip if not exists
 	if ($(name)) {
 		// console.log('Call for %s, options: %s', name, options_only);
@@ -705,7 +711,7 @@ function html_options_refill(name, data, sort = '')
 		});
 		$(name).innerHTML = '';
 		for (const key of data_list) {
-			let value = data[key];
+			value = data[key];
 			// console.log('add [%s]  options: key: %s, value: %s', name, key, value);
 			element_option = document.createElement('option');
 			element_option.label = value;
