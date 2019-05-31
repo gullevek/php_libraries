@@ -79,7 +79,7 @@ if (isset($TEMPLATE_NAME) && !file_exists($smarty->getTemplateDir()[0].DS.$TEMPL
 if (false === strstr(BASE.INCLUDES.LANG.CONTENT_PATH, $cms->lang_dir) ||
 	strcasecmp(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG, $lang)
 ) {
-	$cms->debug('LANG', 'Orig Lang: '.(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG).', New Lang: '.$lang);
+	$cms->debug('LANG', 'Orig: '.BASE.INCLUDES.LANG.CONTENT_PATH.', New: '.$cms->lang_dir.' | Orig Lang: '.(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG).', New Lang: '.$lang);
 	$cms->l->l10nReloadMOfile($lang, $cms->lang_dir);
 		// if we have login class
 	if ($login) {
@@ -91,7 +91,7 @@ if (false === strstr(BASE.INCLUDES.LANG.CONTENT_PATH, $cms->lang_dir) ||
 	}
 }
 
-// javascrip translate data as template for auto translate
+// javascript translate data as template for auto translate
 if (!$TEMPLATE_TRANSLATE) {
 	$TEMPLATE_TRANSLATE = 'jsTranslate_'.$lang.'.tpl';
 	$cms->debug('LANG', 'Load lang: '.$lang.', for page file '.$TEMPLATE_TRANSLATE);

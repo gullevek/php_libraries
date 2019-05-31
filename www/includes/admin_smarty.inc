@@ -14,7 +14,7 @@ if ($cms->HEADER['USE_PROTOTYPE']) {
 	$cms->HEADER['USE_SCRIPTACULOUS'] = isset($USE_SCRIPTACULOUS) ? $USE_SCRIPTACULOUS : USE_SCRIPTACULOUS;
 }
 // jquery and prototype should not be used together
-$cms->HEADER['USE_JQUERY'] = isset($USE_JQUERY) ? $USE_JQUERY : USE_JQUERY; // don't use either of those two toger
+$cms->HEADER['USE_JQUERY'] = isset($USE_JQUERY) ? $USE_JQUERY : USE_JQUERY; // don't use either of those two together
 
 // set basic template path (tmp)
 // paths are set in the 'set_paths.inc' file

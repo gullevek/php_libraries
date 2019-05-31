@@ -428,9 +428,12 @@ function aelx(base, ...attach)
 
 // METHOD: rel [reset element]
 // PARAMS: cel created element
-// RETURN: "none", is self change, but returns base.sub
+// RETURN: returns sub reset base element
 // DESC  : resets the sub elements of the base element given
-const rel = (base) => base.sub = [];
+const rel = (base) => {
+	base.sub = [];
+	return base;
+};
 
 // METHOD: rcssel [remove a css from the element]
 // PARAMS: element, style sheet to remove
