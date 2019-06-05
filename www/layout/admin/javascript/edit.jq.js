@@ -224,6 +224,7 @@ function getTimestamp()
 // METHOD: isObject
 // PARAMS: possible object
 // RETURN: true/false if it is an object or not
+// DESC  : checks if a variable is an object
 function isObject(val) {
 	if (val === null) {
 		return false;
@@ -231,11 +232,25 @@ function isObject(val) {
 	return ((typeof val === 'function') || (typeof val === 'object'));
 }
 
+// METHOD: keyInObject
+// PARAMS: key name, object
+// RETURN: true/false if key exists in object
+// DESC  : checks if a key exists in a given object
+const keyInObject = (key, object) => (key in object) ? true : false;
+/*function keyInObject(key, object)
+{
+	return (key in object) ? true : false;
+}*/
+
 // METHOD: exists
 // PARAMS: uid
 // RETURN: true/false
 // DESC  : checks if a DOM element actually exists
-const exists = (id) => $('#' + id) ? true : false;
+const exists = (id) => $('#' + id).length > 0 ? true : false;
+/*function exists(id)
+{
+	return $('#' + id).length > 0 ? true : false;
+}*/
 
 // METHOD: formatBytes
 // PARAMS: bytes in int
