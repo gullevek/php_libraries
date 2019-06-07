@@ -26,10 +26,16 @@
 	{if $JAVASCRIPT}
 	<script language="JavaScript" src="{$js}{$JAVASCRIPT}"></script>
 	{/if}
+	{if $USE_JQUERY}
+	{* JQuery *}
+	<script type="text/javascript" src="{$js}/jquery.min.js"></script>
+	{/if}
+	{if $USE_PROTOTYPE}
 	{* declare prototype everywhere *}
 	<script src="{$js}/scriptaculous/prototype.js" type="text/javascript"></script>
-	{if $USE_SCRIPTACULOUS}
+		{if $USE_SCRIPTACULOUS}
 	<script src="{$js}/scriptaculous/scriptaculous.js" type="text/javascript"></script>
+		{/if}
 	{/if}
 	{if $JS_INCLUDE}
 	<script language="JavaScript" src="{$JS_INCLUDE}"></script>
@@ -37,10 +43,16 @@
 	{if $JS_SPECIAL_INCLUDE}
 	<script language="JavaScript" src="{$JS_SPECIAL_INCLUDE}"></script>
 	{/if}
-	{* for including datepickr *}
+	{* for including datepickr or flatpickr *}
 	{if $JS_DATEPICKR}
 	<link rel=stylesheet type="text/css" href="{$js}/datepickr/datepickr.min.css">
 	<script language="JavaScript" src="{$js}/datepickr/datepickr.min.js"></script>
+	<script language="JavaScript" src="{$js}/datepickr/datepickr.init.js"></script>
+	{/if}
+	{if $JS_FLATPICKR}
+	<link rel=stylesheet type="text/css" href="{$js}/flatpickr/flatpickr.min.css">
+	<script language="JavaScript" src="{$js}/flatpickr/flatpickr.min.js"></script>
+	<script language="JavaScript" src="{$js}/flatpickr/flatpickr.ja.js"></script>
 	{/if}
 	{if $USE_OVERLIB}
 	{popup_init src="`$js`/overlib/overlib.js"}
