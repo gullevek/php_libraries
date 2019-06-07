@@ -1374,7 +1374,10 @@ class Basic
 		if (!$hour || !$min) {
 			return false;
 		}
-		if (($hour < 0 && $hour > 24) || ($min < 0 && $hour > 60) || ($sec && $sec < 0 && $sec > 60)) {
+		if (($hour < 0 || $hour > 24) ||
+			($min < 0 || $hour > 60) ||
+			($sec && ($sec < 0 || $sec > 60))
+		) {
 			return false;
 		}
 		return true;
@@ -1443,6 +1446,40 @@ class Basic
 		}
 		if ($start_timestamp > $end_timestamp) {
 			return 1;
+		}
+	}
+
+	// METHOD: calcDaysInterval
+	// PARAMS: start date, end date
+	// RETURN: overall days, week days, weekend days as array 0...2 or named
+	// DESC  : calculates the days between two dates
+	private function calcDaysInterval($start_date, $end_date, $return_named = false)
+	{
+		// pos 0 all, pos 1 weekday, pos 2 weekend
+		$days = array ();
+		$start = new \DateTime($start_date);
+		$end = new \DateTime($end_date);
+
+		$days[0] = $end->diff($start)->days;
+
+		$period = new \DatePeriod($start, new \DateInterval('P1D'), $end);
+
+		foreach ($period as $dt) {
+			$curr = $dt->format('D');
+			if ($curr == 'Sat' || $curr == 'Sun') {
+				$days[2] ++;
+			} else {
+				$days[1] ++;
+			}
+		}
+		if ($return_named === true) {
+			return array (
+				'overall' => $days[0],
+				'weekday' => $days[1],
+				'weekend' => $days[2]
+			);
+		} else {
+			return $days;
 		}
 	}
 
