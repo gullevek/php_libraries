@@ -1375,7 +1375,7 @@ class Basic
 			return false;
 		}
 		if (($hour < 0 || $hour > 24) ||
-			($min < 0 || $hour > 60) ||
+			($min < 0 || $min > 60) ||
 			($sec && ($sec < 0 || $sec > 60))
 		) {
 			return false;
