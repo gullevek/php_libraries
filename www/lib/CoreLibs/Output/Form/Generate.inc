@@ -1351,11 +1351,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						}
 						// set type and boundaries for insert/update
 						if ($data_array['pk_id'] && $_POST[$prfx.$el_name][$i]) {
-							$q_begin[$i] = 'UPDATE $table_name SET ';
-							$q_end[$i] = ' WHERE $el_name = '.$_POST[$prfx.$el_name][$i];
+							$q_begin[$i] = 'UPDATE '.$table_name.' SET ';
+							$q_end[$i] = ' WHERE '.$el_name.' = '.$_POST[$prfx.$el_name][$i];
 							$type[$i] = 'update';
 						} elseif ($data_array['pk_id'] && !$_POST[$prfx.$el_name][$i]) {
-							$q_begin[$i] = 'INSERT INTO $table_name (';
+							$q_begin[$i] = 'INSERT INTO '.$table_name.' (';
 							$q_middle[$i] = ') VALUES (';
 							$q_end[$i] = ')';
 							$type[$i] = 'insert';
