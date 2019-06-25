@@ -99,6 +99,6 @@ if (is_dir(BASE.TEMPLATES_C)) {
 if (is_dir(BASE.CACHE)) {
 	$smarty->setCacheDir(BASE.CACHE);
 }
-$smarty->display($MASTER_TEMPLATE_NAME, $TEMPLATE.$lang, $TEMPLATE.$lang);
+$smarty->display($MASTER_TEMPLATE_NAME, $CACHE_ID.($CACHE_ID ? '_' : '').$lang, $COMPILE_ID.($COMPILE_ID ? '_' : '').$lang);
 
 // __END__

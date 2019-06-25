@@ -29,7 +29,11 @@ if (isset($_SESSION['DEFAULT_LANG'])) {
 $lang_short = substr($lang, 0, 2);
 
 // set include & template names
-$CONTENT_INCLUDE = str_replace(".php", ".tpl", $cms->page_name);
+$PAGE_FILE_NAME = str_replace(".php", "", $cms->page_name);
+// set include & template names
+if (!isset($CONTENT_INCLUDE)) {
+	$CONTENT_INCLUDE = $PAGE_FILE_NAME.'.tpl';
+}
 $FORM_NAME = !isset($FORM_NAME) || !$FORM_NAME ? str_replace(".php", "", $cms->page_name) : $FORM_NAME;
 // set local page title
 $L_TITLE = ucfirst(str_replace('_', ' ', $cms->getPageName(1))).' - '.$G_TITLE;
@@ -52,7 +56,7 @@ if ($smarty) {
 	$smarty->setTemplateDir($cms->template_path);
 }
 if (isset($LANGUAGE_FOLDER)) {
-	$cms->kang_dir = $LANGUAGE_FOLDER;
+	$cms->lang_dir = $LANGUAGE_FOLDER;
 } else {
 	$cms->lang_dir = BASE.INCLUDES.LANG.CONTENT_PATH; // no outside
 }
@@ -64,14 +68,20 @@ $cms->cache_pictures_root = ROOT.$cms->cache_pictures;
 if (!is_dir($cms->cache_pictures_root)) {
 	mkdir($cms->cache_pictures_root);
 }
-
-// check if template names exist
-if (!file_exists($smarty->getTemplateDir()[0].DS.$MASTER_TEMPLATE_NAME)) {
-	// abort if master template could not be found
-	exit('MASTER TEMPLATE: '.$MASTER_TEMPLATE_NAME.' could not be found');
+// check for template include
+if (isset($USE_INCLUDE_TEMPLATE) && $USE_INCLUDE_TEMPLATE === true && !isset($TEMPLATE_NAME)) {
+	$TEMPLATE_NAME = $CONTENT_INCLUDE;
 }
-if (isset($TEMPLATE_NAME) && !file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_NAME)) {
-	exit('INCLUDE TEMPLATE: '.$TEMPLATE_NAME.' could not be found');
+
+if (!$AJAX_PAGE) {
+	// check if template names exist
+	if (!file_exists($smarty->getTemplateDir()[0].DS.$MASTER_TEMPLATE_NAME)) {
+		// abort if master template could not be found
+		exit('MASTER TEMPLATE: '.$MASTER_TEMPLATE_NAME.' could not be found');
+	}
+	if (isset($TEMPLATE_NAME) && !file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_NAME)) {
+		exit('INCLUDE TEMPLATE: '.$TEMPLATE_NAME.' could not be found');
+	}
 }
 
 // if the lang folder is different to the default one
@@ -91,24 +101,26 @@ if (false === strstr(BASE.INCLUDES.LANG.CONTENT_PATH, $cms->lang_dir) ||
 	}
 }
 
-// javascript translate data as template for auto translate
-if (!$TEMPLATE_TRANSLATE) {
-	$TEMPLATE_TRANSLATE = 'jsTranslate_'.$lang.'.tpl';
-	$cms->debug('LANG', 'Load lang: '.$lang.', for page file '.$TEMPLATE_TRANSLATE);
-} else {
-	// we assume we have some fixed set
-	// we must add _<$lang>
-	// if .tpl, put before .tpl
-	// if not .tpl, add _<$lang>.tpl
-	if (strpos($TEMPLATE_TRANSLATE, '.tpl')) {
-		$TEMPLATE_TRANSLATE = str_replace('.tpl', '_'.$lang.'.tpl', $TEMPLATE_TRANSLATE);
+if (!$AJAX_PAGE) {
+	// javascript translate data as template for auto translate
+	if (!$TEMPLATE_TRANSLATE) {
+		$TEMPLATE_TRANSLATE = 'jsTranslate_'.$lang.'.tpl';
+		$cms->debug('LANG', 'Load lang: '.$lang.', for page file '.$TEMPLATE_TRANSLATE);
 	} else {
-		$TEMPLATE_TRANSLATE .= '_'.$lang.'.tpl';
+		// we assume we have some fixed set
+		// we must add _<$lang>
+		// if .tpl, put before .tpl
+		// if not .tpl, add _<$lang>.tpl
+		if (strpos($TEMPLATE_TRANSLATE, '.tpl')) {
+			$TEMPLATE_TRANSLATE = str_replace('.tpl', '_'.$lang.'.tpl', $TEMPLATE_TRANSLATE);
+		} else {
+			$TEMPLATE_TRANSLATE .= '_'.$lang.'.tpl';
+		}
 	}
-}
-// if we can't find it, dump it
-if (!file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_TRANSLATE)) {
-	unset($TEMPLATE_TRANSLATE);
+	// if we can't find it, dump it
+	if (!file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_TRANSLATE)) {
+		unset($TEMPLATE_TRANSLATE);
+	}
 }
 
 //	$cms->debug("LANGUAGE", "L: $lang | ".$cms->lang_dir." | MO File: ".$cms->l->mofile);

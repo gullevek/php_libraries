@@ -45,7 +45,7 @@ class L10n extends \CoreLibs\Basic
 
 		// override path check
 		if (!is_dir($path)) {
-			$path = INCLUDES.LANG.CONTENT_PATH;
+			$path = BASE.INCLUDES.LANG.CONTENT_PATH;
 		}
 
 		$this->mofile = $path.$this->lang.".mo";
@@ -70,7 +70,7 @@ class L10n extends \CoreLibs\Basic
 
 		// override path check
 		if (!is_dir($path)) {
-			$path = INCLUDES.LANG.CONTENT_PATH;
+			$path = BASE.INCLUDES.LANG.CONTENT_PATH;
 		}
 
 		$this->mofile = $path.$this->lang.".mo";
