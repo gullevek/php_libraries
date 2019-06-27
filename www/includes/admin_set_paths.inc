@@ -91,7 +91,7 @@ if (false === strstr(BASE.INCLUDES.LANG.CONTENT_PATH, $cms->lang_dir) ||
 ) {
 	$cms->debug('LANG', 'Orig: '.BASE.INCLUDES.LANG.CONTENT_PATH.', New: '.$cms->lang_dir.' | Orig Lang: '.(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG).', New Lang: '.$lang);
 	$cms->l->l10nReloadMOfile($lang, $cms->lang_dir);
-		// if we have login class
+	// if we have login class
 	if ($login) {
 		$login->l->l10nReloadMOfile($lang, $cms->lang_dir);
 	}
@@ -118,13 +118,15 @@ if (!$AJAX_PAGE) {
 		}
 	}
 	// if we can't find it, dump it
-	if (!file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_TRANSLATE)) {
+	if ($smarty && !file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_TRANSLATE)) {
 		unset($TEMPLATE_TRANSLATE);
 	}
 }
 
 //	$cms->debug("LANGUAGE", "L: $lang | ".$cms->lang_dir." | MO File: ".$cms->l->mofile);
 $cms->debug("LANGUAGE", "SL: ".$_SESSION['DEFAULT_CHARSET']." | ".$_SESSION['LANG']." | ".$_SESSION['DEFAULT_LANG']);
-$cms->debug("TEMPLATE", "P: ".$smarty->getTemplateDir()[0]);
+if ($smarty) {
+	$cms->debug("TEMPLATE", "P: ".$smarty->getTemplateDir()[0]);
+}
 
 // __END__

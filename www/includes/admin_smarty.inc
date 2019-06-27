@@ -61,11 +61,11 @@ $cms->HEADER['CSS'] = CSS;
 $cms->HEADER['JS'] = JS;
 $cms->HEADER['ENCODING'] = $encoding;
 $cms->HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
-$cms->HEADER['STYLESHEET'] = $EDIT_STYLESHEET;
-$cms->HEADER['JAVASCRIPT'] = $EDIT_JAVASCRIPT;
+$cms->HEADER['STYLESHEET'] = isset($ADMIN_STYLESHEET) ? $ADMIN_STYLESHEET : ADMIN_STYLESHEET;
+$cms->HEADER['JAVASCRIPT'] = isset($ADMIN_JAVASCRIPT) ? $ADMIN_JAVASCRIPT : ADMIN_JAVASCRIPT;
 // html title
-$cms->HEADER['HTML_TITLE'] = (!isset($L_TITLE) || !$L_TITLE) ? $cms->l->__($G_TITLE) : $cms->l->__($L_TITLE);
-$cms->DATA['table_width'] = $PAGE_WIDTH ? $PAGE_WIDTH : PAGE_WIDTH;
+$cms->HEADER['HTML_TITLE'] = isset($L_TITLE) ? $cms->l->__($L_TITLE) : $cms->l->__(G_TITLE);
+$cms->DATA['table_width'] = isset($PAGE_WIDTH) ? $PAGE_WIDTH : PAGE_WIDTH;
 
 // messages = array('msg' =>, 'class' => 'error/warning/...')
 $cms->DATA['messages'] = $cms->messages;

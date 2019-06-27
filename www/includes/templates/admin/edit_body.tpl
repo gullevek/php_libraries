@@ -15,12 +15,14 @@
 	{if $STYLESHEET}
 	<link rel=stylesheet type="text/css" href="{$css}{$STYLESHEET}">
 	{/if}
-	{if $JAVASCRIPT}
-	<script language="JavaScript" src="{$js}{$JAVASCRIPT}"></script>
-	{/if}
-	{if $DATE_JAVASCRIPT}
-	<script language="JavaScript" src="{$JS}{$DATE_JAVASCRIPT}"></script>
-	{/if}
+	<script language="JavaScript">
+<!--
+function pop(theURL, winName, features) {
+	winName = window.open(theURL, winName, features);
+	winName.focus();
+}
+//-->
+	</script>
 </head>
 <body>
 <table width="{$table_width}" border="0" cellpadding="0" cellspacing="1">

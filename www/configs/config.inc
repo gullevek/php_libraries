@@ -26,6 +26,8 @@ DEFINE('LIBS', 'lib'.DS);
 DEFINE('CONFIGS', 'configs'.DS);
 // includes (strings, arrays for static, etc)
 DEFINE('INCLUDES', 'includes'.DS);
+// data folder (mostly in includes)
+DEFINE('DATA', 'data'.DS);
 // layout base path
 DEFINE('LAYOUT', 'layout'.DS);
 // pic-root (compatible to CMS)
@@ -153,13 +155,6 @@ DEFINE('DEV_SCHEMA', 'public');
 DEFINE('TEST_SCHEMA', 'public');
 DEFINE('LIVE_SCHEMA', 'public');
 
-/************* OTHER PATHS *****************/
-// File and Folder paths
-// ID is TARGET (first array element)
-//	$PATHS['test']['csv_path'] = '';
-//	$PATHS['test']['perl_bin'] = '';
-//	$PATHS['test']['redirect_url'] = '';
-
 /************* DB ACCESS *****************/
 if (file_exists(BASE.CONFIGS.'config.db.inc')) {
 	require BASE.CONFIGS.'config.db.inc';
@@ -167,6 +162,10 @@ if (file_exists(BASE.CONFIGS.'config.db.inc')) {
 /************* CORE HOST SETTINGS *****************/
 if (file_exists(BASE.CONFIGS.'config.host.inc')) {
 	require BASE.CONFIGS.'config.host.inc';
+}
+/************* OTHER PATHS *****************/
+if (file_exists(BASE.CONFIGS.'config.path.inc')) {
+	require BASE.CONFIGS.'config.path.inc';
 }
 
 // set the USE_DATABASE var, if there is nothing set, we assume TRUE
@@ -213,14 +212,13 @@ DEFINE('SITE_LANG', $SITE_LANG[$HOST_NAME]);
 DEFINE('SHOW_ALL_ERRORS', true); // show all errors if debug_all & show_error_handling are enabled
 
 /************* GENERAL PAGE TITLE ********/
-$G_TITLE = '<OVERALL PAGE TITLE>';
+DEFINE('G_TITLE', '<OVERALL FALLBACK PAGE TITLE>');
 
 /************ STYLE SHEETS / JS **********/
-$EDIT_STYLESHEET = 'edit.css';
-$EDIT_JAVASCRIPT = 'edit.js';
-
-$STYLESHEET = 'frontend.css';
-$JAVASCRIPT = 'frontend.js';
+DEFINE('ADMIN_STYLESHEET', 'edit.css');
+DEFINE('ADMIN_JAVASCRIPT', 'edit.js');
+DEFINE('STYLESHEET', 'frontend.css');
+DEFINE('JAVASCRIPT', 'frontend.js');
 
 // anything optional
 /************* INTERNAL ******************/

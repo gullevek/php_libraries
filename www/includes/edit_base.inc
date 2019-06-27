@@ -106,6 +106,11 @@ $data = array (
 // log action
 EditLog('Edit Submit', serialize($data));
 
+// define all needed smarty stuff for the general HTML/page building
+$HEADER['CSS'] = CSS;
+$HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
+$HEADER['STYLESHEET'] = isset($ADMIN_STYLESHEET) ? $ADMIN_STYLESHEET : ADMIN_STYLESHEET;
+
 if ($form->my_page_name == 'edit_order') {
 	// get is for "table_name" and "where" only
 	$table_name = isset($_GET['table_name']) ? $_GET['table_name'] : '';
@@ -176,18 +181,12 @@ if ($form->my_page_name == 'edit_order') {
 		);
 	} // while read data ...
 
-	// define all needed smarty stuff for the general HTML/page building
-	$HEADER['CSS'] = CSS;
-	$HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
-	$HEADER['JS'] = JS;
-	$HEADER['STYLESHEET'] = $EDIT_STYLESHEET;
-	$HEADER['JAVASCRIPT'] = $EDIT_JAVASCRIPT;
 	// html title
-	$HEADER['HTML_TITLE'] = (!$L_TITLE) ? $smarty->l10n->__($G_TITLE) : $smarty->l10n->__($L_TITLE);
+	$HEADER['HTML_TITLE'] = $form->l->__('Edit Order');
 
 	// error msg
 	if ($error) {
-		$messages[] = array('msg' => $msg, 'class' => 'error', 'width' => '100%');
+		$messages[] = array ('msg' => $msg, 'class' => 'error', 'width' => '100%');
 	}
 	$DATA['form_error_msg'] = $messages;
 
@@ -234,13 +233,6 @@ if ($form->my_page_name == 'edit_order') {
 	$form->formProcedureSave();
 	$form->formProcedureDelete();
 	$form->formProcedureDeleteFromElementList($element_list, $remove_name);
-
-	// define all needed smarty stuff for the general HTML/page building
-	$HEADER['CSS'] = CSS;
-	$HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
-	$HEADER['JS'] = JS;
-	$HEADER['STYLESHEET'] = $EDIT_STYLESHEET;
-	$HEADER['JAVASCRIPT'] = $EDIT_JAVASCRIPT;
 
 	$DATA['table_width'] = $table_width;
 
@@ -314,7 +306,7 @@ if ($form->my_page_name == 'edit_order') {
 	$DATA['page_name'] = $menuarray[$position]["page_name"];
 	$L_TITLE = $DATA['page_name'];
 	// html title
-	$HEADER['HTML_TITLE'] = ((!$L_TITLE) ? $form->l->__($G_TITLE) : $form->l->__($L_TITLE));
+	$HEADER['HTML_TITLE'] = $form->l->__($L_TITLE);
 	// END MENU
 	// LOAD AND NEW
 	$DATA['load'] = $form->formCreateLoad();
@@ -445,7 +437,7 @@ if (is_dir(BASE.TEMPLATES_C)) {
 if (is_dir(BASE.CACHE)) {
 	$smarty->setCacheDir(BASE.CACHE);
 }
-$smarty->display($EDIT_TEMPLATE, $lang, $lang);
+$smarty->display($EDIT_TEMPLATE, 'editAdmin_'.$lang, 'editAdmin_'.$lang);
 
 // debug output
 echo $login->printErrorMsg();

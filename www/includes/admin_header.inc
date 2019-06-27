@@ -33,12 +33,14 @@ if (!isset($encoding)) {
 if (session_id() && $_SESSION['DEFAULT_LANG']) {
 	$lang = $_SESSION['DEFAULT_LANG'];
 } elseif (!$lang) {
-	$lang = DEFAULT_LANG;
+	$lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
 }
 // end the stop of the output flow, but only if we didn't request a csv file download
 if (array_key_exists('action', $_POST) && $_POST['action'] != 'download_csv') {
 	header("Content-type: text/html; charset=".$encoding);
-	ob_end_flush();
+}
+if ($AJAX_PAGE && !$ZIP_STREAM) {
+	header("Content-Type: application/json; charset=UTF-8");
 }
 //------------------------------ basic variable settings start
 
@@ -59,6 +61,8 @@ $cms->menu_show_flag = 'main';
 $cms->dbInfo();
 // set acl
 $cms->acl = $login->acl;
+// flush
+ob_end_flush();
 //------------------------------ class init end
 
 //------------------------------ logging start

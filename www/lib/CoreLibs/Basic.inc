@@ -1241,8 +1241,8 @@ class Basic
 	// DESC  : calculates the bytes based on a string with nnG, nnM, etc
 	public static function stringByteFormat($number)
 	{
-		$number = (int)trim($number);
 		$last = strtolower($number[strlen($number) - 1]);
+		$number = (int)trim($number);
 		switch ($last) {
 			case 't':
 				$number *= 1024;

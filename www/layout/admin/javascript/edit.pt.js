@@ -14,7 +14,7 @@ if (!DEBUG) {
 // METHOD: pop
 // PARAMS: url, window name, features
 // RETURN: none
-// DESC  : opens a popup window with winNAme and given features (string)
+// DESC  : opens a popup window with winName and given features (string)
 function pop(theURL, winName, features) {
 	winName = window.open(theURL, winName, features);
 	winName.focus();
