@@ -1453,7 +1453,7 @@ class Basic
 	// PARAMS: start date, end date
 	// RETURN: overall days, week days, weekend days as array 0...2 or named
 	// DESC  : calculates the days between two dates
-	private function calcDaysInterval($start_date, $end_date, $return_named = false)
+	public static function calcDaysInterval($start_date, $end_date, $return_named = false)
 	{
 		// pos 0 all, pos 1 weekday, pos 2 weekend
 		$days = array ();

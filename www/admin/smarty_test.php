@@ -16,10 +16,10 @@ $CSS_NAME = 'smart_test.css';
 $USE_PROTOTYPE = false;
 $USE_JQUERY = true;
 if ($USE_PROTOTYPE) {
-	$EDIT_JAVASCRIPT = 'edit.pt.js';
+	$ADMIN_JAVASCRIPT = 'edit.pt.js';
 	$JS_NAME = 'prototype.test.js';
-} else if ($USE_JQUERY) {
-	$EDIT_JAVASCRIPT = 'edit.jq.js';
+} elseif ($USE_JQUERY) {
+	$ADMIN_JAVASCRIPT = 'edit.jq.js';
 	$JS_NAME = 'jquery.test.js';
 }
 $PAGE_WIDTH = "100%";
