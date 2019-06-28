@@ -16,34 +16,6 @@ if ($cms->HEADER['USE_PROTOTYPE']) {
 // jquery and prototype should not be used together
 $cms->HEADER['USE_JQUERY'] = isset($USE_JQUERY) ? $USE_JQUERY : USE_JQUERY; // don't use either of those two together
 
-// set basic template path (tmp)
-// paths are set in the 'set_paths.inc' file
-
-// check if we have an external file with the template name
-if (file_exists($cms->includes.$cms->INC_TEMPLATE_NAME) && is_file($cms->includes.$cms->INC_TEMPLATE_NAME)) {
-	include($cms->includes.$cms->INC_TEMPLATE_NAME);
-}
-// additional per page Javascript include
-$cms->JS_INCLUDE = '';
-if (file_exists($cms->javascript.$cms->JS_TEMPLATE_NAME) && is_file($cms->javascript.$cms->JS_TEMPLATE_NAME)) {
-	$cms->JS_INCLUDE = $cms->javascript.$cms->JS_TEMPLATE_NAME;
-}
-// per page css file
-$cms->CSS_INCLUDE = '';
-if (file_exists($cms->css.$cms->CSS_TEMPLATE_NAME) && is_file($cms->css.$cms->CSS_TEMPLATE_NAME)) {
-	$cms->CSS_INCLUDE = $cms->css.$cms->CSS_TEMPLATE_NAME;
-}
-// optional CSS file
-$cms->CSS_SPECIAL_INCLUDE = '';
-if (file_exists($cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME) && is_file($cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME)) {
-	$cms->CSS_SPECIAL_INCLUDE = $cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME;
-}
-// optional JS file
-$cms->JS_SPECIAL_INCLUDE = '';
-if (file_exists($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME) && is_file($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME)) {
-	$cms->JS_SPECIAL_INCLUDE = $cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME;
-}
-
 // the actual include files for javascript (per page)
 $cms->HEADER['JS_INCLUDE'] = $cms->JS_INCLUDE;
 $cms->HEADER['CSS_INCLUDE'] = $cms->CSS_INCLUDE;
@@ -99,6 +71,10 @@ if (is_dir(BASE.TEMPLATES_C)) {
 if (is_dir(BASE.CACHE)) {
 	$smarty->setCacheDir(BASE.CACHE);
 }
-$smarty->display($MASTER_TEMPLATE_NAME, $CACHE_ID.($CACHE_ID ? '_' : '').$lang, $COMPILE_ID.($COMPILE_ID ? '_' : '').$lang);
+$smarty->display(
+	$MASTER_TEMPLATE_NAME,
+	$cms->CACHE_ID.($cms->CACHE_ID ? '_' : '').$lang,
+	$cms->COMPILE_ID.($cms->COMPILE_ID ? '_' : '').$lang
+);
 
 // __END__

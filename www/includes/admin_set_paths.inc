@@ -48,6 +48,9 @@ $cms->CSS_TEMPLATE_NAME = str_replace(".tpl", ".css", $CONTENT_INCLUDE);
 $cms->CSS_SPECIAL_TEMPLATE_NAME = $CSS_NAME;
 // special JS file
 $cms->JS_SPECIAL_TEMPLATE_NAME = $JS_NAME;
+// compile & cache id
+$cms->CACHE_ID = isset($CACHE_ID) ? $CACHE_ID : CACHE_ID;
+$cms->COMPILE_ID = isset($COMPILE_ID) ? $COMPILE_ID : CACHE_ID;
 
 // set basic template path (tmp)
 $cms->includes = BASE.INCLUDES; // no longer in templates, only global
@@ -68,12 +71,41 @@ $cms->cache_pictures_root = ROOT.$cms->cache_pictures;
 if (!is_dir($cms->cache_pictures_root)) {
 	mkdir($cms->cache_pictures_root);
 }
-// check for template include
-if (isset($USE_INCLUDE_TEMPLATE) && $USE_INCLUDE_TEMPLATE === true && !isset($TEMPLATE_NAME)) {
-	$TEMPLATE_NAME = $CONTENT_INCLUDE;
+// check if we have an external file with the template name
+if (file_exists($cms->includes.$cms->INC_TEMPLATE_NAME) &&
+	is_file($cms->includes.$cms->INC_TEMPLATE_NAME)
+) {
+	include($cms->includes.$cms->INC_TEMPLATE_NAME);
 }
-
+// only CSS/JS/etc include stuff if we have non AJAX page
 if (!$AJAX_PAGE) {
+	// check for template include
+	if (isset($USE_INCLUDE_TEMPLATE) && $USE_INCLUDE_TEMPLATE === true && !isset($TEMPLATE_NAME)) {
+		$TEMPLATE_NAME = $CONTENT_INCLUDE;
+		// add to cache & compile id
+		$cms->COMPILE_ID .= '_'.$TEMPLATE_NAME;
+		$cms->CACHE_ID .= '_'.$TEMPLATE_NAME;
+	}
+	// additional per page Javascript include
+	$cms->JS_INCLUDE = '';
+	if (file_exists($cms->javascript.$cms->JS_TEMPLATE_NAME) && is_file($cms->javascript.$cms->JS_TEMPLATE_NAME)) {
+		$cms->JS_INCLUDE = $cms->javascript.$cms->JS_TEMPLATE_NAME;
+	}
+	// per page css file
+	$cms->CSS_INCLUDE = '';
+	if (file_exists($cms->css.$cms->CSS_TEMPLATE_NAME) && is_file($cms->css.$cms->CSS_TEMPLATE_NAME)) {
+		$cms->CSS_INCLUDE = $cms->css.$cms->CSS_TEMPLATE_NAME;
+	}
+	// optional CSS file
+	$cms->CSS_SPECIAL_INCLUDE = '';
+	if (file_exists($cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME) && is_file($cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME)) {
+		$cms->CSS_SPECIAL_INCLUDE = $cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME;
+	}
+	// optional JS file
+	$cms->JS_SPECIAL_INCLUDE = '';
+	if (file_exists($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME) && is_file($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME)) {
+		$cms->JS_SPECIAL_INCLUDE = $cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME;
+	}
 	// check if template names exist
 	if (!file_exists($smarty->getTemplateDir()[0].DS.$MASTER_TEMPLATE_NAME)) {
 		// abort if master template could not be found

@@ -132,6 +132,10 @@ DEFINE('SESSION_NAME', 'SESSION_NAME'.SERVER_NAME_HASH);
 // SET_SESSION_NAME should be set in the header if a special session name is needed
 // DEFINE('SET_SESSION_NAME', SESSION_NAME);
 
+/************* CACHE/COMPILE IDS *************/
+DEFINE('CACHE_ID', 'CACHE_'.SERVER_NAME_HASH);
+DEFINE('COMPILE_ID', 'COMPILE_'.SERVER_NAME_HASH);
+
 /************* LANGUAGE / ENCODING *******/
 DEFINE('DEFAULT_LANG', 'en_utf8');
 // default web page encoding setting
