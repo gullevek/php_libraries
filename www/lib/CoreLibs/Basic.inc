@@ -1459,6 +1459,8 @@ class Basic
 		$days = array ();
 		$start = new \DateTime($start_date);
 		$end = new \DateTime($end_date);
+		// so we include the last day too, we need to add +1 second in the time
+		$end->setTime(0, 0, 1);
 
 		$days[0] = $end->diff($start)->days;
 
