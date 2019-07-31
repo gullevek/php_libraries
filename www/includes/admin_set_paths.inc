@@ -106,13 +106,15 @@ if (!$AJAX_PAGE) {
 	if (file_exists($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME) && is_file($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME)) {
 		$cms->JS_SPECIAL_INCLUDE = $cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME;
 	}
-	// check if template names exist
-	if (!file_exists($smarty->getTemplateDir()[0].DS.$MASTER_TEMPLATE_NAME)) {
-		// abort if master template could not be found
-		exit('MASTER TEMPLATE: '.$MASTER_TEMPLATE_NAME.' could not be found');
-	}
-	if (isset($TEMPLATE_NAME) && !file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_NAME)) {
-		exit('INCLUDE TEMPLATE: '.$TEMPLATE_NAME.' could not be found');
+	if ($smarty) {
+		// check if template names exist
+		if (!file_exists($smarty->getTemplateDir()[0].DS.$MASTER_TEMPLATE_NAME)) {
+			// abort if master template could not be found
+			exit('MASTER TEMPLATE: '.$MASTER_TEMPLATE_NAME.' could not be found');
+		}
+		if (isset($TEMPLATE_NAME) && !file_exists($smarty->getTemplateDir()[0].DS.$TEMPLATE_NAME)) {
+			exit('INCLUDE TEMPLATE: '.$TEMPLATE_NAME.' could not be found');
+		}
 	}
 }
 

@@ -1322,6 +1322,7 @@ class Basic
 		if (preg_match("/(d|h|m|s|ms)/", $timestring)) {
 			// pos for preg match read + multiply factor
 			$timegroups = array (2 => 86400, 4 => 3600, 6 => 60, 8 => 1);
+			$matches = array ();
 			// preg match: 0: full strsing
 			// 2, 4, 6, 8 are the to need values
 			preg_match("/^((\d+)d ?)?((\d+)h ?)?((\d+)m ?)?((\d+)s ?)?((\d+)ms)?$/", $timestring, $matches);

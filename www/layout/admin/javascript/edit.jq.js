@@ -221,6 +221,38 @@ function getTimestamp()
 	return date.getTime();
 }
 
+// METHOD: dec2hex
+// PARAMS: decimal string
+// RETURN: string
+// DESC  : dec2hex :: Integer -> String
+//         i.e. 0-255 -> '00'-'ff'
+function dec2hex(dec)
+{
+	return ('0' + dec.toString(16)).substr(-2);
+}
+
+// METHOD: generateId
+// PARAMS: lenght in int
+// RETURN: random string
+// DESC  : generateId :: Integer -> String
+//         only works on mondern browsers
+function generateId(len)
+{
+	var arr = new Uint8Array((len || 40) / 2);
+	(window.crypto || window.msCrypto).getRandomValues(arr);
+	return Array.from(arr, dec2hex).join('');
+}
+
+// METHOD: randomIdF()
+// PARAMS: none
+// RETURN: not true random string
+// DESC  : creates a pseudo random string of 10 characters
+//         after many runs it will create duplicates
+function randomIdF()
+{
+	return Math.random().toString(36).substring(2);
+}
+
 // METHOD: isObject
 // PARAMS: possible object
 // RETURN: true/false if it is an object or not
@@ -554,6 +586,8 @@ function phfo(tree)
 // *** DOM MANAGEMENT FUNCTIONS
 
 // BLOCK: html wrappers for quickly creating html data blocks
+
+// NOTE  : OLD FORMAT which misses multiple block set
 // METHOD: html_options
 // PARAMS: name/id, array for the options, selected item uid
 //         options_only [def false] if this is true, it will not print the select part
@@ -564,14 +598,35 @@ function phfo(tree)
 //         the array needs to be key -> value format. key is for the option id and value is for the data output
 function html_options(name, data, selected = '', options_only = false, return_string = false, sort = '')
 {
+	// wrapper to new call
+	return html_options_block(name, data, selected, false, options_only, return_string, sort);
+}
+
+// NOTE  : USE THIS CALL, the above one is deprecated
+// METHOD: html_options
+// PARAMS: name/id, array for the options,
+//         selected item uid
+//         multiple [def false] if this is true, the drop down will be turned into multiple select
+//         options_only [def false] if this is true, it will not print the select part
+//         return_string [def false]: return as string and not as element
+//         sort [def '']: if empty as is, else allowed 'keys', 'values' all others are ignored
+// RETURN: html with build options block
+// DESC  : creates an select/options drop down block.
+//         the array needs to be key -> value format. key is for the option id and value is for the data output
+function html_options_block(name, data, selected = '', multiple = false, options_only = false, return_string = false, sort = '')
+{
 	var content = [];
 	var element_select;
+	var select_options = {};
 	var element_option;
 	var data_list = []; // for sorted output
 	var value;
-	var options;
+	var option;
+	if (multiple === true) {
+		select_options.multiple = '';
+	}
 	// set outside select, gets stripped on return if options only is true
-	element_select = cel('select', name);
+	element_select = cel('select', name, '', [], select_options);
 	// console.log('Call for %s, options: %s', name, options_only);
 	if (sort == 'keys') {
 		data_list = Object.keys(data).sort();
