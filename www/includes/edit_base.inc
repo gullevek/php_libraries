@@ -340,6 +340,7 @@ if ($form->my_page_name == 'edit_order') {
 				$elements[] = $form->formCreateElement("edit_language_id");
 				$elements[] = $form->formCreateElement("edit_scheme_id");
 				$elements[] = $form->formCreateElementListTable("edit_access_user");
+				$elements[] = $form->formCreateElement("additional_acl");
 				break;
 			case "edit_schemes":
 				$elements[] = $form->formCreateElement("enabled");

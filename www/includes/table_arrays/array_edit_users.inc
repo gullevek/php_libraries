@@ -103,7 +103,8 @@ $edit_users = array (
 		"email" => array (
 			"value" => $GLOBALS["email"],
 			"output_name" => "E-Mail",
-			"type" => "text"
+			"type" => "text",
+			"error_check" => "email"
 		),
 		"last_name" => array (
 			"value" => $GLOBALS["last_name"],
@@ -173,7 +174,15 @@ $edit_users = array (
 				"1" => "Yes",
 				"0" => "No"
 			)
-		)
+		),
+		"additional_acl" => array (
+			"value" => $GLOBALS["additional_acl"],
+			"output_name" => "Additional ACL (as JSON)",
+			"type" => "textarea",
+			"error_check" => "json",
+			"rows" => 10,
+			"cols" => 60
+		),
 	),
 	"load_query" => "SELECT edit_user_id, username, enabled, debug, db_debug, strict, locked, login_error_count FROM edit_user ORDER BY username",
 	"table_name" => "edit_user",

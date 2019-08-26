@@ -844,6 +844,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			//if ($value['mandatory'] && $value['error_check'])
 			// if error value set && somethign input, check if input okay
 			if ($value['error_check'] && $this->table_array[$key]['value']) {
+				$this->debug('ERROR CHECK', 'Key: '.$key.' => '.$value['error_check']);
 				// each error check can be a piped seperated value, lets split it
 				// $this->debug('edit', $value['error_check']);
 				foreach (explode('|', $value['error_check']) as $error_check) {
@@ -916,6 +917,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							// password and CONFIRM_password need to be the same
 							if ($this->table_array[$key]['value'] != $this->table_array[$key]['CONFIRM_value']) {
 								// error
+							}
+							break;
+						case 'json':
+							// check if valid json
+							$json_out = json_decode($this->table_array[$key]['value'], true);
+							$this->debug('JSON ENCODE', 'LAST ERROR: '.json_last_error());
+							if (json_last_error()) {
+								$this->msg .= sprintf($this->l->__('Please enter a valid JSON string for the field <b>%s<b>: %s'), $this->table_array[$key]['output_name'], json_last_error_msg());
 							}
 							break;
 					} // switch
@@ -1585,7 +1594,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			if ($data_array['type'] == 'drop_down_db') {
 				$md_q = md5($data_array['query']);
 				while ($res = $this->dbReturn($data_array['query'])) {
-					$this->debug('edit', 'Q[$md_q] pos: '.$this->cursor_ext[$md_q]['pos'].' | want: '.$data_array['preset'].' | set: '.$data['preset'][$el_name]);
+					$this->debug('edit', 'Q['.$md_q.'] pos: '.$this->cursor_ext[$md_q]['pos'].' | want: '.$data_array['preset'].' | set: '.$data['preset'][$el_name]);
 					// first is default for this element
 					if (!$data['preset'][$el_name] && ($this->cursor_ext[$md_q]['pos'] == $data_array['preset'])) {
 						$data['preset'][$el_name] = $res[0];

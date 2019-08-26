@@ -32,6 +32,7 @@ CREATE TABLE edit_user (
 	locked	SMALLINT DEFAULT 0,
 	password_change_date	TIMESTAMP WITHOUT TIME ZONE, -- only when password is first set or changed
 	password_change_interval	INTERVAL, -- null if no change is needed, or d/m/y time interval
+	additional_acl	JSONB, -- additional ACL as JSON string (can be set by other pages)
 	FOREIGN KEY (connect_edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_language_id) REFERENCES edit_language (edit_language_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,

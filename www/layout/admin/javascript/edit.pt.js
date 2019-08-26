@@ -684,14 +684,15 @@ function html_options(name, data, selected = '', options_only = false, return_st
 // METHOD: html_options
 // PARAMS: name/id, array for the options,
 //         selected item uid
-//         multiple [def false] if this is true, the drop down will be turned into multiple select
+//         multiple [def 0] if this is 1 or larger, the drop down will be turned into multiple select
+//                          the number sets the size value unless it is 1, then it is default
 //         options_only [def false] if this is true, it will not print the select part
 //         return_string [def false]: return as string and not as element
 //         sort [def '']: if empty as is, else allowed 'keys', 'values' all others are ignored
 // RETURN: html with build options block
 // DESC  : creates an select/options drop down block.
 //         the array needs to be key -> value format. key is for the option id and value is for the data output
-function html_options_block(name, data, selected = '', multiple = false, options_only = false, return_string = false, sort = '')
+function html_options_block(name, data, selected = '', multiple = 0, options_only = false, return_string = false, sort = '')
 {
 	var content = [];
 	var element_select;
@@ -700,8 +701,11 @@ function html_options_block(name, data, selected = '', multiple = false, options
 	var data_list = []; // for sorted output
 	var value;
 	var option;
-	if (multiple === true) {
+	if (multiple > 0) {
 		select_options.multiple = '';
+		if (multiple > 1) {
+			select_options.size = multiple;
+		}
 	}
 	// set outside select, gets stripped on return if options only is true
 	element_select = cel('select', name, '', [], select_options);
