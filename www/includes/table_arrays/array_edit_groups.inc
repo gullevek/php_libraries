@@ -37,7 +37,15 @@ $edit_groups = array (
 			"int_null" => 1,
 			"type" => "drop_down_db",
 			"query" => "SELECT edit_scheme_id, name FROM edit_scheme WHERE enabled = 1 ORDER BY name"
-		)
+		),
+		"additional_acl" => array (
+			"value" => $GLOBALS["additional_acl"],
+			"output_name" => "Additional ACL (as JSON)",
+			"type" => "textarea",
+			"error_check" => "json",
+			"rows" => 10,
+			"cols" => 60
+		),
 	),
 	"load_query" => "SELECT edit_group_id, name, enabled FROM edit_group ORDER BY name",
 	"table_name" => "edit_group",

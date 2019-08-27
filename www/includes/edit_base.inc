@@ -392,6 +392,7 @@ if ($form->my_page_name == 'edit_order') {
 				$elements[] = $form->formCreateElement("edit_access_right_id");
 				$elements[] = $form->formCreateElement("edit_scheme_id");
 				$elements[] = $form->formCreateElementListTable("edit_page_access");
+				$elements[] = $form->formCreateElement("additional_acl");
 				break;
 			case "edit_visible_group":
 				$elements[] = $form->formCreateElement("name");
