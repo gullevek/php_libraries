@@ -334,7 +334,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		$q_vars = '';
 		$q_where = '';
 		foreach ($this->table_array as $column => $data_array) {
-/********************************* START FILE *************************************/
+			/********************************* START FILE *************************************/
 			// file upload
 			if ($this->table_array[$column]['file']) {
 				// falls was im tmp drinnen, sprich ein upload, datei kopieren, Dateinamen in db schreiben
@@ -381,7 +381,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 					}
 				} // delete or upload
 			} // file IF
-/********************************* END FILE **************************************/
+			/********************************* END FILE **************************************/
 
 			// do not write 'pk' (primary key) or 'view' values
 			if (!$this->table_array[$column]['pk'] && $this->table_array[$column]['type'] != 'view' && strlen($column) > 0) {
@@ -425,15 +425,21 @@ class ArrayIO extends \CoreLibs\DB\IO
 					}
 					$q_data .= $_value;
 				} else {
-					// normal string
-					$q_data .= "'";
-					// if add slashes do convert & add slashes else write AS is
-					if ($addslashes) {
-						$q_data .= $this->dbEscapeString($this->convertEntities($this->table_array[$column]['value']));
+					// if the error check is json, we set field to null if NOT set
+					// else normal string write
+					if ($this->table_array[$column]['error_check'] == 'json' && !$this->table_array[$column]['value']) {
+						$q_data .= 'NULL';
 					} else {
-						$q_data .= $this->dbEscapeString($this->table_array[$column]['value']);
+						// normal string
+						$q_data .= "'";
+						// if add slashes do convert & add slashes else write AS is
+						if ($addslashes) {
+							$q_data .= $this->dbEscapeString($this->convertEntities($this->table_array[$column]['value']));
+						} else {
+							$q_data .= $this->dbEscapeString($this->table_array[$column]['value']);
+						}
+						$q_data .= "'";
 					}
-					$q_data .= "'";
 				}
 			}
 		} // while ...
