@@ -16,6 +16,7 @@ CREATE TABLE edit_user (
 	first_name_furigana	VARCHAR,
 	last_name_furigana	VARCHAR,
 	enabled	SMALLINT NOT NULL DEFAULT 0,
+	deleted	SMALLINT NOT NULL DEFAULT 0,
 	debug	SMALLINT NOT NULL DEFAULT 0,
 	db_debug	SMALLINT NOT NULL DEFAULT 0,
 	email	VARCHAR,

@@ -1259,9 +1259,10 @@ class IO extends \CoreLibs\Basic
 	// WAS   : db_fetch_array
 	// PARAMS: cusors -> the cursor from db_exec or pg_query/pg_exec/mysql_query
 	//                   if not set will use internal cursor, if not found, stops with 0 (error)
+	//         assoc_only -> false is default, if true only assoc rows
 	// RETURN: a mixed row
 	// DESC  : executes a cursor and returns the data, if no more data 0 will be returned
-	public function dbFetchArray($cursor = 0)
+	public function dbFetchArray($cursor = 0, $assoc_only = false)
 	{
 		// return false if no query or cursor set ...
 		if (!$cursor) {
@@ -1272,15 +1273,21 @@ class IO extends \CoreLibs\Basic
 			$this->__dbError();
 			return false;
 		}
-		return $this->__dbConvertEncoding($this->db_functions->__dbFetchArray($cursor));
+		return $this->__dbConvertEncoding(
+			$this->db_functions->__dbFetchArray(
+				$cursor,
+				$this->db_functions->__dbResultType($assoc_only)
+			)
+		);
 	}
 
 	// METHOD: dbReturnRow
 	// WAS   : db_return_row
 	// PARAMS: query -> the query to be executed
+	//         assoc_only -> if true, only return assoc entry, else both (pgsql)
 	// RETURN: mixed db result
 	// DESC  : returns the FIRST row of the given query
-	public function dbReturnRow($query)
+	public function dbReturnRow($query, $assoc_only = false)
 	{
 		if (!$query) {
 			$this->error_id = 11;
@@ -1294,7 +1301,7 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$cursor = $this->dbExec($query);
-		$result = $this->dbFetchArray($cursor);
+		$result = $this->dbFetchArray($cursor, $assoc_only);
 		return $result;
 	}
 

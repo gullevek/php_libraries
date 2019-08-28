@@ -190,12 +190,27 @@ class PgSQL
 	// DESC  : wrapper for pg_fetch_array
 	public function __dbFetchArray($cursor, $result_type = '')
 	{
+		if ($result_type == true) {
+			$result_type = PGSQL_ASSOC;
+		}
 		// result type is passed on as is [should be checked]
 		if ($result_type) {
 			return pg_fetch_array($cursor, null, $result_type);
 		} else {
 			return pg_fetch_array($cursor);
 		}
+	}
+
+	// METHOD: __dbResultType
+	// PARAMS: true/false for ASSOC only or BOTH
+	// RETURN: PGSQL assoc type
+	// DESC  : simple match up between assoc true/false
+	public function __dbResultType($assoc_type)
+	{
+		if ($assoc_type == true) {
+			return PGSQL_ASSOC;
+		}
+		return ''; // fallback to default
 	}
 
 	// METHOD: __dbFetchAll

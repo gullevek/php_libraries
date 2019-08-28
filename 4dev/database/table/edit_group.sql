@@ -10,6 +10,7 @@ CREATE TABLE edit_group (
 	edit_group_id	SERIAL PRIMARY KEY,
 	name	VARCHAR,
 	enabled	SMALLINT NOT NULL DEFAULT 0,
+	deleted	SMALLINT DEFAULT 0,
 	edit_scheme_id INT,
 	edit_access_right_id INT NOT NULL,
 	alternative_acl	JSONB,
