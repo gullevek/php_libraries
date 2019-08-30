@@ -1088,6 +1088,84 @@ class Basic
 		return false;
 	}
 
+	// METHOD: arrayMergeRecursive
+	// PARAMS: array, array, ..., true/false flag how to handle key
+	//         key flag: true: handle keys as string or int, default false: all keys are string
+	// RETURN: merged array
+	// DESC  : correctly recursive merges as an array as array_merge_recursive just glues things together
+	public static function arrayMergeRecursive()
+	{
+		// croak on not enough arguemnts (we need at least two)
+		if (func_num_args() < 2) {
+			trigger_error(__FUNCTION__ .' needs two or more array arguments', E_USER_WARNING);
+			return;
+		}
+		// default key is not string
+		$key_is_string = false;
+		$arrays = func_get_args();
+		// if last is not array, then assume it is trigger for key is always string
+		if (!is_array(end($arrays))) {
+			if (array_pop($arrays)) {
+				$key_is_string = true;
+			}
+		}
+		// check that arrays count is at least two, else we don't have enough to do anything
+		if (count($arrays) < 2) {
+			trigger_error(__FUNCTION__.' needs two or more array arguments', E_USER_WARNING);
+			return;
+		}
+		$merged = array();
+		while ($arrays) {
+			$array = array_shift($arrays);
+			if (!is_array($array)) {
+				trigger_error(__FUNCTION__ .' encountered a non array argument', E_USER_WARNING);
+				return;
+			}
+			if (!$array) {
+				continue;
+			}
+			foreach ($array as $key => $value) {
+				// if string or if key is assumed to be string do key match else add new entry
+				if (is_string($key) || $key_is_string === false) {
+					if (is_array($value) && array_key_exists($key, $merged) && is_array($merged[$key])) {
+						// $merged[$key] = call_user_func(__METHOD__, $merged[$key], $value, $key_is_string);
+						$merged[$key] = Basic::arrayMergeRecursive($merged[$key], $value, $key_is_string);
+					} else {
+						$merged[$key] = $value;
+					}
+				} else {
+					$merged[] = $value;
+				}
+			}
+		}
+		return $merged;
+	}
+
+	// METHOD: arrayFlatForKey
+	// PARAMS: array (nested)
+	//         search, key to find that has no sub leaf and will be pushed up
+	// RETURN: modified array
+	// DESC  : searches for key -> value in an array tree and writes the value one level up
+	//         this will remove this leaf will all other values
+	public static function arrayFlatForKey($array, $search)
+	{
+		foreach ($array as $key => $value) {
+			// if it is not an array do just nothing
+			if (is_array($value)) {
+				// probe it has search key
+				if (isset($value[$search])) {
+					// set as current
+					$array[$key] = $value[$search];
+				} else {
+					// call up next node down
+					// $array[$key] = call_user_func(__METHOD__, $value, $search);
+					$array[$key] = Basic::arrayFlatForKey($value, $search);
+				}
+			}
+		}
+		return $array;
+	}
+
 	// METHOD: inArrayAny
 	// WAS   : in_array_any
 	// PARAMS: needle: array

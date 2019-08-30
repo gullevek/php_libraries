@@ -51,6 +51,7 @@ INSERT INTO edit_page_menu_group VALUES ((SELECT edit_page_id FROM edit_page WHE
 DELETE FROM edit_access_right;
 INSERT INTO edit_access_right (name, level, type) VALUES ('Default', -1, 'default');
 INSERT INTO edit_access_right (name, level, type) VALUES ('No Access', 0, 'none');
+INSERT INTO edit_access_right (name, level, type) VALUES ('List', 10, 'list');
 INSERT INTO edit_access_right (name, level, type) VALUES ('Read', 20, 'read');
 INSERT INTO edit_access_right (name, level, type) VALUES ('Translator', 30, 'mod_trans');
 INSERT INTO edit_access_right (name, level, type) VALUES ('Modify', 40, 'mod');

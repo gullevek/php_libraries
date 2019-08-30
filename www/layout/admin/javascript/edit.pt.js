@@ -683,7 +683,7 @@ function html_options(name, data, selected = '', options_only = false, return_st
 // NOTE  : USE THIS CALL, the above one is deprecated
 // METHOD: html_options
 // PARAMS: name/id, array for the options,
-//         selected item uid
+//         selected item uid [drop down string, multi select array]
 //         multiple [def 0] if this is 1 or larger, the drop down will be turned into multiple select
 //                          the number sets the size value unless it is 1, then it is default
 //         options_only [def false] if this is true, it will not print the select part
@@ -722,14 +722,18 @@ function html_options_block(name, data, selected = '', multiple = 0, options_onl
 	// for (const [key, value] of Object.entries(data)) {
 	for (const key of data_list) {
 		value = data[key];
-		console.log('create [%s] options: key: %s, value: %s', name, key, value);
+		// console.log('create [%s] options: key: %s, value: %s', name, key, value);
 		// basic options init
 		options = {
 			'label': value,
 			'value': key
 		};
 		// add selected if matching
-		if (selected == key) {
+		if (multiple == 0 && !Array.isArray(selected) && selected == key) {
+			options.selected = '';
+		}
+		// for multiple, we match selected as array
+		if (multiple == 1 && Array.isArray(selected) && selected.indexOf(key) != -1) {
 			options.selected = '';
 		}
 		// create the element option
