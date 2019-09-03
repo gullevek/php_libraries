@@ -442,7 +442,7 @@ class Basic
 	//         on second call it sends the end time and then also prints the running time
 	public function runningTime($simple = false)
 	{
-		list($micro, $timestamp) = explode(" ", microtime());
+		list($micro, $timestamp) = explode(' ', microtime());
 		$string = '';
 		$running_time = '';
 		if (!$this->starttime) {

@@ -411,6 +411,7 @@ if ($form->my_page_name == 'edit_order') {
 				$elements[] = $form->formCreateElement("description");
 				// add name/value list here
 				$elements[] = $form->formCreateElementListTable("edit_access_data");
+				$elements[] = $form->formCreateElement("additional_acl");
 				break;
 			default:
 				print "[No valid page definition given]";

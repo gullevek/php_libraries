@@ -14,5 +14,6 @@ CREATE TABLE edit_access (
 	uid	VARCHAR,
 	enabled	SMALLINT NOT NULL DEFAULT 0,
 	protected INT,
-	deleted	SMALLINT DEFAULT 0
+	deleted	SMALLINT DEFAULT 0,
+	additional_acl	JSONB
 ) INHERITS (edit_generic) WITHOUT OIDS;

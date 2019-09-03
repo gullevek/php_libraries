@@ -49,7 +49,15 @@ $edit_access = array (
 				"1" => "Yes",
 				"0" => "No"
 			)
-		)
+		),
+		"additional_acl" => array (
+			"value" => $GLOBALS["additional_acl"],
+			"output_name" => "Additional ACL (as JSON)",
+			"type" => "textarea",
+			"error_check" => "json",
+			"rows" => 10,
+			"cols" => 60
+		),
 	),
 	"table_name" => "edit_access",
 	"load_query" => "SELECT edit_access_id, name FROM edit_access ORDER BY name",
