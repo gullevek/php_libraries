@@ -22,6 +22,8 @@ extract($_POST, EXTR_SKIP);
 //------------------------------ library include start
 // set output to quiet for load of classes & session settings
 ob_start();
+// set the session name
+define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 //------------------------------ library include end
 
 //------------------------------ basic variable settings start
@@ -39,7 +41,7 @@ if (session_id() && $_SESSION['DEFAULT_LANG']) {
 if (array_key_exists('action', $_POST) && $_POST['action'] != 'download_csv') {
 	header("Content-type: text/html; charset=".$encoding);
 }
-if ($AJAX_PAGE && !$ZIP_STREAM) {
+if (isset($AJAX_PAGE) && isset($ZIP_STREAM) && $AJAX_PAGE && !$ZIP_STREAM) {
 	header("Content-Type: application/json; charset=UTF-8");
 }
 //------------------------------ basic variable settings start
@@ -84,7 +86,7 @@ if (!$login->login) {
 //------------------------------ page rights start
 // flag if to show the edit access id drop down list
 // check if we have more than one EA ID
-$cms->DATA['show_ea_extra'] = $login->acl['acl']['show_ea_extra'];
+$cms->DATA['show_ea_extra'] = $login->acl['show_ea_extra'];
 //------------------------------ page rights ned
 
 // automatic hide for DEBUG messages on live server

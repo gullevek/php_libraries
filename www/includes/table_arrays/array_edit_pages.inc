@@ -92,7 +92,7 @@ $edit_pages = array (
 		'content_alias_edit_page_id' => array (
 			'value' => isset($GLOBALS['content_alias_edit_page_id']) ? $GLOBALS['content_alias_edit_page_id'] : '',
 			'output_name' => 'Content Alias Source',
-			'int' => 1,
+			'int_null' => 1,
 			'type' => 'drop_down_db',
 			// query creation
 			'select_distinct' => 0,

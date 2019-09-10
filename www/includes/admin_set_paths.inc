@@ -36,7 +36,7 @@ if (!isset($CONTENT_INCLUDE)) {
 }
 $FORM_NAME = !isset($FORM_NAME) || !$FORM_NAME ? str_replace(".php", "", $cms->page_name) : $FORM_NAME;
 // set local page title
-$L_TITLE = ucfirst(str_replace('_', ' ', $cms->getPageName(1))).' - '.$G_TITLE;
+$L_TITLE = ucfirst(str_replace('_', ' ', $cms->getPageName(1))).(defined(G_TITLE) ? ' - '.G_TITLE : '');
 // strip tpl and replace it with inc
 // php include file per page
 $cms->INC_TEMPLATE_NAME = str_replace(".tpl", ".inc", $CONTENT_INCLUDE);
@@ -78,7 +78,7 @@ if (file_exists($cms->includes.$cms->INC_TEMPLATE_NAME) &&
 	include($cms->includes.$cms->INC_TEMPLATE_NAME);
 }
 // only CSS/JS/etc include stuff if we have non AJAX page
-if (!$AJAX_PAGE) {
+if (isset($AJAX_PAGE) && !$AJAX_PAGE) {
 	// check for template include
 	if (isset($USE_INCLUDE_TEMPLATE) && $USE_INCLUDE_TEMPLATE === true && !isset($TEMPLATE_NAME)) {
 		$TEMPLATE_NAME = $CONTENT_INCLUDE;
@@ -135,9 +135,9 @@ if (false === strstr(BASE.INCLUDES.LANG.CONTENT_PATH, $cms->lang_dir) ||
 	}
 }
 
-if (!$AJAX_PAGE) {
+if (isset($AJAX_PAGE) && !$AJAX_PAGE) {
 	// javascript translate data as template for auto translate
-	if (!$TEMPLATE_TRANSLATE) {
+	if (empty($TEMPLATE_TRANSLATE)) {
 		$TEMPLATE_TRANSLATE = 'jsTranslate_'.$lang.'.tpl';
 		$cms->debug('LANG', 'Load lang: '.$lang.', for page file '.$TEMPLATE_TRANSLATE);
 	} else {

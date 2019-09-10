@@ -689,7 +689,7 @@ class Basic
 				$fn = str_replace('##LOGID##', $rpl_string, $fn); // log id (like a log file prefix)
 
 				if ($this->log_per_run) {
-					if ($GLOBALS['LOG_FILE_UNIQUE_ID']) {
+					if (isset($GLOBALS['LOG_FILE_UNIQUE_ID'])) {
 						$this->log_file_unique_id = $GLOBALS['LOG_FILE_UNIQUE_ID'];
 					}
 					if (!$this->log_file_unique_id) {

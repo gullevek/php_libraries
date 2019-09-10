@@ -15,6 +15,7 @@ $TEMPLATE_NAME = 'smarty_test.tpl';
 $CSS_NAME = 'smart_test.css';
 $USE_PROTOTYPE = false;
 $USE_JQUERY = true;
+$JS_DATEPICKR = false;
 if ($USE_PROTOTYPE) {
 	$ADMIN_JAVASCRIPT = 'edit.pt.js';
 	$JS_NAME = 'prototype.test.js';

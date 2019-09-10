@@ -16,6 +16,31 @@ if ($cms->HEADER['USE_PROTOTYPE']) {
 // jquery and prototype should not be used together
 $cms->HEADER['USE_JQUERY'] = isset($USE_JQUERY) ? $USE_JQUERY : USE_JQUERY; // don't use either of those two together
 
+// check if we have an external file with the template name
+if (file_exists($cms->includes.$cms->INC_TEMPLATE_NAME) && is_file($cms->includes.$cms->INC_TEMPLATE_NAME)) {
+	include($cms->includes.$cms->INC_TEMPLATE_NAME);
+}
+// additional per page Javascript include
+$cms->JS_INCLUDE = '';
+if (file_exists($cms->javascript.$cms->JS_TEMPLATE_NAME) && is_file($cms->javascript.$cms->JS_TEMPLATE_NAME)) {
+	$cms->JS_INCLUDE = $cms->javascript.$cms->JS_TEMPLATE_NAME;
+}
+// per page css file
+$cms->CSS_INCLUDE = '';
+if (file_exists($cms->css.$cms->CSS_TEMPLATE_NAME) && is_file($cms->css.$cms->CSS_TEMPLATE_NAME)) {
+	$cms->CSS_INCLUDE = $cms->css.$cms->CSS_TEMPLATE_NAME;
+}
+// optional CSS file
+$cms->CSS_SPECIAL_INCLUDE = '';
+if (file_exists($cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME) && is_file($cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME)) {
+	$cms->CSS_SPECIAL_INCLUDE = $cms->css.$cms->CSS_SPECIAL_TEMPLATE_NAME;
+}
+// optional JS file
+$cms->JS_SPECIAL_INCLUDE = '';
+if (file_exists($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME) && is_file($cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME)) {
+	$cms->JS_SPECIAL_INCLUDE = $cms->javascript.$cms->JS_SPECIAL_TEMPLATE_NAME;
+}
+
 // the actual include files for javascript (per page)
 $cms->HEADER['JS_INCLUDE'] = $cms->JS_INCLUDE;
 $cms->HEADER['CSS_INCLUDE'] = $cms->CSS_INCLUDE;
@@ -54,6 +79,9 @@ $cms->DATA['CONTENT_INCLUDE'] = $CONTENT_INCLUDE;
 // LANG
 $cms->DATA['LANG'] = $lang;
 $cms->DATA['TINYMCE_LANG'] = $lang_short;
+$cms->DATA['USE_TINY_MCE'] = isset($USE_TINY_MCE) ? $USE_TINY_MCE : false;
+$cms->DATA['JS_DATEPICKR'] = isset($JS_DATEPICKR) ? $JS_DATEPICKR : false;
+$cms->DATA['JS_FLATPICKR'] = isset($JS_FLATPICKR) ? $JS_FLATPICKR : false;
 
 // debug data, if DEBUG flag is on, this data is print out
 $cms->DEBUG_DATA['debug_error_msg'] = $cms->runningTime();

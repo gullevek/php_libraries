@@ -541,12 +541,13 @@ class Login extends \CoreLibs\DB\IO
 						} // user has permission to THIS page
 					} // user was not enabled or other login error
 					if ($this->login_error) {
+						$login_error_date_first = '';
 						if ($res['login_error_count'] == 0) {
-							$login_error_date_first = ', login_error_date_first = NOW()';
+							$login_error_date_first = ", login_error_date_first = NOW()";
 						}
 						// update login error count for this user
 						$q = "UPDATE edit_user ";
-						$q .= "SET login_error_count = login_error_count + 1, login_error_date_last = NOW() $login_error_date_first ";
+						$q .= "SET login_error_count = login_error_count + 1, login_error_date_last = NOW() ".$login_error_date_first." ";
 						$q .= "WHERE edit_user_id = ".$res['edit_user_id'];
 						$this->dbExec($q);
 						// totally lock the user if error max is reached

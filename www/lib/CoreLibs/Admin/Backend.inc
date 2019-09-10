@@ -159,9 +159,12 @@ class Backend extends \CoreLibs\DB\IO
 		}
 
 		// get the session pages array
-		$pages = $_SESSION["PAGES"];
-		if (!is_array($pages)) {
-			$pages = array ();
+		$PAGES = $_SESSION['PAGES'];
+		if (!isset($PAGES) || !is_array($PAGES)) {
+			$PAGES = array ();
+		}
+		foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
+			$pages[] = $PAGE_DATA;
 		}
 		// $this->debug('pages', $this->print_ar($pages));
 		// if flag is 0, then we show all, else, we show only the matching flagges array points
@@ -170,10 +173,10 @@ class Backend extends \CoreLibs\DB\IO
 		for ($i = 0, $iMax = count($pages); $i < $iMax; $i ++) {
 			$show = 0;
 			// is it visible in the menu & is it online
-			if ($pages[$i]["menu"] && $pages[$i]["online"]) {
+			if ($pages[$i]['menu'] && $pages[$i]['online']) {
 				// check if it falls into our flag if we have a flag
 				if ($flag) {
-					foreach ($pages[$i]["visible"] as $name => $key) {
+					foreach ($pages[$i]['visible'] as $name => $key) {
 						if ($key == $flag) {
 							$show = 1;
 						}
@@ -185,43 +188,51 @@ class Backend extends \CoreLibs\DB\IO
 
 				if ($show) {
 					// if it is popup, write popup arrayound
-					if ($pages[$i]["popup"]) {
-						$type = "popup";
+					if (isset($pages[$i]['popup']) && $pages[$i]['popup']) {
+						$type = 'popup';
 					} else {
-						$type = "normal";
+						$type = 'normal';
+						$pages[$i]['popup'] = 0;
 					}
 					$query_string = '';
-					if (count($pages[$i]["query"])) {
-						for ($j = 0, $jMax = count($pages[$i]["query"]); $j < $jMax; $j ++) {
+					if (count($pages[$i]['query'])) {
+						for ($j = 0, $jMax = count($pages[$i]['query']); $j < $jMax; $j ++) {
 							if (strlen($query_string)) {
-								$query_string .= "&";
+								$query_string .= '&';
 							}
-							$query_string .= $pages[$i]["query"][$j]["name"]."=";
-							if (!$pages[$i]["query"][$j]["dynamic"]) {
-								$query_string .= urlencode($pages[$i]["query"][$j]["value"]);
+							$query_string .= $pages[$i]['query'][$j]['name'].'=';
+							if (!$pages[$i]['query'][$j]['dynamic']) {
+								$query_string .= urlencode($pages[$i]['query'][$j]['value']);
 							} else {
-								$query_string .= $_GET[$pages[$i]["query"][$j]["value"]] ? urlencode($_GET[$pages[$i]["query"][$j]["value"]]) : urlencode($_POST[$pages[$i]["query"][$j]["value"]]);
+								$query_string .= $_GET[$pages[$i]['query'][$j]['value']] ? urlencode($_GET[$pages[$i]['query'][$j]['value']]) : urlencode($_POST[$pages[$i]['query'][$j]['value']]);
 							}
 						}
 					}
-					$url = $pages[$i]["filename"];
+					$url = $pages[$i]['filename'];
 					if (strlen($query_string)) {
-						$url .= "?".$query_string;
+						$url .= '?'.$query_string;
 					}
-					$name = $pages[$i]["page_name"];
+					$name = $pages[$i]['page_name'];
 					// if page name matchs -> set selected flag
 					$selected = 0;
-					if ($this->getPageName() == $pages[$i]["filename"]) {
+					if ($this->getPageName() == $pages[$i]['filename']) {
 						$selected = 1;
 						$this->page_name = $name;
 					}
 					// last check, is this menu point okay to show
 					$enabled = 0;
-					if ($this->adbShowMenuPoint($pages[$i]["filename"])) {
+					if ($this->adbShowMenuPoint($pages[$i]['filename'])) {
 						$enabled = 1;
 					}
 					// write in to view menu array
-					array_push($this->menu, array("name" => $this->l->__($name), "url" => $url, "selected" => $selected, "enabled" => $enabled, "type" => $type));
+					array_push($this->menu, array(
+						'name' => $this->l->__($name),
+						'url' => $url,
+						'selected' => $selected,
+						'enabled' => $enabled,
+						'popup' => $type == 'popup' ? 1 : 0,
+						'type' => $type
+					));
 				} // show page
 			} // online and in menu
 		} // for each page

@@ -804,7 +804,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					$query .= " WHERE ".$this->table_array[$element_name]['where'];
 				}
 				// not self where
-				if (!empty($this->table_array[$element_name]['where_not_self'])) {
+				if (!empty($this->table_array[$element_name]['where_not_self']) && isset($this->table_array[$this->int_pk_name]['value']) && $this->table_array[$this->int_pk_name]['value']) {
 					// check if query has where already
 					if (strstr($query, 'WHERE') === false) {
 						$query .= " WHERE ";
@@ -1447,14 +1447,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							$no_write[$i] = 1;
 						}
 						// $this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: MANDATORY: ".isset($data_array['mandatory'])." SET: ".isset($_POST[$prfx.$el_name][$i]).", EMPTY: ".empty($_POST[$prfx.$el_name][$i])." | DO ACTION ".((!isset($_POST[$prfx.$el_name][$i]) || (isset($_POST[$prfx.$el_name][$i]) && empty($_POST[$prfx.$el_name][$i]))) ? 'YES' : 'NO')." => NO WRITE: ".$no_write[$i]);
-						if (isset($reference_array['enable_name']) &&
-							isset($reference_array['delete']) &&
-							!isset($_POST[$reference_array['enable_name']][$i])
+						if (!empty($reference_array['enable_name']) &&
+							isset($reference_array['delete']) && $reference_array['delete'] &&
+							(!isset($_POST[$reference_array['enable_name']][$i]) || empty($_POST[$reference_array['enable_name']][$i]))
 						) {
 							$no_write[$i] = 1;
 						}
 						// $this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: ENABLED NAME: ".isset($reference_array['enable_name']).", DELETE: ".isset($reference_array['delete']).", NOT ENABLED FOR POS: ".(isset($reference_array['enable_name']) ? isset($_POST[$reference_array['enable_name']][$i]) : '-'));
-						// $this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: WRITE: ".$no_write[$i]);
+						$this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: WRITE: ".$no_write[$i]);
 						// flag if data is in the text field and we are in a reference data set
 						if (isset($reference_array['type']) && $reference_array['type'] == 'reference_data') {
 							if ($data_array['type'] == 'text' && isset($_POST[$prfx.$el_name][$i])) {
@@ -1472,7 +1472,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							$q_begin[$i] = 'UPDATE '.$table_name.' SET ';
 							$q_end[$i] = ' WHERE '.$el_name.' = '.$_POST[$prfx.$el_name][$i];
 							$type[$i] = 'update';
-							// $this->debug('REF ELEMENT', 'SET UPDATE');
+							$this->debug('REF ELEMENT', 'SET UPDATE');
 						} elseif (isset($data_array['pk_id']) &&
 							!empty($data_array['pk_id']) &&
 							empty($_POST[$prfx.$el_name][$i])
@@ -1481,7 +1481,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							$q_middle[$i] = ') VALUES (';
 							$q_end[$i] = ')';
 							$type[$i] = 'insert';
-							// $this->debug('REF ELEMENT', 'SET INSERT');
+							$this->debug('REF ELEMENT', 'SET INSERT');
 						}
 						// $this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."] PK SET: ".isset($data_array['pk_id']).'/'.empty($data_array['pk_id']).', KEY SET: '.empty($_POST[$prfx.$el_name][$i])." -> TYPE: ".(isset($type[$i]) ? $type[$i] : '-'));
 						// write all data (insert/update) because I don't know until all are processed if it is insert or update
