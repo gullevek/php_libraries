@@ -1,3 +1,14 @@
+# PHP XDEBUG SETTINGS
+# php_value xdebug.profiler_output_dir xdebug/
+# php_value xdebug.profiler_output_name timestamp
+# php_value xdebug.profiler_enable 1
+php_value xdebug.collect_params 2
+php_value xdebug.collect_vars 0
+php_value xdebug.show_local_vars 0
+#php_value xdebug.dump_globals 0
+# allowed COOKIE, FILES, GET, POST, REQUEST, SERVER, SESSION
+#php_value xdebug.dump.GET *
+# PHP ERROR SETTINGS
 php_flag display_startup_errors on
 php_flag display_errors on
 php_flag html_errors on
