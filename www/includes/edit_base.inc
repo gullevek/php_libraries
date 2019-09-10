@@ -58,7 +58,7 @@ if ($form->mobile_phone) {
 // smarty template engine (extended Translation version)
 $smarty = new CoreLibs\Template\SmartyExtend($lang);
 
-$form->debug('POST', $form->printAr($_POST));
+// $form->debug('POST', $form->printAr($_POST));
 
 if (TARGET == 'live' || TARGET == 'remote') {
 	// login
