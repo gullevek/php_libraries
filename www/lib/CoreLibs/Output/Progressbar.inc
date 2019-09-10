@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*
 *	Class ProgressBar
 *
@@ -481,7 +481,7 @@ class ProgressBar
 		$js .= ' }'."\n";
 		$js .= '}'."\n";
 
-		// print "DUMP LABEL: <br><pre>".print_r($this->label, 1)."</pre><br>";
+		// print "DUMP LABEL: <br><pre>".print_r($this->label, true)."</pre><br>";
 		foreach ($this->label as $name => $data) {
 			// set what type of move we do
 			$move_prefix = $data['type'] == 'button' ? 'margin' : 'padding';

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2000/06/01
@@ -67,7 +67,7 @@ class Login extends \CoreLibs\DB\IO
 	private $username; // login name
 	private $password; // login password
 	private $logout; // logout button
-	private $login_error; // login error code, can be matched to the array login_error_msg, which holds the string
+	private $login_error = 0; // login error code, can be matched to the array login_error_msg, which holds the string
 	private $password_change = false; // if this is set to true, the user can change passwords
 	private $password_change_ok = false; // password change was successful
 	private $password_forgot = false; // can we reset password and mail to user with new password set screen
@@ -426,18 +426,22 @@ class Login extends \CoreLibs\DB\IO
 							$pages = array();
 							$edit_page_ids = array();
 							// set pages access
-							$q = "SELECT ep.edit_page_id, filename, ep.name AS edit_page_name, ep.order_number AS edit_page_order, menu, ";
-							$q .= "popup, popup_x, popup_y, online, ear.level, ear.type ";
-							$q .= "FROM edit_page ep, edit_page_access epa, edit_access_right ear ";
+							$q = "SELECT ep.edit_page_id, ep.cuid, epca.cuid AS content_alias_uid, ep.filename, ep.name AS edit_page_name, ep.order_number AS edit_page_order, ep.menu, ";
+							$q .= "ep.popup, ep.popup_x, ep.popup_y, ep.online, ear.level, ear.type ";
+							$q .= "FROM edit_page ep ";
+							$q .= "LEFT JOIN edit_page epca ON (epca.edit_page_id = ep.content_alias_edit_page_id)";
+							$q .= ", edit_page_access epa, edit_access_right ear ";
 							$q .= "WHERE ep.edit_page_id = epa.edit_page_id AND ear.edit_access_right_id = epa.edit_access_right_id ";
 							$q .= "AND epa.enabled = 1 AND epa.edit_group_id = ".$res["edit_group_id"]." ";
 							$q .= "ORDER BY ep.order_number";
 							while ($res = $this->dbReturn($q)) {
 								// page id array for sub data readout
-								$edit_page_ids[] = $res['edit_page_id'];
+								$edit_page_ids[$res['edit_page_id']] = $res['cuid'];
 								// create the array for pages
-								array_push($pages, array (
+								$pages[$res['cuid']] = array (
 									'edit_page_id' => $res['edit_page_id'],
+									'cuid' => $res['cuid'],
+									'content_alias_uid' => $res['content_alias_uid'], // for reference of content data on a differen page
 									'filename' => $res['filename'],
 									'page_name' => $res['edit_page_name'],
 									'order' => $res['edit_page_order'],
@@ -450,7 +454,7 @@ class Login extends \CoreLibs\DB\IO
 									'acl_type' => $res['type'],
 									'query' => array (),
 									'visible' => array ()
-								));
+								);
 								// make reference filename -> level
 								$pages_acl[$res['filename']] = $res['level'];
 							} // for each page
@@ -458,33 +462,42 @@ class Login extends \CoreLibs\DB\IO
 							$_edit_page_id = 0;
 							$q = "SELECT epvg.edit_page_id, name, flag ";
 							$q .= "FROM edit_visible_group evp, edit_page_visible_group epvg ";
-							$q .= "WHERE evp.edit_visible_group_id = epvg.edit_visible_group_id AND epvg.edit_page_id IN (".join(', ', $edit_page_ids).") ";
+							$q .= "WHERE evp.edit_visible_group_id = epvg.edit_visible_group_id AND epvg.edit_page_id IN (".join(', ', array_keys($edit_page_ids)).") ";
 							$q .= "ORDER BY epvg.edit_page_id";
 							while ($res = $this->dbReturn($q)) {
-								if ($res['edit_page_id'] != $_edit_page_id) {
-									// search the pos in the array push
-									$pos = $this->arraySearchRecursive($res['edit_page_id'], $pages, 'edit_page_id');
-									$_edit_page_id = $res['edit_page_id'];
-								}
-								$pages[$pos[0]]['visible'][$res['name']] = $res['flag'];
+								$pages[$edit_page_ids[$res['edit_page_id']]]['visible'][$res['name']] = $res['flag'];
 							}
 							// get the same for the query strings
 							$_edit_page_id = 0;
 							$q = "SELECT eqs.edit_page_id, name, value, dynamic FROM edit_query_string eqs ";
-							$q .= "WHERE enabled = 1 AND edit_page_id IN (".join(', ', $edit_page_ids).") ORDER BY eqs.edit_page_id";
+							$q .= "WHERE enabled = 1 AND edit_page_id IN (".join(', ', array_keys($edit_page_ids)).") ";
+							$q .= "ORDER BY eqs.edit_page_id";
 							while ($res = $this->dbReturn($q)) {
-								if ($res['edit_page_id'] != $_edit_page_id)	{
-									// search the pos in the array push
-									$pos = $this->arraySearchRecursive($res['edit_page_id'], $pages, 'edit_page_id');
-									$_edit_page_id = $res['edit_page_id'];
-								}
-								$pages[$pos[0]]['query'][] = array (
+								$pages[$edit_page_ids[$res['edit_page_id']]]['query'][] = array (
 									'name' => $res['name'],
 									'value' => $res['value'],
 									'dynamic' => $res['dynamic']
 								);
 							}
-
+							// get the page content and add them to the page
+							$_edit_page_id = 0;
+							$q = "SELECT epc.edit_page_id, epc.name, epc.uid, epc.order_number, epc.online, ear.level, ear.type ";
+							$q .= "FROM edit_page_content epc, edit_access_right ear ";
+							$q .= "WHERE epc.edit_access_right_id = ear.edit_access_right_id AND ";
+							$q .= "epc.edit_page_id IN (".join(', ', array_keys($edit_page_ids)).") ";
+							$q .= "ORDER BY epc.order_number";
+							while ($res = $this->dbReturn($q)) {
+								$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = array (
+									'name' => $res['name'],
+									'uid' => $res['uid'],
+									'online' => $res['online'],
+									'order' => $res['order_number'],
+									// access name and level
+									'acl_type' => $res['type'],
+									'acl_level' => $res['level']
+								);
+							}
+							// write back the pages data to the output array
 							$_SESSION['PAGES'] = $pages;
 							$_SESSION['PAGES_ACL_LEVEL'] = $pages_acl;
 							// load the edit_access user rights
@@ -593,7 +606,8 @@ class Login extends \CoreLibs\DB\IO
 		if ($this->logout || $this->login_error) {
 			// unregister and destroy session vars
 			unset($_SESSION['EUID']);
-			unset($_SESSION['GROUP_LEVEL']);
+			unset($_SESSION['GROUP_ACL_LEVEL']);
+			unset($_SESSION['USER_ACL_LEVEL']);
 			unset($_SESSION['PAGES']);
 			unset($_SESSION['USER_NAME']);
 			unset($_SESSION['UNIT']);
@@ -658,6 +672,7 @@ class Login extends \CoreLibs\DB\IO
 					$this->acl['base'] = $_SESSION['USER_ACL_LEVEL'];
 				}
 			}
+			$_SESSION['BASE_ACL_LEVEL'] = $this->acl['base'];
 
 			// set the current page acl
 			// start with default acl

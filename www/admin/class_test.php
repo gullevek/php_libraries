@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -33,7 +33,7 @@ ob_end_flush();
 // set + check edit access id
 $edit_access_id = 3;
 if (isset($login) && is_object($login) && isset($login->acl['unit'])) {
-	print "ACL UNIT: ".print_r(array_keys($login->acl['unit']), 1)."<br>";
+	print "ACL UNIT: ".print_r(array_keys($login->acl['unit']), true)."<br>";
 	print "ACCESS CHECK: ".$login->loginCheckEditAccess($edit_access_id)."<br>";
 	if ($login->loginCheckEditAccess($edit_access_id)) {
 		$basic->edit_access_id = $edit_access_id;
@@ -87,22 +87,22 @@ while ($res = $basic->dbReturn("SELECT * FROM max_test")) {
 }
 
 $status = $basic->dbExec("INSERT INTO foo (test) VALUES ('FOO TEST ".time()."') RETURNING test");
-print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
-print "DIRECT INSERT PREVIOUS INSERTED: ".print_r($basic->dbReturnRow("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>";
+print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, true)."<br>";
+print "DIRECT INSERT PREVIOUS INSERTED: ".print_r($basic->dbReturnRow("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), true)."<br>";
 $basic->dbPrepare("ins_foo", "INSERT INTO foo (test) VALUES ($1)");
 $status = $basic->dbExecute("ins_foo", array('BAR TEST '.time()));
-print "PREPARE INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
-print "PREPARE INSERT PREVIOUS INSERTED: ".print_r($basic->dbReturnRow("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>";
+print "PREPARE INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, true)."<br>";
+print "PREPARE INSERT PREVIOUS INSERTED: ".print_r($basic->dbReturnRow("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), true)."<br>";
 // returning test with multiple entries
 //	$status = $basic->db_exec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."') RETURNING foo_id");
 $status = $basic->dbExec("INSERT INTO foo (test) values ('BAR 1 ".time()."'), ('BAR 2 ".time()."'), ('BAR 3 ".time()."') RETURNING foo_id, test");
-print "DIRECT MULTIPLE INSERT STATUS: $status | PRIMARY KEYS: ".print_r($basic->insert_id, 1)." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
+print "DIRECT MULTIPLE INSERT STATUS: $status | PRIMARY KEYS: ".print_r($basic->insert_id, true)." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, true)."<br>";
 // no returning, but not needed ;
 $status = $basic->dbExec("INSERT INTO foo (test) VALUES ('FOO; TEST ".time()."');");
-print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
+print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIMARY KEY EXT: ".print_r($basic->insert_id_ext, true)."<br>";
 // UPDATE WITH RETURNING
 $status = $basic->dbExec("UPDATE foo SET test = 'SOMETHING DIFFERENT' WHERE foo_id = 3688452 RETURNING test");
-print "UPDATE STATUS: $status | RETURNING EXT: ".print_r($basic->insert_id_ext, 1)."<br>";
+print "UPDATE STATUS: $status | RETURNING EXT: ".print_r($basic->insert_id_ext, true)."<br>";
 
 # db write class test
 $table = 'foo';
@@ -124,6 +124,11 @@ print "Wrote to DB tabel $table and got primary key $primary_key<br>";
 $data = array ('test' => 'BOOL TEST UNSET '.time());
 $primary_key = $basic->dbWriteDataExt($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
 print "Wrote to DB tabel $table and got primary key $primary_key<br>";
+
+// return Array Test
+$query = "SELECT type, sdate, integer FROM foobar";
+$data = $basic->dbReturnArray($query, true);
+print "Full foobar list: <br><pre>".print_r($data, true)."</pre><br>";
 
 # async test queries
 /*	$basic->dbExecAsync("SELECT test FROM foo, (SELECT pg_sleep(10)) as sub WHERE foo_id IN (27, 50, 67, 44, 10)");
@@ -156,7 +161,7 @@ while (($ret = $basic->dbCheckAsync()) === true)
 	flush();
 }
 print "<br>END STATUS: ".$ret." | PK: ".$basic->insert_id."<br>";
-print "ASYNC PREVIOUS INSERTED: ".print_r($basic->dbReturnRow("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), 1)."<br>"; */
+print "ASYNC PREVIOUS INSERTED: ".print_r($basic->dbReturnRow("SELECT foo_id, test FROM foo WHERE foo_id = ".$basic->insert_id), true)."<br>"; */
 
 $to_db_version = '9.1.9';
 print "VERSION DB: ".$basic->dbVersion()."<br>";

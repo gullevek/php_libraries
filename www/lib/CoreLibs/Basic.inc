@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/03/24
@@ -169,7 +169,7 @@ class Basic
 	public function __construct($debug_all = 0, $echo_all = 1, $print_all = 0)
 	{
 		// set per run UID for logging
-		$this->running_uid = hash($this->hash_algo, uniqid(rand(), true));
+		$this->running_uid = hash($this->hash_algo, uniqid((string)rand(), true));
 
 		// internal info var
 		$this->class_info["basic"] = array (
@@ -369,8 +369,6 @@ class Basic
 			$this->session_id = session_id();
 		}
 
-		// [!!! DEPRECATED !!!] init crypt settings
-		$this->cryptInit();
 		// new better password init
 		$this->passwordInit();
 
@@ -452,7 +450,7 @@ class Basic
 			$this->endtime = ((float)$micro + (float)$timestamp);
 			$string .= $simple ? 'End: ' : "<b>Stopped at</b>: ";
 		}
-		$string .= date("Y-m-d H:i:s", $timestamp);
+		$string .= date("Y-m-d H:i:s", (int)$timestamp);
 		$string .= " ".$micro;
 		if ($this->starttime && $this->endtime) {
 			$running_time = $this->endtime - $this->starttime;
@@ -480,7 +478,7 @@ class Basic
 	public static function printTime($set_microtime = -1)
 	{
 		list($microtime, $timestamp) = explode(' ', microtime());
-		$string = date("Y-m-d H:i:s", $timestamp);
+		$string = date("Y-m-d H:i:s", (int)$timestamp);
 		// if microtime flag is -1 no round, if 0, no microtime, if >= 1, round that size
 		if ($set_microtime == -1) {
 			$string .= substr($microtime, 1);
@@ -494,8 +492,8 @@ class Basic
 
 	// METHOD: fdebug
 	// PARAMS: $string: data to write to file
-	//        $enter: default on true, if set to false, no linebreak (\n) will be put at the end
-	// RETURN:  none
+	//         $enter: default on true, if set to false, no linebreak (\n) will be put at the end
+	// RETURN: none
 	// DESC  : writes a string to a file immediatly, for fast debug output
 	public function fdebug($string, $enter = 1)
 	{
@@ -695,7 +693,7 @@ class Basic
 						$this->log_file_unique_id = $GLOBALS['LOG_FILE_UNIQUE_ID'];
 					}
 					if (!$this->log_file_unique_id) {
-						$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id = date('Y-m-d_His').'_U_'.substr(hash('sha1', uniqid(mt_rand(), true)), 0, 8);
+						$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id = date('Y-m-d_His').'_U_'.substr(hash('sha1', uniqid((string)mt_rand(), true)), 0, 8);
 					}
 					$rpl_string = '_'.$this->log_file_unique_id; // add 8 char unique string
 				} else {
@@ -792,9 +790,9 @@ class Basic
 	// PARAMS: $array
 	// RETURN: string html formatted
 	// DESC  : prints a html formatted (pre) array
-	public static function printAr($array)
+	public static function printAr(array $array)
 	{
-		return "<pre>".print_r($array, 1)."</pre>";
+		return "<pre>".print_r($array, true)."</pre>";
 	}
 
 	// METHOD: checked
@@ -951,6 +949,8 @@ class Basic
 			$host_name = 'NA';
 		}
 		$this->host_port = $port ? $port : 80;
+		$this->host_name = $host_name;
+		// also return for old type call
 		return $host_name;
 	}
 
@@ -993,7 +993,7 @@ class Basic
 	// RETURN: array with the elements where the needle can be found in the haystack array
 	// DESC  : searches key = value in an array / array
 	//         only returns the first one found
-	public static function arraySearchRecursive($needle, $haystack, $key_lookin = "")
+	public static function arraySearchRecursive($needle, $haystack, $key_lookin = '')
 	{
 		$path = null;
 		if (!is_array($haystack)) {
@@ -1360,9 +1360,9 @@ class Basic
 	public static function timeStringFormat($timestamp, $show_micro = true)
 	{
 		// check if the timestamp has any h/m/s/ms inside, if yes skip
-		if (!preg_match("/(h|m|s|ms)/", $timestamp)) {
+		if (!preg_match("/(h|m|s|ms)/", (string)$timestamp)) {
 			$ms = 0;
-			list ($timestamp, $ms) = explode('.', round($timestamp, 4));
+			list ($timestamp, $ms) = explode('.', (string)round($timestamp, 4));
 			$timegroups = array (86400, 3600, 60, 1);
 			$labels = array ('d', 'h', 'm', 's');
 			$time_string = '';
@@ -1584,14 +1584,14 @@ class Basic
 			3 => 'png'
 		);
 
-		if ($cache_source) {
+		if (!empty($cache_source)) {
 			$tmp_src = $cache_source;
 		} else {
 			$tmp_src = BASE.TMP;
 		}
 		// check if pic has a path, and override next sets
 		if (strstr($pic, '/') === false) {
-			if (!$path) {
+			if (empty($path)) {
 				$path = BASE;
 			}
 			$filename = $path.MEDIA.PICTURES.$pic;
@@ -1847,6 +1847,7 @@ class Basic
 	//         there is no auto init for this at the moment
 	private function cryptInit()
 	{
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		// SET CRYPT SALT PREFIX:
 		// the prefix string is defined by what the server can do
 		// first we check if we can do blowfish, if not we try md5 and then des
@@ -1892,6 +1893,7 @@ class Basic
 	// DESC  : creates a random string from alphanumeric characters: A-Z a-z 0-9 ./
 	private function cryptSaltString($nSize = 22)
 	{
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		// A-Z is 65,90
 		// a-z is 97,122
 		// 0-9 is 48,57
@@ -1921,6 +1923,7 @@ class Basic
 	// DESC  : encrypts the string with blowfish and returns the full string + salt part that needs to be stored somewhere (eg DB)
 	public function cryptString($string)
 	{
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		// the crypt prefix is set in the init of the class
 		// uses the random string method to create the salt
 		return crypt($string, $this->cryptSaltPrefix.$this->cryptSaltString($this->cryptSaltSize).$this->cryptSaltSuffix);
@@ -1934,6 +1937,7 @@ class Basic
 	// DESC  : compares the string with the crypted one, is counter method to cryptString
 	public function verifyCryptString($string, $crypt)
 	{
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		// the full crypted string needs to be passed on to the salt, so the init (for blowfish) and salt are passed on
 		if (crypt($string, $crypt) == $crypt) {
 			return true;
@@ -2457,6 +2461,7 @@ class Basic
 	public function checkConvert($string, $from_encoding, $to_encoding)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->checkConvertEncoding($string, $from_encoding, $to_encoding);
 	}
 
@@ -2469,144 +2474,168 @@ class Basic
 	public function running_time($simple = false)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->runningTime($simple);
 	}
 
 	public static function print_time($set_microtime = -1)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return Basic::printTime($set_microtime);
 	}
 
 	private function fdebug_fp($flag = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->fdebugFP($flag);
 	}
 
 	public function debug_for($type, $flag)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->debugFor($type, $flag);
 	}
 
 	public function get_caller_method($level = 2)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->getCallerMethod($level);
 	}
 
 	public function merge_errors($error_msg = array ())
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->mergeErrors($error_msg);
 	}
 
 	public function print_error_msg($string = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->printErrorMsg($string);
 	}
 
 	private function write_error_msg($level, $error_string)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->writeErrorMsg($level, $error_string);
 	}
 
 	public function reset_error_msg($level = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->resetErrorMsg($level);
 	}
 
 	public static function print_ar($array)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return Basic::printAr($array);
 	}
 
 	public function magic_links($string, $target = "_blank")
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->magicLinks($string, $target);
 	}
 
 	private function create_url($href, $atag, $_1, $_2, $_3, $name, $class)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->createUrl($href, $atag, $_1, $_2, $_3, $name, $class);
 	}
 
 	private function create_email($mailto, $atag, $_1, $_2, $_3, $title, $class)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->createEmail($mailto, $atag, $_1, $_2, $_3, $title, $class);
 	}
 
 	public function get_host_name()
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->getHostName();
 	}
 
 	public static function get_page_name($strip_ext = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return Basic::getPageName($strip_ext);
 	}
 
 	public static function get_filename_ending($filename)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return Basic::getFilenameEnding($filename);
 	}
 
 	public static function array_search_recursive($needle, $haystack, $key_lookin = "")
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return Basic::arraySearchRecursive($needle, $haystack, $key_lookin);
 	}
 
 	public static function array_search_recursive_all($needle, $haystack, $key, $path = null)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return Basic::arraySearchRecursiveAll($needle, $haystack, $key, $path);
 	}
 
 	public static function array_search_simple($array, $key, $value)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return Basic::arraySearchSimple($array, $key, $value);
 	}
 
 	public static function _mb_mime_encode($string, $encoding)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return Basic::__mbMimeEncode($string, $encoding);
 	}
 
 	public function _crc32b($string)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__crc32b($string);
 	}
 
 	public function _sha1_short($string, $use_sha = false)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__sha1Short($string, $use_sha);
 	}
 
 	public function _hash($string, $hash_type = 'adler32')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__hash($string, $hash_type);
 	}
 
 	public static function in_array_any($needle, $haystack)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return Basic::inArrayAny($needle, $haystack);
 	}
 }

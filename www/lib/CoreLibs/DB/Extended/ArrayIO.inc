@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2002/12/17
@@ -69,7 +69,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// set primary key for given table_array
 		if (is_array($this->table_array)) {
 			foreach ($this->table_array as $key => $value) {
-				if ($value['pk']) {
+				if (isset($value['pk'])) {
 					$this->pk_name = $key;
 				}
 			}
@@ -204,7 +204,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 		$q_where = '';
 		foreach ($this->table_array as $column => $data_array) {
 			// suchen nach bildern und lschen ...
-			if ($this->table_array[$column]['file'] && file_exists($this->table_array[$column]['url'].$this->table_array[$column]['value'])) {
+			if (!empty($this->table_array[$column]['file']) &&
+				file_exists($this->table_array[$column]['url'].$this->table_array[$column]['value'])
+			) {
 				if (file_exists($this->table_array[$column]['path'].$this->table_array[$column]['value'])) {
 					unlink($this->table_array[$column]['path'].$this->table_array[$column]['value']);
 				}
@@ -214,7 +216,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 				}
 			}
 			// if we have a foreign key
-			if ($this->table_array[$column]['fk']) {
+			if (!empty($this->table_array[$column]['fk'])) {
 				// create FK constraint checks
 				if ($q_where) {
 					$q_where .= ' AND ';
@@ -263,7 +265,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			$q_select .= $column;
 
 			// check FK ...
-			if ($this->table_array[$column]['fk'] && $this->table_array[$column]['value']) {
+			if (isset($this->table_array[$column]['fk']) && isset($this->table_array[$column]['value'])) {
 				if ($q_where) {
 					$q_where .= ' AND ';
 				}
@@ -290,7 +292,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 					if ($edit) {
 						$this->table_array[$column]['value'] = $res[$column];
 						// if password, also write to hidden
-						if ($this->table_array[$column]['type'] == 'password') {
+						if (isset($this->table_array[$column]['type']) &&
+							$this->table_array[$column]['type'] == 'password'
+						) {
 							$this->table_array[$column]['HIDDEN_value'] = $res[$column];
 						}
 					} else {
@@ -336,7 +340,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		foreach ($this->table_array as $column => $data_array) {
 			/********************************* START FILE *************************************/
 			// file upload
-			if ($this->table_array[$column]['file']) {
+			if (isset($this->table_array[$column]['file'])) {
 				// falls was im tmp drinnen, sprich ein upload, datei kopieren, Dateinamen in db schreiben
 				// falls datei schon am server (physischer pfad), dann einfach url in db schreiben (update)
 				// falls in 'delete' 'ja' dann loeschen (und gibts eh nur beim update)
@@ -384,9 +388,16 @@ class ArrayIO extends \CoreLibs\DB\IO
 			/********************************* END FILE **************************************/
 
 			// do not write 'pk' (primary key) or 'view' values
-			if (!$this->table_array[$column]['pk'] && $this->table_array[$column]['type'] != 'view' && strlen($column) > 0) {
+			if (!isset($this->table_array[$column]['pk']) &&
+				isset($this->table_array[$column]['type']) &&
+				$this->table_array[$column]['type'] != 'view' &&
+				strlen($column) > 0
+			) {
 				// for password use hidden value if main is not set
-				if ($this->table_array[$column]['type'] == 'password' && !$this->table_array[$column]['value']) {
+				if (isset($this->table_array[$column]['type']) &&
+					$this->table_array[$column]['type'] == 'password' &&
+					empty($this->table_array[$column]['value'])
+				) {
 					$this->table_array[$column]['value'] = $this->table_array[$column]['HIDDEN_value'];
 				}
 				if (!$insert) {
@@ -399,35 +410,47 @@ class ArrayIO extends \CoreLibs\DB\IO
 					if (strlen($q_data)) {
 						$q_data .= ', ';
 					}
-					if ($q_vars) {
+					if (strlen($q_vars)) {
 						$q_vars .= ', ';
 					}
 					$q_vars .= $column;
 				}
 				// integer is different
-				if ($this->table_array[$column]['int'] || $this->table_array[$column]['int_null']) {
-					$this->debug('write_check', '[$column]['.$this->table_array[$column]['value'].'] Foo: '.isset($this->table_array[$column]['value']).' | '.$this->table_array[$column]['int_null']);
-					if (!$this->table_array[$column]['value'] && $this->table_array[$column]['int_null']) {
+				if (isset($this->table_array[$column]['int']) || isset($this->table_array[$column]['int_null'])) {
+					$this->debug('write_check', '['.$column.']['.$this->table_array[$column]['value'].']['.$this->table_array[$column]['type'].'] VALUE SET: '.isset($this->table_array[$column]['value']).' | INT NULL: '.isset($this->table_array[$column]['int_null']));
+					if (isset($this->table_array[$column]['value']) &&
+						!$this->table_array[$column]['value'] &&
+						isset($this->table_array[$column]['int_null'])
+					) {
 						$_value = 'NULL';
-					} elseif (!isset($this->table_array[$column]['value'])) {
+					} elseif (!isset($this->table_array[$column]['value']) ||
+						(isset($this->table_array[$column]['value']) && !$this->table_array[$column]['value'])
+					) {
 						$_value = 0;
 					} else {
 						$_value = $this->table_array[$column]['value'];
 					}
 					$q_data .= $_value;
-				} elseif ($this->table_array[$column]['bool']) {
+				} elseif (isset($this->table_array[$column]['bool'])) {
 					// boolean storeage (reverse check on ifset)
 					$q_data .= "'".$this->dbBoolean($this->table_array[$column]['value'], true)."'";
-				} elseif ($this->table_array[$column]["interval"]) {
+				} elseif (isset($this->table_array[$column]['interval'])) {
 					// for interval we check if no value, then we set null
-					if (!$this->table_array[$column]['value']) {
+					if (!isset($this->table_array[$column]['value']) ||
+						(isset($this->table_array[$column]['value']) && !$this->table_array[$column]['value'])
+					) {
 						$_value = 'NULL';
+					} elseif (isset($this->table_array[$column]['value'])) {
+						$_value = $this->table_array[$column]['value'];
 					}
 					$q_data .= $_value;
 				} else {
 					// if the error check is json, we set field to null if NOT set
 					// else normal string write
-					if ($this->table_array[$column]['error_check'] == 'json' && !$this->table_array[$column]['value']) {
+					if (isset($this->table_array[$column]['error_check']) &&
+						$this->table_array[$column]['error_check'] == 'json' &&
+						(!isset($this->table_array[$column]['value']) || (isset($this->table_array[$column]['value']) && !$this->table_array[$column]['value']))
+					) {
 						$q_data .= 'NULL';
 					} else {
 						// normal string
@@ -450,8 +473,8 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// create select part & addition FK part
 		foreach ($this->table_array as $column => $data_array) {
 			// check FK ...
-			if ($this->table_array[$column]['fk'] && $this->table_array[$column]['value']) {
-				if ($q_where) {
+			if (isset($this->table_array[$column]['fk']) && isset($this->table_array[$column]['value'])) {
+				if (!empty($q_where)) {
 					$q_where .= ' AND ';
 				}
 				$q_where .= $column .= ' = '.$this->table_array[$column]['value'];
@@ -459,11 +482,11 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 
 		// if no PK set, then get max ID from DB
-		if (!$this->table_array[$this->pk_name]["value"]) {
+		if (!$this->table_array[$this->pk_name]['value']) {
 			// max id, falls INSERT
 			$q = 'SELECT MAX('.$this->pk_name.') + 1 AS pk_id FROM '.$this->table_name;
 			$res = $this->dbReturnRow($q);
-			if (!$res['pk_id']) {
+			if (!isset($res['pk_id'])) {
 				$res['pk_id'] = 1;
 			}
 			$this->table_array[$this->pk_name]['value'] = $res['pk_id'];
@@ -474,7 +497,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			$q .= $q_data;
 			$q .= ' WHERE ';
 			$q .= $this->pk_name.' = '.$this->table_array[$this->pk_name]['value'].' ';
-			if ($q_where) {
+			if (!empty($q_where)) {
 				$q .= ' AND '.$q_where;
 			}
 			// set pk_id ... if it has changed or so
@@ -486,8 +509,8 @@ class ArrayIO extends \CoreLibs\DB\IO
 			// write primary key too
 			// if ($q_data)
 			//	$q .= ", ";
-			// $q .= $this->pk_name." = ".$this->table_array[$this->pk_name]["value"]." ";
-			// $this->pk_id = $this->table_array[$this->pk_name]["value"];
+			// $q .= $this->pk_name." = ".$this->table_array[$this->pk_name]['value']." ";
+			// $this->pk_id = $this->table_array[$this->pk_name]['value'];
 		}
 		// return success or not
 		if (!$this->dbExec($q)) {
@@ -512,48 +535,56 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function convert_data($text)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->convertData($text);
 	}
 
 	public function convert_entities($text)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->convertEntities($text);
 	}
 
 	public function db_dump_array($write = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbDumpArray($write);
 	}
 
 	public function db_check_pk_set()
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbCheckPkSet();
 	}
 
 	public function db_reset_array($reset_pk = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbResetArray($reset_pk);
 	}
 
 	public function db_delete($table_array = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbDelete($table_array);
 	}
 
 	public function db_read($edit = 0, $table_array = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbRead($edit, $table_array);
 	}
 
 	public function db_write($addslashes = 0, $table_array = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbWrite($addslashes, $table_array);
 	}
 } // end of class

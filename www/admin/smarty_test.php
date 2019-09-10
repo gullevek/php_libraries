@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $ENABLE_ERROR_HANDLING = 0;
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;

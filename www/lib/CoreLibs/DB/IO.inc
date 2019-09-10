@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2000/11/23
@@ -784,7 +784,7 @@ class IO extends \CoreLibs\Basic
 						// we have returning, now we need to check if we get one or many returned
 						// we'll need to loop this, if we have multiple insert_id returns
 						while ($_insert_id = $this->db_functions->__dbFetchArray($this->cursor, PGSQL_ASSOC)) {
-							// echo "*** RETURNING: ".print_r($_insert_id, 1)."<br>";
+							// echo "*** RETURNING: ".print_r($_insert_id, true)."<br>";
 							$this->insert_id[] = $_insert_id;
 						}
 						// if we have only one, revert from array to single
@@ -1307,10 +1307,11 @@ class IO extends \CoreLibs\Basic
 
 	// METHOD: dbReturnArray
 	// WAS   : db_return_array
-	// PARAMS: query -> the query to be executed, named_only -> if true, only name ref are returned
+	// PARAMS: query -> the query to be executed
+	//         assoc_only -> if true, only name ref are returned
 	// RETURN: array of hashes (row -> fields)
 	// DESC  : createds an array of hashes of the query (all data)
-	public function dbReturnArray($query, $named_only = 0)
+	public function dbReturnArray($query, $assoc_only = false)
 	{
 		if (!$query) {
 			$this->error_id = 11;
@@ -1324,14 +1325,9 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$cursor = $this->dbExec($query);
-		while ($res = $this->dbFetchArray($cursor)) {
+		while ($res = $this->dbFetchArray($cursor, $assoc_only)) {
 			for ($i = 0; $i < $this->num_fields; $i ++) {
-				// cereated mixed, first name
 				$data[$this->field_names[$i]] = $res[$this->field_names[$i]];
-				// then number
-				if (!$named_only) {
-					$data[$i] = $res[$this->field_names[$i]];
-				}
 			}
 			$rows[] = $data;
 		}
@@ -1590,7 +1586,7 @@ class IO extends \CoreLibs\Basic
 	public function dbCompareVersion($compare)
 	{
 		// compare has =, >, < prefix, and gets stripped, if the rest is not X.Y format then error
-		preg_match("/^([<>=]{1,2})(\d{1,2})\.(\d{1,2})/", $compare, $matches);
+		preg_match("/^([<>=]{1,})(\d{1,})\.(\d{1,})/", $compare, $matches);
 		$compare = $matches[1];
 		$to_master = $matches[2];
 		$to_minor = $matches[3];
@@ -1601,7 +1597,9 @@ class IO extends \CoreLibs\Basic
 		}
 		// db_version can return X.Y.Z
 		// we only compare the first two
-		list ($master, $minor, $_other) = explode('.', $this->dbVersion());
+		preg_match("/^(\d{1,})\.(\d{1,})\.?(\d{1,})?/", $this->dbVersion(), $matches);
+		$master = $matches[1];
+		$minor = $matches[2];
 		$version = $master.($minor < 10 ? '0' : '').$minor;
 		$return = false;
 		// compare
@@ -1866,264 +1864,308 @@ class IO extends \CoreLibs\Basic
 	private function _connect_to_db()
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__connectToDB();
 	}
 
 	private function _close_db()
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__closeDB();
 	}
 
 	private function _check_query_for_select($query)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__checkQueryForSelect($query);
 	}
 
 	private function _check_query_for_insert($query, $pure = false)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__checkQueryForInsert($query, $pure);
 	}
 
 	private function _print_array($array)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__printArray($array);
 	}
 
 	private function _db_debug($debug_id, $error_string, $id = '', $type = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__dbDebug($debug_id, $error_string, $id, $type);
 	}
 
 	public function _db_error($cursor = '', $msg = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__dbError($cursor, $msg);
 	}
 
 	private function _db_convert_encoding($row)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__dbConvertEncoding($row);
 	}
 
 	private function _db_debug_prepare($stm_name, $data = array())
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__dbDebugPrepare($stm_name, $data);
 	}
 
 	private function _db_return_table($query)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__dbReturnTable($query);
 	}
 
 	private function _db_prepare_exec($query, $pk_name)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__dbPrepareExec($query, $pk_name);
 	}
 
 	private function _db_post_exec()
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->__dbPostExec();
 	}
 
 	public function db_set_debug($debug = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbSetDebug($debug);
 	}
 
 	public function db_reset_query_called($query)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbResetQueryCalled($query);
 	}
 
 	public function db_get_query_called($query)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbGetQueryCalled($query);
 	}
 
 	public function db_close()
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbClose();
 	}
 
 	public function db_set_schema($db_schema = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbSetSchema($db_schema);
 	}
 
 	public function db_get_schema()
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbGetSchema();
 	}
 
 	public function db_set_encoding($db_encoding = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbSetEncoding($db_encoding);
 	}
 
 	public function db_info($show = 1)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbInfo($show);
 	}
 
 	public function db_dump_data($query = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbDumpData($query);
 	}
 
 	public function db_return($query, $reset = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbReturn($query, $reset);
 	}
 
 	public function db_cache_reset($query)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbCacheReset($query);
 	}
 
 	public function db_exec($query = 0, $pk_name = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbExec($query, $pk_name);
 	}
 
 	public function db_exec_async($query, $pk_name = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbExecAsync($query, $pk_name);
 	}
 
 	public function db_check_async()
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbCheckAsync();
 	}
 
 	public function db_fetch_array($cursor = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbFetchArray($cursor);
 	}
 
 	public function db_return_row($query)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbReturnRow($query);
 	}
 
 	public function db_return_array($query, $named_only = 0)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbReturnArray($query, $named_only);
 	}
 
 	public function db_cursor_pos($query)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbCursorPos($query);
 	}
 
 	public function db_cursor_num_rows($query)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbCursorNumRows($query);
 	}
 
 	public function db_show_table_meta_data($table, $schema = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbShowTableMetaData($table, $schema);
 	}
 
 	public function db_prepare($stm_name, $query, $pk_name = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbPrepare($stm_name, $query, $pk_name);
 	}
 
 	public function db_execute($stm_name, $data = array())
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbExecute($stm_name, $data);
 	}
 
 	public function db_escape_string($string)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbEscapeString($string);
 	}
 
 	public function db_escape_bytea($bytea)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbEscapeBytea($bytea);
 	}
 
 	public function db_version()
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbVersion();
 	}
 
 	public function db_compare_version($compare)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbCompareVersion($compare);
 	}
 
 	public function db_boolean($string, $rev = false)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbBoolean($string, $rev);
 	}
 
 	public function db_write_data($write_array, $not_write_array, $primary_key, $table, $data = array ())
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbWriteData($write_array, $not_write_array, $primary_key, $table, $data);
 	}
 
 	public function db_write_data_ext($write_array, $primary_key, $table, $not_write_array = array (), $not_write_update_array = array (), $data = array ())
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbWriteDataExt($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
 	}
 
 	public function db_time_format($age, $show_micro = false)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbTimeFormat($age, $show_micro);
 	}
 
 	public function db_array_parse($text)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbArrayParse($text);
 	}
 
 	public function db_sql_escape($value, $kbn = "")
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->dbSqlEscape($value, $kbn);
 	}
 } // end if db class

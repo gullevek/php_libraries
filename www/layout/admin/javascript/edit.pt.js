@@ -352,6 +352,22 @@ const keyInObject = (key, object) => (key in object) ? true : false;
 	return (key in object) ? true : false;
 }*/
 
+// METHOD: getKeyByValue
+// PARAMS: object, value
+// RETURN: key found
+// DESC  : returns matching key of value
+const getKeyByValue = (obj, value) => Object.keys(obj).find(key => obj[key] === value);
+// function getKeyByValue(object, value)
+// {
+// 	return Object.keys(object).find(key => object[key] === value);
+// }
+
+// METHOD: valueInObject
+// PARAMS: obj, value
+// RETURN: true/false
+// DESC  : returns true if value is found in object with a key
+const valueInObject = (obj, value) => (Object.keys(obj).find(key => obj[key] === value)) ? true : false;
+
 // METHOD: exists
 // PARAMS: uid
 // RETURN: true/false

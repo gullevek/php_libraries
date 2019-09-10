@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 // debug for L10n issues in php 7.3
 

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/04/09
@@ -376,7 +376,7 @@ class PgSQL
 	// DESC  : wrapper for pg_escape_string
 	public function __dbEscapeString($string)
 	{
-		return pg_escape_string($this->dbh, $string);
+		return pg_escape_string($this->dbh, (string)$string);
 	}
 
 	// METHOD: __dbEscapeBytea

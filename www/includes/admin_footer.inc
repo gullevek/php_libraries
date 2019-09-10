@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2008/08/14

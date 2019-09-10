@@ -15,12 +15,6 @@
 	{if $STYLESHEET}
 	<link rel=stylesheet type="text/css" href="{$css}{$STYLESHEET}">
 	{/if}
-	{if $JAVASCRIPT}
-	<script language="JavaScript" src="{$JS}{$JAVASCRIPT}"></script>
-	{/if}
-	{if $DATE_JAVASCRIPT}
-	<script language="JavaScript" src="{$JS}{$DATE_JAVASCRIPT}"></script>
-	{/if}
 </head>
 <body>
 <table width="100%" border="0" cellpadding="0" cellspacing="1">

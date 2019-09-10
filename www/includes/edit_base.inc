@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2003/06/10
@@ -41,7 +41,7 @@ if (!DEBUG)	{
 }
 
 // set default lang if not set otherwise
-if (!$lang) {
+if (!isset($lang)) {
 	$lang = DEFAULT_LANG;
 }
 // should be utf8
@@ -57,6 +57,8 @@ if ($form->mobile_phone) {
 }
 // smarty template engine (extended Translation version)
 $smarty = new CoreLibs\Template\SmartyExtend($lang);
+
+$form->debug('POST', $form->printAr($_POST));
 
 if (TARGET == 'live' || TARGET == 'remote') {
 	// login
@@ -123,7 +125,7 @@ if ($form->my_page_name == 'edit_order') {
 	//               there are the POSITION stored, that should CHANGE there order (up/down)
 	// $row_data_id ... has ALL ids from the sorting part
 	// $row_data_order ... has ALL order positions from the soirting part
-	if (!is_array($position)) {
+	if (!isset($position)) {
 		$position = array ();
 	}
 	if (count($position)) {
@@ -131,7 +133,7 @@ if ($form->my_page_name == 'edit_order') {
 
 		// FIRST u have to put right sort, then read again ...
 		// hast to be >0 or the first one is selected and then there is no move
-		if ($up && $position[0] > 0) {
+		if (isset($up) && $position[0] > 0) {
 			for ($i = 0; $i < count($position); $i++) {
 				// change position order
 				// this gets temp, id before that, gets actual (moves one "down")
@@ -146,7 +148,7 @@ if ($form->my_page_name == 'edit_order') {
 		} // if up
 
 		// the last position id from position array is not to be the count-1 of row_data_id array, or it is the last element
-		if ($down && ($position[count($position) - 1] != (count($row_data_id) - 1))) {
+		if (isset($down) && ($position[count($position) - 1] != (count($row_data_id) - 1))) {
 			for ($i = count($position) - 1; $i >= 0; $i --)	{
 				// same as up, just up in other way, starts from bottom (last element) and moves "up"
 				// element before actuel gets temp, this element, becomes element after this,
@@ -158,7 +160,9 @@ if ($form->my_page_name == 'edit_order') {
 		} // if down
 
 		// write data ... (which has to be abstrackt ...)
-		if (($up && $position[0] > 0) || ($down && ($position[count($position) - 1]!=(count($row_data_id) - 1)))) {
+		if ((isset($up) && $position[0] > 0) ||
+			(isset($down) && ($position[count($position) - 1] != (count($row_data_id) - 1)))
+		) {
 			for ($i = 0; $i < count($row_data_id); $i ++) {
 				$q = "UPDATE ".$table_name." SET order_number = ".$row_data_order[$i]." WHERE ".$table_name."_id = ".$row_data_id[$i];
 				$q = $form->dbExec($q);
@@ -168,7 +172,7 @@ if ($form->my_page_name == 'edit_order') {
 
 	// get ...
 	$q = "SELECT ".$table_name."_id, name, order_number FROM ".$table_name." ";
-	if ($where_string) {
+	if (!empty($where_string)) {
 		$q .= "WHERE $where_string ";
 	}
 	$q .= "ORDER BY order_number";
@@ -184,8 +188,9 @@ if ($form->my_page_name == 'edit_order') {
 	// html title
 	$HEADER['HTML_TITLE'] = $form->l->__('Edit Order');
 
+	$messages = array ();
 	// error msg
-	if ($error) {
+	if (isset($error)) {
 		$messages[] = array ('msg' => $msg, 'class' => 'error', 'width' => '100%');
 	}
 	$DATA['form_error_msg'] = $messages;
@@ -199,11 +204,11 @@ if ($form->my_page_name == 'edit_order') {
 	}
 	for ($i = 0; $i < count($row_data); $i ++) {
 		$options_id[] = $i;
-		$options_name[] = $row_data[$i]["name"];
+		$options_name[] = $row_data[$i]['name'];
 		// list of points to order
 		for ($j = 0; $j < count($position); $j++) {
 			// if matches, put into select array
-			if ($original_id[$position[$j]] == $row_data[$i]["id"]) {
+			if ($original_id[$position[$j]] == $row_data[$i]['id']) {
 				$options_selected[] = $i;
 			}
 		}
@@ -216,23 +221,29 @@ if ($form->my_page_name == 'edit_order') {
 	$row_data_id = array ();
 	$row_data_order = array ();
 	for ($i = 0; $i < count($row_data); $i++) {
-		$row_data_id[] = $row_data[$i]["id"];
-		$row_data_order[] = $row_data[$i]["order"];
+		$row_data_id[] = $row_data[$i]['id'];
+		$row_data_order[] = $row_data[$i]['order'];
 	}
 	$DATA['row_data_id'] = $row_data_id;
 	$DATA['row_data_order'] = $row_data_order;
 
 	// hidden names for the table & where string
 	$DATA['table_name'] = $table_name;
-	$DATA['where_string'] = $where_string;
+	$DATA['where_string'] = isset($where_string) ? $where_string : '';
 
 	$EDIT_TEMPLATE = 'edit_order.tpl';
 } else {
-	$form->formProcedureLoad(${$form->archive_pk_name});
+	// load call only if id is set
+	if (isset(${$form->archive_pk_name})) {
+		$form->formProcedureLoad(${$form->archive_pk_name});
+	}
 	$form->formProcedureNew();
 	$form->formProcedureSave();
 	$form->formProcedureDelete();
-	$form->formProcedureDeleteFromElementList($element_list, $remove_name);
+	// delete call only if those two are set
+	if (isset($element_list) && isset($remove_name)) {
+		$form->formProcedureDeleteFromElementList($element_list, $remove_name);
+	}
 
 	$DATA['table_width'] = $table_width;
 
@@ -242,26 +253,26 @@ if ($form->my_page_name == 'edit_order') {
 
 	// MENU START
 	// request some session vars
-	if (!$HEADER_COLOR) {
-		$DATA['HEADER_COLOR'] = "#E0E2FF";
+	if (!isset($HEADER_COLOR)) {
+		$DATA['HEADER_COLOR'] = '#E0E2FF';
 	} else {
 		$DATA['HEADER_COLOR'] = $_SESSION['HEADER_COLOR'];
 	}
-	$DATA['USER_NAME'] = $_SESSION["USER_NAME"];
-	$DATA['EUID'] = $_SESSION["EUID"];
-	$DATA['GROUP_NAME'] = $_SESSION["GROUP_NAME"];
-	$DATA['GROUP_LEVEL'] = $_SESSION["GROUP_LEVEL"];
-	$PAGES = $_SESSION["PAGES"];
+	$DATA['USER_NAME'] = $_SESSION['USER_NAME'];
+	$DATA['EUID'] = $_SESSION['EUID'];
+	$DATA['GROUP_NAME'] = $_SESSION['GROUP_NAME'];
+	$DATA['GROUP_LEVEL'] = $_SESSION['GROUP_ACL_LEVEL'];
+	$PAGES = $_SESSION['PAGES'];
 
 	//$form->debug('menu', $form->printAr($PAGES));
 
 	// build nav from $PAGES ...
-	if (!is_array($PAGES)) {
+	if (!isset($PAGES) || !is_array($PAGES)) {
 		$PAGES = array ();
 	}
-	for ($i = 0, $i_max = count($PAGES); $i < $i_max; $i ++) {
-		if ($PAGES[$i]["menu"] && $PAGES[$i]["online"]) {
-			$menuarray[] = $PAGES[$i];
+	foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
+		if ($PAGE_DATA['menu'] && $PAGE_DATA['online']) {
+			$menuarray[] = $PAGE_DATA;
 		}
 	}
 
@@ -276,34 +287,44 @@ if ($form->my_page_name == 'edit_order') {
 		}
 	}
 
+	$position = 0;
 	for ($i = 1; $i <= count($menuarray); $i ++) {
 		// do that for new array
 		$j = $i - 1;
-		$menu_data[$j]['pagename'] = htmlentities($menuarray[($i-1)]["page_name"]);
-		$menu_data[$j]['filename'] = $menuarray[($i-1)]["filename"].$menuarray[($i-1)]["query_string"];
-		if ($i == 1 || !(($i - 1) % $SPLIT_FACTOR)) {
+		$menu_data[$j]['pagename'] = htmlentities($menuarray[($i-1)]['page_name']);
+		$menu_data[$j]['filename'] = $menuarray[($i-1)]['filename'].(isset($menuarray[$j]['query_string']) ? $menuarray[$j]['query_string'] : '');
+		if ($i == 1 || !($j % $SPLIT_FACTOR)) {
 			$menu_data[$j]['splitfactor_in'] = 1;
+		} else {
+			$menu_data[$j]['splitfactor_in'] = 0;
 		}
-		if ($menuarray[($i - 1)]["filename"] == $form->getPageName()) {
-			$position = $i - 1;
+		if ($menuarray[$j]['filename'] == $form->getPageName()) {
+			$position = $j;
 			$menu_data[$j]['position'] = 1;
+			$menu_data[$j]['popup'] = 0;
 		} else {
 			// add query stuff
 			// HAS TO DONE LATER ... set urlencode, etc ...
 			// check if popup needed
-			if ($menuarray[($i - 1)]["popup"]) {
+			if (isset($menuarray[$j]['popup']) && $menuarray[$j]['popup'] == 1) {
 				$menu_data[$j]['popup'] = 1;
-				$menu_data[$j]['rand'] = uniqid(rand());
-				$menu_data[$j]['width'] = $menuarray[($i-1)]["popup_x"];
-				$menu_data[$j]['height'] = $menuarray[($i-1)]["popup_y"];
-			} // popup or not
+				$menu_data[$j]['rand'] = uniqid((string)rand());
+				$menu_data[$j]['width'] = $menuarray[$j]['popup_x'];
+				$menu_data[$j]['height'] = $menuarray[$j]['popup_y'];
+			} else {
+				$menu_data[$j]['popup'] = 0;
+			}
+			$menu_data[$j]['position'] = 0;
 		} // highlight or not
 		if (!($i % $SPLIT_FACTOR) || (($i + 1) > count($menuarray))) {
 			$menu_data[$j]['splitfactor_out'] = 1;
-		} // split
+		} else {
+			$menu_data[$j]['splitfactor_out'] = 0;
+		}
 	} // for
+	// $form->debug('MENU ARRAY', $form->printAr($menu_data));
 	$DATA['menu_data'] = $menu_data;
-	$DATA['page_name'] = $menuarray[$position]["page_name"];
+	$DATA['page_name'] = $menuarray[$position]['page_name'];
 	$L_TITLE = $DATA['page_name'];
 	// html title
 	$HEADER['HTML_TITLE'] = $form->l->__($L_TITLE);
@@ -315,118 +336,124 @@ if ($form->my_page_name == 'edit_order') {
 	if ($form->yes) {
 		$DATA['form_yes'] = $form->yes;
 		$DATA['form_my_page_name'] = $form->my_page_name;
+		$DATA['filename_exist'] = 0;
+		$DATA['drop_down_input'] = 0;
 
 		// depending on the "getPageName()" I show different stuff
 		switch ($form->my_page_name) {
-			case "edit_users":
-				$elements[] = $form->formCreateElement("login_error_count");
-				$elements[] = $form->formCreateElement("login_error_date_last");
-				$elements[] = $form->formCreateElement("login_error_date_first");
-				$elements[] = $form->formCreateElement("enabled");
-				$elements[] = $form->formCreateElement("protected");
-				$elements[] = $form->formCreateElement("username");
-				$elements[] = $form->formCreateElement("password");
-				$elements[] = $form->formCreateElement("password_change_interval");
-				$elements[] = $form->formCreateElement("email");
-				$elements[] = $form->formCreateElement("last_name");
-				$elements[] = $form->formCreateElement("first_name");
-				$elements[] = $form->formCreateElement("edit_group_id");
-				$elements[] = $form->formCreateElement("edit_access_right_id");
-				$elements[] = $form->formCreateElement("strict");
-				$elements[] = $form->formCreateElement("locked");
-				$elements[] = $form->formCreateElement("admin");
-				$elements[] = $form->formCreateElement("debug");
-				$elements[] = $form->formCreateElement("db_debug");
-				$elements[] = $form->formCreateElement("edit_language_id");
-				$elements[] = $form->formCreateElement("edit_scheme_id");
-				$elements[] = $form->formCreateElementListTable("edit_access_user");
-				$elements[] = $form->formCreateElement("additional_acl");
+			case 'edit_users':
+				$elements[] = $form->formCreateElement('login_error_count');
+				$elements[] = $form->formCreateElement('login_error_date_last');
+				$elements[] = $form->formCreateElement('login_error_date_first');
+				$elements[] = $form->formCreateElement('enabled');
+				$elements[] = $form->formCreateElement('protected');
+				$elements[] = $form->formCreateElement('username');
+				$elements[] = $form->formCreateElement('password');
+				$elements[] = $form->formCreateElement('password_change_interval');
+				$elements[] = $form->formCreateElement('email');
+				$elements[] = $form->formCreateElement('last_name');
+				$elements[] = $form->formCreateElement('first_name');
+				$elements[] = $form->formCreateElement('edit_group_id');
+				$elements[] = $form->formCreateElement('edit_access_right_id');
+				$elements[] = $form->formCreateElement('strict');
+				$elements[] = $form->formCreateElement('locked');
+				$elements[] = $form->formCreateElement('admin');
+				$elements[] = $form->formCreateElement('debug');
+				$elements[] = $form->formCreateElement('db_debug');
+				$elements[] = $form->formCreateElement('edit_language_id');
+				$elements[] = $form->formCreateElement('edit_scheme_id');
+				$elements[] = $form->formCreateElementListTable('edit_access_user');
+				$elements[] = $form->formCreateElement('additional_acl');
 				break;
-			case "edit_schemes":
-				$elements[] = $form->formCreateElement("enabled");
-				$elements[] = $form->formCreateElement("name");
-				$elements[] = $form->formCreateElement("header_color");
-				$elements[] = $form->formCreateElement("template");
+			case 'edit_schemes':
+				$elements[] = $form->formCreateElement('enabled');
+				$elements[] = $form->formCreateElement('name');
+				$elements[] = $form->formCreateElement('header_color');
+				$elements[] = $form->formCreateElement('template');
 				break;
-			case "edit_pages":
-				if (!$form->table_array["edit_page_id"]["value"]) {
+			case 'edit_pages':
+				if (!isset($form->table_array['edit_page_id']['value'])) {
 					$q = "DELETE FROM temp_files";
 					$form->dbExec($q);
 					// gets all files in the current dir ending with .php
-					$crap = exec("ls *.php", $output, $status);
+					$crap = exec('ls *.php', $output, $status);
 					// now get all that are NOT in de DB
 					$q = "INSERT INTO temp_files VALUES ";
 					for ($i = 0; $i < count($output); $i ++) {
 						$t_q = "('".$form->dbEscapeString($output[$i])."')";
 						$form->dbExec($q.$t_q, 'NULL');
 					}
-					$elements[] = $form->formCreateElement("filename");
+					$elements[] = $form->formCreateElement('filename');
 				} else {
 					// show file menu
 					// just show name of file ...
 					$DATA['filename_exist'] = 1;
-					$DATA['filename'] = $form->table_array["filename"]["value"];
+					$DATA['filename'] = $form->table_array['filename']['value'];
 				} // File Name View IF
-				$elements[] = $form->formCreateElement("name");
-				// $elements[] = $form->formCreateElement("tag");
-				// $elements[] = $form->formCreateElement("min_acl");
-				$elements[] = $form->formCreateElement("order_number");
-				$elements[] = $form->formCreateElement("online");
-				$elements[] = $form->formCreateElement("menu");
-				$elements[] = $form->formCreateElementListTable("edit_query_string");
-				$elements[] = $form->formCreateElement("popup");
-				$elements[] = $form->formCreateElement("popup_x");
-				$elements[] = $form->formCreateElement("popup_y");
-				$elements[] = $form->formCreateElementReferenceTable("edit_visible_group");
-				$elements[] = $form->formCreateElementReferenceTable("edit_menu_group");
+				$elements[] = $form->formCreateElement('name');
+				// $elements[] = $form->formCreateElement('tag');
+				// $elements[] = $form->formCreateElement('min_acl');
+				$elements[] = $form->formCreateElement('order_number');
+				$elements[] = $form->formCreateElement('online');
+				$elements[] = $form->formCreateElement('menu');
+				$elements[] = $form->formCreateElementListTable('edit_query_string');
+				$elements[] = $form->formCreateElement('content_alias_edit_page_id');
+				$elements[] = $form->formCreateElementListTable('edit_page_content');
+				$elements[] = $form->formCreateElement('popup');
+				$elements[] = $form->formCreateElement('popup_x');
+				$elements[] = $form->formCreateElement('popup_y');
+				$elements[] = $form->formCreateElementReferenceTable('edit_visible_group');
+				$elements[] = $form->formCreateElementReferenceTable('edit_menu_group');
 				break;
-			case "edit_languages":
-				$elements[] = $form->formCreateElement("enabled");
-				$elements[] = $form->formCreateElement("short_name");
-				$elements[] = $form->formCreateElement("long_name");
-				$elements[] = $form->formCreateElement("iso_name");
+			case 'edit_languages':
+				$elements[] = $form->formCreateElement('enabled');
+				$elements[] = $form->formCreateElement('short_name');
+				$elements[] = $form->formCreateElement('long_name');
+				$elements[] = $form->formCreateElement('iso_name');
 				break;
-			case "edit_groups":
-				$elements[] = $form->formCreateElement("enabled");
-				$elements[] = $form->formCreateElement("name");
-				$elements[] = $form->formCreateElement("edit_access_right_id");
-				$elements[] = $form->formCreateElement("edit_scheme_id");
-				$elements[] = $form->formCreateElementListTable("edit_page_access");
-				$elements[] = $form->formCreateElement("additional_acl");
+			case 'edit_groups':
+				$elements[] = $form->formCreateElement('enabled');
+				$elements[] = $form->formCreateElement('name');
+				$elements[] = $form->formCreateElement('edit_access_right_id');
+				$elements[] = $form->formCreateElement('edit_scheme_id');
+				$elements[] = $form->formCreateElementListTable('edit_page_access');
+				$elements[] = $form->formCreateElement('additional_acl');
 				break;
-			case "edit_visible_group":
-				$elements[] = $form->formCreateElement("name");
-				$elements[] = $form->formCreateElement("flag");
+			case 'edit_visible_group':
+				$elements[] = $form->formCreateElement('name');
+				$elements[] = $form->formCreateElement('flag');
 				break;
-			case "edit_menu_group":
-				$elements[] = $form->formCreateElement("name");
-				$elements[] = $form->formCreateElement("flag");
-				$elements[] = $form->formCreateElement("order_number");
+			case 'edit_menu_group':
+				$elements[] = $form->formCreateElement('name');
+				$elements[] = $form->formCreateElement('flag');
+				$elements[] = $form->formCreateElement('order_number');
 				break;
-			case "edit_access":
-				$elements[] = $form->formCreateElement("name");
-				$elements[] = $form->formCreateElement("enabled");
-				$elements[] = $form->formCreateElement("protected");
-				$elements[] = $form->formCreateElement("color");
-				$elements[] = $form->formCreateElement("description");
+			case 'edit_access':
+				$elements[] = $form->formCreateElement('name');
+				$elements[] = $form->formCreateElement('enabled');
+				$elements[] = $form->formCreateElement('protected');
+				$elements[] = $form->formCreateElement('color');
+				$elements[] = $form->formCreateElement('description');
 				// add name/value list here
-				$elements[] = $form->formCreateElementListTable("edit_access_data");
-				$elements[] = $form->formCreateElement("additional_acl");
+				$elements[] = $form->formCreateElementListTable('edit_access_data');
+				$elements[] = $form->formCreateElement('additional_acl');
 				break;
 			default:
-				print "[No valid page definition given]";
+				print '[No valid page definition given]';
 				break;
 		}
 		// $form->debug('edit', "Elements: <pre>".$form->printAr($elements));
 		$DATA['elements'] = $elements;
 		$DATA['hidden'] = $form->formCreateHiddenFields();
 		$DATA['save_delete'] = $form->formCreateSaveDelete();
+	} else {
+		$DATA['form_yes'] = 0;
 	}
 	$EDIT_TEMPLATE = 'edit_body.tpl';
 }
 
 // debug data, if DEBUG flag is on, this data is print out
-$DEBUG_DATA['DEBUG'] = $DEBUG_TMPL;
+$DEBUG_DATA['DEBUG'] = isset($DEBUG_TMPL) ? $DEBUG_TMPL : '';
 
 // create main data array
 $CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);

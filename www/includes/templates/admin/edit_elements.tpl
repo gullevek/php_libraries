@@ -114,8 +114,8 @@
 			{/foreach}
 			</table>
 			{if $element.data.delete_name}
-			<input type="hidden" value="" name="{$element.data.delete_name}">
-			<input type="hidden" value="" name="{$element.data.delete_name}_flag">
+			<input type="hidden" value="" id="{$element.data.delete_name}" name="{$element.data.delete_name}">
+			<input type="hidden" value="" id="{$element.data.delete_name}_flag" name="{$element.data.delete_name}_flag">
 			<input type="hidden" name="remove_name[]" value="{$element.data.delete_name}">
 			{/if}
 			{if $element.data.enable_name}
