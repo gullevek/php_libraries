@@ -95,18 +95,28 @@
 
 namespace CoreLibs;
 
+// define check vars for the flags we can have
+define('CLASS_STRICT_MODE', 1);
+define('CLASS_OFF_COMPATIBLE_MODE', 2);
+
 class Basic
 {
 	public $class_info; // class info var
-
+	// control vars
+	// compatible mode sets variable even if it is not defined
+	private $set_compatible = true;
+	// strict mode throws an error if the variable is not defined
+	private $set_strict_mode = false;
+	// page and host name
 	public $page_name;
 	public $host_name;
 	public $host_port;
-
+	// internal error reporting vars
 	private $error_id; // error ID for errors in classes
 	private $error_string; // error strings in classes (for error_id)
 	private $error_msg = array (); // the "connection" to the outside errors
-
+	public $error_msg_prefix = ''; // prefix to the error string (the class name)
+	// debug flags
 	public $debug_output; // if this is true, show debug on desconstructor
 	public $debug_output_not;
 	public $debug_output_all;
@@ -116,7 +126,11 @@ class Basic
 	public $print_output; // errors: print to file, default is 0
 	public $print_output_not;
 	public $print_output_all;
-
+	// debug flags/settings
+	public $debug_fp = ''; // filepointer for writing to file
+	public $debug_filename = 'debug_file.log'; // where to write output
+	public $hash_algo = 'crc32b'; // the hash algo used for the internal debug uid
+	public $running_uid = ''; // unique ID set on class init and used in logging as prefix
 	// log file name
 	private $log_file_name_ext = 'log'; // use this for date rotate
 	public $log_max_filesize = 0; // set in kilobytes
@@ -128,19 +142,20 @@ class Basic
 	public $log_per_class = 0; // set, will split log per class
 	public $log_per_page = 0; // set, will split log per called file
 	public $log_per_run = 0; // create a new log file per run (time stamp + unique ID)
-
+	// run time messurements
 	private $starttime; // start time if time debug is used
 	private $endtime; // end time if time debug is used
+	private $runningtime_string; // the running time as a string with info text
+	private $hr_starttime; // start time
+	private $hr_endtime; // end time
+	private $hr_runtime; // run time
 
+	// email valid checks
+	public $email_regex_check = array ();
+	public $mobile_email_type = array ();
+	public $mobile_email_type_short = array ();
 	public $email_regex; // regex var for email check
 	public $keitai_email_regex; // regex var for email check
-
-	public $error_msg_prefix = ''; // prefix to the error string (the class name)
-
-	public $debug_fp = ''; // filepointer for writing to file
-	public $debug_filename = 'debug_file.log'; // where to write output
-	public $hash_algo = 'crc32b'; // the hash algo used for the internal debug uid
-	public $running_uid = ''; // unique ID set on class init and used in logging as prefix
 
 	// data path for files
 	public $data_path = array ();
@@ -158,16 +173,24 @@ class Basic
 	// session name
 	private $session_name = '';
 	private $session_id = '';
+	// key generation
+	private $key_range = array ();
+	private $one_key_length;
+	private $key_length;
+	private $max_key_length = 256; // max allowed length
 
 	// form token (used for form validation)
 	private $form_token = '';
 
 	// METHOD: __construct
-	// PARAMS: debug_all (0)/1, echo_all (1)/0, print_all (0)/1
+	// PARAMS: set_control_flag [current sets set/get var errors]
 	// RETURN: none
 	// DESC constructor
-	public function __construct($debug_all = 0, $echo_all = 1, $print_all = 0)
+	public function __construct(int $set_control_flag = 0)
 	{
+		// init flags
+		$this->__setControlFlag($set_control_flag);
+
 		// set per run UID for logging
 		$this->running_uid = hash($this->hash_algo, uniqid((string)rand(), true));
 
@@ -222,9 +245,9 @@ class Basic
 		);
 
 		// if given via parameters, only for all
-		$this->debug_output_all = $debug_all;
-		$this->echo_output_all = $echo_all;
-		$this->print_output_all = $print_all;
+		$this->debug_output_all = false;
+		$this->echo_output_all = true;
+		$this->print_output_all = false;
 		// globals overrule given settings, for one (array), eg $ECHO['db'] = 1;
 		if (isset($GLOBALS['DEBUG'])) {
 			$this->debug_output = $GLOBALS['DEBUG'];
@@ -372,6 +395,9 @@ class Basic
 		// new better password init
 		$this->passwordInit();
 
+		// key generation init
+		$this->initRandomKeyData();
+
 		// start logging running time
 		$this->runningTime();
 	}
@@ -390,6 +416,69 @@ class Basic
 	}
 
 	// *************************************************************
+	// INTERAL VARIABLE ERROR HANDLER
+	// *************************************************************
+
+	// METHOD: __setControlFlag
+	// PARAMS: control flag as bit list
+	// RETURN: none
+	// DESC  : sets internal control flags for class variable check
+	//         0 -> turn of all, works like default php class
+	//         CLASS_STRICT_MODE: 1 -> if set throws error on unset class variable
+	//         CLASS_OFF_COMPATIBLE_MODE: 2 -> if set turns of auto set for unset variables
+	//         3 -> sets error on unset and does not set variable (strict)
+	private function __setControlFlag(int $set_control_flag)
+	{
+		// is there either a constant or global set to override the control flag
+		if (defined('CLASS_VARIABLE_ERROR_MODE')) {
+			$set_control_flag = CLASS_VARIABLE_ERROR_MODE;
+		}
+		if (isset($GLOBALS['CLASS_VARIABLE_ERROR_MODE'])) {
+			$set_control_flag = $GLOBALS['CLASS_VARIABLE_ERROR_MODE'];
+		}
+		// bit wise check of int and set
+		if ($set_control_flag & CLASS_OFF_COMPATIBLE_MODE) {
+			$this->set_compatible = false;
+		} else {
+			$this->set_compatible = true;
+		}
+		if ($set_control_flag & CLASS_STRICT_MODE) {
+			$this->set_strict_mode = true;
+		} else {
+			$this->set_strict_mode = false;
+		}
+	}
+
+	// METHOD: __set
+	// PARAMS: var name, var value
+	// RETURN: none
+	// DESC  : if strict mode is set, throws an error if the class variable is not set
+	//         if compatible mode is set, also auto sets variable even if not declared
+	//         default is strict mode false and compatible mode on
+	public function __set($name, $value)
+	{
+		if ($this->set_strict_mode === true && !property_exists($this, $name)) {
+			trigger_error('Undefined property via __set(): '.$name, E_USER_NOTICE);
+		}
+		// use this for fallback as to work like before to set unset
+		if ($this->set_compatible === true) {
+			return $this->{$name} = $value;
+		}
+	}
+
+	// METHOD: __get
+	// PARAMS: var name
+	// RETURN: none
+	// DESC  : if strict mode is set, throws an error if the class variable is not set
+	//         default is strict mode false
+	public function __get($name)
+	{
+		if ($this->set_strict_mode === true && !property_exists($this, $name)) {
+			trigger_error('Undefined property via __get(): '.$name, E_USER_NOTICE);
+		}
+	}
+
+	// *************************************************************
 	// GENERAL METHODS
 	// *************************************************************
 
@@ -398,7 +487,7 @@ class Basic
 	// RETURN: current set string
 	// DESC  : sets the log file prefix id
 	//         must be alphanumeric only (\w)
-	public function basicSetLogId($string)
+	public function basicSetLogId(string $string): string
 	{
 		if (!isset($log_file_id)) {
 			$log_file_id = '';
@@ -409,11 +498,11 @@ class Basic
 		return $log_file_id;
 	}
 
-	// METHOD: db_io_info
-	// PARAMS: show, default 1, if set to 0 won't write to error_msg var
+	// METHOD: classInfo
+	// PARAMS: print to debug (true/false)
 	// RETURN: string with info
 	// DESC  : default class info (prints out class info)
-	public function info($class_name = "basic", $stdio = 0)
+	public function classInfo(string $class_name = 'basic', bool $print_to_debug = false): string
 	{
 		unset($string);
 		list($major, $minor, $patchlvl) = explode(".", $this->class_info[$class_name]["class_version"]);
@@ -424,12 +513,58 @@ class Basic
 		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Revision: <b>".$this->class_info[$class_name]["class_revision"]."</b><br>";
 		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Created: <b>".$this->class_info[$class_name]["class_created"]."</b><br>";
 		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Last Change: <b>".$this->class_info[$class_name]["class_last_changed"]."</b>";
-		if ($stdio) {
-			echo $string.'<br>';
-		} else {
+		if ($print_to_debug === true) {
 			$this->debug('info', '<br>'.$string);
 		}
 		return $string;
+	}
+
+	// ****** DEBUG/ERROR FUNCTIONS ******
+
+	// METHOD: hrRunningTime
+	// PARAMS: time return conversion, default is ms
+	//         allowed are ns (nano), ys (micro), ms (milli), s
+	// RETURN: running time or nothing on start
+	// DESC  : uses the hrtime() for running time
+	public function hrRunningTime(string $out_time = 'ms'): float
+	{
+		// if start time not set, set start time
+		if (!$this->hr_starttime) {
+			$this->hr_starttime = hrtime(true);
+		} else {
+			$this->hr_endtime = hrtime(true);
+			$this->hr_runtime = $this->hr_endtime - $this->hr_starttime;
+			// reset start and end time past run
+			$this->hr_starttime = 0;
+			$this->hr_endtime = 0;
+		}
+		// init divisor, just in case
+		$divisor = 1;
+		// check through valid out time, if nothing matches default to ms
+		switch ($out_time) {
+			case 'n':
+			case 'ns':
+				$divisor = 1;
+				break;
+			case 'y':
+			case 'ys':
+				$divisor = 1000;
+				break;
+			case 'm':
+			case 'ms':
+				$divisor = 1000000;
+				break;
+			case 's':
+				$divisor = 1000000000;
+				break;
+			// default is ms
+			default:
+				$divisor = 1000000;
+				break;
+		}
+		// return the run time in converted format
+		$this->hr_runtime /= $divisor;
+		return $this->hr_runtime;
 	}
 
 	// METHOD: runningTime
@@ -438,11 +573,11 @@ class Basic
 	// RETURN: string with running time for debugging
 	// DESC  : prints start or end time in text format. On first call sets start time
 	//         on second call it sends the end time and then also prints the running time
-	public function runningTime($simple = false)
+	public function runningTime(bool $simple = false): float
 	{
 		list($micro, $timestamp) = explode(' ', microtime());
 		$string = '';
-		$running_time = '';
+		$running_time = 0;
 		if (!$this->starttime) {
 			$this->starttime = ((float)$micro + (float)$timestamp);
 			$string .= $simple ? 'Start: ' : "<b>Started at</b>: ";
@@ -450,12 +585,13 @@ class Basic
 			$this->endtime = ((float)$micro + (float)$timestamp);
 			$string .= $simple ? 'End: ' : "<b>Stopped at</b>: ";
 		}
-		$string .= date("Y-m-d H:i:s", (int)$timestamp);
-		$string .= " ".$micro;
+		$string .= date('Y-m-d H:i:s', (int)$timestamp);
+		$string .= ' '.$micro;
 		if ($this->starttime && $this->endtime) {
 			$running_time = $this->endtime - $this->starttime;
 			$string .= ($simple ? 'Run: ' : "<br><b>Script running time</b>: ").$running_time." s";
 		}
+		$this->runningtime_string = $string;
 		// $this->debug('info', $string);
 		return $running_time;
 	}
@@ -464,10 +600,11 @@ class Basic
 	// PARAMS: none
 	// RETURN: none
 	// DESC  : resets start & end time for runningTime call
-	public function resetRunningTime()
+	public function resetRunningTime(): void
 	{
 		$this->starttime = '';
 		$this->endtime = '';
+		$this->runningtime_string = '';
 	}
 
 	// METHOD: printTime
@@ -475,7 +612,7 @@ class Basic
 	// PARAMS: $set_microtime, 0 shows none, default (-1) shows all, positive number is for rounding
 	// RETURN: formated datetime string
 	// DESC  : wrapper around microtime function to print out y-m-d h:i:s.ms
-	public static function printTime($set_microtime = -1)
+	public static function printTime(int $set_microtime = -1): string
 	{
 		list($microtime, $timestamp) = explode(' ', microtime());
 		$string = date("Y-m-d H:i:s", (int)$timestamp);
@@ -495,11 +632,11 @@ class Basic
 	//         $enter: default on true, if set to false, no linebreak (\n) will be put at the end
 	// RETURN: none
 	// DESC  : writes a string to a file immediatly, for fast debug output
-	public function fdebug($string, $enter = 1)
+	public function fdebug(string $string, $enter = true): void
 	{
 		if ($this->debug_filename) {
 			$this->fdebugFP();
-			if ($enter) {
+			if ($enter === true) {
 				$string .= "\n";
 			}
 			$string = "[".$this->printTime()."] [".$this->getPageName(2)."] - ".$string;
@@ -513,7 +650,7 @@ class Basic
 	// PARAMS: $flag: default '', 'o' -> open, 'c' -> close
 	// RETURN: none
 	// DESC  : if no debug_fp found, opens a new one; if fp exists close it
-	private function fdebugFP($flag = '')
+	private function fdebugFP(string $flag = ''): void
 	{
 		if (!$this->debug_fp || $flag == 'o') {
 			$fn = BASE.LOG.$this->debug_filename;
@@ -531,14 +668,14 @@ class Basic
 	// RETURN: none
 	// DESC  : passes list of level names, to turn on debug
 	//         eg $foo->debug_for('print', 'on', array('LOG', 'DEBUG', 'INFO'));
-	public function debugFor($type, $flag)
+	public function debugFor(string $type, string $flag): void
 	{
 		$debug_on = func_get_args();
 		array_shift($debug_on); // kick out type
 		array_shift($debug_on); // kick out flag (on/off)
 		if (count($debug_on) >= 1) {
 			foreach ($debug_on as $level) {
-				$switch = $type."_output";
+				$switch = $type.'_output';
 				if ($flag == 'off') {
 					$switch .= '_not';
 				}
@@ -554,7 +691,7 @@ class Basic
 	//                 this is only used for debug output
 	// RETURN: none
 	// DESC  : write debug data to error_msg array
-	public function debug($level, $string, $strip = false)
+	public function debug(string $level, string $string, bool $strip = false): void
 	{
 		if (($this->debug_output[$level] || $this->debug_output_all) && !$this->debug_output_not[$level]) {
 			if (!isset($this->error_msg[$level])) {
@@ -572,7 +709,7 @@ class Basic
 				// find any <br> and replace them with \n
 				$string = str_replace('<br>', "\n", $string);
 				// strip rest of html elements
-				$string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "", $string);
+				$string = preg_replace("/(<\/?)(\w+)([^>]*>)/", '', $string);
 			}
 			// same string put for print (no html crap inside)
 			$error_string_print = '['.$this->printTime().'] ['.$this->host_name.'] ['.$this->getPageName(2).'] ['.$this->running_uid.'] {'.get_class($this).'} <'.$level.'> - '.$string;
@@ -592,7 +729,7 @@ class Basic
 	// RETURN: null or the function that called the function where this methid is called
 	// DESC  : if there is a need to find out which parent method called a child method, eg for debugging, this function does this
 	//         call this method in the child method and you get the parent function that called it
-	public function getCallerMethod($level = 2)
+	public function getCallerMethod(int $level = 2): ?string
 	{
 		$traces = debug_backtrace();
 		// extended info (later)
@@ -617,7 +754,7 @@ class Basic
 	// RETURN: none
 	// DESC  : merges the given error array with the one from this class
 	//         only merges visible ones
-	public function mergeErrors($error_msg = array ())
+	public function mergeErrors(array $error_msg = array ()): void
 	{
 		if (!is_array($error_msg)) {
 			$error_msg = array ();
@@ -632,7 +769,7 @@ class Basic
 	// PARAMS: $string: prefix string for header
 	// RETURN: error msg for all levels
 	// DESC  : prints out the error string
-	public function printErrorMsg($string = '')
+	public function printErrorMsg(string $string = ''): string
 	{
 		$string_output = '';
 		if ($this->debug_output_all) {
@@ -665,7 +802,7 @@ class Basic
 	// PARAMS: $level: the level to write
 	// RETURN: none
 	// DESC  : writes error msg data to file for current level
-	private function writeErrorMsg($level, $error_string)
+	private function writeErrorMsg(string $level, string $error_string): void
 	{
 		if (($this->debug_output[$level] || $this->debug_output_all) && !$this->debug_output_not[$level]) {
 			// only write if write is requested
@@ -734,55 +871,13 @@ class Basic
 	// DESC  : unsests the error message array
 	//         can be used if writing is primary to file
 	//         if no level given resets all
-	public function resetErrorMsg($level = '')
+	public function resetErrorMsg(string $level = ''): void
 	{
 		if (!$level) {
 			unset($this->error_msg);
-		} else {
+		} elseif (isset($this->error_msg[$level])) {
 			unset($this->error_msg[$level]);
 		}
-	}
-
-	// METHOD: errorHandler
-	// WAS   : ErrorHandler
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : catch function to handle all errors that are not handled by php itself
-	//         eg all errors that would be surpressed are written to a log file if this function is enabled
-	//         to use it call with set_error_handler(array("Basic", "ErrorHandler"));
-	// NOTE  : this will only catch any additional erros created AFTER the set_error_handler was set,
-	//         so mostly no strict/notices from the classes are visible
-	//         also, this currently returns true, which will invoke the standard PHP error reporter too
-	public static function errorHandler($type, $message, $file, $line)
-	{
-		// error levels for PHP
-		// values based on 5.3
-		$error_level = array (
-			1 => 'E_ERROR',
-			2 => 'E_WARNING',
-			4 => 'E_PARSE',
-			8 => 'E_NOTICE',
-			16 => 'E_CORE_ERROR',
-			32 => 'E_CORE_WARNING',
-			64 => 'E_COMPILE_ERROR',
-			128 => 'E_COMPILE_WARNING',
-			256 => 'E_USER_ERROR',
-			512 => 'E_USER_WARNING',
-			1024 => 'E_USER_NOTICE',
-			2048 => 'E_STRICT',
-			4096 => 'E_RECOVERABLE_ERROR', // since 5.2
-			8192 => 'E_DEPRICATED', // since 5.3
-			16384 => 'E_USER_DEPRICATED', // since 5.3
-			30719 => 'E_ALL' // 6143 in 5.2, 2047 in previous versions
-		);
-
-		$fn = BASE.LOG.'php_errors-'.date('Y-m-d').'.log';
-		$output = '['.Basic::print_time().'] {'.Basic::get_page_name().'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message."\n";
-		$fp = fopen($fn, 'a');
-		fwrite($fp, $output);
-		fclose($fp);
-		// if set to false the PHP error reporter will be called after this
-		return false;
 	}
 
 	// METHOD: printAr
@@ -790,19 +885,100 @@ class Basic
 	// PARAMS: $array
 	// RETURN: string html formatted
 	// DESC  : prints a html formatted (pre) array
-	public static function printAr(array $array)
+	public static function printAr(array $array): string
 	{
 		return "<pre>".print_r($array, true)."</pre>";
 	}
 
+	// ****** DEBUG/ERROR FUNCTIONS ******
+
+	// ****** RANDOM KEY GEN ******
+
+	// METHOD: initRandomKeyData
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : sets the random key range with the default values
+	private function initRandomKeyData()
+	{
+		// random key generation
+		$this->key_range = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
+		$this->one_key_length = count($this->key_range);
+		// pow($this->one_key_length, 4);
+		// default set to 4, should be more than enought (62*62*62*62)
+		$this->key_length = 4;
+	}
+
+	// METHOD: validateRandomKeyLenght
+	// PARAMS: int key length
+	// RETURN: true for valid, false for invalid length
+	// DESC  : validates they key length
+	private function validateRandomKeyLenght(int $key_length): bool
+	{
+		if (isset($key_length) &&
+			is_numeric($key_length) &&
+			$key_length > 0 &&
+			$key_length <= $this->max_key_length
+		) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// METHOD: initRandomKeyLength
+	// PARAMS: key length in int
+	// RETURN: true/false for set status
+	// DESC  : sets the key length and checks that they key given is valid
+	//         if failed it will not change the default key length and return false
+	public function initRandomKeyLength(int $key_length): bool
+	{
+		// only if valid int key with valid length
+		if ($this->validateRandomKeyLenght($key_length) === true) {
+			$this->key_length = $key_length;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// METHOD: randomKeyGen
+	// PARAMS: key length override, -1 for use default
+	// RETURN: random key
+	// DESC  : creates a random key based on the key_range with key_length
+	//         if override key length is set, it will check on valid key and use this
+	//         this will not set the class key length variable
+	public function randomKeyGen(int $key_length = -1): string
+	{
+		$use_key_length;
+		// only if valid int key with valid length
+		if ($this->validateRandomKeyLenght($key_length) === true) {
+			$use_key_length= $key_length;
+		} else {
+			$use_key_length = $this->key_length;
+		}
+
+		return join(
+			'',
+			array_map(
+				function () {
+					return $this->key_range[rand(0, $this->one_key_length - 1)];
+				},
+				range(1, $use_key_length)
+			)
+		);
+	}
+
+	// ****** RANDOM KEY GEN ******
+
 	// METHOD: checked
-	// PARAMS: haystack (search in), needle (search for), type: 0: returns selected, 1, returns checked
-	//         haystack can be an array or a string
+	// PARAMS: haystack (search in) haystack can be an array or a string
+	//         needle (search for)
+	//         type: 0: returns selected, 1, returns checked
 	// RETURN: returns checked or selected, else returns nothing (empty return)
 	// DESC  : returns 'checked' or 'selected' if okay
 	//         $needle is a var, $haystack an array
-	// **** THE RETURN: VALUE WILL CHANGE TO A DEFAULT "FALSE" ****
-	public static function checked($haystack, $needle, $type = 0)
+	// **** THE RETURN: VALUE WILL CHANGE TO A DEFAULT NULL IF NOT FOUND ****
+	public static function checked($haystack, $needle, int $type = 0): ?string
 	{
 		if (is_array($haystack)) {
 			if (in_array((string)$needle, $haystack)) {
@@ -813,6 +989,7 @@ class Basic
 				return (($type) ? "checked" : "selected");
 			}
 		}
+		return null;
 	}
 
 	// METHOD: magicLinks
@@ -822,7 +999,7 @@ class Basic
 	// DESC  : tries to find mailto:user@bubu.at and changes it into -> <a href="mailto:user@bubu.at">E-Mail senden</a>
 	//         or tries to take any url (http, ftp, etc) and transform it into a valid URL
 	//         the string is in the format: some url|name#css|, same for email
-	public function magicLinks($string, $target = "_blank")
+	public function magicLinks(string $string, string $target = "_blank"): string
 	{
 		$output = $string;
 		$protList = array("http", "https", "ftp", "news", "nntp");
@@ -894,7 +1071,7 @@ class Basic
 	// RETURN: correct string for url href process
 	// DESC  : internal function, called by the magic url create functions.
 	//         checks if title $_4 exists, if not, set url as title
-	private function createUrl($href, $atag, $_1, $_2, $_3, $name, $class)
+	private function createUrl($href, $atag, $_1, $_2, $_3, $name, $class): string
 	{
 		// $this->debug('URL', "1: $_1 - 2: $_2 - $_3 - atag: $atag - name: $name - class: $class");
 		// if $_1 ends with //, then we strip $_1 complete & target is also blanked (its an internal link)
@@ -938,7 +1115,7 @@ class Basic
 	// PARAMS: none
 	// RETURN: host name
 	// DESC  : get the host name without the port as given by the SELF var
-	public function getHostName()
+	public function getHostName(): string
 	{
 		$port = '';
 		if ($_SERVER['HTTP_HOST'] && preg_match("/:/", $_SERVER['HTTP_HOST'])) {
@@ -961,7 +1138,7 @@ class Basic
 	//         2: keep filename as is, but add dirname too
 	// RETURN: filename
 	// DESC  : get the page name of the curronte page:
-	public static function getPageName($strip_ext = 0)
+	public static function getPageName(int $strip_ext = 0): string
 	{
 		// get the file info
 		$page_temp = pathinfo($_SERVER["PHP_SELF"]);
@@ -979,7 +1156,7 @@ class Basic
 	// PARAMS: filename
 	// RETURN: extension of the file name
 	// DESC  : quick return the extension of the given file name
-	public static function getFilenameEnding($filename)
+	public static function getFilenameEnding(string $filename): string
 	{
 		$page_temp = pathinfo($filename);
 		return $page_temp['extension'];
@@ -993,7 +1170,7 @@ class Basic
 	// RETURN: array with the elements where the needle can be found in the haystack array
 	// DESC  : searches key = value in an array / array
 	//         only returns the first one found
-	public static function arraySearchRecursive($needle, $haystack, $key_lookin = '')
+	public static function arraySearchRecursive($needle, array $haystack, $key_lookin = ''): ?array
 	{
 		$path = null;
 		if (!is_array($haystack)) {
@@ -1025,16 +1202,16 @@ class Basic
 	//         path: recursive call for previous path
 	// RETURN: all array elements paths where the element was found
 	// DESC  : recursive array search function, which returns all found not only the first one
-	public static function arraySearchRecursiveAll($needle, $haystack, $key, $path = null)
+	public static function arraySearchRecursiveAll($needle, array $haystack, $key, $path = null): ?array
 	{
 		if (!isset($path['level'])) {
 			$path['level'] = 0;
 		}
 		if (!isset($path['work'])) {
-			$path['work'] = array();
+			$path['work'] = array ();
 		}
 		if (!isset($haystack)) {
-			$haystack = array();
+			$haystack = array ();
 		}
 
 		// go through the array,
@@ -1068,7 +1245,7 @@ class Basic
 	// PARAMS: array (search in), key (key to search in), value (what to find
 	// RETURN: true on found, false on not found
 	// DESC  : array search simple. looks for key, value combination, if found, returns true
-	public static function arraySearchSimple($array, $key, $value)
+	public static function arraySearchSimple(array $array, $key, $value): bool
 	{
 		if (!is_array($array)) {
 			$array = array ();
@@ -1147,8 +1324,11 @@ class Basic
 	// RETURN: modified array
 	// DESC  : searches for key -> value in an array tree and writes the value one level up
 	//         this will remove this leaf will all other values
-	public static function arrayFlatForKey($array, $search)
+	public static function arrayFlatForKey(array $array, $search): array
 	{
+		if (!is_array($array)) {
+			$array = array ();
+		}
 		foreach ($array as $key => $value) {
 			// if it is not an array do just nothing
 			if (is_array($value)) {
@@ -1173,7 +1353,7 @@ class Basic
 	// RETURN: found elements: array
 	// DESC  : search for the needle array elements in haystack and return the ones found as an array,
 	//         is there nothing found, it returns FALSE (boolean)
-	public static function inArrayAny($needle, $haystack)
+	public static function inArrayAny($needle, array $haystack)
 	{
 		if (!is_array($needle)) {
 			return false;
@@ -1199,8 +1379,9 @@ class Basic
 	// PARAMS: db array, key, value part, flag if set all or only set
 	// RETURN: returns and associative array
 	// DESC  : creates out of a normal db_return array an assoc array
-	public static function genAssocArray($db_array, $key, $value, $set_only = 0)
+	public static function genAssocArray(array $db_array, $key, $value, bool $set_only = false): array
 	{
+		$ret_array = array ();
 		// do this to only run count once
 		for ($i = 0, $iMax = count($db_array); $i < $iMax; $i ++) {
 			// if no key then we make an order reference
@@ -1220,13 +1401,12 @@ class Basic
 	// PARAMS: array, connect char
 	// RETRUN: string
 	// DESC  : wrapper for join, but checks if input is an array and if not returns null
-	public static function arrayToString($array, $connect_char)
+	public static function arrayToString(array $array, string $connect_char): string
 	{
 		if (is_array($array)) {
-			return join($connect_char, $array);
-		} else {
-			return false;
+			$array = array ();
 		}
+		return join($connect_char, $array);
 	}
 
 	// METHOD: flattenArray
@@ -1234,7 +1414,7 @@ class Basic
 	// RETURN: returns a flatten array
 	// DESC  : converts multi dimensional array to a flat array
 	//         does NOT preserve keys
-	public static function flattenArray(array $array)
+	public static function flattenArray(array $array): array
 	{
 		$return = array ();
 		array_walk_recursive(
@@ -1251,7 +1431,7 @@ class Basic
 	// RETURN: flattened array with array keys as values in order of tree
 	// DESC  : note: the second parameter $return is automatically set
 	//         will loop through an array recursivly and write the array keys back
-	public static function flattenArrayKey(array $array, array $return = array ())
+	public static function flattenArrayKey(array $array, array $return = array ()): array
 	{
 		foreach ($array as $key => $sub) {
 			$return[] = $key;
@@ -1267,7 +1447,7 @@ class Basic
 	// PARAMS: string to encode, encoding to encode in
 	// RETURN: encoded string
 	// DESC  : wrapper function for mb mime convert, for correct conversion with long strings
-	public static function __mbMimeEncode($string, $encoding)
+	public static function __mbMimeEncode(string $string, string $encoding): string
 	{
 		// set internal encoding, so the mimeheader encode works correctly
 		mb_internal_encoding($encoding);
@@ -1301,39 +1481,67 @@ class Basic
 	// PARAMS: int bytes, boolean for space, default is set
 	// RETURN: string
 	// DESC  : converts bytes into formated string with KB, MB, etc
-	public static function byteStringFormat($number, $space = true)
+	public static function byteStringFormat($number, bool $space = true): string
 	{
 		if (is_numeric($number) && $number > 0) {
 			// labels in order of size
-			$labels = array('B', 'KB', 'MB', 'GB', 'TB');
+			$labels = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB');
 			// calc file size, round down too two digits, add label based max change
-			return round($number / pow(1024, ($i = floor(log($number, 1024)))), 2).($space ? ' ' : '').$labels[$i];
+			return round($number / pow(1024, ($i = floor(log($number, 1024)))), 2).($space ? ' ' : '').(isset($labels[$i]) ? $labels[$i] : '>EB');
 		}
-		return $number;
+		return (string)$number;
 	}
 
 	// METHOD: stringByteFormat
 	// WAS   : StringByteFormat
-	// PARAMS: string
-	// RETURN: int
-	// DESC  : calculates the bytes based on a string with nnG, nnM, etc
-	public static function stringByteFormat($number)
+	// PARAMS: some string with byte info, flag if the number is . or , thousand notaded
+	// RETURN: int or string as is if not mathcing
+	// DESC  : calculates the bytes based on a string with nnG, nnGB, nnM, etc
+	//         if the number has a non standard thousand seperator , inside, the second
+	//         flag needs to be set true (eg german style notaded numbers)
+	public static function stringByteFormat($number, bool $dot_thousand = false)
 	{
-		$last = strtolower($number[strlen($number) - 1]);
-		$number = (int)trim($number);
-		switch ($last) {
-			case 't':
-				$number *= 1024;
-				// no break, calc down next level
-			case 'g':
-				$number *= 1024;
-				// no break: if we have giga we do first multiplication before the others
-			case 'm':
-				$number *= 1024;
-				// no break: if we have mega, do first before we do final kilo
-			case 'k':
-				$number *= 1024;
+		// detects up to exo bytes
+		preg_match("/([\d.,]*)\s?(eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/", strtolower($number), $matches);
+		if (isset($matches[1]) && isset($matches[2])) {
+			// $last = strtolower($number[strlen($number) - 1]);
+			if ($dot_thousand === false) {
+				$number = str_replace(',', '', $matches[1]);
+			} else {
+				$number = str_replace('.', '', $matches[1]);
+			}
+			$number = (float)trim($number);
+			// match string in type to calculate
+			switch ($matches[2]) {
+				// exo bytes
+				case 'e':
+				case 'eb':
+					$number *= 1024;
+				// peta bytes
+				case 'p':
+				case 'pb':
+					$number *= 1024;
+				// tera bytes
+				case 't':
+				case 'tb':
+					$number *= 1024;
+				// giga bytes
+				case 'g':
+				case 'gb':
+					$number *= 1024;
+				// mega bytes
+				case 'm':
+				case 'mb':
+					$number *= 1024;
+				// kilo bytes
+				case 'k':
+				case 'kb':
+					$number *= 1024;
+					break;
+			}
+			$number = (int)round($number, 0);
 		}
+		// if not matching return as is
 		return $number;
 	}
 
@@ -1342,7 +1550,7 @@ class Basic
 	// PARAMS: unix timestamp, true/false to show microtime
 	// RETURN: string formated date+time in Y-M-D h:m:s
 	// DESC  : a simple wrapper for the date format
-	public static function dateStringFormat($timestamp, $show_micro = true)
+	public static function dateStringFormat($timestamp, bool $show_micro = true): string
 	{
 		list ($timestamp, $ms) = explode('.', round($timestamp, 4));
 		$string = date("Y-m-d H:i:s", $timestamp);
@@ -1357,7 +1565,7 @@ class Basic
 	// PARAMS: seconds
 	// RETURN: formated time string
 	// DESC  : formats a timestamp into time from. not a date
-	public static function timeStringFormat($timestamp, $show_micro = true)
+	public static function timeStringFormat($timestamp, bool $show_micro = true): string
 	{
 		// check if the timestamp has any h/m/s/ms inside, if yes skip
 		if (!preg_match("/(h|m|s|ms)/", (string)$timestamp)) {
@@ -1394,7 +1602,7 @@ class Basic
 	// RETURN: timestamp with microseconds
 	// DESC  : does a reverse of the TimeStringFormat and converts the string from
 	//         xd xh xm xs xms to a timestamp.microtime format
-	public static function stringToTime($timestring)
+	public static function stringToTime($timestring): string
 	{
 		$timestamp = 0;
 		if (preg_match("/(d|h|m|s|ms)/", $timestring)) {
@@ -1424,7 +1632,7 @@ class Basic
 	// PARAMS: date (YYYY-MM-DD)
 	// RETURN: true if valid date, false if date not valid
 	// DESC  : splits & checks date, wrap around for check_date function
-	public static function checkDate($date)
+	public static function checkDate($date): bool
 	{
 		list ($year, $month, $day) = preg_split("/[\/-]/", $date);
 		if (!$year || !$month || !$day) {
@@ -1441,7 +1649,7 @@ class Basic
 	// PARAMS: date (YYYY-MM-DD) + time (HH:MM:SS), SS can be dropped
 	// RETURN: true if valid date, false if date not valid
 	// DESC  : splits & checks date, wrap around for check_date function
-	public static function checkDateTime($datetime)
+	public static function checkDateTime($datetime): bool
 	{
 		list ($year, $month, $day, $hour, $min, $sec) = preg_split("/[\/\- :]/", $datetime);
 		if (!$year || !$month || !$day) {
@@ -1465,7 +1673,10 @@ class Basic
 	// METHOD: compareDate
 	// WAS   : CompareDate
 	// PARAMS: start_date, end_date (both: YYYY-MM-DD)
-	// RETURN: -1 if the first date is smaller the last, 0 if both are equal, 1 if the first date is bigger than the last
+	// RETURN: -1 if the first date is smaller the last
+	//         0 if both are equal
+	//         1 if the first date is bigger than the last
+	//         false if there are no valid dates to be found
 	// DESC  : splits & checks date, wrap around for check_date function
 	public static function compareDate($start_date, $end_date)
 	{
@@ -1495,11 +1706,9 @@ class Basic
 		// now do the compare
 		if ($start_date < $end_date) {
 			return -1;
-		}
-		if ($start_date == $end_date) {
+		} elseif ($start_date == $end_date) {
 			return 0;
-		}
-		if ($start_date > $end_date) {
+		} elseif ($start_date > $end_date) {
 			return 1;
 		}
 	}
@@ -1507,7 +1716,10 @@ class Basic
 	// METHOD: compareDateTime
 	// WAS   : CompareDateTime
 	// PARAMS: start_datetime, end_datetime (both YYYY-MM-DD HH:mm:ss)
-	// RETURN: -1 if the first date is smaller the last, 0 if both are equal, 1 if the end date is bigger than the last
+	// RETURN: -1 if the first date is smaller the last
+	//         0 if both are equal
+	//         1 if the end date is bigger than the last
+	//         false if no valid date/times chould be found
 	// DESC  : compares the two dates + times. if seconds missing in one set, add :00, converts / to -
 	public static function compareDateTime($start_datetime, $end_datetime)
 	{
@@ -1519,11 +1731,9 @@ class Basic
 		$end_timestamp = strtotime($end_datetime);
 		if ($start_timestamp < $end_timestamp) {
 			return -1;
-		}
-		if ($start_timestamp == $end_timestamp) {
+		} elseif ($start_timestamp == $end_timestamp) {
 			return 0;
-		}
-		if ($start_timestamp > $end_timestamp) {
+		} elseif ($start_timestamp > $end_timestamp) {
 			return 1;
 		}
 	}
@@ -1532,7 +1742,7 @@ class Basic
 	// PARAMS: start date, end date
 	// RETURN: overall days, week days, weekend days as array 0...2 or named
 	// DESC  : calculates the days between two dates
-	public static function calcDaysInterval($start_date, $end_date, $return_named = false)
+	public static function calcDaysInterval($start_date, $end_date, bool $return_named = false): array
 	{
 		// pos 0 all, pos 1 weekday, pos 2 weekend
 		$days = array ();
@@ -1575,7 +1785,7 @@ class Basic
 	//         clear cache -> if set to true, will create thumb all the tame
 	// RETURN: thumbnail name
 	// DESC  : converts picture to a thumbnail with max x and max y size
-	public static function createThumbnail($pic, $size_x, $size_y, $dummy = "", $path = "", $cache_source = "", $clear_cache = false)
+	public static function createThumbnail($pic, $size_x, $size_y, $dummy = "", $path = "", $cache_source = "", bool $clear_cache = false)
 	{
 		// get image type flags
 		$image_types = array (
@@ -1696,7 +1906,7 @@ class Basic
 	//         if check to ISO-2022-JP-MS
 	//         set three dots (∴) as wrong character for correct convert error detect
 	//         (this char is used, because it is one of the least used ones)
-	public function checkConvertEncoding($string, $from_encoding, $to_encoding)
+	public function checkConvertEncoding(string $string, string $from_encoding, string $to_encoding)
 	{
 		// convert to target encoding and convert back
 		$temp = mb_convert_encoding($string, $to_encoding, $from_encoding);
@@ -1726,7 +1936,7 @@ class Basic
 	//         optional source encoding
 	// RETURN: converted string
 	// DESC  : detects the source encoding of the string and if doesn't match to the given target encoding it convert is
-	public static function convertEncoding($string, $to_encoding, $source_encoding = '')
+	public static function convertEncoding(string $string, string $to_encoding, string $source_encoding = ''): string
 	{
 		// set if not given
 		if (!$source_encoding) {
@@ -1747,7 +1957,7 @@ class Basic
 	// PARAMS: string
 	// RETURN: old (wrong) crc32b hash
 	// DESC  : checks php version and if >=5.2.7 it will flip the string
-	public function __crc32b($string)
+	public function __crc32b(string $string): string
 	{
 		// do normal hash crc32b
 		$string = hash('crc32b', $string);
@@ -1764,7 +1974,7 @@ class Basic
 	// PARAMS: string, flag to use sha
 	// RETURN: sha1 short (9 chars), but current calls __crc32b
 	// DESC  : replacement for __crc32b call
-	public function __sha1Short($string, $use_sha = false)
+	public function __sha1Short(string $string, bool $use_sha = false): string
 	{
 		if ($use_sha) {
 			return substr(hash('sha1', $string), 0, 9);
@@ -1780,7 +1990,7 @@ class Basic
 	// DESC  : replacemend for __crc32b call (alternate)
 	//         defaults to adler 32, fnv132, fnv1a32, joaat
 	//         all that create 8 char long hashes
-	public function __hash($string, $hash_type = 'adler32')
+	public function __hash(string $string, string $hash_type = 'adler32'): string
 	{
 		if (!in_array($hash_type, array('adler32', 'fnv132', 'fnv1a32', 'joaat'))) {
 			$hash_type = 'adler32';
@@ -1793,7 +2003,7 @@ class Basic
 	//         $max_version: default empty, else in same format as min version
 	// RETURN: true if ok, false if not matching version
 	// DESC  : checks if running PHP version matches given PHP version (min or max)
-	public static function checkPHPVersion($min_version, $max_version = '')
+	public static function checkPHPVersion(string $min_version, string $max_version = ''): bool
 	{
 		// exit with false if the min/max strings are wrong
 		if (!preg_match("/^\d{1}(\.\d{1})?(\.\d{1,2})?$/", $min_version)) {
@@ -1952,7 +2162,7 @@ class Basic
 	// RETURN: none
 	// DESC  : inits the password options set
 	//         currently this is et empty, and the default options are used
-	private function passwordInit()
+	private function passwordInit(): void
 	{
 		// set default password cost: use default set automatically
 		$this->password_options = array (
@@ -1964,7 +2174,7 @@ class Basic
 	// PARAMS: password
 	// RETURN: hashed password
 	// DESC  : creates the password hash
-	public function passwordSet($password)
+	public function passwordSet(string $password): string
 	{
 		// always use the PHP default for the password
 		// password options ca be set in the password init, but should be kept as default
@@ -1975,7 +2185,7 @@ class Basic
 	// PARAMS: password and hash
 	// RETURN: true or false
 	// DESC  : checks if the entered password matches the hash
-	public function passwordVerify($password, $hash)
+	public function passwordVerify(string $password, string $hash): bool
 	{
 		if (password_verify($password, $hash)) {
 			return true;
@@ -1990,7 +2200,7 @@ class Basic
 	// PARAMS: hash
 	// RETURN: true or false
 	// DESC  : checks if the password needs to be rehashed
-	public function passwordRehashCheck($hash)
+	public function passwordRehashCheck(string $hash): bool
 	{
 		if (password_needs_rehash($hash, PASSWORD_DEFAULT, $this->password_options)) {
 			return true;
@@ -2007,7 +2217,7 @@ class Basic
 	// PARAMS: hexstring, flag to return as string (true/false), string seperator: default: ,
 	// RETURN: array with RGB or a string with the seperator
 	// DESC  : converts a hex RGB color to the int numbers
-	public static function hex2rgb($hexStr, $returnAsString = false, $seperator = ',')
+	public static function hex2rgb(string $hexStr, bool $returnAsString = false, string $seperator = ',')
 	{
 		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
 		$rgbArray = array();
@@ -2032,7 +2242,7 @@ class Basic
 	// PARAMS: red, green, blue (0-255)
 	// RETURN: string with hex rgb color plus # in front
 	// DESC  : converts the rgb values from int data to the valid rgb html hex string
-	public static function rgb2hex($red, $green, $blue)
+	public static function rgb2hex(int $red, int $green, int $blue): string
 	{
 		$hex_color = '#';
 		foreach (array ('red', 'green', 'blue') as $color) {
@@ -2046,7 +2256,7 @@ class Basic
 	// PARAMS: red, green, blue (0-255)
 	// RETURN: array with hue (0-360), sat (0-100%), brightness/value (0-100%)
 	// DESC  : converts RGB to HSB/V values
-	public static function rgb2hsb($r, $g, $b)
+	public static function rgb2hsb(int $r, int $g, int $b): array
 	{
 		// check that rgb is from 0 to 255
 		foreach (array('r', 'g', 'b') as $c) {
@@ -2081,7 +2291,7 @@ class Basic
 	// PARAMS: hue (0-360), saturation (0-1), brightness/value (0-1)
 	// RETURN: array with red, blue, green
 	// DESC  : converts HSB/V to RGB values RGB is full INT
-	public static function hsb2rgb($H, $S, $V)
+	public static function hsb2rgb(int $H, int $S, int $V): array
 	{
 		// check that H is 0 to 359, 360 = 0
 		// and S and V are 0 to 1
@@ -2149,7 +2359,7 @@ class Basic
 	// PARAMS: red, blue, green (all 0-255)
 	// RETURN: array with hue (0-360), saturation (0-100%) and luminance (0-100%)
 	// DESC  : converts a RGB (0-255) to HSL
-	public static function rgb2hsl($r, $g, $b)
+	public static function rgb2hsl(int $r, int $g, int $b): array
 	{
 		// check that rgb is from 0 to 255
 		foreach (array('r', 'g', 'b') as $c) {
@@ -2193,7 +2403,7 @@ class Basic
 	//         luminance: 0-1
 	// RETURN: array with RGB as full int
 	// DESC  : converts an HSL to RGB
-	public static function hsl2rgb($h, $s, $l)
+	public static function hsl2rgb(int $h, int $s, int $l): array
 	{
 		$h = (1 / 360) * $h; // calc to internal convert value for hue
 		// if saturation is 0
@@ -2228,7 +2438,7 @@ class Basic
 	// PARAMS: red, green, blue
 	// RETRUN valid # prefix hex html color string
 	// DESC  : converts and int RGB to the HTML color string in hex format
-	public static function rgb2html($red, $green, $blue)
+	public static function rgb2html(int $red, int $green, int $blue): string
 	{
 		// check that each color is between 0 and 255
 		foreach (array('red', 'green', 'blue') as $color) {
@@ -2249,11 +2459,11 @@ class Basic
 	// RETURN: string for email type, eg "pc", "docomo", etc
 	// DESC  : guesses the email type (mostly for mobile) from the domain
 	//         if second is set to true, it will return short naming scheme (only provider)
-	public function getEmailType($email, $short = false)
+	public function getEmailType(string $email, bool $short = false): string
 	{
 		// trip if there is no email address
 		if (!$email) {
-			return "invalid";
+			return 'invalid';
 		}
 		// loop until we match a mobile type, return this first found type
 		foreach ($this->mobile_email_type as $email_regex => $email_type) {
@@ -2267,9 +2477,9 @@ class Basic
 		}
 		// if no previous return we assume this is a pc address
 		if ($short) {
-			return "pc";
+			return 'pc';
 		} else {
-			return "pc_html";
+			return 'pc_html';
 		}
 	}
 
@@ -2277,9 +2487,15 @@ class Basic
 	// PARAMS: long email type (not email)
 	// RETURN: short email type
 	// DESC  : gets the short email type from a long email type
-	public function getShortEmailType($email_type)
+	public function getShortEmailType(string $email_type)
 	{
-		return $this->mobile_email_type_short[$email_type];
+		// check if the short email type exists
+		if (isset($this->mobile_email_type_short[$email_type])) {
+			return $this->mobile_email_type_short[$email_type];
+		} else {
+			// return false on not found
+			return false;
+		}
 	}
 
 	// METHOD: printDateTime
@@ -2291,7 +2507,7 @@ class Basic
 	//                        after the drop down and not before the drop down
 	// RETURN: HTML formated strings for drop down lists of date and time
 	// DESC  : print the date/time drop downs, used in any queue/send/insert at date/time place
-	public static function printDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1, $name_pos_back = false)
+	public static function printDateTime($year, $month, $day, $hour, $min, string $suffix = '', int $min_steps = 1, bool $name_pos_back = false)
 	{
 		// if suffix given, add _ before
 		if ($suffix) {
@@ -2383,7 +2599,7 @@ class Basic
 	// PARAMS: string to encode
 	// RETURN: encoded string
 	// DESC  : full wrapper for html entities
-	public function htmlent($string)
+	public function htmlent(string $string): string
 	{
 		if (is_string($string)) {
 			return htmlentities($string, ENT_COMPAT|ENT_HTML401, 'UTF-8', false);
@@ -2396,7 +2612,7 @@ class Basic
 	// PARAMS: string, optional replace character
 	// RETURN: string with line breaks removed
 	// DESC  : strips out all line breaks or replaced with given string
-	public function removeLB($string, $replace = ' ')
+	public function removeLB(string $string, string $replace = ' '): string
 	{
 		return str_replace(array("\r", "\n"), $replace, $string);
 	}
@@ -2405,7 +2621,7 @@ class Basic
 	// PARAMS: number, round decimals (default 10)
 	// RETURN: correct ceil number
 	// DESC  : some float numbers will be rounded up even if they have no decimal entries
-	public function fceil($number, $precision = 10)
+	public function fceil(float $number, int $precision = 10): float
 	{
 		return ceil(round($number, $precision));
 	}
@@ -2414,7 +2630,7 @@ class Basic
 	// PARAMS: number, round to
 	// RETURN: floor number but with tround to
 	// DESC  : eg 48767 with -2 -> 48700
-	public function floorp($number, $precision = -2)
+	public function floorp(float $number, int $precision = -2): float
 	{
 		$mult = pow(10, $precision); // Can be cached in lookup table
 		return floor($number * $mult) / $mult;
@@ -2424,7 +2640,7 @@ class Basic
 	// PARAMS: any value
 	// RETURN: if not numeric, sets to 0, else returns value already set
 	// DESC  : inits input to 0, if value is not numeric
-	public function initNumeric($number)
+	public function initNumeric(float $number): float
 	{
 		if (!is_numeric($number)) {
 			return 0;
@@ -2437,7 +2653,7 @@ class Basic
 	// PARAMS: session name, if not set then default is form_token
 	// RETURN: form token
 	// DESC  : sets a form token in a session and returns form token
-	public function setFormToken($name = 'form_token')
+	public function setFormToken(string $name = 'form_token'): string
 	{
 		// current hard set to sha256
 		$token = uniqid(hash('sha256', rand()));
@@ -2449,9 +2665,13 @@ class Basic
 	// PARAMS: form token, session name (default form_token)
 	// RETURN: true or false
 	// DESC  : checks if the form token matches the session set form token
-	public function validateFormToken($token, $name = 'form_token')
+	public function validateFormToken(string $token, string $name = 'form_token'): bool
 	{
-		return $_SESSION[$name] === $token;
+		if (isset($_SESSION[$name])) {
+			return $_SESSION[$name] === $token;
+		} else {
+			return false;
+		}
 	}
 
 	// *************************************************************

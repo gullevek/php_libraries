@@ -19,6 +19,7 @@
 *   PRIVATE METHOD:S
 *
 * HISTORY:
+* 2019/9/11 (cs) error string 21->91, 22->92 for not overlapping with IO
 * 2005/07/07 (cs) updated array class for postgres: set 0 & NULL if int field given, insert uses () values () syntax
 * 2005/03/31 (cs) fixed the class call with all debug vars
 * 2003-03-10: error_ids where still wrong chagned 11->21 and 12->22
@@ -51,17 +52,17 @@ class ArrayIO extends \CoreLibs\DB\IO
 	// PARAMS: db_config -> db_io class init vars
 	//         table_array -> the array from the table
 	//         table_name -> name of the table (for the array)
-	//         db_debug -> turn on db_io debug output (DB_DEBUG as global var does the same)
+	//         set_control_flag -> set basic class set/get variable error flags
 	// RETURN: none
 	// DESC  : constructor for the array io class, set the
 	//         primary key name automatically (from array)
-	public function __construct($db_config, $table_array, $table_name, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
+	public function __construct(array $db_config, array $table_array, string $table_name, int $set_control_flag = 0)
 	{
 		// instance db_io class
-		parent::__construct($db_config, $debug, $db_debug, $echo, $print);
+		parent::__construct($db_config, $set_control_flag);
 		// more error vars for this class
-		$this->error_string['21'] = 'No Primary Key given';
-		$this->error_string['22'] = 'Could not run Array Query';
+		$this->error_string['91'] = 'No Primary Key given';
+		$this->error_string['92'] = 'Could not run Array Query';
 
 		$this->table_array = $table_array;
 		$this->table_name = $table_name;
@@ -75,12 +76,13 @@ class ArrayIO extends \CoreLibs\DB\IO
 			}
 		} // set pk_name IF table_array was given
 		// internal
-		$this->class_info['db_array_io'] = array(
+		$this->class_info['db_array_io'] = array (
 			'class_name' => 'DB Array IO',
 			'class_version' => '1.0.0',
 			'class_created' => '2002/12/17',
 			'class_author' => 'Clemens Schwaighofer'
 		);
+		// echo "CALSS INFO POST [A]: <pre>".print_r($this->class_info, true)."</pre><br>";
 	}
 
 	// deconstruktor
@@ -158,7 +160,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// if not set ... produce error
 		if (!$this->table_array[$this->pk_name]['value']) {
 			// if no PK found, error ...
-			$this->error_id = 21;
+			$this->error_id = 91;
 			$this->__dbError();
 			return 0;
 		} else {
@@ -234,7 +236,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// if 0, error
 		unset($this->pk_id);
 		if (!$this->dbExec($q)) {
-			$this->error_id=22;
+			$this->error_id = 92;
 			$this->__dbError();
 		}
 		return $this->table_array;
@@ -306,7 +308,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			// possible dbFetchArray errors ...
 			$this->pk_id = $this->table_array[$this->pk_name]['value'];
 		} else {
-			$this->error_id = 22;
+			$this->error_id = 92;
 			$this->__dbError();
 		}
 		return $this->table_array;
@@ -514,7 +516,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// return success or not
 		if (!$this->dbExec($q)) {
-			$this->error_id = 22;
+			$this->error_id = 92;
 			$this->__dbError();
 		}
 		// set primary key

@@ -30,6 +30,15 @@ $basic = new CoreLibs\Admin\Backend($DB_CONFIG[MAIN_DB], $lang);
 $basic->dbInfo(1);
 ob_end_flush();
 
+$basic->hrRunningTime();
+$basic->runningTime();
+echo "RANDOM KEY [50]: ".$basic->randomKeyGen(50)."<br>";
+echo "TIMED [hr]: ".$basic->hrRunningTime()."<br>";
+echo "TIMED [def]: ".$basic->runningTime()."<br>";
+$basic->hrRunningTime();
+echo "RANDOM KEY [default]: ".$basic->randomKeyGen()."<br>";
+echo "TIMED: ".$basic->hrRunningTime()."<br>";
+
 // set + check edit access id
 $edit_access_id = 3;
 if (isset($login) && is_object($login) && isset($login->acl['unit'])) {

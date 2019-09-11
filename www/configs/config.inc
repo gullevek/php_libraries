@@ -146,6 +146,13 @@ DEFINE('DEFAULT_ENCODING', 'UTF-8');
 /************* LOGGING *******************/
 // DEFINE('LOG_FILE_ID', '');
 
+/************* CLASS ERRORS *******************/
+// 0 = default all OFF
+// 1 = throw notice on unset class var
+// 2 = no notice on unset class var, but do not set undefined class var
+// 3 = throw error and do not set class var
+define('CLASS_VARIABLE_ERROR_MODE', 3);
+
 /************* QUEUE TABLE *************/
 // if we have a dev/live system
 // set_live is a per page/per item

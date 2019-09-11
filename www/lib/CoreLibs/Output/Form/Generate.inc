@@ -235,9 +235,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public $delete;
 	public $really_delete;
 	public $save;
+	public $remove_button;
 	// security publics
 	public $base_acl_level;
-	public $security_levels;
+	public $security_level;
 	// layout publics
 	public $table_width;
 
@@ -248,8 +249,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// PARAMS: $db_config -> connect to DB
 	//         $lang -> language code ('en', 'ja', etc)
 	//         $table_width -> width of table
-	//         $db_debug -> turns db_io debug on/off (DB_DEBUG as global var does the same)
-	public function __construct($db_config, $lang, $table_width = 750, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
+	//         $set_control_flag -> basic class set/get variable error flags
+	public function __construct(array $db_config, string $lang, int $table_width = 750, int $set_control_flag = 0)
 	{
 		$this->my_page_name = $this->getPageName(1);
 		// init the language class
@@ -278,7 +279,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 
 		// start the array_io class which will start db_io ...
-		parent::__construct($db_config, $config_array['table_array'], $config_array['table_name'], $debug, $db_debug, $echo, $print);
+		parent::__construct($db_config, $config_array['table_array'], $config_array['table_name'], $set_control_flag);
 		// here should be a check if the config_array is correct ...
 		if (isset($config_array['show_fields']) && is_array($config_array['show_fields'])) {
 			$this->field_array = $config_array['show_fields'];

@@ -50,7 +50,7 @@ class GetTextReader
 	private $total = 0;          // total string count
 	private $table_originals = null;  // table for original strings (offsets)
 	private $table_translations = null;  // table for translated strings (offsets)
-	private $cache_translations = null;  // original -> translation mapping
+	private $cache_translations = array ();  // original -> translation mapping
 
 
 	/* Methods */
@@ -272,7 +272,7 @@ class GetTextReader
 
 		if ($this->enable_cache) {
 			// Caching enabled, get translated string from cache
-			if (array_key_exists($string, $this->cache_translations)) {
+			if (is_array($this->cache_translations) && array_key_exists($string, $this->cache_translations)) {
 				return $this->cache_translations[$string];
 			} else {
 				return $string;
@@ -355,7 +355,7 @@ class GetTextReader
 		// cache header field for plural forms
 		if (! is_string($this->pluralheader)) {
 			if ($this->enable_cache) {
-				$header = $this->cache_translations[""];
+				$header = $this->cache_translations[''];
 			} else {
 				$header = $this->get_translation_string(0);
 			}
@@ -415,7 +415,7 @@ class GetTextReader
 		$key = $single . chr(0) . $plural;
 
 		if ($this->enable_cache) {
-			if (! array_key_exists($key, $this->cache_translations)) {
+			if (is_array($this->cache_translations) && !array_key_exists($key, $this->cache_translations)) {
 				return ($number != 1) ? $plural : $single;
 			} else {
 				$result = $this->cache_translations[$key];

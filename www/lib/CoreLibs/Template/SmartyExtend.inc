@@ -20,7 +20,7 @@ class SmartyExtend extends SmartyBC
 	public $l10n;
 
 	// constructor class, just sets the language stuff
-	public function __construct($lang)
+	public function __construct(string $lang)
 	{
 		SmartyBC::__construct();
 		$this->l10n = new \CoreLibs\Language\L10n($lang);

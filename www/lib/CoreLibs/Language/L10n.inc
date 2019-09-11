@@ -35,7 +35,7 @@ class L10n extends \CoreLibs\Basic
 	private $input;
 	private $l10n;
 
-	public function __construct($lang = '', $path = '')
+	public function __construct(string $lang = '', string $path = '')
 	{
 		if (!$lang) {
 			$this->lang = 'en';
@@ -60,7 +60,7 @@ class L10n extends \CoreLibs\Basic
 	}
 
 	// reloads the mofile, if the location of the lang file changes
-	public function l10nReloadMOfile($lang, $path = '')
+	public function l10nReloadMOfile(string $lang, string $path = ''): bool
 	{
 		$success = false;
 		$old_mofile = $this->mofile;

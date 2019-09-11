@@ -27,7 +27,6 @@ namespace CoreLibs\Admin;
 class Backend extends \CoreLibs\DB\IO
 {
 	// page name
-	public $page_name; // the name of the current page
 	public $menu = array();
 	public $menu_show_flag = 0; // top menu flag (mostly string)
 	// action ids
@@ -43,6 +42,9 @@ class Backend extends \CoreLibs\DB\IO
 	public $action_error;
 	// ACL array variable if we want to set acl data from outisde
 	public $acl = array ();
+	public $default_acl;
+	// queue key
+	public $queue_key;
 	// the current active edit access id
 	public $edit_access_id;
 	// error/warning/info messages
@@ -55,15 +57,41 @@ class Backend extends \CoreLibs\DB\IO
 	public $HEADER;
 	public $DEBUG_DATA;
 	public $CONTENT_DATA;
+	// smarty include/set var
+	public $INC_TEMPLATE_NAME;
+	public $JS_TEMPLATE_NAME;
+	public $CSS_TEMPLATE_NAME;
+	public $CSS_SPECIAL_TEMPLATE_NAME;
+	public $JS_SPECIAL_TEMPLATE_NAME;
+	public $CACHE_ID;
+	public $COMPILE_ID;
+	public $includes;
+	public $template_path;
+	public $lang_dir;
+	public $javascript;
+	public $css;
+	public $pictures;
+	public $cache_pictures;
+	public $cache_pictures_root;
+	public $JS_INCLUDE;
+	public $JS_SPECIAL_INCLUDE;
+	public $CSS_INCLUDE;
+	public $CSS_SPECIAL_INCLUDE;
+	// language
+	public $l;
 
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
-	public function __construct($db_config, $lang, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
+	// METHOD: __construct
+	// PARAMS: array db config
+	//         string for language set
+	//         int set control flag (for core basic set/get var error control)
+	public function __construct(array $db_config, string $lang, int $set_control_flag = 0)
 	{
 		// get the language sub class & init it
 		$this->l = new \CoreLibs\Language\L10n($lang);
 
 		// init the database class
-		parent::__construct($db_config, $debug, $db_debug, $echo, $print);
+		parent::__construct($db_config, $set_control_flag);
 
 		// internal
 		$this->class_info["adbBackend"] = array(
@@ -73,9 +101,6 @@ class Backend extends \CoreLibs\DB\IO
 			"class_author" => "Clemens Schwaighofer"
 		);
 
-		// set page name
-		$this->page_name = $this->getPageName();
-
 		// set the action ids
 		foreach ($this->action_list as $_action) {
 			$this->$_action = (isset($_POST[$_action])) ? $_POST[$_action] : '';
@@ -83,24 +108,9 @@ class Backend extends \CoreLibs\DB\IO
 
 		$this->default_acl = DEFAULT_ACL_LEVEL;
 
-		// random key generation
-		$this->key_range = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
-		$GLOBALS["_KEY_RANGE"] = $this->key_range;
-		$this->one_key_length = count($this->key_range);
-		$this->key_length = 4; // pow($this->one_key_length, 4); // hardcoded, should be more than enought (62*62*62*62)
-
 		// queue key
 		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action)) {
-			$this->queue_key = join(
-				'',
-				array_map(
-					function () {
-						$range = $GLOBALS['_KEY_RANGE'];
-						return $range[rand(0, (count($range) - 1))];
-					},
-					range(1, 3)
-				)
-			);
+			$this->queue_key = $this->randomKeyGen(3);
 		}
 	}
 
@@ -116,16 +126,18 @@ class Backend extends \CoreLibs\DB\IO
 	// PUBLIC METHODS |=================================================>
 
 	// METHOD: adbEditLog()
-	// PARAMS: event -> any kind of event description, data -> any kind of data related to that event
+	// PARAMS: event -> any kind of event description,
+	//         data -> any kind of data related to that event
 	// RETURN: none
 	// DESC  : writes all action vars plus other info into edit_log table
-	public function adbEditLog($event = '', $data = '', $write_type = 'STRING')
+	public function adbEditLog(string $event = '', $data = '', string $write_type = 'STRING')
 	{
 		if ($write_type == 'BINARY') {
 			$data_binary = $this->dbEscapeBytea(bzcompress(serialize($data)));
 			$data = 'see bzip compressed data_binary field';
 		}
 		if ($write_type == 'STRING') {
+			$data_binary = '';
 			$data = $this->dbEscapeString(serialize($data));
 		}
 
@@ -134,17 +146,27 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
 		$q .= "VALUES ";
-		$q .= "(".@$_SESSION['EUID'].", NOW(), '".$this->dbEscapeString($event)."', '".$data."', '".$data_binary."', '".$this->page_name."', ";
+		$q .= "(".$this->dbEscapeString(isset($_SESSION['EUID']) ? $_SESSION['EUID'] : '').", ";
+		$q .= "NOW(), ";
+		$q .= "'".$this->dbEscapeString($event)."', '".$data."', '".$data_binary."', '".$this->dbEscapeString($this->page_name)."', ";
 		$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->dbEscapeString(@$_SERVER['HTTP_USER_AGENT'])."', ";
-		$q .= "'".$this->dbEscapeString(@$_SERVER['HTTP_REFERER'])."', '".$this->dbEscapeString(@$_SERVER['SCRIPT_FILENAME'])."', ";
-		$q .= "'".$this->dbEscapeString(@$_SERVER['QUERY_STRING'])."', '".$this->dbEscapeString(@$_SERVER['SERVER_NAME'])."', ";
-		$q .= "'".$this->dbEscapeString(@$_SERVER['HTTP_HOST'])."', '".$this->dbEscapeString(@$_SERVER['HTTP_ACCEPT'])."', ";
-		$q .= "'".$this->dbEscapeString(@$_SERVER['HTTP_ACCEPT_CHARSET'])."', '".$this->dbEscapeString(@$_SERVER['HTTP_ACCEPT_ENCODING'])."', ";
+		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '')."', ";
+		$q .= "'".$this->dbEscapeString(isset($_SERVER['SCRIPT_FILENAME']) ? $_SERVER['SCRIPT_FILENAME'] : '')."', ";
+		$q .= "'".$this->dbEscapeString(isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '')."', ";
+		$q .= "'".$this->dbEscapeString(isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '')."', ";
+		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '')."', ";
+		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : '')."', ";
+		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_ACCEPT_CHARSET']) ? $_SERVER['HTTP_ACCEPT_CHARSET'] : '')."', ";
+		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? $_SERVER['HTTP_ACCEPT_ENCODING'] : '')."', ";
 		$q .= "'".session_id()."', ";
-		$q .= "'".$this->dbEscapeString($this->action)."', '".$this->dbEscapeString($this->action_id)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_yes)."', '".$this->dbEscapeString($this->action_flag)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_menu)."', '".$this->dbEscapeString($this->action_loaded)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_value)."', '".$this->dbEscapeString($this->action_error)."')";
+		$q .= "'".$this->dbEscapeString($this->action)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_id)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_yes)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_flag)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_menu)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_loaded)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_value)."', ";
+		$q .= "'".$this->dbEscapeString($this->action_error)."')";
 		$this->dbExec($q, 'NULL');
 	}
 
@@ -152,7 +174,7 @@ class Backend extends \CoreLibs\DB\IO
 	// PARAMS: level
 	// RETURN: returns an array for the top menu with all correct settings
 	// DESC  : menu creater
-	public function adbTopMenu($flag = 0)
+	public function adbTopMenu(int $flag = 0): array
 	{
 		if ($this->menu_show_flag) {
 			$flag = $this->menu_show_flag;
@@ -243,12 +265,12 @@ class Backend extends \CoreLibs\DB\IO
 	// PARAMS: filename
 	// RETURN: returns boolean true/false
 	// DESC  : checks if this filename is in the current situation (user id, etc) available
-	public function adbShowMenuPoint($filename)
+	public function adbShowMenuPoint(string $filename): bool
 	{
-		$enabled = 0;
+		$enabled = false;
 		switch ($filename) {
 			default:
-				$enabled = 1;
+				$enabled = true;
 				break;
 		};
 		return $enabled;
@@ -259,8 +281,9 @@ class Backend extends \CoreLibs\DB\IO
 	// PARAMS: db array, key, value part
 	// RETURN: returns and associative array
 	// DESC  : creates out of a normal db_return array an assoc array
-	public function adbAssocArray($db_array, $key, $value)
+	public function adbAssocArray(array $db_array, $key, $value): array
 	{
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->genAssocArray($db_array, $key, $value);
 	}
 
@@ -269,8 +292,9 @@ class Backend extends \CoreLibs\DB\IO
 	// PARAMS: int
 	// RETURN: string
 	// DESC  : converts bytes into formated string with KB, MB, etc
-	public function adbByteStringFormat($number)
+	public function adbByteStringFormat($number): string
 	{
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->byteStringFormat($number);
 	}
 
@@ -286,6 +310,7 @@ class Backend extends \CoreLibs\DB\IO
 	// DESC  : converts picture to a thumbnail with max x and max y size
 	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = false, $path = "", $cache = "")
 	{
+		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
 	}
 
@@ -295,7 +320,7 @@ class Backend extends \CoreLibs\DB\IO
 	//         var array -> optional data for a possible printf formated msg
 	// RETURN: none
 	// DESC  : wrapper function to fill up the mssages array
-	public function adbMsg($level, $msg, $vars = array ())
+	public function adbMsg(string $level, string $msg, array $vars = array ()): void
 	{
 		if (!preg_match("/^info|warning|error$/", $level)) {
 			$level = "info";
@@ -328,8 +353,16 @@ class Backend extends \CoreLibs\DB\IO
 	//         file      -> string for special file copy actions; mostyle "test#live;..."
 	// RETURN: none
 	// DESC  : writes live queue
-	public function adbLiveQueue($queue_key, $type, $target, $data, $key_name, $key_value, $associate = null, $file = null)
-	{
+	public function adbLiveQueue(
+		$queue_key,
+		$type,
+		$target,
+		$data,
+		$key_name,
+		$key_value,
+		$associate = null,
+		$file = null
+	) {
 		$q = "INSERT INTO ".GLOBAL_DB_SCHEMA.".live_queue (";
 		$q .= "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file";
 		$q .= ") VALUES (";
@@ -353,8 +386,16 @@ class Backend extends \CoreLibs\DB\IO
 	// DESC  : print the date/time drop downs, used in any queue/send/insert at date/time place
 	// NOTE  : Basic class holds exact the same, except the Year/Month/Day/etc strings
 	//         are translated in this call
-	public function adbPrintDateTime($year, $month, $day, $hour, $min, $suffix = '', $min_steps = 1, $name_pos_back = false)
-	{
+	public function adbPrintDateTime(
+		$year,
+		$month,
+		$day,
+		$hour,
+		$min,
+		string $suffix = '',
+		int $min_steps = 1,
+		bool $name_pos_back = false
+	) {
 		// get the build layout
 		$html_time = $this->printDateTime($year, $month, $day, $hour, $min, $suffix, $min_steps, $name_pos_back);
 		// translate the strings inside

@@ -78,6 +78,9 @@ class Login extends \CoreLibs\DB\IO
 	private $pw_new_password;
 	private $pw_new_password_confirm;
 	private $pw_change_deny_users = array (); // array of users for which the password change is forbidden
+	private $logout_target;
+	private $max_login_error_count = -1;
+	private $lock_deny_users = array ();
 
 	// if we have password change we need to define some rules
 	private $password_min_length = PASSWORD_MIN_LENGTH;
@@ -102,18 +105,21 @@ class Login extends \CoreLibs\DB\IO
 	public $acl = array ();
 	public $default_acl_list = array ();
 
+	// language
+	private $l;
+
 	// METHOD: login
 	// PARAMS: db_config -> array for logging in to DB where edit_users tables are
 	//        db_debug -> sets debug output for db_io (can be overruled with DB_DEBUG)
 	// RETURN: none
 	// DESC  : cunstroctuor, does ALL, opens db, works through connection checks, closes itself
-	public function __construct($db_config, $lang = 'en_utf8', $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
+	public function __construct(array $db_config, string $lang = 'en_utf8', int $set_control_flag = 0)
 	{
 		// log login data for this class only
 		$this->log_per_class = 1;
 
 		// create db connection and init base class
-		if (!parent::__construct($db_config, $debug, $db_debug, $echo, $print)) {
+		if (!parent::__construct($db_config, $set_control_flag)) {
 			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
 			exit;
@@ -282,7 +288,7 @@ class Login extends \CoreLibs\DB\IO
 	// PARAMS: hash, optional password, to override
 	// RETURN: true or false
 	// DESC  : checks if password is valid, sets internal error login variable
-	private function loginPasswordCheck($hash, $password = '')
+	private function loginPasswordCheck(string $hash, string $password = ''): bool
 	{
 		// check with what kind of prefix the password begins:
 		// $2a$ or $2y$: BLOWFISCH
@@ -551,7 +557,9 @@ class Login extends \CoreLibs\DB\IO
 						$q .= "WHERE edit_user_id = ".$res['edit_user_id'];
 						$this->dbExec($q);
 						// totally lock the user if error max is reached
-						if ($res['login_error_count'] + 1 > $this->max_login_error_count) {
+						if ($this->max_login_error_count != -1 &&
+							$res['login_error_count'] + 1 > $this->max_login_error_count
+						) {
 							// do some alert reporting in case this error is too big
 							// if strict is set, lock this user
 							// this needs manual unlocking by an admin user
@@ -738,7 +746,7 @@ class Login extends \CoreLibs\DB\IO
 	// PARAMS: edit_access_id to check
 	// RETURN: true/false: if the edit access is not in the valid list: false
 	// DESC  : checks if this edit access id is valid
-	public function loginCheckEditAccess($edit_access_id)
+	public function loginCheckEditAccess($edit_access_id): bool
 	{
 		if (array_key_exists($edit_access_id, $this->acl['unit'])) {
 			return true;
@@ -773,7 +781,7 @@ class Login extends \CoreLibs\DB\IO
 	// PARAMS: set the minimum length
 	// RETURN: true/false on success
 	// DESC  : sets the minium length and checks on valid
-	public function loginSetPasswordMinLength($length)
+	public function loginSetPasswordMinLength(int $length): bool
 	{
 		// check that numeric, positive numeric, not longer than max input string lenght
 		// and not short than min password length
@@ -1176,7 +1184,13 @@ EOM;
 			}
 		}
 		$q .= "'".session_id()."', ";
-		$q .= "'".$this->dbEscapeString($this->action)."', '".$this->dbEscapeString($this->username)."', NULL, '".$this->dbEscapeString($this->login_error)."', NULL, NULL, '".$this->dbEscapeString($this->permission_okay)."', NULL)";
+		$q .= "'".$this->dbEscapeString($this->action)."', ";
+		$q .= "'".$this->dbEscapeString($this->username)."', ";
+		$q .= "NULL, ";
+		$q .= "'".$this->dbEscapeString((string)$this->login_error)."', ";
+		$q .= "NULL, NULL, ";
+		$q .= "'".$this->dbEscapeString((string)$this->permission_okay)."', ";
+		$q .= "NULL)";
 		$this->dbExec($q, 'NULL');
 	}
 

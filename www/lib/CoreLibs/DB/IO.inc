@@ -270,14 +270,16 @@ class IO extends \CoreLibs\Basic
 	public $cursor; // actual cursor (DBH)
 	public $num_rows; // how many rows have been found
 	public $num_fields; // how many fields has the query
-	public $field_names; // array with the field names of the current query
+	public $field_names = array (); // array with the field names of the current query
 	public $insert_id; // last inserted ID
 	public $insert_id_ext; // extended insert ID (for data outside only primary key)
+	private $temp_sql;
 	// other vars
 	private $nbsp = ''; // used by print_array recursion function
 	// error & warning id
 	private $error_id;
 	private $warning_id;
+	private $had_warning;
 	// sub include with the database functions
 	private $db_functions;
 
@@ -285,7 +287,7 @@ class IO extends \CoreLibs\Basic
 	private $MAX_QUERY_CALL;
 	private $query_called = array ();
 	// error string
-	private $error_string = array ();
+	protected $error_string = array ();
 	// prepared list
 	public $prepare_cursor = array ();
 	// primary key per table list
@@ -300,14 +302,13 @@ class IO extends \CoreLibs\Basic
 
 	// METHOD __construct
 	// PARAMS db_config -> array with db, user, password & host
-	//        debug -> turns debugging output on or of (default 0),
-	//        debugging can also be triggerd via DB_DEBUG var on global level
+	//        set_control_flag -> flags for core class get/set variable error handling
 	// RETURN nothing
 	// DESC   constructor for db_clss
-	public function __construct($db_config, $debug = 0, $db_debug = 0, $echo = 1, $print = 0)
+	public function __construct(array $db_config, int $set_control_flag = 0)
 	{
 		// start basic class
-		parent::__construct($debug, $echo, $print);
+		parent::__construct($set_control_flag);
 		// dummy init array for db config if not array
 		if (!is_array($db_config)) {
 			$db_config = array ();
@@ -355,7 +356,7 @@ class IO extends \CoreLibs\Basic
 		$this->error_string['42'] = 'Cannot check for async query, none has been started yet.';
 
 		// set debug, either via global var, or debug var during call
-		$this->db_debug = $db_debug;
+		$this->db_debug = false;
 		// global overrules local
 		if (isset($GLOBALS['DB_DEBUG'])) {
 			$this->db_debug = $GLOBALS['DB_DEBUG'];
@@ -389,7 +390,7 @@ class IO extends \CoreLibs\Basic
 			'class_author' => 'Clemens Schwaighofer'
 		);
 
-		// all ok return true
+		// so we can check that we have a successful DB connection created
 		return true;
 	}
 
@@ -414,7 +415,7 @@ class IO extends \CoreLibs\Basic
 	// DESC  :
 	// internal connection function. Used to connect to the DB if there is no connection done yet.
 	// Called before any execute
-	private function __connectToDB()
+	private function __connectToDB(): bool
 	{
 		// generate connect string
 		$this->dbh = $this->db_functions->__dbConnect($this->db_host, $this->db_user, $this->db_pwd, $this->db_name, $this->db_port, $this->db_ssl);
@@ -449,7 +450,7 @@ class IO extends \CoreLibs\Basic
 	// RETURN: none
 	// DESC  : close db connection
 	//         only used by the deconstructor
-	private function __closeDB()
+	private function __closeDB(): void
 	{
 		if (isset($this->dbh) && $this->dbh) {
 			$this->db_functions->__dbClose();
@@ -463,7 +464,7 @@ class IO extends \CoreLibs\Basic
 	// RETURN: true if matching, false if not
 	// DESC  : checks if query is a SELECT, SHOW or WITH, if not error, 0 return
 	// NOTE  : Query needs to start with SELECT, SHOW or WITH. if starts with "with" it is ignored
-	private function __checkQueryForSelect($query)
+	private function __checkQueryForSelect(string $query): bool
 	{
 		// perhaps allow spaces before select ?!?
 		if (preg_match("/^(select|show|with) /i", $query)) {
@@ -479,7 +480,7 @@ class IO extends \CoreLibs\Basic
 	// DESC  : check for DELETE, INSERT, UPDATE
 	//       : if pure is set to true, only when INSERT is set will return true
 	// NOTE  : Queries need to start with INSERT, UPDATE, DELETE. Anything else is ignored
-	private function __checkQueryForInsert($query, $pure = false)
+	private function __checkQueryForInsert(string $query, bool $pure = false): bool
 	{
 		if ($pure && preg_match("/^insert /i", $query)) {
 			return true;
@@ -495,7 +496,7 @@ class IO extends \CoreLibs\Basic
 	// RETURN: true if UPDATE, else false
 	// DESC  : returns true if the query starts with UPDATE
 	// NOTE  : query NEEDS to start with UPDATE
-	private function __checkQueryForUpdate($query)
+	private function __checkQueryForUpdate(string $query): bool
 	{
 		if (preg_match("/^update /i", $query)) {
 			return true;
@@ -509,9 +510,12 @@ class IO extends \CoreLibs\Basic
 	// RETURN: string with printed and formated array
 	// DESC  : internal funktion that creates the array
 	// NOTE  : used in db_dump_data only
-	private function __printArray($array)
+	private function __printArray(array $array): string
 	{
 		$string = '';
+		if (!is_array($array)) {
+			$array = array ();
+		}
 		foreach ($array as $key => $value) {
 			$string .= $this->nbsp.'<b>'.$key.'</b> => ';
 			if (is_array($value)) {
@@ -534,7 +538,7 @@ class IO extends \CoreLibs\Basic
 	//         type -> query identifiery (Q, I, etc)
 	// RETURN: none
 	// DESC  : calls the basic class debug with strip command
-	private function __dbDebug($debug_id, $error_string, $id = '', $type = '')
+	private function __dbDebug(string $debug_id, string $error_string, string $id = '', string $type = ''): void
 	{
 		$prefix = '';
 		if ($id) {
@@ -557,7 +561,7 @@ class IO extends \CoreLibs\Basic
 	// RETURN: none
 	// DESC  : if error_id set, writes long error string into error_msg
 	// NOTE  : needed to make public so it can be called from DB.Array.IO too
-	public function __dbError($cursor = '', $msg = '')
+	public function __dbError($cursor = '', string $msg = ''): void
 	{
 		$pg_error_string = '';
 		$where_called = $this->getCallerMethod();
@@ -591,15 +595,15 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: array from fetch_row
 	// RETURN: convert fetch_row array
 	// DESC  : if there is the 'to_encoding' var set, and the field is in the wrong encoding converts it to the target
-	private function __dbConvertEncoding($row)
+	private function __dbConvertEncoding(array $row): array
 	{
 		if ($this->to_encoding && $this->db_encoding) {
 			// go through each row and convert the encoding if needed
-			for ($i = 0; $i < $this->num_fields; $i ++) {
-				$from_encoding = mb_detect_encoding($row[$i]);
+			foreach ($row as $key => $value) {
+				$from_encoding = mb_detect_encoding($value);
 				// convert only if encoding doesn't match and source is not pure ASCII
 				if ($from_encoding != $this->to_encoding && $from_encoding != 'ASCII') {
-					$row[$i] = mb_convert_encoding($row[$i], $this->to_encoding, $from_encoding);
+					$row[$key] = mb_convert_encoding($value, $this->to_encoding, $from_encoding);
 				}
 			}
 		}
@@ -611,7 +615,7 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: $stm_name, data array
 	// RETURN: query in prepared form
 	// DESC  : for debug purpose replaces $1, $2, etc with actual data
-	private function __dbDebugPrepare($stm_name, $data = array())
+	private function __dbDebugPrepare(string $stm_name, array $data = array()): string
 	{
 		// get the keys from data array
 		$keys = array_keys($data);
@@ -628,7 +632,7 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: insert/select/update/delete query
 	// RETURN: array with schema and table
 	// DESC  : extracts schema and table from the query, if no schema returns just empty string
-	private function __dbReturnTable($query)
+	private function __dbReturnTable(string $query): array
 	{
 		if (preg_match("/^SELECT /i", $query)) {
 			preg_match("/ (FROM) (([\w_]+)\.)?([\w_]+) /i", $query, $matches);
@@ -649,7 +653,7 @@ class IO extends \CoreLibs\Basic
 	//         * checks for insert if returning is set/pk name
 	//         * sets internal md5 for query
 	//         * checks multiple call count
-	private function __dbPrepareExec($query, $pk_name)
+	private function __dbPrepareExec(string $query, string $pk_name)
 	{
 		// to either use the returning method or the guess method for getting primary keys
 		$this->returning_id = false;
@@ -741,7 +745,7 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: none
 	// RETURN: true on success or false if an error occured
 	// DESC  : runs post execute for rows affected, field names, inserted primary key, etc
-	private function __dbPostExec()
+	private function __dbPostExec(): bool
 	{
 		// if FALSE returned, set error stuff
 		// if either the cursor is false
@@ -762,7 +766,7 @@ class IO extends \CoreLibs\Basic
 				// count the fields
 				$this->num_fields = $this->db_functions->__dbNumFields($this->cursor);
 				// set field names
-				unset($this->field_names);
+				$this->field_names = array ();
 				for ($i = 0; $i < $this->num_fields; $i ++) {
 					$this->field_names[] = $this->db_functions->__dbFieldName($this->cursor, $i);
 				}
@@ -1177,7 +1181,7 @@ class IO extends \CoreLibs\Basic
 	//         like num_rows, num_fields, etc depending on query
 	//         for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
 	//         read from the database for the PK NAME
-	public function dbExec($query = 0, $pk_name = '')
+	public function dbExec(string $query = '', string $pk_name = '')
 	{
 		// prepare and check if we can actually run it
 		if (($md5 = $this->__dbPrepareExec($query, $pk_name)) === false) {
@@ -1204,7 +1208,7 @@ class IO extends \CoreLibs\Basic
 	//         for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
 	//         read from the database for the PK NAME
 	// NEEDS : dbCheckAsync
-	public function dbExecAsync($query, $pk_name = '')
+	public function dbExecAsync(string $query, string $pk_name = ''): bool
 	{
 		// prepare and check if we can actually run the query
 		if (($md5 = $this->__dbPrepareExec($query, $pk_name)) === false) {
@@ -1262,7 +1266,7 @@ class IO extends \CoreLibs\Basic
 	//         assoc_only -> false is default, if true only assoc rows
 	// RETURN: a mixed row
 	// DESC  : executes a cursor and returns the data, if no more data 0 will be returned
-	public function dbFetchArray($cursor = 0, $assoc_only = false)
+	public function dbFetchArray($cursor = 0, bool $assoc_only = false)
 	{
 		// return false if no query or cursor set ...
 		if (!$cursor) {
@@ -1287,7 +1291,7 @@ class IO extends \CoreLibs\Basic
 	//         assoc_only -> if true, only return assoc entry, else both (pgsql)
 	// RETURN: mixed db result
 	// DESC  : returns the FIRST row of the given query
-	public function dbReturnRow($query, $assoc_only = false)
+	public function dbReturnRow(string $query, bool $assoc_only = false)
 	{
 		if (!$query) {
 			$this->error_id = 11;
@@ -1311,7 +1315,7 @@ class IO extends \CoreLibs\Basic
 	//         assoc_only -> if true, only name ref are returned
 	// RETURN: array of hashes (row -> fields)
 	// DESC  : createds an array of hashes of the query (all data)
-	public function dbReturnArray($query, $assoc_only = false)
+	public function dbReturnArray(string $query, bool $assoc_only = false)
 	{
 		if (!$query) {
 			$this->error_id = 11;
@@ -1339,7 +1343,7 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: $query -> query to find in cursor_ext
 	// RETURN: position (int)
 	// DESC  : returns the current position the read out
-	public function dbCursorPos($query)
+	public function dbCursorPos(string $query)
 	{
 		if (!$query) {
 			$this->error_id = 11;
@@ -1355,7 +1359,7 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: $query -> query to find in cursor_ext
 	// RETURN: row count (int)
 	// DESC  : returns the number of rows for the current select query
-	public function dbCursorNumRows($query)
+	public function dbCursorNumRows(string $query)
 	{
 		if (!$query) {
 			$this->error_id = 11;
@@ -1370,9 +1374,9 @@ class IO extends \CoreLibs\Basic
 	// WAS   : db_show_table_meta_data
 	// PARAMS: $table -> table name
 	//         $schema -> optional schema name
-	// RETURN: array of table data
+	// RETURN: array of table data, false on error (table not found)
 	// DESC  : returns an array of the table with columns and values. FALSE on no table found
-	public function dbShowTableMetaData($table, $schema = '')
+	public function dbShowTableMetaData(string $table, string $schema = '')
 	{
 		$table = ($schema ? $schema.'.' : '').$table;
 
@@ -1386,11 +1390,11 @@ class IO extends \CoreLibs\Basic
 	// METHOD: dbPrepare
 	// WAS   : db_prepare
 	// PARAMS: $stm_name, $query, $pk_name: optional
-	// RETURN: false on error
+	// RETURN: false on error, true on warning or result on full ok
 	// DESC  : prepares a query
 	//         for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
 	//         read from the database for the PK NAME
-	public function dbPrepare($stm_name, $query, $pk_name = '')
+	public function dbPrepare(string $stm_name, string $query, string $pk_name = '')
 	{
 		if (!$query) {
 			$this->error_id = 11;
@@ -1469,9 +1473,9 @@ class IO extends \CoreLibs\Basic
 	// METHOD: dbExecute
 	// WAS   : db_execute
 	// PARAMS: $stm_name, data array
-	// RETURN: false on error
+	// RETURN: false on error, result on OK
 	// DESC  : runs a prepare query
-	public function dbExecute($stm_name, $data = array())
+	public function dbExecute(string $stm_name, array $data = array())
 	{
 		// if we do not have no prepare cursor array entry for this statement name, abort
 		if (!is_array($this->prepare_cursor[$stm_name])) {
@@ -1492,22 +1496,25 @@ class IO extends \CoreLibs\Basic
 			if ($this->db_debug) {
 				$this->__dbDebug('db', $this->__dbDebugPrepare($stm_name, $data), 'dbExecPrep', 'Q');
 			}
-			$code = $this->db_functions->__dbExecute($stm_name, $data);
-			if (!$code) {
+			$result = $this->db_functions->__dbExecute($stm_name, $data);
+			if (!$result) {
 				$this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[$stm_name]['result'].']: '.$this->print_ar($data));
 				$this->error_id = 22;
 				$this->__dbError($this->prepare_cursor[$stm_name]['result']);
 				$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Execution failed</span>', 'DB_ERROR');
+				return false;
 			}
-			if ($this->__checkQueryForInsert($this->prepare_cursor[$stm_name]['query'], true) && $this->prepare_cursor[$stm_name]['pk_name'] != 'NULL') {
+			if ($this->__checkQueryForInsert($this->prepare_cursor[$stm_name]['query'], true) &&
+				$this->prepare_cursor[$stm_name]['pk_name'] != 'NULL'
+			) {
 				if (!$this->prepare_cursor[$stm_name]['returning_id']) {
 					$this->insert_id = $this->db_functions->__dbInsertId($this->prepare_cursor[$stm_name]['query'], $this->prepare_cursor[$stm_name]['pk_name']);
-				} elseif ($code) {
+				} elseif ($result) {
 					$this->insert_id = array ();
 					$this->insert_id_ext = array ();
 					// we have returning, now we need to check if we get one or many returned
 					// we'll need to loop this, if we have multiple insert_id returns
-					while ($_insert_id = $this->db_functions->__dbFetchArray($code, PGSQL_ASSOC)) {
+					while ($_insert_id = $this->db_functions->__dbFetchArray($result, PGSQL_ASSOC)) {
 						$this->insert_id[] = $_insert_id;
 					}
 					// if we have only one, revert from arry to single
@@ -1517,7 +1524,9 @@ class IO extends \CoreLibs\Basic
 						// if this has only the pk_name, then only return this, else array of all data (but without the position)
 						// example if insert_id[0]['foo'] && insert_id[0]['bar'] it will become insert_id['foo'] & insert_id['bar']
 						// if only ['foo_id'] and it is the PK then the PK is directly written to the insert_id
-						if (count($this->insert_id[0]) > 1 || !array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])) {
+						if (count($this->insert_id[0]) > 1 ||
+							!array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])
+						) {
 							$this->insert_id_ext = $this->insert_id[0];
 							$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
 						} elseif ($this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]) {
@@ -1543,7 +1552,7 @@ class IO extends \CoreLibs\Basic
 					$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': Could not get insert id</span>', 'DB_WARNING');
 				}
 			}
-			return $code;
+			return $result;
 		}
 	}
 
@@ -1552,7 +1561,7 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: $string -> string to escape
 	// RETURN: escaped string
 	// DESC  : neutral function to escape a string for DB writing
-	public function dbEscapeString($string)
+	public function dbEscapeString(string $string): string
 	{
 		return $this->db_functions->__dbEscapeString($string);
 	}
@@ -1572,7 +1581,7 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: none
 	// RETURN: database version as string
 	// DESC  : return current database version
-	public function dbVersion()
+	public function dbVersion(): string
 	{
 		return $this->db_functions->__dbVersion();
 	}
@@ -1583,7 +1592,7 @@ class IO extends \CoreLibs\Basic
 	//        =X.Y, >X.Y, <X.Y
 	// RETURN: true/false
 	// DESC  : returns boolean true or false if the string matches the database version
-	public function dbCompareVersion($compare)
+	public function dbCompareVersion(string $compare): bool
 	{
 		// compare has =, >, < prefix, and gets stripped, if the rest is not X.Y format then error
 		preg_match("/^([<>=]{1,})(\d{1,})\.(\d{1,})/", $compare, $matches);
@@ -1700,6 +1709,7 @@ class IO extends \CoreLibs\Basic
 	//                     -> alternate the primary key can be an array with
 	//                        'row' => 'row name', 'value' => 'data' to use a
 	//                        different column as the primary key
+	//                     !!! primary key can be an array or a number/string
 	//         table -> name for the target table
 	// (optional)
 	//         not_write_array -> list of elements not to write
@@ -1707,13 +1717,21 @@ class IO extends \CoreLibs\Basic
 	//         data -> optional array with data, if not _POST vars are used
 	// RETURN: primary key id
 	// DESC  : writes into one table based on array of table columns
-	public function dbWriteDataExt($write_array, $primary_key, $table, $not_write_array = array (), $not_write_update_array = array (), $data = array ())
-	{
+	public function dbWriteDataExt(
+		array $write_array,
+		$primary_key,
+		string $table,
+		array $not_write_array = array (),
+		array $not_write_update_array = array (),
+		array $data = array ()
+	) {
 		if (!is_array($primary_key)) {
 			$primary_key = array (
 				'row' => $table.'_id',
 				'value' => $primary_key
 			);
+		} elseif (!isset($primary_key['value'])) {
+			$primary_key['value'] = '';
 		}
 		// var set for strings
 		$q_sub_value = '';
@@ -1799,7 +1817,7 @@ class IO extends \CoreLibs\Basic
 	//         micro on off (default false)
 	// RETURN: Y/M/D/h/m/s formatted string (like TimeStringFormat
 	// DESC  :   only for postgres. pretty formats an age or datetime difference string
-	public function dbTimeFormat($age, $show_micro = false)
+	public function dbTimeFormat(string $age, bool $show_micro = false): string
 	{
 		// in string (datetime diff): 1786 days 22:11:52.87418
 		// or (age): 4 years 10 mons 21 days 12:31:11.87418
@@ -1821,7 +1839,7 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: text: input text to parse to an array
 	// RETURN: PHP array of the parsed data
 	// DESC  : this is only needed for Postgresql. Converts postgresql arrays to PHP
-	public function dbArrayParse($text)
+	public function dbArrayParse(string $text): array
 	{
 		$output = array ();
 		return $this->db_functions->__dbArrayParse($text, $output);
@@ -1833,23 +1851,23 @@ class IO extends \CoreLibs\Basic
 	//          kbn -> escape trigger type
 	// RETURN: escaped value
 	// DESC  : clear up any data for valid DB insert
-	public function dbSqlEscape($value, $kbn = "")
+	public function dbSqlEscape($value, string $kbn = '')
 	{
 		switch ($kbn) {
-			case "i":
-				$value = (!isset($value) || $value === "") ? "NULL" : intval($value);
+			case 'i':
+				$value = (!isset($value) || $value === '') ? "NULL" : intval($value);
 				break;
-			case "f":
-				$value = (!isset($value) || $value === "") ? "NULL" : floatval($value);
+			case 'f':
+				$value = (!isset($value) || $value === '') ? "NULL" : floatval($value);
 				break;
-			case "t":
-				$value = (!isset($value) || $value === "") ? "NULL" : "'".$this->dbEscapeString($value)."'";
+			case 't':
+				$value = (!isset($value) || $value === '') ? "NULL" : "'".$this->dbEscapeString($value)."'";
 				break;
-			case "d":
-				$value = (!isset($value) || $value === "") ? "NULL" : "'".$this->dbEscapeString($value)."'";
+			case 'd':
+				$value = (!isset($value) || $value === '') ? "NULL" : "'".$this->dbEscapeString($value)."'";
 				break;
-			case "i2":
-				$value = (!isset($value) || $value === "") ? 0 : intval($value);
+			case 'i2':
+				$value = (!isset($value) || $value === '') ? 0 : intval($value);
 				break;
 		}
 		return $value;
@@ -2022,7 +2040,7 @@ class IO extends \CoreLibs\Basic
 		return $this->dbCacheReset($query);
 	}
 
-	public function db_exec($query = 0, $pk_name = '')
+	public function db_exec($query = '', $pk_name = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
@@ -2057,7 +2075,7 @@ class IO extends \CoreLibs\Basic
 		return $this->dbReturnRow($query);
 	}
 
-	public function db_return_array($query, $named_only = 0)
+	public function db_return_array($query, $named_only = false)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
