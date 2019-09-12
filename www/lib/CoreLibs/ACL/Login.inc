@@ -106,7 +106,7 @@ class Login extends \CoreLibs\DB\IO
 	public $default_acl_list = array ();
 
 	// language
-	private $l;
+	public $l;
 
 	// METHOD: login
 	// PARAMS: db_config -> array for logging in to DB where edit_users tables are
@@ -1173,7 +1173,7 @@ EOM;
 		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
 		$q .= "VALUES ('".$this->dbEscapeString($username)."', 'PASSWORD', ".(($this->euid) ? $this->euid : 'NULL').", ";
-		$q .= "NOW(), '".$this->dbEscapeString($event)."', '".$this->dbEscapeString($error)."', '".$this->dbEscapeString($data)."', '".$data_binary."', '".$this->page_name."', ";
+		$q .= "NOW(), '".$this->dbEscapeString($event)."', '".$this->dbEscapeString((string)$error)."', '".$this->dbEscapeString($data)."', '".$data_binary."', '".$this->page_name."', ";
 		foreach (array(
 			'REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME', 'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT', 'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING'
 		) as $server_code) {

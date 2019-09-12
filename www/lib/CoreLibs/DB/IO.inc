@@ -595,15 +595,18 @@ class IO extends \CoreLibs\Basic
 	// PARAMS: array from fetch_row
 	// RETURN: convert fetch_row array
 	// DESC  : if there is the 'to_encoding' var set, and the field is in the wrong encoding converts it to the target
-	private function __dbConvertEncoding(array $row): array
+	private function __dbConvertEncoding($row)
 	{
-		if ($this->to_encoding && $this->db_encoding) {
-			// go through each row and convert the encoding if needed
-			foreach ($row as $key => $value) {
-				$from_encoding = mb_detect_encoding($value);
-				// convert only if encoding doesn't match and source is not pure ASCII
-				if ($from_encoding != $this->to_encoding && $from_encoding != 'ASCII') {
-					$row[$key] = mb_convert_encoding($value, $this->to_encoding, $from_encoding);
+		// only do if array, else pass through row (can be false)
+		if (is_array($row)) {
+			if ($this->to_encoding && $this->db_encoding) {
+				// go through each row and convert the encoding if needed
+				foreach ($row as $key => $value) {
+					$from_encoding = mb_detect_encoding($value);
+					// convert only if encoding doesn't match and source is not pure ASCII
+					if ($from_encoding != $this->to_encoding && $from_encoding != 'ASCII') {
+						$row[$key] = mb_convert_encoding($value, $this->to_encoding, $from_encoding);
+					}
 				}
 			}
 		}

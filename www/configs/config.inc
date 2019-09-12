@@ -262,6 +262,7 @@ if (defined('DEBUG') && DEBUG == false) {
 	$DEBUG_ALL = 1;
 	$PRINT_ALL = 1;
 	$DB_DEBUG = 1;
+	$ENABLE_ERROR_HANDLING = 0;
 }
 
 // read auto loader
