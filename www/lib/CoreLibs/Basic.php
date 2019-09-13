@@ -1526,7 +1526,7 @@ class Basic
 	// DESC  : a simple wrapper for the date format
 	public static function dateStringFormat($timestamp, bool $show_micro = true): string
 	{
-		list ($timestamp, $ms) = explode('.', round($timestamp, 4));
+		list ($timestamp, $ms) = explode('.', (string)round($timestamp, 4));
 		$string = date("Y-m-d H:i:s", $timestamp);
 		if ($show_micro) {
 			$string .= ' '.$ms.'ms';

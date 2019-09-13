@@ -37,7 +37,7 @@ if (!isset($CONTENT_INCLUDE)) {
 $FORM_NAME = !isset($FORM_NAME) || !$FORM_NAME ? str_replace(".php", "", $cms->page_name) : $FORM_NAME;
 // set local page title
 $L_TITLE = ucfirst(str_replace('_', ' ', $cms->getPageName(1))).(defined(G_TITLE) ? ' - '.G_TITLE : '');
-// strip tpl and replace it with inc
+// strip tpl and replace it with php
 // php include file per page
 $cms->INC_TEMPLATE_NAME = str_replace(".tpl", ".php", $CONTENT_INCLUDE);
 // javascript include per page
