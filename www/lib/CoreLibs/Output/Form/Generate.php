@@ -173,7 +173,7 @@
 *               only a certain field list. If where is filled out and used in combination with insert (not same_db)
 *               then this key will be SET when inserted into the DB !!!
 *   2003-04-09: added open_dir for download of file (URL), save_dir is only for upload (absolute path)
-*               added require once for class_db_array_io.inc
+*               added require once for class_db_array_io.php
 *   2003-03-31: added a file upload module (type==file)
 *   2003-03-20: added form_procedure_new, etc functions so for default calls it is easier to write
 *               also added security levels to all functions where it is needed
@@ -260,12 +260,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// WARNING: auto spl load does not work with this as it is an array and not a function/object
 		// check if this is the old path or the new path
 		if (is_dir(TABLE_ARRAYS)) {
-			if (is_file(TABLE_ARRAYS.'array_'.$this->my_page_name.'.inc')) {
-				include(TABLE_ARRAYS.'array_'.$this->my_page_name.'.inc');
+			if (is_file(TABLE_ARRAYS.'array_'.$this->my_page_name.'.php')) {
+				include(TABLE_ARRAYS.'array_'.$this->my_page_name.'.php');
 			}
 		} else {
-			if (is_file(BASE.INCLUDES.TABLE_ARRAYS.'array_'.$this->my_page_name.'.inc')) {
-				include(BASE.INCLUDES.TABLE_ARRAYS.'array_'.$this->my_page_name.'.inc');
+			if (is_file(BASE.INCLUDES.TABLE_ARRAYS.'array_'.$this->my_page_name.'.php')) {
+				include(BASE.INCLUDES.TABLE_ARRAYS.'array_'.$this->my_page_name.'.php');
 			}
 		}
 		if (isset(${$this->my_page_name}) && is_array(${$this->my_page_name})) {
@@ -330,14 +330,6 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		// write array to class var
 		$this->security_level = $config_array['security_level'];
-
-		// internal
-		$this->class_info['form'] = array(
-			'class_name' => 'Form create',
-			'class_version' => '3.0.0',
-			'class_created' => '2002-10-22',
-			'class_author' => 'Clemens Schwaighofer'
-		);
 	}
 
 	// dumps all values into output (for error msg)

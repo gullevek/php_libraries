@@ -11,8 +11,8 @@ if ($DEBUG_ALL) {
 
 // sample config
 require 'config.php';
-echo "FILE: ".BASE.LIB."Error.Handling.inc<br>";
-require(BASE.LIB."Error.Handling.inc");
+echo "FILE: ".BASE.LIB."Error.Handling.php<br>";
+require(BASE.LIB."Error.Handling.php");
 
 if ($var) {
 	echo "OUT<br>";

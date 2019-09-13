@@ -9,7 +9,7 @@ $LOG_PER_RUN = 1;
 define('USE_DATABASE', true);
 define('USE_HEADER', true);
 require 'config.php';
-require BASE.INCLUDES.'admin_header.inc';
+require BASE.INCLUDES.'admin_header.php';
 $MASTER_TEMPLATE_NAME = 'main_body.tpl';
 $TEMPLATE_NAME = 'smarty_test.tpl';
 $CSS_NAME = 'smart_test.css';
@@ -24,7 +24,7 @@ if ($USE_PROTOTYPE) {
 	$JS_NAME = 'jquery.test.js';
 }
 $PAGE_WIDTH = "100%";
-require BASE.INCLUDES.'admin_set_paths.inc';
+require BASE.INCLUDES.'admin_set_paths.php';
 
 // smarty test
 $cms->DATA['SMARTY_TEST'] = 'Test Data';
@@ -48,5 +48,5 @@ $options = array (
 
 $cms->DATA['drop_down_test'] = $options;
 
-require BASE.INCLUDES.'admin_smarty.inc';
-require BASE.INCLUDES.'admin_footer.inc';
+require BASE.INCLUDES.'admin_smarty.php';
+require BASE.INCLUDES.'admin_footer.php';

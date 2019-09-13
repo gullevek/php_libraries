@@ -75,14 +75,6 @@ class ArrayIO extends \CoreLibs\DB\IO
 				}
 			}
 		} // set pk_name IF table_array was given
-		// internal
-		$this->class_info['db_array_io'] = array (
-			'class_name' => 'DB Array IO',
-			'class_version' => '1.0.0',
-			'class_created' => '2002/12/17',
-			'class_author' => 'Clemens Schwaighofer'
-		);
-		// echo "CALSS INFO POST [A]: <pre>".print_r($this->class_info, true)."</pre><br>";
 	}
 
 	// deconstruktor

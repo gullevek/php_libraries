@@ -33,7 +33,7 @@ if (class_exists('Autoload', false) === false) {
 				$len = strlen(__NAMESPACE__);
 			}
 			// set default extension
-			$extension = '.inc';
+			$extension = '.php';
 			// set full include path
 			$path = __DIR__.$ds.$LIB.substr($class, $len);
 			// replace namespace \ with dir sepeator

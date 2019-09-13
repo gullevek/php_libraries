@@ -93,14 +93,6 @@ class Backend extends \CoreLibs\DB\IO
 		// init the database class
 		parent::__construct($db_config, $set_control_flag);
 
-		// internal
-		$this->class_info["adbBackend"] = array(
-			"class_name" => "Admin Interface Backend",
-			"class_version" => "1.0.0",
-			"class_created" => "2006/08/15",
-			"class_author" => "Clemens Schwaighofer"
-		);
-
 		// set the action ids
 		foreach ($this->action_list as $_action) {
 			$this->$_action = (isset($_POST[$_action])) ? $_POST[$_action] : '';

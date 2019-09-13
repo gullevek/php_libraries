@@ -64,6 +64,7 @@ class Login extends \CoreLibs\DB\IO
 	private $euid; // the user id var
 	private $permission_okay = 0; // is set to one if login okay, or EUID is set and user is okay to access this page
 	public $login; // pressed login
+	private $action; // master action command
 	private $username; // login name
 	private $password; // login password
 	private $logout; // logout button
@@ -216,14 +217,6 @@ class Login extends \CoreLibs\DB\IO
 		$this->max_login_error_count = 10;
 		// users that never get locked, even if they are set strict
 		$this->lock_deny_users = array ('admin');
-
-		// internal
-		$this->class_info['login'] = array(
-			'class_name' => 'Login',
-			'class_version' => '5.0.0',
-			'class_created' => '2000-06-01',
-			'class_author' => 'Clemens Schwaighofer'
-		);
 
 		// init default ACL list array
 		$_SESSION['DEFAULT_ACL_LIST'] = array ();

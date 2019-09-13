@@ -1,1 +1,1 @@
-../includes/edit_base.inc
+../includes/edit_base.php

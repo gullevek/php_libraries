@@ -1,5 +1,7 @@
 <?php
 
+use \CoreLibs\Upload;
+
 $DEBUG_ALL = 1;
 $ECHO_ALL = 0;
 $PRINT_ALL = 1;

@@ -11,7 +11,6 @@
 *   basic class start class for ALL clases, holds basic vars, infos, methods, etc
 *
 * PUBLIC VARIABLES
-*	class_info
 *
 * These are if there is any debug to print out at all at the end
 *	debug_output_all - general yes no
@@ -96,12 +95,12 @@
 namespace CoreLibs;
 
 // define check vars for the flags we can have
+/** @internal */
 define('CLASS_STRICT_MODE', 1);
 define('CLASS_OFF_COMPATIBLE_MODE', 2);
 
 class Basic
 {
-	public $class_info; // class info var
 	// control vars
 	// compatible mode sets variable even if it is not defined
 	private $set_compatible = true;
@@ -193,14 +192,6 @@ class Basic
 
 		// set per run UID for logging
 		$this->running_uid = hash($this->hash_algo, uniqid((string)rand(), true));
-
-		// internal info var
-		$this->class_info["basic"] = array (
-			"class_name" => "Basic",
-			"class_version" => "2.0.0",
-			"class_created" => "2003-03-24",
-			"class_author" => 'Clemens Schwaighofer'
-		);
 
 		// before we start any work, we should check that all MUST constants are defined
 		$abort = false;
@@ -482,6 +473,10 @@ class Basic
 	// GENERAL METHODS
 	// *************************************************************
 
+	/**
+	 * @param string $string
+	 * @return string
+	 */
 	// METHOD: basicSetLogId
 	// PARAMS: string
 	// RETURN: current set string
@@ -496,27 +491,6 @@ class Basic
 			$this->log_file_id = $string;
 		}
 		return $log_file_id;
-	}
-
-	// METHOD: classInfo
-	// PARAMS: print to debug (true/false)
-	// RETURN: string with info
-	// DESC  : default class info (prints out class info)
-	public function classInfo(string $class_name = 'basic', bool $print_to_debug = false): string
-	{
-		unset($string);
-		list($major, $minor, $patchlvl) = explode(".", $this->class_info[$class_name]["class_version"]);
-		$string = '';
-		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Name: <b>".$this->class_info[$class_name]["class_name"]."</b><br>";
-		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Author: <b>".$this->class_info[$class_name]["class_author"]."</b><br>";
-		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Version: <b>".$this->class_info[$class_name]["class_version"]."</b><br>";
-		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Revision: <b>".$this->class_info[$class_name]["class_revision"]."</b><br>";
-		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Created: <b>".$this->class_info[$class_name]["class_created"]."</b><br>";
-		$string .= "<b>-Class-info-[".$class_name."]-></b> Class Last Change: <b>".$this->class_info[$class_name]["class_last_changed"]."</b>";
-		if ($print_to_debug === true) {
-			$this->debug('info', '<br>'.$string);
-		}
-		return $string;
 	}
 
 	// ****** DEBUG/ERROR FUNCTIONS ******
@@ -949,10 +923,10 @@ class Basic
 	//         this will not set the class key length variable
 	public function randomKeyGen(int $key_length = -1): string
 	{
-		$use_key_length;
+		$use_key_length = 0;
 		// only if valid int key with valid length
 		if ($this->validateRandomKeyLenght($key_length) === true) {
-			$use_key_length= $key_length;
+			$use_key_length = $key_length;
 		} else {
 			$use_key_length = $this->key_length;
 		}

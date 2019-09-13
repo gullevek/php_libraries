@@ -167,16 +167,16 @@ DEFINE('TEST_SCHEMA', 'public');
 DEFINE('LIVE_SCHEMA', 'public');
 
 /************* DB ACCESS *****************/
-if (file_exists(BASE.CONFIGS.'config.db.inc')) {
-	require BASE.CONFIGS.'config.db.inc';
+if (file_exists(BASE.CONFIGS.'config.db.php')) {
+	require BASE.CONFIGS.'config.db.php';
 }
 /************* CORE HOST SETTINGS *****************/
-if (file_exists(BASE.CONFIGS.'config.host.inc')) {
-	require BASE.CONFIGS.'config.host.inc';
+if (file_exists(BASE.CONFIGS.'config.host.php')) {
+	require BASE.CONFIGS.'config.host.php';
 }
 /************* OTHER PATHS *****************/
-if (file_exists(BASE.CONFIGS.'config.path.inc')) {
-	require BASE.CONFIGS.'config.path.inc';
+if (file_exists(BASE.CONFIGS.'config.path.php')) {
+	require BASE.CONFIGS.'config.path.php';
 }
 
 // set the USE_DATABASE var, if there is nothing set, we assume TRUE

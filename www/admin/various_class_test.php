@@ -6,7 +6,6 @@ $PRINT_ALL = 1;
 $DB_DEBUG = 1;
 
 // admin class tests
-// require 'config.inc';
 require 'config.php';
 DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
 $base = new CoreLibs\Basic();
@@ -43,7 +42,7 @@ print "LB remove: ".$base->removeLB($text, '##BR##')."<br>";
 // 	)
 // );
 
-$base->debug('ARRAY', $base->printAr($test));
+// $base->debug('ARRAY', $base->printAr($test));
 
 function rec($pre, $cur, $node = array ())
 {
@@ -82,6 +81,7 @@ function flattenArrayKey(array $array, array $return = array ())
 	return $return;
 }
 
+$test = array ();
 // core
 $test = rec('', 'A', $test);
 $test = rec('', '1', $test);

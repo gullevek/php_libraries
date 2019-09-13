@@ -383,13 +383,6 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 
-		$this->class_info['db_io']=array(
-			'class_name' => 'DB IO',
-			'class_version' => '5.0.0',
-			'class_created' => '2000-11-23',
-			'class_author' => 'Clemens Schwaighofer'
-		);
-
 		// so we can check that we have a successful DB connection created
 		return true;
 	}

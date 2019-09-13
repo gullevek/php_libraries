@@ -12,8 +12,8 @@ define('CONFIG_PATH', 'configs'.DIRECTORY_SEPARATOR);
 $CONFIG_PATH_PREFIX = '';
 for ($dir_pos = 0, $dir_max = count(explode(DIRECTORY_SEPARATOR, __DIR__)); $dir_pos <= $dir_max; $dir_pos ++) {
 	$CONFIG_PATH_PREFIX .= '..'.DIRECTORY_SEPARATOR;
-	if (file_exists($CONFIG_PATH_PREFIX.CONFIG_PATH.'config.inc')) {
-		require $CONFIG_PATH_PREFIX.CONFIG_PATH.'config.inc';
+	if (file_exists($CONFIG_PATH_PREFIX.CONFIG_PATH.'config.master.php')) {
+		require $CONFIG_PATH_PREFIX.CONFIG_PATH.'config.master.php';
 		break;
 	}
 }

@@ -39,7 +39,7 @@ $FORM_NAME = !isset($FORM_NAME) || !$FORM_NAME ? str_replace(".php", "", $cms->p
 $L_TITLE = ucfirst(str_replace('_', ' ', $cms->getPageName(1))).(defined(G_TITLE) ? ' - '.G_TITLE : '');
 // strip tpl and replace it with inc
 // php include file per page
-$cms->INC_TEMPLATE_NAME = str_replace(".tpl", ".inc", $CONTENT_INCLUDE);
+$cms->INC_TEMPLATE_NAME = str_replace(".tpl", ".php", $CONTENT_INCLUDE);
 // javascript include per page
 $cms->JS_TEMPLATE_NAME = str_replace(".tpl", ".js", $CONTENT_INCLUDE);
 // css per page
