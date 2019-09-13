@@ -9,19 +9,19 @@ $edit_access = array (
 		),
 		'name' => array (
 			'value' => isset($GLOBALS['name']) ? $GLOBALS['name'] : '',
-			'output_name' => $this->l->__('Access Group Name'),
+			'output_name' => 'Access Group Name',
 			'mandatory' => 1,
 			'type' => 'text',
 			'error_check' => 'alphanumericspace|unique'
 		),
 		'description' => array (
 			'value' => isset($GLOBALS['description']) ? $GLOBALS['description'] : '',
-			'output_name' => $this->l->__('Description'),
+			'output_name' => 'Description',
 			'type' => 'textarea'
 		),
 		'color' => array (
 			'value' => isset($GLOBALS['color']) ? $GLOBALS['color'] : '',
-			'output_name' => $this->l->__('Color'),
+			'output_name' => 'Color',
 			'mandatory' => 0,
 			'type' => 'text',
 			'size' => 6,

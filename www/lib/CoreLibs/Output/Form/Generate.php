@@ -923,12 +923,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							}
 							break;
 						case 'date': // YYYY-MM-DD
-							if (!check_date($this->table_array[$key]['value'], 1)) {
+							if (!$this->checkDate($this->table_array[$key]['value'], 1)) {
 								$this->msg .= sprintf($this->l->__('Please enter a vailid date (YYYY-MM-DD) for the <b>%s</b> Field!<br>'), $this->table_array[$key]['output_name']);
 							}
 							break;
 						case 'time': // HH:MM[:SS]
-							if (!check_time($this->table_array[$key]['value'])) {
+							if (!$this->checkDateTime($this->table_array[$key]['value'])) {
 								$this->msg .= sprintf($this->l->__('Please enter a vailid time (HH:MM[:SS]) for the <b>%s</b> Field!<br>'), $this->table_array[$key]['output_name']);
 							}
 							break;

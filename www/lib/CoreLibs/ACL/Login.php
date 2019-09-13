@@ -770,6 +770,15 @@ class Login extends \CoreLibs\DB\IO
 		return $is_valid_password;
 	}
 
+	// METHOD: loginPasswordForgot
+	// PARAMS: none
+	// RETURN: none
+	// DESC  : dummy declare for password forget
+	private function loginPasswordForgot()
+	{
+		// will do some password recovert, eg send email
+	}
+
 	// METHOD: loginSetPasswordMinLength
 	// PARAMS: set the minimum length
 	// RETURN: true/false on success

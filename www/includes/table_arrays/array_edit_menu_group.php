@@ -9,13 +9,13 @@ $edit_menu_group = array (
 		),
 		'name' => array (
 			'value' => isset($GLOBALS['name']) ? $GLOBALS['name'] : '',
-			'output_name' => $this->l->__('Group name'),
+			'output_name' => 'Group name',
 			'mandatory' => 1,
 			'type' => 'text'
 		),
 		'flag' => array (
 			'value' => isset($GLOBALS['flag']) ? $GLOBALS['flag'] : '',
-			'output_name' => $this->l->__('Flag'),
+			'output_name' => 'Flag',
 			'mandatory' => 1,
 			'type' => 'text',
 			'error_check' => 'alphanumeric|unique'

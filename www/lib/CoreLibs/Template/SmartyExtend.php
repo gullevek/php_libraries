@@ -25,7 +25,8 @@ class SmartyExtend extends SmartyBC
 		SmartyBC::__construct();
 		$this->l10n = new \CoreLibs\Language\L10n($lang);
 		// variable variable register
-		$this->register_modifier('getvar', array(&$this, 'get_template_vars'));
+		// $this->register_modifier('getvar', array(&$this, 'get_template_vars'));
+		$this->registerPlugin('modifier', 'getvar', array(&$this, 'get_template_vars'));
 	}
 }
 

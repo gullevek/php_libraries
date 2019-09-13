@@ -1,7 +1,5 @@
 <?php
 
-use \CoreLibs\Upload;
-
 $DEBUG_ALL = 1;
 $ECHO_ALL = 0;
 $PRINT_ALL = 1;
@@ -18,7 +16,7 @@ $MAX_UPLOAD_SIZE = $base->StringByteFormat(ini_get('upload_max_filesize'));
 $allowedExtensions = array ('csv', 'zip', 'jpg', 'pdf', 'bz2');
 $sizeLimit = $MAX_UPLOAD_SIZE; // as set in php ini
 $base->debug('AJAX UPLOAD', 'Size: '.$sizeLimit.', Memory Limit: '.ini_get('memory_limit'));
-$uploader = new CoreLibs\Upload\qqFileUploader($allowedExtensions, $sizeLimit);
+$uploader = new FileUpload\qqFileUploader($allowedExtensions, $sizeLimit);
 // either in post or get
 $_action= $_POST['action'] ? $_POST['action'] : $_GET['action'];
 $_task_uid = $_POST['task_uid'] ? $_POST['task_uid'] : $_GET['task_uid'];

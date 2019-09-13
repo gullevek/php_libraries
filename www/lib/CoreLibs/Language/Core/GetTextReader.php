@@ -369,7 +369,7 @@ class GetTextReader
 	* Detects which plural form to take
 	*
 	* @access private
-	* @param n count
+	* @param string count
 	* @return int array index of the right plural form
 	*/
 	private function select_string($n)

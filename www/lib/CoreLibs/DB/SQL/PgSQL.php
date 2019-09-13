@@ -435,7 +435,7 @@ class PgSQL
 						return $offset;
 					}
 				} else {
-					$offset = pg_array_parse($text, $output[], $limit, $offset + 1);
+					$offset = $this->__dbArrayParse($text, $output[], $limit, $offset + 1);
 				}
 			} while ($limit > $offset);
 		}

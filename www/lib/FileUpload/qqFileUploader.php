@@ -2,8 +2,7 @@
 
 namespace FileUpload;
 
-use \FileUpload\Core\qqUploadedFileForm;
-use \FileUpload\Core\qqUploadedFileXhr;
+use \FileUpload\Core;
 
 class qqFileUploader
 {
@@ -21,9 +20,9 @@ class qqFileUploader
 		$this->checkServerSettings();
 
 		if (isset($_GET['qqfile'])) {
-			$this->file = new qqUploadedFileXhr();
+			$this->file = new \FileUpload\Core\qqUploadedFileXhr();
 		} elseif (isset($_FILES['qqfile'])) {
-			$this->file = new qqUploadedFileForm();
+			$this->file = new \FileUpload\Core\qqUploadedFileForm();
 		} else {
 			$this->file = false;
 		}

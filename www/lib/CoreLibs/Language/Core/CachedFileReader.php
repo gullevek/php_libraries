@@ -24,7 +24,7 @@ namespace CoreLibs\Language\Core;
 
 // Preloads entire file in memory first, then creates a StringReader
 // over it (it assumes knowledge of StringReader internals)
-class CachedFileReader extends CoreLibs\Language\Core\StringReader
+class CachedFileReader extends \CoreLibs\Language\Core\StringReader
 {
 	public function __construct($filename)
 	{
