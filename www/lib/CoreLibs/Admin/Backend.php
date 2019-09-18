@@ -67,7 +67,7 @@ class Backend extends \CoreLibs\DB\IO
 	public $COMPILE_ID;
 	public $includes;
 	public $template_path;
-	public $lang_dir;
+	public $lang_dir = '';
 	public $javascript;
 	public $css;
 	public $pictures;
@@ -124,6 +124,7 @@ class Backend extends \CoreLibs\DB\IO
 	// DESC  : writes all action vars plus other info into edit_log table
 	public function adbEditLog(string $event = '', $data = '', string $write_type = 'STRING')
 	{
+		$data_binary = '';
 		if ($write_type == 'BINARY') {
 			$data_binary = $this->dbEscapeBytea(bzcompress(serialize($data)));
 			$data = 'see bzip compressed data_binary field';
@@ -140,7 +141,7 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "VALUES ";
 		$q .= "(".$this->dbEscapeString(isset($_SESSION['EUID']) ? $_SESSION['EUID'] : '').", ";
 		$q .= "NOW(), ";
-		$q .= "'".$this->dbEscapeString($event)."', '".$data."', '".$data_binary."', '".$this->dbEscapeString($this->page_name)."', ";
+		$q .= "'".$this->dbEscapeString((string)$event)."', '".$data."', '".$data_binary."', '".$this->dbEscapeString($this->page_name)."', ";
 		$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->dbEscapeString(@$_SERVER['HTTP_USER_AGENT'])."', ";
 		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '')."', ";
 		$q .= "'".$this->dbEscapeString(isset($_SERVER['SCRIPT_FILENAME']) ? $_SERVER['SCRIPT_FILENAME'] : '')."', ";
@@ -177,6 +178,7 @@ class Backend extends \CoreLibs\DB\IO
 		if (!isset($PAGES) || !is_array($PAGES)) {
 			$PAGES = array ();
 		}
+		$pages = array ();
 		foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
 			$pages[] = $PAGE_DATA;
 		}
@@ -209,7 +211,7 @@ class Backend extends \CoreLibs\DB\IO
 						$pages[$i]['popup'] = 0;
 					}
 					$query_string = '';
-					if (count($pages[$i]['query'])) {
+					if (isset($pages[$i]['query']) && count($pages[$i]['query'])) {
 						for ($j = 0, $jMax = count($pages[$i]['query']); $j < $jMax; $j ++) {
 							if (strlen($query_string)) {
 								$query_string .= '&';
@@ -318,7 +320,7 @@ class Backend extends \CoreLibs\DB\IO
 			$level = "info";
 		}
 		$this->messages[] = array (
-			'msg' => sprintf($this->l->__($msg), $vars),
+			'msg' => vsprintf($this->l->__($msg), $vars),
 			'class' => $level
 		);
 		switch ($level) {

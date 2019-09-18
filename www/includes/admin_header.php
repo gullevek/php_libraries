@@ -23,7 +23,7 @@ extract($_POST, EXTR_SKIP);
 // set output to quiet for load of classes & session settings
 ob_start();
 // set the session name
-define('SET_SESSION_NAME', EDIT_SESSION_NAME);
+$SET_SESSION_NAME = EDIT_SESSION_NAME;
 //------------------------------ library include end
 
 //------------------------------ basic variable settings start
@@ -48,7 +48,7 @@ if (isset($AJAX_PAGE) && isset($ZIP_STREAM) && $AJAX_PAGE && !$ZIP_STREAM) {
 
 //------------------------------ class init start
 // login & page access check
-$login = new CoreLibs\ACL\Login($DB_CONFIG[LOGIN_DB], $lang);
+$login = new CoreLibs\ACL\Login(DB_CONFIG, $lang);
 // post login lang check
 if ($_SESSION['DEFAULT_LANG']) {
 	$lang = $_SESSION['DEFAULT_LANG'];
@@ -56,7 +56,7 @@ if ($_SESSION['DEFAULT_LANG']) {
 // create smarty object
 $smarty = new CoreLibs\Template\SmartyExtend($lang);
 // create new DB class
-$cms = new CoreLibs\Admin\Backend($DB_CONFIG[MAIN_DB], $lang);
+$cms = new CoreLibs\Admin\Backend(DB_CONFIG, $lang);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db nfo

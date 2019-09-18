@@ -35,8 +35,9 @@ class L10n extends \CoreLibs\Basic
 	private $input;
 	private $l10n;
 
-	public function __construct(string $lang = '', string $path = '')
+	public function __construct(string $lang = '', string $path = '', int $set_control_flag = 0)
 	{
+		parent::__construct($set_control_flag);
 		if (!$lang) {
 			$this->lang = 'en';
 		} else {

@@ -15,12 +15,12 @@ if (class_exists('Autoload', false) === false) {
 		{
 			// print "(1) Class: $class / DIR: ".__DIR__."<br>";
 			// set directory seperator (we need to replace from namespace)
-			$ds = DS ?? DIRECTORY_SEPARATOR;
+			$ds = defined('DS') ? DS : DIRECTORY_SEPARATOR;
 			// base lib
-			$LIB = LIB ?? 'lib';
+			$LIB = defined('LIB') ? LIB : 'lib';
 			// if lib is in path, do not add lib again
 			if (strpos(__DIR__, $LIB) !== false) {
-				$LIB .= DS;
+				$LIB .= $ds;
 			} else {
 				$LIB = '';
 			}

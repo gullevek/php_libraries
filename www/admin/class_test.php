@@ -17,17 +17,20 @@ define('USE_DATABASE', true);
 require 'config.php';
 // set session name
 if (!defined('SET_SESSION_NAME')) {
-	DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
+	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 }
 // define log file id
-DEFINE('LOG_FILE_ID', 'classTest');
+define('LOG_FILE_ID', 'classTest');
 // set language for l10n
 $lang = 'en_utf8';
+
 // init login & backend class
-$login = new CoreLibs\ACL\Login($DB_CONFIG[LOGIN_DB], $lang);
-$basic = new CoreLibs\Admin\Backend($DB_CONFIG[MAIN_DB], $lang);
+$login = new CoreLibs\ACL\Login(DB_CONFIG, $lang);
+$basic = new CoreLibs\Admin\Backend(DB_CONFIG, $lang);
 $basic->dbInfo(1);
 ob_end_flush();
+
+echo "DB_CONFIG_SET constant: <pre>".print_r(DB_CONFIG, true)."</pre><br>";
 
 $basic->hrRunningTime();
 $basic->runningTime();
@@ -40,7 +43,7 @@ echo "TIMED: ".$basic->hrRunningTime()."<br>";
 
 // set + check edit access id
 $edit_access_id = 3;
-if (isset($login) && is_object($login) && isset($login->acl['unit'])) {
+if (is_object($login) && isset($login->acl['unit'])) {
 	print "ACL UNIT: ".print_r(array_keys($login->acl['unit']), true)."<br>";
 	print "ACCESS CHECK: ".$login->loginCheckEditAccess($edit_access_id)."<br>";
 	if ($login->loginCheckEditAccess($edit_access_id)) {
@@ -76,7 +79,7 @@ print "CALLER BACKTRACE: ".$basic->getCallerMethod()."<br>";
 $basic->debug('SOME MARK', 'Some error output');
 
 print "EDIT ACCESS ID: ".$basic->edit_access_id."<br>";
-if (isset($login)) {
+if (is_object($login)) {
 	//	print "ACL: <br>".$basic->print_ar($login->acl)."<br>";
 	$basic->debug('ACL', "ACL: ".$basic->printAr($login->acl));
 	//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
@@ -90,8 +93,12 @@ if (isset($login)) {
 // DB client encoding
 print "DB Client encoding: ".$basic->dbGetEncoding()."<br>";
 
-while ($res = $basic->dbReturn("SELECT * FROM max_test")) {
+while ($res = $basic->dbReturn("SELECT * FROM max_test", 0, true)) {
 	print "TIME: ".$res['time']."<br>";
+}
+print "CACHED DATA: <pre>".print_r($basic->cursor_ext, true)."</pre><br>";
+while ($res = $basic->dbReturn("SELECT * FROM max_test")) {
+	print "[CACHED] TIME: ".$res['time']."<br>";
 }
 
 $status = $basic->dbExec("INSERT INTO foo (test) VALUES ('FOO TEST ".time()."') RETURNING test");

@@ -1,0 +1,37 @@
+# PHP Stan Config
+
+parameters:
+	level: 1
+	paths:
+		- %currentWorkingDirectory%/www
+	#bootstrap: %currentWorkingDirectory%/phpstan-bootstrap.php
+	#bootstrap: phpstan-bootstrap.php
+	autoload_directories:
+	autoload_files:
+		- %currentWorkingDirectory%/phpstan-bootstrap.php
+		- www/configs/config.master.php
+		- www/lib/autoloader.php
+	excludes_analyse:
+		- www/includes/admin_header.php # ignore the admin include stuff
+		- www/includes/admin_footer.php # ignore the admin include stuff
+		- www/includes/admin_set_paths.php # ignore the admin include stuff
+		- www/includes/admin_smarty.php # ignore the admin include stuff
+		- www/templates_c
+		- www/cache
+		- www/log
+		- www/media
+		- www/tmp
+		- www/lib/pChart
+		- www/lib/pChart2.1.4
+		- www/lib/Smarty/
+		- www/lib/smarty-3.1.30/
+		- www/admin/edit_access.php
+		- www/admin/edit_groups.php
+		- www/admin/edit_languages.php
+		- www/admin/edit_menu_group.php
+		- www/admin/edit_order.php
+		- www/admin/edit_pages.php
+		- www/admin/edit_schemes.php
+		- www/admin/edit_users.php
+		- www/admin/edit_visible_group.php
+		- www/vendor

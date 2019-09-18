@@ -9,6 +9,8 @@ class qqFileUploader
 	private $allowedExtensions = array();
 	private $sizeLimit = 10485760;
 	private $file;
+	public $uploadFileName;
+	public $uploadFileExt;
 
 	public function __construct(array $allowedExtensions = array(), $sizeLimit = 10485760)
 	{
@@ -41,7 +43,7 @@ class qqFileUploader
 
 	private function toBytes($str)
 	{
-		$val = trim($str);
+		$val = (int)trim($str);
 		$last = strtolower($str[strlen($str)-1]);
 		switch ($last) {
 			case 'g':

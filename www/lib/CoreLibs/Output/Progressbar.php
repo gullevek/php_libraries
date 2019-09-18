@@ -115,6 +115,7 @@ class ProgressBar
 
 	private function __calculatePosition($step)
 	{
+		$bar = 0;
 		switch ($this->direction) {
 			case 'right':
 			case 'left':
@@ -137,6 +138,7 @@ class ProgressBar
 			$pixel = $bar - ($this->pedding * 2);
 		}
 
+		$position = array ();
 		switch ($this->direction) {
 			case 'right':
 				$position['left'] = $this->pedding;
@@ -438,6 +440,7 @@ class ProgressBar
 		$this->__setStep($this->step);
 		$this->position = $this->__calculatePosition($this->step);
 
+		$style_master = '';
 		if ($this->top || $this->left) {
 			$style_master = 'position:relative;top:'.$this->top.'px;left:'.$this->left.'px;width:'.($this->width + 10).'px;';
 		}
@@ -459,6 +462,7 @@ class ProgressBar
 		}
 
 		if ($this->frame['show'] == true) {
+			$border = '';
 			if ($this->frame['border'] > 0) {
 				$border = 'border:'.$this->frame['border'].'px solid;border-color:'.$this->frame['brd_color'].';margin-top:2px;-webkit-border-radius: 5px 5px 5px 5px; border-radius: 5px 5px 5px 5px;';
 			}

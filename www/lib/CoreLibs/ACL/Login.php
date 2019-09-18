@@ -120,7 +120,8 @@ class Login extends \CoreLibs\DB\IO
 		$this->log_per_class = 1;
 
 		// create db connection and init base class
-		if (!parent::__construct($db_config, $set_control_flag)) {
+		parent::__construct($db_config, $set_control_flag);
+		if ($this->db_init_error === false) {
 			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
 			exit;
@@ -365,7 +366,7 @@ class Login extends \CoreLibs\DB\IO
 				$q .= "(LOWER(username) = '".$this->dbEscapeString(strtolower($this->username))."') ";
 				$res = $this->dbReturn($q);
 				// username is wrong, but we throw for wrong username and wrong password the same error
-				if (!$this->cursor_ext[md5($q)]["num_rows"]) {
+				if (!$this->cursor_ext[md5($q)]['num_rows']) {
 					$this->login_error = 1010;
 				} else {
 					// if login errors is half of max errors and the last login error was less than 10s ago, forbid any new login try
@@ -422,8 +423,9 @@ class Login extends \CoreLibs\DB\IO
 								$q .= "WHERE edit_user_id = ".$res['edit_user_id'];
 								$this->dbExec($q);
 							}
-							$pages = array();
 							$edit_page_ids = array();
+							$pages = array();
+							$pages_acl = array ();
 							// set pages access
 							$q = "SELECT ep.edit_page_id, ep.cuid, epca.cuid AS content_alias_uid, ep.filename, ep.name AS edit_page_name, ep.order_number AS edit_page_order, ep.menu, ";
 							$q .= "ep.popup, ep.popup_x, ep.popup_y, ep.online, ear.level, ear.type ";
@@ -804,8 +806,12 @@ class Login extends \CoreLibs\DB\IO
 	{
 		if ($this->change_password) {
 			$event = 'Password Change';
+			$data = '';
 			// check that given username is NOT in the deny list, else silent skip (with error log)
 			if (!in_array($this->pw_username, $this->pw_change_deny_users)) {
+				// init the edit user id variable
+				$edit_user_id = '';
+				// cehck if either username or old password is not set
 				if (!$this->pw_username || !$this->pw_old_password) {
 					$this->login_error = 200;
 					$data = 'Missing username or old password.';
@@ -852,7 +858,7 @@ class Login extends \CoreLibs\DB\IO
 					}
 				}
 				// no error change this users password
-				if (!$this->login_error) {
+				if (!$this->login_error && $edit_user_id) {
 					// update the user (edit_user_id) with the new password
 					$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($this->passwordSet($this->pw_new_password))."' WHERE edit_user_id = ".$edit_user_id;
 					$this->dbExec($q);
@@ -883,7 +889,7 @@ class Login extends \CoreLibs\DB\IO
 			if ($AJAX_PAGE === true) {
 				$data = array (
 					'status' => 'error',
-					'error_code' => $this->loging_error,
+					'error_code' => $this->login_error,
 					'msg' =>  array (
 						'level' => 'error',
 						'str' => $this->l->__('Login necessary')

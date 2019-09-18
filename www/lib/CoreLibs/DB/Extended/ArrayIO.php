@@ -411,7 +411,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 				}
 				// integer is different
 				if (isset($this->table_array[$column]['int']) || isset($this->table_array[$column]['int_null'])) {
-					$this->debug('write_check', '['.$column.']['.$this->table_array[$column]['value'].']['.$this->table_array[$column]['type'].'] VALUE SET: '.isset($this->table_array[$column]['value']).' | INT NULL: '.isset($this->table_array[$column]['int_null']));
+					$this->debug('write_check', '['.$column.']['.$this->table_array[$column]['value'].']['.$this->table_array[$column]['type'].'] '.
+						'VALUE SET: '.(string)isset($this->table_array[$column]['value']).
+						' | INT NULL: '.(string)isset($this->table_array[$column]['int_null']));
 					if (isset($this->table_array[$column]['value']) &&
 						!$this->table_array[$column]['value'] &&
 						isset($this->table_array[$column]['int_null'])
@@ -436,6 +438,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 						$_value = 'NULL';
 					} elseif (isset($this->table_array[$column]['value'])) {
 						$_value = $this->table_array[$column]['value'];
+					} else {
+						// fallback
+						$_value = 'NULL';
 					}
 					$q_data .= $_value;
 				} else {
@@ -514,7 +519,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// set primary key
 		if ($insert) {
 			$this->table_array[$this->pk_name]['value'] = $this->insert_id;
-			$this->ok = $this->insert_id;
+			$this->pk_id = $this->insert_id;
 		}
 		// return the table if needed
 		return $this->table_array;

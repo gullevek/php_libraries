@@ -423,7 +423,7 @@ class PgSQL
 	{
 		if (false === $limit) {
 			$limit = strlen($text) - 1;
-			$output = array();
+			$output = array ();
 		}
 		if ('{}' != $text) {
 			do {
@@ -435,7 +435,7 @@ class PgSQL
 						return $offset;
 					}
 				} else {
-					$offset = $this->__dbArrayParse($text, $output[], $limit, $offset + 1);
+					$offset = $this->__dbArrayParse($text, $output, $limit, $offset + 1);
 				}
 			} while ($limit > $offset);
 		}

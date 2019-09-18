@@ -226,6 +226,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	private $int_pk_name; // primary key, only internal usage
 	public $reference_array = array (); // reference arrays -> stored in $this->reference_array[$table_name]=>array();
 	public $element_list; // element list for elements next to each other as a special sub group
+	public $table_array = array ();
 	public $my_page_name; // the name of the page without .php extension
 	public $mobile_phone = false;
 	// buttons and checkboxes
@@ -241,6 +242,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public $security_level;
 	// layout publics
 	public $table_width;
+	// language
+	public $l;
 
 	// now some default error msgs (english)
 	public $language_array = array ();
@@ -501,7 +504,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formProcedureDeleteFromElementList($element_list, $remove_name)
 	{
 		$this->debug('REMOVE ELEMENT', 'Remove REF ELEMENT: '.$this->base_acl_level.' >= '.$this->security_level['delete']);
-		$this->debug('REMOVE ELEMENT', 'Protected Value set: '.isset($this->table_array['protected']['value']));
+		$this->debug('REMOVE ELEMENT', 'Protected Value set: '.(string)isset($this->table_array['protected']['value']));
 		$this->debug('REMOVE ELEMENT', 'Error: '.$this->error);
 		// only do if the user is allowed to delete
 		if ($this->base_acl_level >= $this->security_level['delete'] &&
@@ -517,9 +520,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// if prefix, set it
 				$prfx = ($this->element_list[$element_list[$i]]['prefix']) ? $this->element_list[$element_list[$i]]['prefix'].'_' : '';
 				// get the primary key
+				$pk_name = '';
 				foreach ($this->element_list[$element_list[$i]]['elements'] as $el_name => $data) {
 					if (isset($data['pk_id'])) {
 						$pk_name = $el_name;
+						break;
 					}
 				}
 				// which key should be deleted
@@ -726,13 +731,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$data['value'][] = $i;
 				$data['output'][] = $this->table_array[$element_name]['element_list'][$i];
 				$data['name'] = $element_name;
-				if ((isset($i) && isset($this->table_array[$element_name]['value'])) ||
-					(!isset($i) && !isset($this->table_array[$element_name]['value']))
+				if (($i && isset($this->table_array[$element_name]['value'])) ||
+					(!$i && !isset($this->table_array[$element_name]['value']))
 				) {
 					$data['checked'] = $this->table_array[$element_name]['value'];
 				}
 
-				if (isset($i)) {
+				if ($i) {
 					$data['separator'] = '';
 				}
 			}
@@ -923,7 +928,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							}
 							break;
 						case 'date': // YYYY-MM-DD
-							if (!$this->checkDate($this->table_array[$key]['value'], 1)) {
+							if (!$this->checkDate($this->table_array[$key]['value'])) {
 								$this->msg .= sprintf($this->l->__('Please enter a vailid date (YYYY-MM-DD) for the <b>%s</b> Field!<br>'), $this->table_array[$key]['output_name']);
 							}
 							break;
@@ -937,7 +942,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							break;
 						case 'intervalshort': // ony interval n [Y/M/D] only
 							if (preg_match("/^\d{1,3}\ ?[YMDymd]{1}$/", $this->table_array[$key]['value'])) {
-								$this->msg .= sprintf($this->l->__('Please enter a valid time interval in the format <length> Y|M|D for the <b>%s</b> Field!<br>'), $this->table[$key]['output_name']);
+								$this->msg .= sprintf($this->l->__('Please enter a valid time interval in the format <length> Y|M|D for the <b>%s</b> Field!<br>'), $this->table_array[$key]['output_name']);
 							}
 							break;
 						case 'email':
@@ -1037,24 +1042,28 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				}
 			}
 		} // while
+		// do check for reference tables
 		if (is_array($this->reference_array)) {
-			// do check for reference tables
-			if (!is_array($this->reference_array)) {
-				$this->reference_array = array ();
-			}
 			reset($this->reference_array);
 			foreach ($this->reference_array as $key => $value) {
 				if ($this->reference_array[$key]['mandatory'] && !$this->reference_array[$key]['selected'][0]) {
 					$this->msg .= sprintf($this->l->__('Please select at least one Element from field <b>%s</b>!<br>'), $this->reference_array[$key]['output_name']);
 				}
 			}
+		} else {
+			$this->reference_array = array ();
 		}
 		// $this->debug('edit_error', 'QS: <pre>'.print_r($_POST, true).'</pre>');
 		if (is_array($this->element_list)) {
 			// check the mandatory stuff
 			// if mandatory, check that at least on pk exists or if at least the mandatory field is filled
 			foreach ($this->element_list as $table_name => $reference_array) {
+				if (!is_array($reference_array)) {
+					$reference_array = array ();
+				}
 				// set pk/fk id for this
+				$_pk_name = '';
+				$_fk_name = '';
 				foreach ($reference_array['elements'] as $_name => $_data) {
 					if (isset($_data['pk_id'])) {
 						$_pk_name = $_name;
@@ -1081,6 +1090,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				}
 				$this->debug('POST ARRAY', $this->printAr($_POST));
 				$mand_okay = 0;
+				$mand_name = '';
 				# check each row
 				for ($i = 0; $i < $max; $i ++) {
 					// either one of the post pks is set, or the mandatory
@@ -1125,8 +1135,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 										if ($this->table_array[$this->int_pk_name]['value']) {
 											$q .= ' AND '.$this->int_pk_name.' <> '.$this->table_array[$this->int_pk_name]['value'];
 										}
-										list($$key) = $this->dbReturnRow($q);
-										if ($$key) {
+										list($key) = $this->dbReturnRow($q);
+										if ($key) {
 											$this->msg .= sprintf($this->l->__('The field <b>%s</b> in row <b>%s</b> can be used only once!<br>'), $reference_array['output_name'], $i);
 										}
 										break;
@@ -1142,7 +1152,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				}
 
 				// main mandatory is met -> error msg
-				if (!isset($mand_okay) && isset($reference_array['mandatory'])) {
+				if (!$mand_okay && isset($reference_array['mandatory'])) {
 					$this->msg .= sprintf($this->l->__('You need to enter at least one data set for field <b>%s</b>!<Br>'), $reference_array['output_name']);
 				}
 				for ($i = 0; $i < $max; $i ++) {
@@ -1269,7 +1279,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		// for drop_down_db_input check if text field is filled and if, if not yet in db ...
 		// and upload files
-		if (!isset($this->table_array)) {
+		if (!is_array($this->table_array)) {
 			$this->table_array = array ();
 		}
 		reset($this->table_array);
@@ -1345,7 +1355,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						}
 						if (move_uploaded_file($GLOBALS['_FILES'][$key.'_file']['tmp_name'], $this->table_array[$key]['save_dir'].$GLOBALS['_FILES'][$key.'_file']['name'])) {
 							// make it unique with a unique number at the beginning
-							$this->table_array[$key]['value'] = uniqid(rand(), 1).'_'.$GLOBALS['_FILES'][$key.'_file']['name'];
+							$this->table_array[$key]['value'] = uniqid((string)rand(), true).'_'.$GLOBALS['_FILES'][$key.'_file']['name'];
 						} else {
 							$this->msg .= $this->l->__('File could not be copied to target directory! Perhaps wrong directory permissions.');
 							$this->error = 1;
@@ -1400,6 +1410,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $reference_array) {
 				// init arrays
+				$q_begin = array ();
+				$q_middle = array ();
+				$q_end = array ();
 				$q_names = array ();
 				$q_data = array ();
 				$q_values = array ();
@@ -1702,6 +1715,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		reset($this->element_list[$table_name]['elements']);
 		// generic data read in (counts for all rows)
 		// visible list data output
+		$q_select = array ();
+		$proto = array ();
 		foreach ($this->element_list[$table_name]['elements'] as $el_name => $data_array) {
 			// $this->debug('CFG', 'El: '.$el_name.' -> '.$this->printAr($data_array));
 			// if the element name matches the read array, then set the table as a name prefix
@@ -1765,6 +1780,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (isset($this->element_list[$table_name]['read_data'])) {
 			// we need a second one for the query build only
 			// prefix all elements with the $table name
+			$_q_select = array ();
 			foreach ($q_select as $_pos => $element) {
 				$_q_select[$_pos] = $table_name.'.'.$element;
 			}

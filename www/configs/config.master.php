@@ -105,6 +105,7 @@ DEFINE('DEFAULT_ACL_ADMIN', 100); */
 DEFINE('LOGOUT_TARGET', '');
 // password change allowed
 DEFINE('PASSWORD_CHANGE', false);
+DEFINE('PASSWORD_FORGOT', false);
 // min/max password length
 DEFINE('PASSWORD_MIN_LENGTH', 8);
 DEFINE('PASSWORD_MAX_LENGTH', 255);
@@ -130,7 +131,7 @@ DEFINE('EDIT_SESSION_NAME', 'ADMIN_SESSION_NAME'.SERVER_NAME_HASH);
 // frontend
 DEFINE('SESSION_NAME', 'SESSION_NAME'.SERVER_NAME_HASH);
 // SET_SESSION_NAME should be set in the header if a special session name is needed
-// DEFINE('SET_SESSION_NAME', SESSION_NAME);
+DEFINE('SET_SESSION_NAME', SESSION_NAME);
 
 /************* CACHE/COMPILE IDS *************/
 DEFINE('CACHE_ID', 'CACHE_'.SERVER_NAME_HASH);
@@ -166,13 +167,31 @@ DEFINE('DEV_SCHEMA', 'public');
 DEFINE('TEST_SCHEMA', 'public');
 DEFINE('LIVE_SCHEMA', 'public');
 
+/************* CORE HOST SETTINGS *****************/
+if (file_exists(BASE.CONFIGS.'config.host.php')) {
+	require BASE.CONFIGS.'config.host.php';
+}
+if (!isset($DB_HOST)) {
+	$DB_HOST = array ();
+}
+if (!isset($DB_PATH)) {
+	$DB_PATH = array ();
+}
+if (!isset($LOCATION)) {
+	$LOCATION = array ();
+}
+if (!isset($DEBUG_FLAG)) {
+	$DEBUG_FLAG = array ();
+}
+if (!isset($SITE_LANG)) {
+	$SITE_LANG = array ();
+}
 /************* DB ACCESS *****************/
 if (file_exists(BASE.CONFIGS.'config.db.php')) {
 	require BASE.CONFIGS.'config.db.php';
 }
-/************* CORE HOST SETTINGS *****************/
-if (file_exists(BASE.CONFIGS.'config.host.php')) {
-	require BASE.CONFIGS.'config.host.php';
+if (!isset($DB_CONFIG)) {
+	$DB_CONFIG = array ();
 }
 /************* OTHER PATHS *****************/
 if (file_exists(BASE.CONFIGS.'config.path.php')) {
@@ -201,9 +220,9 @@ if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVE
 	DEFINE('HOST_SSL', false);
 	DEFINE('HOST_PROTOCOL', 'http://');
 }
-// define the static names
-DEFINE('LOGIN_DB', $DB_HOST[$HOST_NAME]);
-DEFINE('MAIN_DB', $DB_HOST[$HOST_NAME]);
+// define the db config set name, the db config and the db schema
+DEFINE('DB_CONFIG_NAME', $DB_HOST[$HOST_NAME]);
+DEFINE('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME]);
 DEFINE('DB_SCHEMA', $DB_PATH[$HOST_NAME]);
 // DEFINE('TARGET_DB', $DB_TARGET_HOST[$HOST_NAME]);
 // DEFINE('URL_REDIRECT_DB', $DB_URL_REDIRECT_HOST[$HOST_NAME]);
@@ -252,17 +271,19 @@ foreach ($paths as $path) {
 
 // turn off debug if debug flag is OFF
 if (defined('DEBUG') && DEBUG == false) {
-	$ECHO_ALL = 0;
-	$DEBUG_ALL = 0;
-	$PRINT_ALL = 0;
-	$DB_DEBUG = 0;
-	$ENABLE_ERROR_HANDLING = 0;
+	$ECHO_ALL = false;
+	$DEBUG_ALL = false;
+	$PRINT_ALL = false;
+	$DB_DEBUG = false;
+	$ENABLE_ERROR_HANDLING = false;
+	$DEBUG_ALL_OVERRIDE = false;
 } else {
-	$ECHO_ALL = 0;
-	$DEBUG_ALL = 1;
-	$PRINT_ALL = 1;
-	$DB_DEBUG = 1;
-	$ENABLE_ERROR_HANDLING = 0;
+	$ECHO_ALL = false;
+	$DEBUG_ALL = true;
+	$PRINT_ALL = true;
+	$DB_DEBUG = true;
+	$ENABLE_ERROR_HANDLING = false;
+	$DEBUG_ALL_OVERRIDE = false;
 }
 
 // read auto loader

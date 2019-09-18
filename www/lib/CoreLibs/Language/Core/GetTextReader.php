@@ -39,7 +39,7 @@ class GetTextReader
 	// public:
 	public $error = 0; // public variable that holds error code (0 if no error)
 
-   //private:
+	// private:
 	private $BYTEORDER = 0;        // 0: low endian, 1: big endian
 	private $STREAM = null;
 	private $short_circuit = false;
@@ -125,7 +125,6 @@ class GetTextReader
 			$this->BYTEORDER = 0;
 		} else {
 			$this->error = 1; // not MO file
-			return false;
 		}
 
 		// FIXME: Do we care about revision? We should.
@@ -396,7 +395,7 @@ class GetTextReader
 	* @param string single
 	* @param string plural
 	* @param string number
-	* @return translated plural form
+	* @return string plural form
 	*/
 	public function ngettext($single, $plural, $number)
 	{

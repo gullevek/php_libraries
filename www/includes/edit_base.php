@@ -24,14 +24,10 @@ $DB_DEBUG = 1;
 // TODO: only extract _POST data that is needed
 extract($_POST, EXTR_SKIP);
 
-$table_width = '100%';
-// this is for certain CMS modules that set a relative path
-define('REL_PATH', '');
-
 ob_start();
 require 'config.php';
 // set session name here
-define('SET_SESSION_NAME', EDIT_SESSION_NAME);
+$SET_SESSION_NAME = EDIT_SESSION_NAME;
 // overrride debug flags
 if (!DEBUG)	{
 	$DEBUG_ALL = 0;
@@ -47,10 +43,10 @@ if (!isset($lang)) {
 // should be utf8
 header("Content-type: text/html; charset=".DEFAULT_ENCODING);
 ob_end_flush();
-$login = new CoreLibs\ACL\Login($DB_CONFIG[LOGIN_DB], $lang);
+$login = new CoreLibs\ACL\Login(DB_CONFIG, $lang);
 
 // create form class
-$form = new CoreLibs\Output\Form\Generate($DB_CONFIG[MAIN_DB], $lang);
+$form = new CoreLibs\Output\Form\Generate(DB_CONFIG, $lang);
 if ($form->mobile_phone) {
 	echo "I am sorry, but this page cannot be viewed by a mobile phone";
 	exit;
@@ -70,6 +66,8 @@ if (TARGET == 'live' || TARGET == 'remote') {
 	$form->echo_output_all = 0;
 	$form->print_output_all = DEBUG ? 1 : 0;
 }
+// space for setting special debug flags
+$login->debug_output_all = 1;
 // set the template dir
 // WARNING: this has a special check for the mailing tool layout (old layout)
 if (defined('LAYOUT')) {
@@ -81,32 +79,8 @@ if (defined('LAYOUT')) {
 	$DATA['css'] = CSS;
 	$DATA['js'] = JS;
 }
-
-// space for setting special debug flags
-$login->debug_output_all = 1;
-
-// define edit logging function. should be in a special edit interface class later
-// METHOD: EditLog()
-// PARAMS: event -> any kind of event description, data -> any kind of data related to that event
-// RETURN: none
-// DESC:   writes all action vars plus other info into edit_log table
-function EditLog($event = '', $data = '')
-{
-	$q = "INSERT INTO edit_log ";
-	$q .= "(euid, event_date, ip, event, data, page) ";
-	$q .= "VALUES (".$_SESSION['EUID'].", NOW(), '".$_SERVER["REMOTE_ADDR"]."', '".$GLOBALS['form']->dbEscapeString($event)."', '".$GLOBALS['form']->dbEscapeString($data)."', '".$GLOBALS['form']->getPageName()."')";
-}
-
-// log backend data
-// data part creation
-$data = array (
-	'_SESSION' => $_SESSION,
-	'_GET' => $_GET,
-	'_POST' => $_POST,
-	'_FILES' => $_FILES
-);
-// log action
-EditLog('Edit Submit', serialize($data));
+// set table width
+$table_width = '100%';
 
 // define all needed smarty stuff for the general HTML/page building
 $HEADER['CSS'] = CSS;
@@ -128,12 +102,14 @@ if ($form->my_page_name == 'edit_order') {
 	if (!isset($position)) {
 		$position = array ();
 	}
+	$row_data_id = $_POST['row_data_id'];
+	$original_id = $row_data_id;
 	if (count($position)) {
-		$original_id = $row_data_id;
+		$row_data_order = $_POST['row_data_order'];
 
 		// FIRST u have to put right sort, then read again ...
 		// hast to be >0 or the first one is selected and then there is no move
-		if (isset($up) && $position[0] > 0) {
+		if (isset($up) && isset($position[0]) && $position[0] > 0) {
 			for ($i = 0; $i < count($position); $i++) {
 				// change position order
 				// this gets temp, id before that, gets actual (moves one "down")
@@ -141,8 +117,8 @@ if ($form->my_page_name == 'edit_order') {
 				// is done for every element in row
 				// echo "A: ".$row_data_id[$position[$i]]." (".$row_data_order[$position[$i]].") -- ".$row_data_id[$position[$i]-1]." (".$row_data_order[$position[$i]-1].")<br>";
 				$temp_id = $row_data_id[$position[$i]];
-				$row_data_id[$position[$i]] = $row_data_id[$position[$i]-1];
-				$row_data_id[$position[$i]-1] = $temp_id;
+				$row_data_id[$position[$i]] = $row_data_id[$position[$i] - 1];
+				$row_data_id[$position[$i] - 1] = $temp_id;
 				// echo "A: ".$row_data_id[$position[$i]]." (".$row_data_order[$position[$i]].") -- ".$row_data_id[$position[$i]-1]." (".$row_data_order[$position[$i]-1].")<br>";
 			} // for
 		} // if up
@@ -191,6 +167,9 @@ if ($form->my_page_name == 'edit_order') {
 	$messages = array ();
 	// error msg
 	if (isset($error)) {
+		if (!isset($msg)) {
+			$msg = array ();
+		}
 		$messages[] = array ('msg' => $msg, 'class' => 'error', 'width' => '100%');
 	}
 	$DATA['form_error_msg'] = $messages;
@@ -199,7 +178,7 @@ if ($form->my_page_name == 'edit_order') {
 	$options_id = array ();
 	$options_name = array ();
 	$options_selected = array ();
-	if (!is_array($row_data)) {
+	if (!isset($row_data) || !is_array($row_data)) {
 		$row_data = array ();
 	}
 	for ($i = 0; $i < count($row_data); $i ++) {
@@ -270,6 +249,7 @@ if ($form->my_page_name == 'edit_order') {
 	if (!isset($PAGES) || !is_array($PAGES)) {
 		$PAGES = array ();
 	}
+	$menuarray = array ();
 	foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
 		if ($PAGE_DATA['menu'] && $PAGE_DATA['online']) {
 			$menuarray[] = $PAGE_DATA;
@@ -288,6 +268,7 @@ if ($form->my_page_name == 'edit_order') {
 	}
 
 	$position = 0;
+	$menu_data = array ();
 	for ($i = 1; $i <= count($menuarray); $i ++) {
 		// do that for new array
 		$j = $i - 1;
@@ -338,7 +319,7 @@ if ($form->my_page_name == 'edit_order') {
 		$DATA['form_my_page_name'] = $form->my_page_name;
 		$DATA['filename_exist'] = 0;
 		$DATA['drop_down_input'] = 0;
-
+		$elements = array ();
 		// depending on the "getPageName()" I show different stuff
 		switch ($form->my_page_name) {
 			case 'edit_users':

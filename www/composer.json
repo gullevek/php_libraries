@@ -1,0 +1,12 @@
+{
+    "name": "gullevek/www",
+    "description": "CoreLibs",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Clemens Schwaighofer",
+            "email": "clemens.schwaighofer@egplusww.com"
+        }
+    ],
+    "require": {}
+}

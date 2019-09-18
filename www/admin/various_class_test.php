@@ -1,5 +1,7 @@
 <?php
 
+namespace CoreLibs;
+
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
 $PRINT_ALL = 1;
@@ -7,14 +9,14 @@ $DB_DEBUG = 1;
 
 // admin class tests
 require 'config.php';
-DEFINE('SET_SESSION_NAME', EDIT_SESSION_NAME);
-$base = new CoreLibs\Basic();
+$SET_SESSION_NAME = EDIT_SESSION_NAME;
+$base = new Basic();
 
 print "THIS HOST: ".HOST_NAME.", with PROTOCOL: ".HOST_PROTOCOL." is running SSL: ".HOST_SSL."<br>";
 print "DIR: ".DIR."<br>";
 print "BASE: ".BASE."<br>";
 print "ROOT: ".ROOT."<br>";
-print "HOST: ".$HOST_NAME." => DB HOST: ".$DB_HOST[$HOST_NAME]." => ".MAIN_DB."<br>";
+print "HOST: ".HOST_NAME." => DB HOST: ".DB_CONFIG_NAME." => ".DB_SCHEMA." => ".print_r(DB_CONFIG, true)."<br>";
 
 $text = 'I am some text
 with some

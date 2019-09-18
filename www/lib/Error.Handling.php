@@ -60,7 +60,7 @@ function MyErrorHandler($type, $message, $file, $line, $context)
 	// <> the line number in this file
 	// [|] error name and error number
 	// : the php error message
-	$output = '['.date("Y-m-d H:i:s").'] {'.array_pop($page_temp).'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message;
+	$output = '{'.array_pop($page_temp).'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message;
 	# try to open file
 	$ROOT = CURRENT_WORKING_DIR;
 	$LOG = 'log/';
@@ -76,7 +76,7 @@ function MyErrorHandler($type, $message, $file, $line, $context)
 		$fp = @fopen($fn, 'a');
 		// write if we have a file pointer, else set error flag
 		if ($fp) {
-			fwrite($fp, $output."\n");
+			fwrite($fp, '['.date("Y-m-d H:i:s").'] '.$output."\n");
 			fclose($fp);
 		} else {
 			$error = 1;
@@ -92,13 +92,13 @@ function MyErrorHandler($type, $message, $file, $line, $context)
 		if (ini_get("display_errors")) {
 			echo "<div style='border: 1px dotted red; background-color: #ffffe5; color: #000000; padding: 5px; margin-bottom: 2px;'>";
 			echo "<div style='color: orange; font-weight: bold;'>".$error_level[$type].":</div>";
-			echo "<b>$message</b> on line <b>$line</b> in <b>$file</b>";
+			echo "<b>".$message."</b> on line <b>".$line."</b> in <b>".$file."</b>";
 			echo "</div>";
 		}
 		// if write to log is on
 		// simplified, remove datetime for log file
 		if (ini_get('log_errors')) {
-			error_log('{'.$page_temp.'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message);
+			error_log($output);
 		}
 	}
 	// return true, to avoid that php calls its own error stuff

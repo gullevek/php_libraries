@@ -277,9 +277,12 @@ class IO extends \CoreLibs\Basic
 	// other vars
 	private $nbsp = ''; // used by print_array recursion function
 	// error & warning id
-	private $error_id;
+	// not error_id is defined in \CoreLibs\Basic
+	private $had_error;
 	private $warning_id;
 	private $had_warning;
+	// error thrown on class init if we cannot connect to db
+	protected $db_init_error = false;
 	// sub include with the database functions
 	private $db_functions;
 
@@ -305,6 +308,11 @@ class IO extends \CoreLibs\Basic
 	//        set_control_flag -> flags for core class get/set variable error handling
 	// RETURN nothing
 	// DESC   constructor for db_clss
+	/**
+	 * main DB concstructor with auto connection to DB and failure set on failed connection
+	 * @param array       $db_config        DB configuration array
+	 * @param int|integer $set_control_flag Class set control flag
+	 */
 	public function __construct(array $db_config, int $set_control_flag = 0)
 	{
 		// start basic class
@@ -373,18 +381,18 @@ class IO extends \CoreLibs\Basic
 			// abort error
 			$this->error_id = 10;
 			$this->__dbError();
-			return false;
+			$this->db_init_error = false;
 		}
 
 		// connect to DB
 		if (!$this->__connectToDB()) {
 			$this->error_id = 16;
 			$this->__dbError();
-			return false;
+			$this->db_init_error = false;
 		}
 
 		// so we can check that we have a successful DB connection created
-		return true;
+		$this->db_init_error = true;
 	}
 
 	// METHOD: __destruct
@@ -980,7 +988,7 @@ class IO extends \CoreLibs\Basic
 		}
 		$string = '';
 		if (is_array($array)) {
-			$this->nbps = '';
+			$this->nbsp = '';
 			$string .= $this->__printArray($array);
 			$this->__dbDebug('db', $string, 'dbDumpData');
 		}
@@ -991,15 +999,22 @@ class IO extends \CoreLibs\Basic
 	// WAS   : db_return
 	// PARAMS: query -> the query ...
 	//         reset -> if set to 1, at the end of the query (last row returned), the stored array will be deleted ...
-	//                  if set to 2, the data will be read new and cached (wheres 1 reads new AND destroys at end of read)
+	//                  if set to 2, the data will be read new and cached (wheres 1 reads cache AND destroys at end of read)
 	//               -> if set to 3, after EACH row, the data will be reset, no caching is done except for basic (count, etc)
-	// RETURN: res mixed (array/hash)
+	// RETURN: res mixed (array/bool)
 	// DESC  : single running function, if called creates md5 from
 	//         query string and so can itself call exec/return calls
 	//         caches data, so next time called with IDENTICAL (!!!!)
 	//         [this means 1:1 bit to bit identical query] returns cached
 	//         data, or with reset flag set calls data from DB again
-	public function dbReturn($query, $reset = 0)
+	/**
+	 * returned array is database number/fieldname -> value element
+	 * @param  string  $query Query string
+	 * @param  integer $reset reset status: 1: read cache, clean at the end, 2: read new, clean at end, 3: never cache
+	 * @param  bool    $assoc_only true to only returned the named and not index position ones
+	 * @return array|boolean  return array data or false on error/end
+	 */
+	public function dbReturn($query, $reset = 0, bool $assoc_only = false)
 	{
 		if (!$query) {
 			$this->error_id = 11;
@@ -1028,7 +1043,8 @@ class IO extends \CoreLibs\Basic
 			$this->__dbError('', $this->cursor_ext[$md5]['query']);
 			return false;
 		}
-
+		// init return als false
+		$return = false;
 		// if it is a call with reset in it we reset the cursor, so we get an uncached return
 		// but only for the FIRST call (pos == 0)
 		if ($reset && !$this->cursor_ext[$md5]['pos']) {
@@ -1092,9 +1108,14 @@ class IO extends \CoreLibs\Basic
 			}
 			// read data for further work ... but only if necessarry
 			if ($this->cursor_ext[$md5]['read_rows'] == $this->cursor_ext[$md5]['num_rows']) {
-				$return = 0;
+				$return = false;
 			} else {
-				$return = $this->__dbConvertEncoding($this->db_functions->__dbFetchArray($this->cursor_ext[$md5]['cursor']));
+				$return = $this->__dbConvertEncoding(
+					$this->db_functions->__dbFetchArray(
+						$this->cursor_ext[$md5]['cursor'],
+						$this->db_functions->__dbResultType($assoc_only)
+					)
+				);
 			}
 			// check if cached call or reset call ...
 			if (!$return && !$reset) {
@@ -1103,15 +1124,22 @@ class IO extends \CoreLibs\Basic
 					$this->cursor_ext[$md5]['pos'] = 0;
 					# if not reset given, set the cursor to true, so in a cached call on a different page we don't get problems from DB connection (as those will be LOST)
 					$this->cursor_ext[$md5]['cursor'] = 1;
-					$return = 0;
+					$return = false;
 				} else {
 					// unset return value ...
-					unset($return);
+					$return = array ();
 					for ($i = 0; $i < $this->cursor_ext[$md5]['num_fields']; $i ++) {
 						// create mixed return array
-						$field_value = $this->cursor_ext[$md5][$this->cursor_ext[$md5]['pos']][$this->cursor_ext[$md5]['field_names'][$i]];
-						$return[$i] = $field_value;
-						$return[$this->cursor_ext[$md5]['field_names'][$i]] = $field_value;
+						if ($assoc_only === false && isset($this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i])) {
+							$return[$i] = $this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i];
+						}
+						// named part
+						if (isset($this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i])) {
+							$return[$this->cursor_ext[$md5]['field_names'][$i]] = $this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i];
+						} else {
+							// throws PhanTypeMismatchDimFetch error
+							$return[$this->cursor_ext[$md5]['field_names'][$i]] = $this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$this->cursor_ext[$md5]['field_names'][$i]];
+						}
 					}
 					$this->cursor_ext[$md5]['pos'] ++;
 				}
@@ -1125,7 +1153,7 @@ class IO extends \CoreLibs\Basic
 					// at end of read reset pos & set cursor to 1 (so it does not get lost in session transfer)
 					$this->cursor_ext[$md5]['pos'] = 0;
 					$this->cursor_ext[$md5]['cursor'] = 1;
-					$return = 0;
+					$return = false;
 				}
 				// if something found, write data into hash array
 				if ($return) {
@@ -1134,10 +1162,11 @@ class IO extends \CoreLibs\Basic
 					$this->cursor_ext[$md5]['read_rows'] ++;
 					// if reset is <3 caching is done, else no
 					if ($reset < 3) {
+						$temp = array ();
 						foreach ($return as $field_name => $data) {
 							$temp[$field_name] = $data;
 						}
-						$this->cursor_ext[$md5][] = $temp;
+						$this->cursor_ext[$md5]['data'][] = $temp;
 					}
 				} // cached data if
 			} // cached or not if
@@ -1325,7 +1354,9 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$cursor = $this->dbExec($query);
+		$rows = array ();
 		while ($res = $this->dbFetchArray($cursor, $assoc_only)) {
+			$data = array ();
 			for ($i = 0; $i < $this->num_fields; $i ++) {
 				$data[$this->field_names[$i]] = $res[$this->field_names[$i]];
 			}
@@ -1746,7 +1777,7 @@ class IO extends \CoreLibs\Basic
 				$has_default = $table_data[$field]['has default'];
 				$not_null = $table_data[$field]['not null'];
 				// if not null and string => '', if not null and int or numeric => 0, if bool => skip, all others skip
-				if ($not_null && !isset($_data)) {
+				if ($not_null && $_data == null) {
 					if (strstr($table_data[$field]['type'], 'int') || strstr($table_data[$field]['type'], 'numeric')) {
 						$_data = 0;
 					} else {
@@ -1756,7 +1787,12 @@ class IO extends \CoreLibs\Basic
 				// we detect bool, so we can force a write on "false"
 				$is_bool = $table_data[$field]['type'] == 'bool' ? true : false;
 				// write if the field has to be not null, or if there is no data and the field has no default values or if there is data or if this is an update and there is no data (set null)
-				if (($not_null && isset($_data)) || (!$has_default && !isset($_data)) || (is_numeric($_data) && isset($_data)) || ($primary_key['value'] && !isset($_data)) || isset($_data)) {
+				if (($not_null && $_data) ||
+					(!$has_default && !$_data) ||
+					(is_numeric($_data) && $_data) ||
+					($primary_key['value'] && !$_data) ||
+					$_data
+				) {
 					if ($q_sub_value && !$primary_key['value']) {
 						$q_sub_value .= ', ';
 					}
@@ -1774,7 +1810,7 @@ class IO extends \CoreLibs\Basic
 					}
 					// write data into sql string
 					if (strstr($table_data[$field]['type'], 'int')) {
-						$q_sub_data .= (is_numeric($_data) && isset($_data)) ? $_data : 'NULL';
+						$q_sub_data .= (is_numeric($_data)) ? $_data : 'NULL';
 					} else {
 						// if bool -> set bool, else write data
 						$q_sub_data .= isset($_data) ? "'".($is_bool ? $this->dbBoolean($_data, true) : $this->dbEscapeString($_data))."'" : 'NULL';
@@ -1886,7 +1922,7 @@ class IO extends \CoreLibs\Basic
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->__closeDB();
+		$this->__closeDB();
 	}
 
 	private function _check_query_for_select($query)
@@ -1914,14 +1950,14 @@ class IO extends \CoreLibs\Basic
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->__dbDebug($debug_id, $error_string, $id, $type);
+		$this->__dbDebug($debug_id, $error_string, $id, $type);
 	}
 
 	public function _db_error($cursor = '', $msg = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->__dbError($cursor, $msg);
+		$this->__dbError($cursor, $msg);
 	}
 
 	private function _db_convert_encoding($row)

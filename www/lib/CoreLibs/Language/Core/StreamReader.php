@@ -26,6 +26,10 @@ namespace CoreLibs\Language\Core;
 // seek is essential, and it should be byte stream
 class StreamReader
 {
+	public function __construct()
+	{
+		// empty
+	}
 	// should return a string [FIXME: perhaps return array of bytes?]
 	public function read($bytes)
 	{

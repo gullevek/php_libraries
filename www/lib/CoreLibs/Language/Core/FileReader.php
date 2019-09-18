@@ -27,6 +27,7 @@ class FileReader
 	public $fr_pos;
 	public $fr_fd;
 	public $fr_length;
+	public $error = 0;
 
 	public function __construct($filename)
 	{
@@ -36,11 +37,9 @@ class FileReader
 			$this->fr_fd = fopen($filename, 'rb');
 			if (!$this->fr_fd) {
 				$this->error = 3; // Cannot read file, probably permissions
-				return false;
 			}
 		} else {
 			$this->error = 2; // File doesn't exist
-			return false;
 		}
 	}
 

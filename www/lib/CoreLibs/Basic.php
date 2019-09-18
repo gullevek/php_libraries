@@ -111,9 +111,9 @@ class Basic
 	public $host_name;
 	public $host_port;
 	// internal error reporting vars
-	private $error_id; // error ID for errors in classes
-	private $error_string; // error strings in classes (for error_id)
-	private $error_msg = array (); // the "connection" to the outside errors
+	protected $error_id; // error ID for errors in classes
+	protected $error_msg = array (); // the "connection" to the outside errors
+	// debug output prefix
 	public $error_msg_prefix = ''; // prefix to the error string (the class name)
 	// debug flags
 	public $debug_output; // if this is true, show debug on desconstructor
@@ -126,7 +126,7 @@ class Basic
 	public $print_output_not;
 	public $print_output_all;
 	// debug flags/settings
-	public $debug_fp = ''; // filepointer for writing to file
+	public $debug_fp; // filepointer for writing to file
 	public $debug_filename = 'debug_file.log'; // where to write output
 	public $hash_algo = 'crc32b'; // the hash algo used for the internal debug uid
 	public $running_uid = ''; // unique ID set on class init and used in logging as prefix
@@ -137,10 +137,10 @@ class Basic
 	private $log_file_unique_id; // a unique ID set only once for call derived from this class
 	public $log_print_file_date = 1; // if set add Y-m-d and do automatic daily rotation
 	private $log_file_id = ''; // a alphanumeric name that has to be set as global definition
-	public $log_per_level = 0; // set, it will split per level (first parameter in debug call)
-	public $log_per_class = 0; // set, will split log per class
-	public $log_per_page = 0; // set, will split log per called file
-	public $log_per_run = 0; // create a new log file per run (time stamp + unique ID)
+	public $log_per_level = false; // set, it will split per level (first parameter in debug call)
+	public $log_per_class = false; // set, will split log per class
+	public $log_per_page = false; // set, will split log per called file
+	public $log_per_run = false; // create a new log file per run (time stamp + unique ID)
 	// run time messurements
 	private $starttime; // start time if time debug is used
 	private $endtime; // end time if time debug is used
@@ -200,7 +200,7 @@ class Basic
 			'UPLOADS', 'CSV', 'JS', 'CSS', 'TABLE_ARRAYS', 'SMARTY', 'LANG', 'CACHE', 'TMP', 'LOG', 'TEMPLATES', 'TEMPLATES_C',
 			'DEFAULT_LANG', 'DEFAULT_ENCODING', 'DEFAULT_HASH',
 			'DEFAULT_ACL_LEVEL', 'LOGOUT_TARGET', 'PASSWORD_CHANGE', 'AJAX_REQUEST_TYPE', 'USE_PROTOTYPE', 'USE_SCRIPTACULOUS', 'USE_JQUERY',
-			'PAGE_WIDTH', 'MASTER_TEMPLATE_NAME', 'PUBLIC_SCHEMA', 'TEST_SCHEMA', 'DEV_SCHEMA', 'LIVE_SCHEMA', 'LOGIN_DB', 'MAIN_DB', 'DB_SCHEMA',
+			'PAGE_WIDTH', 'MASTER_TEMPLATE_NAME', 'PUBLIC_SCHEMA', 'TEST_SCHEMA', 'DEV_SCHEMA', 'LIVE_SCHEMA', 'DB_CONFIG_NAME', 'DB_CONFIG', 'DB_SCHEMA',
 			'LOGIN_DB_SCHEMA', 'GLOBAL_DB_SCHEMA', 'TARGET', 'DEBUG', 'SHOW_ALL_ERRORS'
 		) as $constant) {
 			if (!defined($constant)) {
@@ -237,27 +237,27 @@ class Basic
 
 		// if given via parameters, only for all
 		$this->debug_output_all = false;
-		$this->echo_output_all = true;
+		$this->echo_output_all = false;
 		$this->print_output_all = false;
 		// globals overrule given settings, for one (array), eg $ECHO['db'] = 1;
-		if (isset($GLOBALS['DEBUG'])) {
+		if (isset($GLOBALS['DEBUG']) && is_array($GLOBALS['DEBUG'])) {
 			$this->debug_output = $GLOBALS['DEBUG'];
 		}
-		if (isset($GLOBALS['ECHO'])) {
+		if (isset($GLOBALS['ECHO']) && is_array($GLOBALS['ECHO'])) {
 			$this->echo_output = $GLOBALS['ECHO'];
 		}
-		if (isset($GLOBALS['PRINT'])) {
+		if (isset($GLOBALS['PRINT']) && is_array($GLOBALS['PRINT'])) {
 			$this->print_output = $GLOBALS['PRINT'];
 		}
 
 		// exclude these ones from output
-		if (isset($GLOBALS['DEBUG_NOT'])) {
+		if (isset($GLOBALS['DEBUG_NOT']) && is_array($GLOBALS['DEBUG_NOT'])) {
 			$this->debug_output_not = $GLOBALS['DEBUG_NOT'];
 		}
-		if (isset($GLOBALS['ECHO_NOT'])) {
+		if (isset($GLOBALS['ECHO_NOT']) && is_array($GLOBALS['ECHO_NOT'])) {
 			$this->echo_output_not = $GLOBALS['ECHO_NOT'];
 		}
-		if (isset($GLOBALS['PRINT_NOT'])) {
+		if (isset($GLOBALS['PRINT_NOT']) && is_array($GLOBALS['PRINT_NOT'])) {
 			$this->print_output_not = $GLOBALS['PRINT_NOT'];
 		}
 
@@ -374,6 +374,11 @@ class Basic
 				// set the session name for possible later check
 				$this->session_name = SET_SESSION_NAME;
 			}
+			// override with global if set
+			if (isset($GLOBALS['SET_SESSION_NAME'])) {
+				$this->session_name = $GLOBALS['SET_SESSION_NAME'];
+			}
+			// if set, set special session name
 			if ($this->session_name) {
 				session_name($this->session_name);
 			}
@@ -484,13 +489,10 @@ class Basic
 	//         must be alphanumeric only (\w)
 	public function basicSetLogId(string $string): string
 	{
-		if (!isset($log_file_id)) {
-			$log_file_id = '';
-		}
-		if (isset($string) && preg_match("/^\w+$/", $string)) {
+		if (preg_match("/^\w+$/", $string)) {
 			$this->log_file_id = $string;
 		}
-		return $log_file_id;
+		return $this->log_file_id;
 	}
 
 	// ****** DEBUG/ERROR FUNCTIONS ******
@@ -595,7 +597,7 @@ class Basic
 			$string .= substr($microtime, 1);
 		} elseif ($set_microtime >= 1) {
 			// in round case we run this through number format to always get the same amount of digits
-			$string .= substr(number_format(round($microtime, $set_microtime), $set_microtime), 1);
+			$string .= substr(number_format(round((float)$microtime, $set_microtime), $set_microtime), 1);
 		}
 		return $string;
 	}
@@ -888,8 +890,7 @@ class Basic
 	// DESC  : validates they key length
 	private function validateRandomKeyLenght(int $key_length): bool
 	{
-		if (isset($key_length) &&
-			is_numeric($key_length) &&
+		if (is_numeric($key_length) &&
 			$key_length > 0 &&
 			$key_length <= $this->max_key_length
 		) {
@@ -1146,11 +1147,15 @@ class Basic
 	//         only returns the first one found
 	public static function arraySearchRecursive($needle, array $haystack, $key_lookin = ''): ?array
 	{
-		$path = null;
+		$path = array ();
 		if (!is_array($haystack)) {
 			$haystack = array();
 		}
-		if (!is_array($key_lookin) && !empty($key_lookin) && array_key_exists($key_lookin, $haystack) && $needle === $haystack[$key_lookin]) {
+		if (!is_array($key_lookin) &&
+			!empty($key_lookin) &&
+			array_key_exists($key_lookin, $haystack) &&
+			$needle === $haystack[$key_lookin]
+		) {
 			$path[] = $key_lookin;
 		} else {
 			foreach ($haystack as $key => $val) {
@@ -1184,7 +1189,7 @@ class Basic
 		if (!isset($path['work'])) {
 			$path['work'] = array ();
 		}
-		if (!isset($haystack)) {
+		if (!is_array($haystack)) {
 			$haystack = array ();
 		}
 
@@ -1461,7 +1466,7 @@ class Basic
 			// labels in order of size
 			$labels = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB');
 			// calc file size, round down too two digits, add label based max change
-			return round($number / pow(1024, ($i = floor(log($number, 1024)))), 2).($space ? ' ' : '').(isset($labels[$i]) ? $labels[$i] : '>EB');
+			return round($number / pow(1024, ($i = floor(log($number, 1024)))), 2).($space ? ' ' : '').(isset($labels[(int)$i]) ? $labels[(int)$i] : '>EB');
 		}
 		return (string)$number;
 	}
@@ -1527,7 +1532,7 @@ class Basic
 	public static function dateStringFormat($timestamp, bool $show_micro = true): string
 	{
 		list ($timestamp, $ms) = explode('.', (string)round($timestamp, 4));
-		$string = date("Y-m-d H:i:s", $timestamp);
+		$string = date("Y-m-d H:i:s", (int)$timestamp);
 		if ($show_micro) {
 			$string .= ' '.$ms.'ms';
 		}
@@ -1549,8 +1554,8 @@ class Basic
 			$labels = array ('d', 'h', 'm', 's');
 			$time_string = '';
 			for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i ++) {
-				$output = floor($timestamp / $timegroups[$i]);
-				$timestamp = $timestamp % $timegroups[$i];
+				$output = floor((float)$timestamp / $timegroups[$i]);
+				$timestamp = (float)$timestamp % $timegroups[$i];
 				// output has days|hours|min|sec
 				if ($output || $time_string) {
 					$time_string .= $output.$labels[$i].(($i + 1) != count($timegroups) ? ' ' : '');
@@ -1589,7 +1594,7 @@ class Basic
 			// multiply the returned matches and sum them up. the last one (ms) is added with .
 			foreach ($timegroups as $i => $time_multiply) {
 				if (is_numeric($matches[$i])) {
-					$timestamp += $matches[$i] * $time_multiply;
+					$timestamp += (float)$matches[$i] * $time_multiply;
 				}
 			}
 			if (is_numeric($matches[10])) {
@@ -1612,7 +1617,7 @@ class Basic
 		if (!$year || !$month || !$day) {
 			return false;
 		}
-		if (!checkdate($month, $day, $year)) {
+		if (!checkdate((int)$month, (int)$day, (int)$year)) {
 			return false;
 		}
 		return true;
@@ -1629,15 +1634,15 @@ class Basic
 		if (!$year || !$month || !$day) {
 			return false;
 		}
-		if (!checkdate($month, $day, $year)) {
+		if (!checkdate((int)$month, (int)$day, (int)$year)) {
 			return false;
 		}
-		if (!$hour || !$min) {
+		if (!is_numeric($hour) || !is_numeric($min)) {
 			return false;
 		}
 		if (($hour < 0 || $hour > 24) ||
 			($min < 0 || $min > 60) ||
-			($sec && ($sec < 0 || $sec > 60))
+			(is_numeric($sec) && ($sec < 0 || $sec > 60))
 		) {
 			return false;
 		}
@@ -1726,6 +1731,8 @@ class Basic
 		$end->setTime(0, 0, 1);
 
 		$days[0] = $end->diff($start)->days;
+		$days[1] = 0;
+		$days[2] = 0;
 
 		$period = new \DatePeriod($start, new \DateInterval('P1D'), $end);
 
@@ -1767,7 +1774,7 @@ class Basic
 			2 => 'jpg',
 			3 => 'png'
 		);
-
+		$return_data = false;
 		if (!empty($cache_source)) {
 			$tmp_src = $cache_source;
 		} else {
@@ -1790,6 +1797,7 @@ class Basic
 			list($width, $height, $type) = getimagesize($filename);
 			$convert_prefix = '';
 			$create_file = false;
+			$delete_filename = '';
 			// check if we can skip the PDF creation: if we have size, if do not have type, we assume type png
 			if (!$type && is_numeric($size_x) && is_numeric($size_y)) {
 				$check_thumb = $tmp_src.'thumb_'.$pic.'_'.$size_x.'x'.$size_y.'.'.$image_types[3];
@@ -1887,6 +1895,7 @@ class Basic
 		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);
 		// if string does not match anymore we have a convert problem
 		if ($string != $compare) {
+			$failed = array ();
 			// go through each character and find the ones that do not match
 			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i ++) {
 				$char = mb_substr($string, $i, 1, $from_encoding);
@@ -1989,10 +1998,10 @@ class Basic
 		}
 		// split up the version strings to calc the compare number
 		$version = explode('.', $min_version);
-		$min_version = $version[0] * 10000 + $version[1] * 100 + $version[2];
+		$min_version = (int)$version[0] * 10000 + (int)$version[1] * 100 + (int)$version[2];
 		if ($max_version) {
 			$version = explode('.', $max_version);
-			$max_version = $version[0] * 10000 + $version[1] * 100 + $version[2];
+			$max_version = (int)$version[0] * 10000 + (int)$version[1] * 100 + (int)$version[2];
 			// drop out if min is bigger max, equal size is okay, that would be only THIS
 			if ($min_version > $max_version) {
 				return false;
@@ -2002,7 +2011,7 @@ class Basic
 		if (!defined('PHP_VERSION_ID')) {
 			$version = explode('.', phpversion());
 			// creates something like 50107
-			define('PHP_VERSION_ID', $version[0] * 10000 + $version[1] * 100 + $version[2]);
+			define('PHP_VERSION_ID', (int)$version[0] * 10000 + (int)$version[1] * 100 + (int)$version[2]);
 		}
 		// check if matching for version
 		if ($min_version && !$max_version) {
@@ -2242,6 +2251,7 @@ class Basic
 
 		$MAX = max($r, $g, $b);
 		$MIN = min($r, $g, $b);
+		$HUE = 0;
 
 		if ($MAX == $MIN) {
 			return array(0, 0, round($MAX * 100));
@@ -2292,41 +2302,41 @@ class Basic
 		switch ($Hi) {
 			case 0:
 				$red = $V;
-				$gre = $t;
-				$blu = $p;
+				$green = $t;
+				$blue = $p;
 				break;
 			case 1:
 				$red = $q;
-				$gre = $V;
-				$blu = $p;
+				$green = $V;
+				$blue = $p;
 				break;
 			case 2:
 				$red = $p;
-				$gre = $V;
-				$blu = $t;
+				$green = $V;
+				$blue = $t;
 				break;
 			case 3:
 				$red = $p;
-				$gre = $q;
-				$blu = $V;
+				$green = $q;
+				$blue = $V;
 				break;
 			case 4:
 				$red = $t;
-				$gre = $p;
-				$blu = $V;
+				$green = $p;
+				$blue = $V;
 				break;
 			case 5:
 				$red = $V;
-				$gre = $p;
-				$blu = $q;
+				$green = $p;
+				$blue = $q;
 				break;
 			default:
 				$red = 0;
-				$gre = 0;
+				$green = 0;
 				$blue = 0;
 		}
 
-		return array(round($red * 255), round($gre * 255), round($blu * 255));
+		return array(round($red * 255), round($green * 255), round($blue * 255));
 	}
 
 	// METHOD: rgb2hsl
@@ -2345,6 +2355,7 @@ class Basic
 
 		$MIN = min($r, $g, $b);
 		$MAX = max($r, $g, $b);
+		$HUE = 0;
 		// luminance
 		$L = round((($MAX + $MIN) / 2) * 100);
 
@@ -2497,7 +2508,7 @@ class Basic
 		$timestamp = time() + 3600; // in seconds
 
 		// the max year is this year + 1;
-		$max_year = date("Y", $timestamp) + 1;
+		$max_year = (int)date("Y", $timestamp) + 1;
 
 		// preset year, month, ...
 		$year = (!$year) ? date("Y", $timestamp) : $year;
@@ -2507,7 +2518,7 @@ class Basic
 		$min = (!$min) ? date("i", $timestamp) : $min; // add to five min?
 		// max days in selected month
 		$days_in_month = date("t", strtotime($year."-".$month."-".$day." ".$hour.":".$min.":0"));
-
+		$string = '';
 		// from now to ?
 		if ($name_pos_back === false) {
 			$string = 'Year ';
@@ -2630,7 +2641,7 @@ class Basic
 	public function setFormToken(string $name = 'form_token'): string
 	{
 		// current hard set to sha256
-		$token = uniqid(hash('sha256', rand()));
+		$token = uniqid(hash('sha256', (string)rand()));
 		$_SESSION[$name] = $token;
 		return $token;
 	}
@@ -2683,14 +2694,14 @@ class Basic
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->fdebugFP($flag);
+		$this->fdebugFP($flag);
 	}
 
 	public function debug_for($type, $flag)
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->debugFor($type, $flag);
+		$this->debugFor($type, $flag);
 	}
 
 	public function get_caller_method($level = 2)
@@ -2704,7 +2715,7 @@ class Basic
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->mergeErrors($error_msg);
+		$this->mergeErrors($error_msg);
 	}
 
 	public function print_error_msg($string = '')
@@ -2718,14 +2729,14 @@ class Basic
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->writeErrorMsg($level, $error_string);
+		$this->writeErrorMsg($level, $error_string);
 	}
 
 	public function reset_error_msg($level = '')
 	{
 		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->resetErrorMsg($level);
+		$this->resetErrorMsg($level);
 	}
 
 	public static function print_ar($array)
