@@ -29,6 +29,10 @@ class FileReader
 	public $fr_length;
 	public $error = 0;
 
+	/**
+	 * file read constructor
+	 * @param string $filename file name to load
+	 */
 	public function __construct($filename)
 	{
 		if (file_exists($filename)) {
@@ -43,6 +47,11 @@ class FileReader
 		}
 	}
 
+	/**
+	 * read byte data length
+	 * @param  int $bytes how many bytes to read
+	 * @return string     read data as string
+	 */
 	public function read($bytes)
 	{
 		if ($bytes) {
@@ -64,6 +73,11 @@ class FileReader
 		}
 	}
 
+	/**
+	 * seek to a position in the file
+	 * @param  int $pos position where to go to
+	 * @return int      file position after seek done
+	 */
 	public function seekto($pos)
 	{
 		fseek($this->fr_fd, $pos);
@@ -71,17 +85,29 @@ class FileReader
 		return $this->fr_pos;
 	}
 
+	/**
+	 * get current position in file
+	 * @return int current position in bytes
+	 */
 	public function currentpos()
 	{
 		return $this->fr_pos;
 	}
 
+	/**
+	 * file length/size
+	 * @return int file size in bytes
+	 */
 	public function length()
 	{
 		return $this->fr_length;
 	}
 
-	public function close()
+	/**
+	 * close open file handler
+	 * @return void has no return
+	 */
+	public function close(): void
 	{
 		fclose($this->fr_fd);
 	}

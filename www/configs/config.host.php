@@ -13,21 +13,21 @@
 *********************************************************************/
 
 // each host has a different db_host
-// development host
-$DB_HOST['soba.tokyo.tequila.jp'] = 'test';
-// target host (live)
-//	$DB_TARGET_HOST['soba'] = '<DB ID>';
-// url redirect database
-//	$DB_URL_REDIRECT_HOST['soba'] = '<DB ID>';
-// location flagging
-// test/dev/live
-$LOCATION['soba.tokyo.tequila.jp'] = 'test';
-// show DEBUG override
-// true/false
-$DEBUG_FLAG['soba.tokyo.tequila.jp'] = true;
-// set postgresql paths (schemas)
-$DB_PATH['soba.tokyo.tequila.jp'] = PUBLIC_SCHEMA;
-// site language
-$SITE_LANG['soba.tokyo.tequila.jp'] = 'en_utf8';
+$SITE_CONFIG = array (
+	// development host
+	'soba.tokyo.tequila.jp' => array (
+		// db config selection
+		'db_host' => 'test',
+		// other db connections
+		// 'db_host_target' => '',
+		// 'db_host_other' => '',
+		// location flagging (test/dev/live) for debug output
+		'location' => 'test',
+		// show DEBUG override
+		'debug_flag' => true,
+		// site language
+		'site_lang' => 'en_utf8',
+	)
+);
 
 // __END__

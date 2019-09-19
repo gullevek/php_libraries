@@ -120,6 +120,7 @@ if (isset($AJAX_PAGE) && !$AJAX_PAGE) {
 
 // if the lang folder is different to the default one
 // if the default lang is not like the lang given, switch lang
+/** @phan-suppress-next-line PhanParamSuspiciousOrder */
 if (false === strstr(BASE.INCLUDES.LANG.CONTENT_PATH, $cms->lang_dir) ||
 	strcasecmp(defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG, $lang)
 ) {

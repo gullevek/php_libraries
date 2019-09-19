@@ -48,19 +48,17 @@ class PgSQL
 	private $last_error_query;
 	private $dbh;
 
-	// METHOD: __construct
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : class constructor
+	/**
+	 * class constructor, empty does nothing
+	 */
 	public function __construct()
 	{
 	}
 
-	// METHOD: __dbLastErrorQuery
-	// WAS   : _db_last_error_query
-	// PARAMS: none
-	// RETURN: true/false if last error is set
-	// DESC  : queries last error query and returns true or false if error was set
+	/**
+	 * queries last error query and returns true or false if error was set
+	 * @return bool true/false if last error is set
+	 */
 	public function __dbLastErrorQuery()
 	{
 		if ($this->last_error_query) {
@@ -70,12 +68,12 @@ class PgSQL
 		}
 	}
 
-	// METHOD: __dbQuery
-	// WAS   : _db_query
-	// PARAMS: query
-	// RETURN: query result
-	// DESC  : wrapper for gp_query, catches error and stores it in class var
-	public function __dbQuery($query)
+	/**
+	 * wrapper for gp_query, catches error and stores it in class var
+	 * @param  string      $query query string
+	 * @return resource|bool      query result
+	 */
+	public function __dbQuery(string $query)
 	{
 		$this->last_error_query = '';
 		// read out the query status and save the query if needed
@@ -86,21 +84,20 @@ class PgSQL
 		return $result;
 	}
 
-	// METHOD: __dbSendQuery
-	// WAS   : _db_send_query
-	// PARAMS: query
-	// RETURN: true/false if query was sent successful
-	// DESC  : sends an async query to the server
-	public function __dbSendQuery($query)
+	/**
+	 * sends an async query to the server
+	 * @param  string $query query string
+	 * @return bool          true/false if query was sent successful
+	 */
+	public function __dbSendQuery(string $query): bool
 	{
 		return pg_send_query($this->dbh, $query);
 	}
 
-	// METHOD: __dbGetResult
-	// WAS   : _db_get_result
-	// PARAMS: none
-	// RETURN: resource handler
-	// DESC  : wrapper for pg_get_result
+	/**
+	 * wrapper for pg_get_result
+	 * @return resource|bool resource handler or false for error
+	 */
 	public function __dbGetResult()
 	{
 		$this->last_error_query = '';
@@ -111,12 +108,11 @@ class PgSQL
 		return $result;
 	}
 
-	// METHOD: __dbClose
-	// WAS   : _db_close
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : wrapper for pg_close
-	public function __dbClose()
+	/**
+	 * wrapper for pg_close
+	 * @return void has no return
+	 */
+	public function __dbClose(): void
 	{
 		if (is_resource($this->dbh)) {
 			if (pg_connection_status($this->dbh) === PGSQL_CONNECTION_OK) {
@@ -125,12 +121,13 @@ class PgSQL
 		}
 	}
 
-	// METHOD: __dbPrepare
-	// WAS   : _db_prepare
-	// PARAMS: prepare name, query
-	// RETURN: prepared statement handler
-	// DESC  : wrapper for pg_prepare
-	public function __dbPrepare($name, $query)
+	/**
+	 * wrapper for pg_prepare
+	 * @param  string $name  statement name
+	 * @param  string $query query string
+	 * @return resource|bool prepare statement handler or false for error
+	 */
+	public function __dbPrepare(string $name, string $query)
 	{
 		$result = pg_prepare($this->dbh, $name, $query);
 		if (!$result) {
@@ -139,12 +136,13 @@ class PgSQL
 		return $result;
 	}
 
-	// METHOD: __dbExecute
-	// WAS   : _db_execute
-	// PARAMS: prepare name, data for query
-	// RETURN: returns status
-	// DESC  : wrapper for pg_execute for running a prepared statement
-	public function __dbExecute($name, $data)
+	/**
+	 * wrapper for pg_execute for running a prepared statement
+	 * @param  string        $name statement name
+	 * @param  array         $data data array
+	 * @return resource|bool returns status or false for error
+	 */
+	public function __dbExecute(string $name, array $data)
 	{
 		$result = pg_execute($this->dbh, $name, $data);
 		if (!$result) {
@@ -153,95 +151,94 @@ class PgSQL
 		return $result;
 	}
 
-	// METHOD: __dbNumRows
-	// WAS   : _db_num_rows
-	// PARAMS: cursor
-	// RETURN: rows
-	// DESC  : wrapper for pg_num_rows
-	public function __dbNumRows($cursor)
+	/**
+	 * wrapper for pg_num_rows
+	 * @param  resource $cursor cursor resource
+	 * @return int              number of rows, -1 on error
+	 */
+	public function __dbNumRows($cursor): int
 	{
 		return pg_num_rows($cursor);
 	}
 
-	// METHOD: __dbNumFields
-	// WAS   : _db_num_fields
-	// PARAMS: cursor
-	// RETURN: number for fields in query
-	// DESC  : wrapper for pg_num_fields
-	public function __dbNumFields($cursor)
+	/**
+	 * wrapper for pg_num_fields
+	 * @param  resource $cursor cursor resource
+	 * @return int              number for fields in result, -1 on error
+	 */
+	public function __dbNumFields($cursor): int
 	{
 		return pg_num_fields($cursor);
 	}
 
-	// METHOD: __dbFieldName
-	// WAS   : _db_field_name
-	// PARAMS: cursor, field position
-	// RETURN: name of field
-	// DESC  : wrapper for pg_field_name
+	/**
+	 * wrapper for pg_field_name
+	 * @param  resource    $cursor cursor resource
+	 * @param  int         $i      field position
+	 * @return string|bool         name or false on error
+	 */
 	public function __dbFieldName($cursor, $i)
 	{
 		return pg_field_name($cursor, $i);
 	}
 
-	// METHOD: __dbFetchArray
-	// WAS   : _db_fetch_array
-	// PARAMS: cursor, opt result type
-	// RETURN: row
-	// DESC  : wrapper for pg_fetch_array
-	public function __dbFetchArray($cursor, $result_type = '')
+	/**
+	 * wrapper for pg_fetch_array
+	 * if through/true false, use __dbResultType(true)
+	 * @param  resource $cursor      cursor resource
+	 * @param  int      $result_type result type as int number
+	 * @return array|bool            array result data or false on end/error
+	 */
+	public function __dbFetchArray($cursor, int $result_type = PGSQL_BOTH)
 	{
-		if ($result_type == true) {
-			$result_type = PGSQL_ASSOC;
-		}
 		// result type is passed on as is [should be checked]
-		if ($result_type) {
-			return pg_fetch_array($cursor, null, $result_type);
-		} else {
-			return pg_fetch_array($cursor);
-		}
+		return pg_fetch_array($cursor, null, $result_type);
 	}
 
-	// METHOD: __dbResultType
-	// PARAMS: true/false for ASSOC only or BOTH
-	// RETURN: PGSQL assoc type
-	// DESC  : simple match up between assoc true/false
-	public function __dbResultType($assoc_type)
+	/**
+	 * simple match up between assoc true/false
+	 * @param  bool $assoc_type true (default) for PGSQL_ASSOC, false for PGSQL_BOTH
+	 * @return int              valid result type for fetch array
+	 */
+	public function __dbResultType(bool $assoc_type = true): int
 	{
 		if ($assoc_type == true) {
 			return PGSQL_ASSOC;
 		}
-		return ''; // fallback to default
+		// fallback to default
+		return PGSQL_BOTH;
 	}
 
-	// METHOD: __dbFetchAll
-	// WAS   : _db_fetch_all
-	// PARAMS: cursor
-	// RETURN: all rows as array
-	// DESC  : wrapper for pg_fetch_array
+	/**
+	 * wrapper for pg_fetch_all
+	 * @param  resource   $cursor cursor resource
+	 * @return array|bool         data array or false for end/error
+	 */
 	public function __dbFetchAll($cursor)
 	{
 		return pg_fetch_all($cursor);
 	}
 
-	// METHOD: __dbAffectedRows
-	// WAS   : _db_affected_rows
-	// PARAMS: cursor
-	// RETURN: number for rows
-	// DESC  : wrapper for pg_affected_rows
-	public function __dbAffectedRows($cursor)
+	/**
+	 * wrapper for pg_affected_rows
+	 * @param  resource $cursor cursor resource
+	 * @return int              affected rows, 0 for none
+	 */
+	public function __dbAffectedRows($cursor): int
 	{
 		return pg_affected_rows($cursor);
 	}
 
-	// METHOD: __dbInsertId
-	// WAS   : _db_insert_id
-	// PARAMS: query, primary key name
-	// RETURN: last insert primary key
-	// DESC  : reads the last inserted primary key for the query
-	//         if ther is no pk_name tries to auto built it from the table name
-	//         this only works if db schema is after "no plural names. and pk name is table name + _id
-	//         detects schema prefix in table name
-	public function __dbInsertId($query, $pk_name)
+	/**
+	 * reads the last inserted primary key for the query
+	 * if there is no pk_name tries to auto built it from the table name
+	 * this only works if db schema is after "no plural names. and pk name is table name + _id
+	 * detects schema prefix in table name
+	 * @param  string     $query   query string
+	 * @param  string     $pk_name primary key name, if '' then auto detect
+	 * @return string|int          primary key value
+	 */
+	public function __dbInsertId(string $query, string $pk_name)
 	{
 		// only if an insert has been done
 		if (preg_match("/^insert /i", $query)) {
@@ -275,12 +272,13 @@ class PgSQL
 		}
 	}
 
-	// METHOD: __dbPrimaryKey
-	// WAS   : _db_primary_key
-	// PARAMS: table and optional schema
-	// RETURN: primary key name OR false if not possible
-	// DESC  : queries database for the primary key name to this table in the selected schema
-	public function __dbPrimaryKey($table, $schema = '')
+	/**
+	 * queries database for the primary key name to this table in the selected schema
+	 * @param  string      $table  table name
+	 * @param  string      $schema optional schema name, '' for default
+	 * @return string|bool         primary key name or false if not found
+	 */
+	public function __dbPrimaryKey(string $table, string $schema = '')
 	{
 		if ($table) {
 			// check if schema set is different from schema given, only needed if schema is not empty
@@ -322,12 +320,17 @@ class PgSQL
 		}
 	}
 
-	// METHOD: __dbConnect
-	// WAS   : _db_connect
-	// PARAMS: host name, user name, password, database name, optional port (defaults to default postgres port), optional ssl (default allow)
-	// RETURN: database handler
-	// DESC  : wrapper for pg_connect, writes out failure to screen if error occurs (hidden var)
-	public function __dbConnect($db_host, $db_user, $db_pass, $db_name, $db_port = 5432, $db_ssl = 'allow')
+	/**
+	 * wrapper for pg_connect, writes out failure to screen if error occurs (hidden var)
+	 * @param  string    $db_host host name
+	 * @param  string    $db_user user name
+	 * @param  string    $db_pass password
+	 * @param  string    $db_name databse name
+	 * @param  integer   $db_port port (int, 5432 is default)
+	 * @param  string    $db_ssl  SSL (allow is default)
+	 * @return ?resource          db handler resource or null on error
+	 */
+	public function __dbConnect(string $db_host, string $db_user, string $db_pass, string $db_name, int $db_port = 5432, string $db_ssl = 'allow')
 	{
 		// to avoid empty db_port
 		if (!$db_port) {
@@ -336,16 +339,18 @@ class PgSQL
 		$this->dbh = pg_connect("host=".$db_host." port=".$db_port." user=".$db_user." password=".$db_pass." dbname=".$db_name." sslmode=".$db_ssl);
 		if (!$this->dbh) {
 			die("<!-- Can't connect [host=".$db_host." port=".$db_port." user=".$db_user." password=XXXX dbname=".$db_name." sslmode=".$db_ssl."] //-->");
+			return null;
 		}
 		return $this->dbh;
 	}
 
-	// METHOD: __dbPrintError
-	// WAS   : _db_print_error
-	// PARAMS: database handler, cursor
-	// RETURN: error string (HTML)
-	// DESC  : reads the last error for this cursor
-	public function __dbPrintError($cursor = '')
+	/**
+	 * reads the last error for this cursor and returns
+	 * html formatted string with error name
+	 * @param  ?resource $cursor cursor resource or null
+	 * @return string            error string
+	 */
+	public function __dbPrintError($cursor = null): string
 	{
 		// run the query again for the error result here
 		if (!$cursor && $this->last_error_query) {
@@ -355,56 +360,71 @@ class PgSQL
 		}
 		if (pg_result_error($cursor)) {
 			return "<span style=\"color: red;\"><b>-PostgreSQL-Error-></b> ".pg_result_error($cursor)."</span><br>";
+		} else {
+			return '';
 		}
 	}
 
-	// METHOD: __dbMetaData
-	// WAS   : _db_meta_data
-	// PARAMS: table name
-	// RETURN: array with table data
-	// DESC  : wrapper for pg_emta_data
-	public function __dbMetaData($table)
+	/**
+	 * wrapper for pg_meta_data
+	 * @param  string $table    table name
+	 * @param  bool   $extended show extended info (default false)
+	 * @return array|bool       array data for the table info or false on error
+	 */
+	public function __dbMetaData(string $table, $extended = false)
 	{
 		// needs to prefixed with @ or it throws a warning on not existing table
-		return @pg_meta_data($this->dbh, $table);
+		return @pg_meta_data($this->dbh, $table, $extended);
 	}
 
-	// METHOD: __dbEscapeString
-	// WAS   : _db_escape_string
-	// PARAMS: string
-	// RETURN: escaped string for postgres
-	// DESC  : wrapper for pg_escape_string
-	public function __dbEscapeString($string)
+	/**
+	 * wrapper for pg_escape_string
+	 * @param  string|int|float|bool $string any string/int/float/bool
+	 * @return string                        excaped string
+	 */
+	public function __dbEscapeString($string): string
 	{
 		return pg_escape_string($this->dbh, (string)$string);
 	}
 
-	// METHOD: __dbEscapeBytea
-	// WAS   : _db_escape_bytea
-	// PARAMS: string
-	// RETURN: escape bytes for postgres
-	// DESC  : wrapper for pg_escape_bytea
-	public function __dbEscapeBytea($bytea)
+	/**
+	 * wrapper for pg_escape_literal
+	 * difference to escape string is that this one adds quotes ('') around
+	 * the string too
+	 * @param  string|int|float|bool $string any string/int/float/bool
+	 * @return string                        excaped string including quites
+	 */
+	public function __dbEscapeLiteral($string): string
+	{
+		return pg_escape_string($this->dbh, (string)$string);
+	}
+
+	/**
+	 * wrapper for pg_escape_byte
+	 * @param  string $bytea bytea data stream
+	 * @return string        escaped bytea string
+	 */
+	public function __dbEscapeBytea($bytea): string
 	{
 		return pg_escape_bytea($this->dbh, $bytea);
 	}
 
-	// METHOD: __dbConnectionBusy
-	// WAS   : _db_connection_busy
-	// PARAMS: none
-	// RETURN: true/false for busy connection
-	// DESC  : wrapper for pg_connection_busy
-	public function __dbConnectionBusy()
+	/**
+	 * wrapper for pg_connection_busy
+	 * @return bool true/false for busy connection
+	 */
+	public function __dbConnectionBusy(): bool
 	{
 		return pg_connection_busy($this->dbh);
 	}
 
-	// METHOD: __dbVersion
-	// WAS   : _db_version
-	// PARAMS: none
-	// RETURN: databse version
-	// DESC  : wrapper for pg_version
-	public function __dbVersion()
+	/**
+	 * wrapper for pg_version
+	 * Note: this only returns server version
+	 * not connection version OR client version
+	 * @return string version string
+	 */
+	public function __dbVersion(): string
 	{
 		// array has client, protocol, server
 		// we just need the server
@@ -412,13 +432,14 @@ class PgSQL
 		return $v['server'];
 	}
 
-	// METHOD: __dbArrayParse
-	// WAS   : _db_array_parse
-	// PARAMS: input text, output array [needed]
-	//         [internal] limit: are we at the end of the parse
-	//         [internal] offset: shift for {}
-	// RETURN: array with the elements
-	// DESC  : postgresql array to php array
+	/**
+	 * postgresql array to php array
+	 * @param  string   $text    array text from PostgreSQL
+	 * @param  array    &$output (internal) recursive pass on for nested arrays
+	 * @param  bool|int $limit   (internal) max limit to not overshoot the end, start with false
+	 * @param  integer  $offset  (internal) shift offset for {}
+	 * @return array|int         converted PHP array, interal recusrive int position
+	 */
 	public function __dbArrayParse($text, &$output, $limit = false, $offset = 1)
 	{
 		if (false === $limit) {

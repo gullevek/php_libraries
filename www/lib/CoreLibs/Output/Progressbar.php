@@ -73,8 +73,12 @@ class ProgressBar
 		)
 	*/
 
-	// constructor
-	public function __construct($width = 0, $height = 0)
+	/**
+	 * progress bar constructor
+	 * @param integer $width  progress bar width, default 0
+	 * @param integer $height progress bar height, default 0
+	 */
+	public function __construct(int $width = 0, int $height = 0)
 	{
 		$this->code = substr(md5(microtime()), 0, 6);
 		if ($width > 0) {
@@ -90,7 +94,12 @@ class ProgressBar
 
 	// private functions
 
-	private function __flushCache($clear_buffer_size = 0)
+	/**
+	 * flush cache hack for IE and others
+	 * @param  integer $clear_buffer_size buffer size override
+	 * @return void                       has not return
+	 */
+	private function __flushCache(int $clear_buffer_size = 0): void
 	{
 		if (!$clear_buffer_size) {
 			$clear_buffer_size = $this->clear_buffer_size;
@@ -100,7 +109,12 @@ class ProgressBar
 		flush();
 	}
 
-	private function __calculatePercent($step)
+	/**
+	 * [__calculatePercent description]
+	 * @param  float $step percent step to do
+	 * @return float       percent step done
+	 */
+	private function __calculatePercent(float $step): float
 	{
 		// avoid divison through 0
 		if ($this->max - $this->min == 0) {
@@ -113,7 +127,12 @@ class ProgressBar
 		return $percent;
 	}
 
-	private function __calculatePosition($step)
+	/**
+	 * calculate position in bar step
+	 * @param  float $step percent step to do
+	 * @return array       bar position as array
+	 */
+	private function __calculatePosition(float $step): array
 	{
 		$bar = 0;
 		switch ($this->direction) {
@@ -168,7 +187,12 @@ class ProgressBar
 		return $position;
 	}
 
-	private function __setStep($step)
+	/**
+	 * set the step
+	 * @param  float  $step percent step to do
+	 * @return void         has no return
+	 */
+	private function __setStep(float $step): void
 	{
 		if ($step > $this->max) {
 			$step = $this->max;
@@ -180,7 +204,13 @@ class ProgressBar
 	}
 
 	// public functions
-	public function setFrame($width = 0, $height = 0)
+	/**
+	 * set frame layout
+	 * @param  integer $width  bar width
+	 * @param  integer $height bar height
+	 * @return void            has no return
+	 */
+	public function setFrame(int $width = 0, int $height = 0): void
 	{
 		$this->frame = array (
 			'show' => true,
@@ -201,7 +231,15 @@ class ProgressBar
 		}
 	}
 
-	public function addLabel($type, $name, $value = '&nbsp;')
+	/**
+	 * set bar label text
+	 * allowed types are: text, button, step, percent, percentlbl, crossbar
+	 * @param  string $type  label type
+	 * @param  string $name  label name (internal)
+	 * @param  string $value label output name (optional)
+	 * @return void          has no return
+	 */
+	public function addLabel(string $type, string $name, string $value = '&nbsp;'): void
 	{
 		switch ($type) {
 			case 'text':
@@ -276,7 +314,6 @@ class ProgressBar
 					'color' => '#000000',
 					'bgr_color' => ''
 				);
-//				print "THIS[$name]: ".$this->label[$name]['left']." | ".$this->label[$name]['width']."<br>";
 				break;
 			case 'crossbar':
 				$this->label[$name] = array(
@@ -297,14 +334,32 @@ class ProgressBar
 		}
 	}
 
-	public function addButton($name, $value, $action, $target = 'self')
+	/**
+	 * add a button to the progress bar
+	 * @param  string $name   button name (internal)
+	 * @param  string $value  button text (output)
+	 * @param  string $action button action (link)
+	 * @param  string $target button action target (default self)
+	 * @return void           has no return
+	 */
+	public function addButton(string $name, string $value, string $action, string $target = 'self'): void
 	{
 		$this->addLabel('button', $name, $value);
 		$this->label[$name]['action'] = $action;
 		$this->label[$name]['target'] = $target;
 	}
 
-	public function setLabelPosition($name, $left, $top, $width, $height, $align = '')
+	/**
+	 * set the label position
+	 * @param  string $name   label name to set
+	 * @param  int    $left   left px
+	 * @param  int    $top    top px
+	 * @param  int    $width  width px
+	 * @param  int    $height height px
+	 * @param  string $align  alignment (left/right/etc), default empty
+	 * @return void           has no return
+	 */
+	public function setLabelPosition(string $name, int $left, int $top, int $width, int $height, string $align = ''): void
 	{
 		// print "SET POSITION[$name]: $left<br>";
 		// if this is percent, we ignore anything, it is auto positioned
@@ -333,7 +388,13 @@ class ProgressBar
 		}
 	}
 
-	public function setLabelColor($name, $color)
+	/**
+	 * set label color
+	 * @param  string $name  label name to set
+	 * @param  string $color color value in rgb html hex
+	 * @return void          has no return
+	 */
+	public function setLabelColor(string $name, string $color): void
 	{
 		$this->label[$name]['color'] = $color;
 		if ($this->status != 'new') {
@@ -342,7 +403,13 @@ class ProgressBar
 		}
 	}
 
-	public function setLabelBackground($name, $color)
+	/**
+	 * set the label background color
+	 * @param  string $name  label name to set
+	 * @param  string $color background color to set in rgb html hex
+	 * @return void          has no return
+	 */
+	public function setLabelBackground(string $name, string $color): void
 	{
 		$this->label[$name]['bgr_color'] = $color;
 		if ($this->status != 'new') {
@@ -351,7 +418,15 @@ class ProgressBar
 		}
 	}
 
-	public function setLabelFont($name, $size, $family = '', $weight = '')
+	/**
+	 * [setLabelFont description]
+	 * @param  string $name   label name to set
+	 * @param  int    $size   font size in px
+	 * @param  string $family font family (default empty)
+	 * @param  string $weight font weight (default empty)
+	 * @return void           has no return
+	 */
+	public function setLabelFont(string $name, int $size, string $family = '', string $weight = ''): void
 	{
 		// just in case if it is too small
 		if (intval($size) < 0) {
@@ -386,7 +461,13 @@ class ProgressBar
 		}
 	}
 
-	public function setLabelValue($name, $value)
+	/**
+	 * set the label valeu
+	 * @param  string $name  label name to set
+	 * @param  string $value label value (output)
+	 * @return void          has no return
+	 */
+	public function setLabelValue(string $name, string $value): void
 	{
 		$this->label[$name]['value'] = $value;
 		// print "NAME[$name], Status: ".$this->status.": ".$value."<Br>";
@@ -396,7 +477,12 @@ class ProgressBar
 		}
 	}
 
-	public function setBarColor($color)
+	/**
+	 * set the bar color
+	 * @param  string $color color for the progress bar in rgb html hex
+	 * @return void          has no return
+	 */
+	public function setBarColor(string $color): void
 	{
 		$this->color = $color;
 		if ($this->status != 'new') {
@@ -405,7 +491,12 @@ class ProgressBar
 		}
 	}
 
-	public function setBarBackground($color)
+	/**
+	 * set the progress bar background color
+	 * @param  string $color background color in rgb html hex
+	 * @return void          has no return
+	 */
+	public function setBarBackground(string $color): void
 	{
 		$this->bgr_color = $color;
 		if ($this->status != 'new') {
@@ -414,7 +505,12 @@ class ProgressBar
 		}
 	}
 
-	public function setBarDirection($direction)
+	/**
+	 * progress bar direct (left/right)
+	 * @param  string $direction set direction as left/right
+	 * @return void              has no return
+	 */
+	public function setBarDirection(string $direction): void
 	{
 		$this->direction = $direction;
 
@@ -431,7 +527,11 @@ class ProgressBar
 		}
 	}
 
-	public function getHtml()
+	/**
+	 * get the progress bar base HTML
+	 * @return string progress bar HTML code
+	 */
+	public function getHtml(): string
 	{
 		$html = '';
 		$js = '';
@@ -582,14 +682,24 @@ class ProgressBar
 		return $html;
 	}
 
-	public function show()
+	/**
+	 * show the progress bar after initialize
+	 * @return void has no return
+	 */
+	public function show(): void
 	{
 		$this->status = 'show';
 		echo $this->getHtml();
 		$this->__flushCache();
 	}
 
-	public function moveStep($step)
+	/**
+	 * move the progress bar by one step
+	 * prints out javascript to move progress bar
+	 * @param  float  $step percent step
+	 * @return void         has no return
+	 */
+	public function moveStep(float $step): void
 	{
 		$last_step = $this->step;
 		$this->__setStep($step);
@@ -636,17 +746,29 @@ class ProgressBar
 		}
 	}
 
-	public function moveNext()
+	/**
+	 * moves progress bar by one step (1)
+	 * @return void has no return
+	 */
+	public function moveNext(): void
 	{
 		$this->moveStep($this->step + 1);
 	}
 
-	public function moveMin()
+	/**
+	 * moves the progress bar back to the beginning
+	 * @return void has no return
+	 */
+	public function moveMin(): void
 	{
 		$this->moveStep($this->min);
 	}
 
-	public function hide()
+	/**
+	 * hide the progress bar if it is visible
+	 * @return void has no return
+	 */
+	public function hide(): void
 	{
 		if ($this->status == 'show') {
 			$this->status = 'hide';
@@ -659,7 +781,11 @@ class ProgressBar
 		}
 	}
 
-	public function unhide()
+	/**
+	 * show progress bar again after it was hidden with hide()
+	 * @return void has no return
+	 */
+	public function unhide(): void
 	{
 		if ($this->status == 'hide') {
 			$this->status = 'show';

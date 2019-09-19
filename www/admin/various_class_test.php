@@ -1,4 +1,7 @@
 <?php
+/**
+ * @phan-file-suppress PhanTypeSuspiciousStringExpression
+ */
 
 namespace CoreLibs;
 
@@ -16,7 +19,7 @@ print "THIS HOST: ".HOST_NAME.", with PROTOCOL: ".HOST_PROTOCOL." is running SSL
 print "DIR: ".DIR."<br>";
 print "BASE: ".BASE."<br>";
 print "ROOT: ".ROOT."<br>";
-print "HOST: ".HOST_NAME." => DB HOST: ".DB_CONFIG_NAME." => ".DB_SCHEMA." => ".print_r(DB_CONFIG, true)."<br>";
+print "HOST: ".HOST_NAME." => DB HOST: ".DB_CONFIG_NAME." => ".print_r(DB_CONFIG, true)."<br>";
 
 $text = 'I am some text
 with some

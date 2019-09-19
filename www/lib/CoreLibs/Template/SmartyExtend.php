@@ -1,4 +1,9 @@
 <?php declare(strict_types=1);
+// because smarty is symlinked folder
+/**
+ * @phan-file-suppress PhanRedefinedExtendedClass
+ */
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2004/12/21
@@ -20,6 +25,12 @@ class SmartyExtend extends SmartyBC
 	public $l10n;
 
 	// constructor class, just sets the language stuff
+	/**
+	 * constructor class, just sets the language stuff
+	 * calls L10 for pass on internaly in smarty
+	 * also registers the getvar caller pliugin
+	 * @param string $lang language string to set
+	 */
 	public function __construct(string $lang)
 	{
 		parent::__construct();

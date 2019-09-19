@@ -1,4 +1,7 @@
 <?php declare(strict_types=1);
+/**
+ * @phan-file-suppress PhanTypeSuspiciousStringExpression
+ */
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -27,7 +30,7 @@ $lang = 'en_utf8';
 // init login & backend class
 $login = new CoreLibs\ACL\Login(DB_CONFIG, $lang);
 $basic = new CoreLibs\Admin\Backend(DB_CONFIG, $lang);
-$basic->dbInfo(1);
+$basic->dbInfo(true);
 ob_end_flush();
 
 echo "DB_CONFIG_SET constant: <pre>".print_r(DB_CONFIG, true)."</pre><br>";
@@ -37,15 +40,20 @@ $basic->runningTime();
 echo "RANDOM KEY [50]: ".$basic->randomKeyGen(50)."<br>";
 echo "TIMED [hr]: ".$basic->hrRunningTime()."<br>";
 echo "TIMED [def]: ".$basic->runningTime()."<br>";
+echo "TIMED [string]: ".$basic->runningtime_string."<br>";
 $basic->hrRunningTime();
 echo "RANDOM KEY [default]: ".$basic->randomKeyGen()."<br>";
-echo "TIMED: ".$basic->hrRunningTime()."<br>";
+echo "TIMED [hr]: ".$basic->hrRunningTime()."<br>";
+
+// color
+print "COLOR: -1, -1, -1: ".$basic->rgb2hex(-1, -1, -1)."<br>";
+print "COLOR: 10, 20, 30: ".$basic->rgb2hex(10, 20, 30)."<br>";
 
 // set + check edit access id
 $edit_access_id = 3;
 if (is_object($login) && isset($login->acl['unit'])) {
 	print "ACL UNIT: ".print_r(array_keys($login->acl['unit']), true)."<br>";
-	print "ACCESS CHECK: ".$login->loginCheckEditAccess($edit_access_id)."<br>";
+	print "ACCESS CHECK: ".(string)$login->loginCheckEditAccess($edit_access_id)."<br>";
 	if ($login->loginCheckEditAccess($edit_access_id)) {
 		$basic->edit_access_id = $edit_access_id;
 	} else {

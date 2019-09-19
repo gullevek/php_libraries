@@ -62,7 +62,7 @@ namespace CoreLibs\ACL;
 class Login extends \CoreLibs\DB\IO
 {
 	private $euid; // the user id var
-	private $permission_okay = 0; // is set to one if login okay, or EUID is set and user is okay to access this page
+	private $permission_okay = false; // is set to one if login okay, or EUID is set and user is okay to access this page
 	public $login; // pressed login
 	private $action; // master action command
 	private $username; // login name
@@ -109,11 +109,12 @@ class Login extends \CoreLibs\DB\IO
 	// language
 	public $l;
 
-	// METHOD: login
-	// PARAMS: db_config -> array for logging in to DB where edit_users tables are
-	//        db_debug -> sets debug output for db_io (can be overruled with DB_DEBUG)
-	// RETURN: none
-	// DESC  : cunstroctuor, does ALL, opens db, works through connection checks, closes itself
+	/**
+	 * constructor, does ALL, opens db, works through connection checks, closes itself
+	 * @param array  $db_config        db config array
+	 * @param string $lang             language string (default en_utf8)
+	 * @param int    $set_control_flag class variable check flags
+	 */
 	public function __construct(array $db_config, string $lang = 'en_utf8', int $set_control_flag = 0)
 	{
 		// log login data for this class only
@@ -149,11 +150,12 @@ class Login extends \CoreLibs\DB\IO
 		// if we have a search path we need to set it, to use the correct DB to login
 		// check what schema to use. if there is a login schema use this, else check if there is a schema set in the config, or fall back to DB_SCHEMA if this exists, if this also does not exists use public schema
 		if (defined('LOGIN_DB_SCHEMA')) {
+			/** @phan-suppress-next-line PhanUndeclaredConstant */
 			$SCHEMA = LOGIN_DB_SCHEMA;
 		} elseif ($db_config['db_schema']) {
 			$SCHEMA = $db_config['db_schema'];
-		} elseif (defined('DB_SCHEMA')) {
-			$SCHEMA = DB_SCHEMA;
+		} elseif (defined('PUBLIC_SCHEMA')) {
+			$SCHEMA = PUBLIC_SCHEMA;
 		} else {
 			$SCHEMA = 'public';
 		}
@@ -269,19 +271,20 @@ class Login extends \CoreLibs\DB\IO
 		$this->loginSetAcl();
 	}
 
-	// METHOD: _login
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : deconstructory, called with the last function to close DB connection
+	/**
+	 * deconstructory, called with the last function to close DB connection
+	 */
 	public function __destruct()
 	{
 		parent::__destruct();
 	}
 
-	// METHOD: loginPasswordCheck
-	// PARAMS: hash, optional password, to override
-	// RETURN: true or false
-	// DESC  : checks if password is valid, sets internal error login variable
+	/**
+	 * checks if password is valid, sets internal error login variable
+	 * @param  string $hash     password hash
+	 * @param  string $password submitted password
+	 * @return bool             true or false on password ok or not
+	 */
 	private function loginPasswordCheck(string $hash, string $password = ''): bool
 	{
 		// check with what kind of prefix the password begins:
@@ -306,6 +309,7 @@ class Login extends \CoreLibs\DB\IO
 			(preg_match("/^\\$2(y)\\$/", $hash) && preg_match("/\\$07\\$/", $hash)) ||
 			preg_match("/^\\$1\\$/", $hash) ||
 			preg_match("/^\\$[0-9A-Za-z.]{12}$/", $hash)) &&
+			/** @phan-suppress-next-line PhanDeprecatedFunction */
 			!$this->verifyCryptString($password, $hash)
 		) {
 			// check passwword as crypted, $2a$ or $2y$ is blowfish start, $1$ is MD5 start, $\w{12} is standard DES
@@ -333,11 +337,10 @@ class Login extends \CoreLibs\DB\IO
 		return $password_ok;
 	}
 
-	// METHOD: loginLoginUser
-	// WAS   : login_login_user
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : if user pressed login button this script is called, but only if there is no preview euid set
+	/**
+	 * if user pressed login button this script is called, but only if there is no preview euid set]
+	 * @return void has not return
+	 */
 	private function loginLoginUser()
 	{
 		// have to get the global stuff here for setting it later
@@ -568,16 +571,15 @@ class Login extends \CoreLibs\DB\IO
 			// if there was an login error, show login screen
 			if ($this->login_error) {
 				// reset the perm var, to confirm logout
-				$this->permission_okay = 0;
+				$this->permission_okay = false;
 			}
 		} // if he pressed login at least and is not yet loggined in
 	}
 
-	// METHOD: loginCheckPermissions
-	// WAS   : login_check_permission
-	// PARAMS: none
-	// RETUNR none
-	// DESC  : for every page the user access this script checks if he is allowed to do so
+	/**
+	 * for every page the user access this script checks if he is allowed to do so
+	 * @return bool permission okay as true/false
+	 */
 	public function loginCheckPermissions()
 	{
 		if ($this->euid && $this->login_error != 103) {
@@ -590,21 +592,20 @@ class Login extends \CoreLibs\DB\IO
 			// if (($GLOBALS["DEBUG_ALL"] || $GLOBALS["DB_DEBUG"] || $_SESSION["DEBUG_ALL"] || $_SESSION["DB_DEBUG"]) && ini_get('memory_limit') != -1)
 			// 	ini_set('memory_limit', -1);
 			if ($res['filename'] == $this->page_name) {
-				$this->permission_okay = 1;
+				$this->permission_okay = true;
 			} else {
 				$this->login_error = 103;
-				$this->permission_okay = 0;
+				$this->permission_okay = false;
 			}
 		}
 		// if called from public, so we can check if the permissions are ok
 		return $this->permission_okay;
 	}
 
-	// METHOD: loginLogoutUser
-	// WAS   : login_logout_user
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : if a user pressed on logout, destroyes session and unsets all global vars
+	/**
+	 * if a user pressed on logout, destroyes session and unsets all global vars
+	 * @return void has no return
+	 */
 	public function loginLogoutUser()
 	{
 		if ($this->logout || $this->login_error) {
@@ -626,7 +627,7 @@ class Login extends \CoreLibs\DB\IO
 			unset($_SESSION['HEADER_COLOR']);
 			session_destroy();
 			// then prints the login screen again
-			$this->permission_okay = 0;
+			$this->permission_okay = false;
 		}
 	}
 
@@ -648,6 +649,23 @@ class Login extends \CoreLibs\DB\IO
 	//         * if an account ACL is set, set this parallel, account ACL overrides user ACL if it applies
 	//         * if edit access ACL level is set, use this, else use page
 	//         set all base ACL levels as a list keyword -> ACL number
+	/**
+	 * sets all the basic ACLs
+	 * init set the basic acl the user has, based on the following rules
+	 * - init set from config DEFAULT ACL
+	 * - if page ACL is set, it overrides the default ACL
+	 * - if group ACL is set, it overrides the page ACL
+	 * - if user ACL is set, it overrides the group ACL
+	 * set the page ACL
+	 * - default ACL set
+	 * - set group ACL if not default overrides default ACL
+	 * - set page ACL if not default overrides group ACL
+	 * set edit access ACL and set default edit access group
+	 * - if an account ACL is set, set this parallel, account ACL overrides user ACL if it applies
+	 * - if edit access ACL level is set, use this, else use page
+	 * set all base ACL levels as a list keyword -> ACL number
+	 * @return void has no return
+	 */
 	private function loginSetAcl()
 	{
 		// only set acl if we have permission okay
@@ -736,11 +754,11 @@ class Login extends \CoreLibs\DB\IO
 		}
 	}
 
-	// METHOD: loginCheckEditAccess
-	// WAS   : login_check_edit_access
-	// PARAMS: edit_access_id to check
-	// RETURN: true/false: if the edit access is not in the valid list: false
-	// DESC  : checks if this edit access id is valid
+	/**
+	 * checks if this edit access id is valid
+	 * @param  int $edit_access_id access id pk to check
+	 * @return bool                true/false: if the edit access is not in the valid list: false
+	 */
 	public function loginCheckEditAccess($edit_access_id): bool
 	{
 		if (array_key_exists($edit_access_id, $this->acl['unit'])) {
@@ -750,10 +768,11 @@ class Login extends \CoreLibs\DB\IO
 		}
 	}
 
-	// METHOD: loginPasswordChangeValidPassword
-	// PARAMS: the new password
-	// RETURN: true or false
-	// DESC  : checks if the password is in a valid format
+	/**
+	 * checks if the password is in a valid format
+	 * @param  string $password the new password
+	 * @return bool             true or false if valid password or not
+	 */
 	private function loginPasswordChangeValidPassword($password)
 	{
 		$is_valid_password = true;
@@ -772,19 +791,20 @@ class Login extends \CoreLibs\DB\IO
 		return $is_valid_password;
 	}
 
-	// METHOD: loginPasswordForgot
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : dummy declare for password forget
+	/**
+	 * dummy declare for password forget
+	 * @return void has no return
+	 */
 	private function loginPasswordForgot()
 	{
 		// will do some password recovert, eg send email
 	}
 
-	// METHOD: loginSetPasswordMinLength
-	// PARAMS: set the minimum length
-	// RETURN: true/false on success
-	// DESC  : sets the minium length and checks on valid
+	/**
+	 * sets the minium length and checks on valid
+	 * @param  int  $length set the minimum length
+	 * @return bool         true/false on success
+	 */
 	public function loginSetPasswordMinLength(int $length): bool
 	{
 		// check that numeric, positive numeric, not longer than max input string lenght
@@ -797,11 +817,10 @@ class Login extends \CoreLibs\DB\IO
 		}
 	}
 
-	// METHOD: loginPasswordChange
-	// WAS   : login_password_change
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : changes a user password
+	/**
+	 * changes a user password
+	 * @return void has no return
+	 */
 	private function loginPasswordChange()
 	{
 		if ($this->change_password) {
@@ -867,7 +886,7 @@ class Login extends \CoreLibs\DB\IO
 				}
 			} else {
 				// illegal user error
-				$this->login_error = '220';
+				$this->login_error = 220;
 				$data = 'Illegal user for password change: '.$this->pw_username;
 			}
 			// log this password change attempt
@@ -875,13 +894,13 @@ class Login extends \CoreLibs\DB\IO
 		} // button pressed
 	}
 
-	// METHOD: loginPrintLogin
-	// WAS   : login_print_login
-	// PARAMS: none
-	// RETURN: html data for login page
-	// DESC  : prints out login html part if no permission (error) is set
+	/**
+	 * prints out login html part if no permission (error) is set
+	 * @return ?string html data for login page, or null for nothing
+	 */
 	private function loginPrintLogin()
 	{
+		$html_string = null;
 		if (!$this->permission_okay) {
 			// get global AJAX page trigger
 			// if true, return error ajax
@@ -954,17 +973,17 @@ class Login extends \CoreLibs\DB\IO
 					$html_string = str_replace('{'.$string.'}', $data, $html_string);
 				}
 			}
-			// return the created HTML here
-			return $html_string;
 		} // if permission is 0 then print out login
+		// return the created HTML here or null for nothing
+		return $html_string;
 	}
 
-	// METHOD: loginCloseClass
-	// WAS   : login_close_class
-	// PARAMS: none
-	// RETURN: true on permission ok, false on permission wrong
-	// DESC  : last function called, writes log and prints out error msg and exists script if permission 0
-	private function loginCloseClass()
+	/**
+	 * last function called, writes log and prints out error msg and
+	 * exists script if permission 0
+	 * @return bool true on permission ok, false on permission wrong
+	 */
+	private function loginCloseClass(): bool
 	{
 		// write to LOG table ...
 		if ($this->login_error || $this->login || $this->logout) {
@@ -995,11 +1014,10 @@ class Login extends \CoreLibs\DB\IO
 		}
 	}
 
-	// METHOD: loginSetTemplates
-	// WAS   : login_set_templates
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : checks if there are external templates, if not uses internal fallback ones
+	/**
+	 * checks if there are external templates, if not uses internal fallback ones
+	 * @return void has no return
+	 */
 	private function loginSetTemplates()
 	{
 		$strings = array (
@@ -1151,14 +1169,15 @@ EOM;
 		}
 	}
 
-	// METHOD: writeLog
-	// WAS   : write_log
-	// PARAMS: event -> string of what has been done
-	//        data -> data information (id, etc)
-	//        error -> if error, write error string (not enougth data, etc)
-	// RETURN: none
-	// DESC  : writes detailed data into the edit user log table (keep log what user does)
-	private function writeLog($event, $data, $error = '', $username = '')
+	/**
+	 * writes detailed data into the edit user log table (keep log what user does)
+	 * @param  string     $event    string of what has been done
+	 * @param  string     $data     data information (id, etc)
+	 * @param  string|int $error    error id (mostly an int)
+	 * @param  string     $username login user username
+	 * @return void                 has no return
+	 */
+	private function writeLog(string $event, string $data, $error = '', string $username = '')
 	{
 		if ($this->login) {
 				$this->action = 'Login';
@@ -1202,12 +1221,12 @@ EOM;
 		$this->dbExec($q, 'NULL');
 	}
 
-	// METHOD: loginCheckEditAccessId
-	// WAS   : login_check_edit_access_id
-	// PARAMS: edit access id to check
-	// RETURN: same edit access id if ok, or the default edit access id if given one is not valud
-	// DESC  : checks that the given edit access id is valid for this user
-	public function loginCheckEditAccessId($edit_access_id)
+	/**
+	 *checks that the given edit access id is valid for this user
+	 * @param  int $edit_access_id edit access id to check
+	 * @return int                 same edit access id if ok, or the default edit access id if given one is not valid
+	 */
+	public function loginCheckEditAccessId(int $edit_access_id)
 	{
 		if (!array_key_exists($edit_access_id, $_SESSION["UNIT"])) {
 			return $_SESSION["UNIT_DEFAULT"];
@@ -1216,12 +1235,13 @@ EOM;
 		}
 	}
 
-	// METHOD: loginSetEditAccessData
-	// WAS   : login_set_edit_access_data
-	// PARAMS: edit access id, key value to search for
-	// RETURN: false for not found or string for found data
-	// DESC  : searchs in the data set for the unit for the data key and returns the value asociated with it
-	public function loginSetEditAccessData($edit_access_id, $data_key)
+	/**
+	 * [loginSetEditAccessData description]
+	 * @param  int        $edit_access_id edit access id
+	 * @param  string|int $data_key       key value to search for
+	 * @return bool|string                false for not found or string for found data
+	 */
+	public function loginSetEditAccessData(int $edit_access_id, $data_key)
 	{
 		if (!$_SESSION['UNIT'][$edit_access_id]['data'][$data_key]) {
 			return false;

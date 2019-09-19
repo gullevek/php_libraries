@@ -26,29 +26,47 @@ namespace CoreLibs\Language\Core;
 // seek is essential, and it should be byte stream
 class StreamReader
 {
+	/**
+	 * constructor, empty
+	 */
 	public function __construct()
 	{
 		// empty
 	}
-	// should return a string [FIXME: perhaps return array of bytes?]
+
+	/**
+	 * should return a string [FIXME: perhaps return array of bytes?]
+	 * @param  int $bytes bytes to read
+	 * @return bool       dummy false
+	 */
 	public function read($bytes)
 	{
 		return false;
 	}
 
-	// should return new position
+	/**
+	 * should return new position
+	 * @param  int $position seek to position
+	 * @return bool          dummy false
+	 */
 	public function seekto($position)
 	{
 		return false;
 	}
 
-	// returns current position
+	/**
+	 * returns current position
+	 * @return bool dummy false
+	 */
 	public function currentpos()
 	{
 		return false;
 	}
 
-	// returns length of entire stream (limit for seekto()s)
+	/**
+	 * returns length of entire stream (limit for seekto()s)
+	 * @return bool dummy false
+	 */
 	public function length()
 	{
 		return false;

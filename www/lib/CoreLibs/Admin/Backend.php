@@ -81,10 +81,12 @@ class Backend extends \CoreLibs\DB\IO
 	public $l;
 
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
-	// METHOD: __construct
-	// PARAMS: array db config
-	//         string for language set
-	//         int set control flag (for core basic set/get var error control)
+	/**
+	 * main class constructor
+	 * @param array       $db_config        db config array
+	 * @param string      $lang             language string
+	 * @param int|integer $set_control_flag class variable check flag
+	 */
 	public function __construct(array $db_config, string $lang, int $set_control_flag = 0)
 	{
 		// get the language sub class & init it
@@ -106,7 +108,9 @@ class Backend extends \CoreLibs\DB\IO
 		}
 	}
 
-	// deconstructor
+	/**
+	 * class deconstructor
+	 */
 	public function __destruct()
 	{
 		parent::__destruct();
@@ -117,12 +121,14 @@ class Backend extends \CoreLibs\DB\IO
 
 	// PUBLIC METHODS |=================================================>
 
-	// METHOD: adbEditLog()
-	// PARAMS: event -> any kind of event description,
-	//         data -> any kind of data related to that event
-	// RETURN: none
-	// DESC  : writes all action vars plus other info into edit_log table
-	public function adbEditLog(string $event = '', $data = '', string $write_type = 'STRING')
+	/**
+	 * writes all action vars plus other info into edit_log tabl
+	 * @param  string       $event      any kind of event description,
+	 * @param  string|array $data       any kind of data related to that event
+	 * @param  string       $write_type write type can bei STRING or BINARY
+	 * @return void                     has no return
+	 */
+	public function adbEditLog(string $event = '', $data = '', string $write_type = 'STRING'): void
 	{
 		$data_binary = '';
 		if ($write_type == 'BINARY') {
@@ -134,7 +140,19 @@ class Backend extends \CoreLibs\DB\IO
 			$data = $this->dbEscapeString(serialize($data));
 		}
 
-		$q = "INSERT INTO ".LOGIN_DB_SCHEMA.".edit_log ";
+		// check schema
+		if (defined('LOGIN_DB_SCHEMA')) {
+			/** @phan-suppress-next-line PhanUndeclaredConstant */
+			$SCHEMA = LOGIN_DB_SCHEMA;
+		} elseif ($this->dbGetSchema()) {
+			$SCHEMA = $this->dbGetSchema();
+		} elseif (defined('PUBLIC_SCHEMA')) {
+			$SCHEMA = PUBLIC_SCHEMA;
+		} else {
+			$SCHEMA = 'public';
+		}
+
+		$q = "INSERT INTO ".$SCHEMA.".edit_log ";
 		$q .= "(euid, event_date, event, data, data_binary, page, ";
 		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
@@ -163,10 +181,11 @@ class Backend extends \CoreLibs\DB\IO
 		$this->dbExec($q, 'NULL');
 	}
 
-	// METHOD: adbTopMenu
-	// PARAMS: level
-	// RETURN: returns an array for the top menu with all correct settings
-	// DESC  : menu creater
+	/**
+	 * menu creater (from login menu session pages)
+	 * @param  int $flag visible flag trigger
+	 * @return array     menu array for output on page (smarty)
+	 */
 	public function adbTopMenu(int $flag = 0): array
 	{
 		if ($this->menu_show_flag) {
@@ -255,10 +274,11 @@ class Backend extends \CoreLibs\DB\IO
 		return $this->menu;
 	}
 
-	// METHOD: adbShowMenuPoint
-	// PARAMS: filename
-	// RETURN: returns boolean true/false
-	// DESC  : checks if this filename is in the current situation (user id, etc) available
+	/**
+	 * checks if this filename is in the current situation (user id, etc) available
+	 * @param  string $filename filename
+	 * @return bool             true for visible/accessable menu point, false for not
+	 */
 	public function adbShowMenuPoint(string $filename): bool
 	{
 		$enabled = false;
@@ -270,50 +290,56 @@ class Backend extends \CoreLibs\DB\IO
 		return $enabled;
 	}
 
-	// REMARK: below function has moved to "Class.Basic"
-	// METHOD: adbAssocArray
-	// PARAMS: db array, key, value part
-	// RETURN: returns and associative array
-	// DESC  : creates out of a normal db_return array an assoc array
+	/**
+	 * @deprecated
+	 * creates out of a normal db_return array an assoc array
+	 * @param  array           $db_array input array
+	 * @param  string|int|bool $key      key
+	 * @param  string|int|bool $value    value
+	 * @return array                     associative array
+	 */
 	public function adbAssocArray(array $db_array, $key, $value): array
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->genAssocArray($db_array, $key, $value);
 	}
 
-	// REMARK: below function has moved to "Class.Basic"
-	// METHOD: adbByteStringFormat
-	// PARAMS: int
-	// RETURN: string
-	// DESC  : converts bytes into formated string with KB, MB, etc
+	/**
+	 * @deprecated
+	 * converts bytes into formated string with KB, MB, etc
+	 * @param  string|int|float $number string or int or number
+	 * @return string                   formatted string
+	 */
 	public function adbByteStringFormat($number): string
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->byteStringFormat($number);
 	}
 
-	// REMARK: below function has moved to "Class.Basic"
-	// METHOD: adbCreateThumbnail
-	// PARAMS: id from picture where from we create a thumbnail
-	//         x -> max x size of thumbnail
-	//         y -> max y size of thumbnail
-	//         dummy -> if set to true, then if no images was found we show a dummy image
-	//         path -> if source start is not ROOT path, if empty ROOT is choosen
-	//         cache -> cache path, if not given TMP is used
-	// RETURN: thumbnail name
-	// DESC  : converts picture to a thumbnail with max x and max y size
-	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = false, $path = "", $cache = "")
+	/**
+	 * @deprecated
+	 * converts picture to a thumbnail with max x and max y size
+	 * @param  string      $pic          source image file with or without path
+	 * @param  int         $size_x       maximum size width
+	 * @param  int         $size_y       maximum size height
+	 * @param  string      $dummy        empty, or file_type to show an icon instead of nothing if file is not found
+	 * @param  string      $path         if source start is not ROOT path, if empty ROOT is choosen
+	 * @param  string      $cache_source cache path, if not given TMP is used
+	 * @return string|bool               thumbnail name, or false for error
+	 */
+	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = '', $path = "", $cache = "")
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
 		return $this->createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
 	}
 
-	// METHOD: adbMsg
-	// PARAMS: level -> info/warning/error
-	//         msg -> string, can be printf formated
-	//         var array -> optional data for a possible printf formated msg
-	// RETURN: none
-	// DESC  : wrapper function to fill up the mssages array
+	/**
+	 * wrapper function to fill up the mssages array
+	 * @param  string $level info/warning/error
+	 * @param  string $msg   string, can be printf formated
+	 * @param  array  $vars  optional data for a possible printf formated msg
+	 * @return void          has no return
+	 */
 	public function adbMsg(string $level, string $msg, array $vars = array ()): void
 	{
 		if (!preg_match("/^info|warning|error$/", $level)) {
@@ -336,28 +362,39 @@ class Backend extends \CoreLibs\DB\IO
 		}
 	}
 
-	// METHOD: adbLiveQueue
-	// PARAMS: queue_key -> string to identfy the queue
-	//         type      -> INSERT/UPDATE/DELETE
-	//         target    -> target table to write to
-	//         data      -> SQL part to write, this can include #KEY_VALUE#, #KEY_NAME# for delete sub queries
-	//         key_name  -> key name, mostly used for update search
-	//         key_value -> data for the key
-	//         associate -> NULL for free, LOCK for first insert, group key for reference to first entry
-	//         file      -> string for special file copy actions; mostyle "test#live;..."
-	// RETURN: none
-	// DESC  : writes live queue
+	/**
+	 * writes live queue
+	 * @param  string  $queue_key string to identfy the queue
+	 * @param  string  $type      [description]
+	 * @param  string  $target    [description]
+	 * @param  string  $data      [description]
+	 * @param  string  $key_name  [description]
+	 * @param  string  $key_value [description]
+	 * @param  ?string $associate [description]
+	 * @param  ?string $file      [description]
+	 * @return void               has no return
+	 */
 	public function adbLiveQueue(
-		$queue_key,
-		$type,
-		$target,
-		$data,
-		$key_name,
-		$key_value,
-		$associate = null,
-		$file = null
-	) {
-		$q = "INSERT INTO ".GLOBAL_DB_SCHEMA.".live_queue (";
+		string $queue_key,
+		string $type,
+		string $target,
+		string $data,
+		string $key_name,
+		string $key_value,
+		string $associate = null,
+		string $file = null
+	): void {
+		if (defined('GLOBAL_DB_SCHEMA')) {
+			/** @phan-suppress-next-line PhanUndeclaredConstant */
+			$SCHEMA = GLOBAL_DB_SCHEMA;
+		} elseif ($this->dbGetSchema()) {
+			$SCHEMA = $this->dbGetSchema();
+		} elseif (defined('PUBLIC_SCHEMA')) {
+			$SCHEMA = PUBLIC_SCHEMA;
+		} else {
+			$SCHEMA = 'public';
+		}
+		$q = "INSERT INTO ".$SCHEMA.".live_queue (";
 		$q .= "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file";
 		$q .= ") VALUES (";
 		$q .= "'".$this->dbEscapeString($queue_key)."', '".$this->dbEscapeString($key_value)."', ";
@@ -365,21 +402,24 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "'".$this->dbEscapeString($target)."', '".$this->dbEscapeString($data)."', ";
 		$q .= "'".$this->queue_key."', '".$this->action."', '".$this->dbEscapeString($associate)."', ";
 		$q .= "'".$this->dbEscapeString($file)."')";
-		$this->db_exec($q);
+		$this->dbExec($q);
 	}
 
-	// METHOD: adbPrintDateTime
-	// PARAMS: year, month, day, hour, min: the date and time values
-	//         suffix: additional info printed after the date time variable in the drop down,
-	//         also used for ID in the on change JS call
-	//         minute steps: can be 1 (default), 5, 10, etc, if invalid (outside 1h range,
-	//         it falls back to 1min)
-	//         name pos back: default false, if set to true, the name will be printend
-	//                        after the drop down and not before the drop down
-	// RETURN: HTML formated strings for drop down lists of date and time
-	// DESC  : print the date/time drop downs, used in any queue/send/insert at date/time place
-	// NOTE  : Basic class holds exact the same, except the Year/Month/Day/etc strings
-	//         are translated in this call
+	/**
+	 * Basic class holds exact the same, except the Year/Month/Day/etc strings
+	 * are translated in this call
+	 * @param  int    $year          year YYYY
+	 * @param  int    $month         month m
+	 * @param  int    $day           day d
+	 * @param  int    $hour          hour H
+	 * @param  int    $min           min i
+	 * @param  string $suffix        additional info printed after the date time variable in the drop down
+	 *                               also used for ID in the on change JS call
+	 * @param  int    $min_steps     default is 1 (minute), can set to anything, is used as sum up from 0
+	 * @param  bool   $name_pos_back default false, if set to true, the name will be printend
+	 *                               after the drop down and not before the drop down
+	 * @return string                HTML formated strings for drop down lists of date and time
+	 */
 	public function adbPrintDateTime(
 		$year,
 		$month,

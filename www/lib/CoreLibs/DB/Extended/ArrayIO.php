@@ -48,14 +48,14 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public $pk_name; // the primary key from this table
 	public $pk_id; // the PK id
 
-	// METHOD: db_array_io
-	// PARAMS: db_config -> db_io class init vars
-	//         table_array -> the array from the table
-	//         table_name -> name of the table (for the array)
-	//         set_control_flag -> set basic class set/get variable error flags
-	// RETURN: none
-	// DESC  : constructor for the array io class, set the
-	//         primary key name automatically (from array)
+	/**
+	 * constructor for the array io class, set the
+	 * primary key name automatically (from array)
+	 * @param array       $db_config        db connection config
+	 * @param array       $table_array      table array config
+	 * @param string      $table_name       table name string
+	 * @param int|integer $set_control_flag set basic class set/get variable error flags
+	 */
 	public function __construct(array $db_config, array $table_array, string $table_name, int $set_control_flag = 0)
 	{
 		// instance db_io class
@@ -77,21 +77,23 @@ class ArrayIO extends \CoreLibs\DB\IO
 		} // set pk_name IF table_array was given
 	}
 
-	// deconstruktor
+	/**
+	 * class deconstructor
+	 */
 	public function __destruct()
 	{
 		parent::__destruct();
 	}
 
-	// METHOD: convertData
-	// WAS   : convert_data
-	// PARAMS: string -> the string that should be changed
-	// RETURN: string -> the altered string
-	// DESC  : changes all previously alterd HTML code into visible one,
-	//         works for <b>,<i>, and <a> (thought <a> can be / or should
-	//         be handled with the magic links functions
-	//         used with the read function
-	public function convertData($text)
+	/**
+	 * changes all previously alterd HTML code into visible one,
+	 * works for <b>,<i>, and <a> (thought <a> can be / or should
+	 * be handled with the magic links functions
+	 * used with the read function
+	 * @param  string $text any html encoded string
+	 * @return string       decoded html string
+	 */
+	public function convertData($text): string
 	{
 		$text = str_replace('&lt;b&gt;', '<b>', $text);
 		$text = str_replace('&lt;/b&gt;', '</b>', $text);
@@ -109,7 +111,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 	// PARAMS: string -> string to be changed
 	// RETURN: string -> altered string
 	// DESC  : changeds all HTML entities into non HTML ones
-	public function convertEntities($text)
+	/**
+	 * changeds all HTML entities into non HTML ones
+	 * @param  string $text encoded html string
+	 * @return string       decoded html string
+	 */
+	public function convertEntities($text): string
 	{
 		$text = str_replace('&lt;', '<', $text);
 		$text = str_replace('&gt;', '>', $text);
@@ -119,12 +126,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 		return $text;
 	}
 
-	// METHOD: dbDumpArray
-	// WAS   : db_dump_array
-	// PARAMS: none
-	// RETURN: returns the current array
-	// DESC  : dumps the current data
-	public function dbDumpArray($write = 0)
+	/**
+	 * dumps the current data
+	 * @param  bool   $write write to error message, default false
+	 * @return string        the array data as html string entry
+	 */
+	public function dbDumpArray($write = false): string
 	{
 		reset($this->table_array);
 		$string = '';
@@ -132,17 +139,16 @@ class ArrayIO extends \CoreLibs\DB\IO
 			$string .= '<b>'.$column.'</b> -> '.$data_array['value'].'<br>';
 		}
 		// add output to internal error_msg
-		if ($write) {
+		if ($write === true) {
 			$this->error_msg['db'] .= $string;
 		}
 		return $string;
 	}
 
-	// METHOD: dbCheckPkSet
-	// WAS   : db_check_pk_set
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : checks if pk is set and if not, set from pk_id and if this also not set return 0
+	/**
+	 * checks if pk is set and if not, set from pk_id and if this also not set return 0
+	 * @return bool true if pk value is set, else false
+	 */
 	public function dbCheckPkSet()
 	{
 		// if pk_id is set, overrule ...
@@ -154,18 +160,18 @@ class ArrayIO extends \CoreLibs\DB\IO
 			// if no PK found, error ...
 			$this->error_id = 91;
 			$this->__dbError();
-			return 0;
+			return false;
 		} else {
-			return 1;
+			return true;
 		}
 	}
 
-	// METHOD: dbResetArray
-	// WAS   : db_reset_array
-	// PARAMS: reset_pk -> if set reset the pk too
-	// RETURN: none
-	// DESC  : resets the whole array
-	public function dbResetArray($reset_pk = 0)
+	/**
+	 * resets the whole array values
+	 * @param  boolean $reset_pk true if we want to reset the pk too
+	 * @return void              has no return
+	 */
+	public function dbResetArray($reset_pk = false): void
 	{
 		reset($this->table_array);
 		foreach ($this->table_array as $column => $data_array) {
@@ -177,14 +183,16 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 	}
 
-	// METHOD: dbDelete
-	// WAS   : db_delete
-	// PARAMS: optional the table_array, if not given uses class var
-	// RETURN: 1 for successfull delete or 0 for error
-	// DESC  : deletes one dataset
-	public function dbDelete($table_array = 0)
+	/**
+	 * deletes one dataset
+	 * @param  array  $table_array optional override for table array set
+	 *                             set this as new table array too
+	 * @return array               returns the table array that was deleted
+	 */
+	public function dbDelete($table_array = array ())
 	{
-		if (is_array($table_array)) {
+		// is array and has values, override set and set new
+		if (is_array($table_array) && count($table_array)) {
 			$this->table_array = $table_array;
 		}
 		if (!$this->dbCheckPkSet()) {
@@ -234,15 +242,16 @@ class ArrayIO extends \CoreLibs\DB\IO
 		return $this->table_array;
 	}
 
-	// METHOD: dbRead
-	// WAS   : db_read
-	// PARAMS: edit -> if 1 data will not be altered for output, optional the table_array, if not given uses class var
-	// RETURN: true or false for reading
-	// DESC  : reads one row into the array
-	public function dbRead($edit = 0, $table_array = 0)
+	/**
+	 * reads one row into the array
+	 * @param  boolean $edit        on true convert data, else as is
+	 * @param  array   $table_array optional table array, overwrites internal set array
+	 * @return array                set table array with values
+	 */
+	public function dbRead($edit = false, $table_array = array ())
 	{
 		// if array give, overrules internal array
-		if (is_array($table_array)) {
+		if (is_array($table_array) && count($table_array)) {
 			$this->table_array = $table_array;
 		}
 		if (!$this->dbCheckPkSet()) {
@@ -280,7 +289,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			if ($res = $this->dbFetchArray()) {
 				reset($this->table_array);
 				foreach ($this->table_array as $column => $data_array) {
-					// wenn "edit" dann gib daten wie in DB zurck, ansonten aufbereiten fr ausgabe
+					// wenn "edit" dann gib daten wie in DB zurück, ansonten aufbereiten fr ausgabe
 					// ?? sollte das nicht drauen ??? man weis ja net was da drin steht --> is noch zu berlegen
 					// echo 'EDIT: $edit | Spalte: $column | type: '.$this->table_array[$column]['type'].' | Res: '.$res[$column].'<br>';
 					if ($edit) {
@@ -306,14 +315,15 @@ class ArrayIO extends \CoreLibs\DB\IO
 		return $this->table_array;
 	}
 
-	// METHOD: dbWrite
-	// WAS   : db_write
-	// PARAMS: addslashes -> if 1 will make an addslashes for each array field, optional the table_array, if not given uses class var
-	// RETURN: true or false on write
-	// DESC  : writes on set into DB or updates one set (if PK exists)
-	public function dbWrite($addslashes = 0, $table_array = 0)
+	/**
+	 * writes one set into DB or updates one set (if PK exists)
+	 * @param  boolean $addslashes  old convert entities and set set escape
+	 * @param  array   $table_array optional table array, overwrites internal one
+	 * @return array                table array or null
+	 */
+	public function dbWrite($addslashes = false, $table_array = array ())
 	{
-		if (is_array($table_array)) {
+		if (is_array($table_array) && count($table_array)) {
 			$this->table_array = $table_array;
 		}
 		// PK ID check
@@ -523,68 +533,6 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// return the table if needed
 		return $this->table_array;
-	}
-
-	// *************************************************************
-	// COMPATIBILITY METHODS
-	// those methods are deprecated function call names
-	// they exist for backwards compatibility only
-	// *************************************************************
-
-	public function convert_data($text)
-	{
-		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->convertData($text);
-	}
-
-	public function convert_entities($text)
-	{
-		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->convertEntities($text);
-	}
-
-	public function db_dump_array($write = 0)
-	{
-		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->dbDumpArray($write);
-	}
-
-	public function db_check_pk_set()
-	{
-		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->dbCheckPkSet();
-	}
-
-	public function db_reset_array($reset_pk = 0)
-	{
-		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->dbResetArray($reset_pk);
-	}
-
-	public function db_delete($table_array = 0)
-	{
-		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->dbDelete($table_array);
-	}
-
-	public function db_read($edit = 0, $table_array = 0)
-	{
-		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->dbRead($edit, $table_array);
-	}
-
-	public function db_write($addslashes = 0, $table_array = 0)
-	{
-		error_log('DEPRECATED CALL: '.__METHOD__.', '.__FILE__.':'.__LINE__.', '.debug_backtrace()[0]['file'].':'.debug_backtrace()[0]['line']);
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->dbWrite($addslashes, $table_array);
 	}
 } // end of class
 

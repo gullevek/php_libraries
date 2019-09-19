@@ -248,11 +248,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// now some default error msgs (english)
 	public $language_array = array ();
 
-	// METHOD: constructor
-	// PARAMS: $db_config -> connect to DB
-	//         $lang -> language code ('en', 'ja', etc)
-	//         $table_width -> width of table
-	//         $set_control_flag -> basic class set/get variable error flags
+	/**
+	 * construct form generator
+	 * @param array       $db_config        db config array
+	 * @param string      $lang             interface language
+	 * @param int|integer $table_width      table/div width (default 750)
+	 * @param int|integer $set_control_flag basic class set/get variable error flags
+	 */
 	public function __construct(array $db_config, string $lang, int $table_width = 750, int $set_control_flag = 0)
 	{
 		$this->my_page_name = $this->getPageName(1);
@@ -335,7 +337,21 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->security_level = $config_array['security_level'];
 	}
 
-	// dumps all values into output (for error msg)
+	/**
+	 * deconstructor
+	 * writes out error msg to global var
+	 * closes db connectio
+	 */
+	public function __destruct()
+	{
+		// close DB connection
+		parent::__destruct();
+	}
+
+	/**
+	 * dumps all values into output (for error msg)
+	 * @return string full table array data output as string html formatted
+	 */
 	public function formDumpTableArray()
 	{
 		if (!is_array($this->table_array)) {
@@ -349,45 +365,38 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		return $string;
 	}
 
-	// dekonstruktor
-	// writes out error msg to global var
-	// closes db connection
-	public function __destruct()
-	{
-		// close DB connection
-		parent::__destruct();
-	}
-
-	// METHOD: formGetColNameFromKey
-	// WAS   : form_get_col_name_from_key
-	// PARAMS: $want_key: the key where you want the data from
-	//         $key_value: if set searches for special right value
-	// RETURN: the value of the $want_key array field
-	//         works only with fields that appear only ONCE
-	//         if multiple gets only FIRST
-	public function formGetColNameFromKey($want_key, $key_value = '')
+	/**
+	 * the value of the $want_key array field
+	 * works only with fields that appear only ONCE
+	 * if multiple gets only FIRST
+	 * @param  string        $want_key  key to search for
+	 * @param  string|null   $key_value value to match to (optional)
+	 * @return string|null              returns key found or empty string
+	 */
+	public function formGetColNameFromKey(string $want_key, ?string $key_value = null): ?string
 	{
 		if (!is_array($this->table_array)) {
 			$this->table_array = array ();
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
-			if (isset($value[$want_key]) && !isset($key_value)) {
+			if (isset($value[$want_key]) && !$key_value) {
 				return $key;
-			} elseif (isset($value[$want_key]) && $value[$want_key] == $key_value && isset($key_value)) {
+			} elseif (isset($value[$want_key]) && $value[$want_key] == $key_value && $key_value) {
 				return $key;
 			}
 		}
 		// return nothing on nothing
-		return '';
+		return null;
 	}
 
-	// METHOD: formGetColNameArrayFromKey
-	// WAS   : form_get_col_name_array_from_key
-	// PARAMS: $want_key: the key where u want the data from
-	//         $key_value: if set searches for special right value
-	// RETURN: array of fields
-	public function formGetColNameArrayFromKey($want_key, $key_value = '')
+	/**
+	 * array of fields
+	 * @param  string      $want_key  the key where you want the data from
+	 * @param  string|null $key_value if set searches for special right value
+	 * @return array                  found key fields
+	 */
+	public function formGetColNameArrayFromKey(string $want_key, ?string $key_value = null): array
 	{
 		$key_array = array();
 		if (!is_array($this->table_array)) {
@@ -405,11 +414,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		return $key_array;
 	}
 
-	// METHOD: formPrintMsg
-	// WAS   : form_print_msg
-	// PARAMS: none
-	// RETURN: formated output for the error && warning msg
-	public function formPrintMsg()
+	/**
+	 * formated output for the error && warning msg
+	 * @return array error message with msg, width, clas
+	 */
+	public function formPrintMsg(): array
 	{
 		$class = '';
 		if ($this->error) {
@@ -426,12 +435,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	}
 
 	// next for functions are pre_test fkts for easier default new,load, etc handling
-	// METHOD: formProcedureLoad
-	// WAS   : form_procedure_load
-	// PARAMS: archive_id - which ID should be loaded
-	// RETURN: none
-	// DESC  : default load procedure
-	public function formProcedureLoad($archive_id)
+	/**
+	 * default load procedure
+	 * @param  int  $archive_id archive id to load
+	 * @return void             has no return
+	 */
+	public function formProcedureLoad(int $archive_id): void
 	{
 		if ($this->archive && $archive_id && $this->base_acl_level >= $this->security_level['load']) {
 			$this->formLoadTableArray($archive_id);
@@ -439,12 +448,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 	}
 
-	// METHOD: formProcedureNew
-	// WAS   : form_procedure_new
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : default new procedure
-	public function formProcedureNew()
+	/**
+	 * default new procedure
+	 * @return void has no return
+	 */
+	public function formProcedureNew(): void
 	{
 		if ($this->new && $this->base_acl_level >= $this->security_level['new']) {
 			if ($this->really_new == 'yes') {
@@ -457,12 +465,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 	}
 
-	// METHOD: formProcedureSave
-	// WAS   : form_procedure_save
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : default save procedure
-	public function formProcedureSave()
+	/**
+	 * default save procedure
+	 * @return void has no return
+	 */
+	public function formProcedureSave(): void
 	{
 		if ($this->save && $this->base_acl_level >= $this->security_level['save']) {
 			$this->formErrorCheck();
@@ -473,12 +480,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 	}
 
-	// METHOD: formProcedureDelete
-	// WAS   : form_procedure_delete
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : default delete procedure
-	public function formProcedureDelete()
+	/**
+	 * default delete procedure
+	 * @return void has no return
+	 */
+	public function formProcedureDelete(): void
 	{
 		// delete is also by 'protected'
 		if ($this->delete && $this->base_acl_level >= $this->security_level['delete']) {
@@ -496,12 +502,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 	}
 
-	// METHOD: formProcedureDeleteFromElementList
-	// WAS   : form_procedure_delete_from_element_list
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : default delete procedure
-	public function formProcedureDeleteFromElementList($element_list, $remove_name)
+	/**
+	 * default delete procedure
+	 * @param  array $element_list element array that should be removed
+	 * @param  array $remove_name  key names that should be removed
+	 * @return void                has no return
+	 */
+	public function formProcedureDeleteFromElementList(array $element_list, array $remove_name): void
 	{
 		$this->debug('REMOVE ELEMENT', 'Remove REF ELEMENT: '.$this->base_acl_level.' >= '.$this->security_level['delete']);
 		$this->debug('REMOVE ELEMENT', 'Protected Value set: '.(string)isset($this->table_array['protected']['value']));
@@ -579,11 +586,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 	}
 
-	// METHOD: formCreateLoad
-	// WAS   : form_create_load
-	// PARAMS: none
-	// RETURN: string from 'load' part of form ...
-	public function formCreateLoad()
+	/**
+	 * create the load list and return it as an array
+	 * @return array load list array with primary key, name and selected entry
+	 */
+	public function formCreateLoad(): array
 	{
 		$pk_selected = '';
 		$t_pk_name = '';
@@ -627,11 +634,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		);
 	}
 
-	// METHOD: formCreateNew
-	// WAS   : form_create_new
-	// PARAMS: none
-	// RETURN: part for new
-	public function formCreateNew($hide_new_checkbox = 0)
+	/**
+	 * Create new entry element for HTML output
+	 * @param  bool $hide_new_checkbox show or hide the new checkbox, default is false
+	 * @return array                   return the new create array with name & checkbox show flag
+	 */
+	public function formCreateNew($hide_new_checkbox = false): array
 	{
 		$show_checkbox = 0;
 		$new_name = '';
@@ -653,11 +661,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		);
 	}
 
-	// METHOD: formCreateSaveDelete
-	// WAS   : form_create_save_delete
-	// PARAMS: none
-	// RETURN: string for delete / save part
-	public function formCreateSaveDelete($hide_delete = 0, $hide_delete_checkbox = 0)
+	/**
+	 * create the save and delete element html group data
+	 * @param  bool  $hide_delete          hide the delete button (default false)
+	 * @param  bool  $hide_delete_checkbox hide the delete checkbox (default false)
+	 * @return array                       return the hide/show delete framework for html creation
+	 */
+	public function formCreateSaveDelete($hide_delete = false, $hide_delete_checkbox = false): array
 	{
 		$seclevel_okay = 0;
 		$save = '';
@@ -699,14 +709,15 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		);
 	} // end of function
 
-	// METHOD: formCreateElement
-	// WAS   : form_create_element
-	// PARAMS: $element_name: the name from the array, you want to have build
-	//         $query: can overrule internal query data,
-	//                 for drop down, as data comes from a reference table
-	//                 for drop_down_text it has to be an array with $key->$value
-	// RETURN: element in HTML
-	public function formCreateElement($element_name, $query = '')
+	/**
+	 * create a form element based on the settings in the element array entry
+	 * @param  string      $element_name the name from the array, you want to have build
+	 * @param  string|null $query        can overrule internal query data,
+	 *                                   for drop down, as data comes from a reference table
+	 *                                   for drop_down_text it has to be an array with $key->$valu
+	 * @return array                     html settings array
+	 */
+	public function formCreateElement(string $element_name, ?string $query = null): array
 	{
 		// special 2nd color for 'binary' attribut
 		if ($this->table_array[$element_name]['type'] == 'binary' && !isset($this->table_array[$element_name]['value'])) {
@@ -897,17 +908,23 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$data['value'] = $this->table_array[$element_name]['value'];
 			}
 		}
-		return array('output_name' => $output_name, 'color' => $EDIT_FGCOLOR_T, 'type' => $type, 'data' => $data);
+		return array(
+			'output_name' => $output_name,
+			'color' => $EDIT_FGCOLOR_T,
+			'type' => $type,
+			'data' => $data
+		);
 	}
 
-	// METHOD: formErrorCheck
-	// WAS   : form_error_check
-	// PARAMS: none
-	// RETURN: full error message string for output
-	//         should be cought like this ...
-	//         if ($msg=$form->form_error_check())
-	//           $error=1;
-	public function formErrorCheck()
+	/**
+	 * full error message string for output
+	 * checks each filled entry to the table array defined error checks
+	 * should be cought like this ...
+	 * if ($msg = $form->form_error_check())
+	 *   $error=1;
+	 * @return void has no return
+	 */
+	public function formErrorCheck(): void
 	{
 		if (!is_array($this->table_array)) {
 			$this->table_array = array ();
@@ -1170,12 +1187,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 	}
 
-	// METHOD: formSetOrder
-	// WAS: form_set_order
-	// PARAMS: none
-	// RETURN: the table array
-	// DESC  : sets the order to the maximum, if order flag is set in array
-	public function formSetOrder()
+	/**
+	 * sets the order to the maximum, if order flag is set in array
+	 * @return array table array with set order number
+	 */
+	public function formSetOrder(): array
 	{
 		// get order name
 		$order_name = $this->formGetColNameFromKey('order');
@@ -1198,12 +1214,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		return $this->table_array;
 	}
 
-	// METHOD: formUnsetTableArray
-	// WAS   : form_unsert_table_array
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : resets all values in table_array and in the reference tables
-	public function formUnsetTableArray()
+	/**
+	 * resets all values in table_array and in the reference tables
+	 * @return void has no return
+	 */
+	public function formUnsetTableArray(): void
 	{
 		unset($this->pk_id);
 		if (!is_array($this->table_array)) {
@@ -1231,17 +1246,17 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->msg = $this->l->__('Cleared for new Dataset!');
 	}
 
-	// METHOD: formLoadTableArray
-	// WAS   : form_load_table_array
-	// PARAMS: pk_id - overrule pk_id
-	// RETURN: none
-	// DESC  : load a table & reference
-	public function formLoadTableArray($pk_id = 0)
+	/**
+	 * load a table & reference
+	 * @param  int|null $pk_id overrule pk_id
+	 * @return void            has no return
+	 */
+	public function formLoadTableArray(?int $pk_id = null): void
 	{
 		if ($pk_id) {
 			$this->pk_id = $pk_id;
 		}
-		$this->table_array = $this->dbRead(1);
+		$this->table_array = $this->dbRead(true);
 
 		// reset all temp fields
 		if (!is_array($this->table_array)) {
@@ -1270,12 +1285,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->msg = $this->l->__('Dataset has been loaded!<br>');
 	}
 
-	// METHOD: formSaveTableArray
-	// WAS   : form_save_table_array
-	// PARAMS: addslashes - if one, passes 1 to the db_write function
-	// RETURN: none
-	// DESC  : save a table, reference and all input fields
-	public function formSaveTableArray($addslashes = 0)
+	/**
+	 * save a table, reference and all input fields
+	 * note that the addslashes flag here is passed on to the dbWrite method
+	 * it only does html conversion, add slashes for DB is done automatically
+	 * @param  bool $addslashes override internal addslasahes flag (default false)
+	 * @return void             has no return
+	 */
+	public function formSaveTableArray($addslashes = false)
 	{
 		// for drop_down_db_input check if text field is filled and if, if not yet in db ...
 		// and upload files
@@ -1670,14 +1687,15 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		return array('output_name' => $output_name, 'type' => $type, 'color' => 'edit_fgcolor', 'data' => $data);
 	}
 
-	// METHOD: formCreateElementListTable
-	// WAS   : form_create_element_list_table
-	// PARAMS: show which element list
-	// RETURN: array for output
-	// DESC  : create list of elements next to each other for a group of data in an input field
-	//         this currently only works for a list that is filled from a sub table and creates only a connection to this one
-	//         new version will allow a sub list with free input fields to directly fill a sub table to a master table
-	public function formCreateElementListTable($table_name)
+	/**
+	 * create list of elements next to each other for a group of data in an input field
+	 * this currently only works for a list that is filled from a sub table and creates
+	 * only a connection to this one new version will allow a sub list with free input
+	 * fields to directly fill a sub table to a master table
+	 * @param  string $table_name which element entry to create
+	 * @return array              element for html creation
+	 */
+	public function formCreateElementListTable(string $table_name): array
 	{
 		// output name for the viewable left table td box, prefixed with * if mandatory
 		$output_name = $this->element_list[$table_name]['output_name'];
@@ -1737,7 +1755,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 			// if drop down db read data for element list from the given sub table as from the query
 			// only two elements are allowed: pos 0 is key, pso 1 is visible output name
-			if ($data_array['type'] == 'drop_down_db') {
+			if (isset($data_array['type']) && $data_array['type'] == 'drop_down_db') {
 				$md_q = md5($data_array['query']);
 				while ($res = $this->dbReturn($data_array['query'])) {
 					$this->debug('edit', 'Q['.$md_q.'] pos: '.$this->cursor_ext[$md_q]['pos'].' | want: '.(isset($data_array['preset']) ? $data_array['preset'] : '-').' | set: '.(isset($data['preset'][$el_name]) ? $data['preset'][$el_name] : '-'));

@@ -171,20 +171,8 @@ DEFINE('LIVE_SCHEMA', 'public');
 if (file_exists(BASE.CONFIGS.'config.host.php')) {
 	require BASE.CONFIGS.'config.host.php';
 }
-if (!isset($DB_HOST)) {
-	$DB_HOST = array ();
-}
-if (!isset($DB_PATH)) {
-	$DB_PATH = array ();
-}
-if (!isset($LOCATION)) {
-	$LOCATION = array ();
-}
-if (!isset($DEBUG_FLAG)) {
-	$DEBUG_FLAG = array ();
-}
-if (!isset($SITE_LANG)) {
-	$SITE_LANG = array ();
+if (!isset($SITE_CONFIG)) {
+	$SITE_CONFIG = array ();
 }
 /************* DB ACCESS *****************/
 if (file_exists(BASE.CONFIGS.'config.db.php')) {
@@ -198,15 +186,25 @@ if (file_exists(BASE.CONFIGS.'config.path.php')) {
 	require BASE.CONFIGS.'config.path.php';
 }
 
-// set the USE_DATABASE var, if there is nothing set, we assume TRUE
-$USE_DATABASE = defined('USE_DATABASE') ? USE_DATABASE : true;
-
 // live frontend pages
 // ** missing live domains **
 // get the name without the port
 list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
-if (!isset($DB_HOST[$HOST_NAME]) && $USE_DATABASE) {
-	echo 'No matching DB config found. Contact Admin<br>';
+// BAIL ON:
+// we have either no db selction for this host but have db config entries
+// or we have a db selection but no db config as array or empty
+// or we have a selection but no matching db config entry
+if ((!isset($SITE_CONFIG[$HOST_NAME]['db_host']) && isset($DB_CONFIG) && count($DB_CONFIG)) ||
+	(isset($SITE_CONFIG[$HOST_NAME]['db_host']) &&
+		// missing DB CONFIG
+		(!isset($DB_CONFIG)) ||
+		(isset($DB_CONFIG) && is_array($DB_CONFIG) && !count($DB_CONFIG)) ||
+		(isset($DB_CONFIG) && !is_array($DB_CONFIG)) ||
+		// has DB CONFIG but no match
+		(isset($DB_CONFIG) && is_array($DB_CONFIG) && count($DB_CONFIG) && !isset($DB_CONFIG[$SITE_CONFIG[$HOST_NAME]['db_host']]))
+	)
+) {
+	echo 'No matching DB config found for: "'.$HOST_NAME.'". Contact Administrator';
 	exit -1;
 }
 // set HOST name
@@ -221,25 +219,24 @@ if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVE
 	DEFINE('HOST_PROTOCOL', 'http://');
 }
 // define the db config set name, the db config and the db schema
-DEFINE('DB_CONFIG_NAME', $DB_HOST[$HOST_NAME]);
+DEFINE('DB_CONFIG_NAME', $SITE_CONFIG[$HOST_NAME]['db_host']);
 DEFINE('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME]);
-DEFINE('DB_SCHEMA', $DB_PATH[$HOST_NAME]);
-// DEFINE('TARGET_DB', $DB_TARGET_HOST[$HOST_NAME]);
-// DEFINE('URL_REDIRECT_DB', $DB_URL_REDIRECT_HOST[$HOST_NAME]);
-// next three if top is not set
-// DEFINE('TEST_SCHEMA', $DB_CONFIG[MAIN_DB]['db_schema']);
-// DEFINE('DEV_SCHEMA', $DB_CONFIG[MAIN_DB]['db_schema']);
-// DEFINE('PUBLIC_SCHEMA', $DB_CONFIG[TARGET_DB]['db_schema']);
-DEFINE('LOGIN_DB_SCHEMA', PUBLIC_SCHEMA); // where the edit* tables are
-DEFINE('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA); // where global tables are that are used by all schemas (eg queue tables for online, etc)
-DEFINE('TARGET', $LOCATION[$HOST_NAME]);
+// DEFINE('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
+// DEFINE('DB_CONFIG_OTHER', SITE_CONFIG[$HOST_NAME]['db_host_other']);
+// override for login and global schemas
+// DEFINE('LOGIN_DB_SCHEMA', PUBLIC_SCHEMA); // where the edit* tables are
+// DEFINE('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA); // where global tables are that are used by all schemas (eg queue tables for online, etc)
+// debug settings, site lang, etc
+DEFINE('TARGET', $SITE_CONFIG[$HOST_NAME]['location']);
+DEFINE('DEBUG', $SITE_CONFIG[$HOST_NAME]['debug_flag']);
+DEFINE('SITE_LANG', $SITE_CONFIG[$HOST_NAME]['site_lang']);
+// paths
 // DEFINE('CSV_PATH', $PATHS[TARGET]['csv_path']);
 // DEFINE('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);
 // DEFINE('REDIRECT_URL', $PATHS[TARGET]['redirect_url']);
-DEFINE('DEBUG', $DEBUG_FLAG[$HOST_NAME]);
-DEFINE('SITE_LANG', $SITE_LANG[$HOST_NAME]);
 
-DEFINE('SHOW_ALL_ERRORS', true); // show all errors if debug_all & show_error_handling are enabled
+// show all errors if debug_all & show_error_handling are enabled
+DEFINE('SHOW_ALL_ERRORS', true);
 
 /************* GENERAL PAGE TITLE ********/
 DEFINE('G_TITLE', '<OVERALL FALLBACK PAGE TITLE>');

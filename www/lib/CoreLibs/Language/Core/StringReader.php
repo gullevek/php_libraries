@@ -27,12 +27,21 @@ class StringReader
 	public $sr_pos;
 	public $sr_str;
 
+	/**
+	 * constructor for string reader
+	 * @param string $str basic string
+	 */
 	public function __construct($str = '')
 	{
 		$this->sr_str = $str;
 		$this->sr_pos = 0;
 	}
 
+	/**
+	 * read bytes in string
+	 * @param  int $bytes bytes to read in string
+	 * @return string     data read in length of bytes as string
+	 */
 	public function read($bytes)
 	{
 		$data = substr($this->sr_str, $this->sr_pos, $bytes);
@@ -44,6 +53,11 @@ class StringReader
 		return $data;
 	}
 
+	/**
+	 * go to position in string
+	 * @param  int $pos position in string
+	 * @return int      new position in string after seek
+	 */
 	public function seekto($pos)
 	{
 		$this->sr_pos = $pos;
@@ -53,11 +67,19 @@ class StringReader
 		return $this->sr_pos;
 	}
 
+	/**
+	 * get current position in string
+	 * @return int position in string
+	 */
 	public function currentpos()
 	{
 		return $this->sr_pos;
 	}
 
+	/**
+	 * get length of string
+	 * @return int return length of assigned string
+	 */
 	public function length()
 	{
 		return strlen($this->sr_str);
