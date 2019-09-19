@@ -114,9 +114,9 @@ DEFINE('PASSWORD_MAX_LENGTH', 255);
 // ajax request type
 DEFINE('AJAX_REQUEST_TYPE', 'POST');
 // what AJAX type to use
-DEFINE('USE_PROTOTYPE', true);
+DEFINE('USE_PROTOTYPE', false);
 DEFINE('USE_SCRIPTACULOUS', false);
-DEFINE('USE_JQUERY', false);
+DEFINE('USE_JQUERY', true);
 
 /************* LAYOUT WIDTHS *************/
 DEFINE('PAGE_WIDTH', 800);
