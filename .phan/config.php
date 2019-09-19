@@ -95,6 +95,7 @@ return [
 		 'www/media',
 	],
 	'exclude_file_list' => [
+		// ignore all symlink files to edit
 		'www/admin/edit_access.php',
 		'www/admin/edit_groups.php',
 		'www/admin/edit_languages.php',

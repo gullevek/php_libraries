@@ -106,7 +106,7 @@ class GetTextReader
 	public function __construct($Reader, $enable_cache = true)
 	{
 		// If there isn't a StreamReader, turn on short circuit mode.
-		if (!$Reader || isset($Reader->error)) {
+		if (!$Reader || $Reader->error) {
 			$this->short_circuit = true;
 			return;
 		}

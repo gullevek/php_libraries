@@ -376,18 +376,15 @@ class IO extends \CoreLibs\Basic
 			// abort error
 			$this->error_id = 10;
 			$this->__dbError();
-			$this->db_init_error = false;
+			$this->db_init_error = true;
 		}
 
 		// connect to DB
 		if (!$this->__connectToDB()) {
 			$this->error_id = 16;
 			$this->__dbError();
-			$this->db_init_error = false;
+			$this->db_init_error = true;
 		}
-
-		// so we can check that we have a successful DB connection created
-		$this->db_init_error = true;
 	}
 
 	/**
@@ -895,6 +892,17 @@ class IO extends \CoreLibs\Basic
 			$this->db_functions->__dbClose();
 			unset($this->dbh);
 		}
+	}
+
+	/**
+	 * returns the db init error
+	 * if failed to connect it is set to true
+	 * else false
+	 * @return bool connection failure status
+	 */
+	public function getConnectionStatus(): bool
+	{
+		return $this->db_init_error;
 	}
 
 	/**

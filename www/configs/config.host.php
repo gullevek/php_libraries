@@ -27,6 +27,8 @@ $SITE_CONFIG = array (
 		'debug_flag' => true,
 		// site language
 		'site_lang' => 'en_utf8',
+		// enable/disable login override
+		'login_enabled' => true
 	)
 );
 

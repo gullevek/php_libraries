@@ -17,6 +17,9 @@ echo "DIR: ".DIR."<br>ROOT: ".ROOT."<br>BASE: ".BASE."<br>";
 $lang = 'ja_utf8';
 $base = new CoreLibs\Admin\Backend(DB_CONFIG, $lang);
 ob_end_flush();
+if ($base->getConnectionStatus()) {
+	die("Cannot connect to database");
+}
 
 print "Start time: ".$base->runningTime()."<br>";
 print "ByteStringFormat: ".$base->ByteStringFormat(1234567.12)."<br>";

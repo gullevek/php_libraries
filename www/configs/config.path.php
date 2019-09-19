@@ -10,8 +10,12 @@
 
 // File and Folder paths
 // ID is TARGET (first array element)
-//	$PATHS['test']['csv_path'] = '';
-//	$PATHS['test']['perl_bin'] = '';
-//	$PATHS['test']['redirect_url'] = '';
+/*$PATHS = array (
+	'test' => array (
+		'csv_path' => '',
+		'perl_bin' => '',
+		'other_url' => '',
+	)
+)*/
 
 // __END__

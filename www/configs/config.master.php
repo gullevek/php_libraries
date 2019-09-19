@@ -145,7 +145,7 @@ DEFINE('DEFAULT_ENCODING', 'UTF-8');
 // below two can be defined here, but they should be
 // defined in either the header file or the file itself
 /************* LOGGING *******************/
-// DEFINE('LOG_FILE_ID', '');
+DEFINE('LOG_FILE_ID', '');
 
 /************* CLASS ERRORS *******************/
 // 0 = default all OFF
@@ -220,7 +220,7 @@ if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVE
 }
 // define the db config set name, the db config and the db schema
 DEFINE('DB_CONFIG_NAME', $SITE_CONFIG[$HOST_NAME]['db_host']);
-DEFINE('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME]);
+DEFINE('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ? $DB_CONFIG[DB_CONFIG_NAME] : array ());
 // DEFINE('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
 // DEFINE('DB_CONFIG_OTHER', SITE_CONFIG[$HOST_NAME]['db_host_other']);
 // override for login and global schemas
@@ -230,6 +230,7 @@ DEFINE('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME]);
 DEFINE('TARGET', $SITE_CONFIG[$HOST_NAME]['location']);
 DEFINE('DEBUG', $SITE_CONFIG[$HOST_NAME]['debug_flag']);
 DEFINE('SITE_LANG', $SITE_CONFIG[$HOST_NAME]['site_lang']);
+DEFINE('LOGIN_ENABLED', $SITE_CONFIG[$HOST_NAME]['login_enabled']);
 // paths
 // DEFINE('CSV_PATH', $PATHS[TARGET]['csv_path']);
 // DEFINE('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);

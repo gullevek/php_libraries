@@ -122,7 +122,7 @@ class Login extends \CoreLibs\DB\IO
 
 		// create db connection and init base class
 		parent::__construct($db_config, $set_control_flag);
-		if ($this->db_init_error === false) {
+		if ($this->db_init_error === true) {
 			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
 			exit;

@@ -1,11 +1,11 @@
-#********************************************************************
+# ********************************************************************
 # AUTHOR: Clemens Schwaighofer
 # CREATED: 2018/03/28
 # SHORT DESCRIPTION:
 # Backend Japanese Messages file for gettext
 # to craete: msgfmt -o ja.mo messages_ja.po
 # HISTORY:
-#********************************************************************/
+# ********************************************************************/
 
 msgid ""
 msgstr ""
@@ -61,3 +61,6 @@ msgstr "土"
 
 msgid "Sun"
 msgstr "日"
+
+msgid "INPUT TEST"
+msgstr "OUTPUT TEST JA"

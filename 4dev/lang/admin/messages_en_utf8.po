@@ -1,11 +1,11 @@
-#********************************************************************
+# ********************************************************************
 # AUTHOR: Clemens Schwaighofer
 # CREATED: 2005/08/09
 # SHORT DESCRIPTION:
 # Backned English Messages file for gettext
 # to craete: msgfmt -o ja.mo messages_en.po
 # HISTORY:
-#********************************************************************/
+# ********************************************************************/
 
 msgid ""
 msgstr ""
@@ -24,3 +24,6 @@ msgstr "Year"
 
 msgid "Month"
 msgstr "Month"
+
+msgid "INPUT TEST"
+msgstr "OUTPUT TEST EN"
