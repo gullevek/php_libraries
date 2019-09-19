@@ -15,12 +15,15 @@ if (class_exists('Autoload', false) === false) {
 		{
 			// print "(1) Class: $class / DIR: ".__DIR__."<br>";
 			// set directory seperator (we need to replace from namespace)
-			$ds = defined('DS') ? DS : DIRECTORY_SEPARATOR;
+			$DS = defined('DS') ? DS : DIRECTORY_SEPARATOR;
 			// base lib
-			$LIB = defined('LIB') ? LIB : 'lib';
-			// if lib is in path, do not add lib again
-			if (strpos(__DIR__, $LIB) !== false) {
-				$LIB .= $ds;
+			$LIB = defined('LIB') ? LIB : 'lib'.$DS;
+			// if lib is in path at the end, do not add lib again
+			// note that $LIB can have a directory seperator at the end
+			// strip that out before we do a match
+			$_LIB = rtrim($LIB, $DS);
+			if (preg_match("|$_LIB$|", __DIR__) === false) {
+				$LIB .= $DS;
 			} else {
 				$LIB = '';
 			}
@@ -35,9 +38,9 @@ if (class_exists('Autoload', false) === false) {
 			// set default extension
 			$extension = '.php';
 			// set full include path
-			$path = __DIR__.$ds.$LIB.substr($class, $len);
+			$path = __DIR__.$DS.$LIB.substr($class, $len);
 			// replace namespace \ with dir sepeator
-			$path = str_replace('\\', $ds, $path).$extension;
+			$path = str_replace('\\', $DS, $path).$extension;
 			// print "(2) Class clean: $path<br>";
 			// if path is set and a valid file
 			if ($path !== false && is_file($path)) {

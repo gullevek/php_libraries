@@ -95,9 +95,8 @@
 namespace CoreLibs;
 
 // define check vars for the flags we can have
-/** @internal */
-define('CLASS_STRICT_MODE', 1);
-define('CLASS_OFF_COMPATIBLE_MODE', 2);
+const CLASS_STRICT_MODE = 1;
+const CLASS_OFF_COMPATIBLE_MODE = 2;
 
 /** Basic core class declaration */
 class Basic

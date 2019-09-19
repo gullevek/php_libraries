@@ -194,14 +194,13 @@ list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 // we have either no db selction for this host but have db config entries
 // or we have a db selection but no db config as array or empty
 // or we have a selection but no matching db config entry
-if ((!isset($SITE_CONFIG[$HOST_NAME]['db_host']) && isset($DB_CONFIG) && count($DB_CONFIG)) ||
+if ((!isset($SITE_CONFIG[$HOST_NAME]['db_host']) && count($DB_CONFIG)) ||
 	(isset($SITE_CONFIG[$HOST_NAME]['db_host']) &&
 		// missing DB CONFIG
-		(!isset($DB_CONFIG)) ||
-		(isset($DB_CONFIG) && is_array($DB_CONFIG) && !count($DB_CONFIG)) ||
-		(isset($DB_CONFIG) && !is_array($DB_CONFIG)) ||
+		((is_array($DB_CONFIG) && !count($DB_CONFIG)) ||
+		!is_array($DB_CONFIG) ||
 		// has DB CONFIG but no match
-		(isset($DB_CONFIG) && is_array($DB_CONFIG) && count($DB_CONFIG) && !isset($DB_CONFIG[$SITE_CONFIG[$HOST_NAME]['db_host']]))
+		(is_array($DB_CONFIG) && count($DB_CONFIG) && !isset($DB_CONFIG[$SITE_CONFIG[$HOST_NAME]['db_host']])))
 	)
 ) {
 	echo 'No matching DB config found for: "'.$HOST_NAME.'". Contact Administrator';

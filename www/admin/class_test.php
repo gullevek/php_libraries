@@ -23,7 +23,7 @@ if (!defined('SET_SESSION_NAME')) {
 	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 }
 // define log file id
-define('LOG_FILE_ID', 'classTest');
+$LOG_FILE_ID = 'classTest';
 // set language for l10n
 $lang = 'en_utf8';
 

@@ -1915,19 +1915,19 @@ class IO extends \CoreLibs\Basic
 	{
 		switch ($kbn) {
 			case 'i':
-				$value = (!isset($value) || $value === '') ? "NULL" : intval($value);
+				$value = ($value === '') ? "NULL" : intval($value);
 				break;
 			case 'f':
-				$value = (!isset($value) || $value === '') ? "NULL" : floatval($value);
+				$value = ($value === '') ? "NULL" : floatval($value);
 				break;
 			case 't':
-				$value = (!isset($value) || $value === '') ? "NULL" : "'".$this->dbEscapeString($value)."'";
+				$value = ($value === '') ? "NULL" : "'".$this->dbEscapeString($value)."'";
 				break;
 			case 'd':
-				$value = (!isset($value) || $value === '') ? "NULL" : "'".$this->dbEscapeString($value)."'";
+				$value = ($value === '') ? "NULL" : "'".$this->dbEscapeString($value)."'";
 				break;
 			case 'i2':
-				$value = (!isset($value) || $value === '') ? 0 : intval($value);
+				$value = ($value === '') ? 0 : intval($value);
 				break;
 		}
 		return $value;
