@@ -42,3 +42,12 @@ parameters:
 		- www/lib/smarty-3.1.30/
 		# ignore composer
 		- www/vendor
+	# ignore errores with
+	# ignoreErrors:
+		#- 'error regex'
+		#-
+		#	message: 'error regex'
+		#	path: %currentWorkingDirectory%/www/some/*
+		#	paths:
+		#		- ...
+		#		- ...

@@ -1512,7 +1512,7 @@ class Basic
 			// labels in order of size
 			$labels = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB');
 			// calc file size, round down too two digits, add label based max change
-			return round($number / pow(1024, ($i = floor(log($number, 1024)))), 2).($space ? ' ' : '').(isset($labels[(int)$i]) ? $labels[(int)$i] : '>EB');
+			return round($number / pow(1024, ($i = floor(log((float)$number, 1024)))), 2).($space ? ' ' : '').(isset($labels[(int)$i]) ? $labels[(int)$i] : '>EB');
 		}
 		return (string)$number;
 	}

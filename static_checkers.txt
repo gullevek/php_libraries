@@ -1,3 +1,9 @@
-phan --progress-bar -C -o analysis.txt
+# main static checker
+phan --progress-bar -C -o 4dev/tmp/analysis.txt
+# sub static checker
 phpstan analyse -c phpstan.neon --memory-limit=4G -l 0 www
+# only if we work with composer only
 www/: psalm (this needs the composer autoloader defined)
+
+# for linting
+parallel-lint www/
