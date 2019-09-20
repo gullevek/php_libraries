@@ -157,7 +157,12 @@ if ($form->my_page_name == 'edit_order') {
 	}
 	$q .= "ORDER BY order_number";
 
+	// init arrays
 	$row_data = array();
+	$options_id = array();
+	$options_name = array();
+	$options_selected = array();
+	// DB read data for menu
 	while ($res = $form->dbReturn($q)) {
 		$row_data[] = array(
 			"id" => $res[$table_name."_id"],
@@ -180,12 +185,6 @@ if ($form->my_page_name == 'edit_order') {
 	$DATA['form_error_msg'] = $messages;
 
 	// all the row data
-	$options_id = array();
-	$options_name = array();
-	$options_selected = array();
-	if (!isset($row_data) || !is_array($row_data)) {
-		$row_data = array();
-	}
 	for ($i = 0; $i < count($row_data); $i ++) {
 		$options_id[] = $i;
 		$options_name[] = $row_data[$i]['name'];

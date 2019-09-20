@@ -94,13 +94,13 @@
 
 namespace CoreLibs;
 
-// define check vars for the flags we can have
-const CLASS_STRICT_MODE = 1;
-const CLASS_OFF_COMPATIBLE_MODE = 2;
 
 /** Basic core class declaration */
 class Basic
 {
+	// define check vars for the flags we can have
+	const CLASS_STRICT_MODE = 1;
+	const CLASS_OFF_COMPATIBLE_MODE = 2;
 	// control vars
 	/** @var bool compatible mode sets variable even if it is not defined */
 	private $set_compatible = true;
@@ -438,12 +438,12 @@ class Basic
 			$set_control_flag = $GLOBALS['CLASS_VARIABLE_ERROR_MODE'];
 		}
 		// bit wise check of int and set
-		if ($set_control_flag & CLASS_OFF_COMPATIBLE_MODE) {
+		if ($set_control_flag & self::CLASS_OFF_COMPATIBLE_MODE) {
 			$this->set_compatible = false;
 		} else {
 			$this->set_compatible = true;
 		}
-		if ($set_control_flag & CLASS_STRICT_MODE) {
+		if ($set_control_flag & self::CLASS_STRICT_MODE) {
 			$this->set_strict_mode = true;
 		} else {
 			$this->set_strict_mode = false;
