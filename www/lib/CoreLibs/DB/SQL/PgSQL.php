@@ -435,7 +435,7 @@ class PgSQL
 	/**
 	 * postgresql array to php array
 	 * @param  string   $text    array text from PostgreSQL
-	 * @param  array    &$output (internal) recursive pass on for nested arrays
+	 * @param  array    $output  (internal) recursive pass on for nested arrays
 	 * @param  bool|int $limit   (internal) max limit to not overshoot the end, start with false
 	 * @param  integer  $offset  (internal) shift offset for {}
 	 * @return array|int         converted PHP array, interal recusrive int position
