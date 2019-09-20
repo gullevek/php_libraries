@@ -60,7 +60,7 @@ class GetTextReader
 	* Reads a 32bit Integer from the Stream
 	*
 	* @access private
-	* @return Integer from the Stream
+	* @return int Integer from the Stream
 	*/
 	private function readint()
 	{
@@ -75,6 +75,11 @@ class GetTextReader
 		}
 	}
 
+	/**
+	 * read bytes
+	 * @param  int    $bytes byte length to read
+	 * @return string        return data, possible string
+	 */
 	public function read($bytes)
 	{
 		return $this->STREAM->read($bytes);
@@ -83,8 +88,8 @@ class GetTextReader
 	/**
 	* Reads an array of Integers from the Stream
 	*
-	* @param int count How many elements should be read
-	* @return Array of Integers
+	* @param  int   $count How many elements should be read
+	* @return array        Array of Integers
 	*/
 	public function readintarray($count)
 	{
@@ -100,8 +105,8 @@ class GetTextReader
 	/**
 	* Constructor
 	*
-	* @param object Reader the StreamReader object
-	* @param boolean enable_cache Enable or disable caching of strings (default on)
+	* @param object $Reader       the StreamReader object
+	* @param bool   $enable_cache Enable or disable caching of strings (default on)
 	*/
 	public function __construct($Reader, $enable_cache = true)
 	{
@@ -177,8 +182,8 @@ class GetTextReader
 	* Returns a string from the "originals" table
 	*
 	* @access private
-	* @param int num Offset number of original string
-	* @return string Requested string if found, otherwise ''
+	* @param  int    $num Offset number of original string
+	* @return string      Requested string if found, otherwise ''
 	*/
 	private function get_original_string($num)
 	{
@@ -196,8 +201,8 @@ class GetTextReader
 	* Returns a string from the "translations" table
 	*
 	* @access private
-	* @param int num Offset number of original string
-	* @return string Requested string if found, otherwise ''
+	* @param  int    $num Offset number of original string
+	* @return string      Requested string if found, otherwise ''
 	*/
 	private function get_translation_string($num)
 	{
@@ -215,10 +220,10 @@ class GetTextReader
 	* Binary search for string
 	*
 	* @access private
-	* @param string string
-	* @param int start (internally used in recursive function)
-	* @param int end (internally used in recursive function)
-	* @return int string number (offset in originals table)
+	* @param  string           $string string to find
+	* @param  int              $start  (internally used in recursive function)
+	* @param  int              $end    (internally used in recursive function)
+	* @return int|string|float         (offset in originals table)
 	*/
 	private function find_string($string, $start = -1, $end = -1)
 	{
@@ -259,8 +264,8 @@ class GetTextReader
 	* Translates a string
 	*
 	* @access public
-	* @param string string to be translated
-	* @return string translated string (or original, if not found)
+	* @param  string $string to be translated
+	* @return string         translated string (or original, if not found)
 	*/
 	public function translate($string)
 	{
@@ -291,7 +296,8 @@ class GetTextReader
 	* Sanitize plural form expression for use in PHP eval call.
 	*
 	* @access private
-	* @return string sanitized plural form expression
+	* @param  string $expr an expression to match
+	* @return string       sanitized plural form expression
 	*/
 	private function sanitize_plural_expression($expr)
 	{
@@ -327,7 +333,8 @@ class GetTextReader
 	* Parse full PO header and extract only plural forms line.
 	*
 	* @access private
-	* @return string verbatim plural form header field
+	* @param  string $header header search in plurals
+	* @return string         verbatim plural form header field
 	*/
 	private function extract_plural_forms_header_from_po_header($header)
 	{
@@ -368,8 +375,8 @@ class GetTextReader
 	* Detects which plural form to take
 	*
 	* @access private
-	* @param string count
-	* @return int array index of the right plural form
+	* @param  string $n count
+	* @return int       array index of the right plural form
 	*/
 	private function select_string($n)
 	{
@@ -392,9 +399,9 @@ class GetTextReader
 	* Plural version of gettext
 	*
 	* @access public
-	* @param string single
-	* @param string plural
-	* @param string number
+	* @param  string $single
+	* @param  string $plural
+	* @param  string $number
 	* @return string plural form
 	*/
 	public function ngettext($single, $plural, $number)
@@ -433,6 +440,12 @@ class GetTextReader
 		}
 	}
 
+	/**
+	 * p get text
+	 * @param  string $context [description]
+	 * @param  string $msgid   [description]
+	 * @return string          [description]
+	 */
 	public function pgettext($context, $msgid)
 	{
 		$key = $context.chr(4).$msgid;
@@ -444,6 +457,14 @@ class GetTextReader
 		}
 	}
 
+	/**
+	 * np get text
+	 * @param  string $context  [description]
+	 * @param  string $singular [description]
+	 * @param  string $plural   [description]
+	 * @param  string $number   [description]
+	 * @return string           [description]
+	 */
 	public function npgettext($context, $singular, $plural, $number)
 	{
 		$key = $context.chr(4).$singular;

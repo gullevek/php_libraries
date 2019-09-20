@@ -719,6 +719,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function formCreateElement(string $element_name, ?string $query = null): array
 	{
+		$data = array();
 		// special 2nd color for 'binary' attribut
 		if ($this->table_array[$element_name]['type'] == 'binary' && !isset($this->table_array[$element_name]['value'])) {
 			$EDIT_FGCOLOR_T = 'edit_fgcolor_no';
@@ -806,7 +807,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$query = "SELECT ".((isset($this->table_array[$element_name]['select_distinct']) && $this->table_array[$element_name]['select_distinct']) ? "DISTINCT" : '');
 				$query .= " ".$this->table_array[$element_name]['pk_name'].", ".$this->table_array[$element_name]['input_name']." ";
 				if (!empty($this->table_array[$element_name]['order_by'])) {
-					$query .", ".$this->table_array[$element_name]['order_by']." ";
+					$query .= ", ".$this->table_array[$element_name]['order_by']." ";
 				}
 				$query .= "FROM ".$this->table_array[$element_name]['table_name'];
 				// possible where statements
@@ -1107,8 +1108,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					// $this->debug('edit_error_chk', 'K: '.$_POST[$prfx.$key].' | '.$_POST[$prfx.$key][0]);
 				}
 				$this->debug('POST ARRAY', $this->printAr($_POST));
+				// init variables before inner loop run
 				$mand_okay = 0;
 				$mand_name = '';
+				$row_okay = array();
+				$default_wrong = array();
+				$error = array();
+				$element_set = array();
 				# check each row
 				for ($i = 0; $i < $max; $i ++) {
 					// either one of the post pks is set, or the mandatory
@@ -1221,7 +1227,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function formUnsetTableArray(): void
 	{
-		unset($this->pk_id);
+		$this->pk_id = null;
 		if (!is_array($this->table_array)) {
 			$this->table_array = array();
 		}
@@ -1670,6 +1676,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// DESC  : creates the multiple select part for a reference_table
 	public function formCreateElementReferenceTable($table_name)
 	{
+		$data = array();
 		$output_name = $this->reference_array[$table_name]['output_name'];
 		if ($this->reference_array[$table_name]['mandatory']) {
 			$output_name .= ' *';
@@ -1698,6 +1705,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function formCreateElementListTable(string $table_name): array
 	{
+		$data = array();
 		// output name for the viewable left table td box, prefixed with * if mandatory
 		$output_name = $this->element_list[$table_name]['output_name'];
 		if (isset($this->element_list[$table_name]['mandatory'])) {

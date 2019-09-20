@@ -358,7 +358,7 @@ class PgSQL
 			$this->last_error_query = '';
 			$cursor = pg_get_result($this->dbh);
 		}
-		if (pg_result_error($cursor)) {
+		if ($cursor && pg_result_error($cursor)) {
 			return "<span style=\"color: red;\"><b>-PostgreSQL-Error-></b> ".pg_result_error($cursor)."</span><br>";
 		} else {
 			return '';

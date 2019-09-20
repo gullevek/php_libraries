@@ -68,6 +68,10 @@ if (TARGET == 'live' || TARGET == 'remote') {
 }
 // space for setting special debug flags
 $login->debug_output_all = 1;
+// set smarty arrays
+$HEADER = array();
+$DATA = array();
+$DEBUG_DATA = array();
 // set the template dir
 // WARNING: this has a special check for the mailing tool layout (old layout)
 if (defined('LAYOUT')) {
@@ -153,6 +157,7 @@ if ($form->my_page_name == 'edit_order') {
 	}
 	$q .= "ORDER BY order_number";
 
+	$row_data = array();
 	while ($res = $form->dbReturn($q)) {
 		$row_data[] = array(
 			"id" => $res[$table_name."_id"],
@@ -226,6 +231,7 @@ if ($form->my_page_name == 'edit_order') {
 
 	$DATA['table_width'] = $table_width;
 
+	$messages = array();
 	// write out error / status messages
 	$messages[] = $form->formPrintMsg();
 	$DATA['form_error_msg'] = $messages;

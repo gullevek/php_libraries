@@ -324,7 +324,6 @@ class Backend extends \CoreLibs\DB\IO
 	 * @param  int         $size_y       maximum size height
 	 * @param  string      $dummy        empty, or file_type to show an icon instead of nothing if file is not found
 	 * @param  string      $path         if source start is not ROOT path, if empty ROOT is choosen
-	 * @param  string      $cache_source cache path, if not given TMP is used
 	 * @return string|bool               thumbnail name, or false for error
 	 */
 	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = '', $path = "", $cache = "")
@@ -400,8 +399,8 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "'".$this->dbEscapeString($queue_key)."', '".$this->dbEscapeString($key_value)."', ";
 		$q .= "'".$this->dbEscapeString($key_name)."', '".$this->dbEscapeString($type)."', ";
 		$q .= "'".$this->dbEscapeString($target)."', '".$this->dbEscapeString($data)."', ";
-		$q .= "'".$this->queue_key."', '".$this->action."', '".$this->dbEscapeString($associate)."', ";
-		$q .= "'".$this->dbEscapeString($file)."')";
+		$q .= "'".$this->queue_key."', '".$this->action."', '".$this->dbEscapeString((string)$associate)."', ";
+		$q .= "'".$this->dbEscapeString((string)$file)."')";
 		$this->dbExec($q);
 	}
 

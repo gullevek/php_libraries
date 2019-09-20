@@ -443,7 +443,7 @@ class IO extends \CoreLibs\Basic
 	{
 		if (isset($this->dbh) && $this->dbh) {
 			$this->db_functions->__dbClose();
-			unset($this->dbh);
+			$this->dbh = null;
 		}
 	}
 
@@ -559,7 +559,7 @@ class IO extends \CoreLibs\Basic
 	public function __dbError($cursor = false, string $msg = ''): void
 	{
 		$pg_error_string = '';
-		$where_called = $this->getCallerMethod();
+		$where_called = (string)$this->getCallerMethod();
 		if ($cursor) {
 			$pg_error_string = $this->db_functions->__dbPrintError($cursor);
 		}
@@ -890,7 +890,7 @@ class IO extends \CoreLibs\Basic
 	{
 		if ($this->dbh) {
 			$this->db_functions->__dbClose();
-			unset($this->dbh);
+			$this->dbh = null;
 		}
 	}
 

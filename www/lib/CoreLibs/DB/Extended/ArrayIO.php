@@ -234,7 +234,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			$q .= ' AND '.$q_where;
 		}
 		// if 0, error
-		unset($this->pk_id);
+		$this->pk_id = null;
 		if (!$this->dbExec($q)) {
 			$this->error_id = 92;
 			$this->__dbError();

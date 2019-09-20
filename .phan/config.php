@@ -43,7 +43,7 @@ return [
 
 	// Only emit critical issues to start with
 	// (0 is low severity, 5 is normal severity, 10 is critical)
-	"minimum_severity" => 5,
+	"minimum_severity" => 0,
 
 	// default false for include path check
 	"enable_include_path_checks" => true,
@@ -113,6 +113,7 @@ return [
 	// what not to show as problem
 	'suppress_issue_types' => [
 		// 'PhanUndeclaredMethod',
+		'PhanEmptyFile',
 	],
 
 	// Override to hardcode existence and types of (non-builtin) globals in the global scope.

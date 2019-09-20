@@ -426,8 +426,9 @@ class Basic
 	 * CLASS_OFF_COMPATIBLE_MODE: 2 -> if set turns of auto set for unset variables
 	 * 3 -> sets error on unset and does not set variable (strict)
 	 * @param  int    $set_control_flag control flag as 0/1/2/3
+	 * @return void
 	 */
-	private function __setControlFlag(int $set_control_flag)
+	private function __setControlFlag(int $set_control_flag): void
 	{
 		// is there either a constant or global set to override the control flag
 		if (defined('CLASS_VARIABLE_ERROR_MODE')) {
@@ -453,17 +454,17 @@ class Basic
 	 * if strict mode is set, throws an error if the class variable is not set
 	 * if compatible mode is set, also auto sets variable even if not declared
 	 * default is strict mode false and compatible mode on
-	 * @param mixed $name  class variable name
-	 * @param mixed $value class varaible value
+	 * @param  mixed $name  class variable name
+	 * @return void
 	 */
-	public function __set($name, $value)
+	public function __set($name, $value): void
 	{
 		if ($this->set_strict_mode === true && !property_exists($this, $name)) {
 			trigger_error('Undefined property via __set(): '.$name, E_USER_NOTICE);
 		}
 		// use this for fallback as to work like before to set unset
 		if ($this->set_compatible === true) {
-			return $this->{$name} = $value;
+			$this->{$name} = $value;
 		}
 	}
 
@@ -471,9 +472,9 @@ class Basic
 	 * if strict mode is set, throws an error if the class variable is not set
 	 * default is strict mode false
 	 * @param  mixed $name class variable name
-	 * @return void        no return
+	 * @return void
 	 */
-	public function __get($name)
+	public function __get($name): void
 	{
 		if ($this->set_strict_mode === true && !property_exists($this, $name)) {
 			trigger_error('Undefined property via __get(): '.$name, E_USER_NOTICE);
@@ -488,7 +489,7 @@ class Basic
 	 * sets the internal log file prefix id
 	 * string must be a alphanumeric string
 	 * if non valid string is given it returns the previous set one only
-	 * @param string $string log file id string value
+	 * @param  string $string log file id string value
 	 * @return string        returns the set log file id string
 	 */
 	public function basicSetLogId(string $string): string
@@ -859,7 +860,7 @@ class Basic
 	public function resetErrorMsg(string $level = ''): void
 	{
 		if (!$level) {
-			unset($this->error_msg);
+			$this->error_msg = array();
 		} elseif (isset($this->error_msg[$level])) {
 			unset($this->error_msg[$level]);
 		}
@@ -951,7 +952,7 @@ class Basic
 		return join(
 			'',
 			array_map(
-				function () {
+				function ($value) {
 					return $this->key_range[rand(0, $this->one_key_length - 1)];
 				},
 				range(1, $use_key_length)
@@ -2314,8 +2315,8 @@ class Basic
 	 * converts the rgb values from int data to the valid rgb html hex string
 	 * optional can turn of leading #
 	 * @param  int    $red        red 0-255
-	 * @param  int    $green      blue 0-255
-	 * @param  int    $blue       green 0-255
+	 * @param  int    $green      green 0-255
+	 * @param  int    $blue       blue 0-255
 	 * @param  bool   $hex_prefix default true, prefix with "#"
 	 * @return string             rgb in hex values with leading # if set
 	 */
@@ -2338,10 +2339,10 @@ class Basic
 
 	/**
 	 * converts and int RGB to the HTML color string in hex format
-	 * @param  int    $red   [description]
-	 * @param  int    $green [description]
-	 * @param  int    $blue  [description]
-	 * @return [type]        [description]
+	 * @param  int    $red   red 0-255
+	 * @param  int    $green green 0-255
+	 * @param  int    $blue  blue 0-255
+	 * @return string        hex rgb string
 	 * @deprecated use rgb2hex instead
 	 */
 	public static function rgb2html(int $red, int $green, int $blue): string

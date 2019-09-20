@@ -204,7 +204,7 @@ if ((!isset($SITE_CONFIG[$HOST_NAME]['db_host']) && count($DB_CONFIG)) ||
 	)
 ) {
 	echo 'No matching DB config found for: "'.$HOST_NAME.'". Contact Administrator';
-	exit -1;
+	exit;
 }
 // set HOST name
 DEFINE('HOST_NAME', $HOST_NAME);
