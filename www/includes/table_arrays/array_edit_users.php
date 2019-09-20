@@ -1,29 +1,29 @@
 <?php declare(strict_types=1);
 
-$edit_users = array (
-	'table_array' => array (
-		'edit_user_id' => array (
+$edit_users = array(
+	'table_array' => array(
+		'edit_user_id' => array(
 			'value' => isset($GLOBALS['edit_user_id']) ? $GLOBALS['edit_user_id'] : '',
 			'type' => 'hidden',
 			'pk' => 1,
 			'int' => 1
 		),
-		'username' => array (
+		'username' => array(
 			'value' => isset($GLOBALS['username']) ? $GLOBALS['username'] : '',
 			'output_name' => 'Username',
 			'mandatory' => 1,
 			'error_check' => 'unique|alphanumericextended',
 			'type' => 'text'
 		),
-		'password' => array (
+		'password' => array(
 			'value' => isset($GLOBALS['password']) ? $GLOBALS['password'] : '',
 			'HIDDEN_value' => isset($GLOBALS['HIDDEN_password']) ? $GLOBALS['HIDDEN_password'] : '',
 			'CONFIRM_value' => isset($GLOBALS['CONFIRM_password']) ? $GLOBALS['CONFIRM_password'] : '',
 			'output_name' => 'Password',
 			'mandatory' => 1,
 			'type' => 'password', // later has to be password for encryption in database
-			'update' => array ( // connected field updates, and update data
-				'password_change_date' => array ( // db row to update
+			'update' => array( // connected field updates, and update data
+				'password_change_date' => array( // db row to update
 					'type' => 'date', // type of field (int/text/date/etc)
 					'value' => 'NOW()' // value [todo: complex reference
 				)
@@ -31,7 +31,7 @@ $edit_users = array (
 		),
 		// password date when first insert and password is set, needs special field with connection to password
 		// password reset force interval, if set, user needs to reset password after X time period
-		'password_change_interval' => array (
+		'password_change_interval' => array(
 			'value' => isset($GLOBALS['password_change_interval']) ? $GLOBALS['password_change_interval'] : '',
 			'output_name' => 'Password change interval',
 			'error_check' => 'intervalshort', // can be any date length format. n Y/M/D [not H/M/S], only one set, no combination
@@ -40,83 +40,83 @@ $edit_users = array (
 			'size' => 5, // make it 5 chars long
 			'length' => 5
 		),
-		'enabled' => array (
+		'enabled' => array(
 			'value' => isset($GLOBALS['enabled']) ? $GLOBALS['enabled'] : '',
 			'output_name' => 'Enabled',
 			'type' => 'binary',
 			'int' => 1,
-			'element_list' => array (
+			'element_list' => array(
 				'1' => 'Yes',
 				'0' => 'No'
 			)
 		),
-		'strict' => array (
+		'strict' => array(
 			'value' => isset($GLOBALS['strict']) ? $GLOBALS['strict'] : '',
 			'output_name' => 'Strict (Lock after errors)',
 			'type' => 'binary',
 			'int' => 1,
-			'element_list' => array (
+			'element_list' => array(
 				'1' => 'Yes',
 				'0' => 'No'
 			)
 		),
-		'locked' => array (
+		'locked' => array(
 			'value' => isset($GLOBALS['locked']) ? $GLOBALS['locked'] : '',
 			'output_name' => 'Locked (auto set if strict with errors)',
 			'type' => 'binary',
 			'int' => 1,
-			'element_list' => array (
+			'element_list' => array(
 				'1' => 'Yes',
 				'0' => 'No'
 			)
 		),
-		'admin' => array (
+		'admin' => array(
 			'value' => isset($GLOBALS['admin']) ? $GLOBALS['admin'] : '',
 			'output_name' => 'Admin',
 			'type' => 'binary',
 			'int' => 1,
-			'element_list' => array (
+			'element_list' => array(
 				'1' => 'Yes',
 				'0' => 'No'
 			)
 		),
-		'debug' => array (
+		'debug' => array(
 			'value' => isset($GLOBALS['debug']) ? $GLOBALS['debug'] : '',
 			'output_name' => 'Debug',
 			'type' => 'binary',
 			'int' => 1,
-			'element_list' => array (
+			'element_list' => array(
 				'1' => 'Yes',
 				'0' => 'No'
 			)
 		),
-		'db_debug' => array (
+		'db_debug' => array(
 			'value' => isset($GLOBALS['db_debug']) ? $GLOBALS['db_debug'] : '',
 			'output_name' => 'DB Debug',
 			'type' => 'binary',
 			'int' => 1,
-			'element_list' => array (
+			'element_list' => array(
 				'1' => 'Yes',
 				'0' => 'No'
 			)
 		),
-		'email' => array (
+		'email' => array(
 			'value' => isset($GLOBALS['email']) ? $GLOBALS['email'] : '',
 			'output_name' => 'E-Mail',
 			'type' => 'text',
 			'error_check' => 'email'
 		),
-		'last_name' => array (
+		'last_name' => array(
 			'value' => isset($GLOBALS['last_name']) ? $GLOBALS['last_name'] : '',
 			'output_name' => 'Last Name',
 			'type' => 'text'
 		),
-		'first_name' => array (
+		'first_name' => array(
 			'value' => isset($GLOBALS['first_name']) ? $GLOBALS['first_name'] : '',
 			'output_name' => 'First Name',
 			'type' => 'text'
 		),
-		'edit_language_id' => array (
+		'edit_language_id' => array(
 			'value' => isset($GLOBALS['edit_language_id']) ? $GLOBALS['edit_language_id'] : '',
 			'output_name' => 'Language',
 			'mandatory' => 1,
@@ -124,14 +124,14 @@ $edit_users = array (
 			'type' => 'drop_down_db',
 			'query' => "SELECT edit_language_id, long_name FROM edit_language WHERE enabled = 1 ORDER BY order_number"
 		),
-		'edit_scheme_id' => array (
+		'edit_scheme_id' => array(
 			'value' => isset($GLOBALS['edit_scheme_id']) ? $GLOBALS['edit_scheme_id'] : '',
 			'output_name' => 'Scheme',
 			'int_null' => 1,
 			'type' => 'drop_down_db',
 			'query' => "SELECT edit_scheme_id, name FROM edit_scheme WHERE enabled = 1 ORDER BY name"
 		),
-		'edit_group_id' => array (
+		'edit_group_id' => array(
 			'value' => isset($GLOBALS['edit_group_id']) ? $GLOBALS['edit_group_id'] : '',
 			'output_name' => 'Group',
 			'int' => 1,
@@ -139,7 +139,7 @@ $edit_users = array (
 			'query' => "SELECT edit_group_id, name FROM edit_group WHERE enabled = 1 ORDER BY name",
 			'mandatory' => 1
 		),
-		'edit_access_right_id' => array (
+		'edit_access_right_id' => array(
 			'value' => isset($GLOBALS['edit_access_right_id']) ? $GLOBALS['edit_access_right_id'] : '',
 			'output_name' => 'User Level',
 			'mandatory' => 1,
@@ -147,35 +147,35 @@ $edit_users = array (
 			'type' => 'drop_down_db',
 			'query' => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level"
 		),
-		'login_error_count' => array (
+		'login_error_count' => array(
 			'output_name' => 'Login error count',
 			'value' => isset($GLOBALS['login_error_count']) ? $GLOBALS['login_error_count'] : '',
 			'type' => 'view',
 			'empty' => '0'
 		),
-		'login_error_date_last' => array (
+		'login_error_date_last' => array(
 			'output_name' => 'Last login error',
 			'value' => isset($GLOBALS['login_error_date_liast']) ? $GLOBALS['login_error_date_liast'] : '',
 			'type' => 'view',
 			'empty' => '-'
 		),
-		'login_error_date_first' => array (
+		'login_error_date_first' => array(
 			'output_name' => 'First login error',
 			'value' => isset($GLOBALS['login_error_date_first']) ? $GLOBALS['login_error_date_first'] : '',
 			'type' => 'view',
 			'empty' => '-'
 		),
-		'protected' => array (
+		'protected' => array(
 			'value' => isset($GLOBALS['protected']) ? $GLOBALS['protected'] : '',
 			'output_name' => 'Protected',
 			'type' => 'binary',
 			'int' => 1,
-			'element_list' => array (
+			'element_list' => array(
 				'1' => 'Yes',
 				'0' => 'No'
 			)
 		),
-		'additional_acl' => array (
+		'additional_acl' => array(
 			'value' => isset($GLOBALS['additional_acl']) ? $GLOBALS['additional_acl'] : '',
 			'output_name' => 'Additional ACL (as JSON)',
 			'type' => 'textarea',
@@ -186,79 +186,79 @@ $edit_users = array (
 	),
 	'load_query' => "SELECT edit_user_id, username, enabled, debug, db_debug, strict, locked, login_error_count FROM edit_user ORDER BY username",
 	'table_name' => 'edit_user',
-	'show_fields' => array (
-		array (
+	'show_fields' => array(
+		array(
 			'name' => 'username'
 		),
-		array (
+		array(
 			'name' => 'enabled',
-			'binary' => array ('Yes', 'No'),
+			'binary' => array('Yes', 'No'),
 			'before_value' => 'Enabled: '
 		),
-		array (
+		array(
 			'name' => 'debug',
-			'binary' => array ('Yes', 'No'),
+			'binary' => array('Yes', 'No'),
 			'before_value' => 'Debug: '
 		),
-		array (
+		array(
 			'name' => 'db_debug',
-			'binary' => array ('Yes', 'No'),
+			'binary' => array('Yes', 'No'),
 			'before_value' => 'DB Debug: '
 		),
-		array (
+		array(
 			'name' => 'strict',
-			'binary' => array ('Yes', 'No'),
+			'binary' => array('Yes', 'No'),
 			'before_value' => 'Strict: '
 		),
-		array (
+		array(
 			'name' => 'locked',
-			'binary' => array ('Yes', 'No'),
+			'binary' => array('Yes', 'No'),
 			'before_value' => 'Locked: '
 		),
-		array (
+		array(
 			'name' => 'login_error_count',
 			'before_value' => 'Errors: '
 		)
 	),
-	'element_list' => array (
-		'edit_access_user' => array (
+	'element_list' => array(
+		'edit_access_user' => array(
 			'output_name' => 'Accounts',
 			'mandatory' => 1,
 			'delete' => 0, // set then reference entries are deleted, else the 'enable' flag is only set
 			'prefix' => 'ecu',
-			'read_data' => array (
+			'read_data' => array(
 				'table_name' => 'edit_access',
 				'pk_id' => 'edit_access_id',
 				'name' => 'name',
 				'order' => 'name'
 			),
-			'elements' => array (
-				'edit_access_user_id' => array (
+			'elements' => array(
+				'edit_access_user_id' => array(
 					'output_name' => 'Activate',
 					'type' => 'hidden',
 					'int' => 1,
 					'pk_id' => 1
 				),
-				'enabled' => array (
+				'enabled' => array(
 					'type' => 'checkbox',
 					'output_name' => 'Activate',
 					'int' => 1,
-					'element_list' => array (1)
+					'element_list' => array(1)
 				),
-				'edit_access_right_id' => array (
+				'edit_access_right_id' => array(
 					'type' => 'drop_down_db',
 					'output_name' => 'Access Level',
 					'preset' => 1, // first of the select
 					'int' => 1,
 					'query' => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level"
 				),
-				'edit_default' => array (
+				'edit_default' => array(
 					'type' => 'radio_group',
 					'output_name' => 'Default',
 					'int' => 1,
 					'element_list' => 'radio_group'
 				),
-				'edit_access_id' => array (
+				'edit_access_id' => array(
 					'type' => 'hidden',
 					'int' => 1
 				)

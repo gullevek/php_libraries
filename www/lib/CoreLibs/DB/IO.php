@@ -41,7 +41,7 @@
 *   $class_name
 *     - the name of the class
 *   $class_version
-*     - the version as an array (major, minor, patchlvl, daypatch)
+*     - the version as an array(major, minor, patchlvl, daypatch)
 *   $class_last_changed
 *     - date (mysql format) for the last change
 *   $class_created
@@ -134,7 +134,7 @@
 *     - correctly escapes string for db insert
 *   $string db_boolean(string)
 *     - if the string value is 't' or 'f' it returns correct TRUE/FALSE for php
-*   $primary_key db_write_data($write_array, $not_write_array, $primary_key, $table, $data = array ())
+*   $primary_key db_write_data($write_array, $not_write_array, $primary_key, $table, $data = array())
 *     - writes into one table based on arrays of columns to write and not write, reads data from global vars or optional array
 *   $boolean db_set_schema(schema)
 *     - sets search path to a schema
@@ -147,7 +147,7 @@
 *   _db_error()
 *     - INTERNAL ONLY!! error that occured during execution
 *   $string _print_array($array)
-*     - returns string of an array (only for interal use)
+*     - returns string of an array(only for interal use)
 *   1/0 _connect_to_db()
 *     - returns 1 for successfull DB connection or 0 for none
 *   1/0 _check_query_for_select($query)
@@ -270,7 +270,7 @@ class IO extends \CoreLibs\Basic
 	public $cursor; // actual cursor (DBH)
 	public $num_rows; // how many rows have been found
 	public $num_fields; // how many fields has the query
-	public $field_names = array (); // array with the field names of the current query
+	public $field_names = array(); // array with the field names of the current query
 	public $insert_id; // last inserted ID
 	public $insert_id_ext; // extended insert ID (for data outside only primary key)
 	private $temp_sql;
@@ -288,14 +288,14 @@ class IO extends \CoreLibs\Basic
 
 	// endless loop protection
 	private $MAX_QUERY_CALL;
-	private $query_called = array ();
+	private $query_called = array();
 	// error string
-	protected $error_string = array ();
+	protected $error_string = array();
 	// prepared list
-	public $prepare_cursor = array ();
+	public $prepare_cursor = array();
 	// primary key per table list
 	// format is 'table' => 'pk_name'
-	public $pk_name_table = array ();
+	public $pk_name_table = array();
 	// internal primary key name, for cross calls in async
 	public $pk_name;
 	// if we use RETURNING in the INSERT call
@@ -314,7 +314,7 @@ class IO extends \CoreLibs\Basic
 		parent::__construct($set_control_flag);
 		// dummy init array for db config if not array
 		if (!is_array($db_config)) {
-			$db_config = array ();
+			$db_config = array();
 		}
 		// sets the names (for connect/reconnect)
 		$this->db_name = $db_config['db_name'] ?? '';
@@ -508,7 +508,7 @@ class IO extends \CoreLibs\Basic
 	{
 		$string = '';
 		if (!is_array($array)) {
-			$array = array ();
+			$array = array();
 		}
 		foreach ($array as $key => $value) {
 			$string .= $this->nbsp.'<b>'.$key.'</b> => ';
@@ -765,7 +765,7 @@ class IO extends \CoreLibs\Basic
 				// count the fields
 				$this->num_fields = $this->db_functions->__dbNumFields($this->cursor);
 				// set field names
-				$this->field_names = array ();
+				$this->field_names = array();
 				for ($i = 0; $i < $this->num_fields; $i ++) {
 					$this->field_names[] = $this->db_functions->__dbFieldName($this->cursor, $i);
 				}
@@ -781,8 +781,8 @@ class IO extends \CoreLibs\Basic
 					if (!$this->returning_id) {
 						$this->insert_id = $this->db_functions->__dbInsertId($this->query, $this->pk_name);
 					} else {
-						$this->insert_id = array ();
-						$this->insert_id_ext = array ();
+						$this->insert_id = array();
+						$this->insert_id_ext = array();
 						// echo "** PREPARE RETURNING FOR CURSOR: ".$this->cursor."<br>";
 						// we have returning, now we need to check if we get one or many returned
 						// we'll need to loop this, if we have multiple insert_id returns
@@ -1033,7 +1033,7 @@ class IO extends \CoreLibs\Basic
 		$md5 = md5($query);
 		// pre declare array
 		if (!isset($this->cursor_ext[$md5])) {
-			$this->cursor_ext[$md5] = array (
+			$this->cursor_ext[$md5] = array(
 				'query' => '',
 				'pos' => 0,
 				'cursor' => 0,
@@ -1135,7 +1135,7 @@ class IO extends \CoreLibs\Basic
 					$return = false;
 				} else {
 					// unset return value ...
-					$return = array ();
+					$return = array();
 					for ($i = 0; $i < $this->cursor_ext[$md5]['num_fields']; $i ++) {
 						// create mixed return array
 						if ($assoc_only === false && isset($this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i])) {
@@ -1171,7 +1171,7 @@ class IO extends \CoreLibs\Basic
 					$this->cursor_ext[$md5]['read_rows'] ++;
 					// if reset is <3 caching is done, else no
 					if ($reset < 3) {
-						$temp = array ();
+						$temp = array();
 						foreach ($return as $field_name => $data) {
 							$temp[$field_name] = $data;
 						}
@@ -1361,9 +1361,9 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$cursor = $this->dbExec($query);
-		$rows = array ();
+		$rows = array();
 		while ($res = $this->dbFetchArray($cursor, $assoc_only)) {
-			$data = array ();
+			$data = array();
 			for ($i = 0; $i < $this->num_fields; $i ++) {
 				$data[$this->field_names[$i]] = $res[$this->field_names[$i]];
 			}
@@ -1547,8 +1547,8 @@ class IO extends \CoreLibs\Basic
 				if (!$this->prepare_cursor[$stm_name]['returning_id']) {
 					$this->insert_id = $this->db_functions->__dbInsertId($this->prepare_cursor[$stm_name]['query'], $this->prepare_cursor[$stm_name]['pk_name']);
 				} elseif ($result) {
-					$this->insert_id = array ();
-					$this->insert_id_ext = array ();
+					$this->insert_id = array();
+					$this->insert_id_ext = array();
 					// we have returning, now we need to check if we get one or many returned
 					// we'll need to loop this, if we have multiple insert_id returns
 					while ($_insert_id = $this->db_functions->__dbFetchArray(
@@ -1738,18 +1738,18 @@ class IO extends \CoreLibs\Basic
 	 * @param  array    $data            data array to override _POST data
 	 * @return int|bool                  primary key
 	 */
-	public function dbWriteData(array $write_array, array $not_write_array, $primary_key, string $table, $data = array ())
+	public function dbWriteData(array $write_array, array $not_write_array, $primary_key, string $table, $data = array())
 	{
 		if (!is_array($write_array)) {
-			$write_array = array ();
+			$write_array = array();
 		}
 		if (!is_array($not_write_array)) {
-			$not_write_array = array ();
+			$not_write_array = array();
 		}
 		if (is_array($table)) {
 			return false;
 		}
-		$not_write_update_array = array ();
+		$not_write_update_array = array();
 		return $this->dbWriteDataExt($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
 	}
 
@@ -1757,7 +1757,7 @@ class IO extends \CoreLibs\Basic
 	 * writes into one table based on array of table columns
 	 * PARAM INFO: $primary key
 	 * this can be a plain string/int and will be internal transformed into the array form
-	 * or it takes the array form of array (row => column, value => pk value)
+	 * or it takes the array form of array(row => column, value => pk value)
 	 * @param  array            $write_array            list of elements to write
 	 * @param  int|string|array $primary_key            primary key string or array set
 	 * @param  string           $table                  name for the target table
@@ -1770,12 +1770,12 @@ class IO extends \CoreLibs\Basic
 		array $write_array,
 		$primary_key,
 		string $table,
-		array $not_write_array = array (),
-		array $not_write_update_array = array (),
-		array $data = array ()
+		array $not_write_array = array(),
+		array $not_write_update_array = array(),
+		array $data = array()
 	) {
 		if (!is_array($primary_key)) {
-			$primary_key = array (
+			$primary_key = array(
 				'row' => $table.'_id',
 				'value' => $primary_key
 			);
@@ -1895,7 +1895,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function dbArrayParse(string $text): array
 	{
-		$output = array ();
+		$output = array();
 		return $this->db_functions->__dbArrayParse($text, $output);
 	}
 

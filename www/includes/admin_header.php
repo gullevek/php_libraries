@@ -14,7 +14,7 @@ if ($DEBUG_ALL && $ENABLE_ERROR_HANDLING) {
 }
 // predefine vars
 $lang = '';
-$messages = array ();
+$messages = array();
 // import all POST vars
 extract($_POST, EXTR_SKIP);
 //------------------------------ variable init end
@@ -70,7 +70,7 @@ ob_end_flush();
 //------------------------------ logging start
 // log backend data
 // data part creation
-$data = array (
+$data = array(
 	'_SESSION' => $_SESSION,
 	'_GET' => $_GET,
 	'_POST' => $_POST,

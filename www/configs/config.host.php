@@ -13,9 +13,9 @@
 *********************************************************************/
 
 // each host has a different db_host
-$SITE_CONFIG = array (
+$SITE_CONFIG = array(
 	// development host
-	'soba.tokyo.tequila.jp' => array (
+	'soba.tokyo.tequila.jp' => array(
 		// db config selection
 		'db_host' => 'test',
 		// other db connections

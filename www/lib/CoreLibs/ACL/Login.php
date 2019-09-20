@@ -78,33 +78,33 @@ class Login extends \CoreLibs\DB\IO
 	private $pw_old_password;
 	private $pw_new_password;
 	private $pw_new_password_confirm;
-	private $pw_change_deny_users = array (); // array of users for which the password change is forbidden
+	private $pw_change_deny_users = array(); // array of users for which the password change is forbidden
 	private $logout_target;
 	private $max_login_error_count = -1;
-	private $lock_deny_users = array ();
+	private $lock_deny_users = array();
 
 	// if we have password change we need to define some rules
 	private $password_min_length = PASSWORD_MIN_LENGTH;
 	// max length is fixed as 255 (for input type max), if set highter, it will be set back to 255
 	private $password_max_length = PASSWORD_MAX_LENGTH;
 	// can have several regexes, if nothing set, all is ok
-	private $password_valid_chars = array (
+	private $password_valid_chars = array(
 		// '^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$',
 		// '^(?.*(\pL)u)(?=.*(\pN)u)(?=.*([^\pL\pN])u).{8,}',
 	);
 
 	// all possible login error conditions
-	private $login_error_msg = array ();
+	private $login_error_msg = array();
 	// this is an array holding all strings & templates passed from the outside (translation)
-	private $login_template = array (
-		'strings' => array (),
+	private $login_template = array(
+		'strings' => array(),
 		'password_change' => '',
 		'template' => ''
 	);
 
 	// acl vars
-	public $acl = array ();
-	public $default_acl_list = array ();
+	public $acl = array();
+	public $default_acl_list = array();
 
 	// language
 	public $l;
@@ -207,7 +207,7 @@ class Login extends \CoreLibs\DB\IO
 		// logout target (from config)
 		$this->logout_target = LOGOUT_TARGET;
 		// disallow user list for password change
-		$this->pw_change_deny_users = array ('admin');
+		$this->pw_change_deny_users = array('admin');
 		// set flag if password change is okay
 		if (defined('PASSWORD_CHANGE')) {
 			$this->password_change = PASSWORD_CHANGE;
@@ -219,15 +219,15 @@ class Login extends \CoreLibs\DB\IO
 		// max login counts before error reporting
 		$this->max_login_error_count = 10;
 		// users that never get locked, even if they are set strict
-		$this->lock_deny_users = array ('admin');
+		$this->lock_deny_users = array('admin');
 
 		// init default ACL list array
-		$_SESSION['DEFAULT_ACL_LIST'] = array ();
+		$_SESSION['DEFAULT_ACL_LIST'] = array();
 		// read the current edit_access_right list into an array
 		$q = "SELECT level, type, name FROM edit_access_right WHERE level >= 0 ORDER BY level";
 		while ($res = $this->dbReturn($q)) {
 			// level to description format (numeric)
-			$this->default_acl_list[$res['level']] = array (
+			$this->default_acl_list[$res['level']] = array(
 				'type' => $res['type'],
 				'name' => $res['name']
 			);
@@ -428,7 +428,7 @@ class Login extends \CoreLibs\DB\IO
 							}
 							$edit_page_ids = array();
 							$pages = array();
-							$pages_acl = array ();
+							$pages_acl = array();
 							// set pages access
 							$q = "SELECT ep.edit_page_id, ep.cuid, epca.cuid AS content_alias_uid, ep.filename, ep.name AS edit_page_name, ep.order_number AS edit_page_order, ep.menu, ";
 							$q .= "ep.popup, ep.popup_x, ep.popup_y, ep.online, ear.level, ear.type ";
@@ -442,7 +442,7 @@ class Login extends \CoreLibs\DB\IO
 								// page id array for sub data readout
 								$edit_page_ids[$res['edit_page_id']] = $res['cuid'];
 								// create the array for pages
-								$pages[$res['cuid']] = array (
+								$pages[$res['cuid']] = array(
 									'edit_page_id' => $res['edit_page_id'],
 									'cuid' => $res['cuid'],
 									'content_alias_uid' => $res['content_alias_uid'], // for reference of content data on a differen page
@@ -456,8 +456,8 @@ class Login extends \CoreLibs\DB\IO
 									'online' => $res['online'],
 									'acl_level' => $res['level'],
 									'acl_type' => $res['type'],
-									'query' => array (),
-									'visible' => array ()
+									'query' => array(),
+									'visible' => array()
 								);
 								// make reference filename -> level
 								$pages_acl[$res['filename']] = $res['level'];
@@ -477,7 +477,7 @@ class Login extends \CoreLibs\DB\IO
 							$q .= "WHERE enabled = 1 AND edit_page_id IN (".join(', ', array_keys($edit_page_ids)).") ";
 							$q .= "ORDER BY eqs.edit_page_id";
 							while ($res = $this->dbReturn($q)) {
-								$pages[$edit_page_ids[$res['edit_page_id']]]['query'][] = array (
+								$pages[$edit_page_ids[$res['edit_page_id']]]['query'][] = array(
 									'name' => $res['name'],
 									'value' => $res['value'],
 									'dynamic' => $res['dynamic']
@@ -491,7 +491,7 @@ class Login extends \CoreLibs\DB\IO
 							$q .= "epc.edit_page_id IN (".join(', ', array_keys($edit_page_ids)).") ";
 							$q .= "ORDER BY epc.order_number";
 							while ($res = $this->dbReturn($q)) {
-								$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = array (
+								$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = array(
 									'name' => $res['name'],
 									'uid' => $res['uid'],
 									'online' => $res['online'],
@@ -516,12 +516,12 @@ class Login extends \CoreLibs\DB\IO
 							while ($res = $this->dbReturn($q)) {
 								// read edit access data fields and drop them into the unit access array
 								$q_sub ="SELECT name, value FROM edit_access_data WHERE enabled = 1 AND edit_access_id = ".$res['edit_access_id'];
-								$ea_data = array ();
+								$ea_data = array();
 								while ($res_sub = $this->dbReturn($q_sub)) {
 									$ea_data[$res_sub['name']] = $res_sub['value'];
 								}
 								// build master unit array
-								$unit_access[$res['edit_access_id']] = array (
+								$unit_access[$res['edit_access_id']] = array(
 									'id' => $res['edit_access_id'],
 									'acl_level' => $res['level'],
 									'acl_type' => $res['type'],
@@ -721,7 +721,7 @@ class Login extends \CoreLibs\DB\IO
 					}
 				}
 				// detail name/level set
-				$this->acl['unit_detail'][$ea_id] = array (
+				$this->acl['unit_detail'][$ea_id] = array(
 					'name' => $unit['name'],
 					'uid' => $unit['uid'],
 					'level' => $this->default_acl_list[$this->acl['unit'][$ea_id]]['name'],
@@ -906,10 +906,10 @@ class Login extends \CoreLibs\DB\IO
 			// if true, return error ajax
 			global $AJAX_PAGE;
 			if ($AJAX_PAGE === true) {
-				$data = array (
+				$data = array(
 					'status' => 'error',
 					'error_code' => $this->login_error,
-					'msg' =>  array (
+					'msg' =>  array(
 						'level' => 'error',
 						'str' => $this->l->__('Login necessary')
 					)
@@ -1020,7 +1020,7 @@ class Login extends \CoreLibs\DB\IO
 	 */
 	private function loginSetTemplates()
 	{
-		$strings = array (
+		$strings = array(
 			'HTML_TITLE' => $this->l->__('LOGIN'),
 			'TITLE' => $this->l->__('LOGIN'),
 			'USERNAME' => $this->l->__('Username'),
@@ -1031,7 +1031,7 @@ class Login extends \CoreLibs\DB\IO
 			'PASSWORD_CHANGE_BUTTON_VALUE' => $this->l->__('Change Password')
 		);
 
-		$error_msgs = array (
+		$error_msgs = array(
 			'100' => $this->l->__('Fatal Error: <b>[EUID] came in as GET/POST!</b>'), // actually obsolete
 			'1010' => $this->l->__('Fatal Error: <b>Login Failed - Wrong Username or Password</b>'), // user not found
 			'1011' => $this->l->__('Fatal Error: <b>Login Failed - Wrong Username or Password</b>'), // blowfish password wrong
@@ -1054,7 +1054,7 @@ class Login extends \CoreLibs\DB\IO
 
 		// if password change is okay
 		if ($this->password_change) {
-			$strings = array_merge($strings, array (
+			$strings = array_merge($strings, array(
 				'TITLE_PASSWORD_CHANGE' => 'Change Password for User',
 				'OLD_PASSWORD' => $this->l->__('Old Password'),
 				'NEW_PASSWORD' => $this->l->__('New Password'),
@@ -1081,7 +1081,7 @@ EOM;
 		if ($this->password_forgot) {
 		}
 		if (!$this->password_change && !$this->password_forgot) {
-			$strings = array_merge($strings, array (
+			$strings = array_merge($strings, array(
 				'JS_SHOW_HIDE' => '',
 				'PASSWORD_CHANGE_BUTTON' => '',
 				'PASSWORD_CHANGE_DIV' => ''
@@ -1186,7 +1186,7 @@ EOM;
 		} else {
 			$this->action = '';
 		}
-		$_data_binary = array (
+		$_data_binary = array(
 				'_SESSION' => $_SESSION,
 				'_GET' => $_GET,
 				'_POST' => $_POST,

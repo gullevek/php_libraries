@@ -444,7 +444,7 @@ class PgSQL
 	{
 		if (false === $limit) {
 			$limit = strlen($text) - 1;
-			$output = array ();
+			$output = array();
 		}
 		if ('{}' != $text) {
 			do {

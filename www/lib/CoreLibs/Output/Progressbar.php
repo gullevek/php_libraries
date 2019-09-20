@@ -157,7 +157,7 @@ class ProgressBar
 			$pixel = $bar - ($this->pedding * 2);
 		}
 
-		$position = array ();
+		$position = array();
 		switch ($this->direction) {
 			case 'right':
 				$position['left'] = $this->pedding;
@@ -212,7 +212,7 @@ class ProgressBar
 	 */
 	public function setFrame(int $width = 0, int $height = 0): void
 	{
-		$this->frame = array (
+		$this->frame = array(
 			'show' => true,
 			'left' => 20,
 			'top' => 35,

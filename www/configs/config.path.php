@@ -10,8 +10,8 @@
 
 // File and Folder paths
 // ID is TARGET (first array element)
-/*$PATHS = array (
-	'test' => array (
+/*$PATHS = array(
+	'test' => array(
 		'csv_path' => '',
 		'perl_bin' => '',
 		'other_url' => '',

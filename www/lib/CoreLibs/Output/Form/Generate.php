@@ -35,7 +35,7 @@
 *        'order_by' => 'order bY' string for drop_down_db(_input) if no query given but fields set
 *        'query' => for drop_down_db/array if no outer query given
 *        'preset' => value to preset when array is unset (available for all types)
-*        'element_list' => array ( 'true', 'false') - MUST (!) be set for binary
+*        'element_list' => array( 'true', 'false') - MUST (!) be set for binary
 *        'length' => 'nr' - only available for 'text' (maxlength)
 *        'size' => 'nr' - only available for 'text' (size of input field)
 *        'rows' => 'nr' - only available for 'textarea'
@@ -69,7 +69,7 @@
 *      array(
 *        'name' => 'name_of_col_in_query' - col from the query that should be shown
 *        'before_value' => 'text' - if set this text will be put in FRONT of the value from the col
-*        'binary' => array ('true','false') - for 1/0 fields in DB changes it int human readable format
+*        'binary' => array('true','false') - for 1/0 fields in DB changes it int human readable format
 *      ),
 *      ...
 *    ),
@@ -215,7 +215,7 @@ namespace CoreLibs\Output\Form;
 class Generate extends \CoreLibs\DB\Extended\ArrayIO
 {
 	// rest
-	public $field_array = array (); // for the load statetment describes which elements from the load query should be shown and i which format
+	public $field_array = array(); // for the load statetment describes which elements from the load query should be shown and i which format
 	public $load_query; // the query needed for loading a data set (one row in the table)
 	public $col_name; // the name of the columen (before _<type>) [used for order button]
 	public $yes; // the yes flag that triggers the template to show ALL and not only new/load
@@ -224,9 +224,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public $warning; // warning flag, for information (saved, loaded, etc)
 	public $archive_pk_name; // the pk name for the load select form
 	private $int_pk_name; // primary key, only internal usage
-	public $reference_array = array (); // reference arrays -> stored in $this->reference_array[$table_name]=>array();
+	public $reference_array = array(); // reference arrays -> stored in $this->reference_array[$table_name]=>array();
 	public $element_list; // element list for elements next to each other as a special sub group
-	public $table_array = array ();
+	public $table_array = array();
 	public $my_page_name; // the name of the page without .php extension
 	public $mobile_phone = false;
 	// buttons and checkboxes
@@ -246,7 +246,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public $l;
 
 	// now some default error msgs (english)
-	public $language_array = array ();
+	public $language_array = array();
 
 	/**
 	 * construct form generator
@@ -277,8 +277,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$config_array = ${$this->my_page_name};
 		} else {
 			// dummy created
-			$config_array = array (
-				'table_array' => array (),
+			$config_array = array(
+				'table_array' => array(),
 				'table_name' => '',
 			);
 		}
@@ -326,7 +326,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (!isset($config_array['security_level']) || !is_array($config_array['security_level']) ||
 			(is_array($config_array['security_level']) && count($config_array['security_level']) < 4)
 		) {
-			$config_array['security_level'] = array (
+			$config_array['security_level'] = array(
 				'load' => 100,
 				'new' => 100,
 				'save' => 100,
@@ -355,7 +355,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formDumpTableArray()
 	{
 		if (!is_array($this->table_array)) {
-			$this->table_array = array ();
+			$this->table_array = array();
 		}
 		reset($this->table_array);
 		$string = '<b>TABLE ARRAY DUMP:</b> '.$this->table_name.'<br>';
@@ -376,7 +376,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formGetColNameFromKey(string $want_key, ?string $key_value = null): ?string
 	{
 		if (!is_array($this->table_array)) {
-			$this->table_array = array ();
+			$this->table_array = array();
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -400,7 +400,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		$key_array = array();
 		if (!is_array($this->table_array)) {
-			$this->table_array = array ();
+			$this->table_array = array();
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -427,7 +427,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if ($this->warning) {
 			$class = 'warning';
 		}
-		return array (
+		return array(
 			'msg' => $this->msg,
 			'width' => $this->table_width,
 			'class' => $class
@@ -437,10 +437,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// next for functions are pre_test fkts for easier default new,load, etc handling
 	/**
 	 * default load procedure
-	 * @param  int  $archive_id archive id to load
-	 * @return void             has no return
+	 * @param  string $archive_id archive id to load
+	 * @return void               has no return
 	 */
-	public function formProcedureLoad(int $archive_id): void
+	public function formProcedureLoad(string $archive_id): void
 	{
 		if ($this->archive && $archive_id && $this->base_acl_level >= $this->security_level['load']) {
 			$this->formLoadTableArray($archive_id);
@@ -520,7 +520,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			!$this->error
 		) {
 			if (!is_array($element_list)) {
-				$element_list = array ();
+				$element_list = array();
 			}
 			for ($i = 0, $i_max = count($element_list); $i < $i_max; $i ++) {
 				// $this->debug('form_error', 'Array: '.is_array($this->element_list[$element_list[$i]]['read_data']).' | '.$this->element_list[$element_list[$i]]['delete']);
@@ -551,7 +551,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					!$this->element_list[$element_list[$i]]['delete']
 				) {
 					if (!isset($_POST[$id])) {
-						$_POST[$id] = array ();
+						$_POST[$id] = array();
 					}
 					for ($j = 0, $j_max = count($_POST[$id]); $j < $j_max; $j ++) {
 						// if it is not activated
@@ -594,8 +594,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		$pk_selected = '';
 		$t_pk_name = '';
-		$pk_names = array ();
-		$pk_ids = array ();
+		$pk_names = array();
+		$pk_ids = array();
 		// when security level is okay ...
 		if ($this->base_acl_level >= $this->security_level['load']) {
 			$t_pk_name = $this->archive_pk_name;
@@ -626,7 +626,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$pk_names[] = $t_string;
 			}
 		} // show it at all
-		return array (
+		return array(
 			't_pk_name' => $t_pk_name,
 			'pk_ids' => $pk_ids,
 			'pk_names' => $pk_names,
@@ -655,7 +655,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$new_name = $this->l->__('New');
 			}
 		} // security level okay
-		return array (
+		return array(
 			'new_name' => $new_name,
 			'show_checkbox' => $show_checkbox
 		);
@@ -742,8 +742,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$data['value'][] = $i;
 				$data['output'][] = $this->table_array[$element_name]['element_list'][$i];
 				$data['name'] = $element_name;
-				if (($i && isset($this->table_array[$element_name]['value'])) ||
-					(!$i && !isset($this->table_array[$element_name]['value']))
+				if (isset($this->table_array[$element_name]['value']) &&
+					(($i && $this->table_array[$element_name]['value']) ||
+					(!$i && !$this->table_array[$element_name]['value']))
 				) {
 					$data['checked'] = $this->table_array[$element_name]['value'];
 				}
@@ -927,7 +928,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formErrorCheck(): void
 	{
 		if (!is_array($this->table_array)) {
-			$this->table_array = array ();
+			$this->table_array = array();
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1068,7 +1069,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				}
 			}
 		} else {
-			$this->reference_array = array ();
+			$this->reference_array = array();
 		}
 		// $this->debug('edit_error', 'QS: <pre>'.print_r($_POST, true).'</pre>');
 		if (is_array($this->element_list)) {
@@ -1076,7 +1077,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// if mandatory, check that at least on pk exists or if at least the mandatory field is filled
 			foreach ($this->element_list as $table_name => $reference_array) {
 				if (!is_array($reference_array)) {
-					$reference_array = array ();
+					$reference_array = array();
 				}
 				// set pk/fk id for this
 				$_pk_name = '';
@@ -1222,7 +1223,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		unset($this->pk_id);
 		if (!is_array($this->table_array)) {
-			$this->table_array = array ();
+			$this->table_array = array();
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1235,7 +1236,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
-				$this->reference_array = array ();
+				$this->reference_array = array();
 			}
 			reset($this->reference_array);
 			foreach ($this->reference_array as $key => $value) {
@@ -1248,10 +1249,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * load a table & reference
-	 * @param  int|null $pk_id overrule pk_id
-	 * @return void            has no return
+	 * @param  string|null $pk_id overrule pk_id
+	 * @return void               has no return
 	 */
-	public function formLoadTableArray(?int $pk_id = null): void
+	public function formLoadTableArray(?string $pk_id = null): void
 	{
 		if ($pk_id) {
 			$this->pk_id = $pk_id;
@@ -1260,7 +1261,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 		// reset all temp fields
 		if (!is_array($this->table_array)) {
-			$this->table_array = array ();
+			$this->table_array = array();
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1270,7 +1271,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (is_array($this->reference_array)) {
 			// load each reference_table
 			if (!is_array($this->reference_array)) {
-				$this->reference_array = array ();
+				$this->reference_array = array();
 			}
 			reset($this->reference_array);
 			foreach ($this->reference_array as $key => $value) {
@@ -1297,7 +1298,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// for drop_down_db_input check if text field is filled and if, if not yet in db ...
 		// and upload files
 		if (!is_array($this->table_array)) {
-			$this->table_array = array ();
+			$this->table_array = array();
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1408,7 +1409,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// write reference array(s) if necessary
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
-				$this->reference_array = array ();
+				$this->reference_array = array();
 			}
 			reset($this->reference_array);
 			foreach ($this->reference_array as $reference_array) {
@@ -1423,18 +1424,18 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		} // if reference arrays
 		// write element list
 		if (isset($this->element_list) && is_array($this->element_list)) {
-			$type = array ();
+			$type = array();
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $reference_array) {
 				// init arrays
-				$q_begin = array ();
-				$q_middle = array ();
-				$q_end = array ();
-				$q_names = array ();
-				$q_data = array ();
-				$q_values = array ();
-				$no_write = array ();
-				$block_write = array ();
+				$q_begin = array();
+				$q_middle = array();
+				$q_end = array();
+				$q_names = array();
+				$q_data = array();
+				$q_values = array();
+				$no_write = array();
+				$block_write = array();
 				// get the number of keys from the elements array
 				$keys = array_keys($reference_array['elements']);
 				// element prefix name
@@ -1596,7 +1597,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// remove any reference arrays
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
-				$this->reference_array = array ();
+				$this->reference_array = array();
 			}
 			reset($this->reference_array);
 			foreach ($this->reference_array as $reference_array) {
@@ -1607,7 +1608,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// remove any element list references
 		if (is_array($this->element_list)) {
 			if (!is_array($this->element_list)) {
-				$this->element_list = array ();
+				$this->element_list = array();
 			}
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $data_array) {
@@ -1617,7 +1618,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		// unlink ALL files
 		if (!is_array($this->table_array)) {
-			$this->table_array = array ();
+			$this->table_array = array();
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1635,11 +1636,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// PARAMS: $hidden_array
 	// RETURN: the input fields (html)
 	// DESC  : creates HTML hidden input fields out of an hash array
-	public function formCreateHiddenFields($hidden_array = array ())
+	public function formCreateHiddenFields($hidden_array = array())
 	{
-		$hidden = array ();
+		$hidden = array();
 		if (!is_array($this->table_array)) {
-			$this->table_array = array ();
+			$this->table_array = array();
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1728,13 +1729,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 		// build the select part
 		if (!isset($this->element_list[$table_name]['elements']) || !is_array($this->element_list[$table_name]['elements'])) {
-			$this->element_list[$table_name]['elements'] = array ();
+			$this->element_list[$table_name]['elements'] = array();
 		}
 		reset($this->element_list[$table_name]['elements']);
 		// generic data read in (counts for all rows)
 		// visible list data output
-		$q_select = array ();
-		$proto = array ();
+		$q_select = array();
+		$proto = array();
 		foreach ($this->element_list[$table_name]['elements'] as $el_name => $data_array) {
 			// $this->debug('CFG', 'El: '.$el_name.' -> '.$this->printAr($data_array));
 			// if the element name matches the read array, then set the table as a name prefix
@@ -1798,7 +1799,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (isset($this->element_list[$table_name]['read_data'])) {
 			// we need a second one for the query build only
 			// prefix all elements with the $table name
-			$_q_select = array ();
+			$_q_select = array();
 			foreach ($q_select as $_pos => $element) {
 				$_q_select[$_pos] = $table_name.'.'.$element;
 			}
@@ -1844,7 +1845,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$pos = 0; // position in while for overwrite if needed
 			// read out the list and add the selected data if needed
 			while ($res = $this->dbReturn($q)) {
-				$_data = array ();
+				$_data = array();
 				$prfx = $data['prefix']; // short
 				// go through each res
 				for ($i = 0, $i_max = count($q_select); $i < $i_max; $i ++) {
@@ -1895,7 +1896,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// set if we need more open entries or if we do not have any entries yet
 			if (($missing_empty_count < $this->element_list[$table_name]['max_empty']) || $element_count == 0) {
 				for ($pos = $element_count, $pos_max = $this->element_list[$table_name]['max_empty'] + $element_count; $pos <= $pos_max; $pos ++) {
-					$_data = array ();
+					$_data = array();
 					// the fields that need to be filled are in data->type array:
 					// pk fields are unfilled
 					// fk fields are filled with the fk_id 'int_pk_name' value
@@ -1911,7 +1912,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						}
 					}
 					$data['content'][] = $_data;
-					$data['pos'][] = array (0 => $pos); // this is for the checkboxes
+					$data['pos'][] = array(0 => $pos); // this is for the checkboxes
 					// $this->debug('CFG ELEMENT LIST FILL', 'Pos: '.$pos.'/'.$pos_max.', Content: '.count($data['content']).', Pos: '.count($data['pos']));
 				}
 			}
@@ -1921,13 +1922,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (isset($data['delete_name']) && !empty($data['delete_name'])) {
 			$data['content'][] = $proto;
 			// we also need the pos add or we through an error in smarty
-			$data['pos'][] = array (
+			$data['pos'][] = array(
 				0 => isset($data['pos']) ? count($data['pos']) : 0
 			);
 		}
 		// $this->debug('CFG ELEMENT LIST FILL', 'Data array: '.$this->printAr($data));
 		$type = 'element_list';
-		return array (
+		return array(
 			'output_name' => $output_name,
 			'type' => $type,
 			'color' => 'edit_fgcolor',

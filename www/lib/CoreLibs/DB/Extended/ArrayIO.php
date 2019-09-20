@@ -6,7 +6,7 @@
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESC  :RIPTION:
 *   DB Array IO Class:
-*   writes, reads or deletes a complete array (one data set) in/out a
+*   writes, reads or deletes a complete array(one data set) in/out a
 *   table from the connected DB.
 *   you don't have to write any SQL queries, worry over update/insert
 *
@@ -189,7 +189,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 *                             set this as new table array too
 	 * @return array               returns the table array that was deleted
 	 */
-	public function dbDelete($table_array = array ())
+	public function dbDelete($table_array = array())
 	{
 		// is array and has values, override set and set new
 		if (is_array($table_array) && count($table_array)) {
@@ -248,7 +248,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  array   $table_array optional table array, overwrites internal set array
 	 * @return array                set table array with values
 	 */
-	public function dbRead($edit = false, $table_array = array ())
+	public function dbRead($edit = false, $table_array = array())
 	{
 		// if array give, overrules internal array
 		if (is_array($table_array) && count($table_array)) {
@@ -321,7 +321,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  array   $table_array optional table array, overwrites internal one
 	 * @return array                table array or null
 	 */
-	public function dbWrite($addslashes = false, $table_array = array ())
+	public function dbWrite($addslashes = false, $table_array = array())
 	{
 		if (is_array($table_array) && count($table_array)) {
 			$this->table_array = $table_array;

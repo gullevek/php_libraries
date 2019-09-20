@@ -8,8 +8,8 @@
 *********************************************************************/
 
 // please be VERY carefull only to change the right side
-$DB_CONFIG = array (
-	'test' => array (
+$DB_CONFIG = array(
+	'test' => array(
 		'db_name' => 'gullevek',
 		'db_user' => 'gullevek',
 		'db_pass' => 'gullevek',

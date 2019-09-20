@@ -172,14 +172,14 @@ if (file_exists(BASE.CONFIGS.'config.host.php')) {
 	require BASE.CONFIGS.'config.host.php';
 }
 if (!isset($SITE_CONFIG)) {
-	$SITE_CONFIG = array ();
+	$SITE_CONFIG = array();
 }
 /************* DB ACCESS *****************/
 if (file_exists(BASE.CONFIGS.'config.db.php')) {
 	require BASE.CONFIGS.'config.db.php';
 }
 if (!isset($DB_CONFIG)) {
-	$DB_CONFIG = array ();
+	$DB_CONFIG = array();
 }
 /************* OTHER PATHS *****************/
 if (file_exists(BASE.CONFIGS.'config.path.php')) {
@@ -219,7 +219,7 @@ if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVE
 }
 // define the db config set name, the db config and the db schema
 DEFINE('DB_CONFIG_NAME', $SITE_CONFIG[$HOST_NAME]['db_host']);
-DEFINE('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ? $DB_CONFIG[DB_CONFIG_NAME] : array ());
+DEFINE('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ? $DB_CONFIG[DB_CONFIG_NAME] : array());
 // DEFINE('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
 // DEFINE('DB_CONFIG_OTHER', SITE_CONFIG[$HOST_NAME]['db_host_other']);
 // override for login and global schemas
@@ -253,7 +253,7 @@ DEFINE('JAVASCRIPT', 'frontend.js');
 //	DEFINE('SOME_ID', <SOME VALUE>);
 
 /************* CONVERT *******************/
-$paths = array (
+$paths = array(
 	'/bin',
 	'/usr/bin',
 	'/usr/local/bin'

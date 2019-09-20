@@ -7,7 +7,7 @@
 * HISTORY:
 *********************************************************************/
 
-$day_short = array (
+$day_short = array(
 	1 => 'Mon',
 	2 => 'Tue',
 	3 => 'Wed',
@@ -17,7 +17,7 @@ $day_short = array (
 	7 => 'Sun'
 );
 
-$day_long = array (
+$day_long = array(
 	1 => 'Monday',
 	2 => 'Tuesday',
 	3 => 'Wednesday',
@@ -28,7 +28,7 @@ $day_long = array (
 );
 
 // months
-$month_long = array (
+$month_long = array(
 	1 => 'January',
 	2 => 'February',
 	3 => 'March',
@@ -43,7 +43,7 @@ $month_long = array (
 	12 => 'December'
 );
 
-$month_short = array (
+$month_short = array(
 	1 => 'Jan',
 	2 => 'Feb',
 	3 => 'Mar',

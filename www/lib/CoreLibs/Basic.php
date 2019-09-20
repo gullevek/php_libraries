@@ -112,7 +112,7 @@ class Basic
 	public $host_port;
 	// internal error reporting vars
 	protected $error_id; // error ID for errors in classes
-	protected $error_msg = array (); // the "connection" to the outside errors
+	protected $error_msg = array(); // the "connection" to the outside errors
 	// debug output prefix
 	public $error_msg_prefix = ''; // prefix to the error string (the class name)
 	// debug flags
@@ -152,14 +152,14 @@ class Basic
 	private $script_starttime;
 
 	// email valid checks
-	public $email_regex_check = array ();
-	public $mobile_email_type = array ();
-	public $mobile_email_type_short = array ();
+	public $email_regex_check = array();
+	public $mobile_email_type = array();
+	public $mobile_email_type_short = array();
 	public $email_regex; // regex var for email check
 	public $keitai_email_regex; // regex var for email check
 
 	// data path for files
-	public $data_path = array ();
+	public $data_path = array();
 
 	// error char for the char conver
 	public $mbErrorChar;
@@ -170,12 +170,12 @@ class Basic
 	public $cryptIterationCost = 7; // this is for staying backwards compatible with the old ones
 	public $cryptSaltSize = 22; // default 22 chars for blowfish, 2 for STD DES, 8 for MD5,
 	// new better password management
-	protected $password_options = array ();
+	protected $password_options = array();
 	// session name
 	private $session_name = '';
 	private $session_id = '';
 	// key generation
-	private $key_range = array ();
+	private $key_range = array();
 	private $one_key_length;
 	private $key_length;
 	private $max_key_length = 256; // max allowed length
@@ -233,7 +233,7 @@ class Basic
 		}
 
 		// set the paths matching to the valid file types
-		$this->data_path = array (
+		$this->data_path = array(
 			'P' => PICTURES,
 			'F' => FLASH,
 			'V' => VIDEOS,
@@ -299,7 +299,7 @@ class Basic
 		// set the regex for checking emails
 		$this->email_regex = "^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$";
 		// this is for error check parts in where the email regex failed
-		$this->email_regex_check = array (
+		$this->email_regex_check = array(
 			1 => "@(.*)@(.*)", // double @
 			2 => "^[A-Za-z0-9!#$%&'*+-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+-\/=?^_`{|}~\.]{0,63}@", // wrong part before @
 			3 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$", // wrong part after @
@@ -309,7 +309,7 @@ class Basic
 			7 => "@.*\.$" // ends with a dot, top level, domain missing
 		);
 		// the array with the mobile types that are valid
-		$this->mobile_email_type = array (
+		$this->mobile_email_type = array(
 			'.*@docomo\.ne\.jp$' => 'keitai_docomo',
 			'.*@([a-z0-9]{2}\.)?ezweb\.ne\.jp$' => 'keitai_kddi_ezweb', # correct are a[2-4], b2, c[1-9], e[2-9], h[2-4], t[1-9]
 			'.*@(ez[a-j]{1}\.)?ido\.ne\.jp$' => 'keitai_kddi_ido', # ez[a-j] or nothing
@@ -335,7 +335,7 @@ class Basic
 			'.*@emobile-s\.ne\.jp$' => 'keitai_willcom_emnet' # e-mobile, group will willcom
 		);
 		// short list for mobile email types
-		$this->mobile_email_type_short = array (
+		$this->mobile_email_type_short = array(
 			'keitai_docomo' => 'docomo',
 			'keitai_kddi_ezweb' => 'kddi',
 			'keitai_kddi' => 'kddi',
@@ -738,10 +738,10 @@ class Basic
 	 * @param  array  $error_msg error array
 	 * @return void              has no return
 	 */
-	public function mergeErrors(array $error_msg = array ()): void
+	public function mergeErrors(array $error_msg = array()): void
 	{
 		if (!is_array($error_msg)) {
-			$error_msg = array ();
+			$error_msg = array();
 		}
 		foreach ($error_msg as $level => $msg) {
 			$this->error_msg[$level] .= $msg;
@@ -1171,7 +1171,7 @@ class Basic
 	 */
 	public static function arraySearchRecursive($needle, array $haystack, $key_lookin = ''): ?array
 	{
-		$path = array ();
+		$path = array();
 		if (!is_array($haystack)) {
 			$haystack = array();
 		}
@@ -1211,10 +1211,10 @@ class Basic
 			$path['level'] = 0;
 		}
 		if (!isset($path['work'])) {
-			$path['work'] = array ();
+			$path['work'] = array();
 		}
 		if (!is_array($haystack)) {
-			$haystack = array ();
+			$haystack = array();
 		}
 
 		// go through the array,
@@ -1245,7 +1245,7 @@ class Basic
 
 	/**
 	 * array search simple. looks for key, value combination, if found, returns true
-	 * @param  array      $array array (search in)
+	 * @param  array      $array array(search in)
 	 * @param  string|int $key   key (key to search in)
 	 * @param  string|int $value value (what to find)
 	 * @return bool              true on found, false on not found
@@ -1253,7 +1253,7 @@ class Basic
 	public static function arraySearchSimple(array $array, $key, $value): bool
 	{
 		if (!is_array($array)) {
-			$array = array ();
+			$array = array();
 		}
 		foreach ($array as $_key => $_value) {
 			// if value is an array, we search
@@ -1342,7 +1342,7 @@ class Basic
 		if (!is_array($haystack)) {
 			return false;
 		}
-		$found = array ();
+		$found = array();
 		foreach ($needle as $element) {
 			if (in_array($element, $haystack)) {
 				$found[] = $element;
@@ -1365,7 +1365,7 @@ class Basic
 	 */
 	public static function genAssocArray(array $db_array, $key, $value, bool $set_only = false): array
 	{
-		$ret_array = array ();
+		$ret_array = array();
 		// do this to only run count once
 		for ($i = 0, $iMax = count($db_array); $i < $iMax; $i ++) {
 			// if no key then we make an order reference
@@ -1395,7 +1395,7 @@ class Basic
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated, use join()', E_USER_DEPRECATED);
 		if (!is_array($array)) {
-			$array = array ();
+			$array = array();
 		}
 		return join($connect_char, $array);
 	}
@@ -1408,7 +1408,7 @@ class Basic
 	 */
 	public static function flattenArray(array $array): array
 	{
-		$return = array ();
+		$return = array();
 		array_walk_recursive(
 			$array,
 			function ($value) use (&$return) {
@@ -1423,9 +1423,9 @@ class Basic
 	 * @param  array  $array  multidemnsional array to flatten
 	 * @return array          flattened keys array
 	 */
-	public static function flattenArrayKey(array $array/*, array $return = array ()*/): array
+	public static function flattenArrayKey(array $array/*, array $return = array()*/): array
 	{
-		$return = array ();
+		$return = array();
 		array_walk_recursive(
 			$array,
 			function ($value, $key) use (&$return) {
@@ -1438,14 +1438,14 @@ class Basic
 	/**
 	 * searches for key -> value in an array tree and writes the value one level up
 	 * this will remove this leaf will all other values
-	 * @param  array      $array  array (nested)
+	 * @param  array      $array  array(nested)
 	 * @param  string|int $search key to find that has no sub leaf and will be pushed up
 	 * @return array              modified, flattened array
 	 */
 	public static function arrayFlatForKey(array $array, $search): array
 	{
 		if (!is_array($array)) {
-			$array = array ();
+			$array = array();
 		}
 		foreach ($array as $key => $value) {
 			// if it is not an array do just nothing
@@ -1600,8 +1600,8 @@ class Basic
 		if (!preg_match("/(h|m|s|ms)/", (string)$timestamp)) {
 			$ms = 0;
 			list ($timestamp, $ms) = explode('.', (string)round($timestamp, 4));
-			$timegroups = array (86400, 3600, 60, 1);
-			$labels = array ('d', 'h', 'm', 's');
+			$timegroups = array(86400, 3600, 60, 1);
+			$labels = array('d', 'h', 'm', 's');
 			$time_string = '';
 			for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i ++) {
 				$output = floor((float)$timestamp / $timegroups[$i]);
@@ -1636,8 +1636,8 @@ class Basic
 		$timestamp = 0;
 		if (preg_match("/(d|h|m|s|ms)/", $timestring)) {
 			// pos for preg match read + multiply factor
-			$timegroups = array (2 => 86400, 4 => 3600, 6 => 60, 8 => 1);
-			$matches = array ();
+			$timegroups = array(2 => 86400, 4 => 3600, 6 => 60, 8 => 1);
+			$matches = array();
 			// preg match: 0: full strsing
 			// 2, 4, 6, 8 are the to need values
 			preg_match("/^((\d+)d ?)?((\d+)h ?)?((\d+)m ?)?((\d+)s ?)?((\d+)ms)?$/", $timestring, $matches);
@@ -1785,7 +1785,7 @@ class Basic
 	public static function calcDaysInterval($start_date, $end_date, bool $return_named = false): array
 	{
 		// pos 0 all, pos 1 weekday, pos 2 weekend
-		$days = array ();
+		$days = array();
 		$start = new \DateTime($start_date);
 		$end = new \DateTime($end_date);
 		// so we include the last day too, we need to add +1 second in the time
@@ -1806,7 +1806,7 @@ class Basic
 			}
 		}
 		if ($return_named === true) {
-			return array (
+			return array(
 				'overall' => $days[0],
 				'weekday' => $days[1],
 				'weekend' => $days[2]
@@ -1830,7 +1830,7 @@ class Basic
 	public static function createThumbnail(string $pic, int $size_x, int $size_y, string $dummy = '', string $path = '', string $cache_source = '', bool $clear_cache = false)
 	{
 		// get image type flags
-		$image_types = array (
+		$image_types = array(
 			1 => 'gif',
 			2 => 'jpg',
 			3 => 'png'
@@ -1956,7 +1956,7 @@ class Basic
 		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);
 		// if string does not match anymore we have a convert problem
 		if ($string != $compare) {
-			$failed = array ();
+			$failed = array();
 			// go through each character and find the ones that do not match
 			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i ++) {
 				$char = mb_substr($string, $i, 1, $from_encoding);
@@ -2161,9 +2161,9 @@ class Basic
 		// a-z is 97,122
 		// 0-9 is 48,57
 		// ./ is 46,47 (so first lower limit is 46)
-		$min = array (46, 65, 97);
-		$max = array (57, 90, 122);
-		$chars = array ();
+		$min = array(46, 65, 97);
+		$max = array(57, 90, 122);
+		$chars = array();
 		for ($i = 0, $iMax = count($min); $i < $iMax; $i ++) {
 			for ($j = $min[$i]; $j <= $max[$i]; $j ++) {
 				$chars[] = chr($j);
@@ -2224,7 +2224,7 @@ class Basic
 	private function passwordInit(): void
 	{
 		// set default password cost: use default set automatically
-		$this->password_options = array (
+		$this->password_options = array(
 			// 'cost' => PASSWORD_BCRYPT_DEFAULT_COST
 		);
 	}
@@ -2325,7 +2325,7 @@ class Basic
 		if ($hex_prefix === true) {
 			$hex_color = '#';
 		}
-		foreach (array ('red', 'green', 'blue') as $color) {
+		foreach (array('red', 'green', 'blue') as $color) {
 			// if not valid, set to gray
 			if ($$color < 0 || $$color > 255) {
 				$$color = 125;

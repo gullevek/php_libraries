@@ -32,7 +32,7 @@ function MyErrorHandler($type, $message, $file, $line, $context)
 		return;
 	}
 	// ERROR LEVEL
-	$error_level = array (
+	$error_level = array(
 		1 => 'E_ERROR',
 		2 => 'E_WARNING',
 		4 => 'E_PARSE',

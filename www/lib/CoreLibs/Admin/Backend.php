@@ -30,7 +30,7 @@ class Backend extends \CoreLibs\DB\IO
 	public $menu = array();
 	public $menu_show_flag = 0; // top menu flag (mostly string)
 	// action ids
-	public $action_list = array ('action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag', 'action_menu', 'action_value', 'action_error', 'action_loaded');
+	public $action_list = array('action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag', 'action_menu', 'action_value', 'action_error', 'action_loaded');
 	public $action;
 	public $action_id;
 	public $action_sub_id;
@@ -41,14 +41,14 @@ class Backend extends \CoreLibs\DB\IO
 	public $action_value;
 	public $action_error;
 	// ACL array variable if we want to set acl data from outisde
-	public $acl = array ();
+	public $acl = array();
 	public $default_acl;
 	// queue key
 	public $queue_key;
 	// the current active edit access id
 	public $edit_access_id;
 	// error/warning/info messages
-	public $messages = array ();
+	public $messages = array();
 	public $error = 0;
 	public $warning = 0;
 	public $info = 0;
@@ -195,9 +195,9 @@ class Backend extends \CoreLibs\DB\IO
 		// get the session pages array
 		$PAGES = $_SESSION['PAGES'];
 		if (!isset($PAGES) || !is_array($PAGES)) {
-			$PAGES = array ();
+			$PAGES = array();
 		}
-		$pages = array ();
+		$pages = array();
 		foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
 			$pages[] = $PAGE_DATA;
 		}
@@ -340,12 +340,12 @@ class Backend extends \CoreLibs\DB\IO
 	 * @param  array  $vars  optional data for a possible printf formated msg
 	 * @return void          has no return
 	 */
-	public function adbMsg(string $level, string $msg, array $vars = array ()): void
+	public function adbMsg(string $level, string $msg, array $vars = array()): void
 	{
 		if (!preg_match("/^info|warning|error$/", $level)) {
 			$level = "info";
 		}
-		$this->messages[] = array (
+		$this->messages[] = array(
 			'msg' => vsprintf($this->l->__($msg), $vars),
 			'class' => $level
 		);
