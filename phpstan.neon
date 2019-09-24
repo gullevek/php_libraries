@@ -1,6 +1,7 @@
 # PHP Stan Config
 
 parameters:
+	tmpDir: /tmp/phpstan-clemens
 	level: 1
 	paths:
 		- %currentWorkingDirectory%/www

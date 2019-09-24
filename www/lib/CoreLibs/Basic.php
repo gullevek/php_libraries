@@ -1664,6 +1664,9 @@ class Basic
 	 */
 	public static function checkDate($date): bool
 	{
+		if (!$date) {
+			return false;
+		}
 		list ($year, $month, $day) = preg_split("/[\/-]/", $date);
 		if (!$year || !$month || !$day) {
 			return false;
@@ -1681,6 +1684,9 @@ class Basic
 	 */
 	public static function checkDateTime($datetime): bool
 	{
+		if (!$datetime) {
+			return false;
+		}
 		list ($year, $month, $day, $hour, $min, $sec) = preg_split("/[\/\- :]/", $datetime);
 		if (!$year || !$month || !$day) {
 			return false;
