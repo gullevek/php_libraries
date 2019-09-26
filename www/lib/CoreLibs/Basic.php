@@ -94,7 +94,6 @@
 
 namespace CoreLibs;
 
-
 /** Basic core class declaration */
 class Basic
 {

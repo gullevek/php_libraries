@@ -45,9 +45,9 @@ $cms->JS_TEMPLATE_NAME = str_replace(".tpl", ".js", $CONTENT_INCLUDE);
 // css per page
 $cms->CSS_TEMPLATE_NAME = str_replace(".tpl", ".css", $CONTENT_INCLUDE);
 // special CSS file
-$cms->CSS_SPECIAL_TEMPLATE_NAME = $CSS_NAME;
+$cms->CSS_SPECIAL_TEMPLATE_NAME = isset($CSS_NAME) ? $CSS_NAME : '';
 // special JS file
-$cms->JS_SPECIAL_TEMPLATE_NAME = $JS_NAME;
+$cms->JS_SPECIAL_TEMPLATE_NAME = isset($JS_NAME) ? $JS_NAME : '';
 // compile & cache id
 $cms->CACHE_ID = isset($CACHE_ID) ? $CACHE_ID : CACHE_ID;
 $cms->COMPILE_ID = isset($COMPILE_ID) ? $COMPILE_ID : CACHE_ID;

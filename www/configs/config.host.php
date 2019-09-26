@@ -12,6 +12,15 @@
 * HISTORY:
 *********************************************************************/
 
+// other master config to attach
+// $LOCAL_CONFIG = array(
+// 	'db_host' => '',
+// 	'location' => '',
+//	'debug_flag' => true,
+//	'site_lang' => 'en_utf8',
+//	'login_enabled' => true
+// )
+
 // each host has a different db_host
 $SITE_CONFIG = array(
 	// development host
@@ -29,7 +38,8 @@ $SITE_CONFIG = array(
 		'site_lang' => 'en_utf8',
 		// enable/disable login override
 		'login_enabled' => true
-	)
+	),
+	// 'other.host.com' => $LOCAL_CONFIG
 );
 
 // __END__

@@ -12,6 +12,7 @@ parameters:
 		- %currentWorkingDirectory%/phpstan-bootstrap.php
 		- www/configs/config.master.php
 		- www/lib/autoloader.php
+		- www/vendor/autoload.php
 	excludes_analyse:
 		# no check admin
 		- www/admin/qq_file_upload_front.php

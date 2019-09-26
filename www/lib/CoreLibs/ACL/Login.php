@@ -152,7 +152,7 @@ class Login extends \CoreLibs\DB\IO
 		if (defined('LOGIN_DB_SCHEMA')) {
 			/** @phan-suppress-next-line PhanUndeclaredConstant */
 			$SCHEMA = LOGIN_DB_SCHEMA;
-		} elseif ($db_config['db_schema']) {
+		} elseif (isset($db_config['db_schema']) && $db_config['db_schema']) {
 			$SCHEMA = $db_config['db_schema'];
 		} elseif (defined('PUBLIC_SCHEMA')) {
 			$SCHEMA = PUBLIC_SCHEMA;
