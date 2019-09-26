@@ -13,13 +13,13 @@
 *********************************************************************/
 
 // other master config to attach
-// $LOCAL_CONFIG = array(
+// $__LOCAL_CONFIG = array(
 // 	'db_host' => '',
 // 	'location' => '',
 //	'debug_flag' => true,
 //	'site_lang' => 'en_utf8',
 //	'login_enabled' => true
-// )
+// );
 
 // each host has a different db_host
 $SITE_CONFIG = array(
@@ -39,7 +39,7 @@ $SITE_CONFIG = array(
 		// enable/disable login override
 		'login_enabled' => true
 	),
-	// 'other.host.com' => $LOCAL_CONFIG
+	// 'other.host.com' => $__LOCAL_CONFIG
 );
 
 // __END__

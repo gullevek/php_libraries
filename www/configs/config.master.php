@@ -190,24 +190,24 @@ if (file_exists(BASE.CONFIGS.'config.path.php')) {
 // ** missing live domains **
 // get the name without the port
 list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
+// set HOST name
+DEFINE('HOST_NAME', $HOST_NAME);
 // BAIL ON:
 // we have either no db selction for this host but have db config entries
 // or we have a db selection but no db config as array or empty
 // or we have a selection but no matching db config entry
-if ((!isset($SITE_CONFIG[$HOST_NAME]['db_host']) && count($DB_CONFIG)) ||
-	(isset($SITE_CONFIG[$HOST_NAME]['db_host']) &&
+if ((!isset($SITE_CONFIG[HOST_NAME]['db_host']) && count($DB_CONFIG)) ||
+	(isset($SITE_CONFIG[HOST_NAME]['db_host']) &&
 		// missing DB CONFIG
 		((is_array($DB_CONFIG) && !count($DB_CONFIG)) ||
 		!is_array($DB_CONFIG) ||
 		// has DB CONFIG but no match
-		(is_array($DB_CONFIG) && count($DB_CONFIG) && !isset($DB_CONFIG[$SITE_CONFIG[$HOST_NAME]['db_host']])))
+		(is_array($DB_CONFIG) && count($DB_CONFIG) && !isset($DB_CONFIG[$SITE_CONFIG[HOST_NAME]['db_host']])))
 	)
 ) {
-	echo 'No matching DB config found for: "'.$HOST_NAME.'". Contact Administrator';
+	echo 'No matching DB config found for: "'.HOST_NAME.'". Contact Administrator';
 	exit;
 }
-// set HOST name
-DEFINE('HOST_NAME', $HOST_NAME);
 // set SSL on
 if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
 	$_SERVER['SERVER_PORT'] == 443) {
@@ -218,7 +218,7 @@ if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVE
 	DEFINE('HOST_PROTOCOL', 'http://');
 }
 // define the db config set name, the db config and the db schema
-DEFINE('DB_CONFIG_NAME', $SITE_CONFIG[$HOST_NAME]['db_host']);
+DEFINE('DB_CONFIG_NAME', $SITE_CONFIG[HOST_NAME]['db_host']);
 DEFINE('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ? $DB_CONFIG[DB_CONFIG_NAME] : array());
 // DEFINE('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
 // DEFINE('DB_CONFIG_OTHER', SITE_CONFIG[$HOST_NAME]['db_host_other']);
@@ -226,10 +226,10 @@ DEFINE('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ? $DB_CONFIG[DB_CONFIG_NAM
 // DEFINE('LOGIN_DB_SCHEMA', PUBLIC_SCHEMA); // where the edit* tables are
 // DEFINE('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA); // where global tables are that are used by all schemas (eg queue tables for online, etc)
 // debug settings, site lang, etc
-DEFINE('TARGET', $SITE_CONFIG[$HOST_NAME]['location']);
-DEFINE('DEBUG', $SITE_CONFIG[$HOST_NAME]['debug_flag']);
-DEFINE('SITE_LANG', $SITE_CONFIG[$HOST_NAME]['site_lang']);
-DEFINE('LOGIN_ENABLED', $SITE_CONFIG[$HOST_NAME]['login_enabled']);
+DEFINE('TARGET', $SITE_CONFIG[HOST_NAME]['location']);
+DEFINE('DEBUG', $SITE_CONFIG[HOST_NAME]['debug_flag']);
+DEFINE('SITE_LANG', $SITE_CONFIG[HOST_NAME]['site_lang']);
+DEFINE('LOGIN_ENABLED', $SITE_CONFIG[HOST_NAME]['login_enabled']);
 // paths
 // DEFINE('CSV_PATH', $PATHS[TARGET]['csv_path']);
 // DEFINE('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);
