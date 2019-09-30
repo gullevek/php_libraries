@@ -305,8 +305,8 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * main DB concstructor with auto connection to DB and failure set on failed connection
-	 * @param array       $db_config        DB configuration array
-	 * @param int|integer $set_control_flag Class set control flag
+	 * @param array $db_config        DB configuration array
+	 * @param int   $set_control_flag 0/1/2/3 to set internal class parameter check
 	 */
 	public function __construct(array $db_config, int $set_control_flag = 0)
 	{
@@ -1056,7 +1056,7 @@ class IO extends \CoreLibs\Basic
 		// if it is a call with reset in it we reset the cursor, so we get an uncached return
 		// but only for the FIRST call (pos == 0)
 		if ($reset && !$this->cursor_ext[$md5]['pos']) {
-			unset($this->cursor_ext[$md5]['cursor']);
+			$this->cursor_ext[$md5]['cursor'] = null;
 		}
 		// $this->debug('MENU', 'Reset: '.$reset.', Cursor: '.$this->cursor_ext[$md5]['cursor'].', Pos: '.$this->cursor_ext[$md5]['pos'].', Query: '.$query);
 
@@ -1156,7 +1156,7 @@ class IO extends \CoreLibs\Basic
 				// return row, if last && reset, then unset the hole md5 array
 				if (!$return && ($reset == 1 || $reset == 3) && $this->cursor_ext[$md5]['pos']) {
 					// unset only the field names here of course
-					unset($this->cursor_ext[$md5]['field_names']);
+					$this->cursor_ext[$md5]['field_names'] = array();
 					$this->cursor_ext[$md5]['pos'] = 0;
 				} elseif (!$return && $reset == 2 && $this->cursor_ext[$md5]['pos']) {
 					// at end of read reset pos & set cursor to 1 (so it does not get lost in session transfer)

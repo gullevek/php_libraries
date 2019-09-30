@@ -29,21 +29,21 @@ if (isset($_SESSION['DEFAULT_LANG'])) {
 $lang_short = substr($lang, 0, 2);
 
 // set include & template names
-$PAGE_FILE_NAME = str_replace(".php", "", $cms->page_name);
+$PAGE_FILE_NAME = str_replace('.php', '', $cms->page_name);
 // set include & template names
 if (!isset($CONTENT_INCLUDE)) {
 	$CONTENT_INCLUDE = $PAGE_FILE_NAME.'.tpl';
 }
-$FORM_NAME = !isset($FORM_NAME) || !$FORM_NAME ? str_replace(".php", "", $cms->page_name) : $FORM_NAME;
+$FORM_NAME = !isset($FORM_NAME) || !$FORM_NAME ? str_replace('.php', '', $cms->page_name) : $FORM_NAME;
 // set local page title
 $L_TITLE = ucfirst(str_replace('_', ' ', $cms->getPageName(1))).(defined(G_TITLE) ? ' - '.G_TITLE : '');
 // strip tpl and replace it with php
 // php include file per page
-$cms->INC_TEMPLATE_NAME = str_replace(".tpl", ".php", $CONTENT_INCLUDE);
+$cms->INC_TEMPLATE_NAME = str_replace('.tpl', '.php', $CONTENT_INCLUDE);
 // javascript include per page
-$cms->JS_TEMPLATE_NAME = str_replace(".tpl", ".js", $CONTENT_INCLUDE);
+$cms->JS_TEMPLATE_NAME = str_replace('.tpl', '.js', $CONTENT_INCLUDE);
 // css per page
-$cms->CSS_TEMPLATE_NAME = str_replace(".tpl", ".css", $CONTENT_INCLUDE);
+$cms->CSS_TEMPLATE_NAME = str_replace('.tpl', '.css', $CONTENT_INCLUDE);
 // special CSS file
 $cms->CSS_SPECIAL_TEMPLATE_NAME = isset($CSS_NAME) ? $CSS_NAME : '';
 // special JS file

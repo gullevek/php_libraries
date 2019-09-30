@@ -27,6 +27,12 @@ $SET_SESSION_NAME = EDIT_SESSION_NAME;
 //------------------------------ library include end
 
 //------------------------------ basic variable settings start
+if (!isset($AJAX_PAGE)) {
+	$AJAX_PAGE = false;
+}
+if (!isset($ZIP_STREAM)) {
+	$ZIP_STREAM = false;
+}
 // set encoding
 if (!isset($encoding)) {
 	$encoding = DEFAULT_ENCODING;
@@ -38,10 +44,10 @@ if (session_id() && $_SESSION['DEFAULT_LANG']) {
 	$lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
 }
 // end the stop of the output flow, but only if we didn't request a csv file download
-if (array_key_exists('action', $_POST) && $_POST['action'] != 'download_csv') {
+if (isset($_POST['action']) && $_POST['action'] != 'download_csv' && !$AJAX_PAGE) {
 	header("Content-type: text/html; charset=".$encoding);
 }
-if (isset($AJAX_PAGE) && isset($ZIP_STREAM) && $AJAX_PAGE && !$ZIP_STREAM) {
+if ($AJAX_PAGE && !$ZIP_STREAM) {
 	header("Content-Type: application/json; charset=UTF-8");
 }
 //------------------------------ basic variable settings start

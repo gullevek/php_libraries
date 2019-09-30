@@ -471,12 +471,21 @@ class Basic
 	 * if strict mode is set, throws an error if the class variable is not set
 	 * default is strict mode false
 	 * @param  mixed $name class variable name
-	 * @return void
+	 * @return mixed       return set variable content
 	 */
-	public function __get($name): void
+	public function &__get($name)
 	{
 		if ($this->set_strict_mode === true && !property_exists($this, $name)) {
 			trigger_error('Undefined property via __get(): '.$name, E_USER_NOTICE);
+		}
+		// on set return
+		if (property_exists($this, $name)) {
+			return $this->$name;
+		} elseif ($this->set_compatible === true && !property_exists($this, $name)) {
+			// if it is not set, and we are in compatible mode we need to init.
+			// This is so that $class->array['key'] = 'bar'; works
+			$this->{$name} = null;
+			return $this->$name;
 		}
 	}
 
@@ -1164,18 +1173,19 @@ class Basic
 	/**
 	 * searches key = value in an array / array
 	 * only returns the first one found
-	 * @param  string|int $needle     needle (search for)
-	 * @param  array      $haystack   haystack (search in)
-	 * @param  string     $key_lookin the key to look out for, default empty
-	 * @return ?array                 array with the elements where the needle can be found in the haystack array
+	 * @param  string|int  $needle     needle (search for)
+	 * @param  array       $haystack   haystack (search in)
+	 * @param  string|null $key_lookin the key to look out for, default empty
+	 * @return array                   array with the elements where the needle can be
+	 *                                 found in the haystack array
 	 */
-	public static function arraySearchRecursive($needle, array $haystack, $key_lookin = ''): ?array
+	public static function arraySearchRecursive($needle, array $haystack, ?string $key_lookin = null): array
 	{
 		$path = array();
 		if (!is_array($haystack)) {
 			$haystack = array();
 		}
-		if (!is_array($key_lookin) &&
+		if ($key_lookin != null &&
 			!empty($key_lookin) &&
 			array_key_exists($key_lookin, $haystack) &&
 			$needle === $haystack[$key_lookin]

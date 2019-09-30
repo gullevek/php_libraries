@@ -7,8 +7,7 @@
 * - DB access name (array group from config.db)
 * - location (test/stage/live)
 * - debug flag (true/false)
-* - DB path (eg PUBLIC_SCHEMA)
-* - stie lang
+* - site lang
 * HISTORY:
 *********************************************************************/
 

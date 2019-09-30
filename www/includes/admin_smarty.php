@@ -69,16 +69,23 @@ $cms->DATA['messages'] = $cms->messages;
 
 // top menu
 $cms->DATA['nav_menu'] = $cms->adbTopMenu();
+$cms->DATA['nav_menu_count'] = is_array($cms->DATA['nav_menu']) ? count($cms->DATA['nav_menu']) : 0;
 // the page name
 $cms->DATA['page_name'] = $cms->page_name;
 // user name
 $cms->DATA['USER_NAME'] = $_SESSION['USER_NAME'];
+$cms->DATA['ADMIN'] = $login->acl['admin'];
 // the template part to include into the body
 $cms->DATA['TEMPLATE_NAME'] = $TEMPLATE_NAME;
 $cms->DATA['CONTENT_INCLUDE'] = $CONTENT_INCLUDE;
+$cms->DATA['TEMPLATE_TRANSLATE'] = $TEMPLATE_TRANSLATE;
+$cms->DATA['PAGE_FILE_NAME'] = $PAGE_FILE_NAME;
 // LANG
 $cms->DATA['LANG'] = $lang;
 $cms->DATA['TINYMCE_LANG'] = $lang_short;
+// form name
+$cms->DATA['FORM_NAME'] = $FORM_NAME;
+// include flags
 $cms->DATA['USE_TINY_MCE'] = isset($USE_TINY_MCE) ? $USE_TINY_MCE : false;
 $cms->DATA['JS_DATEPICKR'] = isset($JS_DATEPICKR) ? $JS_DATEPICKR : false;
 $cms->DATA['JS_FLATPICKR'] = isset($JS_FLATPICKR) ? $JS_FLATPICKR : false;

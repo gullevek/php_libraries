@@ -82,17 +82,17 @@ return [
 	// A list of directories holding code that we want
 	// to parse, but not analyze
 	"exclude_analysis_directory_list" => [
-		 'www/vendor',
-		 'www/lib/FileUpload',
-		 'www/lib/pChart',
-		 'www/lib/pChart2.1.4',
-		 'www/lib/Smarty',
-		 'www/lib/smarty-3.1.30',
-		 'www/templates_c',
-		 'www/log',
-		 'www/tmp',
-		 'www/cache',
-		 'www/media',
+		'www/vendor',
+		'www/lib/FileUpload',
+		'www/lib/pChart',
+		'www/lib/pChart2.1.4',
+		'www/lib/Smarty',
+		'www/lib/smarty-3.1.30',
+		'www/templates_c',
+		'www/log',
+		'www/tmp',
+		'www/cache',
+		'www/media',
 	],
 	'exclude_file_list' => [
 		// ignore all symlink files to edit
