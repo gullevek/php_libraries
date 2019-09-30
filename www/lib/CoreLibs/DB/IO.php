@@ -1156,7 +1156,7 @@ class IO extends \CoreLibs\Basic
 				// return row, if last && reset, then unset the hole md5 array
 				if (!$return && ($reset == 1 || $reset == 3) && $this->cursor_ext[$md5]['pos']) {
 					// unset only the field names here of course
-					$this->cursor_ext[$md5]['field_names'] = array();
+					$this->cursor_ext[$md5]['field_names'] = null;
 					$this->cursor_ext[$md5]['pos'] = 0;
 				} elseif (!$return && $reset == 2 && $this->cursor_ext[$md5]['pos']) {
 					// at end of read reset pos & set cursor to 1 (so it does not get lost in session transfer)
