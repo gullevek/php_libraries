@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/06/10
@@ -192,7 +192,12 @@ if (file_exists(BASE.CONFIGS.'config.path.php')) {
 list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 // set HOST name
 DEFINE('HOST_NAME', $HOST_NAME);
-// BAIL ON:
+// BAIL ON MISSING MASTER SITE CONFIG
+if (!isset($SITE_CONFIG[HOST_NAME]['location'])) {
+	echo 'Missing SITE_CONFIG entry for: "'.HOST_NAME.'". Contact Administrator';
+	exit;
+}
+// BAIL ON MISSING DB CONFIG:
 // we have either no db selction for this host but have db config entries
 // or we have a db selection but no db config as array or empty
 // or we have a selection but no matching db config entry

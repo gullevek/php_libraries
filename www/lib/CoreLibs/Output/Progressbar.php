@@ -22,7 +22,12 @@ class ProgressBar
 	public $code;	// unique code
 	public $status = 'new';	// current status (new,show,hide)
 	public $step = 0;	// current step
-	public $position = array(); // current bar position
+	public $position = array( // current bar position
+		'left' => null,
+		'top' => null,
+		'width' => null,
+		'height' => null,
+	);
 
 	public $clear_buffer_size = 1; // we need to send this before the lfush to get browser output
 	public $clear_buffer_size_init = 1024*1024; // if I don't send that junk, it won't send anything

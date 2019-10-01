@@ -1,1 +1,1 @@
-../../../admin/default/javascript/debug.js
+../../admin/javascript/debug.js
