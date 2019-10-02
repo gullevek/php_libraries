@@ -9,6 +9,7 @@ php_value xdebug.show_local_vars 0
 # allowed COOKIE, FILES, GET, POST, REQUEST, SERVER, SESSION
 #php_value xdebug.dump.GET *
 # PHP ERROR SETTINGS
+php_flag short_open_tag off
 php_flag display_startup_errors on
 php_flag display_errors on
 php_flag html_errors on
