@@ -92,7 +92,7 @@ if (!$login->login) {
 //------------------------------ page rights start
 // flag if to show the edit access id drop down list
 // check if we have more than one EA ID
-$cms->DATA['show_ea_extra'] = $login->acl['show_ea_extra'];
+$cms->DATA['show_ea_extra'] = isset($login->acl['show_ea_extra']) ? $login->acl['show_ea_extra'] : false;
 //------------------------------ page rights ned
 
 // automatic hide for DEBUG messages on live server

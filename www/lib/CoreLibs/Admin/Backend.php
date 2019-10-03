@@ -193,7 +193,7 @@ class Backend extends \CoreLibs\DB\IO
 		}
 
 		// get the session pages array
-		$PAGES = $_SESSION['PAGES'];
+		$PAGES = isset($_SESSION['PAGES']) ? $_SESSION['PAGES'] : null;
 		if (!isset($PAGES) || !is_array($PAGES)) {
 			$PAGES = array();
 		}
