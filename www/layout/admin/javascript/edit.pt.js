@@ -11,19 +11,21 @@ if (!DEBUG) {
 	});
 }*/
 
-// METHOD: pop
-// PARAMS: url, window name, features
-// RETURN: none
-// DESC  : opens a popup window with winName and given features (string)
+/**
+ * opens a popup window with winName and given features (string)
+ * @param  {String} theURL   the url
+ * @param  {String} winName  window name
+ * @param  {Object} features popup features
+ */
 function pop(theURL, winName, features) {
 	winName = window.open(theURL, winName, features);
 	winName.focus();
 }
 
-// METHOD: expandTA
-// PARAMS: id
-// RETURN: none
-// DESC  : automatically resize a text area based on the amount of lines in it
+/**
+ * automatically resize a text area based on the amount of lines in it
+ * @param  {[string} ta_id element id
+ */
 function expandTA(ta_id) {
 	var ta;
 	// if a string comes, its a get by id, else use it as an element pass on
@@ -44,12 +46,12 @@ function expandTA(ta_id) {
 	ta.rows = numNewRows + theRows.length;
 }
 
-// METHOD: ShowHideMenu
-// PARAMS: status -> show or hide
-//         id -> id to work on
-// RETURN: none
-// DESC:   shows or hides the menu
-//         this is used in some old menu templates
+/**
+ * shows or hides the menu
+ * this is used in some old menu templates
+ * @param {String} status show or hide
+ * @param {String} id     element id to work on
+ */
 function ShowHideMenu(status, id)
 {
 	if (status == 'show') {
@@ -65,8 +67,12 @@ function ShowHideMenu(status, id)
 	}
 }
 
-// used in old templates
-// move element action
+/**
+ * used in old templates
+ * move element action
+ * @param  {String} id        element id to move
+ * @param  {String} direction move direction
+ */
 function mv(id, direction)
 {
 	document.forms[form_name].action.value = 'move';
@@ -75,7 +81,11 @@ function mv(id, direction)
 	document.forms[form_name].submit();
 }
 
-// load element action
+/**
+ * used in old templates
+ * load element action
+ * @param  {String} id the element id to load
+ */
 function le(id)
 {
 	document.forms[form_name].action.value = 'load';
@@ -91,13 +101,14 @@ function le(id)
 	}
 }
 
-// METHOD: sh
-// PARAMS: id -> element to hide
-//         showText -> text for the element if shown
-//         hideText -> text for the element if hidden
-// RETURN: returns true if hidden, or false if not
-// DESC  : hides an element, additional writes 1 (show) or 0 (hide) into <id>Flag field
-//         this needs scriptacolous installed for BlindUp/BlindDown
+/**
+ * hides an element, additional writes 1 (show) or 0 (hide) into <id>Flag field
+ * this needs scriptacolous installed for BlindUp/BlindDown
+ * @param  {String}  id       element id to hide
+ * @param  {String}  showText text for the element if shown
+ * @param  {String}  hideText text for the element if hidden
+ * @return {Boolean}          returns true if hidden, or false if not
+ */
 function sh(id, showText, hideText)
 {
 	flag = id + 'Flag';
@@ -120,10 +131,10 @@ function sh(id, showText, hideText)
 	return divStatus;
 }
 
-// METHOD: getWindowSize
-// PARAMS: none
-// RETURN: array with width/height
-// DESC  : wrapper to get the real window size for the current browser window
+/**
+ * wrapper to get the real window size for the current browser window
+ * @return {Object} object with width/height
+ */
 function getWindowSize()
 {
 	var width, height;
@@ -135,10 +146,10 @@ function getWindowSize()
 	};
 }
 
-// METHOD: getScrollOffset
-// PARAMS: none
-// RETURN: array with x/y px
-// DESC  : wrapper to get the correct scroll offset
+/**
+ * wrapper to get the correct scroll offset
+ * @return {Object} object with x/y px
+ */
 function getScrollOffset()
 {
 	var left, top;
@@ -150,10 +161,12 @@ function getScrollOffset()
 	};
 }
 
-// METHOD: setCenter
-// PARAMS: id to set center
-// RETURN: none
-// DESC  : centers div to current window size middle
+/**
+ * centers div to current window size middle
+ * @param {String}  id   element to center
+ * @param {Boolean} left if true centers to the middle from the left
+ * @param {Boolean} top  if true centers to the middle from the top
+ */
 function setCenter(id, left, top)
 {
 	// get size of id
@@ -179,10 +192,11 @@ function setCenter(id, left, top)
 	}
 }
 
-// METHOD: goToPos()
-// PARAMS: element, offset (default 0)
-// RETURN: none
-// DESC:   goes to an element id position
+/**
+ * goes to an element id position
+ * @param  {String} element element id to move to
+ * @param  {Number} offset  offset from top, default is 0 (px)
+ */
 function goToPos(element, offset = 0)
 {
 	try {
@@ -203,10 +217,12 @@ function goToPos(element, offset = 0)
 	}
 }
 
-// METHOD: __
-// PARAMS: text
-// RETURN: translated text (based on PHP selected language)
-// DESC  : uses the i18n array created in the translation template, that is filled from gettext in PHP (Smarty)
+/**
+ * uses the i18n object created in the translation template
+ * that is filled from gettext in PHP
+ * @param  {String} string text to translate
+ * @return {String}        translated text (based on PHP selected language)
+ */
 function __(string)
 {
 	if (typeof i18n !== 'undefined' && isObject(i18n) && i18n[string]) {
@@ -216,12 +232,13 @@ function __(string)
 	}
 }
 
-// METHOD: string.format
-// PARAMS: any, for string format
-// RETURN: formatted string
-// DESC  : simple sprintf formater for replace
-//         "{0} is cool, {1} is not".format("Alpha", "Beta");
-// First, checks if it isn't implemented yet.
+/**
+ * simple sprintf formater for replace
+ * usage: "{0} is cool, {1} is not".format("Alpha", "Beta");
+ * First, checks if it isn't implemented yet.
+ * @param  {String} !String.prototype.format string with elements to be replaced
+ * @return {String}                          Formated string
+ */
 if (!String.prototype.format) {
 	String.prototype.format = function()
 	{
@@ -236,25 +253,32 @@ if (!String.prototype.format) {
 	};
 }
 
-// METHOD: numberWithCommas
-// PARAMS: number
-// RETURN: formatted with , in thousands
-// DESC  : formats flat number 123456 to 123,456
+/**
+ * formats flat number 123456 to 123,456
+ * @param  {Number} x number to be formated
+ * @return {String}   formatted with , in thousands
+ */
 const numberWithCommas = (x) => {
 	var parts = x.toString().split(".");
 	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 	return parts.join(".");
 };
 
-// METHOD:
-// PARAMS: string
-// RETURN: string with <br>
-// DESC  : converts line breaks to br
+/**
+ * converts line breaks to br
+ * @param  {String} string any string
+ * @return {String}        string with <br>
+ */
 function convertLBtoBR(string)
 {
 	return string.replace(/(?:\r\n|\r|\n)/g, '<br>');
 }
 
+/**
+ * escape HTML string
+ * @param  {String} !String.prototype.escapeHTML HTML data string to be escaped
+ * @return {String}                              escaped string
+ */
 if (!String.prototype.escapeHTML) {
 	String.prototype.escapeHTML = function() {
 		return this.replace(/[&<>"'\/]/g, function (s) {
@@ -272,6 +296,11 @@ if (!String.prototype.escapeHTML) {
 	};
 }
 
+/**
+ * unescape a HTML encoded string
+ * @param  {String} !String.prototype.unescapeHTML data with escaped entries
+ * @return {String}                                HTML formated string
+ */
 if (!String.prototype.unescapeHTML) {
 	String.prototype.unescapeHTML = function() {
 		return this.replace(/&[#\w]+;/g, function (s) {
@@ -289,31 +318,33 @@ if (!String.prototype.unescapeHTML) {
 	};
 }
 
-// METHOD: getTimestamp
-// PARAMS: none
-// RETURN: timestamp (in milliseconds)
-// DESC  : returns current timestamp (unix timestamp)
+/**
+ * returns current timestamp (unix timestamp)
+ * @return {Number} timestamp (in milliseconds)
+ */
 function getTimestamp()
 {
 	var date = new Date();
 	return date.getTime();
 }
 
-// METHOD: dec2hex
-// PARAMS: decimal string
-// RETURN: string
-// DESC  : dec2hex :: Integer -> String
-//         i.e. 0-255 -> '00'-'ff'
+/**
+ * dec2hex :: Integer -> String
+ * i.e. 0-255 -> '00'-'ff'
+ * @param  {Number} dec decimal string
+ * @return {String}     hex encdoded number
+ */
 function dec2hex(dec)
 {
 	return ('0' + dec.toString(16)).substr(-2);
 }
 
-// METHOD: generateId
-// PARAMS: lenght in int
-// RETURN: random string
-// DESC  : generateId :: Integer -> String
-//         only works on mondern browsers
+/**
+ * generateId :: Integer -> String
+ * only works on mondern browsers
+ * @param  {Number} len length of unique id string
+ * @return {String}     random string in length of len
+ */
 function generateId(len)
 {
 	var arr = new Uint8Array((len || 40) / 2);
@@ -321,20 +352,22 @@ function generateId(len)
 	return Array.from(arr, dec2hex).join('');
 }
 
-// METHOD: randomIdF()
-// PARAMS: none
-// RETURN: not true random string
-// DESC  : creates a pseudo random string of 10 characters
-//         after many runs it will create duplicates
+/**
+ * creates a pseudo random string of 10 characters
+ * works on all browsers
+ * after many runs it will create duplicates
+ * @return {String} not true random string
+ */
 function randomIdF()
 {
 	return Math.random().toString(36).substring(2);
 }
 
-// METHOD: isObject
-// PARAMS: possible object
-// RETURN: true/false if it is an object or not
-// DESC  : checks if a variable is an object
+/**
+ * checks if a variable is an object
+ * @param  {Mixed}   val possible object
+ * @return {Boolean}     true/false if it is an object or not
+ */
 function isObject(val) {
 	if (val === null) {
 		return false;
@@ -342,47 +375,55 @@ function isObject(val) {
 	return ((typeof val === 'function') || (typeof val === 'object'));
 }
 
-// METHOD: keyInObject
-// PARAMS: key name, object
-// RETURN: true/false if key exists in object
-// DESC  : checks if a key exists in a given object
+/**
+ * checks if a key exists in a given object
+ * @param  {String}  key    key name
+ * @param  {Object}  object object to search key in
+ * @return {Boolean}        true/false if key exists in object
+ */
 const keyInObject = (key, object) => (key in object) ? true : false;
 /*function keyInObject(key, object)
 {
 	return (key in object) ? true : false;
 }*/
 
-// METHOD: getKeyByValue
-// PARAMS: object, value
-// RETURN: key found
-// DESC  : returns matching key of value
+/**
+ * returns matching key of value
+ * @param  {Object} obj   object to search value in
+ * @param  {Mixed}  value any value (String, Number, etc)
+ * @return {String}       the key found for the first matching value
+ */
 const getKeyByValue = (obj, value) => Object.keys(obj).find(key => obj[key] === value);
 // function getKeyByValue(object, value)
 // {
 // 	return Object.keys(object).find(key => object[key] === value);
 // }
 
-// METHOD: valueInObject
-// PARAMS: obj, value
-// RETURN: true/false
-// DESC  : returns true if value is found in object with a key
+/**
+ * returns true if value is found in object with a key
+ * @param  {Object}  obj   object to search value in
+ * @param  {Mixed}   value any value (String, Number, etc)
+ * @return {Boolean}       true on value found, false on not found
+ */
 const valueInObject = (obj, value) => (Object.keys(obj).find(key => obj[key] === value)) ? true : false;
 
-// METHOD: exists
-// PARAMS: uid
-// RETURN: true/false
-// DESC  : checks if a DOM element actually exists
-const exists = (id) => $('#' + id).length > 0 ? true : false;
+/**
+ * checks if a DOM element actually exists
+ * @param  {String}  id Element id to check for
+ * @return {Boolean}    true if element exists, false on failure
+ */
+const exists = (id) => $(id).length > 0 ? true : false;
 /*function exists(id)
 {
-	return $('#' + id).length > 0 ? true : false;
+	return $(id).length > 0 ? true : false;
 }*/
 
-// METHOD: formatBytes
-// PARAMS: bytes in int
-// RETURN: string in GB/MB/KB
-// DESC  : converts a int number into bytes with prefix in two decimals precision
-//         currently precision is fixed, if dynamic needs check for max/min precision
+/**
+ * converts a int number into bytes with prefix in two decimals precision
+ * currently precision is fixed, if dynamic needs check for max/min precision
+ * @param  {Number} bytes bytes in int
+ * @return {String}       string in GB/MB/KB
+ */
 function formatBytes(bytes)
 {
 	var i = -1;
@@ -394,10 +435,10 @@ function formatBytes(bytes)
 	return parseFloat(Math.round(bytes * Math.pow(10, 2)) / Math.pow(10, 2)) + ['kB', 'MB', 'GB', 'TB', 'PB', 'EB'][i];
 }
 
-// METHOD: errorCatch
-// PARAMS: err (error from try/catch
-// RETURN: none
-// DESC  : prints out error messages based on data available from the browser
+/**
+ * prints out error messages based on data available from the browser
+ * @param  {Object} err error from try/catch block
+ */
 function errorCatch(err)
 {
 	// for FF & Chrome
@@ -423,10 +464,10 @@ function errorCatch(err)
 	}
 }
 
-// METHOD: actionIndicator
-// PARAMS: none
-// RETURN: none
-// DESC   : show or hide the "do" overlay
+/**
+ * show or hide the "do" overlay
+ * @param  {String} loc location name for action indicator, default empty. for console.log
+ */
 function actionIndicator(loc = '')
 {
 	if ($('overlayBox').visible()) {
@@ -436,12 +477,11 @@ function actionIndicator(loc = '')
 	}
 }
 
-// METHOD: actionIndicatorShow/actionIndicatorHide
-// PARAMS: loc for console log info
-// RETURN: none
-// DESC  : explicit show/hide for action Indicator
-//         instead of automatically show or hide, do
-//         on command
+/**
+ * explicit show for action Indicator
+ * instead of automatically show or hide, do on command show
+ * @param  {String} loc optional location name, empty if not set. for console.log
+ */
 function actionIndicatorShow(loc = '')
 {
 	console.log('Indicator: SHOW [%s]', loc);
@@ -450,6 +490,12 @@ function actionIndicatorShow(loc = '')
 	$('indicator').show();
 	overlayBoxShow();
 }
+
+/**
+ * explicit hide for action Indicator
+ * instead of automatically show or hide, do on command hide
+ * @param  {String} loc optional location name, empty if not set. for console.log
+ */
 function actionIndicatorHide(loc = '')
 {
 	console.log('Indicator: HIDE [%s]', loc);
@@ -458,10 +504,9 @@ function actionIndicatorHide(loc = '')
 	overlayBoxHide();
 }
 
-// METHOD: overlayBoxView
-// PARAMS: none
-// RETURN: none
-// DESC  : shows or hides the overlay box
+/**
+ * shows the overlay box
+ */
 function overlayBoxShow()
 {
 	// check if overlay box exists and if yes set the z-index to 100
@@ -471,6 +516,10 @@ function overlayBoxShow()
 		$('overlayBox').show();
 	}
 }
+
+/**
+ * hides the overlay box
+ */
 function overlayBoxHide()
 {
 	// if the overlay box z-index is 100, do no hide, but set to 98
@@ -481,10 +530,9 @@ function overlayBoxHide()
 	}
 }
 
-// METHOD: setOverlayBox
-// PARAMS: none
-// RETURN: none
-// DESC   : position the overlay block box and shows it
+/**
+ * position the overlay block box and shows it
+ */
 function setOverlayBox()
 {
 	var viewport = document.viewport.getDimensions();
@@ -495,10 +543,9 @@ function setOverlayBox()
 	$('overlayBox').show();
 }
 
-// METHOD: ClearCall
-// PARAMS: none
-// RETURN: none
-// DESC  : the abort call, clears the action box and hides it and the overlay box
+/**
+ * the abort call, clears the action box and hides it and the overlay box
+ */
 function ClearCall()
 {
 	$('actionBox').innerHTML = '';
@@ -507,14 +554,15 @@ function ClearCall()
 }
 
 // *** DOM MANAGEMENT FUNCTIONS
-// METHOD: cel [create element]
-// PARAMS: tag: must set tag (div, span, etc)
-//         id: optional set for id, if input, select will be used for name
-//         content: text content inside, is skipped if sub elements exist
-//         css: array for css tags
-//         options: anything else (value, placeholder, OnClick, style)
-// RETURN: object
-// DESC  : creates object for DOM element creation flow
+/**
+ * reates object for DOM element creation flow
+ * @param  {String} tag     must set tag (div, span, etc)
+ * @param  {String} id      optional set for id, if input, select will be used for name
+ * @param  {String} content text content inside, is skipped if sub elements exist
+ * @param  {Array}  css     array for css tags
+ * @param  {Object} options anything else (value, placeholder, OnClick, style)
+ * @return {Object}         created element as an object
+ */
 const cel = (tag, id = '', content = '', css = [], options = {}) =>
 	_element = {
 		tag: tag,
@@ -526,12 +574,13 @@ const cel = (tag, id = '', content = '', css = [], options = {}) =>
 		sub: []
 	};
 
-// METHOD: ael [attach element]
-// PARAMS: base: object where to attach/search
-//         attach: the object to be attached
-//         id: optional id, if given search in base for this id and attach there
-// RETURN: "none", technically there is no return needed
-// DESC  : attach a cel created object to another to create a basic DOM tree
+/**
+ * attach a cel created object to another to create a basic DOM tree
+ * @param  {Object} base   object where to attach/search
+ * @param  {Object} attach the object to be attached
+ * @param  {String} id     optional id, if given search in base for this id and attach there
+ * @return {Object}        "none", technically there is no return needed as it is global attach
+ */
 function ael(base, attach, id = '')
 {
 	if (id) {
@@ -553,12 +602,13 @@ function ael(base, attach, id = '')
 	return base;
 }
 
-// METHOD: aelx [attach n elements]
-// PARAMS: base: object to where we attach the elements
-//         attach 1..n: attach directly to the base element those attachments
-// RETURN: "none", technically there is no return needed
-// DESC  : directly attach n elements to one master base element
-//         this type does not support attach with optional id
+/**
+ * directly attach n elements to one master base element
+ * this type does not support attach with optional id
+ * @param  {Object}    base   object to where we attach the elements
+ * @param  {...Object} attach attach 1..n: attach directly to the base element those attachments
+ * @return {Object}           "none", technically there is no return needed, global attach
+ */
 function aelx(base, ...attach)
 {
 	attach.each(function(t) {
@@ -567,19 +617,22 @@ function aelx(base, ...attach)
 	return base;
 }
 
-// METHOD: rel [reset element]
-// PARAMS: cel created element
-// RETURN: returns reset base element
-// DESC  : resets the sub elements of the base element given
+/**
+ * resets the sub elements of the base element given
+ * @param  {Object} base cel created element
+ * @return {Object}      returns reset base element
+ */
 const rel = (base) => {
 	base.sub = [];
 	return base;
 };
 
-// METHOD: rcssel [remove a css from the element]
-// PARAMS: element, style sheet to remove
-// RETURN: returns full element
-// DESC  : searches and removes style from css array
+/**
+ * searches and removes style from css array
+ * @param  {Object} _element element to work one
+ * @param  {String css      style sheet to remove (name)
+ * @return {Object}          returns full element
+ */
 function rcssel(_element, css)
 {
 	var css_index = _element.css.indexOf(css);
@@ -589,10 +642,12 @@ function rcssel(_element, css)
 	return _element;
 }
 
-// METHOD: acssel [add css element]
-// PARAMS: element, style sheet to add
-// RETURN: returns full element
-// DESC  : adds a new style sheet to the element given
+/**
+ * adds a new style sheet to the element given
+ * @param  {Object} _element element to work on
+ * @param  {String} css      style sheet to add (name)
+ * @return {Object}         returns full element
+ */
 function acssel(_element, css)
 {
 	var css_index = _element.css.indexOf(css);
@@ -602,11 +657,14 @@ function acssel(_element, css)
 	return _element;
 }
 
-// METHOD: scssel
-// PARAMS: element, style to remove, style to add
-// RETURN: returns full element
-// DESC  : removes one css and adds another
-//         is a wrapper around rcssel/acssel
+/**
+ * removes one css and adds another
+ * is a wrapper around rcssel/acssel
+ * @param  {Object} _element element to work on
+ * @param  {String} rcss     style to remove (name)
+ * @param  {String} acss     style to add (name)
+ * @return {Object}          returns full element
+ */
 function scssel(_element, rcss, acss)
 {
 	rcssel(_element, rcss);
@@ -614,12 +672,12 @@ function scssel(_element, rcss, acss)
 	return _element;
 }
 
-// METHOD: phfo [produce html from object]
-// PARAMS: object tree with dom element declarations
-// RETURN: HTML string that can be used as innerHTML
-// DESC  : parses the object tree created with cel/ael
-//         and converts it into an HTML string that can
-//         be inserted into the page
+/**
+ * parses the object tree created with cel/ael and converts it into an HTML string
+ * that can be inserted into the page
+ * @param  {Object} tree object tree with dom element declarations
+ * @return {String}      HTML string that can be used as innerHTML
+ */
 function phfo(tree)
 {
 	// holds the elements
@@ -681,33 +739,44 @@ function phfo(tree)
 
 // BLOCK: html wrappers for quickly creating html data blocks
 
-// NOTE  : OLD FORMAT which misses multiple block set
-// METHOD: html_options
-// PARAMS: name/id, array for the options, selected item uid
-//         options_only [def false] if this is true, it will not print the select part
-//         return_string [def false]: return as string and not as element
-//         sort [def '']: if empty as is, else allowed 'keys', 'values' all others are ignored
-// RETURN: html with build options block
-// DESC  : creates an select/options drop down block.
-//         the array needs to be key -> value format. key is for the option id and value is for the data output
+/**
+ * NOTE: OLD FORMAT which misses multiple block set
+ * creates an select/options drop down block.
+ * the array needs to be key -> value format.
+ * key is for the option id and value is for the data output
+ * @param  {String}  name          name/id
+ * @param  {Object}  data          array for the options
+ * @param  {String}  selected      selected item uid
+ * @param  {Boolean} options_only  [def false] if this is true, it will not print the select part
+ * @param  {Boolean} return_string [def false]: return as string and not as element
+ * @param  {String}  sort          [def '']: if empty as is, else allowed 'keys',
+ *                                 'values' all others are ignored
+ * @return {String}                html with build options block
+ */
 function html_options(name, data, selected = '', options_only = false, return_string = false, sort = '')
 {
 	// wrapper to new call
 	return html_options_block(name, data, selected, false, options_only, return_string, sort);
 }
 
-// NOTE  : USE THIS CALL, the above one is deprecated
-// METHOD: html_options
-// PARAMS: name/id, array for the options,
-//         selected item uid [drop down string, multi select array]
-//         multiple [def 0] if this is 1 or larger, the drop down will be turned into multiple select
-//                          the number sets the size value unless it is 1, then it is default
-//         options_only [def false] if this is true, it will not print the select part
-//         return_string [def false]: return as string and not as element
-//         sort [def '']: if empty as is, else allowed 'keys', 'values' all others are ignored
-// RETURN: html with build options block
-// DESC  : creates an select/options drop down block.
-//         the array needs to be key -> value format. key is for the option id and value is for the data output
+/**
+ * NOTE: USE THIS CALL, the above one is deprecated
+ * creates an select/options drop down block.
+ * the array needs to be key -> value format.
+ * key is for the option id and value is for the data output
+ * @param  {String}  name          name/id
+ * @param  {Object}  data          array for the options
+ * @param  {String}  selected      selected item uid
+ * @param  {Number}  multiple      [def 0] if this is 1 or larger, the drop down
+ *                                 will be turned into multiple select
+ *                                 the number sets the size value unless it is 1,
+ *                                 then it is default
+ * @param  {Boolean} options_only  [def false] if this is true, it will not print the select part
+ * @param  {Boolean} return_string [def false]: return as string and not as element
+ * @param  {String}  sort          [def '']: if empty as is, else allowed 'keys', 'values'
+ *                                 all others are ignored
+ * @return {String}                html with build options block
+ */
 function html_options_block(name, data, selected = '', multiple = 0, options_only = false, return_string = false, sort = '')
 {
 	var content = [];
@@ -778,11 +847,13 @@ function html_options_block(name, data, selected = '', multiple = 0, options_onl
 	}
 }
 
-// METHOD: html_options_refill
-// PARAMS: name/id, array of options, sort = ''
-//         sort [def '']: if empty as is, else allowed 'keys', 'values' all others are ignored
-// RETURN: none
-// DESC  : refills a select box with options and keeps the selected
+/**
+ *  refills a select box with options and keeps the selected
+ * @param  {String} name name/id
+ * @param  {Object} data array of options
+ * @param  {String} sort [def '']: if empty as is, else allowed 'keys', 'values'
+ *                       all others are ignored
+ */
 function html_options_refill(name, data, sort = '')
 {
 	var element_option;
@@ -817,10 +888,9 @@ function html_options_refill(name, data, sort = '')
 }
 
 // *** MASTER logout call
-// METHOD: loginLogout
-// PARAMS: none
-// RETURN: none
-// DESC  : submits basic data for form logout
+/**
+ * submits basic data for form logout
+ */
 function loginLogout()
 {
 	const form = document.createElement('form');
