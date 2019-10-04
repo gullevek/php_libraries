@@ -14,9 +14,9 @@ if (!DEBUG) {
 
 /**
  * opens a popup window with winName and given features (string)
- * @param  {String} theURL   the url
- * @param  {String} winName  window name
- * @param  {Object} features popup features
+ * @param {String} theURL   the url
+ * @param {String} winName  window name
+ * @param {Object} features popup features
  */
 function pop(theURL, winName, features) {
 	winName = window.open(theURL, winName, features);
@@ -25,7 +25,7 @@ function pop(theURL, winName, features) {
 
 /**
  * automatically resize a text area based on the amount of lines in it
- * @param  {[string} ta_id element id
+ * @param {[string} ta_id element id
  */
 function expandTA(ta_id) {
 	var ta;
@@ -114,8 +114,8 @@ function setCenter(id, left, top)
 
 /**
  * goes to an element id position
- * @param  {String} element element id to move to
- * @param  {Number} offset  offset from top, default is 0 (px)
+ * @param {String} element    element id to move to
+ * @param {Number} [offset=0] offset from top, default is 0 (px)
  */
 function goToPos(element, offset = 0)
 {
@@ -351,7 +351,7 @@ function formatBytes(bytes)
 
 /**
  * prints out error messages based on data available from the browser
- * @param  {Object} err error from try/catch block
+ * @param {Object} err error from try/catch block
  */
 function errorCatch(err)
 {
@@ -380,7 +380,7 @@ function errorCatch(err)
 
 /**
  * show or hide the "do" overlay
- * @param  {String} loc location name for action indicator, default empty. for console.log
+ * @param {String} [loc=''] location name for action indicator, default empty. for console.log
  */
 function actionIndicator(loc = '')
 {
@@ -394,7 +394,7 @@ function actionIndicator(loc = '')
 /**
  * explicit show for action Indicator
  * instead of automatically show or hide, do on command show
- * @param  {String} loc optional location name, empty if not set. for console.log
+ * @param {String} [loc=''] optional location name, empty if not set. for console.log
  */
 function actionIndicatorShow(loc = '')
 {
@@ -408,7 +408,7 @@ function actionIndicatorShow(loc = '')
 /**
  * explicit hide for action Indicator
  * instead of automatically show or hide, do on command hide
- * @param  {String} loc optional location name, empty if not set. for console.log
+ * @param {String} [loc=''] optional location name, empty if not set. for console.log
  */
 function actionIndicatorHide(loc = '')
 {
@@ -470,12 +470,12 @@ function ClearCall()
 // *** DOM MANAGEMENT FUNCTIONS
 /**
  * reates object for DOM element creation flow
- * @param  {String} tag     must set tag (div, span, etc)
- * @param  {String} id      optional set for id, if input, select will be used for name
- * @param  {String} content text content inside, is skipped if sub elements exist
- * @param  {Array}  css     array for css tags
- * @param  {Object} options anything else (value, placeholder, OnClick, style)
- * @return {Object}         created element as an object
+ * @param  {String} tag          must set tag (div, span, etc)
+ * @param  {String} [id='']      optional set for id, if input, select will be used for name
+ * @param  {String} [content=''] text content inside, is skipped if sub elements exist
+ * @param  {Array}  [css=[]]     array for css tags
+ * @param  {Object} [options={}] anything else (value, placeholder, OnClick, style)
+ * @return {Object}              created element as an object
  */
 const cel = (tag, id = '', content = '', css = [], options = {}) =>
 	_element = {
@@ -490,10 +490,10 @@ const cel = (tag, id = '', content = '', css = [], options = {}) =>
 
 /**
  * attach a cel created object to another to create a basic DOM tree
- * @param  {Object} base   object where to attach/search
- * @param  {Object} attach the object to be attached
- * @param  {String} id     optional id, if given search in base for this id and attach there
- * @return {Object}        "none", technically there is no return needed as it is global attach
+ * @param  {Object} base    object where to attach/search
+ * @param  {Object} attach  the object to be attached
+ * @param  {String} [id=''] optional id, if given search in base for this id and attach there
+ * @return {Object}         "none", technically there is no return needed as it is global attach
  */
 function ael(base, attach, id = '')
 {
@@ -658,14 +658,14 @@ function phfo(tree)
  * creates an select/options drop down block.
  * the array needs to be key -> value format.
  * key is for the option id and value is for the data output
- * @param  {String}  name          name/id
- * @param  {Object}  data          array for the options
- * @param  {String}  selected      selected item uid
- * @param  {Boolean} options_only  [def false] if this is true, it will not print the select part
- * @param  {Boolean} return_string [def false]: return as string and not as element
- * @param  {String}  sort          [def '']: if empty as is, else allowed 'keys',
- *                                 'values' all others are ignored
- * @return {String}                html with build options block
+ * @param  {String}  name                  name/id
+ * @param  {Object}  data                  array for the options
+ * @param  {String}  [selected='']         selected item uid
+ * @param  {Boolean} [options_only=false]  if this is true, it will not print the select part
+ * @param  {Boolean} [return_string=false] return as string and not as element
+ * @param  {String}  [sort='']             if empty as is, else allowed 'keys',
+ *                                         'values' all others are ignored
+ * @return {String}                        html with build options block
  */
 function html_options(name, data, selected = '', options_only = false, return_string = false, sort = '')
 {
@@ -678,18 +678,18 @@ function html_options(name, data, selected = '', options_only = false, return_st
  * creates an select/options drop down block.
  * the array needs to be key -> value format.
  * key is for the option id and value is for the data output
- * @param  {String}  name          name/id
- * @param  {Object}  data          array for the options
- * @param  {String}  selected      selected item uid
- * @param  {Number}  multiple      [def 0] if this is 1 or larger, the drop down
- *                                 will be turned into multiple select
- *                                 the number sets the size value unless it is 1,
- *                                 then it is default
- * @param  {Boolean} options_only  [def false] if this is true, it will not print the select part
- * @param  {Boolean} return_string [def false]: return as string and not as element
- * @param  {String}  sort          [def '']: if empty as is, else allowed 'keys', 'values'
- *                                 all others are ignored
- * @return {String}                html with build options block
+ * @param  {String}  name                  name/id
+ * @param  {Object}  data                  array for the options
+ * @param  {String}  [selected='']         selected item uid
+ * @param  {Number}  [multiple=0]          if this is 1 or larger, the drop down
+ *                                         will be turned into multiple select
+ *                                         the number sets the size value unless it is 1,
+ *                                         then it is default
+ * @param  {Boolean} [options_only=false]  if this is true, it will not print the select part
+ * @param  {Boolean} [return_string=false] return as string and not as element
+ * @param  {String}  [sort='']             if empty as is, else allowed 'keys',
+ *                                         'values' all others are ignored
+ * @return {String}                        html with build options block
  */
 function html_options_block(name, data, selected = '', multiple = 0, options_only = false, return_string = false, sort = '')
 {
@@ -763,10 +763,10 @@ function html_options_block(name, data, selected = '', multiple = 0, options_onl
 
 /**
  *  refills a select box with options and keeps the selected
- * @param  {String} name name/id
- * @param  {Object} data array of options
- * @param  {String} sort [def '']: if empty as is, else allowed 'keys', 'values'
- *                       all others are ignored
+ * @param {String} name      name/id
+ * @param {Object} data      array of options
+ * @param {String} [sort=''] if empty as is, else allowed 'keys', 'values'
+ *                            all others are ignored
  */
 function html_options_refill(name, data, sort = '')
 {
