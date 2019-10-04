@@ -1,4 +1,5 @@
 /* general edit javascript */
+/* prototype version */
 
 /* jshint esversion: 6 */
 
