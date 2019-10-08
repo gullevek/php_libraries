@@ -150,7 +150,7 @@ class Login extends \CoreLibs\DB\IO
 
 		// set global is ajax page for if we show the data directly, or need to pass it back
 		// to the continue AJAX class for output back to the user
-		$this->login_is_ajax_page = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
+		$this->login_is_ajax_page = $this->ajax_page_flag;
 
 		$this->l = new \CoreLibs\Language\L10n($lang);
 

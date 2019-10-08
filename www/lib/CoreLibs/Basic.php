@@ -181,6 +181,8 @@ class Basic
 
 	// form token (used for form validation)
 	private $form_token = '';
+	// ajax flag
+	protected $ajax_page_flag = false;
 
 	// METHOD: __construct
 	// PARAMS: set_control_flag [current sets set/get var errors]
@@ -217,6 +219,11 @@ class Basic
 		if ($abort === true) {
 			die('Core Constant missing. Check config file.');
 		}
+
+		// set ajax page flag based on the AJAX_PAGE varaibles
+		// convert to true/false so if AJAX_PAGE is 0 or false it is
+		// always boolean false
+		$this->ajax_page_flag = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
 
 		// set the page name
 		$this->page_name = $this->getPageName();
