@@ -727,7 +727,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$EDIT_FGCOLOR_T = 'edit_fgcolor';
 		}
 		$output_name = $this->table_array[$element_name]['output_name'];
-		if (isset($this->table_array[$element_name]['mandatory'])) {
+		if (isset($this->table_array[$element_name]['mandatory']) &&
+			$this->table_array[$element_name]['mandatory']
+		) {
 			$output_name .= ' *';
 		}
 		// create right side depending on 'definiton' in table_array
@@ -1022,6 +1024,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					} // switch
 				} // for each error to check
 			} elseif (isset($value['mandatory']) &&
+				$value['mandatory'] &&
 				(
 					// for all 'normal' fields
 					($this->table_array[$key]['type'] != 'password' && $this->table_array[$key]['type'] != 'drop_down_db_input' && !$this->table_array[$key]['value']) ||
@@ -1065,7 +1068,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (is_array($this->reference_array)) {
 			reset($this->reference_array);
 			foreach ($this->reference_array as $key => $value) {
-				if ($this->reference_array[$key]['mandatory'] && !$this->reference_array[$key]['selected'][0]) {
+				if (isset($this->reference_array[$key]['mandatory']) &&
+					$this->reference_array[$key]['mandatory'] &&
+					!$this->reference_array[$key]['selected'][0]) {
 					$this->msg .= sprintf($this->l->__('Please select at least one Element from field <b>%s</b>!<br>'), $this->reference_array[$key]['output_name']);
 				}
 			}
@@ -1119,20 +1124,25 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				for ($i = 0; $i < $max; $i ++) {
 					// either one of the post pks is set, or the mandatory
 					foreach ($reference_array['elements'] as $el_name => $data_array) {
-						if (isset($data_array['mandatory'])) {
+						if (isset($data_array['mandatory']) && $data_array['mandatory']) {
 							$mand_name = $data_array['output_name'];
 						}
 						// check if there is a primary ket inside, so it is okay
 						if (isset($data_array['pk_id']) &&
 							count($_POST[$prfx.$el_name]) &&
-							isset($reference_array['mandatory'])
+							isset($reference_array['mandatory']) &&
+							$reference_array['mandatory']
 						) {
 							$mand_okay = 1;
 						}
 						// we found a mandatory field. check now if one is set to satisfy the main mandatory
 						// also check, if this field is mandatory and its not set, but any other, throw an error
 						// $this->debug('edit_error_chk', 'RG error - Data['.$prfx.$el_name.': '.$_POST[$prfx.$el_name][$i].' | '.$_POST[$prfx.$el_name].' - '.$reference_array['enable_name'].' - '.$_POST[$reference_array['enable_name']][$_POST[$prfx.$el_name][$i]]);
-						if (isset($data_array['mandatory']) && $_POST[$prfx.$el_name][$i]) {
+						if (isset($data_array['mandatory']) &&
+							$data_array['mandatory'] &&
+							isset($_POST[$prfx.$el_name][$i]) &&
+							$_POST[$prfx.$el_name][$i]
+						) {
 							$mand_okay = 1;
 							$row_okay[$i] = 1;
 						} elseif ($data_array['type'] == 'radio_group' && !isset($_POST[$prfx.$el_name])) {
@@ -1145,7 +1155,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							// $this->debug('edit_error_chk', '[$i]');
 							$element_set[$i] = 1;
 							$row_okay[$i] = 1;
-						} elseif (isset($data_array['mandatory']) && !$_POST[$prfx.$el_name][$i]) {
+						} elseif (isset($data_array['mandatory']) &&
+							$data_array['mandatory'] &&
+							!$_POST[$prfx.$el_name][$i]
+						) {
 							$row_okay[$i] = 0;
 						}
 						// do optional error checks like for normal fields
@@ -1153,19 +1166,20 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						if (isset($data_array['error_check'])) {
 							foreach (explode('|', $data_array['error_check']) as $error_check) {
 								switch ($error_check) {
-									// check unique, check if field in table is not yet exist
+									// check unique, check if field is filled and not same in _POST set
 									case 'unique':
-										$q = 'SELECT '.$_pk_name.' FROM '.$table_name.' WHERE '.$el_name.' = '."'".$this->dbEscapeString($_POST[$prfx.$el_name][$i])."'";
-										if ($this->table_array[$this->int_pk_name]['value']) {
-											$q .= ' AND '.$this->int_pk_name.' <> '.$this->table_array[$this->int_pk_name]['value'];
-										}
-										list($key) = $this->dbReturnRow($q);
-										if ($key) {
+										// must be set for double check
+										if ($_POST[$prfx.$el_name][$i] &&
+											count(array_keys($_POST[$prfx.$el_name], $_POST[$prfx.$el_name][$i])) >= 2
+										) {
 											$this->msg .= sprintf($this->l->__('The field <b>%s</b> in row <b>%s</b> can be used only once!<br>'), $reference_array['output_name'], $i);
 										}
 										break;
 									case 'alphanumericspace':
-										if (!preg_match("/^[0-9A-Za-z\ ]+$/", $_POST[$prfx.$el_name][$i])) {
+										// only check if set
+										if ($_POST[$prfx.$el_name][$i] &&
+											!preg_match("/^[0-9A-Za-z\ ]+$/", $_POST[$prfx.$el_name][$i])
+										) {
 											$this->msg .= sprintf($this->l->__('Please enter a valid alphanumeric (Numbers and Letters, spaces allowed) value for the <b>%s</b> Field and row <b>%s</b>!<br>'), $reference_array['output_name'], $i);
 										}
 										break;
@@ -1176,7 +1190,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				}
 
 				// main mandatory is met -> error msg
-				if (!$mand_okay && isset($reference_array['mandatory'])) {
+				if (!$mand_okay &&
+					isset($reference_array['mandatory']) &&
+					$reference_array['mandatory']) {
 					$this->msg .= sprintf($this->l->__('You need to enter at least one data set for field <b>%s</b>!<Br>'), $reference_array['output_name']);
 				}
 				for ($i = 0; $i < $max; $i ++) {
@@ -1472,6 +1488,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						// if we have enable name & delete set, then only insert/update those which are flagged as active
 						// check if mandatory field is set, if not set 'do not write flag'
 						if (isset($data_array['mandatory']) &&
+							$data_array['mandatory'] &&
 							(!isset($_POST[$prfx.$el_name][$i]) || (isset($_POST[$prfx.$el_name][$i]) && empty($_POST[$prfx.$el_name][$i])))
 						) {
 							$no_write[$i] = 1;
@@ -1678,7 +1695,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		$data = array();
 		$output_name = $this->reference_array[$table_name]['output_name'];
-		if ($this->reference_array[$table_name]['mandatory']) {
+		if (isset($this->reference_array[$table_name]['mandatory']) &&
+			$this->reference_array[$table_name]['mandatory']
+		) {
 			$output_name .= ' *';
 		}
 		$data['name'] = $this->reference_array[$table_name]['other_table_pk'];
@@ -1708,7 +1727,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$data = array();
 		// output name for the viewable left table td box, prefixed with * if mandatory
 		$output_name = $this->element_list[$table_name]['output_name'];
-		if (isset($this->element_list[$table_name]['mandatory'])) {
+		if (isset($this->element_list[$table_name]['mandatory']) &&
+			$this->element_list[$table_name]['mandatory']
+		) {
 			$output_name .= ' *';
 		}
 		// delete button name, if there is one set
@@ -1789,7 +1810,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			if ($this->error) {
 				if (isset($_POST[$el_name]) && is_array($_POST[$el_name])) {
 					// this is for the new line
-					$proto[$el_name] = $_POST[$el_name][(count($_POST[$el_name]) - 1)];
+					$proto[$el_name] = isset($_POST[$el_name][(count($_POST[$el_name]) - 1)]) ? $_POST[$el_name][(count($_POST[$el_name]) - 1)] : 0;
 				} else {
 					$proto[$el_name] = 0;
 				}
