@@ -295,10 +295,12 @@ function isObject(val) {
  * @param  {Object}  object object to search key in
  * @return {Boolean}        true/false if key exists in object
  */
-const keyInObject = (key, object) => (key in object) ? true : false;
+// const keyInObject = (key, object) => (key in object) ? true : false;
+const keyInObject = (key, object) => (Object.prototype.hasOwnProperty.call(object, key)) ? true : false;
 /*function keyInObject(key, object)
 {
-	return (key in object) ? true : false;
+	// return (key in object) ? true : false;
+	return (Object.prototype.hasOwnProperty.call(object, key)) ? true : false;
 }*/
 
 /**

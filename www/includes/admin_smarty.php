@@ -78,7 +78,7 @@ $cms->DATA['ADMIN'] = $login->acl['admin'];
 // the template part to include into the body
 $cms->DATA['TEMPLATE_NAME'] = $TEMPLATE_NAME;
 $cms->DATA['CONTENT_INCLUDE'] = $CONTENT_INCLUDE;
-$cms->DATA['TEMPLATE_TRANSLATE'] = $TEMPLATE_TRANSLATE;
+$cms->DATA['TEMPLATE_TRANSLATE'] = isset($TEMPLATE_TRANSLATE) ? $TEMPLATE_TRANSLATE : null;
 $cms->DATA['PAGE_FILE_NAME'] = $PAGE_FILE_NAME;
 // LANG
 $cms->DATA['LANG'] = $lang;
