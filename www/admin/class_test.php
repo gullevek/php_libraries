@@ -131,20 +131,20 @@ print "UPDATE STATUS: $status | RETURNING EXT: ".print_r($basic->insert_id_ext, 
 $table = 'foo';
 print "TABLE META DATA: ".$basic->printAr($basic->dbShowTableMetaData($table))."<br>";
 $primary_key = ''; # unset
-$db_write_table = array ('test', 'string_a', 'number_a', 'some_bool');
-//	$db_write_table = array ('test');
-$object_fields_not_touch = array ();
-$object_fields_not_update = array ();
-$data = array ('test' => 'BOOL TEST SOMETHING '.time(), 'string_a' => 'SOME TEXT', 'number_a' => 5);
+$db_write_table = array('test', 'string_a', 'number_a', 'some_bool');
+//	$db_write_table = array('test');
+$object_fields_not_touch = array();
+$object_fields_not_update = array();
+$data = array('test' => 'BOOL TEST SOMETHING '.time(), 'string_a' => 'SOME TEXT', 'number_a' => 5);
 $primary_key = $basic->dbWriteDataExt($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
 print "Wrote to DB tabel $table and got primary key $primary_key<br>";
-$data = array ('test' => 'BOOL TEST ON '.time(), 'string_a' => '', 'number_a' => 0, 'some_bool' => 1);
+$data = array('test' => 'BOOL TEST ON '.time(), 'string_a' => '', 'number_a' => 0, 'some_bool' => 1);
 $primary_key = $basic->dbWriteDataExt($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
 print "Wrote to DB tabel $table and got primary key $primary_key<br>";
-$data = array ('test' => 'BOOL TEST OFF '.time(), 'string_a' => null, 'number_a' => null, 'some_bool' => 0);
+$data = array('test' => 'BOOL TEST OFF '.time(), 'string_a' => null, 'number_a' => null, 'some_bool' => 0);
 $primary_key = $basic->dbWriteDataExt($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
 print "Wrote to DB tabel $table and got primary key $primary_key<br>";
-$data = array ('test' => 'BOOL TEST UNSET '.time());
+$data = array('test' => 'BOOL TEST UNSET '.time());
 $primary_key = $basic->dbWriteDataExt($db_write_table, $primary_key, $table, $object_fields_not_touch, $object_fields_not_update, $data);
 print "Wrote to DB tabel $table and got primary key $primary_key<br>";
 
@@ -236,8 +236,52 @@ $date_1 = '2017/1/5';
 $date_2 = '2017-01-05';
 print "COMPARE DATE: ".$basic->compareDate($date_1, $date_2)."<br>";
 
+// recursive array search
+$test_array = array(
+	'foo' => 'bar',
+	'input' => array(
+		'element_a' => array(
+			'type' => 'text'
+		),
+		'element_b' => array(
+			'type' => 'email'
+		),
+		'element_c' => array(
+			'type' => 'email'
+		)
+	)
+);
 
-// array re
+echo "SOURCE ARRAY: ".$basic->printAr($test_array)."<br>";
+echo "FOUND ELEMENTS [base]: ".$basic->printAr($basic->arraySearchRecursive('email', $test_array, 'type'))."<br>";
+echo "FOUND ELEMENTS [input]: ".$basic->printAr($basic->arraySearchRecursive('email', $test_array['input'], 'type'))."<br>";
+
+// image thumbnail
+$images = array(
+	// height bigger
+	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture.jpg',
+	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture.png',
+	// width bigger
+	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture_width_bigger.jpg',
+	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture_width_bigger.png',
+	// square
+	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture_square.jpg',
+	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture_square.png',
+	// other sample images
+	BASE.LAYOUT.CONTENT_PATH.IMAGES.'5c501af48da6c.jpg'
+);
+echo "<hr>";
+$thumb_width = 250;
+$thumb_height = 250;
+foreach ($images as $image) {
+	// rotate image first
+	$basic->correctImageOrientation($image);
+	// thumbnail tests
+	echo "<div>".basename($image).": WIDTH: $thumb_width<br><img src=".$basic->createThumbnailSimple($image, $thumb_width)."></div>";
+	echo "<div>".basename($image).": HEIGHT: $thumb_height<br><img src=".$basic->createThumbnailSimple($image, 0, $thumb_height)."></div>";
+	echo "<div>".basename($image).": WIDTH/HEIGHT: $thumb_width x $thumb_height<br><img src=".$basic->createThumbnailSimple($image, $thumb_width, $thumb_height)."></div>";
+	echo "<hr>";
+}
 
 // print error messages
 // print $login->printErrorMsg();

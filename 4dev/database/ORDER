@@ -16,6 +16,7 @@ table/edit_scheme.sql
 table/edit_language.sql
 table/edit_group.sql
 table/edit_page_access.sql
+table/edit_page_content.sql
 table/edit_user.sql
 table/edit_log.sql
 table/edit_access.sql
@@ -31,6 +32,7 @@ trigger/trg_edit_group.sql
 trigger/trg_edit_language.sql
 trigger/trg_edit_log.sql
 trigger/trg_edit_page_access.sql
+trigger/trg_edit_page_content.sql
 trigger/trg_edit_page.sql
 trigger/trg_edit_query_string.sql
 trigger/trg_edit_scheme.sql

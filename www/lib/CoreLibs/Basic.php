@@ -1528,7 +1528,7 @@ class Basic
 			// labels in order of size
 			$labels = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB');
 			// calc file size, round down too two digits, add label based max change
-			return round($number / pow(1024, ($i = floor(log((float)$number, 1024)))), 2).($space ? ' ' : '').(isset($labels[(int)$i]) ? $labels[(int)$i] : '>EB');
+			return round((float)$number / pow(1024, ($i = floor(log((float)$number, 1024)))), 2).($space ? ' ' : '').(isset($labels[(int)$i]) ? $labels[(int)$i] : '>EB');
 		}
 		return (string)$number;
 	}
@@ -1957,15 +1957,168 @@ class Basic
 	}
 
 	/**
+	 * simple thumbnail creation for jpeg, png only
+	 * TODO: add other types like gif, etc
+	 * - bails with false on failed create
+	 * - if either size_x or size_y are empty (0)
+	 *   the resize is to max of one size
+	 *   if both are set, those are the max sizes (aspect ration is always ekpt)
+	 * - if path is not given will cache folder for current path set
+	 * @param  string      $filename       source file name with full path
+	 * @param  int         $thumb_width    thumbnail width
+	 * @param  int         $thumb_height   thumbnail height
+	 * @param  string|null $thumbnail_path altnerative path for thumbnails
+	 * @param  bool        $use_cache      default to true, set to false to skip
+	 *                                     creating new image if exists
+	 * @param  bool        $high_quality   default to true, uses sample version, set to false
+	 *                                     to use quick but less nice version
+	 * @param  int         $jpeg_quality   default 80, set image quality for jpeg only
+	 * @return string|bool                 thumbnail with path
+	 */
+	public function createThumbnailSimple(
+		string $filename,
+		int $thumb_width = 0,
+		int $thumb_height = 0,
+		?string $thumbnail_path = null,
+		bool $use_cache = true,
+		bool $high_quality = true,
+		int $jpeg_quality = 80
+	) {
+		$thumbnail = false;
+		// $this->debug('IMAGE PREPARE', "FILE: $filename (exists ".(string)file_exists($filename)."), WIDTH: $thumb_width, HEIGHT: $thumb_height");
+		// check that input image exists and is either jpeg or png
+		// also fail if the basic CACHE folder does not exist at all
+		if (file_exists($filename) &&
+			is_dir(BASE.LAYOUT.CONTENT_PATH.CACHE) &&
+			is_writable(BASE.LAYOUT.CONTENT_PATH.CACHE)
+		) {
+			// $this->debug('IMAGE PREPARE', "FILENAME OK, THUMB WIDTH/HEIGHT OK");
+			list($inc_width, $inc_height, $img_type) = getimagesize($filename);
+			if ($img_type == IMG_JPG ||
+				$img_type == IMG_PNG
+			) {
+				// $this->debug('IMAGE PREPARE', "IMAGE TYPE OK: ".$inc_width.'x'.$inc_height);
+				// set thumbnail paths
+				$thumbnail_write_path = BASE.LAYOUT.CONTENT_PATH.CACHE.IMAGES;
+				$thumbnail_web_path = LAYOUT.CACHE.IMAGES;
+				// if images folder in cache does not exist create it, if failed, fall back to base cache folder
+				if (!is_dir($thumbnail_write_path)) {
+					if (false === mkdir($thumbnail_write_path)) {
+						$thumbnail_write_path = BASE.LAYOUT.CONTENT_PATH.CACHE;
+						$thumbnail_web_path = LAYOUT.CACHE;
+					}
+				}
+				// if missing width or height in thumb, use the set one
+				if ($thumb_width == 0) {
+					$thumb_width = $inc_width;
+				}
+				if ($thumb_height == 0) {
+					$thumb_height = $inc_height;
+				}
+				// check resize parameters
+				if ($inc_width > $thumb_width || $inc_height > $thumb_height) {
+					$thumb_width_r = 0;
+					$thumb_height_r = 0;
+					// we need to keep the aspect ration on longest side
+					if (($inc_height > $inc_width &&
+						// and the height is bigger than thumb set
+							$inc_height > $thumb_height) ||
+						// or the height is smaller or equal width
+						// but the width for the thumb is equal to the image height
+						($inc_height <= $inc_width &&
+							$inc_width == $thumb_width
+						)
+					) {
+						// $this->debug('IMAGE PREPARE', 'HEIGHT > WIDTH');
+						$ratio = $inc_height / $thumb_height;
+						$thumb_width_r = (int)ceil($inc_width / $ratio);
+						$thumb_height_r = $thumb_height;
+					} else {
+						// $this->debug('IMAGE PREPARE', 'WIDTH > HEIGHT');
+						$ratio = $inc_width / $thumb_width;
+						$thumb_width_r = $thumb_width;
+						$thumb_height_r = (int)ceil($inc_height / $ratio);
+					}
+					// $this->debug('IMAGE PREPARE', "Ratio: $ratio, Target size $thumb_width_r x $thumb_height_r");
+					// set output thumbnail name
+					$thumbnail = 'thumb-'.pathinfo($filename)['filename'].'-'.$thumb_width_r.'x'.$thumb_height_r;
+					if ($use_cache === false ||
+						!file_exists($thumbnail_write_path.$thumbnail)
+					) {
+						// image, copy source image, offset in image, source x/y, new size, source image size
+						$thumb = imagecreatetruecolor($thumb_width_r, $thumb_height_r);
+						if ($img_type == IMG_PNG) {
+							// preservere transaprency
+							imagecolortransparent(
+								$thumb,
+								imagecolorallocatealpha($thumb, 0, 0, 0, 127)
+							);
+							imagealphablending($thumb, false);
+							imagesavealpha($thumb, true);
+						}
+						$source = null;
+						switch ($img_type) {
+							case IMG_JPG:
+								$source = imagecreatefromjpeg($filename);
+								break;
+							case IMG_PNG:
+								$source = imagecreatefrompng($filename);
+								break;
+						}
+						// check that we have a source image resource
+						if ($source !== null) {
+							// resize no shift
+							if ($high_quality === true) {
+								imagecopyresized($thumb, $source, 0, 0, 0, 0, $thumb_width_r, $thumb_height_r, $inc_width, $inc_height);
+							} else {
+								imagecopyresampled($thumb, $source, 0, 0, 0, 0, $thumb_width_r, $thumb_height_r, $inc_width, $inc_height);
+							}
+							// write file
+							switch ($img_type) {
+								case IMG_JPG:
+									imagejpeg($thumb, $thumbnail_write_path.$thumbnail, $jpeg_quality);
+									break;
+								case IMG_PNG:
+									imagepng($thumb, $thumbnail_write_path.$thumbnail);
+									break;
+							}
+							// free up resources (in case we are called in a loop)
+							imagedestroy($source);
+							imagedestroy($thumb);
+						} else {
+							$thumbnail = false;
+						}
+					}
+				} else {
+					// we just copy over the image as is, we never upscale
+					$thumbnail = 'thumb-'.pathinfo($filename)['filename'].'-'.$inc_width.'x'.$inc_height;
+					if ($use_cache === false ||
+						!file_exists($thumbnail_write_path.$thumbnail)
+					) {
+						copy($filename, $thumbnail_write_path.$thumbnail);
+					}
+				}
+				// add output path
+				if ($thumbnail !== false) {
+					$thumbnail = $thumbnail_web_path.$thumbnail;
+				}
+			}
+		}
+		// either return false or the thumbnail name + output path web
+		return $thumbnail;
+	}
+
+	/**
 	 * reads the rotation info of an file and rotates it to be correctly upright
 	 * this is done because not all software honers the exit Orientation flag
+	 * only works with jpg or png
 	 * @param  string $filename path + filename to rotate. This file must be writeable
 	 * @return void
 	 */
 	public function correctImageOrientation($filename): void
 	{
 		if (function_exists('exif_read_data') && is_writeable($filename)) {
-			list($inc_width, $inc_height, $type) = getimagesize($filename);
+			list($inc_width, $inc_height, $img_type) = getimagesize($filename);
 			$exif = exif_read_data($filename);
 			$orientation = null;
 			$img = null;
@@ -1974,11 +2127,13 @@ class Basic
 			}
 			if ($orientation != 1) {
 				$this->debug('IMAGE FILE ROTATE', 'Need to rotate image ['.$filename.'] from: '.$orientation);
-				if ($type == 2) {
-					// load image to include
-					$img = imagecreatefromjpeg($filename);
-				} elseif ($type == 3) {
-					$img = imagecreatefrompng($filename);
+				switch ($img_type) {
+					case IMG_JPG:
+						$img = imagecreatefromjpeg($filename);
+						break;
+					case IMG_PNG:
+						$img = imagecreatefrompng($filename);
+						break;
 				}
 				$deg = 0;
 				// 1 top, 6: left, 8: right, 3: bottom
@@ -1993,14 +2148,21 @@ class Basic
 						$deg = 90;
 						break;
 				}
-				if ($deg && $img !== null) {
-					$img = imagerotate($img, $deg, 0);
-				}
-				// then rewrite the rotated image back to the disk as $filename
-				if ($type == 2 && $img !== null) {
-					imagejpeg($img, $filename);
-				} elseif ($type == 3 && $img !== null) {
-					imagepng($img, $filename);
+				if ($img !== null) {
+					if ($deg) {
+						$img = imagerotate($img, $deg, 0);
+					}
+					// then rewrite the rotated image back to the disk as $filename
+					switch ($img_type) {
+						case IMG_JPG:
+							imagejpeg($img, $filename);
+							break;
+						case IMG_PNG:
+							imagepng($img, $filename);
+							break;
+					}
+					// clean up image if we have an image
+					imagedestroy($img);
 				}
 			} // only if we need to rotate
 		} // function exists & file is writeable, else do nothing

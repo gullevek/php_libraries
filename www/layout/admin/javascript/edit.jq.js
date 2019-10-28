@@ -295,11 +295,9 @@ function isObject(val) {
  * @param  {Object}  object object to search key in
  * @return {Boolean}        true/false if key exists in object
  */
-// const keyInObject = (key, object) => (key in object) ? true : false;
 const keyInObject = (key, object) => (Object.prototype.hasOwnProperty.call(object, key)) ? true : false;
 /*function keyInObject(key, object)
 {
-	// return (key in object) ? true : false;
 	return (Object.prototype.hasOwnProperty.call(object, key)) ? true : false;
 }*/
 
@@ -801,6 +799,66 @@ function html_options_refill(name, data, sort = '')
 			document.getElementById(name).appendChild(element_option);
 		}
 	}
+}
+
+/**
+ * parses a query string from window.location.search.substring(1)
+ * ALTERNATIVE CODE
+ * var url = new URL(window.location.href);
+ * param_uid = url.searchParams.get('uid');
+ * @param  {String}        [query='']      the query string to parse
+ *                                         if not set will auto fill
+ * @param  {String}        [return_key=''] if set only returns this key entry
+ *                                         or empty for none
+ * @return {Object|String}                 parameter entry list
+ */
+function parseQueryString(query = '', return_key = '') {
+	if (!query) {
+		query = window.location.search.substring(1);
+	}
+	var vars = query.split("&");
+	var query_string = {};
+	for (var i = 0; i < vars.length; i++) {
+		var pair = vars[i].split("=");
+		var key = decodeURIComponent(pair[0]);
+		var value = decodeURIComponent(pair[1]);
+		// If first entry with this name
+		if (typeof query_string[key] === "undefined") {
+			query_string[key] = decodeURIComponent(value);
+			// If second entry with this name
+		} else if (typeof query_string[key] === "string") {
+			var arr = [query_string[key], decodeURIComponent(value)];
+			query_string[key] = arr;
+			// If third or later entry with this name
+		} else {
+			query_string[key].push(decodeURIComponent(value));
+		}
+	}
+	if (return_key) {
+		if (keyInObject(return_key, query_string)) {
+			return query_string[return_key];
+		} else {
+			return '';
+		}
+	} else {
+		return query_string;
+	}
+}
+
+/**
+ * searchs the current url for a parameter
+ * @param  {String} key uid key to get data for
+ * @return {String}     value for the key or '' for not found
+ */
+function getQueryStringParam(key)
+{
+	var url = new URL(window.location.href);
+ 	var param = url.searchParams.get(key);
+ 	if (param) {
+ 		return param;
+ 	} else {
+ 		return '';
+ 	}
 }
 
 // *** MASTER logout call
