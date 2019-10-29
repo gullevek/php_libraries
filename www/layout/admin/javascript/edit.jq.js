@@ -853,12 +853,12 @@ function parseQueryString(query = '', return_key = '') {
 function getQueryStringParam(key)
 {
 	var url = new URL(window.location.href);
- 	var param = url.searchParams.get(key);
- 	if (param) {
- 		return param;
- 	} else {
- 		return '';
- 	}
+	var param = url.searchParams.get(key);
+	if (param) {
+		return param;
+	} else {
+		return '';
+	}
 }
 
 // *** MASTER logout call

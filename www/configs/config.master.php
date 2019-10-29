@@ -78,27 +78,19 @@ DEFINE('TEMPLATES', 'templates'.DS);
 DEFINE('DEFAULT_HASH', 'sha256');
 // default acl level
 DEFINE('DEFAULT_ACL_LEVEL', 80);
-// default levels for certain actions
-/*	DEFINE('DEFAULT_ACL_READ', 20);
-DEFINE('DEFAULT_ACL_CONFIRM', 35);
-DEFINE('DEFAULT_ACL_MOD', 40);
-DEFINE('DEFAULT_ACL_WRITE', 60);
-DEFINE('DEFAULT_ACL_SEND', 70);
-DEFINE('DEFAULT_ACL_DEL', 80);
-DEFINE('DEFAULT_ACL_ADMIN', 100); */
 // SSL host name
-//	DEFINE('SSL_HOST', 'ssl.host.name');
+// DEFINE('SSL_HOST', 'ssl.host.name');
 // error page strictness, Default is 3
 // 1: only show error page as the last mesure if really no mid & aid can be loaded and found at all
 // 2: if template not found, do not search, show error template
 // 3: if default template is not found, show error template, do not fall back to default tree
 // 4: very strict, even on normal fixable errors through error
-//	DEFINE('ERROR_STRICT', 3);
+// DEFINE('ERROR_STRICT', 3);
 // allow page caching in general, set to 'FALSE' if you do debugging or development!
-//	DEFINE('ALLOW_SMARTY_CACHE', FALSE);
+// DEFINE('ALLOW_SMARTY_CACHE', FALSE);
 // cache life time, in second', default here is 2 days (172800s)
 // -1 is never expire cache
-//	DEFINE('SMARTY_CACHE_LIFETIME', -1);
+// DEFINE('SMARTY_CACHE_LIFETIME', -1);
 
 /************* LOGOUT ********************/
 // logout target
@@ -123,9 +115,12 @@ DEFINE('PAGE_WIDTH', 800);
 // the default template name
 DEFINE('MASTER_TEMPLATE_NAME', 'main_body.tpl');
 
-/************* SESSION NAMES *************/
-// base name
+/************* OVERALL CONTROL NAMES *************/
+// BELOW has HAS to be changed
+// base name for all session and log names
 DEFINE('BASE_NAME', 'CoreLibs');
+
+/************* SESSION NAMES *************/
 // server name HASH
 DEFINE('SERVER_NAME_HASH', hash('crc32b', $_SERVER['HTTP_HOST']));
 DEFINE('SERVER_PATH_HASH', hash('crc32b', BASE));
@@ -145,10 +140,12 @@ DEFINE('DEFAULT_LANG', 'en_utf8');
 // default web page encoding setting
 DEFINE('DEFAULT_ENCODING', 'UTF-8');
 
+/************* LOGGING *******************/
 // below two can be defined here, but they should be
 // defined in either the header file or the file itself
-/************* LOGGING *******************/
-DEFINE('LOG_FILE_ID', '');
+// as $LOG_FILE_ID which takes presence over LOG_FILE_ID
+// see Basic class constructor
+DEFINE('LOG_FILE_ID', BASE_NAME);
 
 /************* CLASS ERRORS *******************/
 // 0 = default all OFF
@@ -161,7 +158,7 @@ define('CLASS_VARIABLE_ERROR_MODE', 3);
 // if we have a dev/live system
 // set_live is a per page/per item
 // live_queue is a global queue system
-//	DEFINE('QUEUE', 'live_queue');
+// DEFINE('QUEUE', 'live_queue');
 
 /************* DB PATHS (PostgreSQL) *****************/
 // schema names, can also be defined per <DB INFO>
@@ -189,6 +186,7 @@ if (file_exists(BASE.CONFIGS.'config.path.php')) {
 	require BASE.CONFIGS.'config.path.php';
 }
 
+/************* MASTER INIT *****************/
 // live frontend pages
 // ** missing live domains **
 // get the name without the port
@@ -257,10 +255,13 @@ DEFINE('JAVASCRIPT', 'frontend.js');
 
 // anything optional
 /************* INTERNAL ******************/
-// any other global definitons here
-//	DEFINE('SOME_ID', <SOME VALUE>);
+// any other global definitons in the config.other.php
+if (file_exists(BASE.CONFIGS.'config.other.php')) {
+	require BASE.CONFIGS.'config.other.php';
+}
 
 /************* CONVERT *******************/
+// this only needed if the external thumbnail create is used
 $paths = array(
 	'/bin',
 	'/usr/bin',
@@ -274,6 +275,7 @@ foreach ($paths as $path) {
 	}
 }
 
+/************* DEBUG *******************/
 // turn off debug if debug flag is OFF
 if (defined('DEBUG') && DEBUG == false) {
 	$ECHO_ALL = false;
@@ -291,6 +293,7 @@ if (defined('DEBUG') && DEBUG == false) {
 	$DEBUG_ALL_OVERRIDE = false;
 }
 
+/************* AUTO LOADER *******************/
 // read auto loader
 require BASE.LIB.'autoloader.php';
 
