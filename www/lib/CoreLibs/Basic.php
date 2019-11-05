@@ -1859,6 +1859,15 @@ class Basic
 			3 => 'png'
 		);
 		$return_data = false;
+		$CONVERT = '';
+		// if CONVERT is not defined, abort
+		/** @phan-suppress-next-line PhanUndeclaredConstant */
+		if (defined('CONVERT') && is_executable(CONVERT)) {
+			/** @phan-suppress-next-line PhanUndeclaredConstant */
+			$CONVERT = CONVERT;
+		} else {
+			return $return_data;
+		}
 		if (!empty($cache_source)) {
 			$tmp_src = $cache_source;
 		} else {
@@ -1896,7 +1905,7 @@ class Basic
 				// is this a PDF, if no, return from here with nothing
 				$convert_prefix = 'png:';
 				# TEMP convert to PNG, we then override the file name
-				$convert_string = CONVERT.' '.$filename.' '.$convert_prefix.$filename.'_TEMP';
+				$convert_string = $CONVERT.' '.$filename.' '.$convert_prefix.$filename.'_TEMP';
 				$status = exec($convert_string, $output, $return);
 				$filename .= '_TEMP';
 				// for delete, in case we need to glob
@@ -1920,7 +1929,7 @@ class Basic
 			if (!is_file($thumbnail) || $clear_cache == true) {
 				// convert the picture
 				if ($width > $size_x) {
-					$convert_string = CONVERT.' -geometry '.$size_x.'x '.$filename.' '.$thumbnail;
+					$convert_string = $CONVERT.' -geometry '.$size_x.'x '.$filename.' '.$thumbnail;
 					$status = exec($convert_string, $output, $return);
 					// get the size of the converted data, if converted
 					if (is_file($thumbnail)) {
@@ -1928,7 +1937,7 @@ class Basic
 					}
 				}
 				if ($height > $size_y) {
-					$convert_string = CONVERT.' -geometry x'.$size_y.' '.$filename.' '.$thumbnail;
+					$convert_string = $CONVERT.' -geometry x'.$size_y.' '.$filename.' '.$thumbnail;
 					$status = exec($convert_string, $output, $return);
 				}
 			}
@@ -1968,6 +1977,8 @@ class Basic
 	 * @param  int         $thumb_width    thumbnail width
 	 * @param  int         $thumb_height   thumbnail height
 	 * @param  string|null $thumbnail_path altnerative path for thumbnails
+	 * @param  bool        $create_dummy   if we encounter an invalid file
+	 *                                     create a dummy image file and return it
 	 * @param  bool        $use_cache      default to true, set to false to skip
 	 *                                     creating new image if exists
 	 * @param  bool        $high_quality   default to true, uses sample version, set to false
@@ -1980,6 +1991,7 @@ class Basic
 		int $thumb_width = 0,
 		int $thumb_height = 0,
 		?string $thumbnail_path = null,
+		bool $create_dummy = false,
 		bool $use_cache = true,
 		bool $high_quality = true,
 		int $jpeg_quality = 80
@@ -1994,8 +2006,12 @@ class Basic
 		) {
 			// $this->debug('IMAGE PREPARE', "FILENAME OK, THUMB WIDTH/HEIGHT OK");
 			list($inc_width, $inc_height, $img_type) = getimagesize($filename);
+			$thumbnail_write_path = null;
+			$thumbnail_web_path = null;
+			// path set first
 			if ($img_type == IMG_JPG ||
-				$img_type == IMG_PNG
+				$img_type == IMG_PNG ||
+				$create_dummy === true
 			) {
 				// $this->debug('IMAGE PREPARE', "IMAGE TYPE OK: ".$inc_width.'x'.$inc_height);
 				// set thumbnail paths
@@ -2008,6 +2024,11 @@ class Basic
 						$thumbnail_web_path = LAYOUT.CACHE;
 					}
 				}
+			}
+			// do resize or fall back on dummy run
+			if ($img_type == IMG_JPG ||
+				$img_type == IMG_PNG
+			) {
 				// if missing width or height in thumb, use the set one
 				if ($thumb_width == 0) {
 					$thumb_width = $inc_width;
@@ -2102,6 +2123,50 @@ class Basic
 				if ($thumbnail !== false) {
 					$thumbnail = $thumbnail_web_path.$thumbnail;
 				}
+			} elseif ($create_dummy === true) {
+				// create dummy image in the thumbnail size
+				// if one side is missing, use the other side to create a square
+				if (!$thumb_width) {
+					$thumb_width = $thumb_height;
+				}
+				if (!$thumb_height) {
+					$thumb_height = $thumb_width;
+				}
+				// do we have an image already?
+				$thumbnail = 'thumb-'.pathinfo($filename)['filename'].'-'.$thumb_width.'x'.$thumb_height;
+				if ($use_cache === false ||
+					!file_exists($thumbnail_write_path.$thumbnail)
+				) {
+					$thumb = imagecreatetruecolor($thumb_width, $thumb_height);
+					// add outside border px = 5% (rounded up)
+					// eg 50px -> 2.5px
+					$gray = imagecolorallocate($thumb, 200, 200, 200);
+					$white = imagecolorallocate($thumb, 255, 255, 255);
+					// fill gray background
+					imagefill($thumb, 0, 0, $gray);
+					// now create rectangle
+					if (imagesx($thumb) < imagesy($thumb)) {
+						$width = (int)round(imagesx($thumb) / 100 * 5);
+					} else {
+						$width = (int)round(imagesy($thumb) / 100 * 5);
+					}
+					imagefilledrectangle($thumb, 0 + $width, 0 + $width, imagesx($thumb) - $width, imagesy($thumb) - $width, $white);
+					// add "No valid images source"
+					// OR add circle
+					// * find center
+					// * width/height is 75% of size - border
+					// smaller size is taken
+					$base_width = imagesx($thumb) > imagesy($thumb) ? imagesy($thumb) : imagesx($thumb);
+					// get 75% width
+					$cross_width = (int)round((($base_width - ($width * 2)) / 100 * 75) / 2);
+					$center_x = (int)round(imagesx($thumb) / 2);
+					$center_y = (int)round(imagesy($thumb) / 2);
+					imagefilledellipse($thumb, $center_x, $center_y, $cross_width, $cross_width, $gray);
+					// find top left and bottom left for first line
+					imagepng($thumb, $thumbnail_write_path.$thumbnail);
+				}
+				// add web path
+				$thumbnail = $thumbnail_web_path.$thumbnail;
 			}
 		}
 		// either return false or the thumbnail name + output path web
@@ -2119,7 +2184,8 @@ class Basic
 	{
 		if (function_exists('exif_read_data') && is_writeable($filename)) {
 			list($inc_width, $inc_height, $img_type) = getimagesize($filename);
-			$exif = exif_read_data($filename);
+			// add @ to avoid "file not supported error"
+			$exif = @exif_read_data($filename);
 			$orientation = null;
 			$img = null;
 			if ($exif && isset($exif['Orientation'])) {
