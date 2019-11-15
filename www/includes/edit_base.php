@@ -36,23 +36,19 @@ if (!DEBUG)	{
 	$ECHO_ALL = 0;
 }
 
-// set default lang if not set otherwise
-if (!isset($lang)) {
-	$lang = DEFAULT_LANG;
-}
 // should be utf8
 header("Content-type: text/html; charset=".DEFAULT_ENCODING);
 ob_end_flush();
-$login = new CoreLibs\ACL\Login(DB_CONFIG, $lang);
+$login = new CoreLibs\ACL\Login(DB_CONFIG);
 
 // create form class
-$form = new CoreLibs\Output\Form\Generate(DB_CONFIG, $lang);
+$form = new CoreLibs\Output\Form\Generate(DB_CONFIG);
 if ($form->mobile_phone) {
 	echo "I am sorry, but this page cannot be viewed by a mobile phone";
 	exit;
 }
 // smarty template engine (extended Translation version)
-$smarty = new CoreLibs\Template\SmartyExtend($lang);
+$smarty = new CoreLibs\Template\SmartyExtend();
 
 // $form->debug('POST', $form->printAr($_POST));
 
@@ -453,7 +449,7 @@ if (is_dir(BASE.TEMPLATES_C)) {
 if (is_dir(BASE.CACHE)) {
 	$smarty->setCacheDir(BASE.CACHE);
 }
-$smarty->display($EDIT_TEMPLATE, 'editAdmin_'.$lang, 'editAdmin_'.$lang);
+$smarty->display($EDIT_TEMPLATE, 'editAdmin_'.$smarty->lang, 'editAdmin_'.$smarty->lang);
 
 // debug output
 echo $login->printErrorMsg();

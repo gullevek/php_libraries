@@ -24,12 +24,10 @@ if (!defined('SET_SESSION_NAME')) {
 }
 // define log file id
 $LOG_FILE_ID = 'classTest';
-// set language for l10n
-$lang = 'en_utf8';
 
 // init login & backend class
-$login = new CoreLibs\ACL\Login(DB_CONFIG, $lang);
-$basic = new CoreLibs\Admin\Backend(DB_CONFIG, $lang);
+$login = new CoreLibs\ACL\Login(DB_CONFIG);
+$basic = new CoreLibs\Admin\Backend(DB_CONFIG);
 $basic->dbInfo(true);
 ob_end_flush();
 

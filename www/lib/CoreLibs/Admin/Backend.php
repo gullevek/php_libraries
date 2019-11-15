@@ -57,26 +57,25 @@ class Backend extends \CoreLibs\DB\IO
 	public $lang;
 	public $lang_short;
 	public $encoding;
+	// language
+	public $l;
 	// smarty publics [end processing in smarty class]
 	public $DATA;
 	public $HEADER;
 	public $DEBUG_DATA;
 	public $CONTENT_DATA;
-	// language
-	public $l;
 
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**
 	 * main class constructor
 	 * @param array       $db_config        db config array
-	 * @param string      $lang             language string
 	 * @param int|integer $set_control_flag class variable check flag
 	 */
-	public function __construct(array $db_config, string $lang, int $set_control_flag = 0)
+	public function __construct(array $db_config, int $set_control_flag = 0)
 	{
 		$this->setLangEncoding();
 		// get the language sub class & init it
-		$this->l = new \CoreLibs\Language\L10n($lang);
+		$this->l = new \CoreLibs\Language\L10n($this->lang);
 
 		// init the database class
 		parent::__construct($db_config, $set_control_flag);
@@ -104,9 +103,6 @@ class Backend extends \CoreLibs\DB\IO
 
 	// INTERNAL METHODS |===============================================>
 
-
-	// PUBLIC METHODS |=================================================>
-
 	/**
 	 * set the language encoding and language settings
 	 * the default charset from _SESSION login or from
@@ -116,7 +112,7 @@ class Backend extends \CoreLibs\DB\IO
 	 * creates short lang (only first two chars) from the lang
 	 * @return void
 	 */
-	public function setLangEncoding(): void
+	private function setLangEncoding(): void
 	{
 		// just emergency fallback for language
 		// set encoding
@@ -125,10 +121,14 @@ class Backend extends \CoreLibs\DB\IO
 		} else {
 			$this->encoding = DEFAULT_ENCODING;
 		}
-		// just emergency fallback for language
-		if (isset($_SESSION['DEFAULT_LANG'])) {
+		// gobal override
+		if (isset($GLOBALS['OVERRIDE_LANG'])) {
+			$this->lang = $GLOBALS['OVERRIDE_LANG'];
+		} elseif (isset($_SESSION['DEFAULT_LANG'])) {
+			// session (login)
 			$this->lang = $_SESSION['DEFAULT_LANG'];
 		} else {
+			// mostly default SITE LANG or DEFAULT LANG
 			$this->lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
 		}
 		// create the char lang encoding
@@ -136,6 +136,8 @@ class Backend extends \CoreLibs\DB\IO
 		// set the language folder
 		$this->lang_dir = BASE.INCLUDES.LANG.CONTENT_PATH;
 	}
+
+	// PUBLIC METHODS |=================================================>
 
 	/**
 	 * set internal ACL from login ACL

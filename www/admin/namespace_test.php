@@ -14,8 +14,7 @@ $SET_SESSION_NAME = EDIT_SESSION_NAME;
 
 echo "DIR: ".DIR."<br>ROOT: ".ROOT."<br>BASE: ".BASE."<br>";
 
-$lang = 'ja_utf8';
-$base = new CoreLibs\Admin\Backend(DB_CONFIG, $lang);
+$base = new CoreLibs\Admin\Backend(DB_CONFIG);
 ob_end_flush();
 if ($base->getConnectionStatus()) {
 	die("Cannot connect to database");

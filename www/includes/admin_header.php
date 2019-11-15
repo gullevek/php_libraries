@@ -38,12 +38,6 @@ if (!isset($ZIP_STREAM)) {
 if (!isset($ENCODING) || !$ENCODING) {
 	$ENCODING = DEFAULT_ENCODING;
 }
-// set the default lang, if not given
-if (session_id() && isset($_SESSION['DEFAULT_LANG']) && $_SESSION['DEFAULT_LANG']) {
-	$LANG = $_SESSION['DEFAULT_LANG'];
-} else {
-	$LANG = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
-}
 // end the stop of the output flow, but only if we didn't request a csv file download
 if (isset($_POST['action']) && $_POST['action'] != 'download_csv' && !$AJAX_PAGE) {
 	header("Content-type: text/html; charset=".$ENCODING);
@@ -55,15 +49,15 @@ if ($AJAX_PAGE && !$ZIP_STREAM) {
 
 //------------------------------ class init start
 // login & page access check
-$login = new CoreLibs\ACL\Login(DB_CONFIG, $LANG);
+$login = new CoreLibs\ACL\Login(DB_CONFIG);
 // post login lang check
 if (isset($_SESSION['DEFAULT_LANG'])) {
 	$LANG = $_SESSION['DEFAULT_LANG'];
 }
 // create smarty object
-$smarty = new CoreLibs\Template\SmartyExtend($LANG);
+$smarty = new CoreLibs\Template\SmartyExtend();
 // create new DB class
-$cms = new CoreLibs\Admin\Backend(DB_CONFIG, $LANG);
+$cms = new CoreLibs\Admin\Backend(DB_CONFIG);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db nfo

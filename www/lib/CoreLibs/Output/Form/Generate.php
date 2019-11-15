@@ -242,6 +242,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public $security_level;
 	// layout publics
 	public $table_width;
+	// internal lang & encoding vars
+	public $lang_dir = '';
+	public $lang;
+	public $lang_short;
+	public $encoding;
 	// language
 	public $l;
 
@@ -251,15 +256,15 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	/**
 	 * construct form generator
 	 * @param array       $db_config        db config array
-	 * @param string      $lang             interface language
 	 * @param int|integer $table_width      table/div width (default 750)
 	 * @param int|integer $set_control_flag basic class set/get variable error flags
 	 */
-	public function __construct(array $db_config, string $lang, int $table_width = 750, int $set_control_flag = 0)
+	public function __construct(array $db_config, int $table_width = 750, int $set_control_flag = 0)
 	{
 		$this->my_page_name = $this->getPageName(1);
+		$this->setLangEncoding();
 		// init the language class
-		$this->l = new \CoreLibs\Language\L10n($lang);
+		$this->l = new \CoreLibs\Language\L10n($this->lang);
 		// load config array
 		// get table array definitions for current page name
 		// WARNING: auto spl load does not work with this as it is an array and not a function/object
@@ -347,6 +352,45 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// close DB connection
 		parent::__destruct();
 	}
+
+	// INTERNAL METHODS |===============================================>
+
+	/**
+	 * ORIGINAL in \CoreLibs\Admin\Backend
+	 * set the language encoding and language settings
+	 * the default charset from _SESSION login or from
+	 * config DEFAULT ENCODING
+	 * the lang full name for mo loading from _SESSION login
+	 * or SITE LANG or DEFAULT LANG from config
+	 * creates short lang (only first two chars) from the lang
+	 * @return void
+	 */
+	private function setLangEncoding(): void
+	{
+		// just emergency fallback for language
+		// set encoding
+		if (isset($_SESSION['DEFAULT_CHARSET'])) {
+			$this->encoding = $_SESSION['DEFAULT_CHARSET'];
+		} else {
+			$this->encoding = DEFAULT_ENCODING;
+		}
+		// gobal override
+		if (isset($GLOBALS['OVERRIDE_LANG'])) {
+			$this->lang = $GLOBALS['OVERRIDE_LANG'];
+		} elseif (isset($_SESSION['DEFAULT_LANG'])) {
+			// session (login)
+			$this->lang = $_SESSION['DEFAULT_LANG'];
+		} else {
+			// mostly default SITE LANG or DEFAULT LANG
+			$this->lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
+		}
+		// create the char lang encoding
+		$this->lang_short = substr($this->lang, 0, 2);
+		// set the language folder
+		$this->lang_dir = BASE.INCLUDES.LANG.CONTENT_PATH;
+	}
+
+	// PUBLIC METHODS |=================================================>
 
 	/**
 	 * dumps all values into output (for error msg)

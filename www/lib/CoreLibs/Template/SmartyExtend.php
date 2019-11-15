@@ -89,10 +89,9 @@ class SmartyExtend extends SmartyBC
 	/**
 	 * constructor class, just sets the language stuff
 	 * calls L10 for pass on internaly in smarty
-	 * also registers the getvar caller pliugin
-	 * @param string $lang language string to set
+	 * also registers the getvar caller plugin
 	 */
-	public function __construct(string $lang)
+	public function __construct()
 	{
 		// call basic smarty
 		parent::__construct();
@@ -121,7 +120,7 @@ class SmartyExtend extends SmartyBC
 	 * creates short lang (only first two chars) from the lang
 	 * @return void
 	 */
-	public function setLangEncoding(): void
+	private function setLangEncoding(): void
 	{
 		// just emergency fallback for language
 		// set encoding
@@ -130,10 +129,14 @@ class SmartyExtend extends SmartyBC
 		} else {
 			$this->encoding = DEFAULT_ENCODING;
 		}
-		// just emergency fallback for language
-		if (isset($_SESSION['DEFAULT_LANG'])) {
+		// gobal override
+		if (isset($GLOBALS['OVERRIDE_LANG'])) {
+			$this->lang = $GLOBALS['OVERRIDE_LANG'];
+		} elseif (isset($_SESSION['DEFAULT_LANG'])) {
+			// session (login)
 			$this->lang = $_SESSION['DEFAULT_LANG'];
 		} else {
+			// mostly default SITE LANG or DEFAULT LANG
 			$this->lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
 		}
 		// create the char lang encoding
@@ -405,7 +408,7 @@ class SmartyExtend extends SmartyBC
 
 	/**
 	 * render smarty data (can be called sepparate)
-	 * @return [type] [description]
+	 * @return void
 	 */
 	public function renderSmarty(): void
 	{

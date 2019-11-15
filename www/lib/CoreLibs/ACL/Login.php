@@ -115,10 +115,9 @@ class Login extends \CoreLibs\DB\IO
 	/**
 	 * constructor, does ALL, opens db, works through connection checks, closes itself
 	 * @param array  $db_config        db config array
-	 * @param string $lang             language string (default en_utf8)
 	 * @param int    $set_control_flag class variable check flags
 	 */
-	public function __construct(array $db_config, string $lang = 'en_utf8', int $set_control_flag = 0)
+	public function __construct(array $db_config, int $set_control_flag = 0)
 	{
 		// log login data for this class only
 		$this->log_per_class = 1;
@@ -151,7 +150,13 @@ class Login extends \CoreLibs\DB\IO
 		// set global is ajax page for if we show the data directly, or need to pass it back
 		// to the continue AJAX class for output back to the user
 		$this->login_is_ajax_page = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
-
+		// set the default lang
+		$lang = 'en_utf8';
+		if (session_id() && isset($_SESSION['DEFAULT_LANG']) && $_SESSION['DEFAULT_LANG']) {
+			$lang = $_SESSION['DEFAULT_LANG'];
+		} else {
+			$lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
+		}
 		$this->l = new \CoreLibs\Language\L10n($lang);
 
 		// if we have a search path we need to set it, to use the correct DB to login
