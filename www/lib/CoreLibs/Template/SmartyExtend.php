@@ -143,9 +143,12 @@ class SmartyExtend extends SmartyBC
 	}
 
 
-	public function setSmartyPaths()
+	/**
+	 * sets all internal paths and names that need to be passed on to the smarty template
+	 * @return void
+	 */
+	public function setSmartyPaths(): void
 	{
-		global $AJAX_PAGE;
 		// master template
 		if (!isset($this->MASTER_TEMPLATE_NAME)) {
 			$this->MASTER_TEMPLATE_NAME = MASTER_TEMPLATE_NAME;
@@ -178,89 +181,100 @@ class SmartyExtend extends SmartyBC
 		) {
 			include($this->INCLUDES.$this->INC_TEMPLATE_NAME);
 		}
-		// only CSS/JS/etc include stuff if we have non AJAX page
-		if (isset($AJAX_PAGE) && !$AJAX_PAGE) {
-			// check for template include
-			if ($this->USE_INCLUDE_TEMPLATE === true &&
-				!$this->TEMPLATE_NAME
-			) {
-				$this->TEMPLATE_NAME = $this->CONTENT_INCLUDE;
-				// add to cache & compile id
-				$this->COMPILE_ID .= '_'.$this->TEMPLATE_NAME;
-				$this->CACHE_ID .= '_'.$this->TEMPLATE_NAME;
-			}
-			// additional per page Javascript include
-			$this->JS_INCLUDE = '';
-			if (file_exists($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME) &&
-				is_file($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME)
-			) {
-				$this->JS_INCLUDE = $this->JAVASCRIPT.$this->JS_TEMPLATE_NAME;
-			}
-			// per page css file
-			$this->CSS_INCLUDE = '';
-			if (file_exists($this->CSS.$this->CSS_TEMPLATE_NAME) &&
-				is_file($this->CSS.$this->CSS_TEMPLATE_NAME)
-			) {
-				$this->CSS_INCLUDE = $this->CSS.$this->CSS_TEMPLATE_NAME;
-			}
-			// optional CSS file
-			$this->CSS_SPECIAL_INCLUDE = '';
-			if (file_exists($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME) &&
-				is_file($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME)
-			) {
-				$this->CSS_SPECIAL_INCLUDE = $this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME;
-			}
-			// optional JS file
-			$this->JS_SPECIAL_INCLUDE = '';
-			if (file_exists($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME) &&
-				is_file($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME)
-			) {
-				$this->JS_SPECIAL_INCLUDE = $this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME;
-			}
-			// check if template names exist
-			if (!$this->MASTER_TEMPLATE_NAME) {
-				exit('MASTER TEMPLATE is not set');
-			} elseif (!file_exists($this->getTemplateDir()[0].DS.$this->MASTER_TEMPLATE_NAME)) {
-				// abort if master template could not be found
-				exit('MASTER TEMPLATE: '.$this->MASTER_TEMPLATE_NAME.' could not be found');
-			}
-			if ($this->TEMPLATE_NAME &&
-				!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_NAME)
-			) {
-				exit('INCLUDE TEMPLATE: '.$this->TEMPLATE_NAME.' could not be found');
-			}
-			// javascript translate data as template for auto translate
-			if (empty($this->TEMPLATE_TRANSLATE)) {
-				$this->TEMPLATE_TRANSLATE = 'jsTranslate_'.$this->lang.'.tpl';
+		// check for template include
+		if ($this->USE_INCLUDE_TEMPLATE === true &&
+			!$this->TEMPLATE_NAME
+		) {
+			$this->TEMPLATE_NAME = $this->CONTENT_INCLUDE;
+			// add to cache & compile id
+			$this->COMPILE_ID .= '_'.$this->TEMPLATE_NAME;
+			$this->CACHE_ID .= '_'.$this->TEMPLATE_NAME;
+		}
+		// additional per page Javascript include
+		$this->JS_INCLUDE = '';
+		if (file_exists($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME) &&
+			is_file($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME)
+		) {
+			$this->JS_INCLUDE = $this->JAVASCRIPT.$this->JS_TEMPLATE_NAME;
+		}
+		// per page css file
+		$this->CSS_INCLUDE = '';
+		if (file_exists($this->CSS.$this->CSS_TEMPLATE_NAME) &&
+			is_file($this->CSS.$this->CSS_TEMPLATE_NAME)
+		) {
+			$this->CSS_INCLUDE = $this->CSS.$this->CSS_TEMPLATE_NAME;
+		}
+		// optional CSS file
+		$this->CSS_SPECIAL_INCLUDE = '';
+		if (file_exists($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME) &&
+			is_file($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME)
+		) {
+			$this->CSS_SPECIAL_INCLUDE = $this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME;
+		}
+		// optional JS file
+		$this->JS_SPECIAL_INCLUDE = '';
+		if (file_exists($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME) &&
+			is_file($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME)
+		) {
+			$this->JS_SPECIAL_INCLUDE = $this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME;
+		}
+		// check if template names exist
+		if (!$this->MASTER_TEMPLATE_NAME) {
+			exit('MASTER TEMPLATE is not set');
+		} elseif (!file_exists($this->getTemplateDir()[0].DS.$this->MASTER_TEMPLATE_NAME)) {
+			// abort if master template could not be found
+			exit('MASTER TEMPLATE: '.$this->MASTER_TEMPLATE_NAME.' could not be found');
+		}
+		if ($this->TEMPLATE_NAME &&
+			!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_NAME)
+		) {
+			exit('INCLUDE TEMPLATE: '.$this->TEMPLATE_NAME.' could not be found');
+		}
+		// javascript translate data as template for auto translate
+		if (empty($this->TEMPLATE_TRANSLATE)) {
+			$this->TEMPLATE_TRANSLATE = 'jsTranslate_'.$this->lang.'.tpl';
+		} else {
+			// we assume we have some fixed set
+			// we must add _<$this->lang>
+			// if .tpl, put before .tpl
+			// if not .tpl, add _<$this->lang>.tpl
+			if (strpos($this->TEMPLATE_TRANSLATE, '.tpl')) {
+				$this->TEMPLATE_TRANSLATE = str_replace('.tpl', '_'.$this->lang.'.tpl', $this->TEMPLATE_TRANSLATE);
 			} else {
-				// we assume we have some fixed set
-				// we must add _<$this->lang>
-				// if .tpl, put before .tpl
-				// if not .tpl, add _<$this->lang>.tpl
-				if (strpos($this->TEMPLATE_TRANSLATE, '.tpl')) {
-					$this->TEMPLATE_TRANSLATE = str_replace('.tpl', '_'.$this->lang.'.tpl', $this->TEMPLATE_TRANSLATE);
-				} else {
-					$this->TEMPLATE_TRANSLATE .= '_'.$this->lang.'.tpl';
-				}
+				$this->TEMPLATE_TRANSLATE .= '_'.$this->lang.'.tpl';
 			}
-			// if we can't find it, dump it
-			if (!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_TRANSLATE)) {
-				$this->TEMPLATE_TRANSLATE = null;
-			}
+		}
+		// if we can't find it, dump it
+		if (!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_TRANSLATE)) {
+			$this->TEMPLATE_TRANSLATE = null;
 		}
 	}
 
-	public function setSmartyVarsFrontend()
+	/**
+	 * wrapper call for setSmartyVars
+	 * this is for frontend type and will not set any only admin needed variables
+	 * @return void
+	 */
+	public function setSmartyVarsFrontend(): void
 	{
 		$this->setSmartyVars();
 	}
 
-	public function setSmartyVarsAdmin()
+	/**
+	 * wrapper call for setSmartyVars
+	 * this is only for admin interface and will set additional variables
+	 */
+	public function setSmartyVarsAdmin(): void
 	{
 		$this->setSmartyVars(true);
 	}
 
-	private function setSmartyVars($admin_call = false)
+	/**
+	 * set smarty pass on variables, sub template names and finally calls the smarty parser
+	 * @param  boolean $admin_call default false, will set admin only variables
+	 * @return void
+	 */
+	private function setSmartyVars($admin_call = false): void
 	{
 		global $cms;
 		// array merge HEADER, DATA, DEBUG DATA
