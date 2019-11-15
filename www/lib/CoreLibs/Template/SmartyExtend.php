@@ -277,12 +277,7 @@ class SmartyExtend extends SmartyBC
 	private function setSmartyVars($admin_call = false): void
 	{
 		global $cms;
-		// array merge HEADER, DATA, DEBUG DATA
-		foreach (array('HEADER', 'DATA', 'DEBUG_DATA') as $ext_smarty) {
-			if (is_array($cms->{$ext_smarty})) {
-				$this->{$ext_smarty} = array_merge($this->{$ext_smarty}, $cms->{$ext_smarty});
-			}
-		}
+		$this->mergeCmsSmartyVars($cms);
 
 		// trigger flags
 		$this->HEADER['USE_PROTOTYPE'] = $this->USE_PROTOTYPE;
@@ -389,7 +384,31 @@ class SmartyExtend extends SmartyBC
 		$this->DATA['CONTENT_INCLUDE'] = $this->CONTENT_INCLUDE;
 		$this->DATA['TEMPLATE_TRANSLATE'] = isset($this->TEMPLATE_TRANSLATE) ? $this->TEMPLATE_TRANSLATE : null;
 		$this->DATA['PAGE_FILE_NAME'] = str_replace('.php', '', $this->page_name).'.tpl';
+		// render page
+		$this->renderSmarty();
+	}
 
+	/**
+	 * merge outside object HEADER/DATA/DEBUG_DATA vars into the smarty class
+	 * @param  object $cms object that has header/data/debug_data
+	 * @return void
+	 */
+	public function mergeCmsSmartyVars(object $cms): void
+	{
+		// array merge HEADER, DATA, DEBUG DATA
+		foreach (array('HEADER', 'DATA', 'DEBUG_DATA') as $ext_smarty) {
+			if (is_array($cms->{$ext_smarty})) {
+				$this->{$ext_smarty} = array_merge($this->{$ext_smarty}, $cms->{$ext_smarty});
+			}
+		}
+	}
+
+	/**
+	 * render smarty data (can be called sepparate)
+	 * @return [type] [description]
+	 */
+	public function renderSmarty(): void
+	{
 		// create main data array
 		$this->CONTENT_DATA = array_merge($this->HEADER, $this->DATA, $this->DEBUG_DATA);
 		// data is 1:1 mapping (all vars, values, etc)
