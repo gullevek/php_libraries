@@ -13,7 +13,6 @@ if ($DEBUG_ALL && $ENABLE_ERROR_HANDLING) {
 	include BASE.LIBS."Error.Handling.php";
 }
 // predefine vars
-$LANG = '';
 $messages = array();
 // import all POST vars
 // extract($_POST, EXTR_SKIP);
@@ -50,10 +49,6 @@ if ($AJAX_PAGE && !$ZIP_STREAM) {
 //------------------------------ class init start
 // login & page access check
 $login = new CoreLibs\ACL\Login(DB_CONFIG);
-// post login lang check
-if (isset($_SESSION['DEFAULT_LANG'])) {
-	$LANG = $_SESSION['DEFAULT_LANG'];
-}
 // create smarty object
 $smarty = new CoreLibs\Template\SmartyExtend();
 // create new DB class
