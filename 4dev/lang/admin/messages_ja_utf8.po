@@ -64,3 +64,14 @@ msgstr "日"
 
 msgid "INPUT TEST"
 msgstr "OUTPUT TEST JA"
+
+# login string
+msgid "Hello %s"
+msgstr "こにちは %s"
+
+msgid "I should be translated"
+msgstr "「スマーティー」これは正しいです"
+
+msgid "Are we translated?"
+msgstr "「クラス」これは翻訳です？"
+

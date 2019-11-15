@@ -259,27 +259,38 @@ echo "FOUND ELEMENTS [input]: ".$basic->printAr($basic->arraySearchRecursive('em
 // image thumbnail
 $images = array(
 	// height bigger
-	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture.jpg',
-	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture.png',
+	// 'no_picture.jpg',
+	// 'no_picture.png',
 	// width bigger
-	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture_width_bigger.jpg',
-	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture_width_bigger.png',
+	// 'no_picture_width_bigger.jpg',
+	// 'no_picture_width_bigger.png',
 	// square
-	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture_square.jpg',
-	// BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture_square.png',
+	// 'no_picture_square.jpg',
+	// 'no_picture_square.png',
 	// other sample images
-	BASE.LAYOUT.CONTENT_PATH.IMAGES.'5c501af48da6c.jpg'
+	// '5c501af48da6c.jpg',
+	// Apple HEIC files
+	// 'img_2145.heic',
+	// Photoshop
+	'photoshop_test.psd',
 );
 echo "<hr>";
 $thumb_width = 250;
-$thumb_height = 250;
+$thumb_height = 300;
+// return mime type ala mimetype
+$finfo = new finfo(FILEINFO_MIME_TYPE);
 foreach ($images as $image) {
+	$image = BASE.LAYOUT.CONTENT_PATH.IMAGES.$image;
+	list ($height, $width, $img_type) = getimagesize($image);
+	echo "<div>IMAGE INFO: ".$height."x".$width.", TYPE: ".$img_type." [".$finfo->file($image)."]</div>";
 	// rotate image first
 	$basic->correctImageOrientation($image);
 	// thumbnail tests
 	echo "<div>".basename($image).": WIDTH: $thumb_width<br><img src=".$basic->createThumbnailSimple($image, $thumb_width)."></div>";
 	echo "<div>".basename($image).": HEIGHT: $thumb_height<br><img src=".$basic->createThumbnailSimple($image, 0, $thumb_height)."></div>";
 	echo "<div>".basename($image).": WIDTH/HEIGHT: $thumb_width x $thumb_height<br><img src=".$basic->createThumbnailSimple($image, $thumb_width, $thumb_height)."></div>";
+	// test with dummy
+	echo "<div>".basename($image).": WIDTH/HEIGHT: $thumb_width x $thumb_height (+DUMMY)<br><img src=".$basic->createThumbnailSimple($image, $thumb_width, $thumb_height, null, true, false)."></div>";
 	echo "<hr>";
 }
 

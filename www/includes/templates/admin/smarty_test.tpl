@@ -2,6 +2,9 @@
 	{$SMARTY_TEST}
 </div>
 <div>
+	TRANSLATION CLASS: {$TRANSLATE_TEST}
+</div>
+<div>
 	<select id="drop_down_test" name="drop_down_test">
 		{html_options options=$drop_down_test selected=$drop_down_test_selected}
 	</select>
@@ -10,6 +13,9 @@
 	<div id="jq-test" class="jp-test">
 		<div id="test-div" class="test-div">
 			Some content ehre or asdfasdfasf
+		</div>
+		<div id="translate-div">
+			TRANSLATION SMARTY: {t}I should be translated{/t}
 		</div>
 	</div>
 </div>

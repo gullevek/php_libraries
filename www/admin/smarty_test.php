@@ -10,24 +10,26 @@ define('USE_DATABASE', true);
 define('USE_HEADER', true);
 require 'config.php';
 require BASE.INCLUDES.'admin_header.php';
-$MASTER_TEMPLATE_NAME = 'main_body.tpl';
-$TEMPLATE_NAME = 'smarty_test.tpl';
-$CSS_NAME = 'smart_test.css';
-$USE_PROTOTYPE = false;
-$USE_JQUERY = true;
-$JS_DATEPICKR = false;
-if ($USE_PROTOTYPE) {
-	$ADMIN_JAVASCRIPT = 'edit.pt.js';
-	$JS_NAME = 'prototype.test.js';
-} elseif ($USE_JQUERY) {
-	$ADMIN_JAVASCRIPT = 'edit.jq.js';
-	$JS_NAME = 'jquery.test.js';
+$smarty->MASTER_TEMPLATE_NAME = 'main_body.tpl';
+$smarty->TEMPLATE_NAME = 'smarty_test.tpl';
+$smarty->CSS_SPECIAL_TEMPLATE_NAME = 'smart_test.css';
+$smarty->USE_PROTOTYPE = false;
+$smarty->USE_JQUERY = true;
+$smarty->JS_DATEPICKR = false;
+if ($smarty->USE_PROTOTYPE) {
+	$smarty->ADMIN_JAVASCRIPT = 'edit.pt.js';
+	$smarty->JS_SPECIAL_TEMPLATE_NAME = 'prototype.test.js';
+} elseif ($smarty->USE_JQUERY) {
+	$smarty->ADMIN_JAVASCRIPT = 'edit.jq.js';
+	$smarty->JS_SPECIAL_TEMPLATE_NAME = 'jquery.test.js';
 }
-$PAGE_WIDTH = "100%";
-require BASE.INCLUDES.'admin_set_paths.php';
+$smarty->PAGE_WIDTH = "100%";
+// require BASE.INCLUDES.'admin_set_paths.php';
+$smarty->setSmartyPaths();
 
 // smarty test
-$cms->DATA['SMARTY_TEST'] = 'Test Data';
+$smarty->DATA['SMARTY_TEST'] = 'Test Data';
+$smarty->DATA['TRANSLATE_TEST'] = $cms->l->__('Are we translated?');
 
 // drop down test with optgroups
 $options = array (
@@ -46,7 +48,8 @@ $options = array (
 	)
 );
 
-$cms->DATA['drop_down_test'] = $options;
+$smarty->DATA['drop_down_test'] = $options;
 
-require BASE.INCLUDES.'admin_smarty.php';
+// require BASE.INCLUDES.'admin_smarty.php';
+$smarty->setSmartyVarsAdmin();
 require BASE.INCLUDES.'admin_footer.php';

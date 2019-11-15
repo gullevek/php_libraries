@@ -114,8 +114,8 @@ function setCenter(id, left, top)
 
 /**
  * goes to an element id position
- * @param {String} element    element id to move to
- * @param {Number} [offset=0] offset from top, default is 0 (px)
+ * @param {String} element element id to move to
+ * @param {Number} offset  offset from top, default is 0 (px)
  */
 function goToPos(element, offset = 0)
 {
@@ -172,11 +172,12 @@ if (!String.prototype.format) {
  * @param  {Number} x number to be formated
  * @return {String}   formatted with , in thousands
  */
-const numberWithCommas = (x) => {
+function numberWithCommas(x)
+{
 	var parts = x.toString().split(".");
 	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 	return parts.join(".");
-};
+}
 
 /**
  * converts line breaks to br
@@ -290,16 +291,24 @@ function isObject(val) {
 }
 
 /**
+ * get the length of an object (entries)
+ * @param  {Object} object object to check
+ * @return {Number} number of entry
+ */
+function getObjectCount(object) {
+	return Object.keys(object).length;
+}
+
+/**
  * checks if a key exists in a given object
  * @param  {String}  key    key name
  * @param  {Object}  object object to search key in
  * @return {Boolean}        true/false if key exists in object
  */
-const keyInObject = (key, object) => (Object.prototype.hasOwnProperty.call(object, key)) ? true : false;
-/*function keyInObject(key, object)
+function keyInObject(key, object)
 {
 	return (Object.prototype.hasOwnProperty.call(object, key)) ? true : false;
-}*/
+}
 
 /**
  * returns matching key of value
@@ -307,11 +316,13 @@ const keyInObject = (key, object) => (Object.prototype.hasOwnProperty.call(objec
  * @param  {Mixed}  value any value (String, Number, etc)
  * @return {String}       the key found for the first matching value
  */
-const getKeyByValue = (obj, value) => Object.keys(obj).find(key => obj[key] === value);
-// function getKeyByValue(object, value)
-// {
-// 	return Object.keys(object).find(key => object[key] === value);
-// }
+function getKeyByValue(object, value)
+{
+	return Object.keys(object).find(key => object[key] === value);
+	// return Object.keys(object).find(function (key) {
+	// 	return object[key] === value;
+	// });
+}
 
 /**
  * returns true if value is found in object with a key
@@ -319,18 +330,23 @@ const getKeyByValue = (obj, value) => Object.keys(obj).find(key => obj[key] === 
  * @param  {Mixed}   value any value (String, Number, etc)
  * @return {Boolean}       true on value found, false on not found
  */
-const valueInObject = (obj, value) => (Object.keys(obj).find(key => obj[key] === value)) ? true : false;
+function valueInObject(object, value)
+{
+	return (Object.keys(object).find(key => object[key] === value)) ? true : false;
+	// return Object.keys(object).find(function (key) {
+	// 	return object[key] === value;
+	// }) ? true : false;
+}
 
 /**
  * checks if a DOM element actually exists
  * @param  {String}  id Element id to check for
  * @return {Boolean}    true if element exists, false on failure
  */
-const exists = (id) => $('#' + id).length > 0 ? true : false;
-/*function exists(id)
+function exists(id)
 {
 	return $('#' + id).length > 0 ? true : false;
-}*/
+}
 
 /**
  * converts a int number into bytes with prefix in two decimals precision
@@ -345,7 +361,6 @@ function formatBytes(bytes)
 		bytes = bytes / 1024;
 		i++;
 	} while (bytes > 99);
-
 	return parseFloat(Math.round(bytes * Math.pow(10, 2)) / Math.pow(10, 2)) + ['kB', 'MB', 'GB', 'TB', 'PB', 'EB'][i];
 }
 
@@ -380,42 +395,52 @@ function errorCatch(err)
 
 /**
  * show or hide the "do" overlay
- * @param {String} [loc=''] location name for action indicator, default empty. for console.log
+ * @param {String}  loc            location name for action indicator
+ *                                 default empty. for console.log
+ * @param {Boolean} [overlay=true] override the auto hide/show over the overlay div block
  */
-function actionIndicator(loc = '')
+function actionIndicator(loc, overlay = true)
 {
 	if ($('#overlayBox').is(':visible')) {
-		actionIndicatorHide(loc);
+		actionIndicatorHide(loc, overlay);
 	} else {
-		 actionIndicatorShow(loc);
+		 actionIndicatorShow(loc, overlay);
 	}
 }
 
 /**
  * explicit show for action Indicator
  * instead of automatically show or hide, do on command show
- * @param {String} [loc=''] optional location name, empty if not set. for console.log
+ * @param {String}  loc            location name for action indicator
+ *                                 default empty. for console.log
+ * @param {Boolean} [overlay=true] override the auto hide/show over the overlay div block
  */
-function actionIndicatorShow(loc = '')
+function actionIndicatorShow(loc, overlay = true)
 {
 	console.log('Indicator: SHOW [%s]', loc);
 	$('#indicator').addClass('progress');
 	setCenter('indicator', true, true);
 	$('#indicator').show();
-	overlayBoxShow();
+	if (overlay === true) {
+		overlayBoxShow();
+	}
 }
 
 /**
  * explicit hide for action Indicator
  * instead of automatically show or hide, do on command hide
- * @param {String} [loc=''] optional location name, empty if not set. for console.log
+ * @param {String}  loc            location name for action indicator
+ *                                 default empty. for console.log
+ * @param {Boolean} [overlay=true] override the auto hide/show over the overlay div block
  */
-function actionIndicatorHide(loc = '')
+function actionIndicatorHide(loc, overlay = true)
 {
 	console.log('Indicator: HIDE [%s]', loc);
 	$('#indicator').hide();
 	$('#indicator').removeClass('progress');
-	overlayBoxHide();
+	if (overlay === true) {
+		overlayBoxHide();
+	}
 }
 
 /**
@@ -477,8 +502,9 @@ function ClearCall()
  * @param  {Object} [options={}] anything else (value, placeholder, OnClick, style)
  * @return {Object}              created element as an object
  */
-const cel = (tag, id = '', content = '', css = [], options = {}) =>
-	_element = {
+function cel(tag, id = '', content = '', css = [], options = {})
+{
+	return {
 		tag: tag,
 		id: id,
 		name: options.name, // override name if set [name gets ignored in tree build anyway]
@@ -487,6 +513,7 @@ const cel = (tag, id = '', content = '', css = [], options = {}) =>
 		options: options,
 		sub: []
 	};
+}
 
 /**
  * attach a cel created object to another to create a basic DOM tree
@@ -536,10 +563,11 @@ function aelx(base, ...attach)
  * @param  {Object} base cel created element
  * @return {Object}      returns reset base element
  */
-const rel = (base) => {
+function rel(base)
+{
 	base.sub = [];
 	return base;
-};
+}
 
 /**
  * searches and removes style from css array
@@ -876,6 +904,82 @@ function loginLogout()
 	form.appendChild(hiddenField);
 	document.body.appendChild(form);
 	form.submit();
+}
+
+/**
+ * create login string and logout button elements
+ * @param {String} login_string             the login string to show on the left
+ * @param {String} [header_id='mainHeader'] the target for the main element block
+ *                                          if not set mainHeader is assumed
+ *                                          this is the target div for the "loginRow"
+ */
+function createLoginRow(login_string, header_id = 'mainHeader')
+{
+	// if header does not exist, we do nothing
+	if (exists(header_id)) {
+		// that row must exist already, if not it must be the first in the "mainHeader"
+		if (!exists('loginRow')) {
+			$('#' + header_id).html(phfo(cel('div', 'loginRow', '', ['loginRow', 'flx-spbt'])));
+		}
+		// clear out just in case for first entry
+		// fill with div name & login/logout button
+		$('#loginRow').html(phfo(cel('div', '', login_string)));
+		$('#loginRow').append(phfo(
+			aelx(
+				// outer div
+				cel('div'),
+				// inner element
+				cel('input', 'logout', '', [], {
+					value: __('Logout'),
+					type: 'button',
+					onClick: 'loginLogout()'
+				})
+			)
+		));
+	}
+}
+
+/**
+ * create the top nav menu that switches physical between pages
+ * (edit access data based)
+ * @param {Object} nav_menu                 the built nav menu with highlight info
+ * @param {String} [header_id='mainHeader'] the target for the main element block
+ *                                          if not set mainHeader is assumed
+ *                                          this is the target div for the "menuRow"
+ */
+function createNavMenu(nav_menu, header_id = 'mainHeader') {
+	// must be an object
+	if (isObject(nav_menu) && getObjectCount(nav_menu) > 1) {
+		// do we have more than one entry, if not, do not show (single page)
+		if (!exists('menuRow')) {
+			$('#' + header_id).html(phfo(cel('div', 'menuRow', '', ['menuRow', 'flx-s'])));
+		}
+		var content = [];
+		$.each(nav_menu, function(key, item) {
+			// key is number
+			// item is object with entries
+			if (key != 0) {
+				content.push(phfo(cel('div', '', '&middot;', ['pd-2'])));
+			}
+			// ignore item.popup for now
+			if (item.enabled) {
+				// set selected based on window.location.href as the php set will not work
+				if (window.location.href.indexOf(item.url) != -1) {
+					item.selected = 1;
+				}
+				// create the entry
+				content.push(phfo(
+					aelx(
+						cel('div'),
+						cel('a', '', item.name, ['pd-2'].concat(item.selected ? 'highlight': ''), {
+							href: item.url
+						})
+					)
+				));
+			}
+		});
+		$('#menuRow').html(content.join(''));
+	}
 }
 
 /* END */

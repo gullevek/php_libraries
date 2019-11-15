@@ -1850,8 +1850,15 @@ class Basic
 	 * @param  bool        $clear_cache  if set to true, will create thumb all the tame
 	 * @return string|bool               thumbnail name, or false for error
 	 */
-	public static function createThumbnail(string $pic, int $size_x, int $size_y, string $dummy = '', string $path = '', string $cache_source = '', bool $clear_cache = false)
-	{
+	public static function createThumbnail(
+		string $pic,
+		int $size_x,
+		int $size_y,
+		string $dummy = '',
+		string $path = '',
+		string $cache_source = '',
+		bool $clear_cache = false
+	) {
 		// get image type flags
 		$image_types = array(
 			1 => 'gif',
@@ -1991,7 +1998,7 @@ class Basic
 		int $thumb_width = 0,
 		int $thumb_height = 0,
 		?string $thumbnail_path = null,
-		bool $create_dummy = false,
+		bool $create_dummy = true,
 		bool $use_cache = true,
 		bool $high_quality = true,
 		int $jpeg_quality = 80
@@ -2137,6 +2144,13 @@ class Basic
 				if ($use_cache === false ||
 					!file_exists($thumbnail_write_path.$thumbnail)
 				) {
+					// if both are unset, set to 250
+					if ($thumb_height == 0) {
+						$thumb_height = 250;
+					}
+					if ($thumb_width == 0) {
+						$thumb_width = 250;
+					}
 					$thumb = imagecreatetruecolor($thumb_width, $thumb_height);
 					// add outside border px = 5% (rounded up)
 					// eg 50px -> 2.5px

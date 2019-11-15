@@ -52,31 +52,16 @@ class Backend extends \CoreLibs\DB\IO
 	public $error = 0;
 	public $warning = 0;
 	public $info = 0;
-	// smarty publics
+	// internal lang & encoding vars
+	public $lang_dir = '';
+	public $lang;
+	public $lang_short;
+	public $encoding;
+	// smarty publics [end processing in smarty class]
 	public $DATA;
 	public $HEADER;
 	public $DEBUG_DATA;
 	public $CONTENT_DATA;
-	// smarty include/set var
-	public $INC_TEMPLATE_NAME;
-	public $JS_TEMPLATE_NAME;
-	public $CSS_TEMPLATE_NAME;
-	public $CSS_SPECIAL_TEMPLATE_NAME;
-	public $JS_SPECIAL_TEMPLATE_NAME;
-	public $CACHE_ID;
-	public $COMPILE_ID;
-	public $includes;
-	public $template_path;
-	public $lang_dir = '';
-	public $javascript;
-	public $css;
-	public $pictures;
-	public $cache_pictures;
-	public $cache_pictures_root;
-	public $JS_INCLUDE;
-	public $JS_SPECIAL_INCLUDE;
-	public $CSS_INCLUDE;
-	public $CSS_SPECIAL_INCLUDE;
 	// language
 	public $l;
 
@@ -89,6 +74,7 @@ class Backend extends \CoreLibs\DB\IO
 	 */
 	public function __construct(array $db_config, string $lang, int $set_control_flag = 0)
 	{
+		$this->setLangEncoding();
 		// get the language sub class & init it
 		$this->l = new \CoreLibs\Language\L10n($lang);
 
@@ -120,6 +106,45 @@ class Backend extends \CoreLibs\DB\IO
 
 
 	// PUBLIC METHODS |=================================================>
+
+	/**
+	 * set the language encoding and language settings
+	 * the default charset from _SESSION login or from
+	 * config DEFAULT ENCODING
+	 * the lang full name for mo loading from _SESSION login
+	 * or SITE LANG or DEFAULT LANG from config
+	 * creates short lang (only first two chars) from the lang
+	 * @return void
+	 */
+	public function setLangEncoding(): void
+	{
+		// just emergency fallback for language
+		// set encoding
+		if (isset($_SESSION['DEFAULT_CHARSET'])) {
+			$this->encoding = $_SESSION['DEFAULT_CHARSET'];
+		} else {
+			$this->encoding = DEFAULT_ENCODING;
+		}
+		// just emergency fallback for language
+		if (isset($_SESSION['DEFAULT_LANG'])) {
+			$this->lang = $_SESSION['DEFAULT_LANG'];
+		} else {
+			$this->lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
+		}
+		// create the char lang encoding
+		$this->lang_short = substr($this->lang, 0, 2);
+		// set the language folder
+		$this->lang_dir = BASE.INCLUDES.LANG.CONTENT_PATH;
+	}
+
+	/**
+	 * set internal ACL from login ACL
+	 * @param array $acl login acl array
+	 */
+	public function setACL(array $acl): void
+	{
+		$this->acl = $acl;
+	}
 
 	/**
 	 * writes all action vars plus other info into edit_log tabl
@@ -157,7 +182,7 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
 		$q .= "VALUES ";
-		$q .= "(".$this->dbEscapeString(isset($_SESSION['EUID']) ? $_SESSION['EUID'] : '').", ";
+		$q .= "(".$this->dbEscapeString(isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ? $_SESSION['EUID'] : 'NULL').", ";
 		$q .= "NOW(), ";
 		$q .= "'".$this->dbEscapeString((string)$event)."', '".$data."', '".$data_binary."', '".$this->dbEscapeString($this->page_name)."', ";
 		$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->dbEscapeString(@$_SERVER['HTTP_USER_AGENT'])."', ";
@@ -179,6 +204,42 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "'".$this->dbEscapeString($this->action_value)."', ";
 		$q .= "'".$this->dbEscapeString($this->action_error)."')";
 		$this->dbExec($q, 'NULL');
+	}
+
+	/**
+	 * helper function for PHP file upload error messgaes to messge string
+	 * @param  int    $error_code integer _FILE upload error code
+	 * @return string                     message string, translated
+	 */
+	public function fileUploadErrorMessage(int $error_code): string
+	{
+		switch ($error_code) {
+			case UPLOAD_ERR_INI_SIZE:
+				$message = 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
+				break;
+			case UPLOAD_ERR_FORM_SIZE:
+				$message = 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
+				break;
+			case UPLOAD_ERR_PARTIAL:
+				$message = 'The uploaded file was only partially uploaded';
+				break;
+			case UPLOAD_ERR_NO_FILE:
+				$message = 'No file was uploaded';
+				break;
+			case UPLOAD_ERR_NO_TMP_DIR:
+				$message = 'Missing a temporary folder';
+				break;
+			case UPLOAD_ERR_CANT_WRITE:
+				$message = 'Failed to write file to disk';
+				break;
+			case UPLOAD_ERR_EXTENSION:
+				$message = 'File upload stopped by extension';
+				break;
+			default:
+				$message = 'Unknown upload error';
+				break;
+		}
+		return $this->l->__($message);
 	}
 
 	/**

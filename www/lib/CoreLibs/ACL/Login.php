@@ -150,7 +150,7 @@ class Login extends \CoreLibs\DB\IO
 
 		// set global is ajax page for if we show the data directly, or need to pass it back
 		// to the continue AJAX class for output back to the user
-		$this->login_is_ajax_page = $this->ajax_page_flag;
+		$this->login_is_ajax_page = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
 
 		$this->l = new \CoreLibs\Language\L10n($lang);
 
@@ -696,6 +696,9 @@ class Login extends \CoreLibs\DB\IO
 	{
 		// only set acl if we have permission okay
 		if ($this->permission_okay) {
+			// username (login), group name
+			$this->acl['user_name'] = $_SESSION['USER_NAME'];
+			$this->acl['group_name'] = $_SESSION['GROUP_NAME'];
 			// we start with the default acl
 			$this->acl['base'] = DEFAULT_ACL_LEVEL;
 

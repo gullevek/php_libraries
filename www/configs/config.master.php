@@ -274,6 +274,7 @@ foreach ($paths as $path) {
 		DEFINE('CONVERT', $path.DS.'convert');
 	}
 }
+unset($paths);
 
 /************* DEBUG *******************/
 // turn off debug if debug flag is OFF
