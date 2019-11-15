@@ -16,7 +16,7 @@ if ($DEBUG_ALL && $ENABLE_ERROR_HANDLING) {
 $LANG = '';
 $messages = array();
 // import all POST vars
-extract($_POST, EXTR_SKIP);
+// extract($_POST, EXTR_SKIP);
 //------------------------------ variable init end
 
 //------------------------------ library include start
@@ -24,6 +24,7 @@ extract($_POST, EXTR_SKIP);
 ob_start();
 // set the session name
 $SET_SESSION_NAME = EDIT_SESSION_NAME;
+$LOG_FILE_ID = BASE_NAME.'Admin';
 //------------------------------ library include end
 
 //------------------------------ basic variable settings start
@@ -34,7 +35,7 @@ if (!isset($ZIP_STREAM)) {
 	$ZIP_STREAM = false;
 }
 // set encoding
-if (!isset($ENCODING)) {
+if (!isset($ENCODING) || !$ENCODING) {
 	$ENCODING = DEFAULT_ENCODING;
 }
 // set the default lang, if not given
@@ -56,7 +57,7 @@ if ($AJAX_PAGE && !$ZIP_STREAM) {
 // login & page access check
 $login = new CoreLibs\ACL\Login(DB_CONFIG, $LANG);
 // post login lang check
-if ($_SESSION['DEFAULT_LANG']) {
+if (isset($_SESSION['DEFAULT_LANG'])) {
 	$LANG = $_SESSION['DEFAULT_LANG'];
 }
 // create smarty object

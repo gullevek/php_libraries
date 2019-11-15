@@ -47,6 +47,7 @@ class SmartyExtend extends SmartyBC
 	public $JS_DATEPICKR = false;
 	public $JS_FLATPICKR = false;
 	public $DEBUG_TMPL = false;
+	public $USE_INCLUDE_TEMPLATE = false;
 	// cache & compile
 	public $CACHE_ID = '';
 	public $COMPILE_ID = '';
@@ -55,6 +56,7 @@ class SmartyExtend extends SmartyBC
 	public $PAGE_FILE_NAME;
 	public $CONTENT_INCLUDE;
 	public $FORM_NAME;
+	public $FORM_ACTION;
 	public $L_TITLE;
 	public $PAGE_WIDTH;
 	// smarty include/set var
@@ -138,6 +140,114 @@ class SmartyExtend extends SmartyBC
 		$this->lang_short = substr($this->lang, 0, 2);
 		// set the language folder
 		$this->lang_dir = BASE.INCLUDES.LANG.CONTENT_PATH;
+	}
+
+
+	public function setSmartyPaths()
+	{
+		global $AJAX_PAGE;
+		// master template
+		if (!isset($this->MASTER_TEMPLATE_NAME)) {
+			$this->MASTER_TEMPLATE_NAME = MASTER_TEMPLATE_NAME;
+		}
+
+		// set include & template names
+		if (!isset($this->CONTENT_INCLUDE)) {
+			$this->CONTENT_INCLUDE = str_replace('.php', '', $this->page_name).'.tpl';
+		}
+		// strip tpl and replace it with php
+		// php include file per page
+		$this->INC_TEMPLATE_NAME = str_replace('.tpl', '.php', $this->CONTENT_INCLUDE);
+		// javascript include per page
+		$this->JS_TEMPLATE_NAME = str_replace('.tpl', '.js', $this->CONTENT_INCLUDE);
+		// css per page
+		$this->CSS_TEMPLATE_NAME = str_replace('.tpl', '.css', $this->CONTENT_INCLUDE);
+
+		// set basic template path (tmp)
+		$this->INCLUDES = BASE.INCLUDES; // no longer in templates, only global
+		$this->TEMPLATE_PATH = BASE.INCLUDES.TEMPLATES.CONTENT_PATH;
+		$this->setTemplateDir($this->TEMPLATE_PATH);
+		$this->JAVASCRIPT = LAYOUT.JS;
+		$this->CSS = LAYOUT.CSS;
+		$this->PICTURES = LAYOUT.IMAGES;
+		$this->CACHE_PICTURES = LAYOUT.CACHE;
+		$this->CACHE_PICTURES_ROOT = ROOT.$this->CACHE_PICTURES;
+		// check if we have an external file with the template name
+		if (file_exists($this->INCLUDES.$this->INC_TEMPLATE_NAME) &&
+			is_file($this->INCLUDES.$this->INC_TEMPLATE_NAME)
+		) {
+			include($this->INCLUDES.$this->INC_TEMPLATE_NAME);
+		}
+		// only CSS/JS/etc include stuff if we have non AJAX page
+		if (isset($AJAX_PAGE) && !$AJAX_PAGE) {
+			// check for template include
+			if ($this->USE_INCLUDE_TEMPLATE === true &&
+				!$this->TEMPLATE_NAME
+			) {
+				$this->TEMPLATE_NAME = $this->CONTENT_INCLUDE;
+				// add to cache & compile id
+				$this->COMPILE_ID .= '_'.$this->TEMPLATE_NAME;
+				$this->CACHE_ID .= '_'.$this->TEMPLATE_NAME;
+			}
+			// additional per page Javascript include
+			$this->JS_INCLUDE = '';
+			if (file_exists($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME) &&
+				is_file($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME)
+			) {
+				$this->JS_INCLUDE = $this->JAVASCRIPT.$this->JS_TEMPLATE_NAME;
+			}
+			// per page css file
+			$this->CSS_INCLUDE = '';
+			if (file_exists($this->CSS.$this->CSS_TEMPLATE_NAME) &&
+				is_file($this->CSS.$this->CSS_TEMPLATE_NAME)
+			) {
+				$this->CSS_INCLUDE = $this->CSS.$this->CSS_TEMPLATE_NAME;
+			}
+			// optional CSS file
+			$this->CSS_SPECIAL_INCLUDE = '';
+			if (file_exists($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME) &&
+				is_file($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME)
+			) {
+				$this->CSS_SPECIAL_INCLUDE = $this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME;
+			}
+			// optional JS file
+			$this->JS_SPECIAL_INCLUDE = '';
+			if (file_exists($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME) &&
+				is_file($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME)
+			) {
+				$this->JS_SPECIAL_INCLUDE = $this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME;
+			}
+			// check if template names exist
+			if (!$this->MASTER_TEMPLATE_NAME) {
+				exit('MASTER TEMPLATE is not set');
+			} elseif (!file_exists($this->getTemplateDir()[0].DS.$this->MASTER_TEMPLATE_NAME)) {
+				// abort if master template could not be found
+				exit('MASTER TEMPLATE: '.$this->MASTER_TEMPLATE_NAME.' could not be found');
+			}
+			if ($this->TEMPLATE_NAME &&
+				!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_NAME)
+			) {
+				exit('INCLUDE TEMPLATE: '.$this->TEMPLATE_NAME.' could not be found');
+			}
+			// javascript translate data as template for auto translate
+			if (empty($this->TEMPLATE_TRANSLATE)) {
+				$this->TEMPLATE_TRANSLATE = 'jsTranslate_'.$this->lang.'.tpl';
+			} else {
+				// we assume we have some fixed set
+				// we must add _<$this->lang>
+				// if .tpl, put before .tpl
+				// if not .tpl, add _<$this->lang>.tpl
+				if (strpos($this->TEMPLATE_TRANSLATE, '.tpl')) {
+					$this->TEMPLATE_TRANSLATE = str_replace('.tpl', '_'.$this->lang.'.tpl', $this->TEMPLATE_TRANSLATE);
+				} else {
+					$this->TEMPLATE_TRANSLATE .= '_'.$this->lang.'.tpl';
+				}
+			}
+			// if we can't find it, dump it
+			if (!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_TRANSLATE)) {
+				$this->TEMPLATE_TRANSLATE = null;
+			}
+		}
 	}
 
 	public function setSmartyVarsFrontend()
@@ -254,6 +364,7 @@ class SmartyExtend extends SmartyBC
 		$this->DATA['FORM_NAME'] = !$this->FORM_NAME ?
 			str_replace('.php', '', $this->page_name) :
 			$this->FORM_NAME;
+		$this->DATA['FORM_ACTION'] = $this->FORM_ACTION;
 		// include flags
 		$this->DATA['JS_DATEPICKR'] = $this->JS_DATEPICKR;
 		$this->DATA['JS_FLATPICKR'] = $this->JS_FLATPICKR;
@@ -282,114 +393,6 @@ class SmartyExtend extends SmartyBC
 			$this->CACHE_ID.($this->CACHE_ID ? '_' : '').$this->lang,
 			$this->COMPILE_ID.($this->COMPILE_ID ? '_' : '').$this->lang
 		);
-	}
-
-	public function setSmartyPaths()
-	{
-		global $AJAX_PAGE, $USE_INCLUDE_TEMPLATE;
-		// master template
-		if (!isset($this->MASTER_TEMPLATE_NAME)) {
-			$this->MASTER_TEMPLATE_NAME = MASTER_TEMPLATE_NAME;
-		}
-
-		// set include & template names
-		if (!isset($this->CONTENT_INCLUDE)) {
-			$this->CONTENT_INCLUDE = str_replace('.php', '', $this->page_name).'.tpl';
-		}
-		// strip tpl and replace it with php
-		// php include file per page
-		$this->INC_TEMPLATE_NAME = str_replace('.tpl', '.php', $this->CONTENT_INCLUDE);
-		// javascript include per page
-		$this->JS_TEMPLATE_NAME = str_replace('.tpl', '.js', $this->CONTENT_INCLUDE);
-		// css per page
-		$this->CSS_TEMPLATE_NAME = str_replace('.tpl', '.css', $this->CONTENT_INCLUDE);
-
-		// set basic template path (tmp)
-		$this->INCLUDES = BASE.INCLUDES; // no longer in templates, only global
-		$this->TEMPLATE_PATH = BASE.INCLUDES.TEMPLATES.CONTENT_PATH;
-		$this->setTemplateDir($this->TEMPLATE_PATH);
-		$this->JAVASCRIPT = LAYOUT.JS;
-		$this->CSS = LAYOUT.CSS;
-		$this->PICTURES = LAYOUT.IMAGES;
-		$this->CACHE_PICTURES = LAYOUT.CACHE;
-		$this->CACHE_PICTURES_ROOT = ROOT.$this->CACHE_PICTURES;
-		// check if we have an external file with the template name
-		if (file_exists($this->INCLUDES.$this->INC_TEMPLATE_NAME) &&
-			is_file($this->INCLUDES.$this->INC_TEMPLATE_NAME)
-		) {
-			include($this->INCLUDES.$this->INC_TEMPLATE_NAME);
-		}
-		// only CSS/JS/etc include stuff if we have non AJAX page
-		if (isset($AJAX_PAGE) && !$AJAX_PAGE) {
-			// check for template include
-			if (isset($USE_INCLUDE_TEMPLATE) &&
-				$USE_INCLUDE_TEMPLATE === true &&
-				!$this->TEMPLATE_NAME
-			) {
-				$this->TEMPLATE_NAME = $this->CONTENT_INCLUDE;
-				// add to cache & compile id
-				$this->COMPILE_ID .= '_'.$this->TEMPLATE_NAME;
-				$this->CACHE_ID .= '_'.$this->TEMPLATE_NAME;
-			}
-			// additional per page Javascript include
-			$this->JS_INCLUDE = '';
-			if (file_exists($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME) &&
-				is_file($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME)
-			) {
-				$this->JS_INCLUDE = $this->JAVASCRIPT.$this->JS_TEMPLATE_NAME;
-			}
-			// per page css file
-			$this->CSS_INCLUDE = '';
-			if (file_exists($this->CSS.$this->CSS_TEMPLATE_NAME) &&
-				is_file($this->CSS.$this->CSS_TEMPLATE_NAME)
-			) {
-				$this->CSS_INCLUDE = $this->CSS.$this->CSS_TEMPLATE_NAME;
-			}
-			// optional CSS file
-			$this->CSS_SPECIAL_INCLUDE = '';
-			if (file_exists($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME) &&
-				is_file($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME)
-			) {
-				$this->CSS_SPECIAL_INCLUDE = $this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME;
-			}
-			// optional JS file
-			$this->JS_SPECIAL_INCLUDE = '';
-			if (file_exists($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME) &&
-				is_file($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME)
-			) {
-				$this->JS_SPECIAL_INCLUDE = $this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME;
-			}
-			// check if template names exist
-			if (!$this->MASTER_TEMPLATE_NAME) {
-				exit('MASTER TEMPLATE is not set');
-			} elseif (!file_exists($this->getTemplateDir()[0].DS.$this->MASTER_TEMPLATE_NAME)) {
-				// abort if master template could not be found
-				exit('MASTER TEMPLATE: '.$this->MASTER_TEMPLATE_NAME.' could not be found');
-			}
-			if ($this->TEMPLATE_NAME &&
-				!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_NAME)
-			) {
-				exit('INCLUDE TEMPLATE: '.$this->TEMPLATE_NAME.' could not be found');
-			}
-			// javascript translate data as template for auto translate
-			if (empty($this->TEMPLATE_TRANSLATE)) {
-				$this->TEMPLATE_TRANSLATE = 'jsTranslate_'.$this->lang.'.tpl';
-			} else {
-				// we assume we have some fixed set
-				// we must add _<$this->lang>
-				// if .tpl, put before .tpl
-				// if not .tpl, add _<$this->lang>.tpl
-				if (strpos($this->TEMPLATE_TRANSLATE, '.tpl')) {
-					$this->TEMPLATE_TRANSLATE = str_replace('.tpl', '_'.$this->lang.'.tpl', $this->TEMPLATE_TRANSLATE);
-				} else {
-					$this->TEMPLATE_TRANSLATE .= '_'.$this->lang.'.tpl';
-				}
-			}
-			// if we can't find it, dump it
-			if (!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_TRANSLATE)) {
-				$this->TEMPLATE_TRANSLATE = null;
-			}
-		}
 	}
 }
 
