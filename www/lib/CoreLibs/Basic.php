@@ -1236,12 +1236,22 @@ class Basic
 			$path[] = $key_lookin;
 		} else {
 			foreach ($haystack as $key => $val) {
-				if (is_scalar($val) && $val === $needle && empty($key_lookin)) {
-					break;
-				} elseif (is_scalar($val) && !empty($key_lookin) && $key === $key_lookin && $val == $needle) {
+				if (is_scalar($val) &&
+					$val === $needle &&
+					empty($key_lookin)
+				) {
 					$path[] = $key;
 					break;
-				} elseif (is_array($val) && $path = Basic::arraySearchRecursive($needle, $val, $key_lookin)) {
+				} elseif (is_scalar($val) &&
+					!empty($key_lookin) &&
+					$key === $key_lookin &&
+					$val == $needle
+				) {
+					$path[] = $key;
+					break;
+				} elseif (is_array($val) &&
+					$path = Basic::arraySearchRecursive($needle, $val, $key_lookin)
+				) {
 					array_unshift($path, $key);
 					break;
 				}

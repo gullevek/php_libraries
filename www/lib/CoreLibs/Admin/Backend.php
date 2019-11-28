@@ -105,6 +105,7 @@ class Backend extends \CoreLibs\DB\IO
 
 	/**
 	 * set the language encoding and language settings
+	 * use $OVERRIDE_LANG to override all language settings
 	 * the default charset from _SESSION login or from
 	 * config DEFAULT ENCODING
 	 * the lang full name for mo loading from _SESSION login
