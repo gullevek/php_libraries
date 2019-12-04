@@ -1391,6 +1391,21 @@ class Basic
 	}
 
 	/**
+	 * correct array_diff that does an actualy difference between two arrays.
+	 * array_diff only checks elements from A that are not in B, but not the
+	 * other way around.
+	 * Note that like array_diff this only checks first level values not keys
+	 * @param  array  $a array to compare a
+	 * @param  array  $b array to compare b
+	 * @return array     array with missing elements from a & b
+	 */
+	public static function arrayDiff(array $a, array $b): array
+	{
+		$intersect = array_intersect($a, $b);
+		return array_merge(array_diff($a, $intersect), array_diff($b, $intersect));
+	}
+
+	/**
 	 * search for the needle array elements in haystack and return the ones found as an array,
 	 * is there nothing found, it returns FALSE (boolean)
 	 * @param  array $needle   elements to search for
