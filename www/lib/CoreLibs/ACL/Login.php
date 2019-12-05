@@ -178,44 +178,17 @@ class Login extends \CoreLibs\DB\IO
 		$this->euid = array_key_exists('EUID', $_SESSION) ? $_SESSION['EUID'] : 0; // if there is none, there is none, saves me POST/GET check
 		// get login vars, are so, can't be changed
 		// prepare
-		if (!isset($_POST['login_login'])) {
-			$_POST['login_login'] = '';
-		}
-		if (!isset($_POST['login_username'])) {
-			$_POST['login_username'] = '';
-		}
-		if (!isset($_POST['login_password'])) {
-			$_POST['login_password'] = '';
-		}
-		if (!isset($_POST['login_logout'])) {
-			$_POST['login_logout'] = '';
-		}
-		if (!isset($_POST['change_password'])) {
-			$_POST['change_password'] = '';
-		}
-		if (!isset($_POST['pw_username'])) {
-			$_POST['pw_username'] = '';
-		}
-		if (!isset($_POST['pw_old_password'])) {
-			$_POST['pw_old_password'] = '';
-		}
-		if (!isset($_POST['pw_new_password'])) {
-			$_POST['pw_new_password'] = '';
-		}
-		if (!isset($_POST['pw_new_password_confirm'])) {
-			$_POST['pw_new_password_confirm'] = '';
-		}
 		// pass on vars to Object vars
-		$this->login = $_POST['login_login'];
-		$this->username = $_POST['login_username'];
-		$this->password = $_POST['login_password'];
-		$this->logout = $_POST['login_logout'];
+		$this->login = isset($_POST['login_login']) ? $_POST['login_login'] : '';
+		$this->username = isset($_POST['login_username']) ? $_POST['login_username'] : '';
+		$this->password = isset($_POST['login_password']) ? $_POST['login_password'] : '';
+		$this->logout = isset($_POST['login_logout']) ? $_POST['login_logout'] : '';
 		// password change vars
-		$this->change_password = $_POST['change_password'];
-		$this->pw_username = $_POST['pw_username'];
-		$this->pw_old_password = $_POST['pw_old_password'];
-		$this->pw_new_password = $_POST['pw_new_password'];
-		$this->pw_new_password_confirm = $_POST['pw_new_password_confirm'];
+		$this->change_password = isset($_POST['change_password']) ? $_POST['change_password'] : '';
+		$this->pw_username = isset($_POST['pw_username']) ? $_POST['pw_username'] : '';
+		$this->pw_old_password = isset($_POST['pw_old_password']) ? $_POST['pw_old_password'] : '';
+		$this->pw_new_password = isset($_POST['pw_new_password']) ? $_POST['pw_new_password'] : '';
+		$this->pw_new_password_confirm = isset($_POST['pw_new_password_confirm']) ? $_POST['pw_new_password_confirm'] : '';
 		// logout target (from config)
 		$this->logout_target = LOGOUT_TARGET;
 		// disallow user list for password change

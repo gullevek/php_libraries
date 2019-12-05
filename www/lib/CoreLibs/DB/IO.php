@@ -1779,16 +1779,30 @@ class IO extends \CoreLibs\Basic
 				'row' => $table.'_id',
 				'value' => $primary_key
 			);
-		} elseif (!isset($primary_key['value'])) {
-			$primary_key['value'] = '';
+		} else {
+			if (!isset($primary_key['row'])) {
+				$primary_key['row'] = '';
+			}
+			if (!isset($primary_key['value'])) {
+				$primary_key['value'] = '';
+			}
 		}
 		// var set for strings
 		$q_sub_value = '';
 		$q_sub_data = '';
 		// get the table layout and row types
 		$table_data = $this->dbShowTableMetaData(($this->db_schema ? $this->db_schema.'.' : '').$table);
+		// @phan HACK
+		$primary_key['value'] = $primary_key['value'] ?? '';
+		$primary_key['row'] = $primary_key['row'] ?? '';
+		// loop through the write array and each field to build the query
 		foreach ($write_array as $field) {
-			if ((!$primary_key['value'] || ($primary_key['value'] && !in_array($field, $not_write_update_array))) && !in_array($field, $not_write_array)) {
+			if ((!$primary_key['value'] ||
+					($primary_key['value'] &&
+					!in_array($field, $not_write_update_array))
+				) &&
+				!in_array($field, $not_write_array)
+			) {
 				// data from external or data field
 				$_data = null;
 				if (count($data) >= 1 && array_key_exists($field, $data)) {
@@ -1842,7 +1856,7 @@ class IO extends \CoreLibs\Basic
 		}
 
 		// first work contact itself (we need contact id for everything else)
-		if ($primary_key['value']) {
+		if ($primary_key['value'] && $primary_key['row']) {
 			$q = 'UPDATE '.$table.' SET ';
 			$q .= $q_sub_data.' ';
 			$q .= 'WHERE '.$primary_key['row'].' = '.$primary_key['value'];
@@ -1861,8 +1875,8 @@ class IO extends \CoreLibs\Basic
 		if (!$primary_key['value']) {
 			$primary_key['value'] = $this->insert_id;
 		}
-
-		return $primary_key['value'];
+		// if there is not priamry key value field return false
+		return isset($primary_key['value']) ? $primary_key['value'] : false;
 	}
 
 	/**

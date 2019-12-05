@@ -1210,7 +1210,7 @@ class Basic
 	public static function getFilenameEnding(string $filename): string
 	{
 		$page_temp = pathinfo($filename);
-		return $page_temp['extension'];
+		return isset($page_temp['extension']) ? $page_temp['extension'] : '';
 	}
 
 	/**
@@ -1270,16 +1270,27 @@ class Basic
 	 */
 	public static function arraySearchRecursiveAll($needle, array $haystack, $key, $path = null): ?array
 	{
+		// init if not set on null
+		if ($path === null) {
+			$path = array(
+				'level' => 0,
+				'work' => array()
+			);
+		}
+		// init sub sets if not set
 		if (!isset($path['level'])) {
 			$path['level'] = 0;
 		}
 		if (!isset($path['work'])) {
 			$path['work'] = array();
 		}
+		// should not be needed because it would trigger a php mehtod error
 		if (!is_array($haystack)) {
 			$haystack = array();
 		}
 
+		// @phan HACK
+		$path['level'] = $path['level'] ?? 0;
 		// go through the array,
 		foreach ($haystack as $_key => $_value) {
 			if (is_scalar($_value) && $_value == $needle && !$key) {
@@ -1299,6 +1310,9 @@ class Basic
 				$path = Basic::arraySearchRecursiveAll($needle, $_value, $key, $path);
 			}
 		}
+		// @phan HACK
+		$path['level'] = $path['level'] ?? 0;
+		$path['work'] = $path['work'] ?? array();
 		// cut all that is >= level
 		array_splice($path['work'], $path['level']);
 		// step back a level

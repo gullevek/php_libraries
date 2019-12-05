@@ -187,7 +187,7 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "VALUES ";
 		$q .= "(".$this->dbEscapeString(isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ? $_SESSION['EUID'] : 'NULL').", ";
 		$q .= "NOW(), ";
-		$q .= "'".$this->dbEscapeString((string)$event)."', '".$data."', '".$data_binary."', '".$this->dbEscapeString($this->page_name)."', ";
+		$q .= "'".$this->dbEscapeString((string)$event)."', '".$data."', '".$data_binary."', '".$this->dbEscapeString((string)$this->page_name)."', ";
 		$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->dbEscapeString(@$_SERVER['HTTP_USER_AGENT'])."', ";
 		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '')."', ";
 		$q .= "'".$this->dbEscapeString(isset($_SERVER['SCRIPT_FILENAME']) ? $_SERVER['SCRIPT_FILENAME'] : '')."', ";
@@ -233,13 +233,14 @@ class Backend extends \CoreLibs\DB\IO
 		// if flag is 0, then we show all, else, we show only the matching flagges array points
 		// array is already sorted after correct order
 		reset($pages);
-		for ($i = 0, $iMax = count($pages); $i < $iMax; $i ++) {
+		foreach ($pages as $i => $data) {
+		// for ($i = 0, $iMax = count($pages); $i < $iMax; $i ++) {
 			$show = 0;
 			// is it visible in the menu & is it online
-			if ($pages[$i]['menu'] && $pages[$i]['online']) {
+			if ($data['menu'] && $data['online']) {
 				// check if it falls into our flag if we have a flag
 				if ($flag) {
-					foreach ($pages[$i]['visible'] as $name => $key) {
+					foreach ($data['visible'] as $name => $key) {
 						if ($key == $flag) {
 							$show = 1;
 						}
@@ -251,40 +252,59 @@ class Backend extends \CoreLibs\DB\IO
 
 				if ($show) {
 					// if it is popup, write popup arrayound
-					if (isset($pages[$i]['popup']) && $pages[$i]['popup']) {
+					if (isset($data['popup']) && $data['popup']) {
 						$type = 'popup';
 					} else {
 						$type = 'normal';
-						$pages[$i]['popup'] = 0;
+						$data['popup'] = 0;
 					}
 					$query_string = '';
-					if (isset($pages[$i]['query']) && count($pages[$i]['query'])) {
-						for ($j = 0, $jMax = count($pages[$i]['query']); $j < $jMax; $j ++) {
-							if (strlen($query_string)) {
-								$query_string .= '&';
-							}
-							$query_string .= $pages[$i]['query'][$j]['name'].'=';
-							if (!$pages[$i]['query'][$j]['dynamic']) {
-								$query_string .= urlencode($pages[$i]['query'][$j]['value']);
-							} else {
-								$query_string .= $_GET[$pages[$i]['query'][$j]['value']] ? urlencode($_GET[$pages[$i]['query'][$j]['value']]) : urlencode($_POST[$pages[$i]['query'][$j]['value']]);
+
+					if (isset($data['query']) &&
+						is_array($data['query']) &&
+						count($data['query'])
+					) {
+						// for ($j = 0, $jMax = count($pages[$i]['query']); $j < $jMax; $j ++) {
+						foreach ($data['query'] as $j => $query) {
+							if (!empty($query['name']) &&
+								!empty($query['value'])
+							) {
+								if (strlen($query_string)) {
+									$query_string .= '&';
+								}
+								$query_string .= $query['name'].'=';
+								if (isset($query['dynamic']) &&
+									$query['dynamic']
+								) {
+									if (isset($_GET[$query['value']])) {
+										$query_string .= urlencode($_GET[$query['value']]);
+									} elseif (isset($_POST[$query['value']])) {
+										$query_string .= urlencode($_POST[$query['value']]);
+									}
+								} else {
+									$query_string .= urlencode($query['value']);
+								}
 							}
 						}
 					}
-					$url = $pages[$i]['filename'];
+					$url = isset($data['filename']) ? $data['filename'] : '';
 					if (strlen($query_string)) {
 						$url .= '?'.$query_string;
 					}
-					$name = $pages[$i]['page_name'];
+					$name = isset($data['page_name']) ? $data['page_name'] : '';
 					// if page name matchs -> set selected flag
 					$selected = 0;
-					if ($this->getPageName() == $pages[$i]['filename']) {
+					if (isset($data['filename']) &&
+						$this->getPageName() == $data['filename']
+					) {
 						$selected = 1;
 						$this->page_name = $name;
 					}
 					// last check, is this menu point okay to show
 					$enabled = 0;
-					if ($this->adbShowMenuPoint($pages[$i]['filename'])) {
+					if (isset($data['filename']) &&
+						$this->adbShowMenuPoint($data['filename'])
+					) {
 						$enabled = 1;
 					}
 					// write in to view menu array
@@ -304,12 +324,15 @@ class Backend extends \CoreLibs\DB\IO
 
 	/**
 	 * checks if this filename is in the current situation (user id, etc) available
-	 * @param  string $filename filename
-	 * @return bool             true for visible/accessable menu point, false for not
+	 * @param  string|null $filename filename
+	 * @return bool                  true for visible/accessable menu point, false for not
 	 */
-	public function adbShowMenuPoint(string $filename): bool
+	public function adbShowMenuPoint(?string $filename): bool
 	{
 		$enabled = false;
+		if ($filename === null) {
+			return $enabled;
+		}
 		switch ($filename) {
 			default:
 				$enabled = true;
