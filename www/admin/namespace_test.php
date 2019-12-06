@@ -21,8 +21,8 @@ if ($base->getConnectionStatus()) {
 }
 
 print "Start time: ".$base->runningTime()."<br>";
-print "ByteStringFormat: ".$base->ByteStringFormat(1234567.12)."<br>";
-print "byteStringFormat: ".$base->byteStringFormat(1234567.12)."<br>";
+print "HumanReadableByteFormat: ".$base->HumanReadableByteFormat(1234567.12)."<br>";
+print "humanReadableByteFormat: ".$base->humanReadableByteFormat(1234567.12)."<br>";
 // print "get_page_name [DEPRECATED]: ".$base->get_page_name()."<br>";
 print "getPageName: ".$base->getPageName()."<br>";
 

@@ -364,7 +364,7 @@ class Backend extends \CoreLibs\DB\IO
 	public function adbByteStringFormat($number): string
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->byteStringFormat($number);
+		return $this->humanReadableByteFormat($number);
 	}
 
 	/**

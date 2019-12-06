@@ -254,6 +254,45 @@ echo "SOURCE ARRAY: ".$basic->printAr($test_array)."<br>";
 echo "FOUND ELEMENTS [base]: ".$basic->printAr($basic->arraySearchRecursive('email', $test_array, 'type'))."<br>";
 echo "FOUND ELEMENTS [input]: ".$basic->printAr($basic->arraySearchRecursive('email', $test_array['input'], 'type'))."<br>";
 
+// *** BYTES TEST ***
+$bytes = array(
+	-123123123,
+	999999, // KB-1
+	999999999, // MB-1
+	254779258, // MB-n
+	999999999999999, // TB-1
+	588795544887632, // TB-n
+	999999999999999999, // PB-1
+	9223372036854775807, // MAX INT
+	999999999999999999999, // EB-1
+);
+print "<b>BYTE FORMAT TESTS</b><br>";
+foreach ($bytes as $byte) {
+	print '<div style="display: flex; border-bottom: 1px dashed gray;">';
+	//
+	print '<div style="width: 35%; text-align: right; padding-right: 2px;">';
+	print "(".number_format($byte)."/".$byte.") bytes :";
+	print '</div><div style="width: 40%;">';
+	print $basic->humanReadableByteFormat($byte);
+	print "</div>";
+	//
+	print "</div>";
+	//
+	print '<div style="display: flex; border-bottom: 1px dotted red;">';
+	//
+	print '<div style="width: 35%; text-align: right; padding-right: 2px;">';
+	print "bytes [si]:";
+	print '</div><div style="width: 40%;">';
+	// print $basic->byteStringFormat($byte, true, false, true);
+	print $basic->humanReadableByteFormat($byte, $basic::BYTE_FORMAT_SI);
+	print "</div>";
+	//
+	print "</div>";
+}
+
+
+// *** IMAGE TESTS ***
+echo "<hr>";
 // image thumbnail
 $images = array(
 	// height bigger
@@ -272,7 +311,6 @@ $images = array(
 	// Photoshop
 	'photoshop_test.psd',
 );
-echo "<hr>";
 $thumb_width = 250;
 $thumb_height = 300;
 // return mime type ala mimetype

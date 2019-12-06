@@ -100,6 +100,10 @@ class Basic
 	// define check vars for the flags we can have
 	const CLASS_STRICT_MODE = 1;
 	const CLASS_OFF_COMPATIBLE_MODE = 2;
+	// define byteFormat
+	const BYTE_FORMAT_NOSPACE = 1;
+	const BYTE_FORMAT_ADJUST = 2;
+	const BYTE_FORMAT_SI = 4;
 	// control vars
 	/** @var bool compatible mode sets variable even if it is not defined */
 	private $set_compatible = true;
@@ -1592,20 +1596,117 @@ class Basic
 	}
 
 	/**
+	 * WRAPPER call to new humanReadableByteFormat
 	 * converts bytes into formated string with KB, MB, etc
-	 * @param  string|int|float $number bytes as string int or pure int
-	 * @param  bool             $space  true (default) to add space between number and suffix
+	 * @param  string|int|float $bytes  bytes as string int or pure int
+	 * @param  bool             $space  default true, to add space between number and suffix
+	 * @param  bool             $adjust default false, always print two decimals (sprintf)
+	 * @param  bool             $si     default false, if set to true, use 1000 for calculation
 	 * @return string                   converted byte number (float) with suffix
+	 * @deprecated Use humanReadableByteFormat instead
 	 */
-	public static function byteStringFormat($number, bool $space = true): string
+	public static function byteStringFormat($bytes, bool $space = true, bool $adjust = false, bool $si = false): string
 	{
-		if (is_numeric($number) && $number > 0) {
-			// labels in order of size
-			$labels = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB');
-			// calc file size, round down too two digits, add label based max change
-			return round((float)$number / pow(1024, ($i = floor(log((float)$number, 1024)))), 2).($space ? ' ' : '').(isset($labels[(int)$i]) ? $labels[(int)$i] : '>EB');
+		// trigger_error('Method '.__METHOD__.' is deprecated, use humanReadableByteFormat', E_USER_DEPRECATED);
+		$flags = 0;
+		// match over the true/false flags to the new int style flag
+		// if space need to set 1
+		if ($space === false) {
+			$flags |= self::BYTE_FORMAT_NOSPACE;
 		}
-		return (string)$number;
+		// if adjust need to set 2
+		if ($adjust === true) {
+			$flags |= self::BYTE_FORMAT_ADJUST;
+		}
+		// if si need to set 3
+		if ($si === true) {
+			$flags |= self::BYTE_FORMAT_SI;
+		}
+
+		// call
+		return self::humanReadableByteFormat($bytes, $flags);
+	}
+
+
+	/**
+	 * This function replaces the old byteStringFormat
+	 *
+	 * Converts any number string to human readable byte format
+	 * Maxium is Exobytes and above that the Exobytes suffix is used for all
+	 * If more are needed only the correct short name for the suffix has to be
+	 * added to the labels array
+	 * On no number string it returns string as is
+	 * Source Idea: SOURCE: https://programming.guide/worlds-most-copied-so-snippet.html
+	 *
+	 * The class itself hast the following defined
+	 * BYTE_FORMAT_NOSPACE [1] turn off spaces between number and extension
+	 * BYTE_FORMAT_ADJUST  [2] use sprintf to always print two decimals
+	 * BYTE_FORMAT_SI      [3] use si standard 1000 instead of bytes 1024
+	 * To use the constant from outside use $class::CONSTANT
+	 * @param  string|int|float $bytes bytes as string int or pure int
+	 * @param  int              $flags bitwise flag with use space turned on
+	 * @return string                  converted byte number (float) with suffix
+	 */
+	public static function humanReadableByteFormat($bytes, int $flags = 0): string
+	{
+		// if not numeric, return as is
+		if (is_numeric($bytes)) {
+			// flags bit wise check
+			// remove space between number and suffix
+			if ($flags & self::BYTE_FORMAT_NOSPACE) {
+				$space = false;
+			} else {
+				$space = true;
+			}
+			// use sprintf instead of round
+			if ($flags & self::BYTE_FORMAT_ADJUST) {
+				$adjust = true;
+			} else {
+				$adjust = false;
+			}
+			// use SI 1000 mod and not 1024 mod
+			if ($flags & self::BYTE_FORMAT_SI) {
+				$si = true;
+			} else {
+				$si = false;
+			}
+
+			// si or normal
+			$unit = $si ? 1000 : 1024;
+			// always positive
+			$abs_bytes = $bytes == PHP_INT_MIN ? PHP_INT_MAX : abs($bytes);
+			// smaller than unit is always B
+			if ($abs_bytes < $unit) {
+				return $bytes.'B';
+			}
+			// labels in order of size [Y, Z]
+			$labels = array('', 'K', 'M', 'G', 'T', 'P', 'E');
+			// exp position calculation
+			$exp = floor(log($abs_bytes, $unit));
+			// avoid printing out anything larger than max labels
+			if ($exp >= count($labels)) {
+				$exp = count($labels) - 1;
+			}
+			// deviation calculation
+			$dev = pow($unit, $exp) * ($unit - 0.05);
+			// shift the exp +1 for on the border units
+			if ($exp < 6 &&
+				$abs_bytes > ($dev - (((int)$dev & 0xfff) == 0xd00 ? 52 : 0))
+			) {
+				$exp ++;
+			}
+			// label name, including leading space if flagged
+			$pre = ($space ? ' ' : '').(isset($labels[$exp]) ? $labels[$exp] : '>E').($si ? 'i' : '').'B';
+			$bytes_calc = $abs_bytes / pow($unit, $exp);
+			if ($adjust) {
+				return sprintf("%.2f%sB", $bytes_calc, $pre);
+			} else {
+				return round($bytes_calc, 2).$pre;
+			}
+		} else {
+			// if anything other return as string
+			return (string)$bytes;
+		}
 	}
 
 	/**
