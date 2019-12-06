@@ -1140,6 +1140,8 @@ class Basic
 			return "href=##QUOT##$_1$_2$_3##QUOT##";
 		} elseif ($atag) {
 			return $atag.$_2.$_3;
+		} else {
+			return $href;
 		}
 	}
 
