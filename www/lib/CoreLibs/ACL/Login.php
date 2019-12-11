@@ -434,7 +434,9 @@ class Login extends \CoreLibs\DB\IO
 							$pages = array();
 							$pages_acl = array();
 							// set pages access
-							$q = "SELECT ep.edit_page_id, ep.cuid, epca.cuid AS content_alias_uid, ep.filename, ep.name AS edit_page_name, ep.order_number AS edit_page_order, ep.menu, ";
+							$q = "SELECT ep.edit_page_id, ep.cuid, epca.cuid AS content_alias_uid, ";
+							$q .= "ep.hostname, ep.filename, ep.name AS edit_page_name, ";
+							$q .= "ep.order_number AS edit_page_order, ep.menu, ";
 							$q .= "ep.popup, ep.popup_x, ep.popup_y, ep.online, ear.level, ear.type ";
 							$q .= "FROM edit_page ep ";
 							$q .= "LEFT JOIN edit_page epca ON (epca.edit_page_id = ep.content_alias_edit_page_id)";
@@ -450,6 +452,7 @@ class Login extends \CoreLibs\DB\IO
 									'edit_page_id' => $res['edit_page_id'],
 									'cuid' => $res['cuid'],
 									'content_alias_uid' => $res['content_alias_uid'], // for reference of content data on a differen page
+									'hostname' => $res['hostname'],
 									'filename' => $res['filename'],
 									'page_name' => $res['edit_page_name'],
 									'order' => $res['edit_page_order'],

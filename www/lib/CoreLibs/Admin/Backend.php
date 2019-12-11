@@ -287,7 +287,11 @@ class Backend extends \CoreLibs\DB\IO
 							}
 						}
 					}
-					$url = isset($data['filename']) ? $data['filename'] : '';
+					$url = '';
+					if (isset($data['hostname']) && $data['hostname']) {
+						$url .= $data['hostname'];
+					}
+					$url .= isset($data['filename']) ? $data['filename'] : '';
 					if (strlen($query_string)) {
 						$url .= '?'.$query_string;
 					}
@@ -295,7 +299,11 @@ class Backend extends \CoreLibs\DB\IO
 					// if page name matchs -> set selected flag
 					$selected = 0;
 					if (isset($data['filename']) &&
-						$this->getPageName() == $data['filename']
+						$this->getPageName() == $data['filename'] &&
+						(!isset($data['hostname']) || (
+							isset($data['hostname']) &&
+								(!$data['hostname'] || strstr($data['hostname'], CONTENT_PATH) !== false)
+						))
 					) {
 						$selected = 1;
 						$this->page_name = $name;

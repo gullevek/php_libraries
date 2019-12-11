@@ -89,7 +89,7 @@ DEFINE('DEFAULT_ACL_LEVEL', 80);
 // 4: very strict, even on normal fixable errors through error
 // DEFINE('ERROR_STRICT', 3);
 // allow page caching in general, set to 'FALSE' if you do debugging or development!
-// DEFINE('ALLOW_SMARTY_CACHE', FALSE);
+// DEFINE('ALLOW_SMARTY_CACHE', false);
 // cache life time, in second', default here is 2 days (172800s)
 // -1 is never expire cache
 // DEFINE('SMARTY_CACHE_LIFETIME', -1);

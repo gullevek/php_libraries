@@ -12,10 +12,15 @@ $edit_pages = array(
 			'output_name' => 'Add File ...',
 			'mandatory' => 1,
 			'type' => 'drop_down_db',
-			'query' => "SELECT DISTINCT temp_files.filename AS id, temp_files.filename AS name ".
+			'query' => "SELECT DISTINCT temp_files.filename AS id, temp_files.folder || temp_files.filename AS name ".
 				"FROM temp_files ".
 				"LEFT JOIN edit_page ep ON temp_files.filename = ep.filename ".
 				"WHERE ep.filename IS NULL"
+		),
+		'hostname' => array(
+			'value' => isset($GLOBALS['hostname']) ? $GLOBALS['hostname'] : '',
+			'output_name' => 'Hostname or folder',
+			'type' => 'text'
 		),
 		'name' => array(
 			'value' => isset($GLOBALS['name']) ? $GLOBALS['name'] : '',
@@ -107,7 +112,7 @@ $edit_pages = array(
 				// "ORDER BY order_number"
 		)
 	),
-	'load_query' => "SELECT edit_page_id, filename, name, online, menu, popup FROM edit_page ORDER BY order_number",
+	'load_query' => "SELECT edit_page_id, CASE WHEN hostname IS NOT NULL THEN hostname ELSE ''::VARCHAR END || filename AS filename, name, online, menu, popup FROM edit_page ORDER BY order_number",
 	'table_name' => 'edit_page',
 	'show_fields' => array(
 		array(

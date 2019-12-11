@@ -1974,7 +1974,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		} else {
 			// only create query if we have a primary key
 			// reads directly from the reference table
-			if (isset($this->table_array[$this->int_pk_name]['value'])) {
+			if (isset($this->table_array[$this->int_pk_name]['value']) &&
+				$this->table_array[$this->int_pk_name]['value']
+			) {
 				$q = 'SELECT '.implode(', ', $q_select).' FROM '.$table_name.' WHERE '.$this->int_pk_name.' = '.$this->table_array[$this->int_pk_name]['value'];
 			}
 		}

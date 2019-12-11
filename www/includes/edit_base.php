@@ -270,38 +270,57 @@ if ($form->my_page_name == 'edit_order') {
 
 	$position = 0;
 	$menu_data = array();
-	for ($i = 1; $i <= count($menuarray); $i ++) {
+	// for ($i = 1; $i <= count($menuarray); $i ++) {
+	foreach ($menuarray as $i => $data) {
 		// do that for new array
-		$j = $i - 1;
-		$menu_data[$j]['pagename'] = htmlentities($menuarray[($i-1)]['page_name']);
-		$menu_data[$j]['filename'] = $menuarray[($i-1)]['filename'].(isset($menuarray[$j]['query_string']) ? $menuarray[$j]['query_string'] : '');
-		if ($i == 1 || !($j % $SPLIT_FACTOR)) {
-			$menu_data[$j]['splitfactor_in'] = 1;
+		$j = $i + 1;
+		$menu_data[$i]['pagename'] = htmlentities($data['page_name']);
+		$menu_data[$i]['filename'] =
+			// prefix folder or host name
+			(isset($data['hostname']) && $data['hostname'] ?
+				$data['hostname'] :
+				''
+			).
+			// filename
+			$data['filename'].
+			// query string
+			(isset($data['query_string']) && $data['query_string'] ?
+				$data['query_string'] :
+				''
+			);
+		if ($j == 1 || !($i % $SPLIT_FACTOR)) {
+			$menu_data[$i]['splitfactor_in'] = 1;
 		} else {
-			$menu_data[$j]['splitfactor_in'] = 0;
+			$menu_data[$i]['splitfactor_in'] = 0;
 		}
-		if ($menuarray[$j]['filename'] == $form->getPageName()) {
+		// on matching, we also need to check if we are in the same folder
+		if ($data['filename'] == $form->getPageName() &&
+			(!isset($data['hostname']) || (
+				isset($data['hostname']) &&
+					(!$data['hostname'] || strstr($data['hostname'], CONTENT_PATH) !== false)
+			))
+		) {
 			$position = $j;
-			$menu_data[$j]['position'] = 1;
-			$menu_data[$j]['popup'] = 0;
+			$menu_data[$i]['position'] = 1;
+			$menu_data[$i]['popup'] = 0;
 		} else {
 			// add query stuff
 			// HAS TO DONE LATER ... set urlencode, etc ...
 			// check if popup needed
-			if (isset($menuarray[$j]['popup']) && $menuarray[$j]['popup'] == 1) {
-				$menu_data[$j]['popup'] = 1;
-				$menu_data[$j]['rand'] = uniqid((string)rand());
-				$menu_data[$j]['width'] = $menuarray[$j]['popup_x'];
-				$menu_data[$j]['height'] = $menuarray[$j]['popup_y'];
+			if (isset($data['popup']) && $data['popup'] == 1) {
+				$menu_data[$i]['popup'] = 1;
+				$menu_data[$i]['rand'] = uniqid((string)rand());
+				$menu_data[$i]['width'] = $data['popup_x'];
+				$menu_data[$i]['height'] = $data['popup_y'];
 			} else {
-				$menu_data[$j]['popup'] = 0;
+				$menu_data[$i]['popup'] = 0;
 			}
-			$menu_data[$j]['position'] = 0;
+			$menu_data[$i]['position'] = 0;
 		} // highlight or not
-		if (!($i % $SPLIT_FACTOR) || (($i + 1) > count($menuarray))) {
-			$menu_data[$j]['splitfactor_out'] = 1;
+		if (!($j % $SPLIT_FACTOR) || (($j + 1) > count($menuarray))) {
+			$menu_data[$i]['splitfactor_out'] = 1;
 		} else {
-			$menu_data[$j]['splitfactor_out'] = 0;
+			$menu_data[$i]['splitfactor_out'] = 0;
 		}
 	} // for
 	// $form->debug('MENU ARRAY', $form->printAr($menu_data));
@@ -357,14 +376,35 @@ if ($form->my_page_name == 'edit_order') {
 				if (!isset($form->table_array['edit_page_id']['value'])) {
 					$q = "DELETE FROM temp_files";
 					$form->dbExec($q);
-					// gets all files in the current dir ending with .php
-					$crap = exec('ls *.php', $output, $status);
-					// now get all that are NOT in de DB
-					$q = "INSERT INTO temp_files VALUES ";
-					for ($i = 0; $i < count($output); $i ++) {
-						$t_q = "('".$form->dbEscapeString($output[$i])."')";
-						$form->dbExec($q.$t_q, 'NULL');
+					// gets all files in the current dir and dirs given ending with .php
+					$folders = array('../admin/', '../frontend/');
+					$files = array('*.php');
+					$search_glob = array();
+					foreach ($folders as $folder) {
+						// make sure this folder actually exists
+						if (is_dir(ROOT.$folder)) {
+							foreach ($files as $file) {
+								$search_glob[] = $folder.$file;
+							}
+						}
 					}
+					$crap = exec('ls '.join(' ', $search_glob), $output, $status);
+					// now get all that are NOT in de DB
+					$q = "INSERT INTO temp_files (folder, filename) VALUES ";
+					$t_q = '';
+					foreach ($output as $output_file) {
+						// split the ouput into folder and file
+						// eg ../admin/test.php is ../admin/ and test.php
+						preg_match("/([\.\/\w]+\/)+(\w+\.\w{1,})$/", $output_file, $matches);
+						// if named config.php, skip
+						if ($matches[2] != 'config.php') {
+							if ($t_q) {
+								$t_q .= ', ';
+							}
+							$t_q .= "('".$form->dbEscapeString($matches[1])."', '".$form->dbEscapeString($matches[2])."')";
+						}
+					}
+					$form->dbExec($q.$t_q, 'NULL');
 					$elements[] = $form->formCreateElement('filename');
 				} else {
 					// show file menu
@@ -372,6 +412,7 @@ if ($form->my_page_name == 'edit_order') {
 					$DATA['filename_exist'] = 1;
 					$DATA['filename'] = $form->table_array['filename']['value'];
 				} // File Name View IF
+				$elements[] = $form->formCreateElement('hostname');
 				$elements[] = $form->formCreateElement('name');
 				// $elements[] = $form->formCreateElement('tag');
 				// $elements[] = $form->formCreateElement('min_acl');
