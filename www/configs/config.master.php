@@ -114,6 +114,7 @@ DEFINE('USE_JQUERY', true);
 
 /************* LAYOUT WIDTHS *************/
 DEFINE('PAGE_WIDTH', 800);
+DEFINE('CONTENT_WIDTH', 800);
 // the default template name
 DEFINE('MASTER_TEMPLATE_NAME', 'main_body.tpl');
 
@@ -261,22 +262,6 @@ DEFINE('JAVASCRIPT', 'frontend.js');
 if (file_exists(BASE.CONFIGS.'config.other.php')) {
 	require BASE.CONFIGS.'config.other.php';
 }
-
-/************* CONVERT *******************/
-// this only needed if the external thumbnail create is used
-$paths = array(
-	'/bin',
-	'/usr/bin',
-	'/usr/local/bin'
-);
-// find convert
-foreach ($paths as $path) {
-	if (file_exists($path.DS.'convert') && is_file($path.DS.'convert')) {
-		// image magick convert location
-		DEFINE('CONVERT', $path.DS.'convert');
-	}
-}
-unset($paths);
 
 /************* DEBUG *******************/
 // turn off debug if debug flag is OFF
