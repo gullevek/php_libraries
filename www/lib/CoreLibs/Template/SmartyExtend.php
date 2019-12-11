@@ -81,6 +81,7 @@ class SmartyExtend extends SmartyBC
 	public $INCLUDES;
 	public $JAVASCRIPT;
 	public $CSS;
+	public $FONT;
 	public $PICTURES;
 	public $CACHE_PICTURES;
 	public $CACHE_PICTURES_ROOT;
@@ -175,6 +176,7 @@ class SmartyExtend extends SmartyBC
 		$this->setTemplateDir($this->TEMPLATE_PATH);
 		$this->JAVASCRIPT = LAYOUT.JS;
 		$this->CSS = LAYOUT.CSS;
+		$this->FONT = LAYOUT.FONT;
 		$this->PICTURES = LAYOUT.IMAGES;
 		$this->CACHE_PICTURES = LAYOUT.CACHE;
 		$this->CACHE_PICTURES_ROOT = ROOT.$this->CACHE_PICTURES;
@@ -334,6 +336,7 @@ class SmartyExtend extends SmartyBC
 		// default CMS settings
 		// define all needed smarty stuff for the general HTML/page building
 		$this->HEADER['CSS'] = CSS;
+		$this->HEADER['FONT'] = FONT;
 		$this->HEADER['JS'] = JS;
 		$this->HEADER['ENCODING'] = $this->encoding;
 		$this->HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;

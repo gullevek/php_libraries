@@ -54,6 +54,8 @@ DEFINE('PDFS', 'documents'.DS);
 DEFINE('CSV', 'csv'.DS);
 // css
 DEFINE('CSS', 'css'.DS);
+// font (web)
+DEFINE('FONT', 'font'.DS);
 // js
 DEFINE('JS', 'javascript'.DS);
 // table arrays
