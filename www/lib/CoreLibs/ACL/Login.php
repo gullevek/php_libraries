@@ -345,7 +345,7 @@ class Login extends \CoreLibs\DB\IO
 	 * if user pressed login button this script is called, but only if there is no preview euid set]
 	 * @return void has not return
 	 */
-	private function loginLoginUser()
+	private function loginLoginUser(): void
 	{
 		// have to get the global stuff here for setting it later
 		if (!$this->euid && $this->login) {
@@ -587,7 +587,7 @@ class Login extends \CoreLibs\DB\IO
 	 * for every page the user access this script checks if he is allowed to do so
 	 * @return bool permission okay as true/false
 	 */
-	public function loginCheckPermissions()
+	public function loginCheckPermissions(): bool
 	{
 		if ($this->euid && $this->login_error != 103) {
 			$q = "SELECT filename ";
@@ -613,7 +613,7 @@ class Login extends \CoreLibs\DB\IO
 	 * if a user pressed on logout, destroyes session and unsets all global vars
 	 * @return void has no return
 	 */
-	public function loginLogoutUser()
+	public function loginLogoutUser(): void
 	{
 		if ($this->logout || $this->login_error) {
 			// unregister and destroy session vars
@@ -673,7 +673,7 @@ class Login extends \CoreLibs\DB\IO
 	 * set all base ACL levels as a list keyword -> ACL number
 	 * @return void has no return
 	 */
-	private function loginSetAcl()
+	private function loginSetAcl(): void
 	{
 		// only set acl if we have permission okay
 		if ($this->permission_okay) {
@@ -766,8 +766,8 @@ class Login extends \CoreLibs\DB\IO
 
 	/**
 	 * checks if this edit access id is valid
-	 * @param  int $edit_access_id access id pk to check
-	 * @return bool                true/false: if the edit access is not in the valid list: false
+	 * @param  int|null $edit_access_id access id pk to check
+	 * @return bool                     true/false: if the edit access is not in the valid list: false
 	 */
 	public function loginCheckEditAccess($edit_access_id): bool
 	{
@@ -783,7 +783,7 @@ class Login extends \CoreLibs\DB\IO
 	 * @param  string $password the new password
 	 * @return bool             true or false if valid password or not
 	 */
-	private function loginPasswordChangeValidPassword($password)
+	private function loginPasswordChangeValidPassword($password): bool
 	{
 		$is_valid_password = true;
 		// check for valid in regex arrays in list
@@ -805,7 +805,7 @@ class Login extends \CoreLibs\DB\IO
 	 * dummy declare for password forget
 	 * @return void has no return
 	 */
-	private function loginPasswordForgot()
+	private function loginPasswordForgot(): void
 	{
 		// will do some password recovert, eg send email
 	}
@@ -831,7 +831,7 @@ class Login extends \CoreLibs\DB\IO
 	 * changes a user password
 	 * @return void has no return
 	 */
-	private function loginPasswordChange()
+	private function loginPasswordChange(): void
 	{
 		if ($this->change_password) {
 			$event = 'Password Change';
@@ -1013,7 +1013,7 @@ class Login extends \CoreLibs\DB\IO
 	 * checks if there are external templates, if not uses internal fallback ones
 	 * @return void has no return
 	 */
-	private function loginSetTemplates()
+	private function loginSetTemplates(): void
 	{
 		$strings = array(
 			'HTML_TITLE' => $this->l->__('LOGIN'),
@@ -1172,7 +1172,7 @@ EOM;
 	 * @param  string     $username login user username
 	 * @return void                 has no return
 	 */
-	private function writeLog(string $event, string $data, $error = '', string $username = '')
+	private function writeLog(string $event, string $data, $error = '', string $username = ''): void
 	{
 		if ($this->login) {
 				$this->action = 'Login';
@@ -1217,28 +1217,33 @@ EOM;
 	}
 
 	/**
-	 *checks that the given edit access id is valid for this user
-	 * @param  int $edit_access_id edit access id to check
-	 * @return int                 same edit access id if ok, or the default edit access id if given one is not valid
+	 * checks that the given edit access id is valid for this user
+	 * @param  int|null $edit_access_id edit access id to check
+	 * @return int|null                 same edit access id if ok
+	 *                                  or the default edit access id if given one is not valid
 	 */
-	public function loginCheckEditAccessId(int $edit_access_id)
+	public function loginCheckEditAccessId(?int $edit_access_id): ?int
 	{
-		if (!array_key_exists($edit_access_id, $_SESSION["UNIT"])) {
-			return $_SESSION["UNIT_DEFAULT"];
+		if (isset($_SESSION['UNIT']) &&
+			is_array($_SESSION['UNIT']) &&
+			!array_key_exists($edit_access_id, $_SESSION['UNIT'])
+		) {
+			return $_SESSION['UNIT_DEFAULT'];
 		} else {
 			return $edit_access_id;
 		}
 	}
 
 	/**
-	 * [loginSetEditAccessData description]
+	 * retunrn a set entry from the UNIT session for an edit access_id
+	 * if not found return false
 	 * @param  int        $edit_access_id edit access id
 	 * @param  string|int $data_key       key value to search for
 	 * @return bool|string                false for not found or string for found data
 	 */
 	public function loginSetEditAccessData(int $edit_access_id, $data_key)
 	{
-		if (!$_SESSION['UNIT'][$edit_access_id]['data'][$data_key]) {
+		if (!isset($_SESSION['UNIT'][$edit_access_id]['data'][$data_key])) {
 			return false;
 		} else {
 			return $_SESSION['UNIT'][$edit_access_id]['data'][$data_key];

@@ -224,6 +224,13 @@ if (round($timestamp, 4) == $basic->stringToTime($time_string)) {
 } else {
 	print "REVERSE TRIME STRING DO NOT MATCH<br>";
 }
+print "ZERO TIME STRING: ".$basic->timeStringFormat(0, true)."<br>";
+print "ZERO TIME STRING: ".$basic->timeStringFormat(0.0, true)."<br>";
+print "ZERO TIME STRING: ".$basic->timeStringFormat(1.005, true)."<br>";
+
+echo "HTML ENT INT: ".$basic->htmlent(5)."<br>";
+echo "HTML ENT STRING: ".$basic->htmlent('5<<>')."<br>";
+echo "HTML ENT NULL: ".$basic->htmlent(null)."<br>";
 
 // magic links test
 print $basic->magicLinks('user@bubu.at').'<br>';

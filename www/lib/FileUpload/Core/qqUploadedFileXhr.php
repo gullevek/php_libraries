@@ -35,8 +35,8 @@ class qqUploadedFileXhr
 	}
 	public function getSize()
 	{
-		if (isset($_SERVER["CONTENT_LENGTH"])) {
-			return (int)$_SERVER["CONTENT_LENGTH"];
+		if (isset($_SERVER['CONTENT_LENGTH'])) {
+			return (int)$_SERVER['CONTENT_LENGTH'];
 		} else {
 			throw new \Exception('Getting content length is not supported.');
 		}

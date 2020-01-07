@@ -110,7 +110,8 @@ class ProgressBar
 			$clear_buffer_size = $this->clear_buffer_size;
 		}
 		echo str_repeat(' ', $clear_buffer_size);
-		ob_flush();
+		// a small hack to avoid warnings about no buffer to flush
+		@ob_flush();
 		flush();
 	}
 
@@ -541,6 +542,7 @@ class ProgressBar
 		$html = '';
 		$js = '';
 		$html_button = '';
+		$html_percent = '';
 
 		$this->__setStep($this->step);
 		$this->position = $this->__calculatePosition($this->step);
@@ -636,7 +638,7 @@ class ProgressBar
 					case 'percent':
 						// only one inner percent
 						// print "STYLE[$name]: ".$style_lbl."<br>";
-						if (!isset($html_percent)) {
+						if (empty($html_percent)) {
 							$html_percent = '<div id="plbl'.$name.$this->code.'" style="'.$style_lbl.'width:'.$data['width'].'px;line-height:1;text-shadow: 0 0 .2em white, 0 0 .5em white;">'.$this->__calculatePercent($this->step).'%</div>'."\n";
 						}
 						break;

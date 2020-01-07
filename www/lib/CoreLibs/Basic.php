@@ -1563,6 +1563,31 @@ class Basic
 	}
 
 	/**
+	 * get lines in a file
+	 * @param  string $file file for line count read
+	 * @return int          number of lines or -1 for non readable file
+	 */
+	public static function getLinesFromFile(string $file): int
+	{
+		if (is_file($file) &&
+			file_exists($file) &&
+			is_readable($file)
+		) {
+			$f = fopen($file, 'rb');
+			$lines = 0;
+			while (!feof($f)) {
+				$lines += substr_count(fread($f, 8192), "\n");
+			}
+			fclose($f);
+		} else {
+			// if file does not exist or is not readable, return -1
+			$lines = -1;
+		}
+		// return lines in file
+		return $lines;
+	}
+
+	/**
 	 * wrapper function for mb mime convert, for correct conversion with long strings
 	 * @param  string $string   string to encode
 	 * @param  string $encoding target encoding
@@ -1793,26 +1818,33 @@ class Basic
 	{
 		// check if the timestamp has any h/m/s/ms inside, if yes skip
 		if (!preg_match("/(h|m|s|ms)/", (string)$timestamp)) {
-			$ms = 0;
-			list ($timestamp, $ms) = explode('.', (string)round($timestamp, 4));
+			list ($timestamp, $ms) = array_pad(explode('.', (string)round($timestamp, 4)), 2, null);
 			$timegroups = array(86400, 3600, 60, 1);
 			$labels = array('d', 'h', 'm', 's');
 			$time_string = '';
-			for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i ++) {
-				$output = floor((float)$timestamp / $timegroups[$i]);
-				$timestamp = (float)$timestamp % $timegroups[$i];
-				// output has days|hours|min|sec
-				if ($output || $time_string) {
-					$time_string .= $output.$labels[$i].(($i + 1) != count($timegroups) ? ' ' : '');
+			// if timestamp is zero, return zero string
+			if ($timestamp == 0) {
+				$time_string = '0s';
+			} else {
+				for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i ++) {
+					$output = floor((float)$timestamp / $timegroups[$i]);
+					$timestamp = (float)$timestamp % $timegroups[$i];
+					// output has days|hours|min|sec
+					if ($output || $time_string) {
+						$time_string .= $output.$labels[$i].(($i + 1) != count($timegroups) ? ' ' : '');
+					}
 				}
 			}
-			// if we have ms and it has leading zeros, remove them
-			$ms = preg_replace("/^0+/", '', $ms);
-			// add ms if there
-			if ($show_micro) {
-				$time_string .= ' '.(!$ms ? 0 : $ms).'ms';
-			} elseif (!$time_string) {
-				$time_string .= (!$ms ? 0 : $ms).'ms';
+			// only add ms if we have an ms value
+			if ($ms !== null) {
+				// if we have ms and it has leading zeros, remove them, but only if it is nut just 0
+				$ms = preg_replace("/^0+(\d+)$/", '${1}', $ms);
+				// add ms if there
+				if ($show_micro) {
+					$time_string .= ' '.(!$ms ? 0 : $ms).'ms';
+				} elseif (!$time_string) {
+					$time_string .= (!$ms ? 0 : $ms).'ms';
+				}
 			}
 		} else {
 			$time_string = $timestamp;
@@ -1881,7 +1913,7 @@ class Basic
 		if (!$datetime) {
 			return false;
 		}
-		list ($year, $month, $day, $hour, $min, $sec) = preg_split("/[\/\- :]/", $datetime);
+		list ($year, $month, $day, $hour, $min, $sec) = array_pad(preg_split("/[\/\- :]/", $datetime), 6, null);
 		if (!$year || !$month || !$day) {
 			return false;
 		}
@@ -2921,7 +2953,11 @@ class Basic
 			$HUE += 360;
 		}
 
-		return array(round($HUE), round((($MAX - $MIN) / $MAX) * 100), round($MAX * 100));
+		return array(
+			(int)round($HUE),
+			(int)round((($MAX - $MIN) / $MAX) * 100),
+			(int)round($MAX * 100)
+		);
 	}
 
 	/**
@@ -2992,7 +3028,11 @@ class Basic
 				$blue = 0;
 		}
 
-		return array(round($red * 255), round($green * 255), round($blue * 255));
+		return array(
+			(int)round($red * 255),
+			(int)round($green * 255),
+			(int)round($blue * 255)
+		);
 	}
 
 	/**
@@ -3039,7 +3079,11 @@ class Basic
 
 			// H, S, L
 			// S= L <= 0.5 ? C/2L : C/2 - 2L
-			return array(round($HUE), round((($MAX - $MIN) / (($L <= 0.5) ? ($MAX + $MIN) : (2 - $MAX - $MIN))) * 100), $L);
+			return array(
+				(int)round($HUE),
+				(int)round((($MAX - $MIN) / (($L <= 0.5) ? ($MAX + $MIN) : (2 - $MAX - $MIN))) * 100),
+				(int)$L
+			);
 		}
 	}
 
@@ -3077,7 +3121,11 @@ class Basic
 				return $m1;
 			};
 
-			return array(round(255 * $hue($h + (1 / 3))), round(255 * $hue($h)), round(255 * $hue($h - (1 / 3))));
+			return array(
+				(int)round(255 * $hue($h + (1 / 3))),
+				(int)round(255 * $hue($h)),
+				(int)round(255 * $hue($h - (1 / 3)))
+			);
 		}
 	}
 
@@ -3232,10 +3280,10 @@ class Basic
 
 	/**
 	 * full wrapper for html entities
-	 * @param  string $string string to html encode
-	 * @return mixed  if string, encoded, else as is
+	 * @param  mixed $string string to html encode
+	 * @return mixed         if string, encoded, else as is (eg null)
 	 */
-	public function htmlent(string $string)
+	public function htmlent($string)
 	{
 		if (is_string($string)) {
 			return htmlentities($string, ENT_COMPAT|ENT_HTML401, 'UTF-8', false);

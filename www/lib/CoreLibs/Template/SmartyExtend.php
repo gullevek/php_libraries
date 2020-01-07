@@ -46,6 +46,7 @@ class SmartyExtend extends SmartyBC
 	public $USE_TINY_MCE = false;
 	public $JS_DATEPICKR = false;
 	public $JS_FLATPICKR = false;
+	public $JS_FILE_UPLOADER = false;
 	public $DEBUG_TMPL = false;
 	public $USE_INCLUDE_TEMPLATE = false;
 	// cache & compile
@@ -383,6 +384,7 @@ class SmartyExtend extends SmartyBC
 		// include flags
 		$this->DATA['JS_DATEPICKR'] = $this->JS_DATEPICKR;
 		$this->DATA['JS_FLATPICKR'] = $this->JS_FLATPICKR;
+		$this->DATA['JS_FILE_UPLOADER'] = $this->JS_FILE_UPLOADER;
 		// user name
 		$this->DATA['USER_NAME'] = !empty($_SESSION['USER_NAME']) ? $_SESSION['USER_NAME'] : '';
 		// the template part to include into the body

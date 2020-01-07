@@ -958,6 +958,28 @@ class IO extends \CoreLibs\Basic
 	}
 
 	/**
+	 * get certain settings like username, db name
+	 * @param  string $name what setting to query
+	 * @return mixed        setting value, if not allowed name return false
+	 */
+	public function dbGetSetting(string $name)
+	{
+		$setting = '';
+		switch ($name) {
+			case 'name':
+				$setting = $this->db_name;
+				break;
+			case 'user':
+				$setting = $this->db_user;
+				break;
+			default:
+				$setting = false;
+				break;
+		}
+		return $setting;
+	}
+
+	/**
 	 * prints out status info from the connected DB (might be usefull for debug stuff)
 	 * @param  bool|boolean $show show db connection info, default true
 	 *                            if set to false won't write to error_msg var
@@ -1462,7 +1484,7 @@ class IO extends \CoreLibs\Basic
 					if (!$pk_name) {
 						// read the primary key from the table, if we do not have one, we get nothing in return
 						list($schema, $table) = $this->__dbReturnTable($query);
-						if (!$this->pk_name_table[$table]) {
+						if (empty($this->pk_name_table[$table])) {
 							$this->pk_name_table[$table] = $this->db_functions->__dbPrimaryKey($table, $schema);
 						}
 						$pk_name = $this->pk_name_table[$table];
