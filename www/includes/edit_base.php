@@ -282,7 +282,7 @@ if ($form->my_page_name == 'edit_order') {
 				''
 			).
 			// filename
-			$data['filename'].
+			(isset($data['filename']) ? $data['filename'] : '').
 			// query string
 			(isset($data['query_string']) && $data['query_string'] ?
 				$data['query_string'] :
@@ -294,7 +294,8 @@ if ($form->my_page_name == 'edit_order') {
 			$menu_data[$i]['splitfactor_in'] = 0;
 		}
 		// on matching, we also need to check if we are in the same folder
-		if ($data['filename'] == $form->getPageName() &&
+		if (isset($data['filename']) &&
+			$data['filename'] == $form->getPageName() &&
 			(!isset($data['hostname']) || (
 				isset($data['hostname']) &&
 					(!$data['hostname'] || strstr($data['hostname'], CONTENT_PATH) !== false)

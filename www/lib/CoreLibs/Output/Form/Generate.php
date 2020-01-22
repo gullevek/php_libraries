@@ -689,7 +689,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						$t_string .= $field_array['before_value'];
 					}
 					// must have res element set
-					if (isset($res[$field_array['name']])) {
+					if (isset($field_array['name']) &&
+						isset($res[$field_array['name']])
+					) {
 						if (isset($field_array['binary'])) {
 							if (isset($field_array['binary'][0])) {
 								$t_string .= $field_array['binary'][0];

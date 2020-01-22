@@ -86,9 +86,10 @@ function getScrollOffset()
 function setCenter(id, left, top)
 {
 	// get size of id
-	var dimensions = {};
-	dimensions.height = $('#' + id).height();
-	dimensions.width = $('#' + id).width();
+	var dimensions = {
+		height: $('#' + id).height(),
+		width: $('#' + id).width()
+	};
 	var type = $('#' + id).css('position');
 	var viewport = getWindowSize();
 	var offset = getScrollOffset();
@@ -474,11 +475,11 @@ function overlayBoxHide()
  */
 function setOverlayBox()
 {
-	var viewport = document.viewport.getDimensions();
-	$('#overlayBox').setStyle ({
+/*	var viewport = document.viewport.getDimensions();
+	$('#overlayBox').css ({
 		width: '100%',
 		height: '100%'
-	});
+	});*/
 	$('#overlayBox').show();
 }
 

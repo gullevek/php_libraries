@@ -256,6 +256,7 @@ class Backend extends \CoreLibs\DB\IO
 						$type = 'popup';
 					} else {
 						$type = 'normal';
+						/** @phan-suppress-next-line PhanTypeArraySuspicious */
 						$data['popup'] = 0;
 					}
 					$query_string = '';

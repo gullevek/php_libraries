@@ -687,6 +687,63 @@ class Basic
 	}
 
 	/**
+	 * checks if we have a need to work on certain debug output
+	 * Needs debug/echo/print ad target for which of the debug flag groups we check
+	 * also needs level string to check in the per level output flag check.
+	 * In case we have invalid target it will return false
+	 * @param  string $target target group to check debug/echo/print
+	 * @param  string $level  level to check in detailed level flag
+	 * @return bool           true on access allowed or false on no access
+	 */
+	private function doDebugTrigger(string $target, string $level): bool
+	{
+		$access = false;
+		// check if we do debug, echo or print
+		switch ($target) {
+			case 'debug':
+				if ((
+						(isset($this->debug_output[$level]) && $this->debug_output[$level]) ||
+						$this->debug_output_all
+					) &&
+					(!isset($this->debug_output_not[$level]) ||
+						(isset($this->debug_output_not[$level]) && !$this->debug_output_not[$level])
+					)
+				) {
+					$access = true;
+				}
+				break;
+			case 'echo':
+				if ((
+						(isset($this->echo_output[$level]) && $this->echo_output[$level]) ||
+						$this->echo_output_all
+					) &&
+					(!isset($this->echo_output_not[$level]) ||
+						(isset($this->echo_output_not[$level]) && !$this->echo_output_not[$level])
+					)
+				) {
+					$access = true;
+				}
+				break;
+			case 'print':
+				if ((
+						(isset($this->print_output[$level]) && $this->print_output[$level]) ||
+						$this->print_output_all
+					) &&
+					(!isset($this->print_output_not[$level]) ||
+						(isset($this->print_output_not[$level]) && !$this->print_output_not[$level])
+					)
+				) {
+					$access = true;
+				}
+				break;
+			default:
+				// fall through with access false
+				break;
+		}
+		return $access;
+	}
+
+	/**
 	 * write debug data to error_msg array
 	 * @param  string       $level  id for error message, groups messages together
 	 * @param  string       $string the actual error message
@@ -697,7 +754,7 @@ class Basic
 	 */
 	public function debug(string $level, string $string, bool $strip = false): void
 	{
-		if (($this->debug_output[$level] || $this->debug_output_all) && !$this->debug_output_not[$level]) {
+		if ($this->doDebugTrigger('debug', $level)) {
 			if (!isset($this->error_msg[$level])) {
 				$this->error_msg[$level] = '';
 			}
@@ -721,7 +778,7 @@ class Basic
 			// write to file if set
 			$this->writeErrorMsg($level, $error_string_print);
 			// write to error level
-			if (($this->echo_output[$level] || $this->echo_output_all) && !$this->echo_output_not[$level]) {
+			if ($this->doDebugTrigger('echo', $level)) {
 				$this->error_msg[$level] .= $error_string;
 			}
 		}
@@ -782,8 +839,8 @@ class Basic
 			}
 			$script_end = microtime(true) - $this->script_starttime;
 			foreach ($this->error_msg as $level => $temp_debug_output) {
-				if (($this->debug_output[$level] || $this->debug_output_all) && !$this->debug_output_not[$level]) {
-					if (($this->echo_output[$level] || $this->echo_output_all) && !$this->echo_output_not[$level]) {
+				if ($this->doDebugTrigger('debug', $level)) {
+					if ($this->doDebugTrigger('echo', $level)) {
 						$string_output .= '<div style="font-size: 12px;">[<span style="font-style: italic; color: #c56c00;">'.$level.'</span>] '.(($string) ? "<b>**** ".$this->htmlent($string)." ****</b>\n" : "").'</div>';
 						$string_output .= $temp_debug_output;
 					} // echo it out
@@ -809,9 +866,9 @@ class Basic
 	 */
 	private function writeErrorMsg(string $level, string $error_string): void
 	{
-		if (($this->debug_output[$level] || $this->debug_output_all) && !$this->debug_output_not[$level]) {
+		if ($this->doDebugTrigger('debug', $level)) {
 			// only write if write is requested
-			if (($this->print_output[$level] || $this->print_output_all) && !$this->print_output_not[$level]) {
+			if ($this->doDebugTrigger('print', $level)) {
 				// replace all html tags
 				// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "##\\2##", $error_string);
 				// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "", $error_string);
@@ -2646,6 +2703,35 @@ class Basic
 			mt_rand(0, 0xffff),
 			mt_rand(0, 0xffff)
 		);
+	}
+
+	/**
+	 * TODO: make this a proper uniq ID creation
+	 *       add uuidv4 subcall to the uuid function too
+	 * creates a uniq id
+	 * @param  string $type uniq id type, currently md5 or sha256 allowed
+	 *                      if not set will use DEFAULT_HASH if set
+	 * @return string       uniq id
+	 */
+	public function uniqId(string $type = ''): string
+	{
+		$uniq_id = '';
+		switch ($type) {
+			case 'md5':
+				$uniq_id = md5(uniqid((string)rand(), true));
+				break;
+			case 'sha256':
+				$uniq_id = hash('sha256', uniqid((string)rand(), true));
+				break;
+			default:
+				$hash = 'sha256';
+				if (is_defined(DEFAULT_HASH)) {
+					$hash = DEFAULT_HASH;
+				}
+				$uniq_id = hash($hash, uniqid((string)rand(), true));
+				break;
+		}
+		return $uniq_id;
 	}
 
 	// [!!! DEPRECATED !!!]

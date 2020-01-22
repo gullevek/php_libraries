@@ -2,7 +2,7 @@
 
 namespace FileUpload;
 
-use \FileUpload\Core;
+// use \FileUpload\Core;
 
 class qqFileUploader
 {
