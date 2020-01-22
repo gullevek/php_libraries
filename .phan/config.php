@@ -56,6 +56,7 @@ return [
 		"./www/configs/config.db.php",
 		"./www/configs/config.host.php",
 		"./www/configs/config.path.php",
+		"./www/configs/config.other.php",
 		"./www/configs/config.master.php",
 		"./www/includes/admin_header.php",
 	],

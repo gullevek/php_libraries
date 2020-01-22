@@ -23,7 +23,7 @@ if ($smarty->USE_PROTOTYPE) {
 	$smarty->ADMIN_JAVASCRIPT = 'edit.jq.js';
 	$smarty->JS_SPECIAL_TEMPLATE_NAME = 'jquery.test.js';
 }
-$smarty->PAGE_WIDTH = "100%";
+$smarty->PAGE_WIDTH = '100%';
 // require BASE.INCLUDES.'admin_set_paths.php';
 $smarty->setSmartyPaths();
 

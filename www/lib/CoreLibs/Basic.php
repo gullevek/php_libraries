@@ -2725,7 +2725,7 @@ class Basic
 				break;
 			default:
 				$hash = 'sha256';
-				if (is_defined(DEFAULT_HASH)) {
+				if (defined(DEFAULT_HASH)) {
 					$hash = DEFAULT_HASH;
 				}
 				$uniq_id = hash($hash, uniqid((string)rand(), true));
