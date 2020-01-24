@@ -14,8 +14,6 @@ if ($DEBUG_ALL && $ENABLE_ERROR_HANDLING) {
 }
 // predefine vars
 $messages = array();
-// import all POST vars
-// extract($_POST, EXTR_SKIP);
 //------------------------------ variable init end
 
 //------------------------------ library include start

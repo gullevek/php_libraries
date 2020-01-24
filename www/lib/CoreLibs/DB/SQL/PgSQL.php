@@ -260,7 +260,7 @@ class PgSQL
 				// set pk_name to "id"
 				$pk_name = $table."_id";
 			}
-			$seq = (($schema) ? $schema.'.' : '').$table."_".$pk_name."_seq";
+			$seq = ($schema ? $schema.'.' : '').$table."_".$pk_name."_seq";
 			$q = "SELECT CURRVAL('$seq') AS insert_id";
 			// I have to do manually or I overwrite the original insert internal vars ...
 			if ($q = $this->__dbQuery($q)) {

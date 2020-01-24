@@ -179,16 +179,16 @@ class Login extends \CoreLibs\DB\IO
 		// get login vars, are so, can't be changed
 		// prepare
 		// pass on vars to Object vars
-		$this->login = isset($_POST['login_login']) ? $_POST['login_login'] : '';
-		$this->username = isset($_POST['login_username']) ? $_POST['login_username'] : '';
-		$this->password = isset($_POST['login_password']) ? $_POST['login_password'] : '';
-		$this->logout = isset($_POST['login_logout']) ? $_POST['login_logout'] : '';
+		$this->login = $_POST['login_login'] ?? '';
+		$this->username = $_POST['login_username'] ?? '';
+		$this->password = $_POST['login_password'] ?? '';
+		$this->logout = $_POST['login_logout'] ?? '';
 		// password change vars
-		$this->change_password = isset($_POST['change_password']) ? $_POST['change_password'] : '';
-		$this->pw_username = isset($_POST['pw_username']) ? $_POST['pw_username'] : '';
-		$this->pw_old_password = isset($_POST['pw_old_password']) ? $_POST['pw_old_password'] : '';
-		$this->pw_new_password = isset($_POST['pw_new_password']) ? $_POST['pw_new_password'] : '';
-		$this->pw_new_password_confirm = isset($_POST['pw_new_password_confirm']) ? $_POST['pw_new_password_confirm'] : '';
+		$this->change_password = $_POST['change_password'] ?? '';
+		$this->pw_username = $_POST['pw_username'] ?? '';
+		$this->pw_old_password = $_POST['pw_old_password'] ?? '';
+		$this->pw_new_password = $_POST['pw_new_password'] ?? '';
+		$this->pw_new_password_confirm = $_POST['pw_new_password_confirm'] ?? '';
 		// logout target (from config)
 		$this->logout_target = LOGOUT_TARGET;
 		// disallow user list for password change
@@ -418,8 +418,8 @@ class Login extends \CoreLibs\DB\IO
 							$_SESSION['GROUP_ACL_LEVEL'] = $res['group_level'];
 							$_SESSION['GROUP_ACL_TYPE'] = $res['group_type'];
 							// deprecated TEMPLATE setting
-							$_SESSION['TEMPLATE'] = ($res['template']) ? $res['template'] : '';
-							$_SESSION['HEADER_COLOR'] = ($res['second_header_color']) ? $res['second_header_color'] : $res['first_header_color'];
+							$_SESSION['TEMPLATE'] = $res['template'] ? $res['template'] : '';
+							$_SESSION['HEADER_COLOR'] = $res['second_header_color'] ? $res['second_header_color'] : $res['first_header_color'];
 							$_SESSION['LANG'] = $res['lang_short'];
 							$_SESSION['DEFAULT_CHARSET'] = $res['lang_iso'];
 							$_SESSION['DEFAULT_LANG'] = $res['lang_short'].'_'.strtolower(str_replace('-', '', $res['lang_iso']));
@@ -1194,7 +1194,7 @@ EOM;
 		$q .= "(username, password, euid, event_date, event, error, data, data_binary, page, ";
 		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
-		$q .= "VALUES ('".$this->dbEscapeString($username)."', 'PASSWORD', ".(($this->euid) ? $this->euid : 'NULL').", ";
+		$q .= "VALUES ('".$this->dbEscapeString($username)."', 'PASSWORD', ".($this->euid ? $this->euid : 'NULL').", ";
 		$q .= "NOW(), '".$this->dbEscapeString($event)."', '".$this->dbEscapeString((string)$error)."', '".$this->dbEscapeString($data)."', '".$data_binary."', '".$this->page_name."', ";
 		foreach (array(
 			'REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME', 'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT', 'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING'
@@ -1228,7 +1228,7 @@ EOM;
 			is_array($_SESSION['UNIT']) &&
 			!array_key_exists($edit_access_id, $_SESSION['UNIT'])
 		) {
-			return $_SESSION['UNIT_DEFAULT'];
+			return (int)$_SESSION['UNIT_DEFAULT'];
 		} else {
 			return $edit_access_id;
 		}

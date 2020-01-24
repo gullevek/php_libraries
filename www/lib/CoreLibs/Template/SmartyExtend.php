@@ -345,7 +345,7 @@ class SmartyExtend extends SmartyBC
 		// special for admin
 		if ($admin_call === true) {
 			// set ACL extra show
-			$this->DATA['show_ea_extra'] = isset($cms->acl['show_ea_extra']) ? $cms->acl['show_ea_extra'] : false;
+			$this->DATA['show_ea_extra'] = $cms->acl['show_ea_extra'] ?? false;
 			$this->DATA['ADMIN'] = !empty($cms->acl['admin']) ? $cms->acl['admin'] : 0;
 			// set style sheets
 			$this->HEADER['STYLESHEET'] = $this->ADMIN_STYLESHEET ? $this->ADMIN_STYLESHEET : ADMIN_STYLESHEET;
@@ -354,10 +354,10 @@ class SmartyExtend extends SmartyBC
 			$this->DATA['nav_menu'] = $cms->adbTopMenu();
 			$this->DATA['nav_menu_count'] = is_array($this->DATA['nav_menu']) ? count($this->DATA['nav_menu']) : 0;
 			// messages = array('msg' =>, 'class' => 'error/warning/...')
-			$this->DATA['messages'] = isset($cms->messages) ? $cms->messages : $cms->messages;
+			$this->DATA['messages'] = $cms->messages ?? array();
 			// the page name
 			$this->DATA['page_name'] = $this->page_name;
-			$this->DATA['table_width'] = isset($this->PAGE_WIDTH) ? $this->PAGE_WIDTH : PAGE_WIDTH;
+			$this->DATA['table_width'] = $this->PAGE_WIDTH ?? PAGE_WIDTH;
 			// for tinymce special
 			$this->DATA['TINYMCE_LANG'] = $this->lang_short;
 			// include flags
@@ -390,7 +390,7 @@ class SmartyExtend extends SmartyBC
 		// the template part to include into the body
 		$this->DATA['TEMPLATE_NAME'] = $this->TEMPLATE_NAME;
 		$this->DATA['CONTENT_INCLUDE'] = $this->CONTENT_INCLUDE;
-		$this->DATA['TEMPLATE_TRANSLATE'] = isset($this->TEMPLATE_TRANSLATE) ? $this->TEMPLATE_TRANSLATE : null;
+		$this->DATA['TEMPLATE_TRANSLATE'] = $this->TEMPLATE_TRANSLATE ?? null;
 		$this->DATA['PAGE_FILE_NAME'] = str_replace('.php', '', $this->page_name).'.tpl';
 		// render page
 		$this->renderSmarty();

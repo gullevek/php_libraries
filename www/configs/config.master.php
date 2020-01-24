@@ -88,7 +88,7 @@ define('DEFAULT_ACL_LEVEL', 80);
 // 3: if default template is not found, show error template, do not fall back to default tree
 // 4: very strict, even on normal fixable errors through error
 // define('ERROR_STRICT', 3);
-// allow page caching in general, set to 'FALSE' if you do debugging or development!
+// allow page caching in general, set to 'false' if you do debugging or development!
 // define('ALLOW_SMARTY_CACHE', false);
 // cache life time, in second', default here is 2 days (172800s)
 // -1 is never expire cache

@@ -78,6 +78,9 @@ class ProgressBar
 		)
 	*/
 
+	// output strings
+	public $prefix_message = '';
+
 	/**
 	 * progress bar constructor
 	 * @param integer $width  progress bar width, default 0

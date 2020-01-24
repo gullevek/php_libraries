@@ -82,7 +82,7 @@ class Backend extends \CoreLibs\DB\IO
 
 		// set the action ids
 		foreach ($this->action_list as $_action) {
-			$this->$_action = (isset($_POST[$_action])) ? $_POST[$_action] : '';
+			$this->$_action = $_POST[$_action] ?? '';
 		}
 
 		$this->default_acl = DEFAULT_ACL_LEVEL;
@@ -189,14 +189,14 @@ class Backend extends \CoreLibs\DB\IO
 		$q .= "NOW(), ";
 		$q .= "'".$this->dbEscapeString((string)$event)."', '".$data."', '".$data_binary."', '".$this->dbEscapeString((string)$this->page_name)."', ";
 		$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->dbEscapeString(@$_SERVER['HTTP_USER_AGENT'])."', ";
-		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '')."', ";
-		$q .= "'".$this->dbEscapeString(isset($_SERVER['SCRIPT_FILENAME']) ? $_SERVER['SCRIPT_FILENAME'] : '')."', ";
-		$q .= "'".$this->dbEscapeString(isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '')."', ";
-		$q .= "'".$this->dbEscapeString(isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '')."', ";
-		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '')."', ";
-		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : '')."', ";
-		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_ACCEPT_CHARSET']) ? $_SERVER['HTTP_ACCEPT_CHARSET'] : '')."', ";
-		$q .= "'".$this->dbEscapeString(isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? $_SERVER['HTTP_ACCEPT_ENCODING'] : '')."', ";
+		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_REFERER'] ?? '')."', ";
+		$q .= "'".$this->dbEscapeString($_SERVER['SCRIPT_FILENAME'] ?? '')."', ";
+		$q .= "'".$this->dbEscapeString($_SERVER['QUERY_STRING'] ?? '')."', ";
+		$q .= "'".$this->dbEscapeString($_SERVER['SERVER_NAME'] ?? '')."', ";
+		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_HOST'] ?? '')."', ";
+		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_ACCEPT'] ?? '')."', ";
+		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_ACCEPT_CHARSET'] ?? '')."', ";
+		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '')."', ";
 		$q .= "'".session_id()."', ";
 		$q .= "'".$this->dbEscapeString($this->action)."', ";
 		$q .= "'".$this->dbEscapeString($this->action_id)."', ";
@@ -221,7 +221,7 @@ class Backend extends \CoreLibs\DB\IO
 		}
 
 		// get the session pages array
-		$PAGES = isset($_SESSION['PAGES']) ? $_SESSION['PAGES'] : null;
+		$PAGES = $_SESSION['PAGES'] ?? null;
 		if (!isset($PAGES) || !is_array($PAGES)) {
 			$PAGES = array();
 		}
@@ -292,11 +292,11 @@ class Backend extends \CoreLibs\DB\IO
 					if (isset($data['hostname']) && $data['hostname']) {
 						$url .= $data['hostname'];
 					}
-					$url .= isset($data['filename']) ? $data['filename'] : '';
+					$url .= $data['filename'] ?? '';
 					if (strlen($query_string)) {
 						$url .= '?'.$query_string;
 					}
-					$name = isset($data['page_name']) ? $data['page_name'] : '';
+					$name = $data['page_name'] ?? '';
 					// if page name matchs -> set selected flag
 					$selected = 0;
 					if (isset($data['filename']) &&

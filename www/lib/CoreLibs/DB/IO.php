@@ -994,7 +994,7 @@ class IO extends \CoreLibs\Basic
 		$string .= 'at host <b>\''.$this->db_host.'\'</b> ';
 		$string .= 'on port <b>\''.$this->db_port.'\'</b> ';
 		$string .= 'with ssl mode <b>\''.$this->db_ssl.'\'</b><br>';
-		$string .= '<b>-DB-info-></b> DB IO Class debug output: <b>'.(($this->db_debug) ? 'Yes' : 'No').'</b>';
+		$string .= '<b>-DB-info-></b> DB IO Class debug output: <b>'.($this->db_debug ? 'Yes' : 'No').'</b>';
 		if ($show === true) {
 			$this->__dbDebug('db', $string, 'dbInfo');
 		} else {
@@ -1407,7 +1407,7 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$md5 = md5($query);
-		return $this->cursor_ext[$md5]['pos'];
+		return (int)$this->cursor_ext[$md5]['pos'];
 	}
 
 	/**
@@ -1423,7 +1423,7 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$md5 = md5($query);
-		return $this->cursor_ext[$md5]['num_rows'];
+		return (int)$this->cursor_ext[$md5]['num_rows'];
 	}
 
 	/**
@@ -1868,7 +1868,7 @@ class IO extends \CoreLibs\Basic
 					}
 					// write data into sql string
 					if (strstr($table_data[$field]['type'], 'int')) {
-						$q_sub_data .= (is_numeric($_data)) ? $_data : 'NULL';
+						$q_sub_data .= is_numeric($_data) ? $_data : 'NULL';
 					} else {
 						// if bool -> set bool, else write data
 						$q_sub_data .= isset($_data) ? "'".($is_bool ? $this->dbBoolean($_data, true) : $this->dbEscapeString($_data))."'" : 'NULL';
@@ -1898,7 +1898,7 @@ class IO extends \CoreLibs\Basic
 			$primary_key['value'] = $this->insert_id;
 		}
 		// if there is not priamry key value field return false
-		return isset($primary_key['value']) ? $primary_key['value'] : false;
+		return $primary_key['value'] ?? false;
 	}
 
 	/**
@@ -1951,19 +1951,19 @@ class IO extends \CoreLibs\Basic
 	{
 		switch ($kbn) {
 			case 'i':
-				$value = ($value === '') ? "NULL" : intval($value);
+				$value = $value === '' ? "NULL" : intval($value);
 				break;
 			case 'f':
-				$value = ($value === '') ? "NULL" : floatval($value);
+				$value = $value === '' ? "NULL" : floatval($value);
 				break;
 			case 't':
-				$value = ($value === '') ? "NULL" : "'".$this->dbEscapeString($value)."'";
+				$value = $value === '' ? "NULL" : "'".$this->dbEscapeString($value)."'";
 				break;
 			case 'd':
-				$value = ($value === '') ? "NULL" : "'".$this->dbEscapeString($value)."'";
+				$value = $value === '' ? "NULL" : "'".$this->dbEscapeString($value)."'";
 				break;
 			case 'i2':
-				$value = ($value === '') ? 0 : intval($value);
+				$value = $value === '' ? 0 : intval($value);
 				break;
 		}
 		return $value;

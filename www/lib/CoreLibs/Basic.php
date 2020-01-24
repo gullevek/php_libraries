@@ -841,7 +841,7 @@ class Basic
 			foreach ($this->error_msg as $level => $temp_debug_output) {
 				if ($this->doDebugTrigger('debug', $level)) {
 					if ($this->doDebugTrigger('echo', $level)) {
-						$string_output .= '<div style="font-size: 12px;">[<span style="font-style: italic; color: #c56c00;">'.$level.'</span>] '.(($string) ? "<b>**** ".$this->htmlent($string)." ****</b>\n" : "").'</div>';
+						$string_output .= '<div style="font-size: 12px;">[<span style="font-style: italic; color: #c56c00;">'.$level.'</span>] '.($string ? "<b>**** ".$this->htmlent($string)." ****</b>\n" : "").'</div>';
 						$string_output .= $temp_debug_output;
 					} // echo it out
 				} // do printout
@@ -1087,11 +1087,11 @@ class Basic
 	{
 		if (is_array($haystack)) {
 			if (in_array((string)$needle, $haystack)) {
-				return (($type) ? "checked" : "selected");
+				return $type ? 'checked' : 'selected';
 			}
 		} else {
 			if ($haystack == $needle) {
-				return (($type) ? "checked" : "selected");
+				return $type ? 'checked' : 'selected';
 			}
 		}
 		return null;
@@ -1192,7 +1192,7 @@ class Basic
 		}
 		// if it is a link already just return the original link do not touch anything
 		if (!$href && !$atag) {
-			return "##LT##a href=##QUOT##".$_1.$_2.$_3."##QUOT##".(($class) ? ' class=##QUOT##'.$class.'##QUOT##' : '').(($target) ? " target=##QUOT##".$target."##QUOT##" : '')."##GT##".(($name) ? $name : $_2.$_3)."##LT##/a##GT##";
+			return "##LT##a href=##QUOT##".$_1.$_2.$_3."##QUOT##".($class ? ' class=##QUOT##'.$class.'##QUOT##' : '').($target ? " target=##QUOT##".$target."##QUOT##" : '')."##GT##".($name ? $name : $_2.$_3)."##LT##/a##GT##";
 		} elseif ($href && !$atag) {
 			return "href=##QUOT##$_1$_2$_3##QUOT##";
 		} elseif ($atag) {
@@ -1217,7 +1217,7 @@ class Basic
 	{
 		$email = $_1."@".$_2.".".$_3;
 		if (!$mailto && !$atag) {
-			return "##LT##a href=##QUOT##mailto:".$email."##QUOT##".(($class) ? ' class=##QUOT##'.$class.'##QUOT##' : '')."##GT##".(($title) ? $title : $email)."##LT##/a##GT##";
+			return "##LT##a href=##QUOT##mailto:".$email."##QUOT##".($class ? ' class=##QUOT##'.$class.'##QUOT##' : '')."##GT##".($title ? $title : $email)."##LT##/a##GT##";
 		} elseif ($mailto && !$atag) {
 			return "mailto:".$email;
 		} elseif ($atag) {
@@ -1273,7 +1273,7 @@ class Basic
 	public static function getFilenameEnding(string $filename): string
 	{
 		$page_temp = pathinfo($filename);
-		return isset($page_temp['extension']) ? $page_temp['extension'] : '';
+		return $page_temp['extension'] ?? '';
 	}
 
 	/**
@@ -1313,7 +1313,12 @@ class Basic
 					$path[] = $key;
 					break;
 				} elseif (is_array($val) &&
-					$path = Basic::arraySearchRecursive($needle, $val, $key_lookin)
+					$path = Basic::arraySearchRecursive(
+						$needle,
+						(array)$val,
+						// to avoid PhanTypeMismatchArgumentNullable
+						($key_lookin === null ? $key_lookin : (string)$key_lookin)
+					)
 				) {
 					array_unshift($path, $key);
 					break;
@@ -1328,10 +1333,10 @@ class Basic
 	 * @param  string|int $needle   needle (search for)
 	 * @param  array      $haystack haystack (search in)
 	 * @param  string|int $key      the key to look for in
-	 * @param  array      $path     recursive call for previous path
+	 * @param  array|null $path     recursive call for previous path
 	 * @return ?array               all array elements paths where the element was found
 	 */
-	public static function arraySearchRecursiveAll($needle, array $haystack, $key, $path = null): ?array
+	public static function arraySearchRecursiveAll($needle, array $haystack, $key, ?array $path = null): ?array
 	{
 		// init if not set on null
 		if ($path === null) {
@@ -1780,7 +1785,7 @@ class Basic
 				$exp ++;
 			}
 			// label name, including leading space if flagged
-			$pre = ($space ? ' ' : '').(isset($labels[$exp]) ? $labels[$exp] : '>E').($si ? 'i' : '').'B';
+			$pre = ($space ? ' ' : '').($labels[$exp] ?? '>E').($si ? 'i' : '').'B';
 			$bytes_calc = $abs_bytes / pow($unit, $exp);
 			if ($adjust) {
 				return sprintf("%.2f%sB", $bytes_calc, $pre);
@@ -2995,7 +3000,7 @@ class Basic
 			// convert to HEX value
 			$$color = dechex($$color);
 			// prefix with 0 if only one char
-			$$color = ((strlen($$color) < 2) ? '0' : '').$$color;
+			$$color = (strlen($$color) < 2 ? '0' : '').$$color;
 		}
 		// prefix hex parts with 0 if they are just one char long and return the html color string
 		return '#'.$red.$green.$blue;
@@ -3167,7 +3172,7 @@ class Basic
 			// S= L <= 0.5 ? C/2L : C/2 - 2L
 			return array(
 				(int)round($HUE),
-				(int)round((($MAX - $MIN) / (($L <= 0.5) ? ($MAX + $MIN) : (2 - $MAX - $MIN))) * 100),
+				(int)round((($MAX - $MIN) / ($L <= 0.5 ? ($MAX + $MIN) : (2 - $MAX - $MIN))) * 100),
 				(int)$L
 			);
 		}
@@ -3187,11 +3192,11 @@ class Basic
 		if ($s == 0) {
 			return array($l * 255, $l * 255, $l * 255);
 		} else {
-			$m2 = ($l < 0.5) ? $l * ($s + 1) : ($l + $s) - ($l * $s);
+			$m2 = $l < 0.5 ? $l * ($s + 1) : ($l + $s) - ($l * $s);
 			$m1 = $l * 2 - $m2;
 			$hue = function ($base) use ($m1, $m2) {
 				// base = hue, hue > 360 (1) - 360 (1), else < 0 + 360 (1)
-				$base = ($base < 0) ? $base + 1 : (($base > 1) ? $base - 1 : $base);
+				$base = $base < 0 ? $base + 1 : ($base > 1 ? $base - 1 : $base);
 				// 6: 60, 2: 180, 3: 240
 				// 2/3 = 240
 				// 1/3 = 120 (all from 360)
@@ -3295,13 +3300,13 @@ class Basic
 		$max_year = (int)date("Y", $timestamp) + 1;
 
 		// preset year, month, ...
-		$year = (!$year) ? date("Y", $timestamp) : $year;
-		$month = (!$month) ? date("m", $timestamp) : $month;
-		$day = (!$day) ? date("d", $timestamp) : $day;
-		$hour = (!$hour) ? date("H", $timestamp) : $hour;
-		$min = (!$min) ? date("i", $timestamp) : $min; // add to five min?
+		$year = !$year ? date('Y', $timestamp) : $year;
+		$month = !$month ? date('m', $timestamp) : $month;
+		$day = !$day ? date('d', $timestamp) : $day;
+		$hour = !$hour ? date('H', $timestamp) : $hour;
+		$min = !$min ? date('i', $timestamp) : $min; // add to five min?
 		// max days in selected month
-		$days_in_month = date("t", strtotime($year."-".$month."-".$day." ".$hour.":".$min.":0"));
+		$days_in_month = date('t', strtotime($year.'-'.$month.'-'.$day.' '.$hour.':'.$min.':0'));
 		$string = '';
 		// from now to ?
 		if ($name_pos_back === false) {
@@ -3309,7 +3314,7 @@ class Basic
 		}
 		$string .= '<select id="year'.$suffix.'" name="year'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = date("Y"); $i <= $max_year; $i ++) {
-			$string .= '<option value="'.$i.'" '.(($year == $i) ? 'selected' : '').'>'.$i.'</option>';
+			$string .= '<option value="'.$i.'" '.($year == $i ? 'selected' : '').'>'.$i.'</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {
@@ -3320,7 +3325,7 @@ class Basic
 		}
 		$string .= '<select id="month'.$suffix.'" name="month'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = 1; $i <= 12; $i ++) {
-			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($month == $i) ? 'selected' : '').'>'.$i.'</option>';
+			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($month == $i ? 'selected' : '').'>'.$i.'</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {
@@ -3332,7 +3337,7 @@ class Basic
 		$string .= '<select id="day'.$suffix.'" name="day'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = 1; $i <= $days_in_month; $i ++) {
 			// set weekday text based on current month ($month) and year ($year)
-			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($day == $i) ? 'selected' : '').'>'.$i.' ('.date('D', mktime(0, 0, 0, $month, $i, $year)).')</option>';
+			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($day == $i ? 'selected' : '').'>'.$i.' ('.date('D', mktime(0, 0, 0, $month, $i, $year)).')</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {
@@ -3343,7 +3348,7 @@ class Basic
 		}
 		$string .= '<select id="hour'.$suffix.'" name="hour'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = 0; $i <= 23; $i += $min_steps) {
-			$string .= '<option value="'.(($i < 10) ? '0'.$i : $i).'" '.(($hour == $i) ? 'selected' : '').'>'.$i.'</option>';
+			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($hour == $i ? 'selected' : '').'>'.$i.'</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {
@@ -3354,7 +3359,7 @@ class Basic
 		}
 		$string .= '<select id="min'.$suffix.'" name="min'.$suffix.'" onChange="'.$on_change_call.'">';
 		for ($i = 0; $i <= 59; $i ++) {
-			$string .= '<option value="'.(( $i < 10) ? '0'.$i : $i).'" '.(($min == $i) ? 'selected' : '').'>'.$i.'</option>';
+			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($min == $i ? 'selected' : '').'>'.$i.'</option>';
 		}
 		$string .= '</select>';
 		if ($name_pos_back === true) {

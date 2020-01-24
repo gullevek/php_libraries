@@ -85,12 +85,12 @@ $table_width = '100%';
 // define all needed smarty stuff for the general HTML/page building
 $HEADER['CSS'] = CSS;
 $HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
-$HEADER['STYLESHEET'] = isset($ADMIN_STYLESHEET) ? $ADMIN_STYLESHEET : ADMIN_STYLESHEET;
+$HEADER['STYLESHEET'] = $ADMIN_STYLESHEET ?? ADMIN_STYLESHEET;
 
 if ($form->my_page_name == 'edit_order') {
 	// get is for "table_name" and "where" only
-	$table_name = isset($_GET['table_name']) ? $_GET['table_name'] : '';
-	// $where = isset($_GET['where']) ? $_GET['where'] : '';
+	$table_name = $_GET['table_name'] ?? '';
+	// $where = $_GET['where'] ?? '';
 	// order name is _always_ order_number for the edit interface
 
 	// follwing arrays do exist here:
@@ -208,7 +208,7 @@ if ($form->my_page_name == 'edit_order') {
 
 	// hidden names for the table & where string
 	$DATA['table_name'] = $table_name;
-	$DATA['where_string'] = isset($where_string) ? $where_string : '';
+	$DATA['where_string'] = $where_string ?? '';
 
 	$EDIT_TEMPLATE = 'edit_order.tpl';
 } else {
@@ -282,7 +282,7 @@ if ($form->my_page_name == 'edit_order') {
 				''
 			).
 			// filename
-			(isset($data['filename']) ? $data['filename'] : '').
+			($data['filename'] ?? '').
 			// query string
 			(isset($data['query_string']) && $data['query_string'] ?
 				$data['query_string'] :
@@ -477,7 +477,7 @@ if ($form->my_page_name == 'edit_order') {
 }
 
 // debug data, if DEBUG flag is on, this data is print out
-$DEBUG_DATA['DEBUG'] = isset($DEBUG_TMPL) ? $DEBUG_TMPL : '';
+$DEBUG_DATA['DEBUG'] = $DEBUG_TMPL ?? '';
 
 // create main data array
 $CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);

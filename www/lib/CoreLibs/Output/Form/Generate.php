@@ -316,16 +316,16 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->table_width = $table_width;
 
 		// set button vars
-		$this->archive = isset($_POST['archive']) ? $_POST['archive'] : '';
-		$this->new = isset($_POST['new']) ? $_POST['new'] : '';
-		$this->really_new = isset($_POST['really_new']) ? $_POST['really_new'] : '';
-		$this->delete = isset($_POST['delete']) ? $_POST['delete'] : '';
-		$this->really_delete = isset($_POST['really_delete']) ? $_POST['really_delete'] : '';
-		$this->save = isset($_POST['save']) ? $_POST['save'] : '';
-		$this->remove_button = isset($_POST['remove_button']) ? $_POST['remove_button'] : '';
+		$this->archive = $_POST['archive'] ?? '';
+		$this->new = $_POST['new'] ?? '';
+		$this->really_new = $_POST['really_new'] ?? '';
+		$this->delete = $_POST['delete'] ?? '';
+		$this->really_delete = $_POST['really_delete'] ?? '';
+		$this->save = $_POST['save'] ?? '';
+		$this->remove_button = $_POST['remove_button'] ?? '';
 
 		// security settings
-		$this->base_acl_level = isset($_SESSION['BASE_ACL_LEVEL']) ? $_SESSION['BASE_ACL_LEVEL'] : 0;
+		$this->base_acl_level = $_SESSION['BASE_ACL_LEVEL'] ?? 0;
 		// security levels for buttons/actions
 		// if array does not exists create basic
 		if (!isset($config_array['security_level']) ||
@@ -852,16 +852,16 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// normal text element
 		if ($this->table_array[$element_name]['type'] == 'text') {
 			$data['name'] = $element_name;
-			$data['value'] = isset($this->table_array[$element_name]['value']) ? $this->table_array[$element_name]['value'] : '';
-			$data['size'] = isset($this->table_array[$element_name]['size']) ? $this->table_array[$element_name]['size'] : '';
-			$data['length'] = isset($this->table_array[$element_name]['length']) ? $this->table_array[$element_name]['length'] : '';
+			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
+			$data['size'] = $this->table_array[$element_name]['size'] ?? '';
+			$data['length'] = $this->table_array[$element_name]['length'] ?? '';
 		}
 		// password element, does not write back the value
 		if ($this->table_array[$element_name]['type'] == 'password') {
 			$data['name'] = $element_name;
 			$data['HIDDEN_value'] = $this->table_array[$element_name]['HIDDEN_value'];
-			$data['size'] = isset($this->table_array[$element_name]['size']) ? $this->table_array[$element_name]['size'] : '';
-			$data['length'] = isset($this->table_array[$element_name]['length']) ? $this->table_array[$element_name]['length'] : '';
+			$data['size'] = $this->table_array[$element_name]['size'] ?? '';
+			$data['length'] = $this->table_array[$element_name]['length'] ?? '';
 		}
 		// date (YYYY-MM-DD)
 		if ($this->table_array[$element_name]['type'] == 'date') {
@@ -874,9 +874,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// textarea
 		if ($this->table_array[$element_name]['type'] == 'textarea') {
 			$data['name'] = $element_name;
-			$data['value'] = isset($this->table_array[$element_name]['value']) ? $this->table_array[$element_name]['value'] : '';
-			$data['rows'] = isset($this->table_array[$element_name]['rows']) ? $this->table_array[$element_name]['rows'] : '';
-			$data['cols'] = isset($this->table_array[$element_name]['cols']) ? $this->table_array[$element_name]['cols'] : '';
+			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
+			$data['rows'] = $this->table_array[$element_name]['rows'] ?? '';
+			$data['cols'] = $this->table_array[$element_name]['cols'] ?? '';
 		}
 		// for drop_down_*
 		if (preg_match("/^drop_down_/", $this->table_array[$element_name]['type'])) {
@@ -982,7 +982,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if ($this->table_array[$element_name]['type'] == 'order') {
 			$data['output_name'] = $this->table_array[$element_name]['output_name'];
 			$data['name'] = $element_name;
-			$data['value'] = isset($this->table_array[$element_name]['value']) ? $this->table_array[$element_name]['value'] : 0;
+			$data['value'] = $this->table_array[$element_name]['value'] ?? 0;
 			$data['col_name'] = $this->col_name;
 			$data['table_name'] = $this->table_name;
 			$data['query'] = $query !== null ? urlencode($query) : '';
@@ -1185,7 +1185,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// get the leasy of keys from the elements array
 				$keys = array_keys($reference_array['elements']);
 				// prefix
-				$prfx = ($reference_array['prefix']) ? $reference_array['prefix'].'_' : '';
+				$prfx = $reference_array['prefix'] ? $reference_array['prefix'].'_' : '';
 				// get max elements
 				$max = 0;
 				foreach ($keys as $key) {
@@ -1547,7 +1547,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// get the number of keys from the elements array
 				$keys = array_keys($reference_array['elements']);
 				// element prefix name
-				$prfx = ($reference_array['prefix']) ? $reference_array['prefix'].'_' : '';
+				$prfx = $reference_array['prefix'] ? $reference_array['prefix'].'_' : '';
 				// get max elements
 				$max = 0;
 				foreach ($keys as $key) {
@@ -1652,7 +1652,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 									$_value = 'NULL';
 								}
 							} else {
-								$_value = isset($_POST[$prfx.$el_name][$i]) ? $_POST[$prfx.$el_name][$i] : '';
+								$_value = $_POST[$prfx.$el_name][$i] ?? '';
 							}
 							// pre write data set. if int value, unset flagged need to be set null or 0 depending on settings
 							if (isset($data_array['int']) || isset($data_array['int_null'])) {
@@ -1685,15 +1685,15 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						// if tpye is update
 						if (isset($type[$i]) && $type[$i] == 'update') {
 							$q = $q_begin[$i].
-								(isset($q_data[$i]) ? $q_data[$i] : '').
+								($q_data[$i] ?? '').
 								$q_end[$i];
 						// or if we have block write, then it is insert (new)
 						} elseif (isset($block_write[$i]) && $block_write[$i]) {
 							$q = $q_begin[$i].
-								(isset($q_names[$i]) ? $q_names[$i] : '').', '.
+								($q_names[$i] ?? '').', '.
 								$this->int_pk_name.
-								(isset($q_middle[$i]) ? $q_middle[$i] : '').
-								(isset($q_values[$i]) ? $q_values[$i] : '').', '.
+								($q_middle[$i] ?? '').
+								($q_values[$i] ?? '').', '.
 								$this->table_array[$this->int_pk_name]['value'].
 								$q_end[$i];
 						}
@@ -1772,7 +1772,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$this->table_array[$key]['type'] == 'hidden'
 			) {
 				if (array_key_exists($key, $this->table_array)) {
-					$hidden_array[$key] = isset($this->table_array[$key]['value']) ? $this->table_array[$key]['value'] : '';
+					$hidden_array[$key] = $this->table_array[$key]['value'] ?? '';
 				} else {
 					$hidden_array[$key] = '';
 				}
@@ -1807,7 +1807,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$data['value'][] = $res[0];
 			$data['output'][] = $res[1];
 			$data['selected'][] = ($this->checked(
-				isset($this->reference_array[$table_name]['selected']) ? $this->reference_array[$table_name]['selected'] : '',
+				$this->reference_array[$table_name]['selected'] ?? '',
 				$res[0]
 			)) ? $res[0] : '';
 		}
@@ -1882,9 +1882,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// prefix the name for any further data parts
 			$el_name = $data['prefix'].$el_name;
 			// this are the output names (if given)
-			$data['output_name'][$el_name] = isset($data_array['output_name']) ? $data_array['output_name'] : '';
+			$data['output_name'][$el_name] = $data_array['output_name'] ?? '';
 			// this is the type of the field
-			$data['type'][$el_name] = isset($data_array['type']) ? $data_array['type'] : '';
+			$data['type'][$el_name] = $data_array['type'] ?? '';
 			// set the primary key name
 			if (isset($data_array['pk_id'])) {
 				$data['pk_name'] = $el_name;
@@ -1898,7 +1898,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$md_q = md5($data_array['query']);
 				while ($res = $this->dbReturn($data_array['query'])) {
 					/** @phan-suppress-next-line PhanTypeInvalidDimOffset */
-					$this->debug('edit', 'Q['.$md_q.'] pos: '.$this->cursor_ext[$md_q]['pos'].' | want: '.(isset($data_array['preset']) ? $data_array['preset'] : '-').' | set: '.(isset($data['preset'][$el_name]) ? $data['preset'][$el_name] : '-'));
+					$this->debug('edit', 'Q['.$md_q.'] pos: '.$this->cursor_ext[$md_q]['pos'].' | want: '.($data_array['preset'] ?? '-').' | set: '.($data['preset'][$el_name] ?? '-'));
 					// first is default for this element
 					if (isset($data_array['preset']) &&
 						(!isset($data['preset'][$el_name]) || empty($data['preset'][$el_name])) &&
@@ -1920,7 +1920,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			if ($this->error) {
 				if (isset($_POST[$el_name]) && is_array($_POST[$el_name])) {
 					// this is for the new line
-					$proto[$el_name] = isset($_POST[$el_name][(count($_POST[$el_name]) - 1)]) ? $_POST[$el_name][(count($_POST[$el_name]) - 1)] : 0;
+					$proto[$el_name] = $_POST[$el_name][(count($_POST[$el_name]) - 1)] ?? 0;
 				} else {
 					$proto[$el_name] = 0;
 				}
