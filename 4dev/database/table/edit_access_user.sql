@@ -8,10 +8,10 @@
 -- DROP TABLE edit_access_user;
 CREATE TABLE edit_access_user (
 	edit_access_user_id	SERIAL PRIMARY KEY,
-	edit_default	SMALLINT DEFAULT 0,
 	edit_access_id	INT NOT NULL,
 	edit_user_id	INT NOT NULL,
 	edit_access_right_id	INT NOT NULL,
+	edit_default	SMALLINT DEFAULT 0,
 	enabled	SMALLINT NOT NULL DEFAULT 0,
 	FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,

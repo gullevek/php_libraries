@@ -17,5 +17,6 @@ CREATE TABLE edit_page (
 	popup	SMALLINT NOT NULL DEFAULT 0,
 	popup_x	SMALLINT,
 	popup_y SMALLINT,
+	hostname	VARCHAR,
 	FOREIGN KEY (content_alias_edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE RESTRICT ON UPDATE CASCADE,
 ) INHERITS (edit_generic) WITHOUT OIDS;

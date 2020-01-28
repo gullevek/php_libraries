@@ -11,7 +11,3 @@ CREATE TABLE edit_visible_group (
 	name	VARCHAR,
 	flag	VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;
-
-DELETE FROM edit_visible_group;
-INSERT INTO edit_visible_group (name, flag) VALUES ('Main Menu', 'main');
-INSERT INTO edit_visible_group (name, flag) VALUES ('Data popup Menu', 'datapopup');

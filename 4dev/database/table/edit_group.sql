@@ -8,11 +8,12 @@
 -- DROP TABLE edit_group;
 CREATE TABLE edit_group (
 	edit_group_id	SERIAL PRIMARY KEY,
-	name	VARCHAR,
-	enabled	SMALLINT NOT NULL DEFAULT 0,
-	deleted	SMALLINT DEFAULT 0,
 	edit_scheme_id INT,
 	edit_access_right_id INT NOT NULL,
+	enabled	SMALLINT NOT NULL DEFAULT 0,
+	deleted	SMALLINT DEFAULT 0,
+	uid	VARCHAR
+	name	VARCHAR,
 	additional_acl	JSONB,
 	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
