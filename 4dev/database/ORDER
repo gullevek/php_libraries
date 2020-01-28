@@ -1,7 +1,10 @@
 # functions
-function/update_function.sql
+function/set_uid.sql
+function/set_generic.sql
 function/random_string.sql
+function/set_edit_generic.sql
 function/edit_set_access_uid.sql
+function/edit_log_insert_trigger.sql
 # generic tables
 table/edit_temp_files.sql
 table/edit_generic.sql
