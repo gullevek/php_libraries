@@ -39,7 +39,7 @@ do
 	done;
 	# copy the trigger template to the target
 
-	for path in $schema;
+	for path in $schemas;
 	do
 		if [ $sqltype ];
 		then

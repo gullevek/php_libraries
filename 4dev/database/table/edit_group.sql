@@ -12,7 +12,7 @@ CREATE TABLE edit_group (
 	edit_access_right_id INT NOT NULL,
 	enabled	SMALLINT NOT NULL DEFAULT 0,
 	deleted	SMALLINT DEFAULT 0,
-	uid	VARCHAR
+	uid	VARCHAR,
 	name	VARCHAR,
 	additional_acl	JSONB,
 	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,

@@ -10,9 +10,9 @@
 CREATE TABLE edit_language (
 	edit_language_id SERIAL PRIMARY KEY,
 	enabled SMALLINT NOT NULL DEFAULT 0,
-	lang_default SMALLINT NOT NULL DEFAULT 0
+	lang_default SMALLINT NOT NULL DEFAULT 0,
 	long_name VARCHAR,
 	short_name VARCHAR,
 	iso_name VARCHAR,
-	order_number INT,
+	order_number INT
 ) INHERITS (edit_generic) WITHOUT OIDS;
