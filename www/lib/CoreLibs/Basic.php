@@ -2045,7 +2045,7 @@ class Basic
 	 * returns int/bool in:
 	 *     -1 if the first date is smaller the last
 	 *     0 if both are equal
-	 *     1 if the end date is bigger than the last
+	 *     1 if the first date is bigger than the last
 	 *     false if no valid date/times chould be found
 	 * @param  string $start_datetime start date/time in YYYY-MM-DD HH:mm:ss
 	 * @param  string $end_datetime   end date/time in YYYY-MM-DD HH:mm:ss

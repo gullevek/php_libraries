@@ -37,5 +37,5 @@ CREATE TABLE edit_log (
 	http_accept_charset	VARCHAR,
 	http_accept_encoding	VARCHAR,
 	session_id	VARCHAR,
-	FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE
+	FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL
 ) INHERITS (edit_generic) WITHOUT OIDS;
