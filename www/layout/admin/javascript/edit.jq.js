@@ -419,9 +419,11 @@ function actionIndicator(loc, overlay = true)
 function actionIndicatorShow(loc, overlay = true)
 {
 	console.log('Indicator: SHOW [%s]', loc);
-	$('#indicator').addClass('progress');
-	setCenter('indicator', true, true);
-	$('#indicator').show();
+	if (!$('#indicator').is(':visible')) {
+		$('#indicator').addClass('progress');
+		setCenter('indicator', true, true);
+		$('#indicator').show();
+	}
 	if (overlay === true) {
 		overlayBoxShow();
 	}
@@ -475,12 +477,9 @@ function overlayBoxHide()
  */
 function setOverlayBox()
 {
-/*	var viewport = document.viewport.getDimensions();
-	$('#overlayBox').css ({
-		width: '100%',
-		height: '100%'
-	});*/
-	$('#overlayBox').show();
+	if (!$('#overlayBox').is(':visible')) {
+		$('#overlayBox').show();
+	}
 }
 
 /**

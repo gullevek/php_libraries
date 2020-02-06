@@ -1255,7 +1255,7 @@ class Basic
 	public static function getPageName(int $strip_ext = 0): string
 	{
 		// get the file info
-		$page_temp = pathinfo($_SERVER["PHP_SELF"]);
+		$page_temp = pathinfo($_SERVER['PHP_SELF']);
 		if ($strip_ext == 1) {
 			return $page_temp['filename'];
 		} elseif ($strip_ext == 2) {
@@ -1955,7 +1955,7 @@ class Basic
 		if (!$date) {
 			return false;
 		}
-		list ($year, $month, $day) = preg_split("/[\/-]/", $date);
+		list ($year, $month, $day) = array_pad(preg_split("/[\/-]/", $date), 3, null);
 		if (!$year || !$month || !$day) {
 			return false;
 		}
@@ -2013,13 +2013,13 @@ class Basic
 		}
 
 		// splits the data up with / or -
-		list ($start_year, $start_month, $start_day) = preg_split('/[\/-]/', $start_date);
-		list ($end_year, $end_month, $end_day) = preg_split('/[\/-]/', $end_date);
+		list ($start_year, $start_month, $start_day) = array_pad(preg_split('/[\/-]/', $start_date), 3, null);
+		list ($end_year, $end_month, $end_day) = array_pad(preg_split('/[\/-]/', $end_date), 3, null);
 		// check that month & day are two digits and then combine
 		foreach (array('start', 'end') as $prefix) {
 			foreach (array('month', 'day') as $date_part) {
 				$_date = $prefix.'_'.$date_part;
-				if ($$_date < 10 && !preg_match("/^0/", $$_date)) {
+				if (isset($$_date) && $$_date < 10 && !preg_match("/^0/", $$_date)) {
 					$$_date = '0'.$$_date;
 				}
 			}

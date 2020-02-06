@@ -20,7 +20,7 @@ $paths = array(
 foreach ($paths as $path) {
 	if (file_exists($path.DS.'convert') && is_file($path.DS.'convert')) {
 		// image magick convert location
-		DEFINE('CONVERT', $path.DS.'convert');
+		define('CONVERT', $path.DS.'convert');
 	}
 }
 unset($paths);
