@@ -109,6 +109,8 @@ return [
 		// ignore the old qq tests
 		'www/admin/qq_file_upload_front.php',
 		'www/admin/qq_file_upload_ajax.php',
+		// symlink files for msarty
+		'www/lib/smarty-3.1.30/SmartyBC.class.php',
 	],
 
 	// what not to show as problem
