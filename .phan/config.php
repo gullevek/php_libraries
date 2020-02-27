@@ -109,8 +109,9 @@ return [
 		// ignore the old qq tests
 		'www/admin/qq_file_upload_front.php',
 		'www/admin/qq_file_upload_ajax.php',
-		// symlink files for msarty
+		// symlink ignore
 		'www/lib/smarty-3.1.30/SmartyBC.class.php',
+		'www/lib/htmlMimeMail-2.5.1/HtmlMimeMailCreate.php',
 	],
 
 	// what not to show as problem

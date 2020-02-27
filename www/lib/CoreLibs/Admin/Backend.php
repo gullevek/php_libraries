@@ -169,8 +169,7 @@ class Backend extends \CoreLibs\DB\IO
 		}
 
 		// check schema
-		if (defined('LOGIN_DB_SCHEMA')) {
-			/** @phan-suppress-next-line PhanUndeclaredConstant */
+		if (defined('LOGIN_DB_SCHEMA') && LOGIN_DB_SCHEMA) {
 			$SCHEMA = LOGIN_DB_SCHEMA;
 		} elseif ($this->dbGetSchema()) {
 			$SCHEMA = $this->dbGetSchema();
@@ -256,7 +255,6 @@ class Backend extends \CoreLibs\DB\IO
 						$type = 'popup';
 					} else {
 						$type = 'normal';
-						/** @phan-suppress-next-line PhanTypeArraySuspicious */
 						$data['popup'] = 0;
 					}
 					$query_string = '';
@@ -443,8 +441,7 @@ class Backend extends \CoreLibs\DB\IO
 		string $associate = null,
 		string $file = null
 	): void {
-		if (defined('GLOBAL_DB_SCHEMA')) {
-			/** @phan-suppress-next-line PhanUndeclaredConstant */
+		if (defined('GLOBAL_DB_SCHEMA') && GLOBAL_DB_SCHEMA) {
 			$SCHEMA = GLOBAL_DB_SCHEMA;
 		} elseif ($this->dbGetSchema()) {
 			$SCHEMA = $this->dbGetSchema();

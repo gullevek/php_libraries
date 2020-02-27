@@ -1808,6 +1808,7 @@ class Basic
 	 */
 	public static function stringByteFormat($number, bool $dot_thousand = false)
 	{
+		$matches = [];
 		// detects up to exo bytes
 		preg_match("/([\d.,]*)\s?(eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/", strtolower($number), $matches);
 		if (isset($matches[1]) && isset($matches[2])) {
@@ -2181,6 +2182,8 @@ class Basic
 			}
 			// if type is not in the list, but returns as PDF, we need to convert to JPEG before
 			if (!$type)	{
+				$output = [];
+				$return = null;
 				// is this a PDF, if no, return from here with nothing
 				$convert_prefix = 'png:';
 				# TEMP convert to PNG, we then override the file name

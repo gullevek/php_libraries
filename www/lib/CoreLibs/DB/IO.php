@@ -633,6 +633,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	private function __dbReturnTable(string $query): array
 	{
+		$matches = [];
 		if (preg_match("/^SELECT /i", $query)) {
 			preg_match("/ (FROM) (([\w_]+)\.)?([\w_]+) /i", $query, $matches);
 		} else {
@@ -655,6 +656,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	private function __dbPrepareExec(string $query, string $pk_name)
 	{
+		$matches= [];
 		// to either use the returning method or the guess method for getting primary keys
 		$this->returning_id = false;
 		// set the query
@@ -1454,6 +1456,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function dbPrepare(string $stm_name, string $query, string $pk_name = '')
 	{
+		$matches = [];
 		if (!$query) {
 			$this->error_id = 11;
 			$this->__dbError();
@@ -1507,6 +1510,7 @@ class IO extends \CoreLibs\Basic
 					$this->prepare_cursor[$stm_name]['pk_name'] = $pk_name;
 				}
 			}
+			$match = [];
 			// search for $1, $2, in the query and push it into the control array
 			preg_match_all('/(\$[0-9]{1,})/', $query, $match);
 			$this->prepare_cursor[$stm_name]['count'] = count($match[1]);
@@ -1665,6 +1669,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function dbCompareVersion(string $compare): bool
 	{
+		$matches = [];
 		// compare has =, >, < prefix, and gets stripped, if the rest is not X.Y format then error
 		preg_match("/^([<>=]{1,})(\d{1,})\.(\d{1,})/", $compare, $matches);
 		$compare = $matches[1];
@@ -1909,10 +1914,10 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function dbTimeFormat(string $age, bool $show_micro = false): string
 	{
+		$matches = [];
 		// in string (datetime diff): 1786 days 22:11:52.87418
 		// or (age): 4 years 10 mons 21 days 12:31:11.87418
 		// also -09:43:54.781021 or without - prefix
-
 		preg_match("/(.*)?(\d{2}):(\d{2}):(\d{2})(\.(\d+))/", $age, $matches);
 
 		$prefix = $matches[1] != '-' ? $matches[1] : '';

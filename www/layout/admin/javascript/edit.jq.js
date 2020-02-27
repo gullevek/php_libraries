@@ -121,8 +121,7 @@ function setCenter(id, left, top)
 function goToPos(element, offset = 0)
 {
 	try {
-		if ($('#' + element).length)
-		{
+		if ($('#' + element).length) {
 			$('body,html').animate({
 				scrollTop: $('#' + element).offset().top - offset
 			}, 500);
@@ -551,6 +550,21 @@ function ael(base, attach, id = '')
  * @return {Object}           "none", technically there is no return needed, global attach
  */
 function aelx(base, ...attach)
+{
+	for (var i = 0; i < attach.length; i ++) {
+		base.sub.push(Object.assign({}, attach[i]));
+	}
+	return base;
+}
+
+/**
+ * same as aelx, but instead of using objects as parameters
+ * get an array of objects to attach
+ * @param  {Object} base   object to where we attach the elements
+ * @param  {Array}  attach array of objects to attach
+ * @return {Object}        "none", technically there is no return needed, global attach
+ */
+function aelxar(base, attach)
 {
 	for (var i = 0; i < attach.length; i ++) {
 		base.sub.push(Object.assign({}, attach[i]));

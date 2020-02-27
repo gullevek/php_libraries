@@ -161,8 +161,7 @@ class Login extends \CoreLibs\DB\IO
 
 		// if we have a search path we need to set it, to use the correct DB to login
 		// check what schema to use. if there is a login schema use this, else check if there is a schema set in the config, or fall back to DB_SCHEMA if this exists, if this also does not exists use public schema
-		if (defined('LOGIN_DB_SCHEMA')) {
-			/** @phan-suppress-next-line PhanUndeclaredConstant */
+		if (defined('LOGIN_DB_SCHEMA') && LOGIN_DB_SCHEMA) {
 			$SCHEMA = LOGIN_DB_SCHEMA;
 		} elseif (isset($db_config['db_schema']) && $db_config['db_schema']) {
 			$SCHEMA = $db_config['db_schema'];

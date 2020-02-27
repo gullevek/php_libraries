@@ -102,7 +102,7 @@ if ($form->my_page_name == 'edit_order') {
 	if (!isset($position)) {
 		$position = array();
 	}
-	$row_data_id = $_POST['row_data_id'];
+	$row_data_id = $_POST['row_data_id'] ?? [];
 	$original_id = $row_data_id;
 	if (count($position)) {
 		$row_data_order = $_POST['row_data_order'];
@@ -116,8 +116,8 @@ if ($form->my_page_name == 'edit_order') {
 				// this gets the old before (moves one "up")
 				// is done for every element in row
 				// echo "A: ".$row_data_id[$position[$i]]." (".$row_data_order[$position[$i]].") -- ".$row_data_id[$position[$i]-1]." (".$row_data_order[$position[$i]-1].")<br>";
-				$temp_id = $row_data_id[$position[$i]];
-				$row_data_id[$position[$i]] = $row_data_id[$position[$i] - 1];
+				$temp_id = $row_data_id[$position[$i]] ?? null;
+				$row_data_id[$position[$i]] = $row_data_id[$position[$i] - 1] ?? null;
 				$row_data_id[$position[$i] - 1] = $temp_id;
 				// echo "A: ".$row_data_id[$position[$i]]." (".$row_data_order[$position[$i]].") -- ".$row_data_id[$position[$i]-1]." (".$row_data_order[$position[$i]-1].")<br>";
 			} // for
@@ -129,8 +129,8 @@ if ($form->my_page_name == 'edit_order') {
 				// same as up, just up in other way, starts from bottom (last element) and moves "up"
 				// element before actuel gets temp, this element, becomes element after this,
 				// element after this, gets this
-				$temp_id = $row_data_id[$position[$i] + 1];
-				$row_data_id[$position[$i] + 1] = $row_data_id[$position[$i]];
+				$temp_id = $row_data_id[$position[$i] + 1] ?? null;
+				$row_data_id[$position[$i] + 1] = $row_data_id[$position[$i]] ?? null;
 				$row_data_id[$position[$i]] = $temp_id;
 			} // for
 		} // if down
@@ -140,8 +140,10 @@ if ($form->my_page_name == 'edit_order') {
 			(isset($down) && ($position[count($position) - 1] != (count($row_data_id) - 1)))
 		) {
 			for ($i = 0; $i < count($row_data_id); $i ++) {
-				$q = "UPDATE ".$table_name." SET order_number = ".$row_data_order[$i]." WHERE ".$table_name."_id = ".$row_data_id[$i];
-				$q = $form->dbExec($q);
+				if (isset($row_data_order[$i]) && isset($row_data_id[$i])) {
+					$q = "UPDATE ".$table_name." SET order_number = ".$row_data_order[$i]." WHERE ".$table_name."_id = ".$row_data_id[$i];
+					$q = $form->dbExec($q);
+				}
 			} // for all article ids ...
 		} // if write
 	} // if there is something to move
@@ -187,7 +189,9 @@ if ($form->my_page_name == 'edit_order') {
 		// list of points to order
 		for ($j = 0; $j < count($position); $j++) {
 			// if matches, put into select array
-			if ($original_id[$position[$j]] == $row_data[$i]['id']) {
+			if (isset($original_id[$position[$j]]) && isset($row_data[$i]['id']) &&
+				$original_id[$position[$j]] == $row_data[$i]['id']
+			) {
 				$options_selected[] = $i;
 			}
 		}
@@ -301,7 +305,7 @@ if ($form->my_page_name == 'edit_order') {
 					(!$data['hostname'] || strstr($data['hostname'], CONTENT_PATH) !== false)
 			))
 		) {
-			$position = $j;
+			$position = $i;
 			$menu_data[$i]['position'] = 1;
 			$menu_data[$i]['popup'] = 0;
 		} else {
@@ -326,7 +330,7 @@ if ($form->my_page_name == 'edit_order') {
 	} // for
 	// $form->debug('MENU ARRAY', $form->printAr($menu_data));
 	$DATA['menu_data'] = $menu_data;
-	$DATA['page_name'] = $menuarray[$position]['page_name'];
+	$DATA['page_name'] = $menuarray[$position]['page_name'] ?? '-Undefined ['.$position.'] -';
 	$L_TITLE = $DATA['page_name'];
 	// html title
 	$HEADER['HTML_TITLE'] = $form->l->__($L_TITLE);

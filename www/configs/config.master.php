@@ -169,6 +169,8 @@ define('PUBLIC_SCHEMA', 'public');
 define('DEV_SCHEMA', 'public');
 define('TEST_SCHEMA', 'public');
 define('LIVE_SCHEMA', 'public');
+define('GLOBAL_DB_SCHEMA', '');
+define('LOGIN_DB_SCHEMA', '');
 
 /************* CORE HOST SETTINGS *****************/
 if (file_exists(BASE.CONFIGS.'config.host.php')) {
