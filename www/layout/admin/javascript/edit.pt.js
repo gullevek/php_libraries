@@ -505,7 +505,7 @@ function actionIndicatorHide(loc = '')
 }
 
 /**
- * shows the overlay box
+ * shows the overlay box or if already visible, bumps the zIndex to 100
  */
 function overlayBoxShow()
 {
@@ -518,7 +518,7 @@ function overlayBoxShow()
 }
 
 /**
- * hides the overlay box
+ * hides the overlay box or if zIndex is 100 bumps it down to previous level
  */
 function overlayBoxHide()
 {
@@ -541,6 +541,16 @@ function setOverlayBox()
 		height: '100%'
 	});
 	$('overlayBox').show();
+}
+
+/**
+ * opposite of set, always hides overlay box
+ */
+function hideOverlayBox()
+{
+	if ($('overlayBox').visible()) {
+		$('overlayBox').hide();
+	}
 }
 
 /**
