@@ -4,7 +4,7 @@ function/set_generic.sql
 function/random_string.sql
 function/set_edit_generic.sql
 function/edit_set_access_uid.sql
-function/edit_log_partition_trigger.sql
+function/edit_log_partition_insert.sql
 # generic tables
 table/edit_temp_files.sql
 table/edit_generic.sql
@@ -30,7 +30,6 @@ trigger/trg_edit_access_right.sql
 trigger/trg_edit_access.sql
 trigger/trg_edit_access_data.sql
 trigger/trg_edit_access_user.sql
-trigger/trg_edit_generic.sql
 trigger/trg_edit_group.sql
 trigger/trg_edit_language.sql
 trigger/trg_edit_log.sql

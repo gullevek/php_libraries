@@ -15,22 +15,20 @@ function_name="set_generic";
 #sql_path_prep=`echo $sql_path | sed -e "s/\///g"`;
 
 # goes for each file and strips headers and endings, and creates trigger name
-for name in $sql_path*;
-do
+for name in $sql_path*; do
 	echo "Wokring on $name";
 	# strip ending
 #	t_name=`echo $name | sed -e 's/.sql$//g' | sed -e "s/^$sql_path_prep//g" | sed -e 's/\///g'`;
 	t_name=`echo $name | sed -e 's/^.*\///g' | sed -e 's/.sql$//g'`;
 	# clean all beginnings
-	for prefix in $file_prefix;
-	do
+	for prefix in $file_prefix; do
 		prefix=$prefix"_";
 		t_name=`echo $t_name | sed -e "s/\$prefix//g"`;
 	done;
 
-# those tables don't need a trigger
-# edit_generic
-# generic
+	# those tables don't need a trigger
+	# edit_generic
+	# generic
 
 	# copy the trigger template to the target
 	trg_filename=$trigger_path$trigger_prefix"_"$t_name".sql";

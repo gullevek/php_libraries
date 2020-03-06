@@ -496,7 +496,7 @@ function hideOverlayBox()
  */
 function ClearCall()
 {
-	$('#actionBox').innerHTML = '';
+	$('#actionBox').html('');
 	$('#actionBox').hide();
 	$('#overlayBox').hide();
 }

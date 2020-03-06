@@ -1234,9 +1234,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						} elseif ($data_array['type'] == 'radio_group' && !isset($_POST[$prfx.$el_name])) {
 							// radio group and set where one not active
 							// $this->debug('edit_error_chk', 'RADIO GROUP');
-							$row_okay[$_POST[$prfx.$el_name][$i]] = 0;
-							$default_wrong[$_POST[$prfx.$el_name][$i]] = 1;
-							$error[$_POST[$prfx.$el_name][$i]] = 1;
+							$row_okay[$_POST[$prfx.$el_name][$i] ?? 0] = 0;
+							$default_wrong[$_POST[$prfx.$el_name][$i] ?? 0] = 1;
+							$error[$_POST[$prfx.$el_name][$i] ?? 0] = 1;
 						} elseif (isset($_POST[$prfx.$el_name][$i]) && !isset($error[$i])) {
 							// $this->debug('edit_error_chk', '[$i]');
 							$element_set[$i] = 1;
