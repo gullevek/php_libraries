@@ -382,7 +382,7 @@ input[type="text"]:focus, textarea:focus, select:focus {
 	left: 0;
 	top: 0;
 	position: absolute;
-	z-index: 100;
+	z-index: 1000;
 }
 /* Animation for above progress */
 @keyframes rotate {

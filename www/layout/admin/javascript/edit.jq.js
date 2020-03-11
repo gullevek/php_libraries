@@ -12,6 +12,10 @@ if (!DEBUG) {
 	});
 }*/
 
+// open overlay boxes counter
+var GL_OB_S = 10;
+var GL_OB_BASE = 10;
+
 /**
  * opens a popup window with winName and given features (string)
  * @param {String} theURL   the url
@@ -393,6 +397,20 @@ function errorCatch(err)
 	}
 }
 
+/*************************************************************
+ * OLD action indicator and overlay boxes calls
+ * DO NOT USE
+ * actionIndicator -> showActionIndicator
+ * actionIndicator -> hideActionIndicator
+ * actionIndicatorShow -> showActionIndicator
+ * actionIndicatorHide -> hideActionIndicator
+ * overlayBoxShow -> showOverlayBoxLayers
+ * overlayBoxHide -> hideOverlayBoxLayers
+ * setOverlayBox -> showOverlayBoxLayers
+ * hideOverlayBox -> hideOverlayBoxLayers
+ * ClearCall -> ClearCallActionBox
+ * ***********************************************************/
+
 /**
  * show or hide the "do" overlay
  * @param {String}  loc            location name for action indicator
@@ -401,10 +419,10 @@ function errorCatch(err)
  */
 function actionIndicator(loc, overlay = true)
 {
-	if ($('#overlayBox').is(':visible')) {
+	if ($('#indicator').is(':visible')) {
 		actionIndicatorHide(loc, overlay);
 	} else {
-		 actionIndicatorShow(loc, overlay);
+		actionIndicatorShow(loc, overlay);
 	}
 }
 
@@ -455,6 +473,7 @@ function overlayBoxShow()
 		$('#overlayBox').css('zIndex', '100');
 	} else {
 		$('#overlayBox').show();
+		$('#overlayBox').css('zIndex', '98');
 	}
 }
 
@@ -464,7 +483,7 @@ function overlayBoxShow()
 function overlayBoxHide()
 {
 	// if the overlay box z-index is 100, do no hide, but set to 98
-	if ($('#overlayBox').css('zIndex') == 100) {
+	if ($('#overlayBox').css('zIndex') >= 100) {
 		$('#overlayBox').css('zIndex', '98');
 	} else {
 		$('#overlayBox').hide();
@@ -499,6 +518,153 @@ function ClearCall()
 	$('#actionBox').html('');
 	$('#actionBox').hide();
 	$('#overlayBox').hide();
+}
+
+/*************************************************************
+ * NEW action indicator and overlay box calls
+ * USE THIS
+ * ***********************************************************/
+
+/**
+ * show action indicator
+ * - checks if not existing and add
+ * - only shows if not visible (else ignore)
+ * - overlaybox check is called and shown on a fixzed
+ *   zIndex of 1000
+ * - indicator is page centered
+ * @param {String} loc ID string, only used for console log
+ */
+function showActionIndicator(loc)
+{
+	console.log('Indicator: SHOW [%s]', loc);
+	// check if indicator element exists
+	if ($('#indicator').length == 0) {
+		var el = document.createElement('div');
+		el.className = 'progress hide';
+		el.id = 'indicator';
+		$('body').append(el);
+	}
+	// indicator not visible
+	if (!$('#indicator').is(':visible')) {
+		// check if overlay box element exits
+		checkOverlayExists();
+		// if not visible show
+		if (!$('#overlayBox').is(':visible')) {
+			$('#overlayBox').show();
+		}
+		// always set to 1000 zIndex to be top
+		$('#overlayBox').css('zIndex', 1000);
+		// show indicator
+		$('#indicator').show();
+		// center it
+		setCenter('indicator', true, true);
+	}
+}
+
+/**
+ * hide action indicator, if it is visiable
+ * If the global variable GL_OB_S is > 10 then
+ * the overlayBox is not hidden but the zIndex
+ * is set to this value
+ * @param {String} loc ID string, only used for console log
+ */
+function hideActionIndicator(loc)
+{
+	console.log('Indicator: HIDE [%s]', loc);
+	// check if indicator is visible
+	if ($('#indicator').is(':visible')) {
+		// hide indicator
+		$('#indicator').hide();
+		// if global overlay box count is > 0
+		// then set it to this level and keep
+		if (GL_OB_S > GL_OB_BASE) {
+			$('#overlayBox').css('zIndex', GL_OB_S);
+		} else {
+			// else hide overlay box and set zIndex to 0
+			$('#overlayBox').hide();
+			$('#overlayBox').css('zIndex', GL_OB_BASE);
+		}
+	}
+}
+
+/**
+ * checks if overlayBox exists, if not it is
+ * added as hidden item at the body end
+ */
+function checkOverlayExists()
+{
+	// check if overlay box exists, if not create it
+	if ($('#overlayBox').length == 0) {
+		var el = document.createElement('div');
+		el.className = 'overlayBoxElement hide';
+		el.id = 'overlayBox';
+		$('body').append(el);
+	}
+}
+
+/**
+ * show overlay box
+ * if not visible show and set zIndex to 10 (GL_OB_BASE)
+ * if visible, add +1 to the GL_OB_S variable and
+ * up zIndex by this value
+ */
+function showOverlayBoxLayers(el_id)
+{
+	console.log('SHOW overlaybox: %s', GL_OB_S);
+	// if overlay box is not visible show and set zIndex to 0
+	if (!$('#overlayBox').is(':visible')) {
+		$('#overlayBox').show();
+		$('#overlayBox').css('zIndex', GL_OB_BASE);
+		// also set start variable to 0
+		GL_OB_S = GL_OB_BASE;
+	}
+	// up the overlay box counter by 1
+	GL_OB_S ++;
+	// set zIndex
+	$('#overlayBox').css('zIndex', GL_OB_S);
+	// if element given raise zIndex and show
+	if (el_id) {
+		if ($('#' + el_id).length > 0) {
+			$('#' + el_id).css('zIndex', GL_OB_S + 1);
+			$('#' + el_id).show();
+		}
+	}
+	console.log('SHOW overlaybox NEW zIndex: %s', $('#overlayBox').css('zIndex'));
+}
+
+/**
+ * hide overlay box
+ * lower GL_OB_S value by -1
+ * if we are 10 (GL_OB_BASE) or below hide the overlayIndex
+ * and set zIndex and GL_OB_S to 0
+ * else just set zIndex to the new GL_OB_S value
+ */
+function hideOverlayBoxLayers()
+{
+	console.log('HIDE overlaybox: %s', GL_OB_S);
+	// remove on layer
+	GL_OB_S --;
+	// if 0 or lower (overflow) hide it and
+	// set zIndex to 0
+	if (GL_OB_S <= GL_OB_BASE) {
+		GL_OB_S = GL_OB_BASE;
+		$('#overlayBox').hide();
+		$('#overlayBox').css('zIndex', GL_OB_BASE);
+	} else {
+		// if OB_S > 0 then set new zIndex
+		$('#overlayBox').css('zIndex', GL_OB_S);
+	}
+	console.log('HIDE overlaybox NEW zIndex: %s', $('#overlayBox').css('zIndex'));
+}
+
+/**
+ * only for single action box
+ */
+function clearCallActionBox()
+{
+	$('#actionBox').html('');
+	$('#actionBox').hide();
+	hideOverlayBoxLayers();
 }
 
 // *** DOM MANAGEMENT FUNCTIONS

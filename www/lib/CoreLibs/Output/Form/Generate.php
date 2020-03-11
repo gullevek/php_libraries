@@ -829,7 +829,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$data['checked'] = 0;
 			for ($i = (count($this->table_array[$element_name]['element_list']) - 1); $i >= 0; $i --) {
 				$data['value'][] = $i;
-				$data['output'][] = $this->table_array[$element_name]['element_list'][$i];
+				$data['output'][] = $this->table_array[$element_name]['element_list'][$i] ?? null;
 				$data['name'] = $element_name;
 				if (isset($this->table_array[$element_name]['value']) &&
 					(($i && $this->table_array[$element_name]['value']) ||
