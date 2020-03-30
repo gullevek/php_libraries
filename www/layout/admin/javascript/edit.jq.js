@@ -638,8 +638,9 @@ function showOverlayBoxLayers(el_id)
  * if we are 10 (GL_OB_BASE) or below hide the overlayIndex
  * and set zIndex and GL_OB_S to 0
  * else just set zIndex to the new GL_OB_S value
+ * @param {String} el_id Target to hide layer
  */
-function hideOverlayBoxLayers()
+function hideOverlayBoxLayers(el_id)
 {
 	console.log('HIDE overlaybox: %s', GL_OB_S);
 	// remove on layer
@@ -653,6 +654,10 @@ function hideOverlayBoxLayers()
 	} else {
 		// if OB_S > 0 then set new zIndex
 		$('#overlayBox').css('zIndex', GL_OB_S);
+	}
+	if (el_id) {
+		$('#' + el_id).hide();
+		$('#' + el_id).css('zIndex', 0);
 	}
 	console.log('HIDE overlaybox NEW zIndex: %s', $('#overlayBox').css('zIndex'));
 }
