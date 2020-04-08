@@ -288,6 +288,7 @@ class IO extends \CoreLibs\Basic
 
 	// endless loop protection
 	private $MAX_QUERY_CALL;
+	private $DEFAULT_MAX_QUERY_CALL = 20; // default
 	private $query_called = array();
 	// error string
 	protected $error_string = array();
@@ -357,6 +358,8 @@ class IO extends \CoreLibs\Basic
 		$this->error_string['40'] = 'Query async call failed.';
 		$this->error_string['41'] = 'Connection is busy with a different query. Cannot execute.';
 		$this->error_string['42'] = 'Cannot check for async query, none has been started yet.';
+		$this->error_string['50'] = 'Setting max query call to -1 will disable loop protection for all subsequent runs';
+		$this->error_string['51'] = 'Max query call needs to be set to at least 1';
 
 		// set debug, either via global var, or debug var during call
 		$this->db_debug = false;
@@ -731,7 +734,10 @@ class IO extends \CoreLibs\Basic
 			$this->query_called[$md5] = 0;
 		}
 		// count up the run, if this is run more than the max_run then exit with error
-		if ($this->query_called[$md5] > $this->MAX_QUERY_CALL) {
+		// if set to -1, then ignore it
+		if ($this->MAX_QUERY_CALL != -1 &&
+			$this->query_called[$md5] > $this->MAX_QUERY_CALL
+		) {
 				$this->error_id = 30;
 				$this->__dbError();
 				$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
@@ -855,6 +861,52 @@ class IO extends \CoreLibs\Basic
 			$this->db_debug = 1;
 		}
 		return $this->db_debug;
+	}
+
+	/**
+	 * set max query calls, set to --1 to disable loop
+	 * protection. this will generate a warning
+	 * empty call (null) will reset to default
+	 * @param  int|null $max_calls Set the max loops allowed
+	 * @return bool                True for succesfull set
+	 */
+	public function dbSetMaxQueryCall(?int $max_calls = null): bool
+	{
+		$success = false;
+		// if null then reset to default
+		if ($max_calls === null) {
+			$max_calls = $this->DEFAULT_MAX_QUERY_CALL;
+		}
+		// if -1 then disable loop check
+		// DANGEROUS, WARN USER
+		if ($max_calls == -1) {
+			$this->warning_id = 50;
+			$this->__dbError();
+		}
+		// negative or 0
+		if ($max_calls < -1 || $max_calls == 0) {
+			$this->error_id = 51;
+			$this->__dbError();
+			// early abort
+			return false;
+		}
+		// ok entry, set
+		if ($max_calls == -1 ||
+			$max_calls > 0
+		) {
+			$this->MAX_QUERY_CALL = $max_calls;
+			$succes = true;
+		}
+		return $success;
+	}
+
+	/**
+	 * returns current set max query calls for loop avoidance
+	 * @return int Integer number, if -1 the loop check is disabled
+	 */
+	public function dbGetMaxQueryCall(): int
+	{
+		return $this->MAX_QUERY_CALL;
 	}
 
 	/**
