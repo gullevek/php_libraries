@@ -340,6 +340,7 @@ class Backend extends \CoreLibs\DB\IO
 		if ($filename === null) {
 			return $enabled;
 		}
+		/** @phan-suppress-next-line PhanNoopSwitchCases */
 		switch ($filename) {
 			default:
 				$enabled = true;
