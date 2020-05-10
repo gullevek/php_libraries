@@ -176,7 +176,7 @@ function setCenter(id, left, top)
 	var viewport = getWindowSize();
 	var offset = getScrollOffset();
 
-	console.log('Id %s, type: %s, dimensions %s x %s, viewport %s x %s', id, type, dimensions.width, dimensions.height, viewport.width, viewport.height);
+	// console.log('Id %s, type: %s, dimensions %s x %s, viewport %s x %s', id, type, dimensions.width, dimensions.height, viewport.width, viewport.height);
 	// console.log('Scrolloffset left: %s, top: %s', offset.left, offset.top);
 	// console.log('Left: %s, Top: %s (%s)', parseInt((viewport.width / 2) - (dimensions.width / 2) + offset.left), parseInt((viewport.height / 2) - (dimensions.height / 2) + offset.top), parseInt((viewport.height / 2) - (dimensions.height / 2)));
 	if (left) {
@@ -484,7 +484,7 @@ function actionIndicator(loc = '')
  */
 function actionIndicatorShow(loc = '')
 {
-	console.log('Indicator: SHOW [%s]', loc);
+	// console.log('Indicator: SHOW [%s]', loc);
 	$('indicator').addClassName('progress');
 	setCenter('indicator', true, true);
 	$('indicator').show();
@@ -498,7 +498,7 @@ function actionIndicatorShow(loc = '')
  */
 function actionIndicatorHide(loc = '')
 {
-	console.log('Indicator: HIDE [%s]', loc);
+	// console.log('Indicator: HIDE [%s]', loc);
 	$('indicator').hide();
 	$('indicator').removeClassName('progress');
 	overlayBoxHide();

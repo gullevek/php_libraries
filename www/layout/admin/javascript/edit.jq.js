@@ -435,7 +435,7 @@ function actionIndicator(loc, overlay = true)
  */
 function actionIndicatorShow(loc, overlay = true)
 {
-	console.log('Indicator: SHOW [%s]', loc);
+	// console.log('Indicator: SHOW [%s]', loc);
 	if (!$('#indicator').is(':visible')) {
 		$('#indicator').addClass('progress');
 		setCenter('indicator', true, true);
@@ -455,7 +455,7 @@ function actionIndicatorShow(loc, overlay = true)
  */
 function actionIndicatorHide(loc, overlay = true)
 {
-	console.log('Indicator: HIDE [%s]', loc);
+	// console.log('Indicator: HIDE [%s]', loc);
 	$('#indicator').hide();
 	$('#indicator').removeClass('progress');
 	if (overlay === true) {
@@ -536,7 +536,7 @@ function ClearCall()
  */
 function showActionIndicator(loc)
 {
-	console.log('Indicator: SHOW [%s]', loc);
+	// console.log('Indicator: SHOW [%s]', loc);
 	// check if indicator element exists
 	if ($('#indicator').length == 0) {
 		var el = document.createElement('div');
@@ -570,7 +570,7 @@ function showActionIndicator(loc)
  */
 function hideActionIndicator(loc)
 {
-	console.log('Indicator: HIDE [%s]', loc);
+	// console.log('Indicator: HIDE [%s]', loc);
 	// check if indicator is visible
 	if ($('#indicator').is(':visible')) {
 		// hide indicator
@@ -610,7 +610,7 @@ function checkOverlayExists()
  */
 function showOverlayBoxLayers(el_id)
 {
-	console.log('SHOW overlaybox: %s', GL_OB_S);
+	// console.log('SHOW overlaybox: %s', GL_OB_S);
 	// if overlay box is not visible show and set zIndex to 0
 	if (!$('#overlayBox').is(':visible')) {
 		$('#overlayBox').show();
@@ -629,7 +629,7 @@ function showOverlayBoxLayers(el_id)
 			$('#' + el_id).show();
 		}
 	}
-	console.log('SHOW overlaybox NEW zIndex: %s', $('#overlayBox').css('zIndex'));
+	// console.log('SHOW overlaybox NEW zIndex: %s', $('#overlayBox').css('zIndex'));
 }
 
 /**
@@ -642,7 +642,7 @@ function showOverlayBoxLayers(el_id)
  */
 function hideOverlayBoxLayers(el_id)
 {
-	console.log('HIDE overlaybox: %s', GL_OB_S);
+	// console.log('HIDE overlaybox: %s', GL_OB_S);
 	// remove on layer
 	GL_OB_S --;
 	// if 0 or lower (overflow) hide it and
@@ -659,7 +659,7 @@ function hideOverlayBoxLayers(el_id)
 		$('#' + el_id).hide();
 		$('#' + el_id).css('zIndex', 0);
 	}
-	console.log('HIDE overlaybox NEW zIndex: %s', $('#overlayBox').css('zIndex'));
+	// console.log('HIDE overlaybox NEW zIndex: %s', $('#overlayBox').css('zIndex'));
 }
 
 /**
