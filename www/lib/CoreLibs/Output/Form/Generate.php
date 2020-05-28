@@ -1646,7 +1646,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							// data part, read from where [POST]
 							// radio group selections (only one can be active)
 							if ($data_array['type'] == 'radio_group') {
-								if ($i == $_POST[$prfx.$el_name]) {
+								if (isset($_POST[$prfx.$el_name]) && $i == $_POST[$prfx.$el_name]) {
 									$_value = $i + 1;
 								} else {
 									$_value = 'NULL';

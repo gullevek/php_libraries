@@ -311,7 +311,7 @@ class PgSQL
 			$q .= "AND indisprimary";
 			$cursor = $this->__dbQuery($q);
 			if ($cursor) {
-				return $this->__dbFetchArray($cursor)['column_name'];
+				return $this->__dbFetchArray($cursor)['column_name'] ?? false;
 			} else {
 				return false;
 			}

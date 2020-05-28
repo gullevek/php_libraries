@@ -597,7 +597,7 @@ class Login extends \CoreLibs\DB\IO
 			// unset mem limit if debug is set to 1
 			// if (($GLOBALS["DEBUG_ALL"] || $GLOBALS["DB_DEBUG"] || $_SESSION["DEBUG_ALL"] || $_SESSION["DB_DEBUG"]) && ini_get('memory_limit') != -1)
 			// 	ini_set('memory_limit', -1);
-			if ($res['filename'] == $this->page_name) {
+			if (isset($res['filename']) && $res['filename'] == $this->page_name) {
 				$this->permission_okay = true;
 			} else {
 				$this->login_error = 103;
