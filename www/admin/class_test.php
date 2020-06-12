@@ -213,6 +213,16 @@ print "RETURN DATA FOR search_path: ".$data."<br>";
 $status = $basic->dbExec("INSERT INTO test.schema_test (contents, id) VALUES ('TIME: ".time()."', ".rand(1, 10).")");
 print "OTHER SCHEMA INSERT STATUS: ".$status." | PK NAME: ".$basic->pk_name.", PRIMARY KEY: ".$basic->insert_id."<br>";
 
+print "<b>NULL TEST DB READ</b><br>";
+$q = "SELECT uid, null_varchar, null_int FROM test_null_data WHERE uid = 'A'";
+$res = $basic->dbReturnRow($q);
+var_dump($res);
+print "RES: ".$basic->printAr($res)."<br>";
+print "ISSET: ".isset($res['null_varchar'])."<br>";
+print "EMPTY: ".empty($res['null_varchar'])."<br>";
+
+// data read test
+
 // time string thest
 $timestamp = 5887998.33445;
 $time_string = $basic->timeStringFormat($timestamp);

@@ -437,7 +437,9 @@ function actionIndicatorShow(loc, overlay = true)
 {
 	// console.log('Indicator: SHOW [%s]', loc);
 	if (!$('#indicator').is(':visible')) {
-		$('#indicator').addClass('progress');
+		if (!$('#indicator').hasClass('progress')) {
+			$('#indicator').addClass('progress');
+		}
 		setCenter('indicator', true, true);
 		$('#indicator').show();
 	}
@@ -457,7 +459,6 @@ function actionIndicatorHide(loc, overlay = true)
 {
 	// console.log('Indicator: HIDE [%s]', loc);
 	$('#indicator').hide();
-	$('#indicator').removeClass('progress');
 	if (overlay === true) {
 		overlayBoxHide();
 	}
@@ -543,6 +544,8 @@ function showActionIndicator(loc)
 		el.className = 'progress hide';
 		el.id = 'indicator';
 		$('body').append(el);
+	} else if (!$('#indicator').hasClass('progress')) {
+		$('#indicator').addClass('progress');
 	}
 	// indicator not visible
 	if (!$('#indicator').is(':visible')) {

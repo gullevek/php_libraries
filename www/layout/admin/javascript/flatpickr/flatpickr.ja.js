@@ -53,7 +53,8 @@
           ]
       },
       time_24hr: true,
-      rangeSeparator: ' から '
+      rangeSeparator: " から ",
+      firstDayOfWeek: 1
   };
   fp.l10ns.ja = Japanese;
   var ja = fp.l10ns;
