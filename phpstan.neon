@@ -5,14 +5,16 @@ parameters:
 	level: 1
 	paths:
 		- %currentWorkingDirectory%/www
-	#bootstrap: %currentWorkingDirectory%/phpstan-bootstrap.php
-	#bootstrap: phpstan-bootstrap.php
-	autoload_directories:
-	autoload_files:
+	bootstrapFiles:
 		- %currentWorkingDirectory%/phpstan-bootstrap.php
+	scanDirectories:
+		- www/lib/Smarty
+	scanFiles:
+		- www/configs/config.php
 		- www/configs/config.master.php
 		- www/lib/autoloader.php
 		- www/vendor/autoload.php
+		- www/lib/Smarty/Autoloader.php
 	excludes_analyse:
 		# no check admin
 		- www/admin/qq_file_upload_front.php
@@ -40,8 +42,8 @@ parameters:
 		- www/tmp
 		- www/lib/pChart
 		- www/lib/pChart2.1.4
-		- www/lib/Smarty/
-		- www/lib/smarty-3.1.30/
+		- www/lib/Smarty
+		- www/lib/smarty-3.1.30
 		# ignore composer
 		- www/vendor
 	# ignore errores with
