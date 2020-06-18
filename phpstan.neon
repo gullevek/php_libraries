@@ -15,6 +15,7 @@ parameters:
 		- www/lib/autoloader.php
 		- www/vendor/autoload.php
 		- www/lib/Smarty/Autoloader.php
+		- www/lib/CoreLibs/Template/SmartyExtend.php
 	excludes_analyse:
 		# no check admin
 		- www/admin/qq_file_upload_front.php
@@ -46,6 +47,8 @@ parameters:
 		- www/lib/smarty-3.1.30
 		# ignore composer
 		- www/vendor
+		# ignore the smartyextend
+		- www/lib/CoreLibs/Template/SmartyExtend.php
 	# ignore errores with
 	# ignoreErrors:
 		#- 'error regex'
