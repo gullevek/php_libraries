@@ -6,6 +6,7 @@
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
     autoloader="lib/autoloader.php"
+    errorLevel="8"
 >
     <projectFiles>
 		<file name="admin/class_test.php" />
@@ -28,7 +29,8 @@
             <directory name="tmp" />
             <directory name="log" />
             <directory name="media" />
-			<directory name="lib/pChart" />
+			<directory name="lib/FileUpload" />
+            <directory name="lib/pChart" />
 			<directory name="lib/pChart2.1.4" />
 			<directory name="lib/Smarty" />
 			<directory name="lib/smarty-3.1.30" />

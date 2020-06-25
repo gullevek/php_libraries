@@ -343,6 +343,31 @@ function valueInObject(object, value)
 }
 
 /**
+ * true deep copy for Javascript objects
+ * if Object.assign({}, obj) is not working (shallow)
+ * or if JSON.parse(JSON.stringify(obj)) is failing
+ * @param  {Object} inObject Object to copy
+ * @return {Object}          Copied Object
+ */
+function deepCopyFunction(inObject)
+{
+	var outObject, value, key;
+	if (typeof inObject !== "object" || inObject === null) {
+		return inObject; // Return the value if inObject is not an object
+	}
+	// Create an array or object to hold the values
+	outObject = Array.isArray(inObject) ? [] : {};
+	// loop over ech entry in object
+	for (key in inObject) {
+		value = inObject[key];
+		// Recursively (deep) copy for nested objects, including arrays
+		outObject[key] = deepCopyFunction(value);
+	}
+
+	return outObject;
+}
+
+/**
  * checks if a DOM element actually exists
  * @param  {String}  id Element id to check for
  * @return {Boolean}    true if element exists, false on failure
