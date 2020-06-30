@@ -866,64 +866,64 @@ class Basic
 	 */
 	private function writeErrorMsg(string $level, string $error_string): void
 	{
-		if ($this->doDebugTrigger('debug', $level)) {
-			// only write if write is requested
-			if ($this->doDebugTrigger('print', $level)) {
-				// replace all html tags
-				// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "##\\2##", $error_string);
-				// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "", $error_string);
-				// replace special line break tag
-				// $error_string = str_replace('<!--#BR#-->', "\n", $error_string);
+		// only write if write is requested
+		if ($this->doDebugTrigger('debug', $level) &&
+			$this->doDebugTrigger('print', $level)
+		) {
+			// replace all html tags
+			// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "##\\2##", $error_string);
+			// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "", $error_string);
+			// replace special line break tag
+			// $error_string = str_replace('<!--#BR#-->', "\n", $error_string);
 
-				// init output variable
-				$output = $error_string; // output formated error string to output file
-				// init base file path
-				$fn = BASE.LOG.$this->log_print_file.'.'.$this->log_file_name_ext;
-				// log ID prefix settings, if not valid, replace with empty
-				if (preg_match("/^[A-Za-z0-9]+$/", $this->log_file_id)) {
-					$rpl_string = '_'.$this->log_file_id;
-				} else {
-					$rpl_string = '';
+			// init output variable
+			$output = $error_string; // output formated error string to output file
+			// init base file path
+			$fn = BASE.LOG.$this->log_print_file.'.'.$this->log_file_name_ext;
+			// log ID prefix settings, if not valid, replace with empty
+			if (preg_match("/^[A-Za-z0-9]+$/", $this->log_file_id)) {
+				$rpl_string = '_'.$this->log_file_id;
+			} else {
+				$rpl_string = '';
+			}
+			$fn = str_replace('##LOGID##', $rpl_string, $fn); // log id (like a log file prefix)
+
+			if ($this->log_per_run) {
+				if (isset($GLOBALS['LOG_FILE_UNIQUE_ID'])) {
+					$this->log_file_unique_id = $GLOBALS['LOG_FILE_UNIQUE_ID'];
 				}
-				$fn = str_replace('##LOGID##', $rpl_string, $fn); // log id (like a log file prefix)
-
-				if ($this->log_per_run) {
-					if (isset($GLOBALS['LOG_FILE_UNIQUE_ID'])) {
-						$this->log_file_unique_id = $GLOBALS['LOG_FILE_UNIQUE_ID'];
-					}
-					if (!$this->log_file_unique_id) {
-						$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id = date('Y-m-d_His').'_U_'.substr(hash('sha1', uniqid((string)mt_rand(), true)), 0, 8);
-					}
-					$rpl_string = '_'.$this->log_file_unique_id; // add 8 char unique string
-				} else {
-					$rpl_string = !$this->log_print_file_date ? '' : '_'.date('Y-m-d'); // add date to file
+				if (!$this->log_file_unique_id) {
+					$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id = date('Y-m-d_His').'_U_'.substr(hash('sha1', uniqid((string)mt_rand(), true)), 0, 8);
 				}
-				$fn = str_replace('##DATE##', $rpl_string, $fn); // create output filename
+				$rpl_string = '_'.$this->log_file_unique_id; // add 8 char unique string
+			} else {
+				$rpl_string = !$this->log_print_file_date ? '' : '_'.date('Y-m-d'); // add date to file
+			}
+			$fn = str_replace('##DATE##', $rpl_string, $fn); // create output filename
 
-				$rpl_string = !$this->log_per_level ? '' : '_'.$level; // if request to write to one file
-				$fn = str_replace('##LEVEL##', $rpl_string, $fn); // create output filename
+			$rpl_string = !$this->log_per_level ? '' : '_'.$level; // if request to write to one file
+			$fn = str_replace('##LEVEL##', $rpl_string, $fn); // create output filename
 
-				$rpl_string = !$this->log_per_class ? '' : '_'.str_replace('\\', '-', get_class($this)); // set sub class settings
-				$fn = str_replace('##CLASS##', $rpl_string, $fn); // create output filename
+			$rpl_string = !$this->log_per_class ? '' : '_'.str_replace('\\', '-', get_class($this)); // set sub class settings
+			$fn = str_replace('##CLASS##', $rpl_string, $fn); // create output filename
 
-				$rpl_string = !$this->log_per_page ? '' : '_'.$this->getPageName(1); // if request to write to one file
-				$fn = str_replace('##PAGENAME##', $rpl_string, $fn); // create output filename
+			$rpl_string = !$this->log_per_page ? '' : '_'.$this->getPageName(1); // if request to write to one file
+			$fn = str_replace('##PAGENAME##', $rpl_string, $fn); // create output filename
 
-				// write to file
-				// first check if max file size is is set and file is bigger
-				if ($this->log_max_filesize > 0 && ((filesize($fn) / 1024) > $this->log_max_filesize)) {
-					// for easy purpose, rename file only to attach timestamp, nur sequence numbering
-					rename($fn, $fn.'.'.date("YmdHis"));
-				}
-				$fp = fopen($fn, 'a');
-				if ($fp !== false) {
-					fwrite($fp, $output);
-					fclose($fp);
-				} else {
-					echo "<!-- could not open file: $fn //-->";
-				}
-			} // do write to file
-		}
+			// write to file
+			// first check if max file size is is set and file is bigger
+			if ($this->log_max_filesize > 0 && ((filesize($fn) / 1024) > $this->log_max_filesize)) {
+				// for easy purpose, rename file only to attach timestamp, nur sequence numbering
+				rename($fn, $fn.'.'.date("YmdHis"));
+			}
+			$fp = fopen($fn, 'a');
+			if ($fp !== false) {
+				fwrite($fp, $output);
+				fclose($fp);
+			} else {
+				echo "<!-- could not open file: $fn //-->";
+			}
+		} // do write to file
 	}
 
 	/**
