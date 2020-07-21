@@ -283,11 +283,47 @@ function randomIdF()
 }
 
 /**
+ * check if name is a function
+ * @param  {string}  name Name of function to check if exists
+ * @return {Boolean}      true/false
+ */
+function isFunction(name)
+{
+	if (typeof window[name] !== 'undefined' &&
+		typeof window[name] === 'function') {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
+ * call a function by its string name
+ * https://stackoverflow.com/a/359910
+ * example: executeFunctionByName("My.Namespace.functionName", window, arguments);
+ * @param  {string} functionName The function name or namespace + function
+ * @param  {mixed}  context      context (window or first namespace)
+ *                               hidden next are all the arguments
+ * @return {mixed}               Return values from functon
+ */
+function executeFunctionByName(functionName, context /*, args */)
+{
+	var args = Array.prototype.slice.call(arguments, 2);
+	var namespaces = functionName.split('.');
+	var func = namespaces.pop();
+	for (var i = 0; i < namespaces.length; i++) {
+		context = context[namespaces[i]];
+	}
+	return context[func].apply(context, args);
+}
+
+/**
  * checks if a variable is an object
  * @param  {Mixed}   val possible object
  * @return {Boolean}     true/false if it is an object or not
  */
-function isObject(val) {
+function isObject(val)
+{
 	if (val === null) {
 		return false;
 	}
@@ -299,7 +335,8 @@ function isObject(val) {
  * @param  {Object} object object to check
  * @return {Number} number of entry
  */
-function getObjectCount(object) {
+function getObjectCount(object)
+{
 	return Object.keys(object).length;
 }
 

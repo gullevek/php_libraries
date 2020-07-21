@@ -9,12 +9,12 @@
 CREATE TABLE edit_group (
 	edit_group_id	SERIAL PRIMARY KEY,
 	edit_scheme_id INT,
+	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	edit_access_right_id INT NOT NULL,
+	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
 	enabled	SMALLINT NOT NULL DEFAULT 0,
 	deleted	SMALLINT DEFAULT 0,
 	uid	VARCHAR,
 	name	VARCHAR,
-	additional_acl	JSONB,
-	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
+	additional_acl	JSONB
 ) INHERITS (edit_generic) WITHOUT OIDS;

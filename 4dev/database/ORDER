@@ -22,6 +22,7 @@ table/edit_page_access.sql
 table/edit_page_content.sql
 table/edit_user.sql
 table/edit_log.sql
+table/edit_log_overflow.sql
 table/edit_access.sql
 table/edit_access_user.sql
 table/edit_access_data.sql
@@ -32,6 +33,7 @@ trigger/trg_edit_access_data.sql
 trigger/trg_edit_access_user.sql
 trigger/trg_edit_group.sql
 trigger/trg_edit_language.sql
+trigger/trg_edit_log_overflow.sql
 trigger/trg_edit_log.sql
 trigger/trg_edit_page_access.sql
 trigger/trg_edit_page_content.sql

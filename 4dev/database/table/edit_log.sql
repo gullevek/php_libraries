@@ -8,6 +8,8 @@
 -- DROP TABLE edit_log;
 CREATE TABLE edit_log (
 	edit_log_id	SERIAL PRIMARY KEY,
+	euid	INT, -- this is a foreign key, but I don't nedd to reference to it
+	FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL,
 	username	VARCHAR,
 	password	VARCHAR,
 	event_date	TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -26,7 +28,6 @@ CREATE TABLE edit_log (
 	action_value	VARCHAR,
 	action_type	VARCHAR,
 	action_error	VARCHAR,
-	euid	INT, -- this is a foreign key, but I don't nedd to reference to it
 	user_agent	VARCHAR,
 	referer	VARCHAR,
 	script_name	VARCHAR,
@@ -36,6 +37,5 @@ CREATE TABLE edit_log (
 	http_accept	VARCHAR,
 	http_accept_charset	VARCHAR,
 	http_accept_encoding	VARCHAR,
-	session_id	VARCHAR,
-	FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL
+	session_id	VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;

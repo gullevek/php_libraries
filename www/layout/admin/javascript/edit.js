@@ -1,1 +1,1 @@
-edit.pt.js
+edit.jq.js
