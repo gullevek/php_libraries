@@ -101,8 +101,23 @@ define('LOGOUT_TARGET', '');
 define('PASSWORD_CHANGE', false);
 define('PASSWORD_FORGOT', false);
 // min/max password length
-define('PASSWORD_MIN_LENGTH', 8);
+define('PASSWORD_MIN_LENGTH', 9);
 define('PASSWORD_MAX_LENGTH', 255);
+// defines allowed special characters
+DEFINE('PASSWORD_SPECIAL_RANGE', '@$!%*?&');
+// password must have upper case, lower case, number, special
+// comment out for not mandatory
+DEFINE('PASSWORD_LOWER', '(?=.*[a-z])');
+DEFINE('PASSWORD_UPPER', '(?=.*[A-Z])');
+DEFINE('PASSWORD_NUMBER', '(?=.*\d)');
+DEFINE('PASSWORD_SPECIAL', "(?=.*[".PASSWORD_SPECIAL_RANGE."])");
+// define full regex
+DEFINE('PASSWORD_REGEX', "/^".
+	(defined('PASSWORD_LOWER') ? PASSWORD_LOWER : '').
+	(defined('PASSWORD_UPPER') ? PASSWORD_UPPER : '').
+	(defined('PASSWORD_NUMBER') ? PASSWORD_NUMBER : '').
+	(defined('PASSWORD_SPECIAL') ? PASSWORD_SPECIAL : '').
+	"[A-Za-z\d".PASSWORD_SPECIAL_RANGE."]{".PASSWORD_MIN_LENGTH.",".PASSWORD_MAX_LENGTH."}$/");
 
 /************* AJAX / ACCESS *************/
 // ajax request type

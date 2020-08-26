@@ -607,7 +607,9 @@ function showActionIndicator(loc)
 		el.id = 'indicator';
 		$('body').append(el);
 	} else if (!$('#indicator').hasClass('progress')) {
-		$('#indicator').addClass('progress');
+		// if I add a class it will not be hidden anymore
+		// hide it
+		$('#indicator').addClass('progress').hide();
 	}
 	// indicator not visible
 	if (!$('#indicator').is(':visible')) {
@@ -772,7 +774,8 @@ function ael(base, attach, id = '')
 	if (id) {
 		// base id match already
 		if (base.id == id) {
-			base.sub.push(Object.assign({}, attach));
+			// base.sub.push(Object.assign({}, attach));
+			base.sub.push(deepCopyFunction(attach));
 		} else {
 			// sub check
 			if (isObject(base.sub) && base.sub.length > 0) {
@@ -783,7 +786,8 @@ function ael(base, attach, id = '')
 			}
 		}
 	} else {
-		base.sub.push(Object.assign({}, attach));
+		// base.sub.push(Object.assign({}, attach));
+		base.sub.push(deepCopyFunction(attach));
 	}
 	return base;
 }
@@ -798,7 +802,8 @@ function ael(base, attach, id = '')
 function aelx(base, ...attach)
 {
 	for (var i = 0; i < attach.length; i ++) {
-		base.sub.push(Object.assign({}, attach[i]));
+		// base.sub.push(Object.assign({}, attach[i]));
+		base.sub.push(deepCopyFunction(attach[i]));
 	}
 	return base;
 }
@@ -813,7 +818,8 @@ function aelx(base, ...attach)
 function aelxar(base, attach)
 {
 	for (var i = 0; i < attach.length; i ++) {
-		base.sub.push(Object.assign({}, attach[i]));
+		// base.sub.push(Object.assign({}, attach[i]));
+		base.sub.push(deepCopyFunction(attach[i]));
 	}
 	return base;
 }
@@ -935,6 +941,22 @@ function phfo(tree)
 		content.push('</' + tree.tag + '>');
 	}
 	// combine to string
+	return content.join('');
+}
+
+/**
+ * Create HTML elements from array list
+ * as a flat element without master object file
+ * Is like tree.sub call
+ * @param  {Array}  list Array of cel created objects
+ * @return {String}      HTML String
+ */
+function phfa(list)
+{
+	var content = [];
+	for (i = 0; i < list.length; i ++) {
+		content.push(phfo(list[i]));
+	}
 	return content.join('');
 }
 // *** DOM MANAGEMENT FUNCTIONS

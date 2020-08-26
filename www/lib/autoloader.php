@@ -44,7 +44,7 @@ if (class_exists('Autoload', false) === false) {
 			// print "(2) Class clean: $path<br>";
 			// if path is set and a valid file
 			if ($path !== false && is_file($path)) {
-				// echo "<b>(3)</b> Load Path: $path<br>";
+				// print "<b>(3)</b> Load Path: $path<br>";
 				// we should sub that
 				// self::loadFile($path);
 				include $path;

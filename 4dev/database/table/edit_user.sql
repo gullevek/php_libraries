@@ -38,5 +38,10 @@ CREATE TABLE edit_user (
 	locked	SMALLINT DEFAULT 0,
 	password_change_date	TIMESTAMP WITHOUT TIME ZONE, -- only when password is first set or changed
 	password_change_interval	INTERVAL, -- null if no change is needed, or d/m/y time interval
+	password_reset_time	TIMESTAMP WITHOUT TIME ZONE, -- when the password reset was requested
+	password_reset_uid	VARCHAR, -- the uid to access the password reset page
 	additional_acl	JSONB -- additional ACL as JSON string (can be set by other pages)
 ) INHERITS (edit_generic) WITHOUT OIDS;
+
+COMMENT ON COLUMN edit_user.password_reset_time IS 'When the password reset was requested. For reset page uid valid check';
+COMMENT ON COLUMN edit_user.password_reset_uid IS 'Password reset page uid';
