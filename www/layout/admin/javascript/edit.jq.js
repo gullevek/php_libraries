@@ -1049,6 +1049,35 @@ function html_options_block(name, data, selected = '', multiple = 0, options_onl
 		element_option = cel('option', '', value, '', options);
 		// attach it to the select element
 		ael(element_select, element_option);
+		/*
+		// get the original data for this key
+		var opt_value = r_value[opt_key];
+		// if it is an object, we assume a sub group [original data]
+		if (isObject(opt_value)) {
+			element_group = document.createElement('optgroup');
+			element_group.label = opt_key;
+			// loop through attached sub key elements in order (key is orignal)
+			$.each(data.form_reference_order[key][opt_key], function(opt_group_pos, opt_group_key) {
+				var opt_group_value = r_value[opt_key][opt_group_key];
+				element_sub = document.createElement('option');
+				// check if w is object, if yes, the element is a subset drop down
+				element_sub.label = opt_group_value;
+				element_sub.value = opt_group_key;
+				element_sub.innerHTML = opt_group_value;
+				element_group.appendChild(element_sub);
+			});
+			element.appendChild(element_group);
+		} else if (!isObject(opt_key)) {
+			// if this is a plain element, attach as is
+			// we also skip any objects in the reference order group as they are handled different
+			element_sub = document.createElement('option');
+			element_sub.label = opt_value;
+			element_sub.value = opt_key;
+			element_sub.innerHTML = opt_value;
+			element.appendChild(element_sub);
+		}
+
+		 */
 	}
 	// if with select part, convert to text
 	if (!options_only) {

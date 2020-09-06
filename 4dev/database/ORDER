@@ -43,6 +43,5 @@ trigger/trg_edit_scheme.sql
 trigger/trg_edit_user.sql
 trigger/trg_edit_visible_group.sql
 trigger/trg_edit_menu_group.sql
-trigger/trg_set_edit_access_uid.sql
 # insert data
 data/edit_tables.sql

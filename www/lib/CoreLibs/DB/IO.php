@@ -1992,12 +1992,6 @@ class IO extends \CoreLibs\Basic
 		return $this->db_functions->__dbArrayParse($text, $output);
 	}
 
-	// METHOD: dbSqlEscape
-	// WAS   : db_sql_escape
-	// PARAMS: value -> to escape data
-	//          kbn -> escape trigger type
-	// RETURN: escaped value
-	// DESC  : clear up any data for valid DB insert
 	/**
 	 * clear up any data for valid DB insert
 	 * @param  int|float|string $value to escape data
@@ -2024,6 +2018,29 @@ class IO extends \CoreLibs\Basic
 				break;
 		}
 		return $value;
+	}
+
+	/**
+	 * return current set insert_id as is
+	 * @return string|int|null Primary key value, most likely int
+	 *                         Empty string for unset
+	 *                         Null for error
+	 */
+	public function getInsertPK()
+	{
+		return $this->insert_id;
+	}
+
+	/**
+	 * return the extended insert return string set
+	 * Most likely Array
+	 * @return array|string|null RETURNING values as array
+	 *                           Empty string for unset
+	 *                           Null for error
+	 */
+	public function getInsertReturn()
+	{
+		return $this->insert_id_ext;
 	}
 } // end if db class
 
