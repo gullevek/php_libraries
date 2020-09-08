@@ -34,10 +34,10 @@ class SmartyExtend extends SmartyBC
 	public $page_name;
 
 	// array for data parsing
-	public $HEADER = array();
-	public $DATA = array();
-	public $DEBUG_DATA = array();
-	private $CONTENT_DATA = array();
+	public $HEADER = [];
+	public $DATA = [];
+	public $DEBUG_DATA = [];
+	private $CONTENT_DATA = [];
 	// control vars
 	public $USE_PROTOTYPE = USE_PROTOTYPE;
 	public $USE_JQUERY = USE_JQUERY;
@@ -354,7 +354,7 @@ class SmartyExtend extends SmartyBC
 			$this->DATA['nav_menu'] = $cms->adbTopMenu();
 			$this->DATA['nav_menu_count'] = is_array($this->DATA['nav_menu']) ? count($this->DATA['nav_menu']) : 0;
 			// messages = array('msg' =>, 'class' => 'error/warning/...')
-			$this->DATA['messages'] = $cms->messages ?? array();
+			$this->DATA['messages'] = $cms->messages ?? [];
 			// the page name
 			$this->DATA['page_name'] = $this->page_name;
 			$this->DATA['table_width'] = $this->PAGE_WIDTH ?? PAGE_WIDTH;
@@ -405,7 +405,9 @@ class SmartyExtend extends SmartyBC
 	{
 		// array merge HEADER, DATA, DEBUG DATA
 		foreach (array('HEADER', 'DATA', 'DEBUG_DATA') as $ext_smarty) {
-			if (is_array($cms->{$ext_smarty})) {
+			if (isset($cms->{$ext_smarty}) &&
+				is_array($cms->{$ext_smarty})
+			) {
 				$this->{$ext_smarty} = array_merge($this->{$ext_smarty}, $cms->{$ext_smarty});
 			}
 		}
