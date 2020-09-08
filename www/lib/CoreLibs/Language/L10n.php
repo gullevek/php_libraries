@@ -37,13 +37,13 @@ class L10n extends \CoreLibs\Basic
 
 	/**
 	 * class constructor call for language getstring
-	 * @param string      $lang             language name (optional), fallback is en
-	 * @param string      $path             path, if empty fallback on default internal path
-	 * @param int|integer $set_control_flag control flags for Basic class set/get checks
+	 * @param string $lang language name (optional), fallback is en
+	 * @param string $path path, if empty fallback on default internal path
 	 */
-	public function __construct(string $lang = '', string $path = '', int $set_control_flag = 0)
+	public function __construct(string $lang = '', string $path = ''
+)
 	{
-		parent::__construct($set_control_flag);
+		parent::__construct();
 		if (!$lang) {
 			$this->lang = 'en';
 		} else {

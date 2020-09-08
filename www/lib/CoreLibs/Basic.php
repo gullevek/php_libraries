@@ -188,19 +188,11 @@ class Basic
 	// ajax flag
 	protected $ajax_page_flag = false;
 
-	// METHOD: __construct
-	// PARAMS: set_control_flag [current sets set/get var errors]
-	// RETURN: none
-	// DESC  : class constructor
 	/**
 	 * main Basic constructor to init and check base settings
-	 * @param int $set_control_flag 0/1/2/3 to set internal class parameter check
 	 */
-	public function __construct(int $set_control_flag = 0)
+	public function __construct()
 	{
-		// init flags
-		$this->__setControlFlag($set_control_flag);
-
 		// set per run UID for logging
 		$this->running_uid = hash($this->hash_algo, uniqid((string)rand(), true));
 		// running time start for script
@@ -423,81 +415,6 @@ class Basic
 		// return $this->error_msg;
 		// close open file handles
 		// $this->fdebugFP('c');
-	}
-
-	// *************************************************************
-	// INTERAL VARIABLE ERROR HANDLER
-	// *************************************************************
-
-	/**
-	 * sets internal control flags for class variable check
-	 * 0 -> turn of all, works like default php class
-	 * CLASS_STRICT_MODE: 1 -> if set throws error on unset class variable
-	 * CLASS_OFF_COMPATIBLE_MODE: 2 -> if set turns of auto set for unset variables
-	 * 3 -> sets error on unset and does not set variable (strict)
-	 * @param  int    $set_control_flag control flag as 0/1/2/3
-	 * @return void
-	 */
-	private function __setControlFlag(int $set_control_flag): void
-	{
-		// is there either a constant or global set to override the control flag
-		if (defined('CLASS_VARIABLE_ERROR_MODE')) {
-			$set_control_flag = CLASS_VARIABLE_ERROR_MODE;
-		}
-		if (isset($GLOBALS['CLASS_VARIABLE_ERROR_MODE'])) {
-			$set_control_flag = $GLOBALS['CLASS_VARIABLE_ERROR_MODE'];
-		}
-		// bit wise check of int and set
-		if ($set_control_flag & self::CLASS_OFF_COMPATIBLE_MODE) {
-			$this->set_compatible = false;
-		} else {
-			$this->set_compatible = true;
-		}
-		if ($set_control_flag & self::CLASS_STRICT_MODE) {
-			$this->set_strict_mode = true;
-		} else {
-			$this->set_strict_mode = false;
-		}
-	}
-
-	/**
-	 * if strict mode is set, throws an error if the class variable is not set
-	 * if compatible mode is set, also auto sets variable even if not declared
-	 * default is strict mode false and compatible mode on
-	 * @param  mixed $name  class variable name
-	 * @return void
-	 */
-	public function __set($name, $value): void
-	{
-		if ($this->set_strict_mode === true && !property_exists($this, $name)) {
-			trigger_error('Undefined property via __set(): '.$name, E_USER_NOTICE);
-		}
-		// use this for fallback as to work like before to set unset
-		if ($this->set_compatible === true) {
-			$this->{$name} = $value;
-		}
-	}
-
-	/**
-	 * if strict mode is set, throws an error if the class variable is not set
-	 * default is strict mode false
-	 * @param  mixed $name class variable name
-	 * @return mixed       return set variable content
-	 */
-	public function &__get($name)
-	{
-		if ($this->set_strict_mode === true && !property_exists($this, $name)) {
-			trigger_error('Undefined property via __get(): '.$name, E_USER_NOTICE);
-		}
-		// on set return
-		if (property_exists($this, $name)) {
-			return $this->$name;
-		} elseif ($this->set_compatible === true && !property_exists($this, $name)) {
-			// if it is not set, and we are in compatible mode we need to init.
-			// This is so that $class->array['key'] = 'bar'; works
-			$this->{$name} = null;
-			return $this->$name;
-		}
 	}
 
 	// *************************************************************

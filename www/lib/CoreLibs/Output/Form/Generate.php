@@ -255,11 +255,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * construct form generator
-	 * @param array       $db_config        db config array
-	 * @param int|integer $table_width      table/div width (default 750)
-	 * @param int|integer $set_control_flag basic class set/get variable error flags
+	 * @param array       $db_config   db config array
+	 * @param int|integer $table_width table/div width (default 750)
 	 */
-	public function __construct(array $db_config, int $table_width = 750, int $set_control_flag = 0)
+	public function __construct(array $db_config, int $table_width = 750)
 	{
 		$this->my_page_name = $this->getPageName(1);
 		$this->setLangEncoding();
@@ -289,7 +288,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 
 		// start the array_io class which will start db_io ...
-		parent::__construct($db_config, $config_array['table_array'], $config_array['table_name'], $set_control_flag);
+		parent::__construct($db_config, $config_array['table_array'], $config_array['table_name']);
 		// here should be a check if the config_array is correct ...
 		if (isset($config_array['show_fields']) && is_array($config_array['show_fields'])) {
 			$this->field_array = $config_array['show_fields'];

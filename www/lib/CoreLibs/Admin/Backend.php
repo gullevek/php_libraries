@@ -68,17 +68,16 @@ class Backend extends \CoreLibs\DB\IO
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**
 	 * main class constructor
-	 * @param array       $db_config        db config array
-	 * @param int|integer $set_control_flag class variable check flag
+	 * @param array $db_config db config array
 	 */
-	public function __construct(array $db_config, int $set_control_flag = 0)
+	public function __construct(array $db_config)
 	{
 		$this->setLangEncoding();
 		// get the language sub class & init it
 		$this->l = new \CoreLibs\Language\L10n($this->lang);
 
 		// init the database class
-		parent::__construct($db_config, $set_control_flag);
+		parent::__construct($db_config);
 
 		// set the action ids
 		foreach ($this->action_list as $_action) {

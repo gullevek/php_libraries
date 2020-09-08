@@ -51,15 +51,14 @@ class ArrayIO extends \CoreLibs\DB\IO
 	/**
 	 * constructor for the array io class, set the
 	 * primary key name automatically (from array)
-	 * @param array       $db_config        db connection config
-	 * @param array       $table_array      table array config
-	 * @param string      $table_name       table name string
-	 * @param int|integer $set_control_flag set basic class set/get variable error flags
+	 * @param array  $db_config   db connection config
+	 * @param array  $table_array table array config
+	 * @param string $table_name  table name string
 	 */
-	public function __construct(array $db_config, array $table_array, string $table_name, int $set_control_flag = 0)
+	public function __construct(array $db_config, array $table_array, string $table_name)
 	{
 		// instance db_io class
-		parent::__construct($db_config, $set_control_flag);
+		parent::__construct($db_config);
 		// more error vars for this class
 		$this->error_string['91'] = 'No Primary Key given';
 		$this->error_string['92'] = 'Could not run Array Query';

@@ -114,16 +114,15 @@ class Login extends \CoreLibs\DB\IO
 
 	/**
 	 * constructor, does ALL, opens db, works through connection checks, closes itself
-	 * @param array  $db_config        db config array
-	 * @param int    $set_control_flag class variable check flags
+	 * @param array $db_config db config array
 	 */
-	public function __construct(array $db_config, int $set_control_flag = 0)
+	public function __construct(array $db_config)
 	{
 		// log login data for this class only
 		$this->log_per_class = 1;
 
 		// create db connection and init base class
-		parent::__construct($db_config, $set_control_flag);
+		parent::__construct($db_config);
 		if ($this->db_init_error === true) {
 			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
