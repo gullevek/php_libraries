@@ -124,6 +124,22 @@ print "DIRECT INSERT STATUS: $status | PRIMARY KEY: ".$basic->insert_id." | PRIM
 // UPDATE WITH RETURNING
 $status = $basic->dbExec("UPDATE foo SET test = 'SOMETHING DIFFERENT' WHERE foo_id = 3688452 RETURNING test");
 print "UPDATE STATUS: $status | RETURNING EXT: ".print_r($basic->insert_id_ext, true)."<br>";
+// REEAD PREPARE
+if ($basic->dbPrepare('sel_foo', "SELECT foo_id, test, some_bool, string_a, number_a, number_a_numeric, some_time FROM foo ORDER BY foo_id DESC LIMIT 5") === false) {
+	print "Error in sel_foo prepare<br>";
+} else {
+	$max_rows = 6;
+	// do not run this in dbFetchArray directly as
+	// dbFetchArray(dbExecute(...))
+	// this will end in an endless loop
+	$cursor = $basic->dbExecute('sel_foo', []);
+	$i = 1;
+	while (($res = $basic->dbFetchArray($cursor, true)) !== false) {
+		print "DB PREP EXEC FETCH ARR: ".$i.": <pre>".print_r($res, true)."</pre><br>";
+		$i ++;
+	}
+}
+
 
 # db write class test
 $table = 'foo';
@@ -346,6 +362,12 @@ foreach ($images as $image) {
 	echo "<div>".basename($image).": WIDTH/HEIGHT: $thumb_width x $thumb_height (+DUMMY)<br><img src=".$basic->createThumbnailSimple($image, $thumb_width, $thumb_height, null, true, false)."></div>";
 	echo "<hr>";
 }
+
+// mime test
+$mime = 'application/vnd.ms-excel';
+print "App for mime: ".$basic->mimeGetAppName($mime)."<br>";
+$basic->mimeSetAppName($mime, 'Microsoft Excel');
+print "App for mime changed: ".$basic->mimeGetAppName($mime)."<br>";
 
 // print error messages
 // print $login->printErrorMsg();

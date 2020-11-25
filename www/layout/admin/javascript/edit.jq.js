@@ -13,8 +13,8 @@ if (!DEBUG) {
 }*/
 
 // open overlay boxes counter
-var GL_OB_S = 10;
-var GL_OB_BASE = 10;
+var GL_OB_S = 30;
+var GL_OB_BASE = 30;
 
 /**
  * opens a popup window with winName and given features (string)
@@ -999,9 +999,10 @@ function html_options(name, data, selected = '', options_only = false, return_st
  * @param  {Boolean} [return_string=false] return as string and not as element
  * @param  {String}  [sort='']             if empty as is, else allowed 'keys',
  *                                         'values' all others are ignored
+ * @param  {String}  [onchange='']         onchange trigger call, default unset
  * @return {String}                        html with build options block
  */
-function html_options_block(name, data, selected = '', multiple = 0, options_only = false, return_string = false, sort = '')
+function html_options_block(name, data, selected = '', multiple = 0, options_only = false, return_string = false, sort = '', onchange = '')
 {
 	var content = [];
 	var element_select;
@@ -1009,12 +1010,15 @@ function html_options_block(name, data, selected = '', multiple = 0, options_onl
 	var element_option;
 	var data_list = []; // for sorted output
 	var value;
-	var option;
+	// var option;
 	if (multiple > 0) {
 		select_options.multiple = '';
 		if (multiple > 1) {
 			select_options.size = multiple;
 		}
+	}
+	if (onchange) {
+		select_options.OnChange = onchange;
 	}
 	// set outside select, gets stripped on return if options only is true
 	element_select = cel('select', name, '', [], select_options);
@@ -1135,6 +1139,9 @@ function html_options_refill(name, data, sort = '')
 			element_option.label = value;
 			element_option.value = key;
 			element_option.innerHTML = value;
+			if (key == option_selected) {
+				element_option.selected = true;
+			}
 			document.getElementById(name).appendChild(element_option);
 		}
 	}

@@ -589,8 +589,8 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * if there is the 'to_encoding' var set, and the field is in the wrong encoding converts it to the target
-	 * @param  array|bool $row array from fetch_row
-	 * @return array|bool            convert fetch_row array, or false
+	 * @param  array|bool|null $row array from fetch_row
+	 * @return array|bool|null            convert fetch_row array, or false
 	 */
 	private function __dbConvertEncoding($row)
 	{
@@ -807,7 +807,9 @@ class IO extends \CoreLibs\Basic
 							// if this has only the pk_name, then only return this, else array of all data (but without the position)
 							// example if insert_id[0]['foo'] && insert_id[0]['bar'] it will become insert_id['foo'] & insert_id['bar']
 							// if only ['foo_id'] and it is the PK then the PK is directly written to the insert_id
-							if (count($this->insert_id[0]) > 1 || !array_key_exists($this->pk_name, $this->insert_id[0])) {
+							if (count($this->insert_id[0]) > 1 ||
+								!array_key_exists($this->pk_name, $this->insert_id[0])
+							) {
 								$this->insert_id_ext = $this->insert_id[0];
 								if (isset($this->insert_id[0][$this->pk_name])) {
 									$this->insert_id = $this->insert_id[0][$this->pk_name];
@@ -1563,8 +1565,9 @@ class IO extends \CoreLibs\Basic
 			}
 			$match = [];
 			// search for $1, $2, in the query and push it into the control array
+			// skip counts for same eg $1, $1, $2 = 2 and not 3
 			preg_match_all('/(\$[0-9]{1,})/', $query, $match);
-			$this->prepare_cursor[$stm_name]['count'] = count($match[1]);
+			$this->prepare_cursor[$stm_name]['count'] = count(array_unique($match[1]));
 			$this->prepare_cursor[$stm_name]['query'] = $query;
 			$result = $this->db_functions->__dbPrepare($stm_name, $query);
 			if ($result) {
@@ -2019,15 +2022,32 @@ class IO extends \CoreLibs\Basic
 		return $value;
 	}
 
+	// ***************************
+	// INTERNAL VARIABLES READ
+	// ***************************
+
 	/**
 	 * return current set insert_id as is
-	 * @return string|int|null Primary key value, most likely int
-	 *                         Empty string for unset
-	 *                         Null for error
+	 * @return array|string|int|null Primary key value, most likely int
+	 *                               Array for multiple return set
+	 *                               Empty string for unset
+	 *                               Null for error
+	 */
+	public function getReturning()
+	{
+		return $this->insert_id;
+	}
+
+	/**
+	 * alternative name, returns insert_id
+	 * @return array|string|int|null Primary key value, most likely int
+	 *                               Array for multiple return set
+	 *                               Empty string for unset
+	 *                               Null for error
 	 */
 	public function getInsertPK()
 	{
-		return $this->insert_id;
+		return $this->getReturning();
 	}
 
 	/**
@@ -2040,7 +2060,7 @@ class IO extends \CoreLibs\Basic
 	 *                                Empty string for unset
 	 *                                Null for error
 	 */
-	public function getInsertReturn($key = null)
+	public function getReturningExt($key = null)
 	{
 		if ($key !== null) {
 			if (isset($this->insert_id_ext[$key])) {
@@ -2053,11 +2073,23 @@ class IO extends \CoreLibs\Basic
 	}
 
 	/**
+	 * old call for getInserReturnExt
+	 * @param  string|null       $key See above
+	 * @return array|string|null      See above
+	 * @deprecated use getInsertReturnExt($key = null) instead
+	 */
+	public function getInsertReturn($key = null)
+	{
+		trigger_error('Method '.__METHOD__.' is deprecated, use getInsertReturnExt($key = null)', E_USER_DEPRECATED);
+		return $this->getReturningExt($key);
+	}
+
+	/**
 	 * returns the full array for cursor ext
 	 * @param  string|null $q Query string, if not null convert to md5
 	 *                        and return set cursor ext for only this
 	 *                        if not found or null return null
-	 * @return array|nul      Cursor Extended array
+	 * @return array|null     Cursor Extended array
 	 *                        Key is md5 string from query run
 	 */
 	public function getCursorExt($q = null)
@@ -2071,6 +2103,17 @@ class IO extends \CoreLibs\Basic
 			}
 		}
 		return $this->cursor_ext;
+	}
+
+	/**
+	 * returns current number of rows that where
+	 * affected by UPDATE/SELECT, etc
+	 * null on empty
+	 * @return int|null Number of rows
+	 */
+	public function getNumRows()
+	{
+		return $this->num_rows ?? null;
 	}
 } // end if db class
 

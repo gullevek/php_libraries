@@ -97,18 +97,10 @@ namespace CoreLibs;
 /** Basic core class declaration */
 class Basic
 {
-	// define check vars for the flags we can have
-	const CLASS_STRICT_MODE = 1;
-	const CLASS_OFF_COMPATIBLE_MODE = 2;
 	// define byteFormat
 	const BYTE_FORMAT_NOSPACE = 1;
 	const BYTE_FORMAT_ADJUST = 2;
 	const BYTE_FORMAT_SI = 4;
-	// control vars
-	/** @var bool compatible mode sets variable even if it is not defined */
-	private $set_compatible = true;
-	/** @var bool strict mode throws an error if the variable is not defined */
-	private $set_strict_mode = false;
 	// page and host name
 	public $page_name;
 	public $host_name;
@@ -187,6 +179,9 @@ class Basic
 	private $form_token = '';
 	// ajax flag
 	protected $ajax_page_flag = false;
+
+	// mime application list
+	private $mime_apps = [];
 
 	/**
 	 * main Basic constructor to init and check base settings
@@ -402,6 +397,9 @@ class Basic
 
 		// key generation init
 		$this->initRandomKeyData();
+
+		// init mime apps
+		$this->mimeInitApps();
 	}
 
 	// METHOD: __destruct
@@ -981,7 +979,7 @@ class Basic
 		return join(
 			'',
 			array_map(
-				function ($value) {
+				function () {
 					return $this->key_range[rand(0, $this->one_key_length - 1)];
 				},
 				range(1, $use_key_length)
@@ -3395,6 +3393,72 @@ class Basic
 		} else {
 			return false;
 		}
+	}
+
+	// *** MIME PARTS
+	// to be moved to some mime class
+
+	/**
+	 * init array for mime type to application name lookup
+	 * @return void
+	 */
+	private function mimeInitApps(): void
+	{
+		// match mime type to some application description
+		// this is NOT translated
+		$this->mime_apps = [
+			// zip
+			'application/zip' => 'Zip File',
+			// Powerpoint
+			'application/vnd.ms-powerpoint' => 'Microsoft Powerpoint',
+			'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'Microsoft Powerpoint',
+			// PDF
+			'pplication/pdf' => 'PDF',
+			// JPEG
+			'image/jpeg' => 'JPEG',
+			// PNG
+			'image/png' => 'PNG',
+			// Indesign
+			'application/x-indesign' => 'Adobe InDesign',
+			// Photoshop
+			'application/photoshop' => 'Adobe Photoshop',
+			// Illustrator
+			'application/illustrator' => 'Adobe Illustrator',
+			// Word
+			'application/vnd.ms-word' => 'Microsoft Word',
+			'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Microsoft Word',
+			// Excel
+			'application/vnd.ms-excel' => 'Microsoft Excel',
+			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'Microsoft Excel',
+			// plain text
+			'text/plain' => 'Text file',
+			// html
+			'text/html' => 'HTML',
+			// mp4 (max 45MB each)
+			'video/mpeg' => 'MPEG Video'
+		];
+	}
+
+	/**
+	 * Sets or updates a mime type
+	 * @param  string $mime MIME Name, no validiation
+	 * @param  string $app  Applicaiton name
+	 * @return void
+	 */
+	public function mimeSetAppName(string $mime, string $app): void
+	{
+		$this->mime_apps[$mime] = $app;
+	}
+
+	/**
+	 * get the application name from mime type
+	 * if not set returns "Other file"
+	 * @param  string $mime MIME Name
+	 * @return string       Application name matching
+	 */
+	public function mimeGetAppName(string $mime): string
+	{
+		return $this->mime_apps[$mime] ?? 'Other file';
 	}
 }
 

@@ -165,13 +165,6 @@ define('DEFAULT_ENCODING', 'UTF-8');
 // see Basic class constructor
 define('LOG_FILE_ID', BASE_NAME);
 
-/************* CLASS ERRORS *******************/
-// 0 = default all OFF
-// 1 = throw notice on unset class var
-// 2 = no notice on unset class var, but do not set undefined class var
-// 3 = throw error and do not set class var
-define('CLASS_VARIABLE_ERROR_MODE', 3);
-
 /************* QUEUE TABLE *************/
 // if we have a dev/live system
 // set_live is a per page/per item
@@ -199,7 +192,7 @@ if (file_exists(BASE.CONFIGS.'config.db.php')) {
 	require BASE.CONFIGS.'config.db.php';
 }
 if (!isset($DB_CONFIG)) {
-	$DB_CONFIG = array();
+	$DB_CONFIG = [];
 }
 /************* OTHER PATHS *****************/
 if (file_exists(BASE.CONFIGS.'config.path.php')) {
