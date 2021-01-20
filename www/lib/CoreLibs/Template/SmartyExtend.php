@@ -67,6 +67,11 @@ class SmartyExtend extends SmartyBC
 	public $JS_TEMPLATE_NAME;
 	public $CSS_TEMPLATE_NAME;
 	public $TEMPLATE_TRANSLATE;
+	// core group
+	public $JS_CORE_TEMPLATE_NAME;
+	public $CSS_CORE_TEMPLATE_NAME;
+	public $JS_CORE_INCLUDE;
+	public $CSS_CORE_INCLUDE;
 	// local names
 	public $JS_SPECIAL_TEMPLATE_NAME = '';
 	public $CSS_SPECIAL_TEMPLATE_NAME = '';
@@ -147,6 +152,55 @@ class SmartyExtend extends SmartyBC
 		$this->lang_dir = BASE.INCLUDES.LANG.CONTENT_PATH;
 	}
 
+	/**
+	 * @return void
+	 */
+	private function setSmartCoreIncludeCssJs(): void
+	{
+		// core CS
+		$this->CSS_CORE_INCLUDE = '';
+		if (file_exists($this->CSS.$this->CSS_CORE_TEMPLATE_NAME) &&
+			is_file($this->CSS.$this->CSS_CORE_TEMPLATE_NAME)
+		) {
+			$this->CSS_CORE_INCLUDE = $this->CSS.$this->CSS_CORE_TEMPLATE_NAME;
+		}
+		// core JS
+		$this->JS_CORE_INCLUDE = '';
+		if (file_exists($this->JAVASCRIPT.$this->JS_CORE_TEMPLATE_NAME) &&
+			is_file($this->JAVASCRIPT.$this->JS_CORE_TEMPLATE_NAME)
+		) {
+			$this->JS_CORE_INCLUDE = $this->JAVASCRIPT.$this->JS_CORE_TEMPLATE_NAME;
+		}
+		// additional per page Javascript include
+		$this->JS_INCLUDE = '';
+		if (file_exists($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME) &&
+			is_file($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME)
+		) {
+			$this->JS_INCLUDE = $this->JAVASCRIPT.$this->JS_TEMPLATE_NAME;
+		}
+		// per page css file
+		$this->CSS_INCLUDE = '';
+		if (file_exists($this->CSS.$this->CSS_TEMPLATE_NAME) &&
+			is_file($this->CSS.$this->CSS_TEMPLATE_NAME)
+		) {
+			$this->CSS_INCLUDE = $this->CSS.$this->CSS_TEMPLATE_NAME;
+		}
+		// optional CSS file
+		$this->CSS_SPECIAL_INCLUDE = '';
+		if (file_exists($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME) &&
+			is_file($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME)
+		) {
+			$this->CSS_SPECIAL_INCLUDE = $this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME;
+		}
+		// optional JS file
+		$this->JS_SPECIAL_INCLUDE = '';
+		if (file_exists($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME) &&
+			is_file($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME)
+		) {
+			$this->JS_SPECIAL_INCLUDE = $this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME;
+		}
+	}
+
 
 	/**
 	 * sets all internal paths and names that need to be passed on to the smarty template
@@ -196,34 +250,8 @@ class SmartyExtend extends SmartyBC
 			$this->COMPILE_ID .= '_'.$this->TEMPLATE_NAME;
 			$this->CACHE_ID .= '_'.$this->TEMPLATE_NAME;
 		}
-		// additional per page Javascript include
-		$this->JS_INCLUDE = '';
-		if (file_exists($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME) &&
-			is_file($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME)
-		) {
-			$this->JS_INCLUDE = $this->JAVASCRIPT.$this->JS_TEMPLATE_NAME;
-		}
-		// per page css file
-		$this->CSS_INCLUDE = '';
-		if (file_exists($this->CSS.$this->CSS_TEMPLATE_NAME) &&
-			is_file($this->CSS.$this->CSS_TEMPLATE_NAME)
-		) {
-			$this->CSS_INCLUDE = $this->CSS.$this->CSS_TEMPLATE_NAME;
-		}
-		// optional CSS file
-		$this->CSS_SPECIAL_INCLUDE = '';
-		if (file_exists($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME) &&
-			is_file($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME)
-		) {
-			$this->CSS_SPECIAL_INCLUDE = $this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME;
-		}
-		// optional JS file
-		$this->JS_SPECIAL_INCLUDE = '';
-		if (file_exists($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME) &&
-			is_file($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME)
-		) {
-			$this->JS_SPECIAL_INCLUDE = $this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME;
-		}
+		// set all the additional CSS/JS parths
+		$this->setSmartCoreIncludeCssJs();
 		// check if template names exist
 		if (!$this->MASTER_TEMPLATE_NAME) {
 			exit('MASTER TEMPLATE is not set');
@@ -294,36 +322,12 @@ class SmartyExtend extends SmartyBC
 		// jquery and prototype should not be used together
 		$this->HEADER['USE_JQUERY'] = $this->USE_JQUERY;
 
-		// additional per page Javascript include
-		$this->JS_INCLUDE = '';
-		if (file_exists($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME) &&
-			is_file($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME)
-		) {
-			$this->JS_INCLUDE = $this->JAVASCRIPT.$this->JS_TEMPLATE_NAME;
-		}
-		// per page css file
-		$this->CSS_INCLUDE = '';
-		if (file_exists($this->CSS.$this->CSS_TEMPLATE_NAME) &&
-			is_file($this->CSS.$this->CSS_TEMPLATE_NAME)
-		) {
-			$this->CSS_INCLUDE = $this->CSS.$this->CSS_TEMPLATE_NAME;
-		}
-		// optional CSS file
-		$this->CSS_SPECIAL_INCLUDE = '';
-		if (file_exists($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME) &&
-			is_file($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME)
-		) {
-			$this->CSS_SPECIAL_INCLUDE = $this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME;
-		}
-		// optional JS file
-		$this->JS_SPECIAL_INCLUDE = '';
-		if (file_exists($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME) &&
-			is_file($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME)
-		) {
-			$this->JS_SPECIAL_INCLUDE = $this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME;
-		}
+		// set all the additional CSS/JS parths
+		$this->setSmartCoreIncludeCssJs();
 
 		// the actual include files for javascript (per page)
+		$this->HEADER['JS_CORE_INCLUDE'] = $this->JS_CORE_INCLUDE;
+		$this->HEADER['CSS_CORE_INCLUDE'] = $this->CSS_CORE_INCLUDE;
 		$this->HEADER['JS_INCLUDE'] = $this->JS_INCLUDE;
 		$this->HEADER['CSS_INCLUDE'] = $this->CSS_INCLUDE;
 		$this->HEADER['CSS_SPECIAL_INCLUDE'] = $this->CSS_SPECIAL_INCLUDE;

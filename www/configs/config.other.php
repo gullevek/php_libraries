@@ -11,11 +11,11 @@
 
 /************* CONVERT *******************/
 // this only needed if the external thumbnail create is used
-$paths = array(
+$paths = [
 	'/bin',
 	'/usr/bin',
 	'/usr/local/bin'
-);
+];
 // find convert
 foreach ($paths as $path) {
 	if (file_exists($path.DS.'convert') && is_file($path.DS.'convert')) {

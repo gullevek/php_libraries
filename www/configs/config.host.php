@@ -21,9 +21,9 @@
 // );
 
 // each host has a different db_host
-$SITE_CONFIG = array(
+$SITE_CONFIG = [
 	// development host
-	'soba.tokyo.tequila.jp' => array(
+	'soba.tokyo.tequila.jp' => [
 		// db config selection
 		'db_host' => 'test',
 		// other db connections
@@ -37,8 +37,8 @@ $SITE_CONFIG = array(
 		'site_lang' => 'en_utf8',
 		// enable/disable login override
 		'login_enabled' => true
-	),
+	],
 	// 'other.host.com' => $__LOCAL_CONFIG
-);
+];
 
 // __END__

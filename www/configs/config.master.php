@@ -185,7 +185,7 @@ if (file_exists(BASE.CONFIGS.'config.host.php')) {
 	require BASE.CONFIGS.'config.host.php';
 }
 if (!isset($SITE_CONFIG)) {
-	$SITE_CONFIG = array();
+	$SITE_CONFIG = [];
 }
 /************* DB ACCESS *****************/
 if (file_exists(BASE.CONFIGS.'config.db.php')) {
@@ -238,7 +238,7 @@ if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVE
 }
 // define the db config set name, the db config and the db schema
 define('DB_CONFIG_NAME', $SITE_CONFIG[HOST_NAME]['db_host']);
-define('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ? $DB_CONFIG[DB_CONFIG_NAME] : array());
+define('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ? $DB_CONFIG[DB_CONFIG_NAME] : []);
 // define('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
 // define('DB_CONFIG_OTHER', SITE_CONFIG[$HOST_NAME]['db_host_other']);
 // override for login and global schemas

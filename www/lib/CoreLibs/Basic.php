@@ -976,15 +976,11 @@ class Basic
 			$use_key_length = $this->key_length;
 		}
 
-		return join(
-			'',
-			array_map(
-				function () {
-					return $this->key_range[rand(0, $this->one_key_length - 1)];
-				},
-				range(1, $use_key_length)
-			)
-		);
+		$pieces = [];
+		for ($i = 1; $i <= $use_key_length; $i ++) {
+			$pieces[] = $this->key_range[random_int(0, $this->one_key_length - 1)];
+		}
+		return join('', $pieces);
 	}
 
 	// ****** RANDOM KEY GEN ******

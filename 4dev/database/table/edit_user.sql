@@ -31,6 +31,7 @@ CREATE TABLE edit_user (
 	email	VARCHAR,
 	protected SMALLINT NOT NULL DEFAULT 0,
 	admin	SMALLINT NOT NULL DEFAULT 0,
+	last_login	TIMESTAMP WITHOUT TIME ZONE,
 	login_error_count	INT DEFAULT 0,
 	login_error_date_last	TIMESTAMP WITHOUT TIME ZONE,
 	login_error_date_first	TIMESTAMP WITHOUT TIME ZONE,

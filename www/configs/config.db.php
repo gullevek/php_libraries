@@ -8,8 +8,8 @@
 *********************************************************************/
 
 // please be VERY carefull only to change the right side
-$DB_CONFIG = array(
-	'test' => array(
+$DB_CONFIG = [
+	'test' => [
 		'db_name' => 'gullevek',
 		'db_user' => 'gullevek',
 		'db_pass' => 'gullevek',
@@ -19,7 +19,7 @@ $DB_CONFIG = array(
 		'db_type' => 'pgsql',
 		'db_encoding' => '',
 		'db_ssl' => 'disable' // allow, disable, require, prefer
-	)
-);
+	]
+];
 
 // __END__

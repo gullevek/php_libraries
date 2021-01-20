@@ -154,8 +154,8 @@ function __(string)
  * simple sprintf formater for replace
  * usage: "{0} is cool, {1} is not".format("Alpha", "Beta");
  * First, checks if it isn't implemented yet.
- * @param  {String} !String.prototype.format string with elements to be replaced
- * @return {String}                          Formated string
+ * @param  {String} String.prototype.format string with elements to be replaced
+ * @return {String}                         Formated string
  */
 if (!String.prototype.format) {
 	String.prototype.format = function()
@@ -168,6 +168,18 @@ if (!String.prototype.format) {
 				match
 			;
 		});
+	};
+}
+
+/**
+ * round to digits (float)
+ * @param  {Float}  Number.prototype.round Float type number to round
+ * @param  {Number} prec                   Precision to round to
+ * @return {Float}                         Rounded number
+ */
+if (Number.prototype.round) {
+	Number.prototype.round = function (prec) {
+		return Math.round(this * Math.pow(10, prec)) / Math.pow(10, prec);
 	};
 }
 
@@ -630,7 +642,7 @@ function showActionIndicator(loc)
 
 /**
  * hide action indicator, if it is visiable
- * If the global variable GL_OB_S is > 10 then
+ * If the global variable GL_OB_S is > GL_OB_BASE then
  * the overlayBox is not hidden but the zIndex
  * is set to this value
  * @param {String} loc ID string, only used for console log
@@ -954,7 +966,7 @@ function phfo(tree)
 function phfa(list)
 {
 	var content = [];
-	for (i = 0; i < list.length; i ++) {
+	for (var i = 0; i < list.length; i ++) {
 		content.push(phfo(list[i]));
 	}
 	return content.join('');

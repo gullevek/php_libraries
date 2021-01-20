@@ -1201,6 +1201,10 @@ class IO extends \CoreLibs\Basic
 						$this->db_functions->__dbResultType($assoc_only)
 					)
 				);
+				// if returned is NOT an array, abort to false
+				if (!is_array($return)) {
+					$return = false;
+				}
 			}
 			// check if cached call or reset call ...
 			if (!$return && !$reset) {
@@ -2076,11 +2080,11 @@ class IO extends \CoreLibs\Basic
 	 * old call for getInserReturnExt
 	 * @param  string|null       $key See above
 	 * @return array|string|null      See above
-	 * @deprecated use getInsertReturnExt($key = null) instead
+	 * @deprecated use getReturningExt($key = null) instead
 	 */
 	public function getInsertReturn($key = null)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use getInsertReturnExt($key = null)', E_USER_DEPRECATED);
+		trigger_error('Method '.__METHOD__.' is deprecated, use getReturningExt($key = null)', E_USER_DEPRECATED);
 		return $this->getReturningExt($key);
 	}
 

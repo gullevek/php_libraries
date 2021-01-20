@@ -22,7 +22,7 @@ if (!defined('DS')) {
 	exit('Base config unloadable');
 }
 // find trigger name "admin/" or "frontend/" in the getcwd() folder
-foreach (array('admin', 'frontend') as $folder) {
+foreach (['admin', 'frontend'] as $folder) {
 	if (strstr(getcwd(), DS.$folder)) {
 		define('CONTENT_PATH', $folder.DS);
 		break;
