@@ -2037,7 +2037,7 @@ class IO extends \CoreLibs\Basic
 	 *                               Empty string for unset
 	 *                               Null for error
 	 */
-	public function getReturning()
+	public function dbGetReturning()
 	{
 		return $this->insert_id;
 	}
@@ -2049,9 +2049,9 @@ class IO extends \CoreLibs\Basic
 	 *                               Empty string for unset
 	 *                               Null for error
 	 */
-	public function getInsertPK()
+	public function dbGetInsertPK()
 	{
-		return $this->getReturning();
+		return $this->dbGetReturning();
 	}
 
 	/**
@@ -2064,7 +2064,7 @@ class IO extends \CoreLibs\Basic
 	 *                                Empty string for unset
 	 *                                Null for error
 	 */
-	public function getReturningExt($key = null)
+	public function dbGetReturningExt($key = null)
 	{
 		if ($key !== null) {
 			if (isset($this->insert_id_ext[$key])) {
@@ -2077,18 +2077,6 @@ class IO extends \CoreLibs\Basic
 	}
 
 	/**
-	 * old call for getInserReturnExt
-	 * @param  string|null       $key See above
-	 * @return array|string|null      See above
-	 * @deprecated use getReturningExt($key = null) instead
-	 */
-	public function getInsertReturn($key = null)
-	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use getReturningExt($key = null)', E_USER_DEPRECATED);
-		return $this->getReturningExt($key);
-	}
-
-	/**
 	 * returns the full array for cursor ext
 	 * @param  string|null $q Query string, if not null convert to md5
 	 *                        and return set cursor ext for only this
@@ -2096,7 +2084,7 @@ class IO extends \CoreLibs\Basic
 	 * @return array|null     Cursor Extended array
 	 *                        Key is md5 string from query run
 	 */
-	public function getCursorExt($q = null)
+	public function dbGetCursorExt($q = null)
 	{
 		if ($q !== null) {
 			$q_md5 = md5($q);
@@ -2115,9 +2103,90 @@ class IO extends \CoreLibs\Basic
 	 * null on empty
 	 * @return int|null Number of rows
 	 */
-	public function getNumRows()
+	public function dbGetNumRows()
 	{
 		return $this->num_rows ?? null;
+	}
+
+	/**
+	 * Switches db debug flag on or off
+	 * returns current set stats
+	 * @return bool True for debug is on, False for off
+	 */
+	public function dbToggleDebug()
+	{
+		return $this->db_debug = $this->db_debug ? false : true;
+	}
+
+	// DEPEREACTED CALLS
+
+	/**
+	 * old call for getInserReturnExt
+	 * @param  string|null       $key See above
+	 * @return array|string|null      See above
+	 * @deprecated use getReturningExt($key = null) instead
+	 */
+	public function getInsertReturn($key = null)
+	{
+		trigger_error('Method '.__METHOD__.' is deprecated, use getReturningExt($key = null)', E_USER_DEPRECATED);
+		return $this->dbGetReturningExt($key);
+	}
+
+	/**
+	 * DEPRECATED: getReturning
+	 * @return array|string|int|null [DEPRECATED]
+	 * @deprecated use dbGetReturning() instead
+	 */
+	public function getReturning()
+	{
+		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetReturning()', E_USER_DEPRECATED);
+		return $this->dbGetReturning();
+	}
+
+	/**
+	 * DEPRECATED: getInsertPK
+	 * @return array|string|int|null [DEPRECATED]
+	 * @deprecated use dbGetInsertPK() instead
+	 */
+	public function getInsertPK()
+	{
+		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetInsertPK()', E_USER_DEPRECATED);
+		return $this->dbGetReturning();
+	}
+
+	/**
+	 * DEPRECATED: getReturningExt
+	 * @param  string|null $lkey [DEPRECATED]
+	 * @return array|string|null [DEPRECATED]
+	 * @deprecated use dbGetReturningExt($key = null) instead
+	 */
+	public function getReturningExt($key = null)
+	{
+		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetReturningExt($key = null)', E_USER_DEPRECATED);
+		return $this->dbGetReturningExt($key);
+	}
+
+	/**
+	 * DEPRECATED: getCursorExt
+	 * @param  string|null $q [DEPRECATED]
+	 * @return array|null [DEPRECATED]
+	 * @deprecated use dbGetCursorExt($q = null) instead
+	 */
+	public function getCursorExt($q = null)
+	{
+		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetCursorExt($q = null)', E_USER_DEPRECATED);
+		return $this->dbGetCursorExt($q);
+	}
+
+	/**
+	 * DEPRECATED: getNumRows
+	 * @return int|null [DEPRECATED]
+	 * @deprecated use dbGetNumRows() instead
+	 */
+	public function getNumRows()
+	{
+		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetNumRows()', E_USER_DEPRECATED);
+		return $this->getNumRows();
 	}
 } // end if db class
 

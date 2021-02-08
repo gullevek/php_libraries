@@ -16,6 +16,9 @@
 	{if $STYLESHEET}
 	<link rel=stylesheet type="text/css" href="{$css}{$STYLESHEET}">
 	{/if}
+	{if $CSS_CORE_INCLUDE}
+	<link rel=stylesheet type="text/css" href="{$CSS_CORE_INCLUDE}">
+	{/if}
 	{if $CSS_INCLUDE}
 	<link rel=stylesheet type="text/css" href="{$CSS_INCLUDE}">
 	{/if}
@@ -23,9 +26,6 @@
 	<link rel=stylesheet type="text/css" href="{$CSS_SPECIAL_INCLUDE}">
 	{/if}
 	<script language="JavaScript" src="{$js}/firebug.js"></script>
-	{if $JAVASCRIPT}
-	<script language="JavaScript" src="{$js}{$JAVASCRIPT}"></script>
-	{/if}
 	{if $USE_JQUERY}
 	{* JQuery *}
 	<script type="text/javascript" src="{$js}/jquery.min.js"></script>
@@ -36,6 +36,12 @@
 		{if $USE_SCRIPTACULOUS}
 	<script src="{$js}/scriptaculous/scriptaculous.js" type="text/javascript"></script>
 		{/if}
+	{/if}
+	{if $JAVASCRIPT}
+	<script language="JavaScript" src="{$js}{$JAVASCRIPT}"></script>
+	{/if}
+	{if $JS_CORE_INCLUDE}
+	<script language="JavaScript" src="{$JS_CORE_INCLUDE}"></script>
 	{/if}
 	{if $JS_INCLUDE}
 	<script language="JavaScript" src="{$JS_INCLUDE}"></script>
