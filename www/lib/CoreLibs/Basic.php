@@ -183,6 +183,9 @@ class Basic
 	// mime application list
 	private $mime_apps = [];
 
+	// last json error
+	private $json_last_error;
+
 	/**
 	 * main Basic constructor to init and check base settings
 	 */
@@ -1711,54 +1714,28 @@ class Basic
 
 	/**
 	 * calculates the bytes based on a string with nnG, nnGB, nnM, etc
-	 * if the number has a non standard thousand seperator ","" inside, the second
-	 * flag needs to be set true (eg german style notaded numbers)
 	 * @param  string|int|float $number       any string or number to convert
-	 * @param  bool             $dot_thousand default is ".", set true for ","
 	 * @return string|int|float               converted value or original value
 	 */
-	public static function stringByteFormat($number, bool $dot_thousand = false)
+	public static function stringByteFormat($number)
 	{
 		$matches = [];
+		// all valid units
+		$valid_units_ = 'bkmgtpezy';
 		// detects up to exo bytes
-		preg_match("/([\d.,]*)\s?(eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/", strtolower($number), $matches);
+		preg_match("/([\d.,]*)\s?(eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/i", strtolower($number), $matches);
 		if (isset($matches[1]) && isset($matches[2])) {
-			// $last = strtolower($number[strlen($number) - 1]);
-			if ($dot_thousand === false) {
-				$number = str_replace(',', '', $matches[1]);
-			} else {
-				$number = str_replace('.', '', $matches[1]);
-			}
+			// remove all non valid characters from the number
+			$number = preg_replace('/[^0-9\.]/', '', $matches[1]);
+			// final clean up and convert to float
 			$number = (float)trim($number);
-			// match string in type to calculate
-			switch ($matches[2]) {
-				// exo bytes
-				case 'e':
-				case 'eb':
-					$number *= 1024;
-				// peta bytes
-				case 'p':
-				case 'pb':
-					$number *= 1024;
-				// tera bytes
-				case 't':
-				case 'tb':
-					$number *= 1024;
-				// giga bytes
-				case 'g':
-				case 'gb':
-					$number *= 1024;
-				// mega bytes
-				case 'm':
-				case 'mb':
-					$number *= 1024;
-				// kilo bytes
-				case 'k':
-				case 'kb':
-					$number *= 1024;
-					break;
+			// convert any mb/gb/etc to single m/b
+			$unit = preg_replace('/[^bkmgtpezy]/i', '', $matches[2]);
+			if ($unit) {
+				$number = $number * pow(1024, stripos($valid_units_, $unit[0]));
 			}
-			$number = (int)round($number, 0);
+			// convert to INT to avoid +E output
+			$number = (int)round($number);
 		}
 		// if not matching return as is
 		return $number;
@@ -3455,6 +3432,77 @@ class Basic
 	public function mimeGetAppName(string $mime): string
 	{
 		return $this->mime_apps[$mime] ?? 'Other file';
+	}
+
+
+	/**
+	 * converts a json string to an array
+	 * or inits an empty array on null string
+	 * or failed convert to array
+	 * In ANY case it will ALWAYS return array.
+	 * Does not throw errors
+	 * @param  string|null $json     a json string, or null data
+	 * @param  bool        $override if set to true, then on json error
+	 *                               set original value as array
+	 * @return array                 returns an array from the json values
+	 */
+	public function jsonConvertToArray(?string $json, bool $override = false): array
+	{
+		if ($json !== null) {
+			$_json = json_decode($json, true);
+			if ($this->json_last_error = json_last_error()) {
+				if ($override == true) {
+					// init return as array with original as element
+					$json = [$json];
+				} else {
+					$json = [];
+				}
+			} else {
+				$json = $_json;
+			}
+		} else {
+			$json = [];
+		}
+		// be sure that we return an array
+		return (array)$json;
+	}
+
+	/**
+	 * [jsonGetLastError description]
+	 * @param  bool|boolean $return_string [default=false] if set to true
+	 *                                     it will return the message string and not
+	 *                                     the error number
+	 * @return int|string                  Either error number (0 for no error)
+	 *                                     or error string ('' for no error)
+	 */
+	public function jsonGetLastError(bool $return_string = false)
+	{
+		$json_error_string = '';
+		// valid errors as of php 8.0
+		switch ($this->json_last_error) {
+			case JSON_ERROR_NONE:
+				$json_error_string = '';
+				break;
+			case JSON_ERROR_DEPTH:
+				$json_error_string = 'Maximum stack depth exceeded';
+				break;
+			case JSON_ERROR_STATE_MISMATCH:
+				$json_error_string = 'Underflow or the modes mismatch';
+				break;
+			case JSON_ERROR_CTRL_CHAR:
+				$json_error_string = 'Unexpected control character found';
+				break;
+			case JSON_ERROR_SYNTAX:
+				$json_error_string = 'Syntax error, malformed JSON';
+				break;
+			case JSON_ERROR_UTF8:
+				$json_error_string = 'Malformed UTF-8 characters, possibly incorrectly encoded';
+				break;
+			default:
+				$json_error_string = 'Unknown error';
+				break;
+		}
+		return $return_string === true ? $json_error_string : $this->json_last_error;
 	}
 }
 

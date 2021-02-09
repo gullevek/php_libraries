@@ -2110,12 +2110,20 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * Switches db debug flag on or off
+	 * OR
+	 * with the optional parameter fix sets debug
 	 * returns current set stats
+	 * @param  bool|null $debug Flag to turn debug on off
 	 * @return bool True for debug is on, False for off
 	 */
-	public function dbToggleDebug()
+	public function dbToggleDebug(?bool $debug = null)
 	{
-		return $this->db_debug = $this->db_debug ? false : true;
+		if ($debug !== null) {
+			$this->db_debug = $debug;
+		} else {
+			$this->db_debug = $this->db_debug ? false : true;
+		}
+		return $this->db_debug;
 	}
 
 	// DEPEREACTED CALLS
@@ -2156,7 +2164,7 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * DEPRECATED: getReturningExt
-	 * @param  string|null $lkey [DEPRECATED]
+	 * @param  string|null $key [DEPRECATED]
 	 * @return array|string|null [DEPRECATED]
 	 * @deprecated use dbGetReturningExt($key = null) instead
 	 */
@@ -2186,7 +2194,7 @@ class IO extends \CoreLibs\Basic
 	public function getNumRows()
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetNumRows()', E_USER_DEPRECATED);
-		return $this->getNumRows();
+		return $this->dbGetNumRows();
 	}
 } // end if db class
 
