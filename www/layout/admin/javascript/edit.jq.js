@@ -119,16 +119,18 @@ function setCenter(id, left, top)
 
 /**
  * goes to an element id position
- * @param {String} element element id to move to
- * @param {Number} offset  offset from top, default is 0 (px)
+ * @param {String} element            element id to move to
+ * @param {Number} [offset=0]         offset from top, default is 0 (px)
+ * @param {Number} [duration=500]     animation time, default 500ms
+ * @param {String} [base='body,html'] base element for offset scroll
  */
-function goToPos(element, offset = 0)
+function goToPos(element, offset = 0, duration = 500, base = 'body,html')
 {
 	try {
 		if ($('#' + element).length) {
-			$('body,html').animate({
+			$(base).animate({
 				scrollTop: $('#' + element).offset().top - offset
-			}, 500);
+			}, duration);
 		}
 	} catch (err) {
 		errorCatch(err);
@@ -190,9 +192,9 @@ if (Number.prototype.round) {
  */
 function numberWithCommas(x)
 {
-	var parts = x.toString().split(".");
-	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-	return parts.join(".");
+	var parts = x.toString().split('.');
+	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+	return parts.join('.');
 }
 
 /**

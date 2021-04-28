@@ -273,6 +273,7 @@ class IO extends \CoreLibs\Basic
 	public $field_names = []; // array with the field names of the current query
 	public $insert_id; // last inserted ID
 	public $insert_id_ext; // extended insert ID (for data outside only primary key)
+	public $insert_id_arr; // always return as array, even if only one
 	private $temp_sql;
 	// other vars
 	private $nbsp = ''; // used by print_array recursion function
@@ -595,16 +596,16 @@ class IO extends \CoreLibs\Basic
 	private function __dbConvertEncoding($row)
 	{
 		// only do if array, else pass through row (can be false)
-		if (is_array($row)) {
-			if ($this->to_encoding && $this->db_encoding) {
-				// go through each row and convert the encoding if needed
-				foreach ($row as $key => $value) {
-					$from_encoding = mb_detect_encoding($value);
-					// convert only if encoding doesn't match and source is not pure ASCII
-					if ($from_encoding != $this->to_encoding && $from_encoding != 'ASCII') {
-						$row[$key] = mb_convert_encoding($value, $this->to_encoding, $from_encoding);
-					}
-				}
+		if (!is_array($row) || empty($this->to_encoding) || empty($this->db_encoding)
+		) {
+			return $row;
+		}
+		// go through each row and convert the encoding if needed
+		foreach ($row as $key => $value) {
+			$from_encoding = mb_detect_encoding($value);
+			// convert only if encoding doesn't match and source is not pure ASCII
+			if ($from_encoding != $this->to_encoding && $from_encoding != 'ASCII') {
+				$row[$key] = mb_convert_encoding($value, $this->to_encoding, $from_encoding);
 			}
 		}
 		return $row;
@@ -787,9 +788,12 @@ class IO extends \CoreLibs\Basic
 					// if we do not have a returning, we try to get it via the primary key and another select
 					if (!$this->returning_id) {
 						$this->insert_id = $this->db_functions->__dbInsertId($this->query, $this->pk_name);
+						$this->insert_id_ext = $this->insert_id;
+						$this->insert_id_arr[] = $this->insert_id;
 					} else {
 						$this->insert_id = [];
 						$this->insert_id_ext = [];
+						$this->insert_id_arr = [];
 						// echo "** PREPARE RETURNING FOR CURSOR: ".$this->cursor."<br>";
 						// we have returning, now we need to check if we get one or many returned
 						// we'll need to loop this, if we have multiple insert_id returns
@@ -799,6 +803,7 @@ class IO extends \CoreLibs\Basic
 						)) {
 							// echo "*** RETURNING: ".print_r($_insert_id, true)."<br>";
 							$this->insert_id[] = $_insert_id;
+							$this->insert_id_arr[] = $_insert_id;
 						}
 						// if we have only one, revert from array to single
 						if (count($this->insert_id) == 1) {
@@ -1613,71 +1618,74 @@ class IO extends \CoreLibs\Basic
 			$this->error_id = 23;
 			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Array data count does not match prepared fields. Need: '.$this->prepare_cursor[$stm_name]['count'].', has: '.count($data).'</span>', 'DB_ERROR');
 			return false;
-		} else {
-			if ($this->db_debug) {
-				$this->__dbDebug('db', $this->__dbDebugPrepare($stm_name, $data), 'dbExecPrep', 'Q');
-			}
-			$result = $this->db_functions->__dbExecute($stm_name, $data);
-			if (!$result) {
-				$this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[$stm_name]['result'].']: '.$this->printAr($data));
-				$this->error_id = 22;
-				$this->__dbError($this->prepare_cursor[$stm_name]['result']);
-				$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Execution failed</span>', 'DB_ERROR');
-				return false;
-			}
-			if ($this->__checkQueryForInsert($this->prepare_cursor[$stm_name]['query'], true) &&
-				$this->prepare_cursor[$stm_name]['pk_name'] != 'NULL'
-			) {
-				if (!$this->prepare_cursor[$stm_name]['returning_id']) {
-					$this->insert_id = $this->db_functions->__dbInsertId($this->prepare_cursor[$stm_name]['query'], $this->prepare_cursor[$stm_name]['pk_name']);
-				} elseif ($result) {
-					$this->insert_id = [];
-					$this->insert_id_ext = [];
-					// we have returning, now we need to check if we get one or many returned
-					// we'll need to loop this, if we have multiple insert_id returns
-					while ($_insert_id = $this->db_functions->__dbFetchArray(
-						$result,
-						$this->db_functions->__dbResultType(true)
-					)) {
-						$this->insert_id[] = $_insert_id;
-					}
-					// if we have only one, revert from arry to single
-					if (count($this->insert_id) == 1) {
-						// echo "+ SINGLE DATA CONVERT: ".count($this->insert_id[0])." => ".array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])."<br>";
-						// echo "+ PK DIRECT: ".$this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]."<Br>";
-						// if this has only the pk_name, then only return this, else array of all data (but without the position)
-						// example if insert_id[0]['foo'] && insert_id[0]['bar'] it will become insert_id['foo'] & insert_id['bar']
-						// if only ['foo_id'] and it is the PK then the PK is directly written to the insert_id
-						if (count($this->insert_id[0]) > 1 ||
-							!array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])
-						) {
-							$this->insert_id_ext = $this->insert_id[0];
-							$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
-						} elseif ($this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]) {
-							$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
-						}
-					} elseif (count($this->insert_id) == 0) {
-						// failed to get insert id
-						$this->insert_id = '';
-						$this->warning_id = 33;
-						$this->__dbError();
-						$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id returned no data</span>', 'DB_WARNING');
-					}
-				}
-				// this error handling is only for pgsql
-				if (is_array($this->insert_id)) {
-					$this->warning_id = 32;
-					$this->__dbError();
-					$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id data returned as array</span>', 'DB_WARNING');
-				} elseif (!$this->insert_id) {
-					// NOTE should we keep this inside
-					$this->warning_id = 31;
-					$this->__dbError();
-					$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': Could not get insert id</span>', 'DB_WARNING');
-				}
-			}
-			return $result;
 		}
+		if ($this->db_debug) {
+			$this->__dbDebug('db', $this->__dbDebugPrepare($stm_name, $data), 'dbExecPrep', 'Q');
+		}
+		$result = $this->db_functions->__dbExecute($stm_name, $data);
+		if (!$result) {
+			$this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[$stm_name]['result'].']: '.$this->printAr($data));
+			$this->error_id = 22;
+			$this->__dbError($this->prepare_cursor[$stm_name]['result']);
+			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Execution failed</span>', 'DB_ERROR');
+			return false;
+		}
+		if ($this->__checkQueryForInsert($this->prepare_cursor[$stm_name]['query'], true) &&
+			$this->prepare_cursor[$stm_name]['pk_name'] != 'NULL'
+		) {
+			if (!$this->prepare_cursor[$stm_name]['returning_id']) {
+				$this->insert_id = $this->db_functions->__dbInsertId($this->prepare_cursor[$stm_name]['query'], $this->prepare_cursor[$stm_name]['pk_name']);
+				$this->insert_id_ext = $this->insert_id;
+				$this->insert_id_arr[] = $this->insert_id;
+			} elseif ($result) {
+				$this->insert_id = [];
+				$this->insert_id_ext = [];
+				$this->insert_id_arr = [];
+				// we have returning, now we need to check if we get one or many returned
+				// we'll need to loop this, if we have multiple insert_id returns
+				while ($_insert_id = $this->db_functions->__dbFetchArray(
+					$result,
+					$this->db_functions->__dbResultType(true)
+				)) {
+					$this->insert_id[] = $_insert_id;
+					$this->insert_id_arr[] = $_insert_id;
+				}
+				// if we have only one, revert from arry to single
+				if (count($this->insert_id) == 1) {
+					// echo "+ SINGLE DATA CONVERT: ".count($this->insert_id[0])." => ".array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])."<br>";
+					// echo "+ PK DIRECT: ".$this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]."<Br>";
+					// if this has only the pk_name, then only return this, else array of all data (but without the position)
+					// example if insert_id[0]['foo'] && insert_id[0]['bar'] it will become insert_id['foo'] & insert_id['bar']
+					// if only ['foo_id'] and it is the PK then the PK is directly written to the insert_id
+					if (count($this->insert_id[0]) > 1 ||
+						!array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])
+					) {
+						$this->insert_id_ext = $this->insert_id[0];
+						$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
+					} elseif ($this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]) {
+						$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
+					}
+				} elseif (count($this->insert_id) == 0) {
+					// failed to get insert id
+					$this->insert_id = '';
+					$this->warning_id = 33;
+					$this->__dbError();
+					$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id returned no data</span>', 'DB_WARNING');
+				}
+			}
+			// this error handling is only for pgsql
+			if (is_array($this->insert_id)) {
+				$this->warning_id = 32;
+				$this->__dbError();
+				$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id data returned as array</span>', 'DB_WARNING');
+			} elseif (!$this->insert_id) {
+				// NOTE should we keep this inside
+				$this->warning_id = 31;
+				$this->__dbError();
+				$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': Could not get insert id</span>', 'DB_WARNING');
+			}
+		}
+		return $result;
 	}
 
 	/**
@@ -2074,6 +2082,15 @@ class IO extends \CoreLibs\Basic
 			}
 		}
 		return $this->insert_id_ext;
+	}
+
+	/**
+	 * Always returns the returning block as an array
+	 * @return array All returning data as array. even if one row only
+	 */
+	public function dbGetReturningArray(): array
+	{
+		return $this->insert_id_arr;
 	}
 
 	/**

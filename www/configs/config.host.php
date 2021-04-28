@@ -12,13 +12,13 @@
 *********************************************************************/
 
 // other master config to attach
-// $__LOCAL_CONFIG = array(
+// $__LOCAL_CONFIG = [
 // 	'db_host' => '',
 // 	'location' => '',
 //	'debug_flag' => true,
 //	'site_lang' => 'en_utf8',
 //	'login_enabled' => true
-// );
+// ];
 
 // each host has a different db_host
 $SITE_CONFIG = [

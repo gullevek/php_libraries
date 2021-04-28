@@ -1701,6 +1701,10 @@ class Basic
 			// label name, including leading space if flagged
 			$pre = ($space ? ' ' : '').($labels[$exp] ?? '>E').($si ? 'i' : '').'B';
 			$bytes_calc = $abs_bytes / pow($unit, $exp);
+			// if original is negative, reverse
+			if ($bytes < 0) {
+				$bytes_calc *= -1;
+			}
 			if ($adjust) {
 				return sprintf("%.2f%sB", $bytes_calc, $pre);
 			} else {
@@ -2179,8 +2183,8 @@ class Basic
 			$thumbnail_write_path = null;
 			$thumbnail_web_path = null;
 			// path set first
-			if ($img_type == IMG_JPG ||
-				$img_type == IMG_PNG ||
+			if ($img_type == IMAGETYPE_JPEG ||
+				$img_type == IMAGETYPE_PNG ||
 				$create_dummy === true
 			) {
 				// $this->debug('IMAGE PREPARE', "IMAGE TYPE OK: ".$inc_width.'x'.$inc_height);
@@ -2196,8 +2200,8 @@ class Basic
 				}
 			}
 			// do resize or fall back on dummy run
-			if ($img_type == IMG_JPG ||
-				$img_type == IMG_PNG
+			if ($img_type == IMAGETYPE_JPEG ||
+				$img_type == IMAGETYPE_PNG
 			) {
 				// if missing width or height in thumb, use the set one
 				if ($thumb_width == 0) {
@@ -2238,7 +2242,7 @@ class Basic
 					) {
 						// image, copy source image, offset in image, source x/y, new size, source image size
 						$thumb = imagecreatetruecolor($thumb_width_r, $thumb_height_r);
-						if ($img_type == IMG_PNG) {
+						if ($img_type == IMAGETYPE_PNG) {
 							// preservere transaprency
 							imagecolortransparent(
 								$thumb,
@@ -2249,10 +2253,10 @@ class Basic
 						}
 						$source = null;
 						switch ($img_type) {
-							case IMG_JPG:
+							case IMAGETYPE_JPEG:
 								$source = imagecreatefromjpeg($filename);
 								break;
-							case IMG_PNG:
+							case IMAGETYPE_PNG:
 								$source = imagecreatefrompng($filename);
 								break;
 						}
@@ -2266,10 +2270,10 @@ class Basic
 							}
 							// write file
 							switch ($img_type) {
-								case IMG_JPG:
+								case IMAGETYPE_JPEG:
 									imagejpeg($thumb, $thumbnail_write_path.$thumbnail, $jpeg_quality);
 									break;
-								case IMG_PNG:
+								case IMAGETYPE_PNG:
 									imagepng($thumb, $thumbnail_write_path.$thumbnail);
 									break;
 							}
@@ -2371,10 +2375,10 @@ class Basic
 			if ($orientation != 1) {
 				$this->debug('IMAGE FILE ROTATE', 'Need to rotate image ['.$filename.'] from: '.$orientation);
 				switch ($img_type) {
-					case IMG_JPG:
+					case IMAGETYPE_JPEG:
 						$img = imagecreatefromjpeg($filename);
 						break;
-					case IMG_PNG:
+					case IMAGETYPE_PNG:
 						$img = imagecreatefrompng($filename);
 						break;
 				}
@@ -2397,10 +2401,10 @@ class Basic
 					}
 					// then rewrite the rotated image back to the disk as $filename
 					switch ($img_type) {
-						case IMG_JPG:
+						case IMAGETYPE_JPEG:
 							imagejpeg($img, $filename);
 							break;
-						case IMG_PNG:
+						case IMAGETYPE_PNG:
 							imagepng($img, $filename);
 							break;
 					}
@@ -3394,6 +3398,7 @@ class Basic
 			// Indesign
 			'application/x-indesign' => 'Adobe InDesign',
 			// Photoshop
+			'image/vnd.adobe.photoshop' => 'Adobe Photoshop',
 			'application/photoshop' => 'Adobe Photoshop',
 			// Illustrator
 			'application/illustrator' => 'Adobe Illustrator',

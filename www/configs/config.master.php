@@ -26,7 +26,7 @@ define('LIBS', 'lib'.DS);
 define('CONFIGS', 'configs'.DS);
 // includes (strings, arrays for static, etc)
 define('INCLUDES', 'includes'.DS);
-// data folder (mostly in includes)
+// data folder (mostly in includes, or root for internal data)
 define('DATA', 'data'.DS);
 // layout base path
 define('LAYOUT', 'layout'.DS);
@@ -36,20 +36,22 @@ define('PICTURES', 'images'.DS);
 define('IMAGES', 'images'.DS);
 // icons (below the images/ folder)
 define('ICONS', 'icons'.DS);
-// media
+// media (accessable from outside)
 define('MEDIA', 'media'.DS);
-// flash-root (below media)
+// flash-root (below media or data)
 define('FLASH', 'flash'.DS);
-// uploads (anything to keep)
+// uploads (anything to keep or data)
 define('UPLOADS', 'uploads'.DS);
-// files (binaries) (below media)
+// files (binaries) (below media or data)
 define('BINARIES', 'binaries'.DS);
-// files (videos) (below media)
+// files (videos) (below media or data)
 define('VIDEOS', 'videos'.DS);
-// files (documents) (below media)
+// files (documents) (below media or data)
 define('DOCUMENTS', 'documents'.DS);
-// files (pdfs) (below media)
+// files (pdfs) (below media or data)
 define('PDFS', 'documents'.DS);
+// files (general) (below media or data)
+define('FILES', 'files'.DS);
 // CSV
 define('CSV', 'csv'.DS);
 // css
@@ -104,15 +106,15 @@ define('PASSWORD_FORGOT', false);
 define('PASSWORD_MIN_LENGTH', 9);
 define('PASSWORD_MAX_LENGTH', 255);
 // defines allowed special characters
-DEFINE('PASSWORD_SPECIAL_RANGE', '@$!%*?&');
+define('PASSWORD_SPECIAL_RANGE', '@$!%*?&');
 // password must have upper case, lower case, number, special
 // comment out for not mandatory
-DEFINE('PASSWORD_LOWER', '(?=.*[a-z])');
-DEFINE('PASSWORD_UPPER', '(?=.*[A-Z])');
-DEFINE('PASSWORD_NUMBER', '(?=.*\d)');
-DEFINE('PASSWORD_SPECIAL', "(?=.*[".PASSWORD_SPECIAL_RANGE."])");
+define('PASSWORD_LOWER', '(?=.*[a-z])');
+define('PASSWORD_UPPER', '(?=.*[A-Z])');
+define('PASSWORD_NUMBER', '(?=.*\d)');
+define('PASSWORD_SPECIAL', "(?=.*[".PASSWORD_SPECIAL_RANGE."])");
 // define full regex
-DEFINE('PASSWORD_REGEX', "/^".
+define('PASSWORD_REGEX', "/^".
 	(defined('PASSWORD_LOWER') ? PASSWORD_LOWER : '').
 	(defined('PASSWORD_UPPER') ? PASSWORD_UPPER : '').
 	(defined('PASSWORD_NUMBER') ? PASSWORD_NUMBER : '').
