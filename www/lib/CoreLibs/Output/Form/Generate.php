@@ -1230,7 +1230,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						) {
 							$mand_okay = 1;
 							$row_okay[$i] = 1;
-						} elseif ($data_array['type'] == 'radio_group' && !isset($_POST[$prfx.$el_name])) {
+						} elseif (!empty($data_array['type']) && $data_array['type'] == 'radio_group' &&
+							!isset($_POST[$prfx.$el_name])
+						) {
 							// radio group and set where one not active
 							// $this->debug('edit_error_chk', 'RADIO GROUP');
 							$row_okay[$_POST[$prfx.$el_name][$i] ?? 0] = 0;
@@ -1589,7 +1591,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						$this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: WRITE: ".$no_write[$i]);
 						// flag if data is in the text field and we are in a reference data set
 						if (isset($reference_array['type']) && $reference_array['type'] == 'reference_data') {
-							if ($data_array['type'] == 'text' && isset($_POST[$prfx.$el_name][$i])) {
+							if (!empty($data_array['type']) && $data_array['type'] == 'text' &&
+								isset($_POST[$prfx.$el_name][$i])
+							) {
 								$block_write[$i] = 1;
 							}
 						} else {
@@ -1644,7 +1648,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							$q_names[$i] .= $el_name;
 							// data part, read from where [POST]
 							// radio group selections (only one can be active)
-							if ($data_array['type'] == 'radio_group') {
+							if (isset($data_array['type']) && $data_array['type'] == 'radio_group') {
 								if (isset($_POST[$prfx.$el_name]) && $i == $_POST[$prfx.$el_name]) {
 									$_value = $i + 1;
 								} else {
@@ -1941,9 +1945,18 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			foreach ($q_select as $_pos => $element) {
 				$_q_select[$_pos] = $table_name.'.'.$element;
 			}
+			// set if missing
+			if (!isset($this->element_list[$table_name]['read_data']['name'])) {
+				$this->element_list[$table_name]['read_data']['name'] = '';
+			}
+			if (!isset($this->element_list[$table_name]['read_data']['table_name'])) {
+				$this->element_list[$table_name]['read_data']['table_name'] = '';
+			}
 			// add the read names in here, prefix them with the table name
 			// earch to read part is split by |
-			if ($this->element_list[$table_name]['read_data']['name']) {
+			if (!empty($this->element_list[$table_name]['read_data']['name']) &&
+				!empty($this->element_list[$table_name]['read_data']['table_name'])
+			) {
 				foreach (explode('|', $this->element_list[$table_name]['read_data']['name']) as $read_name) {
 					array_unshift($_q_select, $this->element_list[$table_name]['read_data']['table_name'].'.'.$read_name);
 					array_unshift($q_select, $read_name);
