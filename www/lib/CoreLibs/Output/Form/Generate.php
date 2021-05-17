@@ -1937,7 +1937,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// $this->debug('CFG SELECT', 'Proto: '.$this->printAr($q_select));
 		// query for reading in the data
 		$this->debug('edit_error', 'ERR: '.$this->error);
-		// if we got a read data, build the read select for the read, and read out the 'selected' data
+		// if we got a read data, build the read select for the read, and read out the 'selected'
+		/** @phan-assert array $this->element_list[$table_name]['read_data'] */
 		if (isset($this->element_list[$table_name]['read_data'])) {
 			// we need a second one for the query build only
 			// prefix all elements with the $table name
@@ -1946,6 +1947,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$_q_select[$_pos] = $table_name.'.'.$element;
 			}
 			// set if missing
+			if (!isset($this->element_list[$table_name]['read_data']['pk_id'])) {
+				$this->element_list[$table_name]['read_data']['pk_id'] = '';
+			}
 			if (!isset($this->element_list[$table_name]['read_data']['name'])) {
 				$this->element_list[$table_name]['read_data']['name'] = '';
 			}
@@ -1954,10 +1958,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 			// add the read names in here, prefix them with the table name
 			// earch to read part is split by |
-			if (!empty($this->element_list[$table_name]['read_data']['name']) &&
-				!empty($this->element_list[$table_name]['read_data']['table_name'])
-			) {
+			if (!empty($this->element_list[$table_name]['read_data']['name'])) {
+				/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 				foreach (explode('|', $this->element_list[$table_name]['read_data']['name']) as $read_name) {
+					/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 					array_unshift($_q_select, $this->element_list[$table_name]['read_data']['table_name'].'.'.$read_name);
 					array_unshift($q_select, $read_name);
 				}
@@ -1965,24 +1969,29 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// @phan HACK
 			$data['prefix'] = $data['prefix'] ?? '';
 			// set the rest of the data so we can print something out
+			/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 			$data['type'][$data['prefix'].$this->element_list[$table_name]['read_data']['name']] = 'string';
 			// build the read query
 			$q = 'SELECT ';
 			// if (!$this->table_array[$this->int_pk_name]['value'])
 			// 	$q .= 'DISTINCT ';
 			// prefix join key with table name, and implode the query select part
+			/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 			$q .= str_replace($table_name.'.'.$this->element_list[$table_name]['read_data']['pk_id'], $this->element_list[$table_name]['read_data']['table_name'].'.'.$this->element_list[$table_name]['read_data']['pk_id'], implode(', ', $_q_select)).' ';
 			// if (!$this->table_array[$this->int_pk_name]['value'] && $this->element_list[$table_name]['read_data']['order'])
 			// 	$q .= ', '.$this->element_list[$table_name]['read_data']['order'].' ';
 			// read from the read table as main, and left join to the sub table to read the actual data
+			/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 			$q .= 'FROM '.$this->element_list[$table_name]['read_data']['table_name'].' ';
 			$q .= 'LEFT JOIN '.$table_name.' ';
 			$q .= 'ON (';
+			/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 			$q .= $this->element_list[$table_name]['read_data']['table_name'].'.'.$this->element_list[$table_name]['read_data']['pk_id'].' = '.$table_name.'.'.$this->element_list[$table_name]['read_data']['pk_id'].' ';
 			// if ($this->table_array[$this->int_pk_name]['value'])
 			$q .= 'AND '.$table_name.'.'.$this->int_pk_name.' = '.(!empty($this->table_array[$this->int_pk_name]['value']) ? $this->table_array[$this->int_pk_name]['value'] : 'NULL').' ';
 			$q .= ') ';
 			if (isset($this->element_list[$table_name]['read_data']['order'])) {
+				/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 				$q .= ' ORDER BY '.$this->element_list[$table_name]['read_data']['table_name'].'.'.$this->element_list[$table_name]['read_data']['order'];
 			}
 		} else {
