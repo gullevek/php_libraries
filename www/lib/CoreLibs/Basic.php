@@ -1706,7 +1706,7 @@ class Basic
 				$bytes_calc *= -1;
 			}
 			if ($adjust) {
-				return sprintf("%.2f%sB", $bytes_calc, $pre);
+				return sprintf("%.2f%s", $bytes_calc, $pre);
 			} else {
 				return round($bytes_calc, 2).$pre;
 			}
