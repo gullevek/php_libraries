@@ -445,6 +445,49 @@ function formatBytes(bytes)
 }
 
 /**
+ * like formatBytes, but returns bytes for <1KB and not 0.n KB
+ * @param  {Number} bytes bytes in int
+ * @return {String}       string in GB/MB/KB
+ */
+function formatBytesLong(bytes)
+{
+	var i = Math.floor(Math.log(bytes) / Math.log(1024));
+	var sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+	return (bytes / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + sizes[i];
+}
+
+/**
+ * Convert a string with B/K/M/etc into a byte number
+ * @param  {String} bytes Any string with B/K/M/etc
+ * @return {Number}       A byte number, or original string as is
+ */
+function stringByteFormat(bytes)
+{
+	// early abort if this is a number already
+	if (!isNaN(bytes)) {
+		return bytes;
+	}
+	// for pow exponent list
+	let valid_units = 'bkmgtpezy';
+	// valid string that can be converted
+	let regex = /([\d.,]*)\s?(eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/i;
+	let matches = bytes.match(regex);
+	// if nothing found, return original input
+	if (matches !== null) {
+		// remove all non valid entries outside numbers and .
+		// convert to float number
+		let m1 = parseFloat(matches[1].replace(/[^0-9.]/,''));
+		// only get the FIRST letter from the size, convert it to lower case
+		let m2 = matches[2].replace(/[^bkmgtpezy]/i, '').charAt(0).toLowerCase();
+		if (m2) {
+			// use the position in the valid unit list to do the math conversion
+			bytes = m1 * Math.pow(1024, valid_units.indexOf(m2));
+		}
+	}
+	return bytes;
+}
+
+/**
  * prints out error messages based on data available from the browser
  * @param {Object} err error from try/catch block
  */
