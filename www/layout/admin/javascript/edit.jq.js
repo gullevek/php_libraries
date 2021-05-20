@@ -458,13 +458,13 @@ function formatBytesLong(bytes)
 
 /**
  * Convert a string with B/K/M/etc into a byte number
- * @param  {String} bytes Any string with B/K/M/etc
- * @return {Number}       A byte number, or original string as is
+ * @param  {String|Number} bytes Any string with B/K/M/etc
+ * @return {String|Number}       A byte number, or original string as is
  */
 function stringByteFormat(bytes)
 {
-	// early abort if this is a number already
-	if (!isNaN(bytes)) {
+	// if anything not string return
+	if (!(typeof bytes === 'string' || bytes instanceof String)) {
 		return bytes;
 	}
 	// for pow exponent list
