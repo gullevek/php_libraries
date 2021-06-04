@@ -45,7 +45,7 @@
 *	checked -> returnes checked or selected for var & array
 *	magicLinks -> parses text and makes <a href> out of links
 *	getPageName -> get the filename of the current page
-*	arraySearchRecursive -> search for a value/key combination in an array of arrays
+*	arraySearchRecursive -> search for a value/key Combined in an array of arrays
 *	byteStringFormat -> format bytes into KB, MB, GB, ...
 *	timeStringFormat -> format a timestamp (seconds) into days, months, ... also with ms
 *	stringToTime -> reverste a TimeStringFormat to a timestamp
@@ -97,10 +97,6 @@ namespace CoreLibs;
 /** Basic core class declaration */
 class Basic
 {
-	// define byteFormat
-	const BYTE_FORMAT_NOSPACE = 1;
-	const BYTE_FORMAT_ADJUST = 2;
-	const BYTE_FORMAT_SI = 4;
 	// page and host name
 	public $page_name;
 	public $host_name;
@@ -148,8 +144,6 @@ class Basic
 
 	// email valid checks
 	public $email_regex_check = array();
-	public $mobile_email_type = array();
-	public $mobile_email_type_short = array();
 	public $email_regex; // regex var for email check
 	public $keitai_email_regex; // regex var for email check
 
@@ -157,15 +151,11 @@ class Basic
 	public $data_path = array();
 
 	// error char for the char conver
-	public $mbErrorChar;
+	// DEPRECATED
+	/** @internal */
+	/** @deprecated */
+	private $mbErrorChar;
 
-	// [!!! DEPRECATED !!!] crypt saslt prefix
-	public $cryptSaltPrefix = '';
-	public $cryptSaltSuffix = '';
-	public $cryptIterationCost = 7; // this is for staying backwards compatible with the old ones
-	public $cryptSaltSize = 22; // default 22 chars for blowfish, 2 for STD DES, 8 for MD5,
-	// new better password management
-	protected $password_options = array();
 	// session name
 	private $session_name = '';
 	private $session_id = '';
@@ -176,12 +166,12 @@ class Basic
 	private $max_key_length = 256; // max allowed length
 
 	// form token (used for form validation)
-	private $form_token = '';
+	// private $form_token = '';
 	// ajax flag
 	protected $ajax_page_flag = false;
 
-	// mime application list
-	private $mime_apps = [];
+	// [DEPRECATED] holds mime class, will be removed
+	protected $mime;
 
 	// last json error
 	private $json_last_error;
@@ -308,71 +298,6 @@ class Basic
 			6 => "@(.*)\.{2,}", // double .. in domain name part
 			7 => "@.*\.$" // ends with a dot, top level, domain missing
 		);
-		// the array with the mobile types that are valid
-		$this->mobile_email_type = array(
-			'.*@docomo\.ne\.jp$' => 'keitai_docomo',
-			'.*@([a-z0-9]{2}\.)?ezweb\.ne\.jp$' => 'keitai_kddi_ezweb', # correct are a[2-4], b2, c[1-9], e[2-9], h[2-4], t[1-9]
-			'.*@(ez[a-j]{1}\.)?ido\.ne\.jp$' => 'keitai_kddi_ido', # ez[a-j] or nothing
-			'.*@([a-z]{2}\.)?sky\.tu-ka\.ne\.jp$' => 'keitai_kddi_tu-ka', # (sky group)
-			'.*@([a-z]{2}\.)?sky\.tk[kc]{1}\.ne\.jp$' => 'keitai_kddi_sky', # (sky group) [tkk,tkc only]
-			'.*@([a-z]{2}\.)?sky\.dtg\.ne\.jp$' => 'keitai_kddi_dtg', # dtg (sky group)
-			'.*@[tkdhcrnsq]{1}\.vodafone\.ne\.jp$' => 'keitai_softbank_vodafone', # old vodafone [t,k,d,h,c,r,n,s,q]
-			'.*@jp-[dhtkrsnqc]{1}\.ne\.jp$' => 'keitai_softbank_j-phone', # very old j-phone (pre vodafone) [d,h,t,k,r,s,n,q,c]
-			'.*@([dhtcrknsq]{1}\.)?softbank\.ne\.jp$' => 'keitai_softbank', # add i for iphone also as keitai, others similar to the vodafone group
-			'.*@i{1}\.softbank(\.ne)?\.jp$' => 'smartphone_softbank_iphone', # add iPhone also as keitai and not as pc
-			'.*@disney\.ne\.jp$' => 'keitai_softbank_disney', # (kids)
-			'.*@willcom\.ne\.jp$' => 'keitai_willcom',
-			'.*@willcom\.com$' => 'keitai_willcom', # new for pdx.ne.jp address
-			'.*@wcm\.ne\.jp$' => 'keitai_willcom', # old willcom wcm.ne.jp
-			'.*@pdx\.ne\.jp$' => 'keitai_willcom_pdx', # old pdx address for willcom
-			'.*@bandai\.jp$' => 'keitai_willcom_bandai', # willcom paipo! (kids)
-			'.*@pipopa\.ne\.jp$' => 'keitai_willcom_pipopa', # willcom paipo! (kids)
-			'.*@([a-z0-9]{2,4}\.)?pdx\.ne\.jp$' => 'keitai_willcom_pdx', # actually only di,dj,dk,wm -> all others are "wrong", but none also allowed?
-			'.*@ymobile([1]{1})?\.ne\.jp$' => 'keitai_willcom_ymobile', # ymobile, ymobile1 techincally not willcom, but I group them there (softbank sub)
-			'.*@y-mobile\.ne\.jp$' => 'keitai_willcom_ymobile', # y-mobile techincally not willcom, but I group them there (softbank sub)
-			'.*@emnet\.ne\.jp$' => 'keitai_willcom_emnet', # e-mobile, group will willcom
-			'.*@emobile\.ne\.jp$' => 'keitai_willcom_emnet', # e-mobile, group will willcom
-			'.*@emobile-s\.ne\.jp$' => 'keitai_willcom_emnet' # e-mobile, group will willcom
-		);
-		// short list for mobile email types
-		$this->mobile_email_type_short = array(
-			'keitai_docomo' => 'docomo',
-			'keitai_kddi_ezweb' => 'kddi',
-			'keitai_kddi' => 'kddi',
-			'keitai_kddi_tu-ka' => 'kddi',
-			'keitai_kddi_sky' => 'kddi',
-			'keitai_softbank' => 'softbank',
-			'smartphone_softbank_iphone' => 'iphone',
-			'keitai_softbank_disney' => 'softbank',
-			'keitai_softbank_vodafone' => 'softbank',
-			'keitai_softbank_j-phone' => 'softbank',
-			'keitai_willcom' => 'willcom',
-			'keitai_willcom_pdx' => 'willcom',
-			'keitai_willcom_bandai' => 'willcom',
-			'keitai_willcom_pipopa' => 'willcom',
-			'keitai_willcom_ymobile' => 'willcom',
-			'keitai_willcom_emnet' => 'willcom',
-			'pc_html' => 'pc',
-			// old sets -> to be removed later
-			'docomo' => 'docomo',
-			'kddi_ezweb' => 'kddi',
-			'kddi' => 'kddi',
-			'kddi_tu-ka' => 'kddi',
-			'kddi_sky' => 'kddi',
-			'softbank' => 'softbank',
-			'keitai_softbank_iphone' => 'iphone',
-			'softbank_iphone' => 'iphone',
-			'softbank_disney' => 'softbank',
-			'softbank_vodafone' => 'softbank',
-			'softbank_j-phone' => 'softbank',
-			'willcom' => 'willcom',
-			'willcom_pdx' => 'willcom',
-			'willcom_bandai' => 'willcom',
-			'willcom_pipopa' => 'willcom',
-			'willcom_ymobile' => 'willcom',
-			'willcom_emnet' => 'willcom',
-			'pc' => 'pc'
-		);
 
 		// initial the session if there is no session running already
 		if (!session_id()) {
@@ -396,13 +321,13 @@ class Basic
 		}
 
 		// new better password init
-		$this->passwordInit();
+		// $this->passwordInit();
 
 		// key generation init
 		$this->initRandomKeyData();
 
-		// init mime apps
-		$this->mimeInitApps();
+		// [DEPRECATED] init mime apps
+		$this->mime = new \CoreLibs\Convert\MimeAppName();
 	}
 
 	// METHOD: __destruct
@@ -759,7 +684,7 @@ class Basic
 			foreach ($this->error_msg as $level => $temp_debug_output) {
 				if ($this->doDebugTrigger('debug', $level)) {
 					if ($this->doDebugTrigger('echo', $level)) {
-						$string_output .= '<div style="font-size: 12px;">[<span style="font-style: italic; color: #c56c00;">'.$level.'</span>] '.($string ? "<b>**** ".$this->htmlent($string)." ****</b>\n" : "").'</div>';
+						$string_output .= '<div style="font-size: 12px;">[<span style="font-style: italic; color: #c56c00;">'.$level.'</span>] '.($string ? "<b>**** ".\CoreLibs\Convert\Html::htmlent($string)." ****</b>\n" : "").'</div>';
 						$string_output .= $temp_debug_output;
 					} // echo it out
 				} // do printout
@@ -996,19 +921,12 @@ class Basic
 	 * @param  string       $needle   needle (search for)
 	 * @param  int          $type     type: 0: returns selected, 1, returns checked
 	 * @return ?string                returns checked or selected, else returns null
+	 * @deprecated Use \CoreLibs\Convert\Html::checked() instead
 	 */
 	public static function checked($haystack, $needle, int $type = 0): ?string
 	{
-		if (is_array($haystack)) {
-			if (in_array((string)$needle, $haystack)) {
-				return $type ? 'checked' : 'selected';
-			}
-		} else {
-			if ($haystack == $needle) {
-				return $type ? 'checked' : 'selected';
-			}
-		}
-		return null;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Html::checked()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Html::checked($haystack, $needle, $type);
 	}
 
 	/**
@@ -1018,125 +936,12 @@ class Basic
 	 * @param  string $string data to transform to a valud HTML url
 	 * @param  string $target target string, default _blank
 	 * @return string         correctly formed html url link
+	 * @deprecated Use \CoreLibs\Output\Form\Elements::magicLinks() instead
 	 */
 	public function magicLinks(string $string, string $target = "_blank"): string
 	{
-		$output = $string;
-		$protList = array("http", "https", "ftp", "news", "nntp");
-
-		// find urls w/o  protocol
-		$output = preg_replace("/([^\/])www\.([\w\.-]+)\.([a-zA-Z]{2,4})/", "\\1http://www.\\2.\\3", $output);
-		$output = preg_replace("/([^\/])ftp\.([\w\.-]+)\.([a-zA-Z]{2,4})/", "\\1ftp://ftp.\\2.\\3", $output);
-
-		// remove doubles, generate protocol-regex
-		// DIRTY HACK
-		$protRegex = "";
-		foreach ($protList as $protocol) {
-			if ($protRegex)	{
-				$protRegex .= "|";
-			}
-			$protRegex .= "$protocol:\/\/";
-		}
-
-		// find urls w/ protocol
-		// cs: escaped -, added / for http urls
-		// added | |, this time mandatory, todo: if no | |use \\1\\2
-		// backslash at the end of a url also allowed now
-		// do not touch <.*=".."> things!
-		// _1: URL or email
-		// _2: atag (>)
-		// _3: (_1) part of url or email [main url or email pre @ part]
-		// _4: (_2) parameters of url or email post @ part
-		// _5: (_3) parameters of url or tld part of email
-		// _7: link name/email link name
-		// _9: style sheet class
-		$self = $this;
-		// $this->debug('URL', 'Before: '.$output);
-		$output = preg_replace_callback(
-			"/(href=\")?(\>)?\b($protRegex)([\w\.\-?&=+%#~,;\/]+)\b([\.\-?&=+%#~,;\/]*)(\|([^\||^#]+)(#([^\|]+))?\|)?/",
-			function ($matches) use ($self) {
-				return @$self->createUrl($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
-			},
-			$output
-		);
-		// find email-addresses, but not mailto prefix ones
-		$output = preg_replace_callback(
-			"/(mailto:)?(\>)?\b([\w\.-]+)@([\w\.\-]+)\.([a-zA-Z]{2,4})\b(\|([^\||^#]+)(#([^\|]+))?\|)?/",
-			function ($matches) use ($self) {
-				return @$self->createEmail($matches[1], $matches[2], $matches[3], $matches[4], $matches[5], $matches[7], $matches[9]);
-			},
-			$output
-		);
-
-		$this->debug('URL', 'After: '.$output);
-		// we have one slashes after the Protocol -> internal link no domain, strip out the proto
-		// $output = preg_replace("/($protRegex)\/(.*)/e", "\\2", $ouput);
-		// $this->debug('URL', "$output");
-
-		// post processing
-		$output = str_replace("{TARGET}", $target, $output);
-		$output = str_replace("##LT##", "<", $output);
-		$output = str_replace("##GT##", ">", $output);
-		$output = str_replace("##QUOT##", "\"", $output);
-
-		return $output;
-	}
-
-	/**
-	 * internal function, called by the magic url create functions.
-	 * checks if title $_4 exists, if not, set url as title
-	 * @param  string $href  url link
-	 * @param  string $atag  anchor tag (define both type or url)
-	 * @param  string $_1    part of the URL, if atag is set, _1 is not used
-	 * @param  string $_2    part of the URL
-	 * @param  string $_3    part of the URL
-	 * @param  string $name  name for the url, if not given _2 + _3 is used
-	 * @param  string $class style sheet
-	 * @return string        correct string for url href process
-	 */
-	private function createUrl($href, $atag, $_1, $_2, $_3, $name, $class): string
-	{
-		// $this->debug('URL', "1: $_1 - 2: $_2 - $_3 - atag: $atag - name: $name - class: $class");
-		// if $_1 ends with //, then we strip $_1 complete & target is also blanked (its an internal link)
-		if (preg_match("/\/\/$/", $_1) && preg_match("/^\//", $_2)) {
-			$_1 = '';
-			$target = '';
-		} else {
-			$target = '{TARGET}';
-		}
-		// if it is a link already just return the original link do not touch anything
-		if (!$href && !$atag) {
-			return "##LT##a href=##QUOT##".$_1.$_2.$_3."##QUOT##".($class ? ' class=##QUOT##'.$class.'##QUOT##' : '').($target ? " target=##QUOT##".$target."##QUOT##" : '')."##GT##".($name ? $name : $_2.$_3)."##LT##/a##GT##";
-		} elseif ($href && !$atag) {
-			return "href=##QUOT##$_1$_2$_3##QUOT##";
-		} elseif ($atag) {
-			return $atag.$_2.$_3;
-		} else {
-			return $href;
-		}
-	}
-
-	/**
-	 * internal function for createing email, returns data to magic_url method
-	 * @param  string $mailto email address
-	 * @param  string $atag   atag (define type of url)
-	 * @param  string $_1     parts of the email _1 before @, 3_ tld
-	 * @param  string $_2     _2 domain part after @
-	 * @param  string $_3     _3 tld
-	 * @param  string $title  name for the link, if not given use email
-	 * @param  string $class  style sheet
-	 * @return string         created html email a href string
-	 */
-	private function createEmail($mailto, $atag, $_1, $_2, $_3, $title, $class)
-	{
-		$email = $_1."@".$_2.".".$_3;
-		if (!$mailto && !$atag) {
-			return "##LT##a href=##QUOT##mailto:".$email."##QUOT##".($class ? ' class=##QUOT##'.$class.'##QUOT##' : '')."##GT##".($title ? $title : $email)."##LT##/a##GT##";
-		} elseif ($mailto && !$atag) {
-			return "mailto:".$email;
-		} elseif ($atag) {
-			return $atag.$email;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Form\Elements::magicLinks()', E_USER_DEPRECATED);
+		return \CoreLibs\Output\Form\Elements::magicLinks($string, $target);
 	}
 
 	/**
@@ -1183,12 +988,27 @@ class Basic
 	 * quick return the extension of the given file name
 	 * @param  string $filename file name
 	 * @return string           extension of the file name
+	 * @deprecated Use \CoreLibs\Check\File::getFilenameEnding() instead
 	 */
 	public static function getFilenameEnding(string $filename): string
 	{
-		$page_temp = pathinfo($filename);
-		return $page_temp['extension'] ?? '';
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Check\File::getFilenameEnding()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\File::getFilenameEnding($filename);
 	}
+
+	/**
+	 * get lines in a file
+	 * @param  string $file file for line count read
+	 * @return int          number of lines or -1 for non readable file
+	 * @deprecated Use \CoreLibs\Check\File::getLinesFromFile() instead
+	 */
+	public static function getLinesFromFile(string $file): int
+	{
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Check\File::getLinesFromFile()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\File::getLinesFromFile($file);
+	}
+
+	// *** ARRAY HANDLING
 
 	/**
 	 * searches key = value in an array / array
@@ -1198,48 +1018,12 @@ class Basic
 	 * @param  string|null $key_lookin the key to look out for, default empty
 	 * @return array                   array with the elements where the needle can be
 	 *                                 found in the haystack array
+	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arraySearchRecursive() instead
 	 */
 	public static function arraySearchRecursive($needle, array $haystack, ?string $key_lookin = null): array
 	{
-		$path = array();
-		if (!is_array($haystack)) {
-			$haystack = array();
-		}
-		if ($key_lookin != null &&
-			!empty($key_lookin) &&
-			array_key_exists($key_lookin, $haystack) &&
-			$needle === $haystack[$key_lookin]
-		) {
-			$path[] = $key_lookin;
-		} else {
-			foreach ($haystack as $key => $val) {
-				if (is_scalar($val) &&
-					$val === $needle &&
-					empty($key_lookin)
-				) {
-					$path[] = $key;
-					break;
-				} elseif (is_scalar($val) &&
-					!empty($key_lookin) &&
-					$key === $key_lookin &&
-					$val == $needle
-				) {
-					$path[] = $key;
-					break;
-				} elseif (is_array($val) &&
-					$path = Basic::arraySearchRecursive(
-						$needle,
-						(array)$val,
-						// to avoid PhanTypeMismatchArgumentNullable
-						($key_lookin === null ? $key_lookin : (string)$key_lookin)
-					)
-				) {
-					array_unshift($path, $key);
-					break;
-				}
-			}
-		}
-		return $path;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchRecursive()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::arraySearchRecursive($needle, $haystack, $key_lookin);
 	}
 
 	/**
@@ -1249,84 +1033,26 @@ class Basic
 	 * @param  string|int $key      the key to look for in
 	 * @param  array|null $path     recursive call for previous path
 	 * @return ?array               all array elements paths where the element was found
+	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll() instead
 	 */
 	public static function arraySearchRecursiveAll($needle, array $haystack, $key, ?array $path = null): ?array
 	{
-		// init if not set on null
-		if ($path === null) {
-			$path = array(
-				'level' => 0,
-				'work' => array()
-			);
-		}
-		// init sub sets if not set
-		if (!isset($path['level'])) {
-			$path['level'] = 0;
-		}
-		if (!isset($path['work'])) {
-			$path['work'] = array();
-		}
-		// should not be needed because it would trigger a php mehtod error
-		if (!is_array($haystack)) {
-			$haystack = array();
-		}
-
-		// @phan HACK
-		$path['level'] = $path['level'] ?? 0;
-		// go through the array,
-		foreach ($haystack as $_key => $_value) {
-			if (is_scalar($_value) && $_value == $needle && !$key) {
-				// only value matches
-				$path['work'][$path['level']] = $_key;
-				$path['found'][] = $path['work'];
-			} elseif (is_scalar($_value) && $_value == $needle && $_key == $key) {
-				// key and value matches
-				$path['work'][$path['level']] = $_key;
-				$path['found'][] = $path['work'];
-			} elseif (is_array($_value)) {
-				// add position to working
-				$path['work'][$path['level']] = $_key;
-				// we will up a level
-				$path['level'] += 1;
-				// call recursive
-				$path = Basic::arraySearchRecursiveAll($needle, $_value, $key, $path);
-			}
-		}
-		// @phan HACK
-		$path['level'] = $path['level'] ?? 0;
-		$path['work'] = $path['work'] ?? array();
-		// cut all that is >= level
-		array_splice($path['work'], $path['level']);
-		// step back a level
-		$path['level'] -= 1;
-		return $path;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll($needle, $haystack, $key, $path);
 	}
 
 	/**
-	 * array search simple. looks for key, value combination, if found, returns true
+	 * array search simple. looks for key, value Combined, if found, returns true
 	 * @param  array      $array array(search in)
 	 * @param  string|int $key   key (key to search in)
 	 * @param  string|int $value value (what to find)
 	 * @return bool              true on found, false on not found
+	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arraySearchSimple() instead
 	 */
 	public static function arraySearchSimple(array $array, $key, $value): bool
 	{
-		if (!is_array($array)) {
-			$array = array();
-		}
-		foreach ($array as $_key => $_value) {
-			// if value is an array, we search
-			if (is_array($_value)) {
-				// call recursive, and return result if it is true, else continue
-				if (($result = Basic::arraySearchSimple($_value, $key, $value)) !== false) {
-					return $result;
-				}
-			} elseif ($_key == $key && $_value == $value) {
-				return true;
-			}
-		}
-		// no true returned, not found
-		return false;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchSimple()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::arraySearchSimple($array, $key, $value);
 	}
 
 	/**
@@ -1337,53 +1063,13 @@ class Basic
 	 *         bool  key flag: true: handle keys as string or int
 	 *               default false: all keys are string
 	 * @return array|bool merged array
+	 * @deprecated MUSER BE CONVERTED TO \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive() instead
 	 */
 	public static function arrayMergeRecursive()
 	{
-		// croak on not enough arguemnts (we need at least two)
-		if (func_num_args() < 2) {
-			trigger_error(__FUNCTION__ .' needs two or more array arguments', E_USER_WARNING);
-			return false;
-		}
-		// default key is not string
-		$key_is_string = false;
-		$arrays = func_get_args();
-		// if last is not array, then assume it is trigger for key is always string
-		if (!is_array(end($arrays))) {
-			if (array_pop($arrays)) {
-				$key_is_string = true;
-			}
-		}
-		// check that arrays count is at least two, else we don't have enough to do anything
-		if (count($arrays) < 2) {
-			trigger_error(__FUNCTION__.' needs two or more array arguments', E_USER_WARNING);
-			return false;
-		}
-		$merged = array();
-		while ($arrays) {
-			$array = array_shift($arrays);
-			if (!is_array($array)) {
-				trigger_error(__FUNCTION__ .' encountered a non array argument', E_USER_WARNING);
-				return false;
-			}
-			if (!$array) {
-				continue;
-			}
-			foreach ($array as $key => $value) {
-				// if string or if key is assumed to be string do key match else add new entry
-				if (is_string($key) || $key_is_string === false) {
-					if (is_array($value) && array_key_exists($key, $merged) && is_array($merged[$key])) {
-						// $merged[$key] = call_user_func(__METHOD__, $merged[$key], $value, $key_is_string);
-						$merged[$key] = Basic::arrayMergeRecursive($merged[$key], $value, $key_is_string);
-					} else {
-						$merged[$key] = $value;
-					}
-				} else {
-					$merged[] = $value;
-				}
-			}
-		}
-		return $merged;
+		trigger_error('MUST CHANGE: Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive()', E_USER_DEPRECATED);
+		// return \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive();
+		return ['PLEASE CONVERT TO: \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive(a, b, c, ...)'];
 	}
 
 	/**
@@ -1394,11 +1080,12 @@ class Basic
 	 * @param  array  $a array to compare a
 	 * @param  array  $b array to compare b
 	 * @return array     array with missing elements from a & b
+	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arrayDiff() instead
 	 */
 	public static function arrayDiff(array $a, array $b): array
 	{
-		$intersect = array_intersect($a, $b);
-		return array_merge(array_diff($a, $intersect), array_diff($b, $intersect));
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayDiff()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::arrayDiff($a, $b);
 	}
 
 	/**
@@ -1407,26 +1094,12 @@ class Basic
 	 * @param  array $needle   elements to search for
 	 * @param  array $haystack array where the $needle elements should be searched int
 	 * @return array|bool      either the found elements or false for nothing found or error
+	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::inArrayAny() instead
 	 */
 	public static function inArrayAny(array $needle, array $haystack)
 	{
-		if (!is_array($needle)) {
-			return false;
-		}
-		if (!is_array($haystack)) {
-			return false;
-		}
-		$found = array();
-		foreach ($needle as $element) {
-			if (in_array($element, $haystack)) {
-				$found[] = $element;
-			}
-		}
-		if (count($found) == 0) {
-			return false;
-		} else {
-			return $found;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::inArrayAny()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::inArrayAny($needle, $haystack);
 	}
 
 	/**
@@ -1436,25 +1109,12 @@ class Basic
 	 * @param  string|int|bool $value    value set, false for not set
 	 * @param  bool            $set_only flag to return all (default), or set only
 	 * @return array                     associative array
+	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::genAssocArray() instead
 	 */
 	public static function genAssocArray(array $db_array, $key, $value, bool $set_only = false): array
 	{
-		$ret_array = array();
-		// do this to only run count once
-		for ($i = 0, $iMax = count($db_array); $i < $iMax; $i ++) {
-			// if no key then we make an order reference
-			if ($key !== false &&
-				$value !== false &&
-				(($set_only && $db_array[$i][$value]) || (!$set_only))
-			) {
-				$ret_array[$db_array[$i][$key]] = $db_array[$i][$value];
-			} elseif ($key === false && $value !== false) {
-				$ret_array[] = $db_array[$i][$value];
-			} elseif ($key !== false && $value === false) {
-				$ret_array[$db_array[$i][$key]] = $i;
-			}
-		}
-		return $ret_array;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArray()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::genAssocArray($db_array, $key, $value, $set_only);
 	}
 
 	/**
@@ -1479,34 +1139,24 @@ class Basic
 	 * does NOT preserve keys
 	 * @param  array  $array ulti dimensionial array
 	 * @return array         flattened array
+	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::flattenArray() instead
 	 */
 	public static function flattenArray(array $array): array
 	{
-		$return = array();
-		array_walk_recursive(
-			$array,
-			function ($value) use (&$return) {
-				$return[] = $value;
-			}
-		);
-		return $return;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArray()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::flattenArray($array);
 	}
 
 	/**
 	 * will loop through an array recursivly and write the array keys back
 	 * @param  array  $array  multidemnsional array to flatten
 	 * @return array          flattened keys array
+	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::flattenArrayKey() instead
 	 */
 	public static function flattenArrayKey(array $array/*, array $return = array()*/): array
 	{
-		$return = array();
-		array_walk_recursive(
-			$array,
-			function ($value, $key) use (&$return) {
-				$return [] = $key;
-			}
-		);
-		return $return;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArrayKey()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::flattenArrayKey($array);
 	}
 
 	/**
@@ -1515,88 +1165,33 @@ class Basic
 	 * @param  array      $array  array(nested)
 	 * @param  string|int $search key to find that has no sub leaf and will be pushed up
 	 * @return array              modified, flattened array
+	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arrayFlatForKey() instead
 	 */
 	public static function arrayFlatForKey(array $array, $search): array
 	{
-		if (!is_array($array)) {
-			$array = array();
-		}
-		foreach ($array as $key => $value) {
-			// if it is not an array do just nothing
-			if (is_array($value)) {
-				// probe it has search key
-				if (isset($value[$search])) {
-					// set as current
-					$array[$key] = $value[$search];
-				} else {
-					// call up next node down
-					// $array[$key] = call_user_func(__METHOD__, $value, $search);
-					$array[$key] = Basic::arrayFlatForKey($value, $search);
-				}
-			}
-		}
-		return $array;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayFlatForKey()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::arrayFlatForKey($array, $search);
 	}
 
-	/**
-	 * get lines in a file
-	 * @param  string $file file for line count read
-	 * @return int          number of lines or -1 for non readable file
-	 */
-	public static function getLinesFromFile(string $file): int
-	{
-		if (is_file($file) &&
-			file_exists($file) &&
-			is_readable($file)
-		) {
-			$f = fopen($file, 'rb');
-			$lines = 0;
-			while (!feof($f)) {
-				$lines += substr_count(fread($f, 8192), "\n");
-			}
-			fclose($f);
-		} else {
-			// if file does not exist or is not readable, return -1
-			$lines = -1;
-		}
-		// return lines in file
-		return $lines;
-	}
+	// *** ARRAY HANDLING END
 
 	/**
 	 * wrapper function for mb mime convert, for correct conversion with long strings
 	 * @param  string $string   string to encode
 	 * @param  string $encoding target encoding
 	 * @return string           encoded string
+	 * @deprecated Use \CoreLibs\Language\Encoding::__mbMimeEncode() instead
 	 */
 	public static function __mbMimeEncode(string $string, string $encoding): string
 	{
-		// set internal encoding, so the mimeheader encode works correctly
-		mb_internal_encoding($encoding);
-		// if a subject, make a work around for the broken mb_mimencode
-		$pos = 0;
-		$split = 36; // after 36 single bytes characters, if then comes MB, it is broken
-					 // has to 2 x 36 < 74 so the mb_encode_mimeheader 74 hardcoded split does not get triggered
-		$_string = '';
-		while ($pos < mb_strlen($string, $encoding)) {
-			$output = mb_strimwidth($string, $pos, $split, "", $encoding);
-			$pos += mb_strlen($output, $encoding);
-			// if the strinlen is 0 here, get out of the loop
-			if (!mb_strlen($output, $encoding)) {
-				$pos += mb_strlen($string, $encoding);
-			}
-			$_string_encoded = mb_encode_mimeheader($output, $encoding);
-			// only make linebreaks if we have mime encoded code inside
-			// the space only belongs in the second line
-			if ($_string && preg_match("/^=\?/", $_string_encoded)) {
-				$_string .= "\n ";
-			}
-			$_string .= $_string_encoded;
-		}
-		// strip out any spaces BEFORE a line break
-		$string = str_replace(" \n", "\n", $_string);
-		return $string;
+
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Language\Encoding::__mbMimeEncode()', E_USER_DEPRECATED);
+		return \CoreLibs\Language\Encoding::__mbMimeEncode($string, $encoding);
 	}
+
+	// *** HUMAND BYTE READABLE CONVERT
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Convert\Byte
 
 	/**
 	 * WRAPPER call to new humanReadableByteFormat
@@ -1606,28 +1201,27 @@ class Basic
 	 * @param  bool             $adjust default false, always print two decimals (sprintf)
 	 * @param  bool             $si     default false, if set to true, use 1000 for calculation
 	 * @return string                   converted byte number (float) with suffix
-	 * @deprecated Use humanReadableByteFormat instead
+	 * @deprecated Use \CoreLibs\Convert\Byte::humanReadableByteFormat() instead
 	 */
 	public static function byteStringFormat($bytes, bool $space = true, bool $adjust = false, bool $si = false): string
 	{
-		// trigger_error('Method '.__METHOD__.' is deprecated, use humanReadableByteFormat', E_USER_DEPRECATED);
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Byte::humanReadableByteFormat()', E_USER_DEPRECATED);
 		$flags = 0;
 		// match over the true/false flags to the new int style flag
 		// if space need to set 1
 		if ($space === false) {
-			$flags |= self::BYTE_FORMAT_NOSPACE;
+			$flags |= \CoreLibs\Convert\Byte::BYTE_FORMAT_NOSPACE;
 		}
 		// if adjust need to set 2
 		if ($adjust === true) {
-			$flags |= self::BYTE_FORMAT_ADJUST;
+			$flags |= \CoreLibs\Convert\Byte::BYTE_FORMAT_ADJUST;
 		}
 		// if si need to set 3
 		if ($si === true) {
-			$flags |= self::BYTE_FORMAT_SI;
+			$flags |= \CoreLibs\Convert\Byte::BYTE_FORMAT_SI;
 		}
-
 		// call
-		return self::humanReadableByteFormat($bytes, $flags);
+		return \CoreLibs\Convert\Byte::humanReadableByteFormat($bytes, $flags);
 	}
 
 
@@ -1649,118 +1243,41 @@ class Basic
 	 * @param  string|int|float $bytes bytes as string int or pure int
 	 * @param  int              $flags bitwise flag with use space turned on
 	 * @return string                  converted byte number (float) with suffix
+	 * @deprecated Use \CoreLibs\Convert\Byte::humanReadableByteFormat() instead
 	 */
 	public static function humanReadableByteFormat($bytes, int $flags = 0): string
 	{
-		// if not numeric, return as is
-		if (is_numeric($bytes)) {
-			// flags bit wise check
-			// remove space between number and suffix
-			if ($flags & self::BYTE_FORMAT_NOSPACE) {
-				$space = false;
-			} else {
-				$space = true;
-			}
-			// use sprintf instead of round
-			if ($flags & self::BYTE_FORMAT_ADJUST) {
-				$adjust = true;
-			} else {
-				$adjust = false;
-			}
-			// use SI 1000 mod and not 1024 mod
-			if ($flags & self::BYTE_FORMAT_SI) {
-				$si = true;
-			} else {
-				$si = false;
-			}
-
-			// si or normal
-			$unit = $si ? 1000 : 1024;
-			// always positive
-			$abs_bytes = $bytes == PHP_INT_MIN ? PHP_INT_MAX : abs($bytes);
-			// smaller than unit is always B
-			if ($abs_bytes < $unit) {
-				return $bytes.'B';
-			}
-			// labels in order of size [Y, Z]
-			$labels = array('', 'K', 'M', 'G', 'T', 'P', 'E');
-			// exp position calculation
-			$exp = floor(log($abs_bytes, $unit));
-			// avoid printing out anything larger than max labels
-			if ($exp >= count($labels)) {
-				$exp = count($labels) - 1;
-			}
-			// deviation calculation
-			$dev = pow($unit, $exp) * ($unit - 0.05);
-			// shift the exp +1 for on the border units
-			if ($exp < 6 &&
-				$abs_bytes > ($dev - (((int)$dev & 0xfff) == 0xd00 ? 52 : 0))
-			) {
-				$exp ++;
-			}
-			// label name, including leading space if flagged
-			$pre = ($space ? ' ' : '').($labels[$exp] ?? '>E').($si ? 'i' : '').'B';
-			$bytes_calc = $abs_bytes / pow($unit, $exp);
-			// if original is negative, reverse
-			if ($bytes < 0) {
-				$bytes_calc *= -1;
-			}
-			if ($adjust) {
-				return sprintf("%.2f%s", $bytes_calc, $pre);
-			} else {
-				return round($bytes_calc, 2).$pre;
-			}
-		} else {
-			// if anything other return as string
-			return (string)$bytes;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Byte::humanReadableByteFormat()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Byte::humanReadableByteFormat($bytes, $flags);
 	}
 
 	/**
 	 * calculates the bytes based on a string with nnG, nnGB, nnM, etc
 	 * @param  string|int|float $number       any string or number to convert
 	 * @return string|int|float               converted value or original value
+	 * @deprecated Use \CoreLibs\Convert\Byte::stringByteFormat() instead
 	 */
 	public static function stringByteFormat($number)
 	{
-		$matches = [];
-		// all valid units
-		$valid_units_ = 'bkmgtpezy';
-		// detects up to exo bytes
-		preg_match("/([\d.,]*)\s?(eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/i", strtolower($number), $matches);
-		if (isset($matches[1]) && isset($matches[2])) {
-			// remove all non valid characters from the number
-			$number = preg_replace('/[^0-9\.]/', '', $matches[1]);
-			// final clean up and convert to float
-			$number = (float)trim($number);
-			// convert any mb/gb/etc to single m/b
-			$unit = preg_replace('/[^bkmgtpezy]/i', '', $matches[2]);
-			if ($unit) {
-				$number = $number * pow(1024, stripos($valid_units_, $unit[0]));
-			}
-			// convert to INT to avoid +E output
-			$number = (int)round($number);
-		}
-		// if not matching return as is
-		return $number;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Byte::stringByteFormat()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Byte::stringByteFormat($number);
 	}
+
+	// *** DATETIME FUNCTONS
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Combined\DateTime
 
 	/**
 	 * a simple wrapper for the date format
 	 * @param  int|float $timestamp  unix timestamp
 	 * @param  bool      $show_micro show the micro time (default false)
 	 * @return string                formated date+time in Y-M-D h:m:s ms
+	 * @deprecated Use \CoreLibs\Combined\DateTime::dateStringFormat() instead
 	 */
 	public static function dateStringFormat($timestamp, bool $show_micro = false): string
 	{
-		// split up the timestamp, assume . in timestamp
-		// array pad $ms if no microtime
-		list ($timestamp, $ms) = array_pad(explode('.', (string)round($timestamp, 4)), 2, null);
-		$string = date("Y-m-d H:i:s", (int)$timestamp);
-		if ($show_micro && $ms) {
-			$string .= ' '.$ms.'ms';
-		}
-		return $string;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::dateStringFormat()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\DateTime::dateStringFormat($timestamp, $show_micro);
 	}
 
 	/**
@@ -1768,43 +1285,12 @@ class Basic
 	 * @param  string|int|float $timestamp  interval in seconds and optional float micro seconds
 	 * @param  bool             $show_micro show micro seconds, default true
 	 * @return string                       interval formatted string or string as is
+	 * @deprecated Use \CoreLibs\Combined\DateTime::timeStringFormat() instead
 	 */
 	public static function timeStringFormat($timestamp, bool $show_micro = true): string
 	{
-		// check if the timestamp has any h/m/s/ms inside, if yes skip
-		if (!preg_match("/(h|m|s|ms)/", (string)$timestamp)) {
-			list ($timestamp, $ms) = array_pad(explode('.', (string)round($timestamp, 4)), 2, null);
-			$timegroups = array(86400, 3600, 60, 1);
-			$labels = array('d', 'h', 'm', 's');
-			$time_string = '';
-			// if timestamp is zero, return zero string
-			if ($timestamp == 0) {
-				$time_string = '0s';
-			} else {
-				for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i ++) {
-					$output = floor((float)$timestamp / $timegroups[$i]);
-					$timestamp = (float)$timestamp % $timegroups[$i];
-					// output has days|hours|min|sec
-					if ($output || $time_string) {
-						$time_string .= $output.$labels[$i].(($i + 1) != count($timegroups) ? ' ' : '');
-					}
-				}
-			}
-			// only add ms if we have an ms value
-			if ($ms !== null) {
-				// if we have ms and it has leading zeros, remove them, but only if it is nut just 0
-				$ms = preg_replace("/^0+(\d+)$/", '${1}', $ms);
-				// add ms if there
-				if ($show_micro) {
-					$time_string .= ' '.(!$ms ? 0 : $ms).'ms';
-				} elseif (!$time_string) {
-					$time_string .= (!$ms ? 0 : $ms).'ms';
-				}
-			}
-		} else {
-			$time_string = $timestamp;
-		}
-		return $time_string;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::timeStringFormat()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\DateTime::timeStringFormat($timestamp, $show_micro);
 	}
 
 	/**
@@ -1812,79 +1298,36 @@ class Basic
 	 * xd xh xm xs xms to a timestamp.microtime format
 	 * @param  string|int|float $timestring formatted interval
 	 * @return string|int|float             converted float interval, or string as is
+	 * @deprecated Use \CoreLibs\Combined\DateTime::stringToTime() instead
 	 */
 	public static function stringToTime($timestring)
 	{
-		$timestamp = 0;
-		if (preg_match("/(d|h|m|s|ms)/", $timestring)) {
-			// pos for preg match read + multiply factor
-			$timegroups = array(2 => 86400, 4 => 3600, 6 => 60, 8 => 1);
-			$matches = array();
-			// preg match: 0: full strsing
-			// 2, 4, 6, 8 are the to need values
-			preg_match("/^((\d+)d ?)?((\d+)h ?)?((\d+)m ?)?((\d+)s ?)?((\d+)ms)?$/", $timestring, $matches);
-			// multiply the returned matches and sum them up. the last one (ms) is added with .
-			foreach ($timegroups as $i => $time_multiply) {
-				if (is_numeric($matches[$i])) {
-					$timestamp += (float)$matches[$i] * $time_multiply;
-				}
-			}
-			if (is_numeric($matches[10])) {
-				$timestamp .= '.'.$matches[10];
-			}
-			return $timestamp;
-		} else {
-			return $timestring;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::stringToTime()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\DateTime::stringToTime($timestring);
 	}
 
 	/**
 	 * splits & checks date, wrap around for check_date function
 	 * @param  string $date a date string in the format YYYY-MM-DD
 	 * @return bool         true if valid date, false if date not valid
+	 * @deprecated Use \CoreLibs\Combined\DateTime::checkDate() instead
 	 */
 	public static function checkDate($date): bool
 	{
-		if (!$date) {
-			return false;
-		}
-		list ($year, $month, $day) = array_pad(preg_split("/[\/-]/", $date), 3, null);
-		if (!$year || !$month || !$day) {
-			return false;
-		}
-		if (!checkdate((int)$month, (int)$day, (int)$year)) {
-			return false;
-		}
-		return true;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::checkDate()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\DateTime::checkDate($date);
 	}
 
 	/**
 	 * splits & checks date, wrap around for check_date function
 	 * @param  string $datetime date (YYYY-MM-DD) + time (HH:MM:SS), SS can be dropped
 	 * @return bool             true if valid date, false if date not valid
+	 * @deprecated Use \CoreLibs\Combined\DateTime::checkDateTime() instead
 	 */
 	public static function checkDateTime($datetime): bool
 	{
-		if (!$datetime) {
-			return false;
-		}
-		list ($year, $month, $day, $hour, $min, $sec) = array_pad(preg_split("/[\/\- :]/", $datetime), 6, null);
-		if (!$year || !$month || !$day) {
-			return false;
-		}
-		if (!checkdate((int)$month, (int)$day, (int)$year)) {
-			return false;
-		}
-		if (!is_numeric($hour) || !is_numeric($min)) {
-			return false;
-		}
-		if (($hour < 0 || $hour > 24) ||
-			($min < 0 || $min > 60) ||
-			(is_numeric($sec) && ($sec < 0 || $sec > 60))
-		) {
-			return false;
-		}
-		return true;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::checkDateTime()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\DateTime::checkDateTime($datetime);
 	}
 
 	/**
@@ -1897,40 +1340,12 @@ class Basic
 	 * @param  string $start_date start date string in YYYY-MM-DD
 	 * @param  string $end_date   end date string in YYYY-MM-DD
 	 * @return int|bool           false on error, or int -1/0/1 as difference
+	 * @deprecated Use \CoreLibs\Combined\DateTime::compareDate() instead
 	 */
 	public static function compareDate($start_date, $end_date)
 	{
-		// pre check for empty or wrong
-		if ($start_date == '--' || $end_date == '--' || !$start_date || !$end_date) {
-			return false;
-		}
-
-		// splits the data up with / or -
-		list ($start_year, $start_month, $start_day) = array_pad(preg_split('/[\/-]/', $start_date), 3, null);
-		list ($end_year, $end_month, $end_day) = array_pad(preg_split('/[\/-]/', $end_date), 3, null);
-		// check that month & day are two digits and then combine
-		foreach (array('start', 'end') as $prefix) {
-			foreach (array('month', 'day') as $date_part) {
-				$_date = $prefix.'_'.$date_part;
-				if (isset($$_date) && $$_date < 10 && !preg_match("/^0/", $$_date)) {
-					$$_date = '0'.$$_date;
-				}
-			}
-			$_date = $prefix.'_date';
-			$$_date = '';
-			foreach (array('year', 'month', 'day') as $date_part) {
-				$_sub_date = $prefix.'_'.$date_part;
-				$$_date .= $$_sub_date;
-			}
-		}
-		// now do the compare
-		if ($start_date < $end_date) {
-			return -1;
-		} elseif ($start_date == $end_date) {
-			return 0;
-		} elseif ($start_date > $end_date) {
-			return 1;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::compareDate()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\DateTime::compareDate($start_date, $end_date);
 	}
 
 	/**
@@ -1943,22 +1358,12 @@ class Basic
 	 * @param  string $start_datetime start date/time in YYYY-MM-DD HH:mm:ss
 	 * @param  string $end_datetime   end date/time in YYYY-MM-DD HH:mm:ss
 	 * @return int|bool               false for error or -1/0/1 as difference
+	 * @deprecated Use \CoreLibs\Combined\DateTime::compareDateTime() instead
 	 */
 	public static function compareDateTime($start_datetime, $end_datetime)
 	{
-		// pre check for empty or wrong
-		if ($start_datetime == '--' || $end_datetime == '--' || !$start_datetime || !$end_datetime) {
-			return false;
-		}
-		$start_timestamp = strtotime($start_datetime);
-		$end_timestamp = strtotime($end_datetime);
-		if ($start_timestamp < $end_timestamp) {
-			return -1;
-		} elseif ($start_timestamp == $end_timestamp) {
-			return 0;
-		} elseif ($start_timestamp > $end_timestamp) {
-			return 1;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::compareDateTime()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\DateTime::compareDateTime($start_datetime, $end_datetime);
 	}
 
 	/**
@@ -1969,40 +1374,19 @@ class Basic
 	 * @param  string $end_date     valid end date (y/m/d)
 	 * @param  bool   $return_named return array type, false (default), true for named
 	 * @return array                0/overall, 1/weekday, 2/weekend
+	 * @deprecated Use \CoreLibs\Combined\DateTime::calcDaysInterval() instead
 	 */
 	public static function calcDaysInterval($start_date, $end_date, bool $return_named = false): array
 	{
-		// pos 0 all, pos 1 weekday, pos 2 weekend
-		$days = array();
-		$start = new \DateTime($start_date);
-		$end = new \DateTime($end_date);
-		// so we include the last day too, we need to add +1 second in the time
-		$end->setTime(0, 0, 1);
-
-		$days[0] = $end->diff($start)->days;
-		$days[1] = 0;
-		$days[2] = 0;
-
-		$period = new \DatePeriod($start, new \DateInterval('P1D'), $end);
-
-		foreach ($period as $dt) {
-			$curr = $dt->format('D');
-			if ($curr == 'Sat' || $curr == 'Sun') {
-				$days[2] ++;
-			} else {
-				$days[1] ++;
-			}
-		}
-		if ($return_named === true) {
-			return array(
-				'overall' => $days[0],
-				'weekday' => $days[1],
-				'weekend' => $days[2]
-			);
-		} else {
-			return $days;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::calcDaysInterval()', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\DateTime::calcDaysInterval($start_date, $end_date, $return_named);
 	}
+
+	// *** DATETIME END
+
+	// *** IMAGE FUNCTIONS
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Output\Image
 
 	/**
 	 * converts picture to a thumbnail with max x and max y size
@@ -2014,6 +1398,7 @@ class Basic
 	 * @param  string      $cache_source cache path, if not given TMP is used
 	 * @param  bool        $clear_cache  if set to true, will create thumb all the tame
 	 * @return string|bool               thumbnail name, or false for error
+	 *@deprecated use \CoreLibs\Output\Image::createThumbnail() instead
 	 */
 	public static function createThumbnail(
 		string $pic,
@@ -2024,119 +1409,8 @@ class Basic
 		string $cache_source = '',
 		bool $clear_cache = false
 	) {
-		// get image type flags
-		$image_types = array(
-			1 => 'gif',
-			2 => 'jpg',
-			3 => 'png'
-		);
-		$return_data = false;
-		$CONVERT = '';
-		// if CONVERT is not defined, abort
-		/** @phan-suppress-next-line PhanUndeclaredConstant */
-		if (defined('CONVERT') && is_executable(CONVERT)) {
-			/** @phan-suppress-next-line PhanUndeclaredConstant */
-			$CONVERT = CONVERT;
-		} else {
-			return $return_data;
-		}
-		if (!empty($cache_source)) {
-			$tmp_src = $cache_source;
-		} else {
-			$tmp_src = BASE.TMP;
-		}
-		// check if pic has a path, and override next sets
-		if (strstr($pic, '/') === false) {
-			if (empty($path)) {
-				$path = BASE;
-			}
-			$filename = $path.MEDIA.PICTURES.$pic;
-		} else {
-			$filename = $pic;
-			// and get the last part for pic (the filename)
-			$tmp = explode('/', $pic);
-			$pic = $tmp[(count($tmp) - 1)];
-		}
-		// does this picture exist and is it a picture
-		if (file_exists($filename) && is_file($filename)) {
-			list($width, $height, $type) = getimagesize($filename);
-			$convert_prefix = '';
-			$create_file = false;
-			$delete_filename = '';
-			// check if we can skip the PDF creation: if we have size, if do not have type, we assume type png
-			if (!$type && is_numeric($size_x) && is_numeric($size_y)) {
-				$check_thumb = $tmp_src.'thumb_'.$pic.'_'.$size_x.'x'.$size_y.'.'.$image_types[3];
-				if (!is_file($check_thumb)) {
-					$create_file = true;
-				} else {
-					$type = 3;
-				}
-			}
-			// if type is not in the list, but returns as PDF, we need to convert to JPEG before
-			if (!$type)	{
-				$output = [];
-				$return = null;
-				// is this a PDF, if no, return from here with nothing
-				$convert_prefix = 'png:';
-				# TEMP convert to PNG, we then override the file name
-				$convert_string = $CONVERT.' '.$filename.' '.$convert_prefix.$filename.'_TEMP';
-				$status = exec($convert_string, $output, $return);
-				$filename .= '_TEMP';
-				// for delete, in case we need to glob
-				$delete_filename = $filename;
-				// find file, if we can't find base name, use -0 as the first one (ignore other pages in multiple ones)
-				if (!is_file($filename)) {
-					$filename .= '-0';
-				}
-				list($width, $height, $type) = getimagesize($filename);
-			}
-			// if no size given, set size to original
-			if (!$size_x || $size_x < 1 || !is_numeric($size_x)) {
-				$size_x = $width;
-			}
-			if (!$size_y || $size_y < 1 || !is_numeric($size_y)) {
-				$size_y = $height;
-			}
-			$thumb = 'thumb_'.$pic.'_'.$size_x.'x'.$size_y.'.'.$image_types[$type];
-			$thumbnail = $tmp_src.$thumb;
-			// check if we already have this picture converted
-			if (!is_file($thumbnail) || $clear_cache == true) {
-				// convert the picture
-				if ($width > $size_x) {
-					$convert_string = $CONVERT.' -geometry '.$size_x.'x '.$filename.' '.$thumbnail;
-					$status = exec($convert_string, $output, $return);
-					// get the size of the converted data, if converted
-					if (is_file($thumbnail)) {
-						list ($width, $height, $type) = getimagesize($thumbnail);
-					}
-				}
-				if ($height > $size_y) {
-					$convert_string = $CONVERT.' -geometry x'.$size_y.' '.$filename.' '.$thumbnail;
-					$status = exec($convert_string, $output, $return);
-				}
-			}
-			if (!is_file($thumbnail)) {
-				copy($filename, $thumbnail);
-			}
-			$return_data = $thumb;
-			// if we have a delete filename, delete here with glob
-			if ($delete_filename) {
-				array_map('unlink', glob($delete_filename.'*'));
-			}
-		} else {
-			if ($dummy && strstr($dummy, '/') === false) {
-				// check if we have the "dummy" image flag set
-				$filename = PICTURES.ICONS.strtoupper($dummy).".png";
-				if ($dummy && file_exists($filename) && is_file($filename)) {
-					$return_data = $filename;
-				} else {
-					$return_data = false;
-				}
-			} else {
-				$filename = $dummy;
-			}
-		}
-		return $return_data;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Image::createThumbnail()', E_USER_DEPRECATED);
+		return \CoreLibs\Output\Image::createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache_source, $clear_cache);
 	}
 
 	/**
@@ -2159,6 +1433,7 @@ class Basic
 	 *                                     to use quick but less nice version
 	 * @param  int         $jpeg_quality   default 80, set image quality for jpeg only
 	 * @return string|bool                 thumbnail with path
+	 * @deprecated use \CoreLibs\Output\Image::createThumbnailSimple() instead
 	 */
 	public function createThumbnailSimple(
 		string $filename,
@@ -2170,188 +1445,8 @@ class Basic
 		bool $high_quality = true,
 		int $jpeg_quality = 80
 	) {
-		$thumbnail = false;
-		// $this->debug('IMAGE PREPARE', "FILE: $filename (exists ".(string)file_exists($filename)."), WIDTH: $thumb_width, HEIGHT: $thumb_height");
-		// check that input image exists and is either jpeg or png
-		// also fail if the basic CACHE folder does not exist at all
-		if (file_exists($filename) &&
-			is_dir(BASE.LAYOUT.CONTENT_PATH.CACHE) &&
-			is_writable(BASE.LAYOUT.CONTENT_PATH.CACHE)
-		) {
-			// $this->debug('IMAGE PREPARE', "FILENAME OK, THUMB WIDTH/HEIGHT OK");
-			list($inc_width, $inc_height, $img_type) = getimagesize($filename);
-			$thumbnail_write_path = null;
-			$thumbnail_web_path = null;
-			// path set first
-			if ($img_type == IMAGETYPE_JPEG ||
-				$img_type == IMAGETYPE_PNG ||
-				$create_dummy === true
-			) {
-				// $this->debug('IMAGE PREPARE', "IMAGE TYPE OK: ".$inc_width.'x'.$inc_height);
-				// set thumbnail paths
-				$thumbnail_write_path = BASE.LAYOUT.CONTENT_PATH.CACHE.IMAGES;
-				$thumbnail_web_path = LAYOUT.CACHE.IMAGES;
-				// if images folder in cache does not exist create it, if failed, fall back to base cache folder
-				if (!is_dir($thumbnail_write_path)) {
-					if (false === mkdir($thumbnail_write_path)) {
-						$thumbnail_write_path = BASE.LAYOUT.CONTENT_PATH.CACHE;
-						$thumbnail_web_path = LAYOUT.CACHE;
-					}
-				}
-			}
-			// do resize or fall back on dummy run
-			if ($img_type == IMAGETYPE_JPEG ||
-				$img_type == IMAGETYPE_PNG
-			) {
-				// if missing width or height in thumb, use the set one
-				if ($thumb_width == 0) {
-					$thumb_width = $inc_width;
-				}
-				if ($thumb_height == 0) {
-					$thumb_height = $inc_height;
-				}
-				// check resize parameters
-				if ($inc_width > $thumb_width || $inc_height > $thumb_height) {
-					$thumb_width_r = 0;
-					$thumb_height_r = 0;
-					// we need to keep the aspect ration on longest side
-					if (($inc_height > $inc_width &&
-						// and the height is bigger than thumb set
-							$inc_height > $thumb_height) ||
-						// or the height is smaller or equal width
-						// but the width for the thumb is equal to the image height
-						($inc_height <= $inc_width &&
-							$inc_width == $thumb_width
-						)
-					) {
-						// $this->debug('IMAGE PREPARE', 'HEIGHT > WIDTH');
-						$ratio = $inc_height / $thumb_height;
-						$thumb_width_r = (int)ceil($inc_width / $ratio);
-						$thumb_height_r = $thumb_height;
-					} else {
-						// $this->debug('IMAGE PREPARE', 'WIDTH > HEIGHT');
-						$ratio = $inc_width / $thumb_width;
-						$thumb_width_r = $thumb_width;
-						$thumb_height_r = (int)ceil($inc_height / $ratio);
-					}
-					// $this->debug('IMAGE PREPARE', "Ratio: $ratio, Target size $thumb_width_r x $thumb_height_r");
-					// set output thumbnail name
-					$thumbnail = 'thumb-'.pathinfo($filename)['filename'].'-'.$thumb_width_r.'x'.$thumb_height_r;
-					if ($use_cache === false ||
-						!file_exists($thumbnail_write_path.$thumbnail)
-					) {
-						// image, copy source image, offset in image, source x/y, new size, source image size
-						$thumb = imagecreatetruecolor($thumb_width_r, $thumb_height_r);
-						if ($img_type == IMAGETYPE_PNG) {
-							// preservere transaprency
-							imagecolortransparent(
-								$thumb,
-								imagecolorallocatealpha($thumb, 0, 0, 0, 127)
-							);
-							imagealphablending($thumb, false);
-							imagesavealpha($thumb, true);
-						}
-						$source = null;
-						switch ($img_type) {
-							case IMAGETYPE_JPEG:
-								$source = imagecreatefromjpeg($filename);
-								break;
-							case IMAGETYPE_PNG:
-								$source = imagecreatefrompng($filename);
-								break;
-						}
-						// check that we have a source image resource
-						if ($source !== null) {
-							// resize no shift
-							if ($high_quality === true) {
-								imagecopyresized($thumb, $source, 0, 0, 0, 0, $thumb_width_r, $thumb_height_r, $inc_width, $inc_height);
-							} else {
-								imagecopyresampled($thumb, $source, 0, 0, 0, 0, $thumb_width_r, $thumb_height_r, $inc_width, $inc_height);
-							}
-							// write file
-							switch ($img_type) {
-								case IMAGETYPE_JPEG:
-									imagejpeg($thumb, $thumbnail_write_path.$thumbnail, $jpeg_quality);
-									break;
-								case IMAGETYPE_PNG:
-									imagepng($thumb, $thumbnail_write_path.$thumbnail);
-									break;
-							}
-							// free up resources (in case we are called in a loop)
-							imagedestroy($source);
-							imagedestroy($thumb);
-						} else {
-							$thumbnail = false;
-						}
-					}
-				} else {
-					// we just copy over the image as is, we never upscale
-					$thumbnail = 'thumb-'.pathinfo($filename)['filename'].'-'.$inc_width.'x'.$inc_height;
-					if ($use_cache === false ||
-						!file_exists($thumbnail_write_path.$thumbnail)
-					) {
-						copy($filename, $thumbnail_write_path.$thumbnail);
-					}
-				}
-				// add output path
-				if ($thumbnail !== false) {
-					$thumbnail = $thumbnail_web_path.$thumbnail;
-				}
-			} elseif ($create_dummy === true) {
-				// create dummy image in the thumbnail size
-				// if one side is missing, use the other side to create a square
-				if (!$thumb_width) {
-					$thumb_width = $thumb_height;
-				}
-				if (!$thumb_height) {
-					$thumb_height = $thumb_width;
-				}
-				// do we have an image already?
-				$thumbnail = 'thumb-'.pathinfo($filename)['filename'].'-'.$thumb_width.'x'.$thumb_height;
-				if ($use_cache === false ||
-					!file_exists($thumbnail_write_path.$thumbnail)
-				) {
-					// if both are unset, set to 250
-					if ($thumb_height == 0) {
-						$thumb_height = 250;
-					}
-					if ($thumb_width == 0) {
-						$thumb_width = 250;
-					}
-					$thumb = imagecreatetruecolor($thumb_width, $thumb_height);
-					// add outside border px = 5% (rounded up)
-					// eg 50px -> 2.5px
-					$gray = imagecolorallocate($thumb, 200, 200, 200);
-					$white = imagecolorallocate($thumb, 255, 255, 255);
-					// fill gray background
-					imagefill($thumb, 0, 0, $gray);
-					// now create rectangle
-					if (imagesx($thumb) < imagesy($thumb)) {
-						$width = (int)round(imagesx($thumb) / 100 * 5);
-					} else {
-						$width = (int)round(imagesy($thumb) / 100 * 5);
-					}
-					imagefilledrectangle($thumb, 0 + $width, 0 + $width, imagesx($thumb) - $width, imagesy($thumb) - $width, $white);
-					// add "No valid images source"
-					// OR add circle
-					// * find center
-					// * width/height is 75% of size - border
-					// smaller size is taken
-					$base_width = imagesx($thumb) > imagesy($thumb) ? imagesy($thumb) : imagesx($thumb);
-					// get 75% width
-					$cross_width = (int)round((($base_width - ($width * 2)) / 100 * 75) / 2);
-					$center_x = (int)round(imagesx($thumb) / 2);
-					$center_y = (int)round(imagesy($thumb) / 2);
-					imagefilledellipse($thumb, $center_x, $center_y, $cross_width, $cross_width, $gray);
-					// find top left and bottom left for first line
-					imagepng($thumb, $thumbnail_write_path.$thumbnail);
-				}
-				// add web path
-				$thumbnail = $thumbnail_web_path.$thumbnail;
-			}
-		}
-		// either return false or the thumbnail name + output path web
-		return $thumbnail;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Image::createThumbnailSimple()', E_USER_DEPRECATED);
+		return \CoreLibs\Output\Image::createThumbnailSimple($filename, $thumb_width, $thumb_height, $thumbnail_path, $create_dummy, $use_cache, $high_quality, $jpeg_quality);
 	}
 
 	/**
@@ -2360,60 +1455,19 @@ class Basic
 	 * only works with jpg or png
 	 * @param  string $filename path + filename to rotate. This file must be writeable
 	 * @return void
+	 * @deprecated use \CoreLibs\Output\Image::correctImageOrientation() instead
 	 */
 	public function correctImageOrientation($filename): void
 	{
-		if (function_exists('exif_read_data') && is_writeable($filename)) {
-			list($inc_width, $inc_height, $img_type) = getimagesize($filename);
-			// add @ to avoid "file not supported error"
-			$exif = @exif_read_data($filename);
-			$orientation = null;
-			$img = null;
-			if ($exif && isset($exif['Orientation'])) {
-				$orientation = $exif['Orientation'];
-			}
-			if ($orientation != 1) {
-				$this->debug('IMAGE FILE ROTATE', 'Need to rotate image ['.$filename.'] from: '.$orientation);
-				switch ($img_type) {
-					case IMAGETYPE_JPEG:
-						$img = imagecreatefromjpeg($filename);
-						break;
-					case IMAGETYPE_PNG:
-						$img = imagecreatefrompng($filename);
-						break;
-				}
-				$deg = 0;
-				// 1 top, 6: left, 8: right, 3: bottom
-				switch ($orientation) {
-					case 3:
-						$deg = 180;
-						break;
-					case 6:
-						$deg = -90;
-						break;
-					case 8:
-						$deg = 90;
-						break;
-				}
-				if ($img !== null) {
-					if ($deg) {
-						$img = imagerotate($img, $deg, 0);
-					}
-					// then rewrite the rotated image back to the disk as $filename
-					switch ($img_type) {
-						case IMAGETYPE_JPEG:
-							imagejpeg($img, $filename);
-							break;
-						case IMAGETYPE_PNG:
-							imagepng($img, $filename);
-							break;
-					}
-					// clean up image if we have an image
-					imagedestroy($img);
-				}
-			} // only if we need to rotate
-		} // function exists & file is writeable, else do nothing
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Image::correctImageOrientation()', E_USER_DEPRECATED);
+		\CoreLibs\Output\Image::correctImageOrientation($filename);
 	}
+
+	// *** IMAGE END
+
+	// *** ENCODING FUNCTIONS
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Language\Encoding
 
 	/**
 	 * test if a string can be safely convert between encodings. mostly utf8 to shift jis
@@ -2430,30 +1484,12 @@ class Basic
 	 * @param  string     $from_encoding encoding of string to test
 	 * @param  string     $to_encoding   target encoding
 	 * @return bool|array            false if no error or array with failed characters
+	 * @deprecated use \CoreLibs\Language\Encoding::checkConvertEncoding() instead
 	 */
 	public function checkConvertEncoding(string $string, string $from_encoding, string $to_encoding)
 	{
-		// convert to target encoding and convert back
-		$temp = mb_convert_encoding($string, $to_encoding, $from_encoding);
-		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);
-		// if string does not match anymore we have a convert problem
-		if ($string != $compare) {
-			$failed = array();
-			// go through each character and find the ones that do not match
-			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i ++) {
-				$char = mb_substr($string, $i, 1, $from_encoding);
-				$r_char = mb_substr($compare, $i, 1, $from_encoding);
-				// the ord 194 is a hack to fix the IE7/IE8 bug with line break and illegal character
-				// $this->debug('CHECK CONVERTT', '['.$this->mbErrorChar.'] O: '.$char.', C: '.$r_char);
-				if ((($char != $r_char && !$this->mbErrorChar) || ($char != $r_char && $r_char == $this->mbErrorChar && $this->mbErrorChar)) && ord($char) != 194) {
-					$this->debug('CHARS', "'".$char."'".' == '.$r_char.' ('.ord($char).')');
-					$failed[] = $char;
-				}
-			}
-			return $failed;
-		} else {
-			return false;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Language\Encoding::checkConvertEncoding()', E_USER_DEPRECATED);
+		return \CoreLibs\Language\Encoding::checkConvertEncoding($string, $from_encoding, $to_encoding);
 	}
 
 	/**
@@ -2469,47 +1505,30 @@ class Basic
 	 *                                 check that the source is actually matching
 	 *                                 to what we sav the source is
 	 * @return string                  encoding converted string
+	 * @deprecated use \CoreLibs\Language\Encoding::convertEncoding() instead
 	 */
 	public static function convertEncoding(string $string, string $to_encoding, string $source_encoding = '', bool $auto_check = true): string
 	{
-		// set if not given
-		if (!$source_encoding) {
-			$source_encoding = mb_detect_encoding($string);
-		} else {
-			$_source_encoding = mb_detect_encoding($string);
-		}
-		if ($auto_check === true &&
-			isset($_source_encoding) &&
-			$_source_encoding == $source_encoding
-		) {
-			// trigger check if we have override source encoding.
-			// if different (_source is all but not ascii) then trigger skip if matching
-		}
-		if ($source_encoding != $to_encoding) {
-			if ($source_encoding) {
-				$string = mb_convert_encoding($string, $to_encoding, $source_encoding);
-			} else {
-				$string = mb_convert_encoding($string, $to_encoding);
-			}
-		}
-		return $string;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Language\Encoding::convertEncoding()', E_USER_DEPRECATED);
+		return \CoreLibs\Language\Encoding::convertEncoding($string, $to_encoding, $source_encoding, $auto_check);
 	}
+
+	// *** ENCODING FUNCTIONS END
+
+	// *** HASH FUNCTIONS
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Create\Hash
 
 	/**
 	 * checks php version and if >=5.2.7 it will flip the string
 	 * @param  string $string string to crc
 	 * @return string         crc32b hash (old type)
+	 * @deprecated use \CoreLibs\Create\Hash::__crc32b() instead
 	 */
 	public function __crc32b(string $string): string
 	{
-		// do normal hash crc32b
-		$string = hash('crc32b', $string);
-		// if bigger than 5.2.7, we need to "unfix" the fix
-		if (self::checkPHPVersion('5.2.7')) {
-			// flip it back to old (two char groups)
-			$string = preg_replace("/^([a-z0-9]{2})([a-z0-9]{2})([a-z0-9]{2})([a-z0-9]{2})$/", "$4$3$2$1", $string);
-		}
-		return $string;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Hash::__crc32b()', E_USER_DEPRECATED);
+		return \CoreLibs\Create\Hash::__crc32b($string);
 	}
 
 	/**
@@ -2517,15 +1536,12 @@ class Basic
 	 * @param  string $string  string to hash
 	 * @param  bool   $use_sha use sha instead of crc32b (default false)
 	 * @return string          hash of the string
+	 * @deprecated use \CoreLibs\Create\Hash::__sha1Short() instead
 	 */
 	public function __sha1Short(string $string, bool $use_sha = false): string
 	{
-		if ($use_sha) {
-			// return only the first 9 characters
-			return substr(hash('sha1', $string), 0, 9);
-		} else {
-			return $this->__crc32b($string);
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Hash::__sha1Short()', E_USER_DEPRECATED);
+		return \CoreLibs\Create\Hash::__sha1Short($string, $use_sha);
 	}
 
 	/**
@@ -2536,89 +1552,47 @@ class Basic
 	 * @param  string $string    string to hash
 	 * @param  string $hash_type hash type (default adler32)
 	 * @return string            hash of the string
+	 * @deprecated use \CoreLibs\Create\Hash::__hash() instead
 	 */
 	public function __hash(string $string, string $hash_type = 'adler32'): string
 	{
-		if (!in_array($hash_type, array('adler32', 'fnv132', 'fnv1a32', 'joaat'))) {
-			$hash_type = 'adler32';
-		}
-		return hash($hash_type, $string);
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Hash::__hash()', E_USER_DEPRECATED);
+		return \CoreLibs\Create\Hash::__hash($string, $hash_type);
 	}
+
+	// *** HASH FUNCTIONS END
+
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Check\PhpVersion
 
 	/**
 	 * checks if running PHP version matches given PHP version (min or max)
 	 * @param  string $min_version minimum version as string (x, x.y, x.y.x)
 	 * @param  string $max_version optional maximum version as string (x, x.y, x.y.x)
 	 * @return bool                true if ok, false if not matching version
+	 * @deprecated use \CoreLibs\Check\PhpVersion::checkPHPVersion() instead
 	 */
 	public static function checkPHPVersion(string $min_version, string $max_version = ''): bool
 	{
-		// exit with false if the min/max strings are wrong
-		if (!preg_match("/^\d{1}(\.\d{1})?(\.\d{1,2})?$/", $min_version)) {
-			return false;
-		}
-		// max is only chcked if it is set
-		if ($max_version && !preg_match("/^\d{1}(\.\d{1})?(\.\d{1,2})?$/", $max_version)) {
-			return false;
-		}
-		// split up the version strings to calc the compare number
-		$version = explode('.', $min_version);
-		$min_version = (int)$version[0] * 10000 + (int)$version[1] * 100 + (int)$version[2];
-		if ($max_version) {
-			$version = explode('.', $max_version);
-			$max_version = (int)$version[0] * 10000 + (int)$version[1] * 100 + (int)$version[2];
-			// drop out if min is bigger max, equal size is okay, that would be only THIS
-			if ($min_version > $max_version) {
-				return false;
-			}
-		}
-		// set the php version id
-		if (!defined('PHP_VERSION_ID')) {
-			$version = explode('.', phpversion());
-			// creates something like 50107
-			define('PHP_VERSION_ID', (int)$version[0] * 10000 + (int)$version[1] * 100 + (int)$version[2]);
-		}
-		// check if matching for version
-		if ($min_version && !$max_version) {
-			if (PHP_VERSION_ID >= $min_version) {
-				return true;
-			}
-		} elseif ($min_version && $max_version) {
-			if (PHP_VERSION_ID >= $min_version && PHP_VERSION_ID <= $max_version) {
-				return true;
-			}
-		}
-		// if no previous return, fail
-		return false;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\PhpVersion::checkPHPVersion()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\PhpVersion::checkPHPVersion($min_version, $max_version);
 	}
+
+	// *** UIDS ELEMENTS
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Create\Uids
 
 	/**
 	 * creates psuedo random uuid v4
 	 * Code take from class here:
 	 * https://www.php.net/manual/en/function.uniqid.php#94959
 	 * @return string pseudo random uuid v4
+	 * @deprecated use \CoreLibs\Create\Uids::uuidv4() instead
 	 */
 	public static function uuidv4(): string
 	{
-		return sprintf(
-			'%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-			// 32 bits for "time_low"
-			mt_rand(0, 0xffff),
-			mt_rand(0, 0xffff),
-			// 16 bits for "time_mid"
-			mt_rand(0, 0xffff),
-			// 16 bits for "time_hi_and_version",
-			// four most significant bits holds version number 4
-			mt_rand(0, 0x0fff) | 0x4000,
-			// 16 bits, 8 bits for "clk_seq_hi_res",
-			// 8 bits for "clk_seq_low",
-			// two most significant bits holds zero and one for variant DCE1.1
-			mt_rand(0, 0x3fff) | 0x8000,
-			// 48 bits for "node"
-			mt_rand(0, 0xffff),
-			mt_rand(0, 0xffff),
-			mt_rand(0, 0xffff)
-		);
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Uids::uuidv4()', E_USER_DEPRECATED);
+		return \CoreLibs\Create\Uids::uuidv4();
 	}
 
 	/**
@@ -2628,177 +1602,44 @@ class Basic
 	 * @param  string $type uniq id type, currently md5 or sha256 allowed
 	 *                      if not set will use DEFAULT_HASH if set
 	 * @return string       uniq id
+	 * @deprecated use \CoreLibs\Create\Uids::uniqId() instead
 	 */
 	public function uniqId(string $type = ''): string
 	{
-		$uniq_id = '';
-		switch ($type) {
-			case 'md5':
-				$uniq_id = md5(uniqid((string)rand(), true));
-				break;
-			case 'sha256':
-				$uniq_id = hash('sha256', uniqid((string)rand(), true));
-				break;
-			default:
-				$hash = 'sha256';
-				if (defined(DEFAULT_HASH)) {
-					$hash = DEFAULT_HASH;
-				}
-				$uniq_id = hash($hash, uniqid((string)rand(), true));
-				break;
-		}
-		return $uniq_id;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Uids::uniqId()', E_USER_DEPRECATED);
+		return \CoreLibs\Create\Uids::uniqId($type);
 	}
 
-	// [!!! DEPRECATED !!!]
-	// ALL crypt* methids are DEPRECATED and SHALL NOT BE USED
-	// use the new password* instead
-
-	// [!!! DEPRECATED !!!] -> passwordInit
-	/**
-	 * inits crypt settings for the crypt functions
-	 * this function NEEDS (!) to be called BEFORE any of the crypt functions is called
-	 * there is no auto init for this at the moment
-	 * @return void has not return
-	 * @deprecated use passwordInit instead
-	 */
-	private function cryptInit()
-	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use passwordInit', E_USER_DEPRECATED);
-		// SET CRYPT SALT PREFIX:
-		// the prefix string is defined by what the server can do
-		// first we check if we can do blowfish, if not we try md5 and then des
-		// WARNING: des is very bad, only first 6 chars get used for the password
-		// MD5 is a bit better but is already broken
-		// problem with PHP < 5.3 is that you mostly don't have access to blowfish
-		if (CRYPT_BLOWFISH == 1 || self::checkPHPVersion('5.3.0')) {
-			// blowfish salt prefix
-			// for < 5.3.7 use the old one for anything newer use the new version
-			if (self::checkPHPVersion('5.3.7')) {
-				$this->cryptSaltPrefix = '$2y$';
-			} else {
-				$this->cryptSaltPrefix = '$2a$';
-			}
-			// add the iteration cost prefix (currently fixed 07)
-			$this->cryptSaltPrefix .= chr(ord('0') + $this->cryptIterationCost / 10);
-			$this->cryptSaltPrefix .= chr(ord('0') + $this->cryptIterationCost % 10);
-			$this->cryptSaltPrefix .= '$';
-			$this->cryptSaltSuffix = '$';
-		} else {
-			// any version lower 5.3 we do check
-			if (CRYPT_MD5 == 1) {
-				$this->cryptSaltPrefix = '$1$';
-				$this->cryptSaltSize = 6;
-				$this->cryptSaltSuffix = '$';
-			} elseif (CRYPT_STD_DES == 1) {
-				// so I know this is standard DES, I prefix this with $ and have only one random char
-				$this->cryptSaltPrefix = '$';
-				$this->cryptSaltSize = 1;
-				$this->cryptSaltSuffix = '$';
-			} else {
-				// emergency fallback
-				$this->cryptSaltPrefix = '$0';
-				$this->cryptSaltSuffix = '$';
-			}
-		}
-	}
-
-	// [!!! DEPRECATED !!!] -> passwordInit
-	/**
-	 * creates a random string from alphanumeric characters: A-Z a-z 0-9 ./
-	 * @param  integer $nSize random string length, default is 22 (for blowfish crypt)
-	 * @return string         random string
-	 * @deprecated use passwordInit instead
-	 */
-	private function cryptSaltString(int $nSize = 22): string
-	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use passwordInit', E_USER_DEPRECATED);
-		// A-Z is 65,90
-		// a-z is 97,122
-		// 0-9 is 48,57
-		// ./ is 46,47 (so first lower limit is 46)
-		$min = array(46, 65, 97);
-		$max = array(57, 90, 122);
-		$chars = array();
-		for ($i = 0, $iMax = count($min); $i < $iMax; $i ++) {
-			for ($j = $min[$i]; $j <= $max[$i]; $j ++) {
-				$chars[] = chr($j);
-			}
-		}
-		// max should be 63 for this case
-		$max_rand = count($chars) - 1;
-		$salt_string = '';
-		// create the salt part
-		for ($i = 1; $i <= $nSize; $i ++) {
-			$salt_string .= $chars[mt_rand(0, $max_rand)];
-		}
-		return $salt_string;
-	}
-
-	// [!!! DEPRECATED !!!] -> passwordSet
-	/**
-	 * encrypts the string with blowfish and returns the full string + salt part that needs to be stored somewhere (eg DB)
-	 * @param  string $string string to be crypted (one way)
-	 * @return string         encrypted string
-	 * @deprecated use passwordSet instead
-	 */
-	public function cryptString(string $string): string
-	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use passwordSet', E_USER_DEPRECATED);
-		// the crypt prefix is set in the init of the class
-		// uses the random string method to create the salt
-		// suppress deprecated error, as this is an internal call
-		/** @phan-suppress-next-line PhanDeprecatedFunction */
-		return crypt($string, $this->cryptSaltPrefix.$this->cryptSaltString($this->cryptSaltSize).$this->cryptSaltSuffix);
-	}
-
-	// [!!! DEPRECATED !!!] -> passwordVerify
-	/**
-	 * compares the string with the crypted one, is counter method to cryptString
-	 * @param  string $string plain string (eg password)
-	 * @param  string $crypt  full crypted string (from cryptString
-	 * @return bool           true on matching or false for not matching
-	 * @deprecated use passwordVerify instead
-	 */
-	public function verifyCryptString(string $string, string $crypt): bool
-	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use passwordVerify', E_USER_DEPRECATED);
-		// the full crypted string needs to be passed on to the salt, so the init (for blowfish) and salt are passed on
-		if (crypt($string, $crypt) == $crypt) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+	// *** UIDS END
 
 	// *** BETTER PASSWORD OPTIONS, must be used ***
+	// [!!! DEPRECATED !!!]
+	// moved to \CoreLibs\Check\Password
 	/**
 	 * inits the password options set
 	 * currently this is et empty, and the default options are used
 	 * @return void has no reutrn
+	 * @deprecated use This function has been removed
 	 */
 	private function passwordInit(): void
 	{
-		// set default password cost: use default set automatically
+		trigger_error('Method '.__METHOD__.' has been removed', E_USER_DEPRECATED);
+		/* // set default password cost: use default set automatically
 		$this->password_options = array(
 			// 'cost' => PASSWORD_BCRYPT_DEFAULT_COST
-		);
+		); */
 	}
 
-	// METHOD: passwordSet
-	// PARAMS: password
-	// RETURN: hashed password
-	// DESC  : creates the password hash
 	/**
 	 * creates the password hash
 	 * @param  string $password password
 	 * @return string           hashed password
+	 * @deprecated use \CoreLibs\Check\Password::passwordSet() instead
 	 */
 	public function passwordSet(string $password): string
 	{
-		// always use the PHP default for the password
-		// password options ca be set in the password init, but should be kept as default
-		return password_hash($password, PASSWORD_DEFAULT, $this->password_options);
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Password::passwordSet()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\Password::passwordSet($password);
 	}
 
 	/**
@@ -2806,35 +1647,31 @@ class Basic
 	 * @param  string $password password
 	 * @param  string $hash     password hash
 	 * @return bool             true or false
+	 * @deprecated use \CoreLibs\Check\Password::passwordVerify() instead
 	 */
 	public function passwordVerify(string $password, string $hash): bool
 	{
-		if (password_verify($password, $hash)) {
-			return true;
-		} else {
-			return false;
-		}
-		// in case something strange, return false on default
-		return false;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Password::passwordVerify()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\Password::passwordVerify($password, $hash);
 	}
 
 	/**
 	 * checks if the password needs to be rehashed
 	 * @param  string $hash password hash
 	 * @return bool         true or false
+	 * @deprecated use \CoreLibs\Check\Password::passwordRehashCheck() instead
 	 */
 	public function passwordRehashCheck(string $hash): bool
 	{
-		if (password_needs_rehash($hash, PASSWORD_DEFAULT, $this->password_options)) {
-			return true;
-		} else {
-			return false;
-		}
-		// in case of strange, force re-hash
-		return true;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Password::passwordRehashCheck()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\Password::passwordRehashCheck($hash);
 	}
 
+	// *** BETTER PASSWORD OPTIONS END ***
+
 	// *** COLORS ***
+	// [!!! DEPRECATED !!!]
+	// moved to \CoreLibs\Convert\Colors
 
 	/**
 	 * converts a hex RGB color to the int numbers
@@ -2842,28 +1679,12 @@ class Basic
 	 * @param  bool              $returnAsString flag to return as string
 	 * @param  string            $seperator      string seperator: default: ","
 	 * @return string|array|bool                 false on error or array with RGB or a string with the seperator
+	 * @deprecated use \CoreLibs\Convert\Colors::hex2rgb() instead
 	 */
 	public static function hex2rgb(string $hexStr, bool $returnAsString = false, string $seperator = ',')
 	{
-		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
-		$rgbArray = array();
-		if (strlen($hexStr) == 6) {
-			// If a proper hex code, convert using bitwise operation. No overhead... faster
-			$colorVal = hexdec($hexStr);
-			$rgbArray['R'] = 0xFF & ($colorVal >> 0x10);
-			$rgbArray['G'] = 0xFF & ($colorVal >> 0x8);
-			$rgbArray['B'] = 0xFF & $colorVal;
-		} elseif (strlen($hexStr) == 3) {
-			// If shorthand notation, need some string manipulations
-			$rgbArray['R'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
-			$rgbArray['G'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
-			$rgbArray['B'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
-		} else {
-			// Invalid hex color code
-			return false;
-		}
-		// returns the rgb string or the associative array
-		return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::hex2rgb()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Colors::hex2rgb($hexStr, $returnAsString, $seperator);
 	}
 
 	/**
@@ -2874,22 +1695,12 @@ class Basic
 	 * @param  int    $blue       blue 0-255
 	 * @param  bool   $hex_prefix default true, prefix with "#"
 	 * @return string             rgb in hex values with leading # if set
+	 * @deprecated use \CoreLibs\Convert\Colors::rgb2hex() instead
 	 */
 	public static function rgb2hex(int $red, int $green, int $blue, bool $hex_prefix = true): string
 	{
-		$hex_color = '';
-		if ($hex_prefix === true) {
-			$hex_color = '#';
-		}
-		foreach (array('red', 'green', 'blue') as $color) {
-			// if not valid, set to gray
-			if ($$color < 0 || $$color > 255) {
-				$$color = 125;
-			}
-			// pad left with 0
-			$hex_color .= str_pad(dechex($$color), 2, '0', STR_PAD_LEFT);
-		}
-		return $hex_color;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::rgb2hex()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Colors::rgb2hex($red, $green, $blue, $hex_prefix);
 	}
 
 	/**
@@ -2902,19 +1713,9 @@ class Basic
 	 */
 	public static function rgb2html(int $red, int $green, int $blue): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use rgb2hex', E_USER_DEPRECATED);
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::rgb2hex()', E_USER_DEPRECATED);
 		// check that each color is between 0 and 255
-		foreach (array('red', 'green', 'blue') as $color) {
-			if ($$color < 0 || $$color > 255) {
-				$$color = 125;
-			}
-			// convert to HEX value
-			$$color = dechex($$color);
-			// prefix with 0 if only one char
-			$$color = (strlen($$color) < 2 ? '0' : '').$$color;
-		}
-		// prefix hex parts with 0 if they are just one char long and return the html color string
-		return '#'.$red.$green.$blue;
+		return \CoreLibs\Convert\Colors::rgb2hex($red, $green, $blue, true);
 	}
 
 	/**
@@ -2925,41 +1726,12 @@ class Basic
 	 * @param  int    $g green 0-255
 	 * @param  int    $b blue 0-255
 	 * @return array  Hue, Sat, Brightness/Value
+	 * @deprecated use \CoreLibs\Convert\Colors::rgb2hsb() instead
 	 */
-	public static function rgb2hsb(int $r, int $g, int $b): array
+	public static function rgb2hsb(int $red, int $green, int $blue): array
 	{
-		// check that rgb is from 0 to 255
-		foreach (array('r', 'g', 'b') as $c) {
-			if ($$c < 0 || $$c > 255) {
-				$$c = 0;
-			}
-			$$c = $$c / 255;
-		}
-
-		$MAX = max($r, $g, $b);
-		$MIN = min($r, $g, $b);
-		$HUE = 0;
-
-		if ($MAX == $MIN) {
-			return array(0, 0, round($MAX * 100));
-		}
-		if ($r == $MAX) {
-			$HUE = ($g - $b) / ($MAX - $MIN);
-		} elseif ($g == $MAX) {
-			$HUE = 2 + (($b - $r) / ($MAX - $MIN));
-		} elseif ($b == $MAX) {
-			$HUE = 4 + (($r - $g) / ($MAX - $MIN));
-		}
-		$HUE *= 60;
-		if ($HUE < 0) {
-			$HUE += 360;
-		}
-
-		return array(
-			(int)round($HUE),
-			(int)round((($MAX - $MIN) / $MAX) * 100),
-			(int)round($MAX * 100)
-		);
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::rgb2hsb()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Colors::rgb2hsb($red, $green, $blue);
 	}
 
 	/**
@@ -2967,74 +1739,13 @@ class Basic
 	 * @param  int    $H hue 0-360
 	 * @param  float  $S saturation 0-1 (float)
 	 * @param  float  $V brightness/value 0-1 (float)
-	 * @return array  0 red/1 green/2 blue array
+	 * @return array     0 red/1 green/2 blue array
+	 * @deprecated use \CoreLibs\Convert\Colors::hsb2rgb() instead
 	 */
 	public static function hsb2rgb(int $H, float $S, float $V): array
 	{
-		// check that H is 0 to 359, 360 = 0
-		// and S and V are 0 to 1
-		if ($H < 0 || $H > 359 || $H == 360) {
-			$H = 0;
-		}
-		if ($S < 0 || $S > 1) {
-			$S = 0;
-		}
-		if ($V < 0 || $V > 1) {
-			$V = 0;
-		}
-
-		if ($S == 0) {
-			return array($V * 255, $V * 255, $V * 255);
-		}
-
-		$Hi = floor($H / 60);
-		$f = ($H / 60) - $Hi;
-		$p = $V * (1 - $S);
-		$q = $V * (1 - ($S * $f));
-		$t = $V * (1 - ($S * (1 - $f)));
-
-		switch ($Hi) {
-			case 0:
-				$red = $V;
-				$green = $t;
-				$blue = $p;
-				break;
-			case 1:
-				$red = $q;
-				$green = $V;
-				$blue = $p;
-				break;
-			case 2:
-				$red = $p;
-				$green = $V;
-				$blue = $t;
-				break;
-			case 3:
-				$red = $p;
-				$green = $q;
-				$blue = $V;
-				break;
-			case 4:
-				$red = $t;
-				$green = $p;
-				$blue = $V;
-				break;
-			case 5:
-				$red = $V;
-				$green = $p;
-				$blue = $q;
-				break;
-			default:
-				$red = 0;
-				$green = 0;
-				$blue = 0;
-		}
-
-		return array(
-			(int)round($red * 255),
-			(int)round($green * 255),
-			(int)round($blue * 255)
-		);
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::hsb2rgb()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Colors::hsb2rgb($H, (int)round($S * 100), (int)round($V * 100));
 	}
 
 	/**
@@ -3044,49 +1755,13 @@ class Basic
 	 * @param  int    $r red 0-255
 	 * @param  int    $g green 0-255
 	 * @param  int    $b blue 0-255
-	 * @return array  hue/sat/luminance
+	 * @return array     hue/sat/luminance
+	 * @deprecated use \CoreLibs\Convert\Colors::rgb2hsl() instead
 	 */
 	public static function rgb2hsl(int $r, int $g, int $b): array
 	{
-		// check that rgb is from 0 to 255
-		foreach (array('r', 'g', 'b') as $c) {
-			if ($$c < 0 || $$c > 255) {
-				$$c = 0;
-			}
-			$$c = $$c / 255;
-		}
-
-		$MIN = min($r, $g, $b);
-		$MAX = max($r, $g, $b);
-		$HUE = 0;
-		// luminance
-		$L = round((($MAX + $MIN) / 2) * 100);
-
-		if ($MIN == $MAX) {
-			// H, S, L
-			return array(0, 0, $L);
-		} else {
-			// HUE to 0~360
-			if ($r == $MAX) {
-				$HUE = ($g - $b) / ($MAX - $MIN);
-			} elseif ($g == $MAX) {
-				$HUE = 2 + (($b - $r) / ($MAX - $MIN));
-			} elseif ($b == $MAX) {
-				$HUE = 4 + (($r - $g) / ($MAX - $MIN));
-			}
-			$HUE *= 60;
-			if ($HUE < 0) {
-				$HUE += 360;
-			}
-
-			// H, S, L
-			// S= L <= 0.5 ? C/2L : C/2 - 2L
-			return array(
-				(int)round($HUE),
-				(int)round((($MAX - $MIN) / ($L <= 0.5 ? ($MAX + $MIN) : (2 - $MAX - $MIN))) * 100),
-				(int)$L
-			);
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::rgb2hsl()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Colors::rgb2hsb($r, $g, $b);
 	}
 
 	/**
@@ -3094,42 +1769,20 @@ class Basic
 	 * @param  int    $h hue: 0-360 (degrees)
 	 * @param  float  $s saturation: 0-1
 	 * @param  float  $l luminance: 0-1
-	 * @return array  red/blue/green 0-255 each
+	 * @return array     red/blue/green 0-255 each
+	 * @deprecated use \CoreLibs\Convert\Colors::hsl2rgb() instead
 	 */
 	public static function hsl2rgb(int $h, float $s, float $l): array
 	{
-		$h = (1 / 360) * $h; // calc to internal convert value for hue
-		// if saturation is 0
-		if ($s == 0) {
-			return array($l * 255, $l * 255, $l * 255);
-		} else {
-			$m2 = $l < 0.5 ? $l * ($s + 1) : ($l + $s) - ($l * $s);
-			$m1 = $l * 2 - $m2;
-			$hue = function ($base) use ($m1, $m2) {
-				// base = hue, hue > 360 (1) - 360 (1), else < 0 + 360 (1)
-				$base = $base < 0 ? $base + 1 : ($base > 1 ? $base - 1 : $base);
-				// 6: 60, 2: 180, 3: 240
-				// 2/3 = 240
-				// 1/3 = 120 (all from 360)
-				if ($base * 6 < 1) {
-					return $m1 + ($m2 - $m1) * $base * 6;
-				}
-				if ($base * 2 < 1) {
-					return $m2;
-				}
-				if ($base * 3 < 2) {
-					return $m1 + ($m2 - $m1) * ((2 / 3) - $base) * 6;
-				}
-				return $m1;
-			};
-
-			return array(
-				(int)round(255 * $hue($h + (1 / 3))),
-				(int)round(255 * $hue($h)),
-				(int)round(255 * $hue($h - (1 / 3)))
-			);
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::hsl2rgb()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Colors::hsl2rgb($h, $s * 100, $l * 100);
 	}
+
+	// *** COLORS END ***
+
+	// *** EMAIL FUNCTIONS ***
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Check\Email
 
 	/**
 	 * guesses the email type (mostly for mobile) from the domain
@@ -3137,46 +1790,31 @@ class Basic
 	 * @param  string $email email string
 	 * @param  bool   $short default false, if true, returns only short type (pc instead of pc_html)
 	 * @return string|bool   email type, eg "pc", "docomo", etc, false for invalid short type
+	 * @deprecated use \CoreLibs\Check\Email::getEmailType() instead
 	 */
 	public function getEmailType(string $email, bool $short = false)
 	{
-		// trip if there is no email address
-		if (!$email) {
-			return 'invalid';
-		}
-		// loop until we match a mobile type, return this first found type
-		foreach ($this->mobile_email_type as $email_regex => $email_type) {
-			if (preg_match("/$email_regex/", $email)) {
-				if ($short) {
-					return $this->getShortEmailType($email_type);
-				} else {
-					return $email_type;
-				}
-			}
-		}
-		// if no previous return we assume this is a pc address
-		if ($short) {
-			return 'pc';
-		} else {
-			return 'pc_html';
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Email::getEmailType()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\Email::getEmailType($email, $short);
 	}
 
 	/**
 	 * gets the short email type from a long email type
 	 * @param  string $email_type email string
 	 * @return string|bool              short string or false for invalid
+	 * @deprecated use \CoreLibs\Check\Email::getShortEmailType() instead
 	 */
 	public function getShortEmailType(string $email_type)
 	{
-		// check if the short email type exists
-		if (isset($this->mobile_email_type_short[$email_type])) {
-			return $this->mobile_email_type_short[$email_type];
-		} else {
-			// return false on not found
-			return false;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Email::getShortEmailType()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\Email::getShortEmailType($email_type);
 	}
+
+	// *** EMAIL FUNCTIONS END ***
+
+	// *** HTML FUNCTIONS ***
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Output\Form\Elements
 
 	/**
 	 * print the date/time drop downs, used in any queue/send/insert at date/time place
@@ -3191,107 +1829,26 @@ class Basic
 	 * @param  bool   $name_pos_back default false, if set to true, the name will be printend
 	 *                               after the drop down and not before the drop down
 	 * @return string                HTML formated strings for drop down lists of date and time
+	 * @deprecated use \CoreLibs\Output\Form\Elements::printDateTime() instead
 	 */
 	public static function printDateTime($year, $month, $day, $hour, $min, string $suffix = '', int $min_steps = 1, bool $name_pos_back = false)
 	{
-		// if suffix given, add _ before
-		if ($suffix) {
-			$suffix = '_'.$suffix;
-		}
-		if ($min_steps < 1 || $min_steps > 59) {
-			$min_steps = 1;
-		}
-
-		$on_change_call = 'dt_list(\''.$suffix.'\');';
-
-		// always be 1h ahead (for safety)
-		$timestamp = time() + 3600; // in seconds
-
-		// the max year is this year + 1;
-		$max_year = (int)date("Y", $timestamp) + 1;
-
-		// preset year, month, ...
-		$year = !$year ? date('Y', $timestamp) : $year;
-		$month = !$month ? date('m', $timestamp) : $month;
-		$day = !$day ? date('d', $timestamp) : $day;
-		$hour = !$hour ? date('H', $timestamp) : $hour;
-		$min = !$min ? date('i', $timestamp) : $min; // add to five min?
-		// max days in selected month
-		$days_in_month = date('t', strtotime($year.'-'.$month.'-'.$day.' '.$hour.':'.$min.':0'));
-		$string = '';
-		// from now to ?
-		if ($name_pos_back === false) {
-			$string = 'Year ';
-		}
-		$string .= '<select id="year'.$suffix.'" name="year'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = date("Y"); $i <= $max_year; $i ++) {
-			$string .= '<option value="'.$i.'" '.($year == $i ? 'selected' : '').'>'.$i.'</option>';
-		}
-		$string .= '</select> ';
-		if ($name_pos_back === true) {
-			$string .= 'Year ';
-		}
-		if ($name_pos_back === false) {
-			$string .= 'Month ';
-		}
-		$string .= '<select id="month'.$suffix.'" name="month'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 1; $i <= 12; $i ++) {
-			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($month == $i ? 'selected' : '').'>'.$i.'</option>';
-		}
-		$string .= '</select> ';
-		if ($name_pos_back === true) {
-			$string .= 'Month ';
-		}
-		if ($name_pos_back === false) {
-			$string .= 'Day ';
-		}
-		$string .= '<select id="day'.$suffix.'" name="day'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 1; $i <= $days_in_month; $i ++) {
-			// set weekday text based on current month ($month) and year ($year)
-			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($day == $i ? 'selected' : '').'>'.$i.' ('.date('D', mktime(0, 0, 0, $month, $i, $year)).')</option>';
-		}
-		$string .= '</select> ';
-		if ($name_pos_back === true) {
-			$string .= 'Day ';
-		}
-		if ($name_pos_back === false) {
-			$string .= 'Hour ';
-		}
-		$string .= '<select id="hour'.$suffix.'" name="hour'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 0; $i <= 23; $i += $min_steps) {
-			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($hour == $i ? 'selected' : '').'>'.$i.'</option>';
-		}
-		$string .= '</select> ';
-		if ($name_pos_back === true) {
-			$string .= 'Hour ';
-		}
-		if ($name_pos_back === false) {
-			$string .= 'Minute ';
-		}
-		$string .= '<select id="min'.$suffix.'" name="min'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 0; $i <= 59; $i ++) {
-			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($min == $i ? 'selected' : '').'>'.$i.'</option>';
-		}
-		$string .= '</select>';
-		if ($name_pos_back === true) {
-			$string .= ' Minute ';
-		}
-		// return the datetime select string
-		return $string;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Form\Elements::printDateTime()', E_USER_DEPRECATED);
+		return \CoreLibs\Output\Form\Elements::printDateTime($year, $month, $day, $hour, $min, $suffix, $min_steps, $name_pos_back);
 	}
+
+	// Moved to \CoreLibs\Convert\Html
 
 	/**
 	 * full wrapper for html entities
 	 * @param  mixed $string string to html encode
 	 * @return mixed         if string, encoded, else as is (eg null)
+	 * @deprecated use \CoreLibs\Convert\Html::htmlent() instead
 	 */
-	public function htmlent($string)
+	public static function htmlent($string)
 	{
-		if (is_string($string)) {
-			return htmlentities($string, ENT_COMPAT|ENT_HTML401, 'UTF-8', false);
-		} else {
-			return $string;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Html::htmlent()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Html::htmlent($string);
 	}
 
 	/**
@@ -3299,11 +1856,19 @@ class Basic
 	 * @param  string $string  string
 	 * @param  string $replace replace character, default ' '
 	 * @return string          cleaned string without any line breaks
+	 * @deprecated use \CoreLibs\Convert\Html::removeLB() instead
 	 */
-	public function removeLB(string $string, string $replace = ' '): string
+	public static function removeLB(string $string, string $replace = ' '): string
 	{
-		return str_replace(array("\r", "\n"), $replace, $string);
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Html::removeLB()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Html::removeLB($string, $replace);
 	}
+
+	// *** HTML FUNCTIONS END ***
+
+	// *** MATH FUNCTIONS ***
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Convert\Math
 
 	/**
 	 * some float numbers will be rounded up even if they have no decimal entries
@@ -3311,10 +1876,12 @@ class Basic
 	 * @param  float       $number    number to round
 	 * @param  int|integer $precision intermediat round up decimals (default 10)
 	 * @return float                  correct ceil number
+	 * @deprecated use \CoreLibs\Convert\Math::fceil() instead
 	 */
-	public function fceil(float $number, int $precision = 10): float
+	public static function fceil(float $number, int $precision = 10): float
 	{
-		return ceil(round($number, $precision));
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Math::fceil()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Math::fceil($number, $precision);
 	}
 
 	/**
@@ -3323,38 +1890,42 @@ class Basic
 	 * @param  float $number    number to round
 	 * @param  int   $precision negative number for position in number (default -2)
 	 * @return float            rounded number
+	 * @deprecated use \CoreLibs\Convert\Math::floorp() instead
 	 */
-	public function floorp(float $number, int $precision = -2): float
+	public static function floorp(float $number, int $precision = -2): float
 	{
-		$mult = pow(10, $precision); // Can be cached in lookup table
-		return floor($number * $mult) / $mult;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Math::floorp()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Math::floorp($number, $precision);
 	}
 
 	/**
 	 * inits input to 0, if value is not numeric
 	 * @param  string|int|float $number string or number to check
 	 * @return float                    if not number, then returns 0, else original input
+	 * @deprecated use \CoreLibs\Convert\Math::initNumeric() instead
 	 */
-	public function initNumeric($number): float
+	public static function initNumeric($number): float
 	{
-		if (!is_numeric($number)) {
-			return 0;
-		} else {
-			return $number;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Math::initNumeric()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Math::initNumeric($number);
 	}
+
+	// *** MATH FUNCTIONS END ***
+
+	// *** FORM TOKEN PARTS ***
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Output\Form\Token
 
 	/**
 	 * sets a form token in a session and returns form token
 	 * @param  string $name optional form name, default form_token
 	 * @return string       token name for given form id string
+	 * @deprecated use \CoreLibs\Output\Form\Token::setFormToken() instead
 	 */
-	public function setFormToken(string $name = 'form_token'): string
+	public static function setFormToken(string $name = 'form_token'): string
 	{
-		// current hard set to sha256
-		$token = uniqid(hash('sha256', (string)rand()));
-		$_SESSION[$name] = $token;
-		return $token;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Form\Token::setFormToken()', E_USER_DEPRECATED);
+		return \CoreLibs\Output\Form\Token::setFormToken($name);
 	}
 
 	/**
@@ -3362,70 +1933,31 @@ class Basic
 	 * @param  string $token token string to check
 	 * @param  string $name  optional form name to check to, default form_token
 	 * @return bool          false if not set, or true/false if matching or not mtaching
+	 * @deprecated use \CoreLibs\Output\Form\Token::validateFormToken() instead
 	 */
-	public function validateFormToken(string $token, string $name = 'form_token'): bool
+	public static function validateFormToken(string $token, string $name = 'form_token'): bool
 	{
-		if (isset($_SESSION[$name])) {
-			return $_SESSION[$name] === $token;
-		} else {
-			return false;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Form\Token::validateFormToken()', E_USER_DEPRECATED);
+		return \CoreLibs\Output\Form\Token::validateFormToken($token, $name);
 	}
 
-	// *** MIME PARTS
-	// to be moved to some mime class
+	// *** FORM TOKEN END ***
 
-	/**
-	 * init array for mime type to application name lookup
-	 * @return void
-	 */
-	private function mimeInitApps(): void
-	{
-		// match mime type to some application description
-		// this is NOT translated
-		$this->mime_apps = [
-			// zip
-			'application/zip' => 'Zip File',
-			// Powerpoint
-			'application/vnd.ms-powerpoint' => 'Microsoft Powerpoint',
-			'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'Microsoft Powerpoint',
-			// PDF
-			'pplication/pdf' => 'PDF',
-			// JPEG
-			'image/jpeg' => 'JPEG',
-			// PNG
-			'image/png' => 'PNG',
-			// Indesign
-			'application/x-indesign' => 'Adobe InDesign',
-			// Photoshop
-			'image/vnd.adobe.photoshop' => 'Adobe Photoshop',
-			'application/photoshop' => 'Adobe Photoshop',
-			// Illustrator
-			'application/illustrator' => 'Adobe Illustrator',
-			// Word
-			'application/vnd.ms-word' => 'Microsoft Word',
-			'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Microsoft Word',
-			// Excel
-			'application/vnd.ms-excel' => 'Microsoft Excel',
-			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'Microsoft Excel',
-			// plain text
-			'text/plain' => 'Text file',
-			// html
-			'text/html' => 'HTML',
-			// mp4 (max 45MB each)
-			'video/mpeg' => 'MPEG Video'
-		];
-	}
+	// *** MIME PARTS ***
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Convert\MimeAppName
 
 	/**
 	 * Sets or updates a mime type
 	 * @param  string $mime MIME Name, no validiation
 	 * @param  string $app  Applicaiton name
 	 * @return void
+	 * @deprecated use \CoreLibs\Convert\MimeAppName()->mimeSetAppName() instead
 	 */
 	public function mimeSetAppName(string $mime, string $app): void
 	{
-		$this->mime_apps[$mime] = $app;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\MimeAppName()->mimeSetAppName()', E_USER_DEPRECATED);
+		$this->mime->mimeSetAppName($mime, $app);
 	}
 
 	/**
@@ -3433,12 +1965,19 @@ class Basic
 	 * if not set returns "Other file"
 	 * @param  string $mime MIME Name
 	 * @return string       Application name matching
+	 * @deprecated use \CoreLibs\Convert\MimeAppName()->mimeGetAppName() instead
 	 */
 	public function mimeGetAppName(string $mime): string
 	{
-		return $this->mime_apps[$mime] ?? 'Other file';
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\MimeAppName()->mimeGetAppName()', E_USER_DEPRECATED);
+		return $this->mime->mimeGetAppName($mime);
 	}
 
+	// *** MIME PARTS END ***
+
+	// *** JSON ***
+	// [!!! DEPRECATED !!!]
+	// \CoreLibs\Check\Json
 
 	/**
 	 * converts a json string to an array
@@ -3450,26 +1989,12 @@ class Basic
 	 * @param  bool        $override if set to true, then on json error
 	 *                               set original value as array
 	 * @return array                 returns an array from the json values
+	 * @deprecated use \CoreLibs\Check\Jason::jsonConvertToArray() instead
 	 */
 	public function jsonConvertToArray(?string $json, bool $override = false): array
 	{
-		if ($json !== null) {
-			$_json = json_decode($json, true);
-			if ($this->json_last_error = json_last_error()) {
-				if ($override == true) {
-					// init return as array with original as element
-					$json = [$json];
-				} else {
-					$json = [];
-				}
-			} else {
-				$json = $_json;
-			}
-		} else {
-			$json = [];
-		}
-		// be sure that we return an array
-		return (array)$json;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Jason::jsonConvertToArray()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\Jason::jsonConvertToArray($json, $override);
 	}
 
 	/**
@@ -3479,36 +2004,15 @@ class Basic
 	 *                                     the error number
 	 * @return int|string                  Either error number (0 for no error)
 	 *                                     or error string ('' for no error)
+	 * @deprecated use \CoreLibs\Check\Jason::jsonGetLastError() instead
 	 */
 	public function jsonGetLastError(bool $return_string = false)
 	{
-		$json_error_string = '';
-		// valid errors as of php 8.0
-		switch ($this->json_last_error) {
-			case JSON_ERROR_NONE:
-				$json_error_string = '';
-				break;
-			case JSON_ERROR_DEPTH:
-				$json_error_string = 'Maximum stack depth exceeded';
-				break;
-			case JSON_ERROR_STATE_MISMATCH:
-				$json_error_string = 'Underflow or the modes mismatch';
-				break;
-			case JSON_ERROR_CTRL_CHAR:
-				$json_error_string = 'Unexpected control character found';
-				break;
-			case JSON_ERROR_SYNTAX:
-				$json_error_string = 'Syntax error, malformed JSON';
-				break;
-			case JSON_ERROR_UTF8:
-				$json_error_string = 'Malformed UTF-8 characters, possibly incorrectly encoded';
-				break;
-			default:
-				$json_error_string = 'Unknown error';
-				break;
-		}
-		return $return_string === true ? $json_error_string : $this->json_last_error;
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Jason::jsonGetLastError()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\Jason::jsonGetLastError($return_string);
 	}
+
+	// *** JSON END ***
 }
 
 // __END__
