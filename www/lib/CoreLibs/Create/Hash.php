@@ -57,6 +57,16 @@ class Hash
 		}
 		return hash($hash_type, $string);
 	}
+
+	/**
+	 * create a unique id with the standard hash type defined in __hash
+	 *
+	 * @return string Unique ID with fixed length of 8 characters
+	 */
+	public static function __uniqId(): string
+	{
+		return self::__hash(uniqid((string)rand(), true));
+	}
 }
 
 // __END__

@@ -23,16 +23,14 @@ if (!defined('SET_SESSION_NAME')) {
 	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 }
 // define log file id
-$LOG_FILE_ID = 'classTest-datetime';
+$LOG_FILE_ID = 'classTest-array';
 ob_end_flush();
 
 use CoreLibs\Combined\ArrayHandler;
 
 $basic = new CoreLibs\Basic();
-$_array= new CoreLibs\Combined\ArrayHandler();
-$array_class = 'CoreLibs\Combination\ArrayHandler';
-
-// define a list of from to color sets for conversion test
+// $_array= new CoreLibs\Combined\ArrayHandler();
+// $array_class = 'CoreLibs\Combination\ArrayHandler';
 
 print "<html><head><title>TEST CLASS: ARRAY HANDLER</title><head>";
 print "<body>";

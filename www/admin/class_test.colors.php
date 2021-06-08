@@ -26,15 +26,16 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-colors';
 ob_end_flush();
 
-$basic = new CoreLibs\Basic();
-$color = new CoreLibs\Convert\Colors();
-$color_class = 'CoreLibs\Convert\Colors';
+use CoreLibs\Convert\Colors;
 
-// define a list of from to color sets for conversion test
+$basic = new CoreLibs\Basic();
+$color_class = 'CoreLibs\Convert\Colors';
 
 print "<html><head><title>TEST CLASS: COLORS</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+
+// define a list of from to color sets for conversion test
 
 // A(out of bounds)
 print "C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: ".CoreLibs\Convert\Colors::rgb2hex(-1, -1, -1)."<br>";
@@ -44,15 +45,15 @@ $rgb = [10, 20, 30];
 $hex = '#0a141e';
 $hsb = [210, 67, 12];
 $hsl = [210, 50, 7.8];
-print "C/COLOR rgb->hex: $rgb[0], $rgb[1], $rgb[2]: ".$color->rgb2hex($rgb[0], $rgb[1], $rgb[2])."<br>";
-print "C/COLOR hex->rgb: $hex: ".$basic->printAr($color->hex2rgb($hex))."<br>";
+print "S::COLOR rgb->hex: $rgb[0], $rgb[1], $rgb[2]: ".Colors::rgb2hex($rgb[0], $rgb[1], $rgb[2])."<br>";
+print "S::COLOR hex->rgb: $hex: ".$basic->printAr(Colors::hex2rgb($hex))."<br>";
 print "C::S/COLOR rgb->hext: $hex: ".$basic->printAr(CoreLibs\Convert\Colors::hex2rgb($hex))."<br>";
 // C(to hsb/hsl)
-print "C/COLOR rgb->hsb: $rgb[0], $rgb[1], $rgb[2]: ".$basic->printAr($color->rgb2hsb($rgb[0], $rgb[1], $rgb[2]))."<br>";
-print "C/COLOR rgb->hsl: $rgb[0], $rgb[1], $rgb[2]: ".$basic->printAr($color->rgb2hsl($rgb[0], $rgb[1], $rgb[2]))."<br>";
+print "S::COLOR rgb->hsb: $rgb[0], $rgb[1], $rgb[2]: ".$basic->printAr(Colors::rgb2hsb($rgb[0], $rgb[1], $rgb[2]))."<br>";
+print "S::COLOR rgb->hsl: $rgb[0], $rgb[1], $rgb[2]: ".$basic->printAr(Colors::rgb2hsl($rgb[0], $rgb[1], $rgb[2]))."<br>";
 // D(from hsb/hsl) Note that param 2 + 3 is always 0-100 divided
-print "C/COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: ".$basic->printAr($color->hsb2rgb($hsb[0], $hsb[1], $hsb[2]))."<br>";
-print "C/COLOR hsl->rgb: $hsl[0], $hsl[1], $hsl[2]: ".$basic->printAr($color->hsl2rgb($hsl[0], $hsl[1], $hsl[2]))."<br>";
+print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: ".$basic->printAr(Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2]))."<br>";
+print "S::COLOR hsl->rgb: $hsl[0], $hsl[1], $hsl[2]: ".$basic->printAr(Colors::hsl2rgb($hsl[0], $hsl[1], $hsl[2]))."<br>";
 
 // TODO: run compare check input must match output
 

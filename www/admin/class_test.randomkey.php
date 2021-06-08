@@ -23,30 +23,29 @@ if (!defined('SET_SESSION_NAME')) {
 	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
 }
 // define log file id
-$LOG_FILE_ID = 'classTest-uids';
+$LOG_FILE_ID = 'classTest-randomkey';
 ob_end_flush();
 
-$basic = new CoreLibs\Basic();
-$_uids = new CoreLibs\Create\Uids();
-$uids_class = 'CoreLibs\Create\Uids';
+use CoreLibs\Create\RandomKey;
 
-print "<html><head><title>TEST CLASS: UIDS</title><head>";
+$basic = new CoreLibs\Basic();
+$array_class = 'CoreLibs\Create\RandomKey';
+
+print "<html><head><title>TEST CLASS: RANDOM KEY</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
-// class
-print "UUIDV4: ".$_uids->uuidv4()."<br>";
-print "UNIQID (d): ".$_uids->uniqId()."<br>";
-print "UNIQID (md5): ".$_uids->uniqId('md5')."<br>";
-print "UNIQID (sha256): ".$_uids->uniqId('sha256')."<br>";
-// statc
-print "S::UUIDV4: ".$uids_class::uuidv4()."<br>";
-print "S::UNIQID (d): ".$uids_class::uniqId()."<br>";
-print "S::UNIQID (md5): ".$uids_class::uniqId('md5')."<br>";
-print "S::UNIQID (sha256): ".$uids_class::uniqId('sha256')."<br>";
+$key_length = 10;
+$key_length_b = 5;
+print "S::RANDOMKEYGEN(auto): ".RandomKey::randomKeyGen()."<br>";
+print "S::SETRANDOMKEYLENGTH($key_length): ".RandomKey::setRandomKeyLength($key_length)."<br>";
+print "S::RANDOMKEYGEN($key_length): ".RandomKey::randomKeyGen()."<br>";
+print "S::RANDOMKEYGEN($key_length_b): ".RandomKey::randomKeyGen($key_length_b)."<br>";
+print "S::RANDOMKEYGEN($key_length): ".RandomKey::randomKeyGen()."<br>";
+$_array= new CoreLibs\Create\RandomKey();
+print "C->RANDOMKEYGEN(auto): ".$_array->randomKeyGen()."<br>";
 // DEPRECATED
-/* print "D/UUIDV4: ".$basic->uuidv4()."<br>";
-print "/DUNIQID (d): ".$basic->uniqId()."<br>"; */
+// print "D\RANDOMKEYGEN(auto): ".$basic->randomKeyGen()."<br>";
 
 // error message
 print $basic->printErrorMsg();

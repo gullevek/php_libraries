@@ -28,8 +28,6 @@ ob_end_flush();
 
 $basic = new CoreLibs\Admin\Backend(DB_CONFIG);
 
-// define a list of from to color sets for conversion test
-
 print "<html><head><title>TEST CLASS: DB</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

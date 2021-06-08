@@ -29,7 +29,6 @@ ob_end_flush();
 use CoreLibs\Create\Hash;
 
 $basic = new CoreLibs\Basic();
-$_hash = new CoreLibs\Create\Hash();
 $hash_class = 'CoreLibs\Create\Hash';
 
 // define a list of from to color sets for conversion test
@@ -39,14 +38,6 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $to_crc = 'Some text block';
-// class
-print "__CRC32B: $to_crc: ".$_hash->__crc32b($to_crc)."<br>";
-print "__SHA1SHORT(off): $to_crc: ".$_hash->__sha1short($to_crc)."<br>";
-print "__SHA1SHORT(on): $to_crc: ".$_hash->__sha1short($to_crc, true)."<br>";
-print "__hash(d): $to_crc: ".$_hash->__hash($to_crc)."<br>";
-foreach (['adler32', 'fnv132', 'fnv1a32', 'joaat'] as $__hash_c) {
-	print "__hash($__hash_c): $to_crc: ".$_hash->__hash($to_crc, $__hash_c)."<br>";
-}
 // static
 print "S::__CRC32B: $to_crc: ".$hash_class::__crc32b($to_crc)."<br>";
 print "S::__SHA1SHORT(off): $to_crc: ".$hash_class::__sha1short($to_crc)."<br>";

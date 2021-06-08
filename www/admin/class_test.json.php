@@ -26,8 +26,9 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-json';
 ob_end_flush();
 
+use CoreLibs\Check\Jason;
+
 $basic = new CoreLibs\Basic();
-$_json = new CoreLibs\Check\Jason();
 $json_class = 'CoreLibs\Check\Jason';
 
 // define a list of from to color sets for conversion test
@@ -37,25 +38,25 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $json = '{"foo": "bar"}';
-$output = $_json->jsonConvertToArray($json);
-print "JSON: $json: ".$basic->printAr($output)."<br>";
-print "JSON ERROR: ".$_json->jsonGetLastError().": ".$_json->jsonGetLastError(true)."<br>";
+$output = Jason::jsonConvertToArray($json);
+print "S::JSON: $json: ".$basic->printAr($output)."<br>";
+print "S::JSON ERROR: ".Jason::jsonGetLastError().": ".Jason::jsonGetLastError(true)."<br>";
 
 $json = '["f: {b"""ar}]';
-$output = $_json->jsonConvertToArray($json);
-print "E-JSON: $json: ".$basic->printAr($output)."<br>";
-print "E-JSON ERROR: ".$_json->jsonGetLastError().": ".$_json->jsonGetLastError(true)."<br>";
+$output = Jason::jsonConvertToArray($json);
+print "S::E-JSON: $json: ".$basic->printAr($output)."<br>";
+print "S::E-JSON ERROR: ".Jason::jsonGetLastError().": ".Jason::jsonGetLastError(true)."<br>";
 
 // direct
 $json = '{"direct": "static function call"}';
 $output = $json_class::jsonConvertToArray($json);
-print "S::JSON: $json: ".$basic->printAr($output)."<br>";
-print "S::JSON ERROR: ".$json_class::jsonGetLastError().": ".$json_class::jsonGetLastError(true)."<br>";
+print "J/S::JSON: $json: ".$basic->printAr($output)."<br>";
+print "J/S::JSON ERROR: ".$json_class::jsonGetLastError().": ".$json_class::jsonGetLastError(true)."<br>";
 
 $json = '["f: {b"""ar}]';
 $output = $json_class::jsonConvertToArray($json);
-print "S::E-JSON: $json: ".$basic->printAr($output)."<br>";
-print "S::E-JSON ERROR: ".$json_class::jsonGetLastError().": ".$json_class::jsonGetLastError(true)."<br>";
+print "J/S::E-JSON: $json: ".$basic->printAr($output)."<br>";
+print "J/S::E-JSON ERROR: ".$json_class::jsonGetLastError().": ".$json_class::jsonGetLastError(true)."<br>";
 
 // DEPRECATE TEST
 /* $json = '["f: {b"""ar}]';

@@ -52,16 +52,10 @@ print '<div><a href="class_test.byte.php">Class Test: BYTE CONVERT</a></div>';
 print '<div><a href="class_test.datetime.php">Class Test: DATE/TIME</a></div>';
 print '<div><a href="class_test.array.php">Class Test: ARRAY HANDLER</a></div>';
 print '<div><a href="class_test.file.php">Class Test: FILE</a></div>';
-
-$basic->hrRunningTime();
-$basic->runningTime();
-echo "RANDOM KEY [50]: ".$basic->randomKeyGen(50)."<br>";
-echo "TIMED [hr]: ".$basic->hrRunningTime()."<br>";
-echo "TIMED [def]: ".$basic->runningTime()."<br>";
-echo "TIMED [string]: ".$basic->runningtime_string."<br>";
-$basic->hrRunningTime();
-echo "RANDOM KEY [default]: ".$basic->randomKeyGen()."<br>";
-echo "TIMED [hr]: ".$basic->hrRunningTime()."<br>";
+print '<div><a href="class_test.randomkey.php">Class Test: RANDOM KEY</a></div>';
+print '<div><a href="class_test.system.php">Class Test: SYSTEM</a></div>';
+print '<div><a href="class_test.runningtime.php">Class Test: RUNNING TIME</a></div>';
+print '<div><a href="class_test.debug.php">Class Test: DEBUG</a></div>';
 
 // set + check edit access id
 $edit_access_id = 3;
@@ -95,7 +89,6 @@ print "DEBUG OUT ALL: ".$basic->debug_output_all."<br>";
 print "ECHO OUT ALL: ".$basic->echo_output_all."<br>";
 print "PRINT OUT ALL: ".$basic->print_output_all."<br>";
 
-print "CALLER BACKTRACE: ".$basic->getCallerMethod()."<br>";
 $basic->debug('SOME MARK', 'Some error output');
 
 print "EDIT ACCESS ID: ".$basic->edit_access_id."<br>";

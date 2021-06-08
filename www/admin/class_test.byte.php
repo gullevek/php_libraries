@@ -29,10 +29,7 @@ ob_end_flush();
 use CoreLibs\Convert\Byte;
 
 $basic = new CoreLibs\Basic();
-$_byte = new CoreLibs\Convert\Byte();
 $byte_class = 'CoreLibs\Convert\Byte';
-
-// define a list of from to color sets for conversion test
 
 print "<html><head><title>TEST CLASS: BYTE CONVERT</title><head>";
 print "<body>";
@@ -41,8 +38,6 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 // class
 $byte = 254779258;
 $string = '242.98 MB';
-print "BYTE TO: $byte: ".$_byte->humanReadableByteFormat($byte)."<br>";
-print "BYTE FROM: $string: ".$_byte->stringByteFormat($string)."<br>";
 // static
 print "S::BYTE TO: $byte: ".$byte_class::humanReadableByteFormat($byte)."<br>";
 print "S::BYTE FROM: $string: ".$byte_class::stringByteFormat($string)."<br>";

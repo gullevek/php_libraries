@@ -30,8 +30,6 @@ $basic = new CoreLibs\Basic();
 $_token = new CoreLibs\Output\Form\Token();
 $token_class = 'CoreLibs\Output\Form\Token';
 
-// define a list of from to color sets for conversion test
-
 print "<html><head><title>TEST CLASS: FORM TOKEN</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

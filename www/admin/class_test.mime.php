@@ -29,7 +29,6 @@ ob_end_flush();
 $basic = new CoreLibs\Basic();
 $_mime = new CoreLibs\Convert\MimeAppName();
 
-
 print "<html><head><title>TEST CLASS: MIME</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

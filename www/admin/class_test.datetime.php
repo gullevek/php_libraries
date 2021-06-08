@@ -29,10 +29,7 @@ ob_end_flush();
 use CoreLibs\Combined\DateTime;
 
 $basic = new CoreLibs\Basic();
-$_datetime = new CoreLibs\Combined\DateTime();
 $datetime_class = 'CoreLibs\Combination\DateTime';
-
-// define a list of from to color sets for conversion test
 
 print "<html><head><title>TEST CLASS: DATE/TIME</title><head>";
 print "<body>";
@@ -40,7 +37,6 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 // class
 $timestamp = 1622788315.123456;
-print "C->DATESTRINGFORMAT(sm:0): $timestamp: ".$_datetime->dateStringFormat($timestamp)."<br>";
 // static
 print "S::DATESTRINGFORMAT(sm:0): $timestamp: ".$datetime_class::dateStringFormat($timestamp)."<br>";
 

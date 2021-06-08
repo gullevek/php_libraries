@@ -29,10 +29,6 @@ ob_end_flush();
 use CoreLibs\Check\File;
 
 $basic = new CoreLibs\Basic();
-$_array= new CoreLibs\Check\File();
-$array_class = 'CoreLibs\Check\File';
-
-// define a list of from to color sets for conversion test
 
 print "<html><head><title>TEST CLASS: FILE</title><head>";
 print "<body>";

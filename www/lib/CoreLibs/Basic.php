@@ -2,65 +2,15 @@
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/03/24
-* VERSION: 2.0.0
+* VERSION: 5.0.0
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESCRIPTION:
+*   2021/6/7, transfer all methods in this class to their own classes
+*   so we can use them independent without always using the full class
 *   2018/3/23, the whole class system is transformed to namespaces
 *   also all internal class calls are converted to camel case
 *
 *   basic class start class for ALL clases, holds basic vars, infos, methods, etc
-*
-* PUBLIC VARIABLES
-*
-* These are if there is any debug to print out at all at the end
-*	debug_output_all - general yes no
-* It's recommended to use the method "debug_for" to turn on of the array vars
-*	debug_output - turn on for one level (Array)
-*	debug_output_not - turn off for one level (array)
-*
-* Print out the debug at thend of the html
-*	echo_output_all
-*	echo_output
-*	echo_output_not
-*
-* Write debug to file
-*	print_output_all
-*	print_output
-*	print_output_not
-*
-* PRIVATE VARIABLES
-*	error_msg -> array that holds all the error messages, should not be written from outside, use debug method
-*	error_id
-*	error_string
-*
-* PUBLIC METHODS
-*	debug -> calls with "level", "string" and flag to turn off (0) the newline at the end
-*	debugFor -> sets debug on/off for a type (error, echo, print) for a certain level
-*	printErrorMsg -> prints out the error message, optional parameter is a header prefix
-*	fdebug -> prints line directly to debug_file.log in tmp
-*
-* 	printTime -> prints time + microtime, optional flag to turn off (0) microtime printout
-*	info -> info about that class
-*	runningTime -> prints out the time of start/end (automatically called on created and error printout
-*	checked -> returnes checked or selected for var & array
-*	magicLinks -> parses text and makes <a href> out of links
-*	getPageName -> get the filename of the current page
-*	arraySearchRecursive -> search for a value/key Combined in an array of arrays
-*	byteStringFormat -> format bytes into KB, MB, GB, ...
-*	timeStringFormat -> format a timestamp (seconds) into days, months, ... also with ms
-*	stringToTime -> reverste a TimeStringFormat to a timestamp
-*	genAssocArray -> generactes a new associativ array from an existing array
-*	checkDate -> checks if a date is valid
-*   compareDate -> compares two dates. -1 if the first is smaller, 0 if they are equal, 1 if the first is bigger
-*   compareDateTime -> compares two dates with time. -1 if the first is smaller, 0 if they are equal, 1 if the first is bigger
-*   __crc32b -> behaves like the hash("crc32b") in php < 5.2.8. this function will flip the hash like it was (wrong)
-*              before if a new php version is found
-*   crypt* -> encrypt and decrypt login string data, used by Login class
-*   setFormToken/validateFormToken -> form protection with token
-*
-* PRIVATE METHODS
-*	fdebug_fp -> opens and closes file, called from fdebug method
-*	write_error_msg -> writes error msg to file if requested
 *
 * HISTORY:
 * 2010/12/24 (cs) add crypt classes with auto detect what crypt we can use, add php version check class
@@ -132,49 +82,24 @@ class Basic
 	public $log_per_class = false; // set, will split log per class
 	public $log_per_page = false; // set, will split log per called file
 	public $log_per_run = false; // create a new log file per run (time stamp + unique ID)
-	// run time messurements
-	private $starttime; // start time if time debug is used
-	private $endtime; // end time if time debug is used
-	public $runningtime_string; // the running time as a string with info text
-	private $hr_starttime; // start time
-	private $hr_endtime; // end time
-	private $hr_runtime = 0; // run time
 	// script running time
 	private $script_starttime;
 
 	// email valid checks
-	public $email_regex_check = array();
+	public $email_regex_check = [];
 	public $email_regex; // regex var for email check
-	public $keitai_email_regex; // regex var for email check
 
 	// data path for files
-	public $data_path = array();
-
-	// error char for the char conver
-	// DEPRECATED
-	/** @internal */
-	/** @deprecated */
-	private $mbErrorChar;
+	public $data_path = [];
 
 	// session name
 	private $session_name = '';
 	private $session_id = '';
-	// key generation
-	private $key_range = array();
-	private $one_key_length;
-	private $key_length;
-	private $max_key_length = 256; // max allowed length
 
 	// form token (used for form validation)
 	// private $form_token = '';
 	// ajax flag
 	protected $ajax_page_flag = false;
-
-	// [DEPRECATED] holds mime class, will be removed
-	protected $mime;
-
-	// last json error
-	private $json_last_error;
 
 	/**
 	 * main Basic constructor to init and check base settings
@@ -210,8 +135,9 @@ class Basic
 		$this->ajax_page_flag = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
 
 		// set the page name
-		$this->page_name = $this->getPageName();
-		$this->host_name = $this->getHostName();
+		$this->page_name = \CoreLibs\Get\System::getPageName();
+		// set host name
+		list($this->host_name , $this->host_port) = \CoreLibs\Get\System::getHostName();
 		// init the log file id
 		// * GLOBALS
 		// * CONSTANT
@@ -223,14 +149,14 @@ class Basic
 		}
 
 		// set the paths matching to the valid file types
-		$this->data_path = array(
+		$this->data_path = [
 			'P' => PICTURES,
 			'F' => FLASH,
 			'V' => VIDEOS,
 			'D' => DOCUMENTS,
 			'A' => PDFS,
 			'B' => BINARIES
-		);
+		];
 
 		// if given via parameters, only for all
 		$this->debug_output_all = false;
@@ -287,17 +213,11 @@ class Basic
 		}
 
 		// set the regex for checking emails
-		$this->email_regex = "^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$";
+		/** @deprecated */
+		$this->email_regex = \CoreLibs\Check\Email::getEmailRegex();
 		// this is for error check parts in where the email regex failed
-		$this->email_regex_check = array(
-			1 => "@(.*)@(.*)", // double @
-			2 => "^[A-Za-z0-9!#$%&'*+-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+-\/=?^_`{|}~\.]{0,63}@", // wrong part before @
-			3 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$", // wrong part after @
-			4 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.", // wrong domain name part
-			5 => "\.([a-zA-Z]{2,6}){1}$", // wrong top level part
-			6 => "@(.*)\.{2,}", // double .. in domain name part
-			7 => "@.*\.$" // ends with a dot, top level, domain missing
-		);
+		/** @deprecated */
+		$this->email_regex_check = \CoreLibs\Check\Email::getEmailRegexCheck();
 
 		// initial the session if there is no session running already
 		if (!session_id()) {
@@ -319,15 +239,6 @@ class Basic
 			// set internal session id, we can use that later for protection check
 			$this->session_id = session_id();
 		}
-
-		// new better password init
-		// $this->passwordInit();
-
-		// key generation init
-		$this->initRandomKeyData();
-
-		// [DEPRECATED] init mime apps
-		$this->mime = new \CoreLibs\Convert\MimeAppName();
 	}
 
 	// METHOD: __destruct
@@ -364,6 +275,9 @@ class Basic
 
 	// ****** DEBUG/ERROR FUNCTIONS ******
 
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Debug\RunningTime
+
 	/**
 	 * for messure run time between two calls for this method
 	 * uses the hrtime() for running time
@@ -374,47 +288,12 @@ class Basic
 	 * default is milliseconds
 	 * @param  string $out_time set return time adjustment calculation
 	 * @return float            running time without out_time suffix
+	 * @deprecated Use \CoreLibs\Debug\RunningTime::hrRunningTime() instead
 	 */
 	public function hrRunningTime(string $out_time = 'ms'): float
 	{
-		// if start time not set, set start time
-		if (!$this->hr_starttime) {
-			$this->hr_starttime = hrtime(true);
-			$this->hr_runtime = 0;
-		} else {
-			$this->hr_endtime = hrtime(true);
-			$this->hr_runtime = $this->hr_endtime - $this->hr_starttime;
-			// reset start and end time past run
-			$this->hr_starttime = 0;
-			$this->hr_endtime = 0;
-		}
-		// init divisor, just in case
-		$divisor = 1;
-		// check through valid out time, if nothing matches default to ms
-		switch ($out_time) {
-			case 'n':
-			case 'ns':
-				$divisor = 1;
-				break;
-			case 'y':
-			case 'ys':
-				$divisor = 1000;
-				break;
-			case 'm':
-			case 'ms':
-				$divisor = 1000000;
-				break;
-			case 's':
-				$divisor = 1000000000;
-				break;
-			// default is ms
-			default:
-				$divisor = 1000000;
-				break;
-		}
-		// return the run time in converted format
-		$this->hr_runtime /= $divisor;
-		return $this->hr_runtime;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Debug\RunningTime::hrRunningTime()', E_USER_DEPRECATED);
+		return \CoreLibs\Debug\RunningTime::hrRunningTime($out_time);
 	}
 
 	/**
@@ -424,90 +303,53 @@ class Basic
 	 * NOTE: for pure running time check it is recommended to use hrRunningTime method
 	 * @param  bool|boolean $simple     if true prints HTML strings, default text only
 	 * @return float                    running time as float number
+	 * @deprecated Use \CoreLibs\Debug\RunningTime::runningTime() instead
 	 */
 	public function runningTime(bool $simple = false): float
 	{
-		list($micro, $timestamp) = explode(' ', microtime());
-		$running_time = 0;
-		// set start & end time
-		if (!$this->starttime) {
-			// always reset running time string on first call
-			$this->runningtime_string = '';
-			$this->starttime = ((float)$micro + (float)$timestamp);
-			$this->runningtime_string .= $simple ? 'Start: ' : "<b>Started at</b>: ";
-		} else {
-			$this->endtime = ((float)$micro + (float)$timestamp);
-			$this->runningtime_string .= $simple ? 'End: ' : "<b>Stopped at</b>: ";
-		}
-		$this->runningtime_string .= date('Y-m-d H:i:s', (int)$timestamp);
-		$this->runningtime_string .= ' '.$micro.($simple ? ', ' : '<br>');
-		// if both are set
-		if ($this->starttime && $this->endtime) {
-			$running_time = $this->endtime - $this->starttime;
-			$this->runningtime_string .= ($simple ? 'Run: ' : "<b>Script running time</b>: ").$running_time." s";
-			// reset start & end time after run
-			$this->starttime = 0;
-			$this->endtime = 0;
-		}
-		return $running_time;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Debug\RunningTime::runningTime()', E_USER_DEPRECATED);
+		return \CoreLibs\Debug\RunningTime::runningTime($simple);
 	}
+
+	// ****** DEBUG SUPPORT FUNCTIONS ******
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Debug\Support
 
 	/**
 	 * wrapper around microtime function to print out y-m-d h:i:s.ms
 	 * @param  int $set_microtime -1 to set micro time, 0 for none, positive for rounding
 	 * @return string             formated datetime string with microtime
+	 * @deprecated Use \CoreLibs\Debug\Support::printTime() instead
 	 */
 	public static function printTime(int $set_microtime = -1): string
 	{
-		list($microtime, $timestamp) = explode(' ', microtime());
-		$string = date("Y-m-d H:i:s", (int)$timestamp);
-		// if microtime flag is -1 no round, if 0, no microtime, if >= 1, round that size
-		if ($set_microtime == -1) {
-			$string .= substr($microtime, 1);
-		} elseif ($set_microtime >= 1) {
-			// in round case we run this through number format to always get the same amount of digits
-			$string .= substr(number_format(round((float)$microtime, $set_microtime), $set_microtime), 1);
-		}
-		return $string;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Debug\Support::printTime()', E_USER_DEPRECATED);
+		return \CoreLibs\Debug\Support::printTime($set_microtime);
 	}
+
+	// ****** DEBUG SUPPORT FUNCTIONS ******
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Debug\FileWriter
 
 	/**
 	 * writes a string to a file immediatly, for fast debug output
 	 * @param  string  $string string to write to the file
 	 * @param  boolean $enter  default true, if set adds a linebreak \n at the end
 	 * @return void            has no return
+	 * @deprecated Use \CoreLibs\Debug\FileWriter::fdebug() instead
 	 */
-	public function fdebug(string $string, bool $enter = true): void
+	public function fdebug(string $string, bool $enter = true): bool
 	{
-		if ($this->debug_filename) {
-			$this->fdebugFP();
-			if ($enter === true) {
-				$string .= "\n";
-			}
-			$string = "[".$this->printTime()."] [".$this->getPageName(2)."] - ".$string;
-			fwrite($this->debug_fp, $string);
-			$this->fdebugFP();
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Debug\FileWriter::fdebug()', E_USER_DEPRECATED);
+		return \CoreLibs\Debug\FileWriter::fdebug($string, $enter);
 	}
 
-	/**
-	 * if no debug_fp found, opens a new one; if fp exists close it
-	 * @param  string $flag default '', 'o' -> open, 'c' -> close
-	 * @return void         has no return
-	 */
-	private function fdebugFP(string $flag = ''): void
-	{
-		if (!$this->debug_fp || $flag == 'o') {
-			$fn = BASE.LOG.$this->debug_filename;
-			$this->debug_fp = @fopen($fn, 'a');
-		} elseif ($this->debug_fp || $flag == 'c') {
-			fclose($this->debug_fp);
-		}
-	}
+	// ****** DEBUG LOGGING FUNCTIONS ******
+	// Moved to \CoreLibs\Debug\Logging
 
 	/**
 	 * passes list of level names, to turn on debug
-	 * eg $foo->debugFor('print', 'on', array('LOG', 'DEBUG', 'INFO'));
+	 * eg $foo->debugFor('print', 'on', ['LOG', 'DEBUG', 'INFO']);
 	 * @param  string $type  error, echo, print
 	 * @param  string $flag  on/off
 	 *         array  $array of levels to turn on/off debug
@@ -602,7 +444,7 @@ class Basic
 				$this->error_msg[$level] = '';
 			}
 			$error_string = '<div>';
-			$error_string .= '[<span style="font-weight: bold; color: #5e8600;">'.$this->printTime().'</span>] ';
+			$error_string .= '[<span style="font-weight: bold; color: #5e8600;">'.\CoreLibs\Debug\Support::printTime().'</span>] ';
 			$error_string .= '[<span style="font-weight: bold; color: #c56c00;">'.$level.'</span>] ';
 			$error_string .= '[<span style="color: #b000ab;">'.$this->host_name.'</span>] ';
 			$error_string .= '[<span style="color: #08b369;">'.$this->page_name.'</span>] ';
@@ -616,7 +458,7 @@ class Basic
 				$string = preg_replace("/(<\/?)(\w+)([^>]*>)/", '', $string);
 			}
 			// same string put for print (no html crap inside)
-			$error_string_print = '['.$this->printTime().'] ['.$this->host_name.'] ['.$this->getPageName(2).'] ['.$this->running_uid.'] {'.get_class($this).'} <'.$level.'> - '.$string;
+			$error_string_print = '['.\CoreLibs\Debug\Support::printTime().'] ['.$this->host_name.'] ['.\CoreLibs\Get\System::getPageName(2).'] ['.$this->running_uid.'] {'.get_class($this).'} <'.$level.'> - '.$string;
 			$error_string_print .= "\n";
 			// write to file if set
 			$this->writeErrorMsg($level, $error_string_print);
@@ -628,40 +470,15 @@ class Basic
 	}
 
 	/**
-	 * if there is a need to find out which parent method called a child method,
-	 * eg for debugging, this function does this
-	 * call this method in the child method and you get the parent function that called
-	 * @param  int    $level debug level, default 2
-	 * @return ?string       null or the function that called the function where this method is called
-	 */
-	public function getCallerMethod(int $level = 2): ?string
-	{
-		$traces = debug_backtrace();
-		// extended info (later)
-		/*$file = $trace[$level]['file'];
-		$line = $trace[$level]['line'];
-		$object = $trace[$level]['object'];
-		if (is_object($object)) {
-			$object = get_class($object);
-		}
-		return "Where called: line $line of $object \n(in $file)";*/
-		// sets the start point here, and in level two (the sub call) we find this
-		if (isset($traces[$level])) {
-			return $traces[$level]['function'];
-		}
-		return null;
-	}
-
-	/**
 	 * merges the given error array with the one from this class
 	 * only merges visible ones
 	 * @param  array  $error_msg error array
 	 * @return void              has no return
 	 */
-	public function mergeErrors(array $error_msg = array()): void
+	public function mergeErrors(array $error_msg = []): void
 	{
 		if (!is_array($error_msg)) {
-			$error_msg = array();
+			$error_msg = [];
 		}
 		foreach ($error_msg as $level => $msg) {
 			$this->error_msg[$level] .= $msg;
@@ -750,7 +567,7 @@ class Basic
 			$rpl_string = !$this->log_per_class ? '' : '_'.str_replace('\\', '-', get_class($this)); // set sub class settings
 			$fn = str_replace('##CLASS##', $rpl_string, $fn); // create output filename
 
-			$rpl_string = !$this->log_per_page ? '' : '_'.$this->getPageName(1); // if request to write to one file
+			$rpl_string = !$this->log_per_page ? '' : '_'.\CoreLibs\Get\System::getPageName(1); // if request to write to one file
 			$fn = str_replace('##PAGENAME##', $rpl_string, $fn); // create output filename
 
 			// write to file
@@ -789,102 +606,61 @@ class Basic
 	 * prints a html formatted (pre) array
 	 * @param  array  $array any array
 	 * @return string        formatted array for output with <pre> tag added
+	 * DEPRCATE LATER
+	 * @_deprecated Use \CoreLibs\Debug\Support::printAr() instead
 	 */
 	public static function printAr(array $array): string
 	{
-		return "<pre>".print_r($array, true)."</pre>";
+		return \CoreLibs\Debug\Support::printAr($array);
 	}
+
+	/**
+	 * if there is a need to find out which parent method called a child method,
+	 * eg for debugging, this function does this
+	 * call this method in the child method and you get the parent function that called
+	 * @param  int    $level debug level, default 2
+	 * @return ?string       null or the function that called the function where this method is called
+	 * @deprecated Use \CoreLibs\Debug\Support::getCallerMethod() instead
+	 */
+	public static function getCallerMethod(int $level = 2): ?string
+	{
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Debug\Support::getCallerMethod()', E_USER_DEPRECATED);
+		return \CoreLibs\Debug\Support::getCallerMethod($level);
+	}
+
+	// *** SYSTEM HANDLING
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Get\System
 
 	/**
 	 * helper function for PHP file upload error messgaes to messge string
 	 * @param  int    $error_code integer _FILE upload error code
 	 * @return string                     message string, translated
+	 * @deprecated Use \CoreLibs\Get\System::fileUploadErrorMessage() instead
 	 */
 	public function fileUploadErrorMessage(int $error_code): string
 	{
-		switch ($error_code) {
-			case UPLOAD_ERR_INI_SIZE:
-				$message = 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
-				break;
-			case UPLOAD_ERR_FORM_SIZE:
-				$message = 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
-				break;
-			case UPLOAD_ERR_PARTIAL:
-				$message = 'The uploaded file was only partially uploaded';
-				break;
-			case UPLOAD_ERR_NO_FILE:
-				$message = 'No file was uploaded';
-				break;
-			case UPLOAD_ERR_NO_TMP_DIR:
-				$message = 'Missing a temporary folder';
-				break;
-			case UPLOAD_ERR_CANT_WRITE:
-				$message = 'Failed to write file to disk';
-				break;
-			case UPLOAD_ERR_EXTENSION:
-				$message = 'File upload stopped by extension';
-				break;
-			default:
-				$message = 'Unknown upload error';
-				break;
-		}
-		return $message;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Get\System::fileUploadErrorMessage()', E_USER_DEPRECATED);
+		return \CoreLibs\Get\System::fileUploadErrorMessage($error_code);
 	}
 
 	// ****** DEBUG/ERROR FUNCTIONS ******
 
 	// ****** RANDOM KEY GEN ******
-
-	// METHOD: initRandomKeyData
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : sets the random key range with the default values
-	/**
-	 * sets the random key range with the default values
-	 * @return void has no return
-	 */
-	private function initRandomKeyData()
-	{
-		// random key generation
-		$this->key_range = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
-		$this->one_key_length = count($this->key_range);
-		// pow($this->one_key_length, 4);
-		// default set to 4, should be more than enought (62*62*62*62)
-		$this->key_length = 4;
-	}
-
-	/**
-	 * validates they key length for random string generation
-	 * @param  int    $key_length key length
-	 * @return bool               true for valid, false for invalid length
-	 */
-	private function validateRandomKeyLenght(int $key_length): bool
-	{
-		if (is_numeric($key_length) &&
-			$key_length > 0 &&
-			$key_length <= $this->max_key_length
-		) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Create\RandomKey
 
 	/**
 	 * sets the key length and checks that they key given is valid
 	 * if failed it will not change the default key length and return false
 	 * @param  int    $key_length key length
 	 * @return bool               true/false for set status
+	 * @deprecated Use \CoreLibs\Create\RandomKey::setRandomKeyLength() instead
 	 */
 	public function initRandomKeyLength(int $key_length): bool
 	{
-		// only if valid int key with valid length
-		if ($this->validateRandomKeyLenght($key_length) === true) {
-			$this->key_length = $key_length;
-			return true;
-		} else {
-			return false;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\RandomKey::setRandomKeyLength()', E_USER_DEPRECATED);
+		return \CoreLibs\Create\RandomKey::setRandomKeyLength($key_length);
 	}
 
 	/**
@@ -893,25 +669,17 @@ class Basic
 	 * this will not set the class key length variable
 	 * @param  int    $key_length key length override, -1 for use default
 	 * @return string             random key
+	 * @deprecated Use \CoreLibs\Create\RandomKey::randomKeyGen() instead
 	 */
 	public function randomKeyGen(int $key_length = -1): string
 	{
-		$use_key_length = 0;
-		// only if valid int key with valid length
-		if ($this->validateRandomKeyLenght($key_length) === true) {
-			$use_key_length = $key_length;
-		} else {
-			$use_key_length = $this->key_length;
-		}
-
-		$pieces = [];
-		for ($i = 1; $i <= $use_key_length; $i ++) {
-			$pieces[] = $this->key_range[random_int(0, $this->one_key_length - 1)];
-		}
-		return join('', $pieces);
+		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\RandomKey::randomKeyGen()', E_USER_DEPRECATED);
+		return \CoreLibs\Create\RandomKey::randomKeyGen($key_length);
 	}
 
-	// ****** RANDOM KEY GEN ******
+	// ****** MAGIC LINK/CHECKED/SELECTED ******
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Output\Form\Elements
 
 	/**
 	 * returns 'checked' or 'selected' if okay
@@ -944,24 +712,19 @@ class Basic
 		return \CoreLibs\Output\Form\Elements::magicLinks($string, $target);
 	}
 
+	// *** SYSTEM HANDLING
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Get\System
+
 	/**
 	 * get the host name without the port as given by the SELF var
-	 * @return string host name
+	 * @return array host name/port name
+	 * @deprecated Use \CoreLibs\Get\System::getHostName() instead
 	 */
-	public function getHostName(): string
+	public function getHostName(): array
 	{
-		$port = '';
-		if ($_SERVER['HTTP_HOST'] && preg_match("/:/", $_SERVER['HTTP_HOST'])) {
-			list($host_name, $port) = explode(":", $_SERVER['HTTP_HOST']);
-		} elseif ($_SERVER['HTTP_HOST']) {
-			$host_name = $_SERVER['HTTP_HOST'];
-		} else {
-			$host_name = 'NA';
-		}
-		$this->host_port = $port ? $port : 80;
-		$this->host_name = $host_name;
-		// also return for old type call
-		return $host_name;
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Get\System::getHostName()', E_USER_DEPRECATED);
+		return \CoreLibs\Get\System::getHostName();
 	}
 
 	/**
@@ -970,19 +733,17 @@ class Basic
 	 *                           0: keep filename as is
 	 *                           2: keep filename as is, but add dirname too
 	 * @return string            filename
+	 * @deprecated Use \CoreLibs\Get\System::getPageName() instead
 	 */
 	public static function getPageName(int $strip_ext = 0): string
 	{
-		// get the file info
-		$page_temp = pathinfo($_SERVER['PHP_SELF']);
-		if ($strip_ext == 1) {
-			return $page_temp['filename'];
-		} elseif ($strip_ext == 2) {
-			return $_SERVER['PHP_SELF'];
-		} else {
-			return $page_temp['basename'];
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Get\System::getPageName()', E_USER_DEPRECATED);
+		return \CoreLibs\Get\System::getPageName($strip_ext);
 	}
+
+	// *** FILE HANDLING
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Check\File
 
 	/**
 	 * quick return the extension of the given file name
@@ -1009,6 +770,8 @@ class Basic
 	}
 
 	// *** ARRAY HANDLING
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Combined\ArrayHandler
 
 	/**
 	 * searches key = value in an array / array
@@ -1174,6 +937,8 @@ class Basic
 	}
 
 	// *** ARRAY HANDLING END
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Language\Encoding
 
 	/**
 	 * wrapper function for mb mime convert, for correct conversion with long strings

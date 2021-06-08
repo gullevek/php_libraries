@@ -26,27 +26,28 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-email';
 ob_end_flush();
 
-$basic = new CoreLibs\Basic();
-$_email = new CoreLibs\Check\Email();
-$email_class = 'CoreLibs\Check\Email';
+use CoreLibs\Check\Email;
 
-// define a list of from to color sets for conversion test
+$basic = new CoreLibs\Basic();
 
 print "<html><head><title>TEST CLASS: HTML/ELEMENTS</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+
+// regex get
+print "S::GETEMAILREGEX(0): ".Email::getEmailRegex(0)."<br>";
+print "S::GETEMAILREGEX(2): ".Email::getEmailRegex(2)."<br>";
+print "S::GETEMAILREGEX(7): ".Email::getEmailRegex(7)."<br>";
+print "S::GETEMAILREGEX(8 invalid): ".Email::getEmailRegex(8)."<br>";
+print "S::GETEMAILREGEXCHECK: ".$basic->printAr(Email::getEmailRegexCheck())."<br>";
 
 $email = [
 	'foo@bar.org',
 	'foo@i.softbank.ne.jp'
 ];
 foreach ($email as $s_email) {
-	print "EMAIL: $s_email: ".$_email->getEmailType($s_email)."<br>";
-	print "EMAIL SHORT: $s_email: ".$_email->getEmailType($s_email, true)."<br>";
-}
-foreach ($email as $s_email) {
-	print "S-EMAIL: $s_email: ".$email_class::getEmailType($s_email)."<br>";
-	print "S-EMAIL SHORT: $s_email: ".$email_class::getEmailType($s_email, true)."<br>";
+	print "S::EMAIL: $s_email: ".Email::getEmailType($s_email)."<br>";
+	print "S::EMAIL SHORT: $s_email: ".Email::getEmailType($s_email, true)."<br>";
 }
 // DEPRECATED
 /* foreach ($email as $s_email) {

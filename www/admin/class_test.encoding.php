@@ -32,8 +32,6 @@ $basic = new CoreLibs\Basic();
 $_encoding = new CoreLibs\Language\Encoding();
 $encoding_class = 'CoreLibs\Language\Encoding';
 
-// define a list of from to color sets for conversion test
-
 print "<html><head><title>TEST CLASS: ENCODING</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * html convert functions
+ * various file/file name functions
  */
 
 namespace CoreLibs\Check;
