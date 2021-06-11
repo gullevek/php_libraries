@@ -51,9 +51,11 @@ class Basic
 	public $page_name;
 	public $host_name;
 	public $host_port;
+	// logging interface, Debug\Logging class
+	public $log;
 	// internal error reporting vars
-	protected $error_id; // error ID for errors in classes
-	protected $error_msg = array(); // the "connection" to the outside errors
+	/* protected $error_id; // error ID for errors in classes
+	protected $error_msg = []; // the "connection" to the outside errors
 	// debug output prefix
 	public $error_msg_prefix = ''; // prefix to the error string (the class name)
 	// debug flags
@@ -83,7 +85,7 @@ class Basic
 	public $log_per_page = false; // set, will split log per called file
 	public $log_per_run = false; // create a new log file per run (time stamp + unique ID)
 	// script running time
-	private $script_starttime;
+	private $script_starttime; */
 
 	// email valid checks
 	public $email_regex_check = [];
@@ -111,15 +113,16 @@ class Basic
 		// running time start for script
 		$this->script_starttime = microtime(true);
 
+		// TODO make check dynamic for entries we MUST have depending on load type
 		// before we start any work, we should check that all MUST constants are defined
 		$abort = false;
-		foreach (array(
+		foreach ([
 			'DS', 'DIR', 'BASE', 'ROOT', 'LIB', 'INCLUDES', 'LAYOUT', 'PICTURES', 'FLASH', 'VIDEOS', 'DOCUMENTS', 'PDFS', 'BINARIES', 'ICONS',
 			'UPLOADS', 'CSV', 'JS', 'CSS', 'TABLE_ARRAYS', 'SMARTY', 'LANG', 'CACHE', 'TMP', 'LOG', 'TEMPLATES', 'TEMPLATES_C',
 			'DEFAULT_LANG', 'DEFAULT_ENCODING', 'DEFAULT_HASH',
 			'DEFAULT_ACL_LEVEL', 'LOGOUT_TARGET', 'PASSWORD_CHANGE', 'AJAX_REQUEST_TYPE', 'USE_PROTOTYPE', 'USE_SCRIPTACULOUS', 'USE_JQUERY',
 			'PAGE_WIDTH', 'MASTER_TEMPLATE_NAME', 'PUBLIC_SCHEMA', 'TEST_SCHEMA', 'DEV_SCHEMA', 'LIVE_SCHEMA', 'DB_CONFIG_NAME', 'DB_CONFIG', 'TARGET', 'DEBUG', 'SHOW_ALL_ERRORS'
-		) as $constant) {
+		 ] as $constant) {
 			if (!defined($constant)) {
 				echo "Constant $constant misssing<br>";
 				$abort = true;
@@ -134,20 +137,6 @@ class Basic
 		// always boolean false
 		$this->ajax_page_flag = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
 
-		// set the page name
-		$this->page_name = \CoreLibs\Get\System::getPageName();
-		// set host name
-		list($this->host_name , $this->host_port) = \CoreLibs\Get\System::getHostName();
-		// init the log file id
-		// * GLOBALS
-		// * CONSTANT
-		// can be overridden with basicSetLogFileId
-		if (isset($GLOBALS['LOG_FILE_ID'])) {
-			$this->basicSetLogId($GLOBALS['LOG_FILE_ID']);
-		} elseif (defined('LOG_FILE_ID')) {
-			$this->basicSetLogId(LOG_FILE_ID);
-		}
-
 		// set the paths matching to the valid file types
 		$this->data_path = [
 			'P' => PICTURES,
@@ -158,6 +147,21 @@ class Basic
 			'B' => BINARIES
 		];
 
+		// set the page name
+		$this->page_name = \CoreLibs\Get\System::getPageName();
+		// set host name
+		list($this->host_name , $this->host_port) = \CoreLibs\Get\System::getHostName();
+		// logging interface moved here (->debug is now ->log->debug)
+		$this->log = new \CoreLibs\Debug\Logging();
+		// init the log file id
+		// * GLOBALS
+		// * CONSTANT
+		// can be overridden with basicSetLogFileId
+		/* if (isset($GLOBALS['LOG_FILE_ID'])) {
+			$this->basicSetLogId($GLOBALS['LOG_FILE_ID']);
+		} elseif (defined('LOG_FILE_ID')) {
+			$this->basicSetLogId(LOG_FILE_ID);
+		}
 		// if given via parameters, only for all
 		$this->debug_output_all = false;
 		$this->echo_output_all = false;
@@ -210,7 +214,7 @@ class Basic
 		}
 		if (isset($GLOBALS['LOG_PER_RUN'])) {
 			$this->log_per_run = $GLOBALS['LOG_PER_RUN'];
-		}
+		} */
 
 		// set the regex for checking emails
 		/** @deprecated */
@@ -264,13 +268,12 @@ class Basic
 	 * if non valid string is given it returns the previous set one only
 	 * @param  string $string log file id string value
 	 * @return string        returns the set log file id string
+	 * @deprecated Use $basic->log->basicSetLogId() instead
 	 */
 	public function basicSetLogId(string $string): string
 	{
-		if (preg_match("/^\w+$/", $string)) {
-			$this->log_file_id = $string;
-		}
-		return $this->log_file_id;
+		trigger_error('Method '.__METHOD__.' is deprecated, use $basic->log->basicSetLogId() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
+		return $this->log->basicSetLogId($string);
 	}
 
 	// ****** DEBUG/ERROR FUNCTIONS ******
@@ -354,21 +357,12 @@ class Basic
 	 * @param  string $flag  on/off
 	 *         array  $array of levels to turn on/off debug
 	 * @return void          has no return
+	 * @deprecated Use $basic->log->debugFor() instead
 	 */
 	public function debugFor(string $type, string $flag): void
 	{
-		$debug_on = func_get_args();
-		array_shift($debug_on); // kick out type
-		array_shift($debug_on); // kick out flag (on/off)
-		if (count($debug_on) >= 1) {
-			foreach ($debug_on as $level) {
-				$switch = $type.'_output';
-				if ($flag == 'off') {
-					$switch .= '_not';
-				}
-				$this->{$switch}[$level] = 1;
-			}
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use $basic->log->debugFor() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
+		$this->log->debugFor(...[func_get_args()]);
 	}
 
 	/**
@@ -380,7 +374,7 @@ class Basic
 	 * @param  string $level  level to check in detailed level flag
 	 * @return bool           true on access allowed or false on no access
 	 */
-	private function doDebugTrigger(string $target, string $level): bool
+	/* private function doDebugTrigger(string $target, string $level): bool
 	{
 		$access = false;
 		// check if we do debug, echo or print
@@ -426,7 +420,7 @@ class Basic
 				break;
 		}
 		return $access;
-	}
+	} */
 
 	/**
 	 * write debug data to error_msg array
@@ -439,7 +433,7 @@ class Basic
 	 */
 	public function debug(string $level, string $string, bool $strip = false): void
 	{
-		if ($this->doDebugTrigger('debug', $level)) {
+		/* if ($this->doDebugTrigger('debug', $level)) {
 			if (!isset($this->error_msg[$level])) {
 				$this->error_msg[$level] = '';
 			}
@@ -466,7 +460,8 @@ class Basic
 			if ($this->doDebugTrigger('echo', $level)) {
 				$this->error_msg[$level] .= $error_string;
 			}
-		}
+		} */
+		$this->log->debug($level, $string, $strip);
 	}
 
 	/**
@@ -474,15 +469,12 @@ class Basic
 	 * only merges visible ones
 	 * @param  array  $error_msg error array
 	 * @return void              has no return
+	 * @deprecated Use $basic->log->mergeErrors() instead
 	 */
 	public function mergeErrors(array $error_msg = []): void
 	{
-		if (!is_array($error_msg)) {
-			$error_msg = [];
-		}
-		foreach ($error_msg as $level => $msg) {
-			$this->error_msg[$level] .= $msg;
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use $basic->log->mergeErrors() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
+		$this->log->mergeErrors($error_msg);
 	}
 
 	/**
@@ -492,7 +484,7 @@ class Basic
 	 */
 	public function printErrorMsg(string $string = ''): string
 	{
-		$string_output = '';
+		/* $string_output = '';
 		if ($this->debug_output_all) {
 			if ($this->error_msg_prefix) {
 				$string = $this->error_msg_prefix;
@@ -515,7 +507,8 @@ class Basic
 				$string_output .= '</div>';
 			}
 		}
-		return $string_output;
+		return $string_output; */
+		return $this->log->printErrorMsg($string);
 	}
 
 	/**
@@ -524,7 +517,7 @@ class Basic
 	 * @param  string $error_string error string to write
 	 * @return void                 has no return
 	 */
-	private function writeErrorMsg(string $level, string $error_string): void
+	/* private function writeErrorMsg(string $level, string $error_string): void
 	{
 		// only write if write is requested
 		if ($this->doDebugTrigger('debug', $level) &&
@@ -584,7 +577,7 @@ class Basic
 				echo "<!-- could not open file: $fn //-->";
 			}
 		} // do write to file
-	}
+	} */
 
 	/**
 	 * unsests the error message array
@@ -592,15 +585,17 @@ class Basic
 	 * if no level given resets all
 	 * @param  string $level optional level
 	 * @return void          has no return
+	 * @deprecated Use $basic->log->resetErrorMsg() instead
 	 */
 	public function resetErrorMsg(string $level = ''): void
 	{
-		if (!$level) {
-			$this->error_msg = array();
-		} elseif (isset($this->error_msg[$level])) {
-			unset($this->error_msg[$level]);
-		}
+		trigger_error('Method '.__METHOD__.' is deprecated, use $basic->log->resetErrorMsg() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
+		$this->log->resetErrorMsg($level);
 	}
+
+	// ****** DEBUG SUPPORT FUNCTIONS ******
+	// [!!! DEPRECATED !!!]
+	// Moved to \CoreLibs\Debug\Support
 
 	/**
 	 * prints a html formatted (pre) array
@@ -831,8 +826,7 @@ class Basic
 	public static function arrayMergeRecursive()
 	{
 		trigger_error('MUST CHANGE: Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive()', E_USER_DEPRECATED);
-		// return \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive();
-		return ['PLEASE CONVERT TO: \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive(a, b, c, ...)'];
+		return \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive(...func_get_args());
 	}
 
 	/**
