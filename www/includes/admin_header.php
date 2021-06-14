@@ -80,12 +80,10 @@ if (!$login->login) {
 // automatic hide for DEBUG messages on live server
 // can be overridden when setting DEBUG_ALL_OVERRIDE on top of the script (for emergency debugging of one page only)
 if ((TARGET == 'live' || TARGET == 'remote') && !$DEBUG_ALL_OVERRIDE) {
-	$login->debug_output_all = false;
-	$login->echo_output_all = false;
-	$login->print_output_all = false;
-	$cms->debug_output_all = false;
-	$cms->echo_output_all = false;
-	$cms->print_output_all = false;
+	foreach (['debug', 'echo', 'print'] as $target) {
+		$login->log->setLogLevelAll($type, false);
+		$cms->log->setLogLevelAll($type, false);
+	}
 }
 $smarty->DATA['JS_DEBUG'] = DEBUG;
 

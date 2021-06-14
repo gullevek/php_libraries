@@ -9,25 +9,14 @@ namespace CoreLibs\Convert;
 
 class MimeAppName
 {
-	private $mime_apps= [];
+	private static $mime_apps = [];
 
 	/**
 	 * constructor: init mime list
 	 */
 	public function __construct()
 	{
-		$this->mimeInitApps();
-	}
-
-	/**
-	 * init array for mime type to application name lookup
-	 * @return void
-	 */
-	private function mimeInitApps(): void
-	{
-		// match mime type to some application description
-		// this is NOT translated
-		$this->mime_apps = [
+		self::$mime_apps = [
 			// zip
 			'application/zip' => 'Zip File',
 			// Powerpoint
@@ -67,9 +56,9 @@ class MimeAppName
 	 * @param  string $app  Applicaiton name
 	 * @return void
 	 */
-	public function mimeSetAppName(string $mime, string $app): void
+	public static function mimeSetAppName(string $mime, string $app): void
 	{
-		$this->mime_apps[$mime] = $app;
+		self::$mime_apps[$mime] = $app;
 	}
 
 	/**
@@ -78,9 +67,9 @@ class MimeAppName
 	 * @param  string $mime MIME Name
 	 * @return string       Application name matching
 	 */
-	public function mimeGetAppName(string $mime): string
+	public static function mimeGetAppName(string $mime): string
 	{
-		return $this->mime_apps[$mime] ?? 'Other file';
+		return self::$mime_apps[$mime] ?? 'Other file';
 	}
 }
 

@@ -26,6 +26,8 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-db';
 ob_end_flush();
 
+use CoreLibs\Debug\Support as DgS;
+
 $basic = new CoreLibs\Admin\Backend(DB_CONFIG);
 
 print "<html><head><title>TEST CLASS: DB</title><head>";
@@ -105,7 +107,7 @@ if ($basic->dbPrepare('sel_foo', "SELECT foo_id, test, some_bool, string_a, numb
 
 # db write class test
 $table = 'foo';
-print "TABLE META DATA: ".$basic->printAr($basic->dbShowTableMetaData($table))."<br>";
+print "TABLE META DATA: ".DgS::printAr($basic->dbShowTableMetaData($table))."<br>";
 $primary_key = ''; # unset
 $db_write_table = array('test', 'string_a', 'number_a', 'some_bool');
 //	$db_write_table = array('test');
@@ -186,7 +188,7 @@ $q = "SHOW search_path";
 $cursor = $basic->dbExec($q);
 $data = $basic->dbFetchArray($cursor)['search_path'];
 print "RETURN DATA FOR search_path: ".$data."<br>";
-//	print "RETURN DATA FOR search_path: ".$basic->printAr($data)."<br>";
+//	print "RETURN DATA FOR search_path: ".DgS::printAr($data)."<br>";
 // insert something into test.schema_test and see if we get the PK back
 $status = $basic->dbExec("INSERT INTO test.schema_test (contents, id) VALUES ('TIME: ".time()."', ".rand(1, 10).")");
 print "OTHER SCHEMA INSERT STATUS: ".$status." | PK NAME: ".$basic->pk_name.", PRIMARY KEY: ".$basic->insert_id."<br>";
@@ -195,7 +197,7 @@ print "<b>NULL TEST DB READ</b><br>";
 $q = "SELECT uid, null_varchar, null_int FROM test_null_data WHERE uid = 'A'";
 $res = $basic->dbReturnRow($q);
 var_dump($res);
-print "RES: ".$basic->printAr($res)."<br>";
+print "RES: ".DgS::printAr($res)."<br>";
 print "ISSET: ".isset($res['null_varchar'])."<br>";
 print "EMPTY: ".empty($res['null_varchar'])."<br>";
 

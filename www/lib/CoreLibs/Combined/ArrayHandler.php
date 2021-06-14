@@ -19,9 +19,9 @@ class ArrayHandler
 	 */
 	public static function arraySearchRecursive($needle, array $haystack, ?string $key_lookin = null): array
 	{
-		$path = array();
+		$path = [];
 		if (!is_array($haystack)) {
-			$haystack = array();
+			$haystack = [];
 		}
 		if ($key_lookin != null &&
 			!empty($key_lookin) &&
@@ -72,21 +72,21 @@ class ArrayHandler
 	{
 		// init if not set on null
 		if ($path === null) {
-			$path = array(
+			$path = [
 				'level' => 0,
-				'work' => array()
-			);
+				'work' => []
+			];
 		}
 		// init sub sets if not set
 		if (!isset($path['level'])) {
 			$path['level'] = 0;
 		}
 		if (!isset($path['work'])) {
-			$path['work'] = array();
+			$path['work'] = [];
 		}
 		// should not be needed because it would trigger a php mehtod error
 		if (!is_array($haystack)) {
-			$haystack = array();
+			$haystack = [];
 		}
 
 		// @phan HACK
@@ -112,7 +112,7 @@ class ArrayHandler
 		}
 		// @phan HACK
 		$path['level'] = $path['level'] ?? 0;
-		$path['work'] = $path['work'] ?? array();
+		$path['work'] = $path['work'] ?? [];
 		// cut all that is >= level
 		array_splice($path['work'], $path['level']);
 		// step back a level
@@ -130,7 +130,7 @@ class ArrayHandler
 	public static function arraySearchSimple(array $array, $key, $value): bool
 	{
 		if (!is_array($array)) {
-			$array = array();
+			$array = [];
 		}
 		foreach ($array as $_key => $_value) {
 			// if value is an array, we search
@@ -177,7 +177,7 @@ class ArrayHandler
 			trigger_error(__FUNCTION__.' needs two or more array arguments', E_USER_WARNING);
 			return false;
 		}
-		$merged = array();
+		$merged = [];
 		while ($arrays) {
 			$array = array_shift($arrays);
 			if (!is_array($array)) {
@@ -234,7 +234,7 @@ class ArrayHandler
 		if (!is_array($haystack)) {
 			return false;
 		}
-		$found = array();
+		$found = [];
 		foreach ($needle as $element) {
 			if (in_array($element, $haystack)) {
 				$found[] = $element;
@@ -257,7 +257,7 @@ class ArrayHandler
 	 */
 	public static function genAssocArray(array $db_array, $key, $value, bool $set_only = false): array
 	{
-		$ret_array = array();
+		$ret_array = [];
 		// do this to only run count once
 		for ($i = 0, $iMax = count($db_array); $i < $iMax; $i ++) {
 			// if no key then we make an order reference
@@ -283,7 +283,7 @@ class ArrayHandler
 	 */
 	public static function flattenArray(array $array): array
 	{
-		$return = array();
+		$return = [];
 		array_walk_recursive(
 			$array,
 			function ($value) use (&$return) {
@@ -298,13 +298,13 @@ class ArrayHandler
 	 * @param  array  $array  multidemnsional array to flatten
 	 * @return array          flattened keys array
 	 */
-	public static function flattenArrayKey(array $array/*, array $return = array()*/): array
+	public static function flattenArrayKey(array $array): array
 	{
-		$return = array();
+		$return = [];
 		array_walk_recursive(
 			$array,
 			function ($value, $key) use (&$return) {
-				$return [] = $key;
+				$return[] = $key;
 			}
 		);
 		return $return;
@@ -320,7 +320,7 @@ class ArrayHandler
 	public static function arrayFlatForKey(array $array, $search): array
 	{
 		if (!is_array($array)) {
-			$array = array();
+			$array = [];
 		}
 		foreach ($array as $key => $value) {
 			// if it is not an array do just nothing

@@ -27,6 +27,7 @@ $LOG_FILE_ID = 'classTest-colors';
 ob_end_flush();
 
 use CoreLibs\Convert\Colors;
+use CoreLibs\Debug\Support as DgS;
 
 $basic = new CoreLibs\Basic();
 $color_class = 'CoreLibs\Convert\Colors';
@@ -46,14 +47,14 @@ $hex = '#0a141e';
 $hsb = [210, 67, 12];
 $hsl = [210, 50, 7.8];
 print "S::COLOR rgb->hex: $rgb[0], $rgb[1], $rgb[2]: ".Colors::rgb2hex($rgb[0], $rgb[1], $rgb[2])."<br>";
-print "S::COLOR hex->rgb: $hex: ".$basic->printAr(Colors::hex2rgb($hex))."<br>";
-print "C::S/COLOR rgb->hext: $hex: ".$basic->printAr(CoreLibs\Convert\Colors::hex2rgb($hex))."<br>";
+print "S::COLOR hex->rgb: $hex: ".DgS::printAr(Colors::hex2rgb($hex))."<br>";
+print "C::S/COLOR rgb->hext: $hex: ".DgS::printAr(CoreLibs\Convert\Colors::hex2rgb($hex))."<br>";
 // C(to hsb/hsl)
-print "S::COLOR rgb->hsb: $rgb[0], $rgb[1], $rgb[2]: ".$basic->printAr(Colors::rgb2hsb($rgb[0], $rgb[1], $rgb[2]))."<br>";
-print "S::COLOR rgb->hsl: $rgb[0], $rgb[1], $rgb[2]: ".$basic->printAr(Colors::rgb2hsl($rgb[0], $rgb[1], $rgb[2]))."<br>";
+print "S::COLOR rgb->hsb: $rgb[0], $rgb[1], $rgb[2]: ".DgS::printAr(Colors::rgb2hsb($rgb[0], $rgb[1], $rgb[2]))."<br>";
+print "S::COLOR rgb->hsl: $rgb[0], $rgb[1], $rgb[2]: ".DgS::printAr(Colors::rgb2hsl($rgb[0], $rgb[1], $rgb[2]))."<br>";
 // D(from hsb/hsl) Note that param 2 + 3 is always 0-100 divided
-print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: ".$basic->printAr(Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2]))."<br>";
-print "S::COLOR hsl->rgb: $hsl[0], $hsl[1], $hsl[2]: ".$basic->printAr(Colors::hsl2rgb($hsl[0], $hsl[1], $hsl[2]))."<br>";
+print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: ".DgS::printAr(Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2]))."<br>";
+print "S::COLOR hsl->rgb: $hsl[0], $hsl[1], $hsl[2]: ".DgS::printAr(Colors::hsl2rgb($hsl[0], $hsl[1], $hsl[2]))."<br>";
 
 // TODO: run compare check input must match output
 

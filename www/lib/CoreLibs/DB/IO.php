@@ -278,7 +278,7 @@ class IO extends \CoreLibs\Basic
 	// other vars
 	private $nbsp = ''; // used by print_array recursion function
 	// error & warning id
-	// not error_id is defined in \CoreLibs\Basic
+	protected $error_id;
 	private $had_error;
 	private $warning_id;
 	private $had_warning;
@@ -535,7 +535,7 @@ class IO extends \CoreLibs\Basic
 	 * @param  string $type         query identifier (Q, I, etc)
 	 * @return void                 has no return
 	 */
-	private function __dbDebug(string $debug_id, string $error_string, string $id = '', string $type = ''): void
+	protected function __dbDebug(string $debug_id, string $error_string, string $id = '', string $type = ''): void
 	{
 		$prefix = '';
 		if ($id) {
@@ -562,7 +562,7 @@ class IO extends \CoreLibs\Basic
 	public function __dbError($cursor = false, string $msg = ''): void
 	{
 		$pg_error_string = '';
-		$where_called = (string)$this->getCallerMethod();
+		$where_called = (string)\CoreLibs\Debug\Support::getCallerMethod();
 		if ($cursor) {
 			$pg_error_string = $this->db_functions->__dbPrintError($cursor);
 		}
@@ -1115,7 +1115,7 @@ class IO extends \CoreLibs\Basic
 		$md5 = md5($query);
 		// pre declare array
 		if (!isset($this->cursor_ext[$md5])) {
-			$this->cursor_ext[$md5] = array(
+			$this->cursor_ext[$md5] = [
 				'query' => '',
 				'pos' => 0,
 				'cursor' => 0,
@@ -1123,7 +1123,7 @@ class IO extends \CoreLibs\Basic
 				'num_rows' => 0,
 				'num_fields' => 0,
 				'read_rows' => 0
-			);
+			];
 		}
 		// set the query
 		$this->cursor_ext[$md5]['query'] = $query;
@@ -1624,7 +1624,7 @@ class IO extends \CoreLibs\Basic
 		}
 		$result = $this->db_functions->__dbExecute($stm_name, $data);
 		if (!$result) {
-			$this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[$stm_name]['result'].']: '.$this->printAr($data));
+			$this->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[$stm_name]['result'].']: '.\CoreLibs\Debug\Support::printAr($data));
 			$this->error_id = 22;
 			$this->__dbError($this->prepare_cursor[$stm_name]['result']);
 			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Execution failed</span>', 'DB_ERROR');
@@ -1868,10 +1868,10 @@ class IO extends \CoreLibs\Basic
 		array $data = []
 	) {
 		if (!is_array($primary_key)) {
-			$primary_key = array(
+			$primary_key = [
 				'row' => $table.'_id',
 				'value' => $primary_key
-			);
+			];
 		} else {
 			if (!isset($primary_key['row'])) {
 				$primary_key['row'] = '';

@@ -10,14 +10,6 @@
 *   table from the connected DB.
 *   you don't have to write any SQL queries, worry over update/insert
 *
-*   PUBLIC VARIABLES
-*
-*   PRIVATE VARIABLES
-*
-*   PUBLIC METHOD:S
-*
-*   PRIVATE METHOD:S
-*
 * HISTORY:
 * 2019/9/11 (cs) error string 21->91, 22->92 for not overlapping with IO
 * 2005/07/07 (cs) updated array class for postgres: set 0 & NULL if int field given, insert uses () values () syntax
@@ -105,11 +97,6 @@ class ArrayIO extends \CoreLibs\DB\IO
 		return $text;
 	}
 
-	// METHOD: convertEntities
-	// WAS   : convert_entities
-	// PARAMS: string -> string to be changed
-	// RETURN: string -> altered string
-	// DESC  : changeds all HTML entities into non HTML ones
 	/**
 	 * changeds all HTML entities into non HTML ones
 	 * @param  string $text encoded html string
@@ -139,7 +126,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// add output to internal error_msg
 		if ($write === true) {
-			$this->error_msg['db'] .= $string;
+			$this->__dbDebug('dbArray', $string);
 		}
 		return $string;
 	}
@@ -188,7 +175,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 *                             set this as new table array too
 	 * @return array               returns the table array that was deleted
 	 */
-	public function dbDelete($table_array = array())
+	public function dbDelete($table_array = [])
 	{
 		// is array and has values, override set and set new
 		if (is_array($table_array) && count($table_array)) {
@@ -247,7 +234,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  array   $table_array optional table array, overwrites internal set array
 	 * @return array                set table array with values
 	 */
-	public function dbRead($edit = false, $table_array = array())
+	public function dbRead($edit = false, $table_array = [])
 	{
 		// if array give, overrules internal array
 		if (is_array($table_array) && count($table_array)) {
@@ -320,7 +307,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  array   $table_array optional table array, overwrites internal one
 	 * @return array                table array or null
 	 */
-	public function dbWrite($addslashes = false, $table_array = array())
+	public function dbWrite($addslashes = false, $table_array = [])
 	{
 		if (is_array($table_array) && count($table_array)) {
 			$this->table_array = $table_array;

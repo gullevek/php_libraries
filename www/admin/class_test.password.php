@@ -49,6 +49,8 @@ $enc_password = $password_class::passwordSet($password);
 print "PASSWORD: $password: ".$enc_password."<br>";
 print "S-PASSWORD VERIFY: ".(string)$password_class::passwordVerify($password, $enc_password)."<br>";
 print "PASSWORD REHASH: ".(string)$password_class::passwordRehashCheck($enc_password)."<br>";
+// direct static
+print "S::PASSWORD VERFIY: ".(string)PwdChk::passwordVerify($password, $enc_password)."<br>";
 
 // DEPRECATED
 /* $password = 'deprecated4567';
@@ -58,7 +60,7 @@ print "PASSWORD VERIFY: ".(string)$basic->passwordVerify($password, $enc_passwor
 print "PASSWORD REHASH: ".(string)$basic->passwordRehashCheck($enc_password)."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

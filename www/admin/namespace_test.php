@@ -20,23 +20,22 @@ if ($base->getConnectionStatus()) {
 	die("Cannot connect to database");
 }
 
-print "Start time: ".$base->runningTime()."<br>";
-print "HumanReadableByteFormat: ".$base->HumanReadableByteFormat(1234567.12)."<br>";
-print "humanReadableByteFormat: ".$base->humanReadableByteFormat(1234567.12)."<br>";
-// print "get_page_name [DEPRECATED]: ".$base->get_page_name()."<br>";
-print "getPageName: ".$base->getPageName()."<br>";
+print "Start time: ".\CoreLibs\Debug\RunningTime::runningTime()."<br>";
+print "HumanReadableByteFormat: ".\CoreLibs\Convert\Byte::HumanReadableByteFormat(1234567.12)."<br>";
+print "humanReadableByteFormat: ".\CoreLibs\Convert\Byte::humanReadableByteFormat(1234567.12)."<br>";
+print "getPageName: ". \CoreLibs\Get\System::getPageName()."<br>";
 
 print "DB Info: ".$base->dbInfo(true)."<br>";
 
 
-print "End Time: ".$base->runningTime()."<br>";
-print "Start Time: ".$base->runningTime()."<br>";
+print "End Time: ".\CoreLibs\Debug\RunningTime::runningTime()."<br>";
+print "Start Time: ".\CoreLibs\Debug\RunningTime::runningTime()."<br>";
 
 print "Lang: ".$base->l->__getLang().", MO File: ".$base->l->__getMoFile()."<br>";
 print "Translate test: Year -> ".$base->l->__('Year')."<br>";
 
-print "End Time: ".$base->runningTime()."<br>";
+print "End Time: ".\CoreLibs\Debug\RunningTime::runningTime()."<br>";
 // end error print
-print $base->printErrorMsg();
+print $base->log->printErrorMsg();
 
 # __END__

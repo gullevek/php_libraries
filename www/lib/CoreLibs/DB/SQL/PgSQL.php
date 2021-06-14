@@ -266,7 +266,7 @@ class PgSQL
 			if ($q = $this->__dbQuery($q)) {
 				list($id) = $this->__dbFetchArray($q);
 			} else {
-				$id = array(-1, $q);
+				$id = [-1, $q];
 			}
 			return $id;
 		}
@@ -444,7 +444,7 @@ class PgSQL
 	{
 		if (false === $limit) {
 			$limit = strlen($text) - 1;
-			$output = array();
+			$output = [];
 		}
 		if ('{}' != $text) {
 			do {

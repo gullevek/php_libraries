@@ -27,6 +27,7 @@ $LOG_FILE_ID = 'classTest-system';
 ob_end_flush();
 
 use CoreLibs\Get\System;
+use CoreLibs\Debug\Support as DgS;
 
 $basic = new CoreLibs\Basic();
 
@@ -34,7 +35,7 @@ print "<html><head><title>TEST CLASS: SYSTEM</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
-print "GETHOSTNAME: ".$basic->printAr(System::getHostName())."<br>";
+print "GETHOSTNAME: ".DgS::printAr(System::getHostName())."<br>";
 print "GETPAGENAME(0): ".System::getPageName()."<br>";
 print "GETPAGENAME(1): ".System::getPageName(1)."<br>";
 print "GETPAGENAME(2): ".System::getPageName(2)."<br>";

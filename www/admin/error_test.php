@@ -17,3 +17,5 @@ require(BASE.LIB."Error.Handling.php");
 if ($var) {
 	echo "OUT<br>";
 }
+// this wll throw an error and also write
+// asdfa(09);

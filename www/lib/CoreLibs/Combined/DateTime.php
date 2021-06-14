@@ -42,7 +42,7 @@ class DateTime
 			if ((int)$timestamp < 0) {
 				$negative = true;
 			}
-			$timestamp = abs($timestamp);
+			$timestamp = abs((float)$timestamp);
 			$timegroups = [86400, 3600, 60, 1];
 			$labels = ['d', 'h', 'm', 's'];
 			$time_string = '';

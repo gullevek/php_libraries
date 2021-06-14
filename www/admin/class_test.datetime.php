@@ -27,6 +27,7 @@ $LOG_FILE_ID = 'classTest-datetime';
 ob_end_flush();
 
 use CoreLibs\Combined\DateTime;
+use CoreLibs\Debug\Support as DgS;
 
 $basic = new CoreLibs\Basic();
 $datetime_class = 'CoreLibs\Combination\DateTime';
@@ -118,8 +119,8 @@ $compare_dates = [
 	[ '2021-05-02', '2021-05-02', ],
 ];
 foreach ($compare_dates as $compare_date) {
-	print "CALCDAYSINTERVAL: $compare_date[0] = $compare_date[1]: ".$basic->printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1]))."<br>";
-	print "CALCDAYSINTERVAL(named): $compare_date[0] = $compare_date[1]: ".$basic->printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1], true))."<br>";
+	print "CALCDAYSINTERVAL: $compare_date[0] = $compare_date[1]: ".DgS::printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1]))."<br>";
+	print "CALCDAYSINTERVAL(named): $compare_date[0] = $compare_date[1]: ".DgS::printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1], true))."<br>";
 }
 
 // DEPRECATED
@@ -138,7 +139,7 @@ print "COMPAREDATE: $compare_date[0] = $compare_date[1]: ".(string)$basic->compa
 $compare_datetime = ['2021-05-01 10:00:00', '2021-05-01 11:00:00'];
 print "COMPAREDATE: $compare_datetime[0] = $compare_datetime[1]: ".(string)$basic->compareDateTime($compare_datetime[0], $compare_datetime[1])."<br>";
 $compare_date = ['2021-05-01', '2021-05-10'];
-print "CALCDAYSINTERVAL(named): $compare_date[0] = $compare_date[1]: ".$basic->printAr($basic->calcDaysInterval($compare_date[0], $compare_date[1], true))."<br>"; */
+print "CALCDAYSINTERVAL(named): $compare_date[0] = $compare_date[1]: ".DgS::printAr($basic->calcDaysInterval($compare_date[0], $compare_date[1], true))."<br>"; */
 
 // error message
 print $basic->log->printErrorMsg();

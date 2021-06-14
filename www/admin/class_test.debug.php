@@ -30,7 +30,6 @@ ob_end_flush();
 $ECHO_ALL = true;
 
 use CoreLibs\Debug\Support as DebugSupport;
-use CoreLibs\Debug\Logging;
 use CoreLibs\Debug\FileWriter;
 
 $basic = new CoreLibs\Basic();

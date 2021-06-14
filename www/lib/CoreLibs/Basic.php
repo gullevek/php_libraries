@@ -65,8 +65,6 @@ class Basic
 	private $session_name = '';
 	private $session_id = '';
 
-	// form token (used for form validation)
-	// private $form_token = '';
 	// ajax flag
 	protected $ajax_page_flag = false;
 
@@ -75,11 +73,6 @@ class Basic
 	 */
 	public function __construct()
 	{
-		// set per run UID for logging
-		$this->running_uid = \CoreLibs\Create\Uids::uniqId();
-		// running time start for script
-		$this->script_starttime = microtime(true);
-
 		// TODO make check dynamic for entries we MUST have depending on load type
 		// before we start any work, we should check that all MUST constants are defined
 		$abort = false;
@@ -150,17 +143,13 @@ class Basic
 		}
 	}
 
-	// METHOD: __destruct
-	// PARAMS: none
-	// RETURN: if debug is on, return error data
-	// DESC  : basic deconstructor (should be called from all deconstructors in higher classes)
-	//        writes out $error_msg to global var
+	/**
+	 * deconstructor
+	 * basic deconstructor (should be called from all deconstructors in higher classes)
+	 * writes out $error_msg to global var
+	 */
 	public function __destruct()
 	{
-		// this has to be changed, not returned here, this is the last class to close
-		// return $this->error_msg;
-		// close open file handles
-		// $this->fdebugFP('c');
 	}
 
 	// *************************************************************
@@ -243,7 +232,7 @@ class Basic
 	 * writes a string to a file immediatly, for fast debug output
 	 * @param  string  $string string to write to the file
 	 * @param  boolean $enter  default true, if set adds a linebreak \n at the end
-	 * @return void            has no return
+	 * @return bool            True of False for success of writing
 	 * @deprecated Use \CoreLibs\Debug\FileWriter::fdebug() instead
 	 */
 	public function fdebug(string $string, bool $enter = true): bool
@@ -267,6 +256,7 @@ class Basic
 	public function debugFor(string $type, string $flag): void
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated, use $basic->log->debugFor() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
+		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal */
 		$this->log->debugFor(...[func_get_args()]);
 	}
 
@@ -456,8 +446,8 @@ class Basic
 	 * prints a html formatted (pre) array
 	 * @param  array  $array any array
 	 * @return string        formatted array for output with <pre> tag added
-	 * DEPRCATE LATER
-	 * @_deprecated Use \CoreLibs\Debug\Support::printAr() instead
+	 * DEPRCATE HARD LATER
+	 * @deprecated Use \CoreLibs\Debug\Support::printAr() instead
 	 */
 	public static function printAr(array $array): string
 	{
@@ -1336,10 +1326,10 @@ class Basic
 	 * converts RGB to HSB/V values
 	 * returns:
 	 * array with hue (0-360), sat (0-100%), brightness/value (0-100%)
-	 * @param  int    $r red 0-255
-	 * @param  int    $g green 0-255
-	 * @param  int    $b blue 0-255
-	 * @return array  Hue, Sat, Brightness/Value
+	 * @param  int   $red   red 0-255
+	 * @param  int   $green green 0-255
+	 * @param  int   $blue  blue 0-255
+	 * @return array        Hue, Sat, Brightness/Value
 	 * @deprecated use \CoreLibs\Convert\Colors::rgb2hsb() instead
 	 */
 	public static function rgb2hsb(int $red, int $green, int $blue): array
@@ -1571,7 +1561,7 @@ class Basic
 	public function mimeSetAppName(string $mime, string $app): void
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\MimeAppName()->mimeSetAppName()', E_USER_DEPRECATED);
-		$this->mime->mimeSetAppName($mime, $app);
+		\CoreLibs\Convert\MimeAppName::mimeSetAppName($mime, $app);
 	}
 
 	/**
@@ -1584,7 +1574,7 @@ class Basic
 	public function mimeGetAppName(string $mime): string
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\MimeAppName()->mimeGetAppName()', E_USER_DEPRECATED);
-		return $this->mime->mimeGetAppName($mime);
+		return \CoreLibs\Convert\MimeAppName::mimeGetAppName($mime);
 	}
 
 	// *** MIME PARTS END ***

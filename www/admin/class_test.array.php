@@ -27,6 +27,7 @@ $LOG_FILE_ID = 'classTest-array';
 ob_end_flush();
 
 use CoreLibs\Combined\ArrayHandler;
+use CoreLibs\Debug\Support as DgS;
 
 $basic = new CoreLibs\Basic();
 // $_array= new CoreLibs\Combined\ArrayHandler();
@@ -37,24 +38,30 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 // recursive array search
-$test_array = array(
+$test_array = [
 	'foo' => 'bar',
-	'input' => array(
-		'element_a' => array(
+	'input' => [
+		'element_a' => [
 			'type' => 'text'
-		),
-		'element_b' => array(
+		],
+		'element_b' => [
 			'type' => 'email'
-		),
-		'element_c' => array(
+		],
+		'element_c' => [
 			'type' => 'email'
-		)
-	)
-);
+		],
+	],
+];
 
-echo "SOURCE ARRAY: ".$basic->printAr($test_array)."<br>";
-echo "FOUND ELEMENTS [base]: ".$basic->printAr(ArrayHandler::arraySearchRecursive('email', $test_array, 'type'))."<br>";
-echo "FOUND ELEMENTS [input]: ".$basic->printAr(ArrayHandler::arraySearchRecursive('email', $test_array['input'], 'type'))."<br>";
+echo "SOURCE ARRAY: ".DgS::printAr($test_array)."<br>";
+// frist return
+echo "ARRAYSEARCHRECURSIVE(email, [array], type): ".DgS::printAr(ArrayHandler::arraySearchRecursive('email', $test_array, 'type'))."<br>";
+echo "ARRAYSEARCHRECURSIVE(email, [array]['input'], type): ".DgS::printAr(ArrayHandler::arraySearchRecursive('email', $test_array['input'], 'type'))."<br>";
+// all return
+echo "ARRAYSEARCHRECURSIVEALL(email, [array], type): ".Dgs::printAr((array)ArrayHandler::arraySearchRecursiveAll('email', $test_array, 'type'))."<br>";
+
+// simple search
+echo "ARRAYSEARCHSIMPLE([array], type, email): ".(string)ArrayHandler::arraySearchSimple($test_array, 'type', 'email')."<br>";
 
 $array_1 = [
 	'foo' => 'bar'
@@ -67,10 +74,28 @@ $array_3 = [
 		'beta' => 4
 	]
 ];
-print "ARRAYMERGERECURSIVE: ".$basic->printAr(ArrayHandler::arrayMergeRecursive($array_1, $array_2, $array_3))."<br>";
+// recusrice merge
+print "ARRAYMERGERECURSIVE: ".DgS::printAr(ArrayHandler::arrayMergeRecursive($array_1, $array_2, $array_3))."<br>";
+// array difference
+$array_left = [
+	'same' => 'data',
+	'left' => 'Has L'
+];
+$array_right = [
+	'same' => 'data',
+	'right' => 'has R'
+];
+print "ARRAYDIFF: ".DgS::printAr(ArrayHandler::arrayDiff($array_left, $array_right))."<br>";
+// in array check
+print "INARRAYANY([1,3], [array]): ".DgS::printAr(ArrayHandler::inArrayAny([1, 3], $array_2))."<br>";
+// flatten array
+print "FLATTENARRAY: ".DgS::printAr(ArrayHandler::flattenArray($test_array))."<br>";
+print "FLATTENARRAYKEY: ".DgS::printAr(ArrayHandler::flattenArrayKey($test_array))."<br>";
+// flatten for key set
+print "ARRAYFLATFORKEY: ".DgS::printAr(ArrayHandler::arrayFlatForKey($test_array, 'type'))."<br>";
 
 // DEPRECATED
-// print "ARRAYMERGERECURSIVE: ".$basic->printAr($basic->arrayMergeRecursive($array_1, $array_2, $array_3))."<br>";
+// print "ARRAYMERGERECURSIVE: ".DgS::printAr($basic->arrayMergeRecursive($array_1, $array_2, $array_3))."<br>";
 
 // error message
 print $basic->log->printErrorMsg();

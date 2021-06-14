@@ -45,6 +45,12 @@ print "App for mime $mime: ".$_mime->mimeGetAppName($mime)."<br>";
 $_mime->mimeSetAppName($mime, 'Microsoft (better) Excel');
 print "App for mime changed $mime: ".$_mime->mimeGetAppName($mime)."<br>";
 
+// static call test
+$mime = 'application/x-indesign';
+print "S::App for mime $mime: ".\CoreLibs\Convert\MimeAppName::mimeGetAppName($mime)."<br>";
+$mime = 'application/vnd.ms-excel';
+print "S::App for mime $mime: ".\CoreLibs\Convert\MimeAppName::mimeGetAppName($mime)."<br>";
+
 // DEPRECATED
 /* $mime = 'application/illustrator';
 print "MIME $mime: ".$basic->mimeGetAppName($mime)."<br>";

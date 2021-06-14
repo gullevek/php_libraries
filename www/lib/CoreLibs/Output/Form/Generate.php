@@ -1035,12 +1035,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							}
 							break;
 						case 'date': // YYYY-MM-DD
-							if (!$this->checkDate($this->table_array[$key]['value'])) {
+							if (!\CoreLibs\Combined\DateTime::checkDate($this->table_array[$key]['value'])) {
 								$this->msg .= sprintf($this->l->__('Please enter a vailid date (YYYY-MM-DD) for the <b>%s</b> Field!<br>'), $this->table_array[$key]['output_name']);
 							}
 							break;
 						case 'time': // HH:MM[:SS]
-							if (!$this->checkDateTime($this->table_array[$key]['value'])) {
+							if (!\CoreLibs\Combined\DateTime::checkDateTime($this->table_array[$key]['value'])) {
 								$this->msg .= sprintf($this->l->__('Please enter a vailid time (HH:MM[:SS]) for the <b>%s</b> Field!<br>'), $this->table_array[$key]['output_name']);
 							}
 							break;
@@ -1198,7 +1198,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					// $this->log->debug('edit_error_chk', 'KEY: $prfx$key | count: '.count($_POST[$prfx.$key]).' | M: $max');
 					// $this->log->debug('edit_error_chk', 'K: '.$_POST[$prfx.$key].' | '.$_POST[$prfx.$key][0]);
 				}
-				$this->log->debug('POST ARRAY', $this->printAr($_POST));
+				$this->log->debug('POST ARRAY', \CoreLibs\Debug\Support::printAr($_POST));
 				// init variables before inner loop run
 				$mand_okay = 0;
 				$mand_name = '';
@@ -1503,7 +1503,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			if (isset($this->table_array[$key]['type']) && $this->table_array[$key]['type'] == 'password') {
 				if ($this->table_array[$key]['value']) {
 					// use the better new passwordSet instead of crypt based
-					$this->table_array[$key]['value'] = $this->passwordSet($this->table_array[$key]['value']);
+					$this->table_array[$key]['value'] = \CoreLibs\Check\Password::passwordSet($this->table_array[$key]['value']);
 					$this->table_array[$key]['HIDDEN_value'] = $this->table_array[$key]['value'];
 				} else {
 					// $this->table_array[$key]['HIDDEN_value'] =
@@ -1715,11 +1715,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->msg = $this->l->__('Dataset has been saved!<Br>');
 	}
 
-	// METHOD: formDeleteTableArray
-	// WAS   : form_delete_table_array
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : delete a table and reference fields
+	/**
+	 * delete a table and reference fields
+	 * @return void
+	 */
 	public function formDeleteTableArray()
 	{
 		// remove any reference arrays
@@ -1759,12 +1758,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->msg = $this->l->__('Dataset has been deleted!');
 	}
 
-	// METHOD: formCreateHiddenFields
-	// WAS   : form_create_hidden_fields
-	// PARAMS: $hidden_array
-	// RETURN: the input fields (html)
-	// DESC  : creates HTML hidden input fields out of an hash array
-	public function formCreateHiddenFields($hidden_array = [])
+	/**
+	 * creates HTML hidden input fields out of an hash array
+	 * @param  array $hidden_array The list of fields to be added as hidden
+	 * @return array               key -> value list of hidden fileds data
+	 */
+	public function formCreateHiddenFields(array $hidden_array = []): array
 	{
 		$hidden = [];
 		if (!is_array($this->table_array)) {
@@ -1791,12 +1790,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		return $hidden;
 	}
 
-	// METHOD: formCreateElementReferenceTable
-	// WAS   : form_create_element_reference_table
-	// PARAMS: show which reference table
-	// RETURN: array for output
-	// DESC  : creates the multiple select part for a reference_table
-	public function formCreateElementReferenceTable($table_name)
+	/**
+	 * creates the multiple select part for a reference_table
+	 * @param  string $table_name Table name for reference array lookup
+	 * @return array              Reference table output array
+	 */
+	public function formCreateElementReferenceTable(string $table_name): array
 	{
 		$data = [];
 		$output_name = $this->reference_array[$table_name]['output_name'];

@@ -27,6 +27,7 @@ $LOG_FILE_ID = 'classTest-email';
 ob_end_flush();
 
 use CoreLibs\Check\Email;
+use CoreLibs\Debug\Support as DgS;
 
 $basic = new CoreLibs\Basic();
 
@@ -39,7 +40,7 @@ print "S::GETEMAILREGEX(0): ".Email::getEmailRegex(0)."<br>";
 print "S::GETEMAILREGEX(2): ".Email::getEmailRegex(2)."<br>";
 print "S::GETEMAILREGEX(7): ".Email::getEmailRegex(7)."<br>";
 print "S::GETEMAILREGEX(8 invalid): ".Email::getEmailRegex(8)."<br>";
-print "S::GETEMAILREGEXCHECK: ".$basic->printAr(Email::getEmailRegexCheck())."<br>";
+print "S::GETEMAILREGEXCHECK: ".DgS::printAr(Email::getEmailRegexCheck())."<br>";
 
 $email = [
 	'foo@bar.org',

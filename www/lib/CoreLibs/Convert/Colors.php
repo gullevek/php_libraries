@@ -227,7 +227,7 @@ class Colors
 		} else {
 			$sat = $chroma / (1 - abs(2 * $lum - 1));
 			if ($max == $red) {
-				$hue = fmod((($green - $blue) / $chrome), 6);
+				$hue = fmod((($green - $blue) / $chroma), 6);
 				if ($hue < 0) {
 					$hue = (6 - fmod(abs($hue), 6));
 				}
@@ -248,10 +248,10 @@ class Colors
 
 	/**
 	 * converts an HSL to RGB
-	 * @param  int   $h hue: 0-360 (degrees)
-	 * @param  float $s saturation: 0-100
-	 * @param  float $l luminance: 0-100
-	 * @return array     red/blue/green 0-255 each
+	 * @param  int   $hue hue: 0-360 (degrees)
+	 * @param  float $sat saturation: 0-100
+	 * @param  float $lum luminance: 0-100
+	 * @return array      red/blue/green 0-255 each
 	 */
 	public static function hsl2rgb(int $hue, float $sat, float $lum): array
 	{

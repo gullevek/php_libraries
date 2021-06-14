@@ -27,8 +27,8 @@ line breaks
 in there. Theis 
 is sucky';
 
-print "LB remove: ".$base->removeLB($text)."<br>";
-print "LB remove: ".$base->removeLB($text, '##BR##')."<br>";
+print "LB remove: ".\CoreLibs\Convert\Html::removeLB($text)."<br>";
+print "LB remove: ".\CoreLibs\Convert\Html::removeLB($text, '##BR##')."<br>";
 
 // $test = array (
 // 	'A' => array (
@@ -47,7 +47,7 @@ print "LB remove: ".$base->removeLB($text, '##BR##')."<br>";
 // 	)
 // );
 
-// $base->debug('ARRAY', $base->printAr($test));
+// $base->log->debug('ARRAY', \CoreLibs\Debug\Support::printAr($test));
 
 function rec($pre, $cur, $node = array ())
 {
@@ -103,9 +103,9 @@ $test = rec('C', 'U', $test);
 $test = rec('F', 'U', $test);
 $test = rec('', 'Al', $test);
 $test = rec('B', 'B1', $test);
-$base->debug('REC', $base->printAr($test));
-print "FLATTEN: ".$base->printAr(flattenArrayKey($test))."<br>";
+$base->log->debug('REC', \CoreLibs\Debug\Support::printAr($test));
+print "FLATTEN: ".\CoreLibs\Debug\Support::printAr(flattenArrayKey($test))."<br>";
 
-print $base->printErrorMsg();
+print $base->log->printErrorMsg();
 
 // __END__

@@ -308,12 +308,14 @@ class Logging
 	 */
 	public function debugFor(string $type, string $flag): void
 	{
+		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal */
 		$this->setLogLevel(...[func_get_args()]);
 	}
 
 	/**
 	 * passes list of level names, to turn on debug
 	 * eg $foo->debugFor('print', 'on', ['LOG', 'DEBUG', 'INFO']);
+	 * TODO: currently we can only turn ON
 	 * @param  string $type  debug, echo, print
 	 * @param  string $flag  on/off
 	 *         array  $array of levels to turn on/off debug
@@ -342,13 +344,13 @@ class Logging
 
 	/**
 	 * return the log level for the array type normal and not (disable)
-	 * @param  string     $type  debug, echo, print
-	 * @param  string     $flag  on/off
-	 * @param  string     $level if not null then check if this array entry is set
-	 *                           else return false
-	 * @return bool|array        if $level is null, return array, else boolean true/false
+	 * @param  string      $type  debug, echo, print
+	 * @param  string      $flag  on/off
+	 * @param  string|null $level if not null then check if this array entry is set
+	 *                            else return false
+	 * @return bool|array         if $level is null, return array, else boolean true/false
 	 */
-	public function getLogLevel(string $type, string $flag, string $level = null)
+	public function getLogLevel(string $type, string $flag, ?string $level = null)
 	{
 		// abort if not valid type
 		if (!in_array($type, ['debug', 'echo', 'print'])) {
@@ -365,6 +367,37 @@ class Logging
 		}
 		// array
 		return $this->{$switch};
+	}
+
+	/**
+	 * set flags for per log level type
+	 * - level: set per sub group level
+	 * - class: split by class
+	 * - page: split per page called
+	 * - run: for each run
+	 * @param  string $type Type to get: level, class, page, run
+	 * @param  bool   $set  True or False
+	 * @return void
+	 */
+	public function setLogPer(string $type, bool $set): void
+	{
+		if (!in_array($type, ['level', 'class', 'page', 'run'])) {
+			return;
+		}
+		$this->{'log_per'.$type} = $set;
+	}
+
+	/**
+	 * return current set log per flag in bool
+	 * @param  string $type Type to get: level, class, page, run
+	 * @return bool         True of false for turned on or off
+	 */
+	public function getLogPer(string $type): bool
+	{
+		if (!in_array($type, ['level', 'class', 'page', 'run'])) {
+			return false;
+		}
+		return $this->{'log_per'.$type};
 	}
 
 	/**

@@ -121,7 +121,7 @@ class Login extends \CoreLibs\DB\IO
 	public function __construct(array $db_config)
 	{
 		// log login data for this class only
-		$this->log_per_class = 1;
+		$this->log->setLogPer('class', true);
 
 		// create db connection and init base class
 		parent::__construct($db_config);
@@ -629,24 +629,6 @@ class Login extends \CoreLibs\DB\IO
 		}
 	}
 
-	// METHOD: loginSetAcl
-	// WAS   : login_set_acl
-	// PARAMS: none
-	// RETURN: none
-	// DESC  : sets all the basic ACLs
-	//         init set the basic acl the user has, based on the following rules
-	//         * init set from config DEFAULT ACL
-	//         * if page ACL is set, it overrides the default ACL
-	//         * if group ACL is set, it overrides the page ACL
-	//         * if user ACL is set, it overrides the group ACL
-	//         set the page ACL
-	//         * default ACL set
-	//         * set group ACL if not default overrides default ACL
-	//         * set page ACL if not default overrides group ACL
-	//         set edit access ACL and set default edit access group
-	//         * if an account ACL is set, set this parallel, account ACL overrides user ACL if it applies
-	//         * if edit access ACL level is set, use this, else use page
-	//         set all base ACL levels as a list keyword -> ACL number
 	/**
 	 * sets all the basic ACLs
 	 * init set the basic acl the user has, based on the following rules

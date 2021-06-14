@@ -25,11 +25,22 @@ if (defined('BASE')) {
 // RETURN: true, so cought errors do not get processed by the PHP error engine
 // DESC:   will catch any error except E_ERROR and try to write them to the log file in log/php_error-<DAY>.llog
 //         if this fails, it will print the data to the window via echo
-function MyErrorHandler($type, $message, $file, $line, $context)
+/**
+ * will catch any error except E_ERROR and try to write them to the log file
+ * in log/php_error-<DAY>.log
+ * if this fails, it will print the data to the window via echo
+ * @param  int    $type    the error code from PHP
+ * @param  string $message the error message from php
+ * @param  string $file    in which file the error happend. this is the source file (eg include)
+ * @param  int    $line    in which line the error happened
+ * @param  array  $context array with all the variable
+ * @return bool           true, so cought errors do not get processed by the PHP error engine
+ */
+function MyErrorHandler(int $type, string $message, string $file, int $line, array $context): bool
 {
 	if (!(error_reporting() & $type) && !SHOW_ALL_ERRORS) {
 		// This error code is not included in error_reporting
-		return;
+		return false;
 	}
 	// ERROR LEVEL
 	$error_level = array(
@@ -52,7 +63,7 @@ function MyErrorHandler($type, $message, $file, $line, $context)
 	);
 
 	// get the current page name (strip path)
-	$page_temp = explode("/", $_SERVER["PHP_SELF"]);
+	$page_temp = explode(DIRECTORY_SEPARATOR, $_SERVER["PHP_SELF"]);
 	// the output string:
 	// [] current timestamp
 	// {} the current page name in which the error occured (running script)
@@ -63,7 +74,7 @@ function MyErrorHandler($type, $message, $file, $line, $context)
 	$output = '{'.array_pop($page_temp).'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message;
 	# try to open file
 	$ROOT = CURRENT_WORKING_DIR;
-	$LOG = 'log/';
+	$LOG = 'log'.DIRECTORY_SEPARATOR;
 	// if the log folder is not found, try to create it
 	if (!is_dir($ROOT.$LOG) && !is_file($ROOT.LOG)) {
 		$ok = mkdir($ROOT.$LOG);
