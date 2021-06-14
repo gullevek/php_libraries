@@ -22,12 +22,12 @@ class ProgressBar
 	public $code;	// unique code
 	public $status = 'new';	// current status (new,show,hide)
 	public $step = 0;	// current step
-	public $position = array( // current bar position
+	public $position = [ // current bar position
 		'left' => null,
 		'top' => null,
 		'width' => null,
 		'height' => null,
-	);
+	];
 
 	public $clear_buffer_size = 1; // we need to send this before the lfush to get browser output
 	public $clear_buffer_size_init = 1024*1024; // if I don't send that junk, it won't send anything
@@ -50,7 +50,7 @@ class ProgressBar
 
 	public $direction = 'right';	// direction of motion (right,left,up,down)
 
-	public $frame = array('show' => false);	// ProgressBar Frame
+	public $frame = ['show' => false];	// ProgressBar Frame
 	/*	'show' => false,	# frame show (true/false)
 		'left' => 200,	# frame position from left
 		'top' => 100,	# frame position from top
@@ -61,8 +61,8 @@ class ProgressBar
 		'brd_color' => '#dfdfdf #404040 #404040 #dfdfdf'	# frame border color
 	*/
 
-	public $label = array();	// ProgressBar Labels
-	/*	'name' => array(	# label name
+	public $label = [];	// ProgressBar Labels
+	/*	'name' => [	# label name
 			'type' => 'text',	# label type (text,button,step,percent,crossbar)
 			'value' => 'Please wait ...',	# label value
 			'left' => 10,	# label position from left
@@ -75,7 +75,7 @@ class ProgressBar
 			'font-weight' => '',	#	label font weight
 			'color' => '#000000',	#	label font color
 			'bgr_color' => ''	# label background color
-		)
+		]
 	*/
 
 	// output strings
@@ -166,7 +166,7 @@ class ProgressBar
 			$pixel = $bar - ($this->pedding * 2);
 		}
 
-		$position = array();
+		$position = [];
 		switch ($this->direction) {
 			case 'right':
 				$position['left'] = $this->pedding;
@@ -221,7 +221,7 @@ class ProgressBar
 	 */
 	public function setFrame(int $width = 0, int $height = 0): void
 	{
-		$this->frame = array(
+		$this->frame = [
 			'show' => true,
 			'left' => 20,
 			'top' => 35,
@@ -230,7 +230,7 @@ class ProgressBar
 			'color' => '#c0c0c0',
 			'border' => 2,
 			'brd_color' => '#dfdfdf #404040 #404040 #dfdfdf'
-		);
+		];
 
 		if ($width > 0) {
 			$this->frame['width'] = $width;
@@ -252,7 +252,7 @@ class ProgressBar
 	{
 		switch ($type) {
 			case 'text':
-				$this->label[$name] = array(
+				$this->label[$name] = [
 					'type' => 'text',
 					'value' => $value,
 					'left' => 0, // keep all to the left in box
@@ -265,10 +265,10 @@ class ProgressBar
 					'font-weight' => 'normal',
 					'color' => '#000000',
 					'bgr_color' => ''
-				);
+				];
 				break;
 			case 'button':
-				$this->label[$name] = array(
+				$this->label[$name] = [
 					'type' => 'button',
 					'value' => $value,
 					'action' => '',
@@ -283,10 +283,10 @@ class ProgressBar
 					'font-weight' => 'normal',
 					'color' => '#000000',
 					'bgr_color' => ''
-				);
+				];
 				break;
 			case 'step':
-				$this->label[$name] = array(
+				$this->label[$name] = [
 					'type' => 'step',
 					'value' => $value,
 					'left' => $this->left + 5,
@@ -299,7 +299,7 @@ class ProgressBar
 					'font-weight' => 'normal',
 					'color' => '#000000',
 					'bgr_color' => ''
-				);
+				];
 				break;
 			case 'percentlbl':
 			case 'percent':
@@ -309,7 +309,7 @@ class ProgressBar
 				} else {
 					$font_size = 11;
 				}
-				$this->label[$name] = array(
+				$this->label[$name] = [
 					'type' => $type, // either percent or percentlbl
 					'value' => $value,
 					'left' => false,
@@ -322,10 +322,10 @@ class ProgressBar
 					'font-weight' => 'normal',
 					'color' => '#000000',
 					'bgr_color' => ''
-				);
+				];
 				break;
 			case 'crossbar':
-				$this->label[$name] = array(
+				$this->label[$name] = [
 					'type' => 'crossbar',
 					'value' => $value,
 					'left' => $this->left + ($this->width / 2),
@@ -338,7 +338,7 @@ class ProgressBar
 					'font-weight' => 'normal',
 					'color' => '#000000',
 					'bgr_color' => ''
-				);
+				];
 				break;
 		}
 	}
@@ -373,7 +373,7 @@ class ProgressBar
 		// print "SET POSITION[$name]: $left<br>";
 		// if this is percent, we ignore anything, it is auto positioned
 		if ($this->label[$name]['type'] != 'percent') {
-			foreach (array('top', 'left', 'width', 'height') as $pos_name) {
+			foreach (['top', 'left', 'width', 'height'] as $pos_name) {
 				if ($$pos_name !== false) {
 					$this->label[$name][$pos_name] = intval($$pos_name);
 				}

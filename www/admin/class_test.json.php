@@ -65,7 +65,7 @@ print "E-JSON: $json: ".$basic->printAr($output)."<br>";
 print "E-JSON ERROR: ".$basic->jsonGetLastError().": ".$basic->jsonGetLastError(true)."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

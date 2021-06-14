@@ -73,7 +73,7 @@ print "ARRAYMERGERECURSIVE: ".$basic->printAr(ArrayHandler::arrayMergeRecursive(
 // print "ARRAYMERGERECURSIVE: ".$basic->printAr($basic->arrayMergeRecursive($array_1, $array_2, $array_3))."<br>";
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

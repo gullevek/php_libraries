@@ -1,20 +1,20 @@
 <?php declare(strict_types=1);
 
-$edit_schemes = array(
-	'table_array' => array(
-		'edit_scheme_id' => array(
-			'value' => isset($GLOBALS['edit_scheme_id']) ? $GLOBALS['edit_scheme_id'] : '',
+$edit_schemes = [
+	'table_array' => [
+		'edit_scheme_id' => [
+			'value' => $GLOBALS['edit_scheme_id'] ?? '',
 			'type' => 'hidden',
 			'pk' => 1
-		),
-		'name' => array(
-			'value' => isset($GLOBALS['name']) ? $GLOBALS['name'] : '',
+		],
+		'name' => [
+			'value' => $GLOBALS['name'] ?? '',
 			'output_name' => 'Scheme Name',
 			'mandatory' => 1,
 			'type' => 'text'
-		),
-		'header_color' => array(
-			'value' => isset($GLOBALS['header_color']) ? $GLOBALS['header_color'] : '',
+		],
+		'header_color' => [
+			'value' => $GLOBALS['header_color'] ?? '',
 			'output_name' => 'Header Color',
 			'mandatory' => 1,
 			'type' => 'text',
@@ -23,35 +23,35 @@ $edit_schemes = array(
 			'error_check' => 'custom',
 			'error_regex' => '/[\dA-Fa-f]{6}/',
 			'error_example' => 'F6A544'
-		),
-		'enabled' => array(
-			'value' => isset($GLOBALS['enabled']) ? $GLOBALS['enabled'] : '',
+		],
+		'enabled' => [
+			'value' => $GLOBALS['enabled'] ?? '',
 			'output_name' => 'Enabled',
 			'int' => 1,
 			'type' => 'binary',
-			'element_list' => array(
+			'element_list' => [
 				'1' => 'Yes',
 				'0' => 'No'
-			)
-		),
-		'template' => array(
-			'value' => isset($GLOBALS['template']) ? $GLOBALS['template'] : '',
+			],
+		],
+		'template' => [
+			'value' => $GLOBALS['template'] ?? '',
 			'output_name' => 'Template',
 			'type' => 'text'
-		)
-	),
+		],
+	],
 	'table_name' => 'edit_scheme',
 	'load_query' => "SELECT edit_scheme_id, name, enabled FROM edit_scheme ORDER BY name",
-	'show_fields' => array(
-		array(
+	'show_fields' => [
+		[
 			'name' => 'name'
-		),
-		array(
+		],
+		[
 			'name' => 'enabled',
-			'binary' => array('Yes', 'No'),
+			'binary' => ['Yes', 'No'],
 			'before_value' => 'Enabled: '
-		)
-	)
-); // main array
+		],
+	],
+]; // main array
 
 // __END__

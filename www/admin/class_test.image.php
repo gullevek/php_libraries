@@ -99,7 +99,7 @@ $basic->correctImageOrientation($image);
 echo "<div>S::CREATETHUMBNAILSIMPLE: ".basename($image).": WIDTH: $thumb_width<br><img src=".$basic->createThumbnailSimple($image, $thumb_width)."></div>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

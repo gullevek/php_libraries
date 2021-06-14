@@ -43,6 +43,6 @@ print "FILEUPLOADERRORMESSAGE(): ".System::fileUploadErrorMessage(-1)."<br>";
 print "FILEUPLOADERRORMESSAGE(UPLOAD_ERR_CANT_WRITE): ".System::fileUploadErrorMessage(UPLOAD_ERR_CANT_WRITE)."<br>";
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";

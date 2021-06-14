@@ -95,7 +95,7 @@ print "D/MAGICLINK: ".Html::htmlent($basic->magicLinks($magic_link))."<Br>";
 
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

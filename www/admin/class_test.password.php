@@ -26,6 +26,8 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-pass';
 ob_end_flush();
 
+use CoreLibs\Check\Password as PwdChk;
+
 $basic = new CoreLibs\Basic();
 $_password = new CoreLibs\Check\Password();
 $password_class = 'CoreLibs\Check\Password';

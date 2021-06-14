@@ -48,7 +48,7 @@ print "C->RANDOMKEYGEN(auto): ".$_array->randomKeyGen()."<br>";
 // print "D\RANDOMKEYGEN(auto): ".$basic->randomKeyGen()."<br>";
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

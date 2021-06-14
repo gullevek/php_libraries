@@ -59,6 +59,8 @@
 
 namespace CoreLibs\ACL;
 
+use CoreLibs\Check\Password;
+
 class Login extends \CoreLibs\DB\IO
 {
 	private $euid; // the user id var
@@ -78,33 +80,33 @@ class Login extends \CoreLibs\DB\IO
 	private $pw_old_password;
 	private $pw_new_password;
 	private $pw_new_password_confirm;
-	private $pw_change_deny_users = array(); // array of users for which the password change is forbidden
+	private $pw_change_deny_users = []; // array of users for which the password change is forbidden
 	private $logout_target;
 	private $max_login_error_count = -1;
-	private $lock_deny_users = array();
+	private $lock_deny_users = [];
 
 	// if we have password change we need to define some rules
 	private $password_min_length = PASSWORD_MIN_LENGTH;
 	// max length is fixed as 255 (for input type max), if set highter, it will be set back to 255
 	private $password_max_length = PASSWORD_MAX_LENGTH;
 	// can have several regexes, if nothing set, all is ok
-	private $password_valid_chars = array(
+	private $password_valid_chars = [
 		// '^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$',
 		// '^(?.*(\pL)u)(?=.*(\pN)u)(?=.*([^\pL\pN])u).{8,}',
-	);
+	];
 
 	// all possible login error conditions
-	private $login_error_msg = array();
+	private $login_error_msg = [];
 	// this is an array holding all strings & templates passed from the outside (translation)
-	private $login_template = array(
-		'strings' => array(),
+	private $login_template = [
+		'strings' => [],
 		'password_change' => '',
 		'template' => ''
-	);
+	];
 
 	// acl vars
-	public $acl = array();
-	public $default_acl_list = array();
+	public $acl = [];
+	public $default_acl_list = [];
 	// login html, if we are on an ajax page
 	private $login_html = '';
 	private $login_is_ajax_page = false;
@@ -190,7 +192,7 @@ class Login extends \CoreLibs\DB\IO
 		// logout target (from config)
 		$this->logout_target = LOGOUT_TARGET;
 		// disallow user list for password change
-		$this->pw_change_deny_users = array('admin');
+		$this->pw_change_deny_users = ['admin'];
 		// set flag if password change is okay
 		if (defined('PASSWORD_CHANGE')) {
 			$this->password_change = PASSWORD_CHANGE;
@@ -202,18 +204,18 @@ class Login extends \CoreLibs\DB\IO
 		// max login counts before error reporting
 		$this->max_login_error_count = 10;
 		// users that never get locked, even if they are set strict
-		$this->lock_deny_users = array('admin');
+		$this->lock_deny_users = ['admin'];
 
 		// init default ACL list array
-		$_SESSION['DEFAULT_ACL_LIST'] = array();
+		$_SESSION['DEFAULT_ACL_LIST'] = [];
 		// read the current edit_access_right list into an array
 		$q = "SELECT level, type, name FROM edit_access_right WHERE level >= 0 ORDER BY level";
 		while ($res = $this->dbReturn($q)) {
 			// level to description format (numeric)
-			$this->default_acl_list[$res['level']] = array(
+			$this->default_acl_list[$res['level']] = [
 				'type' => $res['type'],
 				'name' => $res['name']
-			);
+			];
 		}
 		// write that into the session
 		$_SESSION['DEFAULT_ACL_LIST'] = $this->default_acl_list;
@@ -246,12 +248,13 @@ class Login extends \CoreLibs\DB\IO
 				// do something with possible debug data?
 				if (TARGET == 'live' || TARGET == 'remote')	{
 					// login
-					$this->debug_output_all = DEBUG ? 1 : 0;
-					$this->echo_output_all = 0;
-					$this->print_output_all = DEBUG ? 1 : 0;
+					$this->log->setLogLevelAll('debug', DEBUG ? true : false);
+					$this->log->setLogLevelAll('echo', false);
+					$this->log->setLogLevelAll('print', DEBUG ? true : false);
 				}
-				$status_msg = $this->printErrorMsg();
-				if ($this->echo_output_all) {
+				$status_msg = $this->log->printErrorMsg();
+				// if ($this->echo_output_all) {
+				if ($this->log->getLogLevelAll('echo')) {
 					echo $status_msg;
 				}
 				// exit so we don't process anything further, at all
@@ -259,8 +262,8 @@ class Login extends \CoreLibs\DB\IO
 			} else {
 				// if we are on an ajax page reset any POST/GET array data to avoid
 				// any accidentical processing going on
-				$_POST = array();
-				$_GET = array();
+				$_POST = [];
+				$_GET = [];
 				// set the action to login so we can trigger special login html return
 				$_POST['action'] = 'login';
 				$_POST['login_html'] = $this->login_html;
@@ -299,6 +302,7 @@ class Login extends \CoreLibs\DB\IO
 		if (!$password) {
 			$password = $this->password;
 		}
+		// first, errors on missing encryption
 		if ((preg_match("/^\\$2(a|y)\\$/", $hash) && CRYPT_BLOWFISH != 1) ||
 			(preg_match("/^\\$1\\$/", $hash) && CRYPT_MD5 != 1) ||
 			(preg_match("/^\\$[0-9A-Za-z.]{12}$/", $hash) && CRYPT_STD_DES != 1)
@@ -306,22 +310,11 @@ class Login extends \CoreLibs\DB\IO
 			// this means password cannot be decrypted because of missing crypt methods
 			$this->login_error = 9999;
 			$password_ok = false;
-		} elseif ((preg_match("/^\\$2(a)\\$/", $hash) ||
-			// old password have $07$ so we check this
-			(preg_match("/^\\$2(y)\\$/", $hash) && preg_match("/\\$07\\$/", $hash)) ||
-			preg_match("/^\\$1\\$/", $hash) ||
-			preg_match("/^\\$[0-9A-Za-z.]{12}$/", $hash)) &&
-			/** @phan-suppress-next-line PhanDeprecatedFunction */
-			!$this->verifyCryptString($password, $hash)
-		) {
-			// check passwword as crypted, $2a$ or $2y$ is blowfish start, $1$ is MD5 start, $\w{12} is standard DES
-			// this is only for OLD $07$ password
-			$this->login_error = 1011;
-			$password_ok = false;
 		} elseif (preg_match("/^\\$2y\\$/", $hash) &&
-			!$this->passwordVerify($password, $hash)
+			!Password::passwordVerify($password, $hash)
 		) {
 			// this is the new password hash methid, is only $2y$
+			// all others are not valid anymore
 			$this->login_error = 1013;
 			$password_ok = false;
 		} elseif (!preg_match("/^\\$2(a|y)\\$/", $hash) &&
@@ -393,10 +386,10 @@ class Login extends \CoreLibs\DB\IO
 						// none to be set, set in login password check
 					} else {
 						// check if the current password is an invalid hash and do a rehash and set password
-						// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '.($this->passwordVerify($this->password, $res['password']) ? 'OK' : 'FAIL').' => HASH: '.($this->passwordRehashCheck($res['password']) ? 'NEW NEEDED' : 'OK'));
-						if ($this->passwordRehashCheck($res['password'])) {
+						// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '.($Password::passwordVerify($this->password, $res['password']) ? 'OK' : 'FAIL').' => HASH: '.(Password::passwordRehashCheck($res['password']) ? 'NEW NEEDED' : 'OK'));
+						if (Password::passwordRehashCheck($res['password'])) {
 							// update password hash to new one now
-							$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($this->passwordSet($this->password))."' WHERE edit_user_id = ".$res['edit_user_id'];
+							$q = "UPDATE edit_user SET password = '".$this->dbEscapeString(Password::passwordSet($this->password))."' WHERE edit_user_id = ".$res['edit_user_id'];
 							$this->dbExec($q);
 						}
 						// normal user processing
@@ -428,9 +421,9 @@ class Login extends \CoreLibs\DB\IO
 								$q .= "WHERE edit_user_id = ".$res['edit_user_id'];
 								$this->dbExec($q);
 							}
-							$edit_page_ids = array();
-							$pages = array();
-							$pages_acl = array();
+							$edit_page_ids = [];
+							$pages = [];
+							$pages_acl = [];
 							// set pages access
 							$q = "SELECT ep.edit_page_id, ep.cuid, epca.cuid AS content_alias_uid, ";
 							$q .= "ep.hostname, ep.filename, ep.name AS edit_page_name, ";
@@ -446,7 +439,7 @@ class Login extends \CoreLibs\DB\IO
 								// page id array for sub data readout
 								$edit_page_ids[$res['edit_page_id']] = $res['cuid'];
 								// create the array for pages
-								$pages[$res['cuid']] = array(
+								$pages[$res['cuid']] = [
 									'edit_page_id' => $res['edit_page_id'],
 									'cuid' => $res['cuid'],
 									'content_alias_uid' => $res['content_alias_uid'], // for reference of content data on a differen page
@@ -461,9 +454,9 @@ class Login extends \CoreLibs\DB\IO
 									'online' => $res['online'],
 									'acl_level' => $res['level'],
 									'acl_type' => $res['type'],
-									'query' => array(),
-									'visible' => array()
-								);
+									'query' => [],
+									'visible' => []
+								];
 								// make reference filename -> level
 								$pages_acl[$res['filename']] = $res['level'];
 							} // for each page
@@ -482,11 +475,11 @@ class Login extends \CoreLibs\DB\IO
 							$q .= "WHERE enabled = 1 AND edit_page_id IN (".join(', ', array_keys($edit_page_ids)).") ";
 							$q .= "ORDER BY eqs.edit_page_id";
 							while ($res = $this->dbReturn($q)) {
-								$pages[$edit_page_ids[$res['edit_page_id']]]['query'][] = array(
+								$pages[$edit_page_ids[$res['edit_page_id']]]['query'][] = [
 									'name' => $res['name'],
 									'value' => $res['value'],
 									'dynamic' => $res['dynamic']
-								);
+								];
 							}
 							// get the page content and add them to the page
 							$_edit_page_id = 0;
@@ -496,7 +489,7 @@ class Login extends \CoreLibs\DB\IO
 							$q .= "epc.edit_page_id IN (".join(', ', array_keys($edit_page_ids)).") ";
 							$q .= "ORDER BY epc.order_number";
 							while ($res = $this->dbReturn($q)) {
-								$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = array(
+								$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = [
 									'name' => $res['name'],
 									'uid' => $res['uid'],
 									'online' => $res['online'],
@@ -504,7 +497,7 @@ class Login extends \CoreLibs\DB\IO
 									// access name and level
 									'acl_type' => $res['type'],
 									'acl_level' => $res['level']
-								);
+								];
 							}
 							// write back the pages data to the output array
 							$_SESSION['PAGES'] = $pages;
@@ -515,18 +508,18 @@ class Login extends \CoreLibs\DB\IO
 							$q .= "WHERE eau.edit_access_id = ea.edit_access_id AND eau.edit_access_right_id = ear.edit_access_right_id ";
 							$q .= "AND eau.enabled = 1 AND edit_user_id = ".$this->euid." ";
 							$q .= "ORDER BY ea.name";
-							$unit_access = array();
-							$eauid = array();
-							$unit_acl = array();
+							$unit_access = [];
+							$eauid = [];
+							$unit_acl = [];
 							while ($res = $this->dbReturn($q)) {
 								// read edit access data fields and drop them into the unit access array
 								$q_sub ="SELECT name, value FROM edit_access_data WHERE enabled = 1 AND edit_access_id = ".$res['edit_access_id'];
-								$ea_data = array();
+								$ea_data = [];
 								while ($res_sub = $this->dbReturn($q_sub)) {
 									$ea_data[$res_sub['name']] = $res_sub['value'];
 								}
 								// build master unit array
-								$unit_access[$res['edit_access_id']] = array(
+								$unit_access[$res['edit_access_id']] = [
 									'id' => $res['edit_access_id'],
 									'acl_level' => $res['level'],
 									'acl_type' => $res['type'],
@@ -535,7 +528,7 @@ class Login extends \CoreLibs\DB\IO
 									'color' => $res['color'],
 									'default' => $res['edit_default'],
 									'data' => $ea_data
-								);
+								];
 								// set the default unit
 								if ($res['edit_default']) {
 									$_SESSION['UNIT_DEFAULT'] = $res['edit_access_id'];
@@ -729,13 +722,13 @@ class Login extends \CoreLibs\DB\IO
 					}
 				}
 				// detail name/level set
-				$this->acl['unit_detail'][$ea_id] = array(
+				$this->acl['unit_detail'][$ea_id] = [
 					'name' => $unit['name'],
 					'uid' => $unit['uid'],
 					'level' => $this->default_acl_list[$this->acl['unit'][$ea_id]]['name'],
 					'default' => $unit['default'],
 					'data' => $unit['data']
-				);
+				];
 				// set default
 				if ($unit['default']) {
 					$this->acl['unit_id'] = $unit['id'];
@@ -887,7 +880,7 @@ class Login extends \CoreLibs\DB\IO
 				// no error change this users password
 				if (!$this->login_error && $edit_user_id) {
 					// update the user (edit_user_id) with the new password
-					$q = "UPDATE edit_user SET password = '".$this->dbEscapeString($this->passwordSet($this->pw_new_password))."' WHERE edit_user_id = ".$edit_user_id;
+					$q = "UPDATE edit_user SET password = '".$this->dbEscapeString(Password::passwordSet($this->pw_new_password))."' WHERE edit_user_id = ".$edit_user_id;
 					$this->dbExec($q);
 					$data = 'Password change for user "'.$this->pw_username.'"';
 					$this->password_change_ok = true;
@@ -1013,7 +1006,7 @@ class Login extends \CoreLibs\DB\IO
 	 */
 	private function loginSetTemplates(): void
 	{
-		$strings = array(
+		$strings = [
 			'HTML_TITLE' => $this->l->__('LOGIN'),
 			'TITLE' => $this->l->__('LOGIN'),
 			'USERNAME' => $this->l->__('Username'),
@@ -1022,9 +1015,9 @@ class Login extends \CoreLibs\DB\IO
 			'ERROR_MSG' => '',
 			'LOGOUT_TARGET' => '',
 			'PASSWORD_CHANGE_BUTTON_VALUE' => $this->l->__('Change Password')
-		);
+		];
 
-		$error_msgs = array(
+		$error_msgs = [
 			'100' => $this->l->__('Fatal Error: <b>[EUID] came in as GET/POST!</b>'), // actually obsolete
 			'1010' => $this->l->__('Fatal Error: <b>Login Failed - Wrong Username or Password</b>'), // user not found
 			'1011' => $this->l->__('Fatal Error: <b>Login Failed - Wrong Username or Password</b>'), // blowfish password wrong
@@ -1043,11 +1036,11 @@ class Login extends \CoreLibs\DB\IO
 			'205' => $this->l->__('Fatal Error: <b>Password change - The new password is not in a valid format</b>'), // we should also not here WHAT is valid
 			'300' => $this->l->__('Success: <b>Password change successful</b>'), // for OK password change
 			'9999' => $this->l->__('Fatal Error: <b>necessary crypt engine could not be found</b>. Login is impossible') // this is bad bad error
-		);
+		];
 
 		// if password change is okay
 		if ($this->password_change) {
-			$strings = array_merge($strings, array(
+			$strings = array_merge($strings, [
 				'TITLE_PASSWORD_CHANGE' => 'Change Password for User',
 				'OLD_PASSWORD' => $this->l->__('Old Password'),
 				'NEW_PASSWORD' => $this->l->__('New Password'),
@@ -1055,7 +1048,7 @@ class Login extends \CoreLibs\DB\IO
 				'CLOSE' => $this->l->__('Close'),
 				'JS_SHOW_HIDE' => "function ShowHideDiv(id) { element = document.getElementById(id); if (element.className == 'visible' || !element.className) element.className = 'hidden'; else element.className = 'visible'; }",
 				'PASSWORD_CHANGE_BUTTON' => '<input type="button" name="pw_change" value="'.$strings['PASSWORD_CHANGE_BUTTON_VALUE'].'" OnClick="ShowHideDiv(\'pw_change_div\');">'
-			));
+			]);
 			$this->login_template['password_change'] = <<<EOM
 <div id="pw_change_div" class="hidden" style="position: absolute; top: 30px; left: 50px; width: 400px; height: 220px; background-color: white; border: 1px solid black; padding: 25px;">
 <table>
@@ -1074,11 +1067,11 @@ EOM;
 		if ($this->password_forgot) {
 		}
 		if (!$this->password_change && !$this->password_forgot) {
-			$strings = array_merge($strings, array(
+			$strings = array_merge($strings, [
 				'JS_SHOW_HIDE' => '',
 				'PASSWORD_CHANGE_BUTTON' => '',
 				'PASSWORD_CHANGE_DIV' => ''
-			));
+			]);
 		}
 
 		// first check if all strings are set from outside, if not, set with default ones
@@ -1179,13 +1172,13 @@ EOM;
 		} else {
 			$this->action = '';
 		}
-		$_data_binary = array(
+		$_data_binary = [
 				'_SESSION' => $_SESSION,
 				'_GET' => $_GET,
 				'_POST' => $_POST,
 				'_FILES' => $_FILES,
 				'error' => $this->login_error
-		);
+		];
 		$data_binary = $this->dbEscapeBytea(bzcompress(serialize($_data_binary)));
 		// SQL querie for log entry
 		$q = "INSERT INTO edit_log ";
@@ -1194,9 +1187,9 @@ EOM;
 		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
 		$q .= "VALUES ('".$this->dbEscapeString($username)."', 'PASSWORD', ".($this->euid ? $this->euid : 'NULL').", ";
 		$q .= "NOW(), '".$this->dbEscapeString($event)."', '".$this->dbEscapeString((string)$error)."', '".$this->dbEscapeString($data)."', '".$data_binary."', '".$this->page_name."', ";
-		foreach (array(
+		foreach ([
 			'REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME', 'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT', 'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING'
-		) as $server_code) {
+		 ] as $server_code) {
 			if (array_key_exists($server_code, $_SERVER)) {
 				$q .= "'".$this->dbEscapeString($_SERVER[$server_code])."', ";
 			} else {

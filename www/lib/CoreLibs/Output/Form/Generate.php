@@ -14,10 +14,10 @@
 *   form data
 *
 * description of the variables && arrays that have to be set ...
-*  $name_u_choose=array(
+*  $name_u_choose = [
 * # this is the description of ALL fields in the main table
-*    'table_array' => array(
-*      'name_of_col_in_table' => array(
+*    'table_array' => [
+*      'name_of_col_in_table' => [
 *        'value' => $name_of_col_in_table',
 *        'pk' => 1/0 - sets the primary key (only one)
 *        'fk' => 1/0 - sets the foreign key (do not use at the moment ... buggy ;)
@@ -35,7 +35,7 @@
 *        'order_by' => 'order bY' string for drop_down_db(_input) if no query given but fields set
 *        'query' => for drop_down_db/array if no outer query given
 *        'preset' => value to preset when array is unset (available for all types)
-*        'element_list' => array( 'true', 'false') - MUST (!) be set for binary
+*        'element_list' => ['true', 'false'] - MUST (!) be set for binary
 *        'length' => 'nr' - only available for 'text' (maxlength)
 *        'size' => 'nr' - only available for 'text' (size of input field)
 *        'rows' => 'nr' - only available for 'textarea'
@@ -47,12 +47,12 @@
 *        --- file:
 *        'save_dir' => 'directory where it should be saved to
 *        'accept_type' => 'mime types accepted (mime/text,mime/jpeg ... etc)'
-*      ),
+*      ],
 *      ...
-*    ),
+*    ],
 * # all reference tables (n<->n)
-*    'reference_array' => array(
-*      'name_u_choose' => array(
+*    'reference_array' => [
+*      'name_u_choose' => [
 *        'table_name' => 'table_u_choose_for_n_to_n_table',
 *        'other_table_pk' => 'primary_key_name_of_reference_table',
 *        'output_name' => 'Printed out next to multiple select field',
@@ -61,18 +61,18 @@
 *        'query' => 'the query to load the multiple select field
 *                    (select id, concat_ws(' ',name_a, name_b) from reference_table)',
 *        'selected' => $var_name for name='xx' in multiple select
-*      ),
+*      ],
 *      ...
-*    ),
+*    ],
 * # fields that should be shown from the load_query and with what aditions
-*    'show_fields' => array(
-*      array(
+*    'show_fields' => [
+*      [
 *        'name' => 'name_of_col_in_query' - col from the query that should be shown
 *        'before_value' => 'text' - if set this text will be put in FRONT of the value from the col
-*        'binary' => array('true','false') - for 1/0 fields in DB changes it int human readable format
-*      ),
+*        'binary' => ['true','false'] - for 1/0 fields in DB changes it int human readable format
+*      ],
 *      ...
-*    ),
+*    ],
 * # the laod query
 *    'load_query' => 'query', - query for generting the list in 'load' function
 * # the name of the main table
@@ -215,7 +215,7 @@ namespace CoreLibs\Output\Form;
 class Generate extends \CoreLibs\DB\Extended\ArrayIO
 {
 	// rest
-	public $field_array = array(); // for the load statetment describes which elements from the load query should be shown and i which format
+	public $field_array = []; // for the load statetment describes which elements from the load query should be shown and i which format
 	public $load_query; // the query needed for loading a data set (one row in the table)
 	public $col_name; // the name of the columen (before _<type>) [used for order button]
 	public $yes; // the yes flag that triggers the template to show ALL and not only new/load
@@ -224,9 +224,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public $warning; // warning flag, for information (saved, loaded, etc)
 	public $archive_pk_name; // the pk name for the load select form
 	private $int_pk_name; // primary key, only internal usage
-	public $reference_array = array(); // reference arrays -> stored in $this->reference_array[$table_name]=>array();
+	public $reference_array = []; // reference arrays -> stored in $this->reference_array[$table_name] => [];
 	public $element_list; // element list for elements next to each other as a special sub group
-	public $table_array = array();
+	public $table_array = [];
 	public $my_page_name; // the name of the page without .php extension
 	public $mobile_phone = false;
 	// buttons and checkboxes
@@ -251,7 +251,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public $l;
 
 	// now some default error msgs (english)
-	public $language_array = array();
+	public $language_array = [];
 
 	/**
 	 * construct form generator
@@ -260,7 +260,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function __construct(array $db_config, int $table_width = 750)
 	{
-		$this->my_page_name = $this->getPageName(1);
+		$this->my_page_name = \CoreLibs\Get\System::getPageName(1);
 		$this->setLangEncoding();
 		// init the language class
 		$this->l = new \CoreLibs\Language\L10n($this->lang);
@@ -281,10 +281,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$config_array = ${$this->my_page_name};
 		} else {
 			// dummy created
-			$config_array = array(
-				'table_array' => array(),
+			$config_array = [
+				'table_array' => [],
 				'table_name' => '',
-			);
+			];
 		}
 
 		// start the array_io class which will start db_io ...
@@ -333,21 +333,22 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				(is_array($config_array['security_level']) && count($config_array['security_level']) < 4))
 			)
 		) {
-			$this->security_level = array(
+			$this->security_level = [
 				'load' => 100,
 				'new' => 100,
 				'save' => 100,
 				'delete' => 100
-			);
+			];
 		} else {
 			// write array to class var
 			$this->security_level = isset($config_array['security_level']) ?
 				$config_array['security_level'] :
-				array('load' => 100,
+				[
+					'load' => 100,
 					'new' => 100,
 					'save' => 100,
 					'delete' => 100
-				);
+				];
 		}
 	}
 
@@ -408,7 +409,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formDumpTableArray()
 	{
 		if (!is_array($this->table_array)) {
-			$this->table_array = array();
+			$this->table_array = [];
 		}
 		reset($this->table_array);
 		$string = '<b>TABLE ARRAY DUMP:</b> '.$this->table_name.'<br>';
@@ -429,7 +430,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formGetColNameFromKey(string $want_key, ?string $key_value = null): ?string
 	{
 		if (!is_array($this->table_array)) {
-			$this->table_array = array();
+			$this->table_array = [];
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -451,9 +452,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function formGetColNameArrayFromKey(string $want_key, ?string $key_value = null): array
 	{
-		$key_array = array();
+		$key_array = [];
 		if (!is_array($this->table_array)) {
-			$this->table_array = array();
+			$this->table_array = [];
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -480,11 +481,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if ($this->warning) {
 			$class = 'warning';
 		}
-		return array(
+		return [
 			'msg' => $this->msg,
 			'width' => $this->table_width,
 			'class' => $class
-		);
+		];
 	}
 
 	// next for functions are pre_test fkts for easier default new,load, etc handling
@@ -577,9 +578,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formProcedureDeleteFromElementList(array $element_list, array $remove_name): void
 	{
 		/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
-		$this->debug('REMOVE ELEMENT', 'Remove REF ELEMENT: '.$this->base_acl_level.' >= '.$this->security_level['delete']);
-		$this->debug('REMOVE ELEMENT', 'Protected Value set: '.(string)isset($this->table_array['protected']['value']));
-		$this->debug('REMOVE ELEMENT', 'Error: '.$this->error);
+		$this->log->debug('REMOVE ELEMENT', 'Remove REF ELEMENT: '.$this->base_acl_level.' >= '.$this->security_level['delete']);
+		$this->log->debug('REMOVE ELEMENT', 'Protected Value set: '.(string)isset($this->table_array['protected']['value']));
+		$this->log->debug('REMOVE ELEMENT', 'Error: '.$this->error);
 		// only do if the user is allowed to delete
 		if (isset($this->security_level['delete']) &&
 			$this->base_acl_level >= $this->security_level['delete'] &&
@@ -588,10 +589,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			!$this->error
 		) {
 			if (!is_array($element_list)) {
-				$element_list = array();
+				$element_list = [];
 			}
 			for ($i = 0, $i_max = count($element_list); $i < $i_max; $i ++) {
-				// $this->debug('form_error', 'Array: '.is_array($this->element_list[$element_list[$i]]['read_data']).' | '.$this->element_list[$element_list[$i]]['delete']);
+				// $this->log->debug('form_error', 'Array: '.is_array($this->element_list[$element_list[$i]]['read_data']).' | '.$this->element_list[$element_list[$i]]['delete']);
 				// if prefix, set it
 				$prfx = ($this->element_list[$element_list[$i]]['prefix']) ? $this->element_list[$element_list[$i]]['prefix'].'_' : '';
 				// get the primary key
@@ -619,13 +620,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					!$this->element_list[$element_list[$i]]['delete']
 				) {
 					if (!isset($_POST[$id])) {
-						$_POST[$id] = array();
+						$_POST[$id] = [];
 					}
 					for ($j = 0, $j_max = count($_POST[$id]); $j < $j_max; $j ++) {
 						// if it is not activated
 						if (!$_POST[$remove_name[$i]][$j]) {
 							$q = 'UPDATE '.$element_list[$i].' WHERE '.$pk_name.' = '.$_POST[$prfx.$pk_name][$j];
-							// $this->debug('edit_db', 'UP: $q');
+							// $this->log->debug('edit_db', 'UP: $q');
 							// $this->dbExec($q);
 							$this->msg .= $this->l->__('Disabled deselected entries from list<br>');
 							$this->warning = 1;
@@ -634,13 +635,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				} elseif (isset($this->element_list[$element_list[$i]]['read_data']) &&
 					$this->element_list[$element_list[$i]]['delete']
 				) {
-					// $this->debug('form_clean', 'ID [$id] [$prfx.$pk_name]');
-					// $this->debug('form_clean', 'ID arr: '.$this->printAr($_POST[$id]));
-					// $this->debug('form_clean', 'PK arr: '.$this->printAr($_POST[$prfx.$pk_name]));
+					// $this->log->debug('form_clean', 'ID [$id] [$prfx.$pk_name]');
+					// $this->log->debug('form_clean', 'ID arr: '.$this->printAr($_POST[$id]));
+					// $this->log->debug('form_clean', 'PK arr: '.$this->printAr($_POST[$prfx.$pk_name]));
 					for ($j = 0, $j_max = count($_POST[$prfx.$pk_name]); $j < $j_max; $j ++) {
 						if (!$_POST[$remove_name[$i]][$j] && $_POST[$prfx.$pk_name][$j]) {
 							$q = 'DELETE FROM '.$element_list[$i].' WHERE '.$pk_name.' = '.$_POST[$prfx.$pk_name][$j];
-							// $this->debug('edit_db', 'DEL: $q');
+							// $this->log->debug('edit_db', 'DEL: $q');
 							$this->dbExec($q);
 							$this->msg .= $this->l->__('Deleted deselected entries from list<br>');
 							$this->warning = 1;
@@ -662,8 +663,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		$pk_selected = '';
 		$t_pk_name = '';
-		$pk_names = array();
-		$pk_ids = array();
+		$pk_names = [];
+		$pk_ids = [];
 		// when security level is okay ...
 		if (isset($this->security_level['load']) &&
 			$this->base_acl_level >= $this->security_level['load']
@@ -705,12 +706,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$pk_names[] = $t_string;
 			}
 		} // show it at all
-		return array(
+		return [
 			't_pk_name' => $t_pk_name,
 			'pk_ids' => $pk_ids,
 			'pk_names' => $pk_names,
 			'pk_selected' => $pk_selected
-		);
+		];
 	}
 
 	/**
@@ -736,10 +737,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$new_name = $this->l->__('New');
 			}
 		} // security level okay
-		return array(
+		return [
 			'new_name' => $new_name,
 			'show_checkbox' => $show_checkbox
-		);
+		];
 	}
 
 	/**
@@ -783,7 +784,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$show_delete = 1;
 			}
 		} // print save/delete row at all$
-		return array(
+		return [
 			'seclevel_okay' => $seclevel_okay,
 			'save' => $save,
 			'pk_name' => $pk_name,
@@ -791,7 +792,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			'show_delete' => $show_delete,
 			'old_school_hidden' => $old_school_hidden,
 			'hide_delete_checkbox' => $hide_delete_checkbox
-		);
+		];
 	} // end of function
 
 	/**
@@ -804,7 +805,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function formCreateElement(string $element_name, ?string $query = null): array
 	{
-		$data = array();
+		$data = [];
 		// special 2nd color for 'binary' attribut
 		if ($this->table_array[$element_name]['type'] == 'binary' && !isset($this->table_array[$element_name]['value'])) {
 			$EDIT_FGCOLOR_T = 'edit_fgcolor_no';
@@ -997,12 +998,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$data['value'] = $this->table_array[$element_name]['value'];
 			}
 		}
-		return array(
+		return [
 			'output_name' => $output_name,
 			'color' => $EDIT_FGCOLOR_T,
 			'type' => $type,
 			'data' => $data
-		);
+		];
 	}
 
 	/**
@@ -1016,16 +1017,16 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formErrorCheck(): void
 	{
 		if (!is_array($this->table_array)) {
-			$this->table_array = array();
+			$this->table_array = [];
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
 			//if ($value['mandatory'] && $value['error_check'])
 			// if error value set && somethign input, check if input okay
 			if (isset($value['error_check']) && isset($this->table_array[$key]['value']) && !empty($this->table_array[$key]['value'])) {
-				$this->debug('ERROR CHECK', 'Key: '.$key.' => '.$value['error_check']);
+				$this->log->debug('ERROR CHECK', 'Key: '.$key.' => '.$value['error_check']);
 				// each error check can be a piped seperated value, lets split it
-				// $this->debug('edit', $value['error_check']);
+				// $this->log->debug('edit', $value['error_check']);
 				foreach (explode('|', $value['error_check']) as $error_check) {
 					switch ($error_check) {
 						case 'number':
@@ -1073,20 +1074,20 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							}
 							break;
 						case 'alphanumericspace':
-							// $this->debug('edit', 'IN Alphanumericspace');
+							// $this->log->debug('edit', 'IN Alphanumericspace');
 							if (!preg_match("/^[0-9A-Za-z_\-\ ]+$/", $this->table_array[$key]['value'])) {
 								$this->msg .= sprintf($this->l->__('Please enter a valid alphanumeric (Numbers and Letters, -, _ and spaces allowed) value for the <b>%s</b> Field!<br>'), $this->table_array[$key]['output_name']);
 							}
 							break;
 						case 'alphanumeric':
-							// $this->debug('edit', 'IN Alphanumeric');
+							// $this->log->debug('edit', 'IN Alphanumeric');
 							if (!preg_match("/^[0-9A-Za-z_\-]+$/", $this->table_array[$key]['value'])) {
 								$this->msg .= sprintf($this->l->__('Please enter a valid alphanumeric (Numbers and Letters only also - and _, no spaces) value for the <b>%s</b> Field!<br>'), $this->table_array[$key]['output_name']);
 							}
 							break;
 						// this one also allows @ and .
 						case 'alphanumericextended':
-							// $this->debug('edit', 'IN Alphanumericextended');
+							// $this->log->debug('edit', 'IN Alphanumericextended');
 							if (!preg_match("/^[0-9A-Za-z_\-@\.]+$/", $this->table_array[$key]['value'])) {
 								$this->msg .= sprintf($this->l->__('Please enter a valid alphanumeric extended (Numbers, Letters, -,  _, @ and . only, no spaces) value for the <b>%s</b> Field!<br>'), $this->table_array[$key]['output_name']);
 							}
@@ -1101,7 +1102,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						case 'json':
 							// check if valid json
 							$json_out = json_decode($this->table_array[$key]['value'], true);
-							$this->debug('JSON ENCODE', 'LAST ERROR: '.json_last_error().' WITH: '.$this->table_array[$key]['value']);
+							$this->log->debug('JSON ENCODE', 'LAST ERROR: '.json_last_error().' WITH: '.$this->table_array[$key]['value']);
 							if (json_last_error()) {
 								$this->msg .= sprintf($this->l->__('Please enter a valid JSON string for the field <b>%s<b>: %s'), $this->table_array[$key]['output_name'], json_last_error_msg());
 							}
@@ -1121,7 +1122,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// main if end
 			) {
 				// if mandatory && no input
-				// $this->debug('form', 'A: '.$this->table_array[$key]['type'].' -- '.$this->table_array[$key]['input_value'].' -- '.$this->table_array[$key]['value']);
+				// $this->log->debug('form', 'A: '.$this->table_array[$key]['type'].' -- '.$this->table_array[$key]['input_value'].' -- '.$this->table_array[$key]['value']);
 				if (!$this->table_array[$key]['value'] && $this->table_array[$key]['type'] != 'binary') {
 					$this->msg .= sprintf($this->l->__('Please enter something into the <b>%s</b> field!<br>'), $this->table_array[$key]['output_name']);
 				}
@@ -1160,15 +1161,15 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				}
 			}
 		} else {
-			$this->reference_array = array();
+			$this->reference_array = [];
 		}
-		// $this->debug('edit_error', 'QS: <pre>'.print_r($_POST, true).'</pre>');
+		// $this->log->debug('edit_error', 'QS: <pre>'.print_r($_POST, true).'</pre>');
 		if (is_array($this->element_list)) {
 			// check the mandatory stuff
 			// if mandatory, check that at least on pk exists or if at least the mandatory field is filled
 			foreach ($this->element_list as $table_name => $reference_array) {
 				if (!is_array($reference_array)) {
-					$reference_array = array();
+					$reference_array = [];
 				}
 				// set pk/fk id for this
 				$_pk_name = '';
@@ -1194,17 +1195,17 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					) {
 						$max = count($_POST[$prfx.$key]);
 					}
-					// $this->debug('edit_error_chk', 'KEY: $prfx$key | count: '.count($_POST[$prfx.$key]).' | M: $max');
-					// $this->debug('edit_error_chk', 'K: '.$_POST[$prfx.$key].' | '.$_POST[$prfx.$key][0]);
+					// $this->log->debug('edit_error_chk', 'KEY: $prfx$key | count: '.count($_POST[$prfx.$key]).' | M: $max');
+					// $this->log->debug('edit_error_chk', 'K: '.$_POST[$prfx.$key].' | '.$_POST[$prfx.$key][0]);
 				}
-				$this->debug('POST ARRAY', $this->printAr($_POST));
+				$this->log->debug('POST ARRAY', $this->printAr($_POST));
 				// init variables before inner loop run
 				$mand_okay = 0;
 				$mand_name = '';
-				$row_okay = array();
-				$default_wrong = array();
-				$error = array();
-				$element_set = array();
+				$row_okay = [];
+				$default_wrong = [];
+				$error = [];
+				$element_set = [];
 				# check each row
 				for ($i = 0; $i < $max; $i ++) {
 					// either one of the post pks is set, or the mandatory
@@ -1222,7 +1223,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						}
 						// we found a mandatory field. check now if one is set to satisfy the main mandatory
 						// also check, if this field is mandatory and its not set, but any other, throw an error
-						// $this->debug('edit_error_chk', 'RG error - Data['.$prfx.$el_name.': '.$_POST[$prfx.$el_name][$i].' | '.$_POST[$prfx.$el_name].' - '.$reference_array['enable_name'].' - '.$_POST[$reference_array['enable_name']][$_POST[$prfx.$el_name][$i]]);
+						// $this->log->debug('edit_error_chk', 'RG error - Data['.$prfx.$el_name.': '.$_POST[$prfx.$el_name][$i].' | '.$_POST[$prfx.$el_name].' - '.$reference_array['enable_name'].' - '.$_POST[$reference_array['enable_name']][$_POST[$prfx.$el_name][$i]]);
 						if (isset($data_array['mandatory']) &&
 							$data_array['mandatory'] &&
 							isset($_POST[$prfx.$el_name][$i]) &&
@@ -1234,12 +1235,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							!isset($_POST[$prfx.$el_name])
 						) {
 							// radio group and set where one not active
-							// $this->debug('edit_error_chk', 'RADIO GROUP');
+							// $this->log->debug('edit_error_chk', 'RADIO GROUP');
 							$row_okay[$_POST[$prfx.$el_name][$i] ?? 0] = 0;
 							$default_wrong[$_POST[$prfx.$el_name][$i] ?? 0] = 1;
 							$error[$_POST[$prfx.$el_name][$i] ?? 0] = 1;
 						} elseif (isset($_POST[$prfx.$el_name][$i]) && !isset($error[$i])) {
-							// $this->debug('edit_error_chk', '[$i]');
+							// $this->log->debug('edit_error_chk', '[$i]');
 							$element_set[$i] = 1;
 							$row_okay[$i] = 1;
 						} elseif (isset($data_array['mandatory']) &&
@@ -1332,7 +1333,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		$this->pk_id = null;
 		if (!is_array($this->table_array)) {
-			$this->table_array = array();
+			$this->table_array = [];
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1345,7 +1346,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
-				$this->reference_array = array();
+				$this->reference_array = [];
 			}
 			reset($this->reference_array);
 			foreach ($this->reference_array as $key => $value) {
@@ -1370,7 +1371,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 		// reset all temp fields
 		if (!is_array($this->table_array)) {
-			$this->table_array = array();
+			$this->table_array = [];
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1380,7 +1381,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (is_array($this->reference_array)) {
 			// load each reference_table
 			if (!is_array($this->reference_array)) {
-				$this->reference_array = array();
+				$this->reference_array = [];
 			}
 			reset($this->reference_array);
 			foreach ($this->reference_array as $key => $value) {
@@ -1407,17 +1408,17 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// for drop_down_db_input check if text field is filled and if, if not yet in db ...
 		// and upload files
 		if (!is_array($this->table_array)) {
-			$this->table_array = array();
+			$this->table_array = [];
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
 			// drop_down_db with input + reference table
-			// $this->debug('form', 'A: '.$this->table_array[$key]['type'].' --- '.$this->table_array[$key]['input_value']);
+			// $this->log->debug('form', 'A: '.$this->table_array[$key]['type'].' --- '.$this->table_array[$key]['input_value']);
 			if (isset($this->table_array[$key]['type']) &&
 				$this->table_array[$key]['type'] == 'drop_down_db_input' &&
 				$this->table_array[$key]['input_value']
 			) {
-				// $this->debug('form', 'HERE');
+				// $this->log->debug('form', 'HERE');
 				// check if this text name already exists (lowercase compare)
 				$q = 'SELECT '.$this->table_array[$key]['pk_name'].' FROM '.$this->table_array[$key]['table_name'].' WHERE LCASE('.$this->table_array[$key]['input_name'].') = '."'".$this->dbEscapeString(strtolower($this->table_array[$key]['input_value']))."'";
 				// if a where was given, add here
@@ -1471,8 +1472,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// if smth in $key, keep as is
 				// $_file=$key.'_file';
 				// $_delete=$key.'_delete';
-				// $this->debug('form', 'UF: '.$GLOBALS['_FILES'][$key.'_file']['name']);
-				// $this->debug('form', 'delete: '.$key.'_delete => '.$GLOBALS[$key.'_delete']);
+				// $this->log->debug('form', 'UF: '.$GLOBALS['_FILES'][$key.'_file']['name']);
+				// $this->log->debug('form', 'delete: '.$key.'_delete => '.$GLOBALS[$key.'_delete']);
 				if ($GLOBALS['_FILES'][$key.'_file']['name']) {
 					// check if dir exists
 					if (is_dir($this->table_array[$key]['save_dir'])) {
@@ -1518,7 +1519,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// write reference array(s) if necessary
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
-				$this->reference_array = array();
+				$this->reference_array = [];
 			}
 			reset($this->reference_array);
 			foreach ($this->reference_array as $reference_array) {
@@ -1533,18 +1534,18 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		} // if reference arrays
 		// write element list
 		if (isset($this->element_list) && is_array($this->element_list)) {
-			$type = array();
+			$type = [];
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $reference_array) {
 				// init arrays
-				$q_begin = array();
-				$q_middle = array();
-				$q_end = array();
-				$q_names = array();
-				$q_data = array();
-				$q_values = array();
-				$no_write = array();
-				$block_write = array();
+				$q_begin = [];
+				$q_middle = [];
+				$q_end = [];
+				$q_names = [];
+				$q_data = [];
+				$q_values = [];
+				$no_write = [];
+				$block_write = [];
 				// get the number of keys from the elements array
 				$keys = array_keys($reference_array['elements']);
 				// element prefix name
@@ -1556,21 +1557,21 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						$max = count($_POST[$prfx.$key]);
 					}
 				}
-				$this->debug('REF ELEMENT', 'RUN FOR TABLE: '.$table_name);
-				// $this->debug('edit_error', 'MAX: $max');
+				$this->log->debug('REF ELEMENT', 'RUN FOR TABLE: '.$table_name);
+				// $this->log->debug('edit_error', 'MAX: $max');
 				// check if there is a hidden key, update, else insert
 				foreach ($reference_array['elements'] as $el_name => $data_array) {
-					// $this->debug('edit_error_query', 'QUERY: '.$this->printAr($_POST));
+					// $this->log->debug('edit_error_query', 'QUERY: '.$this->printAr($_POST));
 					// go through all submitted data
 					// for ($i = 0; $i < count($_POST[$el_name]); $i ++)
 					for ($i = 0; $i < $max; $i ++) {
 						if (!isset($no_write[$i])) {
 							$no_write[$i] = 0;
-							// $this->debug('REF ELEMENT', 'Init no write for pos: '.$i);
+							// $this->log->debug('REF ELEMENT', 'Init no write for pos: '.$i);
 						}
 						if (!isset($block_write[$i])) {
 							$block_write[$i] = 0;
-							// $this->debug('REF ELEMENT', 'Init block write for pos: '.$i);
+							// $this->log->debug('REF ELEMENT', 'Init block write for pos: '.$i);
 						}
 						// if we have enable name & delete set, then only insert/update those which are flagged as active
 						// check if mandatory field is set, if not set 'do not write flag'
@@ -1580,15 +1581,15 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						) {
 							$no_write[$i] = 1;
 						}
-						// $this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: MANDATORY: ".isset($data_array['mandatory'])." SET: ".isset($_POST[$prfx.$el_name][$i]).", EMPTY: ".empty($_POST[$prfx.$el_name][$i])." | DO ACTION ".((!isset($_POST[$prfx.$el_name][$i]) || (isset($_POST[$prfx.$el_name][$i]) && empty($_POST[$prfx.$el_name][$i]))) ? 'YES' : 'NO')." => NO WRITE: ".$no_write[$i]);
+						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: MANDATORY: ".isset($data_array['mandatory'])." SET: ".isset($_POST[$prfx.$el_name][$i]).", EMPTY: ".empty($_POST[$prfx.$el_name][$i])." | DO ACTION ".((!isset($_POST[$prfx.$el_name][$i]) || (isset($_POST[$prfx.$el_name][$i]) && empty($_POST[$prfx.$el_name][$i]))) ? 'YES' : 'NO')." => NO WRITE: ".$no_write[$i]);
 						if (!empty($reference_array['enable_name']) &&
 							isset($reference_array['delete']) && $reference_array['delete'] &&
 							(!isset($_POST[$reference_array['enable_name']][$i]) || empty($_POST[$reference_array['enable_name']][$i]))
 						) {
 							$no_write[$i] = 1;
 						}
-						// $this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: ENABLED NAME: ".isset($reference_array['enable_name']).", DELETE: ".isset($reference_array['delete']).", NOT ENABLED FOR POS: ".(isset($reference_array['enable_name']) ? isset($_POST[$reference_array['enable_name']][$i]) : '-'));
-						$this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: WRITE: ".$no_write[$i]);
+						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: ENABLED NAME: ".isset($reference_array['enable_name']).", DELETE: ".isset($reference_array['delete']).", NOT ENABLED FOR POS: ".(isset($reference_array['enable_name']) ? isset($_POST[$reference_array['enable_name']][$i]) : '-'));
+						$this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: WRITE: ".$no_write[$i]);
 						// flag if data is in the text field and we are in a reference data set
 						if (isset($reference_array['type']) && $reference_array['type'] == 'reference_data') {
 							if (!empty($data_array['type']) && $data_array['type'] == 'text' &&
@@ -1599,7 +1600,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						} else {
 							$block_write[$i] = 1;
 						}
-						// $this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: REFERENCE TYPE: ".isset($reference_array['type']).", SET REFERENCE TYPE: ".(isset($reference_array['type']) ? $reference_array['type'] : '-').", DATA TYPE: ".$data_array['type'].", SET: ".isset($_POST[$prfx.$el_name][$i]).", => BLOCK WIRTE: ".$block_write[$i]);
+						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: REFERENCE TYPE: ".isset($reference_array['type']).", SET REFERENCE TYPE: ".(isset($reference_array['type']) ? $reference_array['type'] : '-').", DATA TYPE: ".$data_array['type'].", SET: ".isset($_POST[$prfx.$el_name][$i]).", => BLOCK WIRTE: ".$block_write[$i]);
 						// set type and boundaries for insert/update
 						if (isset($data_array['pk_id']) &&
 							!empty($data_array['pk_id']) &&
@@ -1608,7 +1609,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							$q_begin[$i] = 'UPDATE '.$table_name.' SET ';
 							$q_end[$i] = ' WHERE '.$el_name.' = '.$_POST[$prfx.$el_name][$i];
 							$type[$i] = 'update';
-							$this->debug('REF ELEMENT', 'SET UPDATE');
+							$this->log->debug('REF ELEMENT', 'SET UPDATE');
 						} elseif (isset($data_array['pk_id']) &&
 							!empty($data_array['pk_id']) &&
 							empty($_POST[$prfx.$el_name][$i])
@@ -1617,13 +1618,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							$q_middle[$i] = ') VALUES (';
 							$q_end[$i] = ')';
 							$type[$i] = 'insert';
-							$this->debug('REF ELEMENT', 'SET INSERT');
+							$this->log->debug('REF ELEMENT', 'SET INSERT');
 						}
-						// $this->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."] PK SET: ".isset($data_array['pk_id']).'/'.empty($data_array['pk_id']).', KEY SET: '.empty($_POST[$prfx.$el_name][$i])." -> TYPE: ".(isset($type[$i]) ? $type[$i] : '-'));
+						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."] PK SET: ".isset($data_array['pk_id']).'/'.empty($data_array['pk_id']).', KEY SET: '.empty($_POST[$prfx.$el_name][$i])." -> TYPE: ".(isset($type[$i]) ? $type[$i] : '-'));
 						// write all data (insert/update) because I don't know until all are processed if it is insert or update
 						// don't write primary key backup for update
 						// for reference_data type, only write if at least one text type field is set
-						// $this->debug('edit_error', 'I: $i | EL Name: '.$prfx.$el_name.' | Data: '.$_POST[$prfx.$el_name][$i].' | Type: '.$type[$i].' | PK: '.$data_array['pk_id'].', Block write: '.$block_write[$i]);
+						// $this->log->debug('edit_error', 'I: $i | EL Name: '.$prfx.$el_name.' | Data: '.$_POST[$prfx.$el_name][$i].' | Type: '.$type[$i].' | PK: '.$data_array['pk_id'].', Block write: '.$block_write[$i]);
 						// only add elements that are not PK or FK flaged
 						if (!isset($data_array['pk_id']) && !isset($data_array['fk_id'])) {
 							// update data list
@@ -1701,7 +1702,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 								$q_end[$i];
 						}
 						/** @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset */
-						$this->debug('edit', 'Pos['.$i.'] => '.$type[$i].' Q: '.$q.'<br>');
+						$this->log->debug('edit', 'Pos['.$i.'] => '.$type[$i].' Q: '.$q.'<br>');
 						// write the dataset
 						if ($q) {
 							$this->dbExec($q);
@@ -1724,7 +1725,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// remove any reference arrays
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
-				$this->reference_array = array();
+				$this->reference_array = [];
 			}
 			reset($this->reference_array);
 			foreach ($this->reference_array as $reference_array) {
@@ -1735,7 +1736,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// remove any element list references
 		if (is_array($this->element_list)) {
 			if (!is_array($this->element_list)) {
-				$this->element_list = array();
+				$this->element_list = [];
 			}
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $data_array) {
@@ -1745,7 +1746,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		// unlink ALL files
 		if (!is_array($this->table_array)) {
-			$this->table_array = array();
+			$this->table_array = [];
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1763,11 +1764,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// PARAMS: $hidden_array
 	// RETURN: the input fields (html)
 	// DESC  : creates HTML hidden input fields out of an hash array
-	public function formCreateHiddenFields($hidden_array = array())
+	public function formCreateHiddenFields($hidden_array = [])
 	{
-		$hidden = array();
+		$hidden = [];
 		if (!is_array($this->table_array)) {
-			$this->table_array = array();
+			$this->table_array = [];
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
@@ -1784,7 +1785,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (is_array($hidden_array)) {
 			reset($hidden_array);
 			foreach ($hidden_array as $key => $value) {
-				$hidden[] = array('key' => $key, 'value' => $value);
+				$hidden[] = ['key' => $key, 'value' => $value];
 			}
 		}
 		return $hidden;
@@ -1797,7 +1798,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// DESC  : creates the multiple select part for a reference_table
 	public function formCreateElementReferenceTable($table_name)
 	{
-		$data = array();
+		$data = [];
 		$output_name = $this->reference_array[$table_name]['output_name'];
 		if (isset($this->reference_array[$table_name]['mandatory']) &&
 			$this->reference_array[$table_name]['mandatory']
@@ -1809,13 +1810,18 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		while ($res = $this->dbReturn($this->reference_array[$table_name]['query'])) {
 			$data['value'][] = $res[0];
 			$data['output'][] = $res[1];
-			$data['selected'][] = ($this->checked(
+			$data['selected'][] = (\CoreLibs\Convert\Html::checked(
 				$this->reference_array[$table_name]['selected'] ?? '',
 				$res[0]
 			)) ? $res[0] : '';
 		}
 		$type = 'reference_table';
-		return array('output_name' => $output_name, 'type' => $type, 'color' => 'edit_fgcolor', 'data' => $data);
+		return [
+			'output_name' => $output_name,
+			'type' => $type,
+			'color' => 'edit_fgcolor',
+			'data' => $data
+		];
 	}
 
 	/**
@@ -1829,22 +1835,22 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formCreateElementListTable(string $table_name): array
 	{
 		// init data rray
-		$data = array(
+		$data = [
 			'delete_name' => '',
 			'delete' => 0,
 			'enable_name' => '',
 			'prefix' => '',
 			'pk_name' => '',
 			'fk_name' => '',
-			'type' => array(),
-			'output_name' => array(),
-			'preset' => array(),
-			'element_list' => array(),
-			'output_data' => array(),
-			'content' => array(),
-			'pos' => array(),
+			'type' => [],
+			'output_name' => [],
+			'preset' => [],
+			'element_list' => [],
+			'output_data' => [],
+			'content' => [],
+			'pos' => [],
 			'table_name' => $table_name // sub table name
-		);
+		];
 		// output name for the viewable left table td box, prefixed with * if mandatory
 		$output_name = $this->element_list[$table_name]['output_name'];
 		if (isset($this->element_list[$table_name]['mandatory']) &&
@@ -1870,15 +1876,15 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 		// build the select part
 		if (!isset($this->element_list[$table_name]['elements']) || !is_array($this->element_list[$table_name]['elements'])) {
-			$this->element_list[$table_name]['elements'] = array();
+			$this->element_list[$table_name]['elements'] = [];
 		}
 		reset($this->element_list[$table_name]['elements']);
 		// generic data read in (counts for all rows)
 		// visible list data output
-		$q_select = array();
-		$proto = array();
+		$q_select = [];
+		$proto = [];
 		foreach ($this->element_list[$table_name]['elements'] as $el_name => $data_array) {
-			// $this->debug('CFG', 'El: '.$el_name.' -> '.$this->printAr($data_array));
+			// $this->log->debug('CFG', 'El: '.$el_name.' -> '.$this->printAr($data_array));
 			// if the element name matches the read array, then set the table as a name prefix
 			// this is for reading the data
 			$q_select[] = $el_name;
@@ -1901,7 +1907,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$md_q = md5($data_array['query']);
 				while ($res = $this->dbReturn($data_array['query'])) {
 					/** @phan-suppress-next-line PhanTypeInvalidDimOffset */
-					$this->debug('edit', 'Q['.$md_q.'] pos: '.$this->cursor_ext[$md_q]['pos'].' | want: '.($data_array['preset'] ?? '-').' | set: '.($data['preset'][$el_name] ?? '-'));
+					$this->log->debug('edit', 'Q['.$md_q.'] pos: '.$this->cursor_ext[$md_q]['pos'].' | want: '.($data_array['preset'] ?? '-').' | set: '.($data['preset'][$el_name] ?? '-'));
 					// first is default for this element
 					if (isset($data_array['preset']) &&
 						(!isset($data['preset'][$el_name]) || empty($data['preset'][$el_name])) &&
@@ -1916,7 +1922,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			} elseif (isset($data_array['element_list'])) {
 				$data['element_list'][$el_name] = $data_array['element_list']; // this is for the checkboxes
 			}
-			$this->debug('CREATE ELEMENT LIST TABLE', 'Table: '.$table_name.', Post: '.$el_name.' => '.
+			$this->log->debug('CREATE ELEMENT LIST TABLE', 'Table: '.$table_name.', Post: '.$el_name.' => '.
 				((isset($_POST[$el_name]) && is_array($_POST[$el_name])) ? 'AS ARRAY'/*.$this->printAr($_POST[$el_name])*/ : 'NOT SET/OR NOT ARRAY').
 				((isset($_POST[$el_name]) && !is_array($_POST[$el_name])) ? $_POST[$el_name] : ''));
 			// if error, check new line addition so we don't loose it
@@ -1932,17 +1938,17 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 			// $proto[$el_name] = $this->error ? $_POST[$el_name][(count($_POST[$el_name]) - 1)] : '';
 		}
-		// $this->debug('CFG DATA', 'Data: '.$this->printAr($data));
-		// $this->debug('CFG PROTO', 'Proto: '.$this->printAr($proto));
-		// $this->debug('CFG SELECT', 'Proto: '.$this->printAr($q_select));
+		// $this->log->debug('CFG DATA', 'Data: '.$this->printAr($data));
+		// $this->log->debug('CFG PROTO', 'Proto: '.$this->printAr($proto));
+		// $this->log->debug('CFG SELECT', 'Proto: '.$this->printAr($q_select));
 		// query for reading in the data
-		$this->debug('edit_error', 'ERR: '.$this->error);
+		$this->log->debug('edit_error', 'ERR: '.$this->error);
 		// if we got a read data, build the read select for the read, and read out the 'selected'
 		/** @phan-assert array $this->element_list[$table_name]['read_data'] */
 		if (isset($this->element_list[$table_name]['read_data'])) {
 			// we need a second one for the query build only
 			// prefix all elements with the $table name
-			$_q_select = array();
+			$_q_select = [];
 			foreach ($q_select as $_pos => $element) {
 				$_q_select[$_pos] = $table_name.'.'.$element;
 			}
@@ -2003,19 +2009,19 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$q = 'SELECT '.implode(', ', $q_select).' FROM '.$table_name.' WHERE '.$this->int_pk_name.' = '.$this->table_array[$this->int_pk_name]['value'];
 			}
 		}
-		// $this->debug('CFG QUERY', 'Q: '.$q);
+		// $this->log->debug('CFG QUERY', 'Q: '.$q);
 		// only run if we have query strnig
 		if (isset($q)) {
 			$pos = 0; // position in while for overwrite if needed
 			// read out the list and add the selected data if needed
 			while ($res = $this->dbReturn($q)) {
-				$_data = array();
+				$_data = [];
 				$prfx = $data['prefix'] ?? ''; // short
 				// go through each res
 				for ($i = 0, $i_max = count($q_select); $i < $i_max; $i ++) {
 					// query select part, set to the element name
 					$el_name = $q_select[$i];
-					// $this->debug('edit_error', '[$i] ELNAME: $el_name | POS[$prfx$el_name]: '.$_POST[$prfx.$el_name][$pos].' | RES: '.$res[$el_name]);
+					// $this->log->debug('edit_error', '[$i] ELNAME: $el_name | POS[$prfx$el_name]: '.$_POST[$prfx.$el_name][$pos].' | RES: '.$res[$el_name]);
 					// if we have an error, we take what we have in the vars, if not we take the data from the db
 					if ($this->error) {
 						// if we have a radio group, set a bit different
@@ -2035,7 +2041,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					}
 				}
 				$data['content'][] = $_data;
-				$data['pos'][] = array(0 => $pos); // this is for the checkboxes
+				$data['pos'][] = [0 => $pos]; // this is for the checkboxes
 				$pos ++; // move up one
 				// reset and unset before next run
 				unset($_data);
@@ -2056,16 +2062,16 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// check if we need to fill fields
 			$element_count = (isset($data['content']) && is_array($data['content'])) ? count($data['content']) : 0;
 			$missing_empty_count = $this->element_list[$table_name]['max_empty'] - $element_count;
-			$this->debug('CFG MAX', 'Max empty: '.$this->element_list[$table_name]['max_empty'].', Missing: '.$missing_empty_count.', Has: '.$element_count);
+			$this->log->debug('CFG MAX', 'Max empty: '.$this->element_list[$table_name]['max_empty'].', Missing: '.$missing_empty_count.', Has: '.$element_count);
 			// set if we need more open entries or if we do not have any entries yet
 			if (($missing_empty_count < $this->element_list[$table_name]['max_empty']) ||
 				$element_count == 0
 			) {
 				for ($pos = $element_count, $pos_max = $this->element_list[$table_name]['max_empty'] + $element_count; $pos <= $pos_max; $pos ++) {
-					$_data = array();
+					$_data = [];
 					// just in case
 					if (!isset($data['type'])) {
-						$data['type'] = array();
+						$data['type'] = [];
 					}
 					// the fields that need to be filled are in data->type array:
 					// pk fields are unfilled
@@ -2085,10 +2091,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					}
 					$data['content'][] = $_data;
 					// this is for the checkboxes
-					$data['pos'][] = array(
+					$data['pos'][] = [
 						0 => $pos
-					);
-					$this->debug('CFG ELEMENT LIST FILL', 'Pos: '.$pos.'/'.$pos_max.', Content: '.count($data['content']).', Pos: '.count($data['pos']));
+					];
+					$this->log->debug('CFG ELEMENT LIST FILL', 'Pos: '.$pos.'/'.$pos_max.', Content: '.count($data['content']).', Pos: '.count($data['pos']));
 				}
 			}
 		}
@@ -2097,18 +2103,18 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (isset($data['delete_name']) && !empty($data['delete_name'])) {
 			$data['content'][] = $proto;
 			// we also need the pos add or we through an error in smarty
-			$data['pos'][] = array(
+			$data['pos'][] = [
 				0 => isset($data['pos']) ? count($data['pos']) : 0
-			);
+			];
 		}
-		// $this->debug('CFG ELEMENT LIST FILL', 'Data array: '.$this->printAr($data));
+		// $this->log->debug('CFG ELEMENT LIST FILL', 'Data array: '.$this->printAr($data));
 		$type = 'element_list';
-		return array(
+		return [
 			'output_name' => $output_name,
 			'type' => $type,
 			'color' => 'edit_fgcolor',
 			'data' => $data
-		);
+		];
 	}
 } // end of class
 

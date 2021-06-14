@@ -58,7 +58,7 @@ print "S::COLOR hsl->rgb: $hsl[0], $hsl[1], $hsl[2]: ".$basic->printAr(Colors::h
 // TODO: run compare check input must match output
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

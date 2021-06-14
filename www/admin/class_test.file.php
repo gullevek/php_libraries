@@ -40,7 +40,7 @@ $file = getcwd().DIRECTORY_SEPARATOR.'class_test.file.php';
 print "GETLINESFROMFILE: $file: ".File::getLinesFromFile($file)."<br>";
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

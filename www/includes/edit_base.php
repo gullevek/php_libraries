@@ -54,20 +54,20 @@ $smarty = new CoreLibs\Template\SmartyExtend();
 
 if (TARGET == 'live' || TARGET == 'remote') {
 	// login
-	$login->debug_output_all = DEBUG ? 1 : 0;
-	$login->echo_output_all = 0;
-	$login->print_output_all = DEBUG ? 1 : 0;
+	$login->log->setLogLevelAll('debug', DEBUG ? true : false);
+	$login->log->setLogLevelAll('echo', false);
+	$login->log->setLogLevelAll('print', DEBUG ? true : false);
 	// form
-	$form->debug_output_all = DEBUG ? 1 : 0;
-	$form->echo_output_all = 0;
-	$form->print_output_all = DEBUG ? 1 : 0;
+	$form->log->setLogLevelAll('debug', DEBUG ? true : false);
+	$form->log->setLogLevelAll('echo', false);
+	$form->log->setLogLevelAll('print', DEBUG ? true : false);
 }
 // space for setting special debug flags
-$login->debug_output_all = 1;
+$login->log->setLogLevelAll('debug', true);
 // set smarty arrays
-$HEADER = array();
-$DATA = array();
-$DEBUG_DATA = array();
+$HEADER = [];
+$DATA = [];
+$DEBUG_DATA = [];
 // set the template dir
 // WARNING: this has a special check for the mailing tool layout (old layout)
 if (defined('LAYOUT')) {
@@ -94,13 +94,13 @@ if ($form->my_page_name == 'edit_order') {
 	// order name is _always_ order_number for the edit interface
 
 	// follwing arrays do exist here:
-	// $position ... has the positions of the array(0..max), cause in a <select>
+	// $position ... has the positions of the [0..max], cause in a <select>
 	//               I can't put an number into the array field, in this array,
 	//               there are the POSITION stored, that should CHANGE there order (up/down)
 	// $row_data_id ... has ALL ids from the sorting part
 	// $row_data_order ... has ALL order positions from the soirting part
 	if (!isset($position)) {
-		$position = array();
+		$position = [];
 	}
 	$row_data_id = $_POST['row_data_id'] ?? [];
 	$original_id = $row_data_id;
@@ -156,29 +156,33 @@ if ($form->my_page_name == 'edit_order') {
 	$q .= "ORDER BY order_number";
 
 	// init arrays
-	$row_data = array();
-	$options_id = array();
-	$options_name = array();
-	$options_selected = array();
+	$row_data = [];
+	$options_id = [];
+	$options_name = [];
+	$options_selected = [];
 	// DB read data for menu
 	while ($res = $form->dbReturn($q)) {
-		$row_data[] = array(
+		$row_data[] = [
 			"id" => $res[$table_name."_id"],
 			"name" => $res["name"],
 			"order" => $res["order_number"]
-		);
+		];
 	} // while read data ...
 
 	// html title
 	$HEADER['HTML_TITLE'] = $form->l->__('Edit Order');
 
-	$messages = array();
+	$messages = [];
 	// error msg
 	if (isset($error)) {
 		if (!isset($msg)) {
-			$msg = array();
+			$msg = [];
 		}
-		$messages[] = array('msg' => $msg, 'class' => 'error', 'width' => '100%');
+		$messages[] = [
+			'msg' => $msg,
+			'class' => 'error',
+			'width' => '100%'
+		];
 	}
 	$DATA['form_error_msg'] = $messages;
 
@@ -201,8 +205,8 @@ if ($form->my_page_name == 'edit_order') {
 	$DATA['options_selected'] = $options_selected;
 
 	// hidden list for the data (id, order number)
-	$row_data_id = array();
-	$row_data_order = array();
+	$row_data_id = [];
+	$row_data_order = [];
 	for ($i = 0; $i < count($row_data); $i++) {
 		$row_data_id[] = $row_data[$i]['id'];
 		$row_data_order[] = $row_data[$i]['order'];
@@ -230,7 +234,7 @@ if ($form->my_page_name == 'edit_order') {
 
 	$DATA['table_width'] = $table_width;
 
-	$messages = array();
+	$messages = [];
 	// write out error / status messages
 	$messages[] = $form->formPrintMsg();
 	$DATA['form_error_msg'] = $messages;
@@ -252,9 +256,9 @@ if ($form->my_page_name == 'edit_order') {
 
 	// build nav from $PAGES ...
 	if (!isset($PAGES) || !is_array($PAGES)) {
-		$PAGES = array();
+		$PAGES = [];
 	}
-	$menuarray = array();
+	$menuarray = [];
 	foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
 		if ($PAGE_DATA['menu'] && $PAGE_DATA['online']) {
 			$menuarray[] = $PAGE_DATA;
@@ -273,7 +277,7 @@ if ($form->my_page_name == 'edit_order') {
 	}
 
 	$position = 0;
-	$menu_data = array();
+	$menu_data = [];
 	// for ($i = 1; $i <= count($menuarray); $i ++) {
 	foreach ($menuarray as $i => $data) {
 		// do that for new array
@@ -299,7 +303,7 @@ if ($form->my_page_name == 'edit_order') {
 		}
 		// on matching, we also need to check if we are in the same folder
 		if (isset($data['filename']) &&
-			$data['filename'] == $form->getPageName() &&
+			$data['filename'] == \CoreLibs\Get\System::getPageName() &&
 			(!isset($data['hostname']) || (
 				isset($data['hostname']) &&
 					(!$data['hostname'] || strstr($data['hostname'], CONTENT_PATH) !== false)
@@ -344,7 +348,7 @@ if ($form->my_page_name == 'edit_order') {
 		$DATA['form_my_page_name'] = $form->my_page_name;
 		$DATA['filename_exist'] = 0;
 		$DATA['drop_down_input'] = 0;
-		$elements = array();
+		$elements = [];
 		// depending on the "getPageName()" I show different stuff
 		switch ($form->my_page_name) {
 			case 'edit_users':
@@ -382,9 +386,9 @@ if ($form->my_page_name == 'edit_order') {
 					$q = "DELETE FROM temp_files";
 					$form->dbExec($q);
 					// gets all files in the current dir and dirs given ending with .php
-					$folders = array('../admin/', '../frontend/');
-					$files = array('*.php');
-					$search_glob = array();
+					$folders = ['../admin/', '../frontend/'];
+					$files = ['*.php'];
+					$search_glob = [];
 					foreach ($folders as $folder) {
 						// make sure this folder actually exists
 						if (is_dir(ROOT.$folder)) {
@@ -498,7 +502,7 @@ if (is_dir(BASE.CACHE)) {
 $smarty->display($EDIT_TEMPLATE, 'editAdmin_'.$smarty->lang, 'editAdmin_'.$smarty->lang);
 
 // debug output
-echo $login->printErrorMsg();
-echo $form->printErrorMsg();
+echo $login->log->printErrorMsg();
+echo $form->log->printErrorMsg();
 
 // __END__

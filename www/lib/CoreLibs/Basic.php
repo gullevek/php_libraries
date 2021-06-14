@@ -53,39 +53,6 @@ class Basic
 	public $host_port;
 	// logging interface, Debug\Logging class
 	public $log;
-	// internal error reporting vars
-	/* protected $error_id; // error ID for errors in classes
-	protected $error_msg = []; // the "connection" to the outside errors
-	// debug output prefix
-	public $error_msg_prefix = ''; // prefix to the error string (the class name)
-	// debug flags
-	public $debug_output; // if this is true, show debug on desconstructor
-	public $debug_output_not;
-	public $debug_output_all;
-	public $echo_output; // errors: echo out, default is 1
-	public $echo_output_not;
-	public $echo_output_all;
-	public $print_output; // errors: print to file, default is 0
-	public $print_output_not;
-	public $print_output_all;
-	// debug flags/settings
-	public $debug_fp; // filepointer for writing to file
-	public $debug_filename = 'debug_file.log'; // where to write output
-	public $hash_algo = 'crc32b'; // the hash algo used for the internal debug uid
-	public $running_uid = ''; // unique ID set on class init and used in logging as prefix
-	// log file name
-	private $log_file_name_ext = 'log'; // use this for date rotate
-	public $log_max_filesize = 0; // set in kilobytes
-	private $log_print_file = 'error_msg##LOGID####LEVEL####CLASS####PAGENAME####DATE##';
-	private $log_file_unique_id; // a unique ID set only once for call derived from this class
-	public $log_print_file_date = 1; // if set add Y-m-d and do automatic daily rotation
-	private $log_file_id = ''; // a alphanumeric name that has to be set as global definition
-	public $log_per_level = false; // set, it will split per level (first parameter in debug call)
-	public $log_per_class = false; // set, will split log per class
-	public $log_per_page = false; // set, will split log per called file
-	public $log_per_run = false; // create a new log file per run (time stamp + unique ID)
-	// script running time
-	private $script_starttime; */
 
 	// email valid checks
 	public $email_regex_check = [];
@@ -109,7 +76,7 @@ class Basic
 	public function __construct()
 	{
 		// set per run UID for logging
-		$this->running_uid = hash($this->hash_algo, uniqid((string)rand(), true));
+		$this->running_uid = \CoreLibs\Create\Uids::uniqId();
 		// running time start for script
 		$this->script_starttime = microtime(true);
 
@@ -153,68 +120,6 @@ class Basic
 		list($this->host_name , $this->host_port) = \CoreLibs\Get\System::getHostName();
 		// logging interface moved here (->debug is now ->log->debug)
 		$this->log = new \CoreLibs\Debug\Logging();
-		// init the log file id
-		// * GLOBALS
-		// * CONSTANT
-		// can be overridden with basicSetLogFileId
-		/* if (isset($GLOBALS['LOG_FILE_ID'])) {
-			$this->basicSetLogId($GLOBALS['LOG_FILE_ID']);
-		} elseif (defined('LOG_FILE_ID')) {
-			$this->basicSetLogId(LOG_FILE_ID);
-		}
-		// if given via parameters, only for all
-		$this->debug_output_all = false;
-		$this->echo_output_all = false;
-		$this->print_output_all = false;
-		// globals overrule given settings, for one (array), eg $ECHO['db'] = 1;
-		if (isset($GLOBALS['DEBUG']) && is_array($GLOBALS['DEBUG'])) {
-			$this->debug_output = $GLOBALS['DEBUG'];
-		}
-		if (isset($GLOBALS['ECHO']) && is_array($GLOBALS['ECHO'])) {
-			$this->echo_output = $GLOBALS['ECHO'];
-		}
-		if (isset($GLOBALS['PRINT']) && is_array($GLOBALS['PRINT'])) {
-			$this->print_output = $GLOBALS['PRINT'];
-		}
-
-		// exclude these ones from output
-		if (isset($GLOBALS['DEBUG_NOT']) && is_array($GLOBALS['DEBUG_NOT'])) {
-			$this->debug_output_not = $GLOBALS['DEBUG_NOT'];
-		}
-		if (isset($GLOBALS['ECHO_NOT']) && is_array($GLOBALS['ECHO_NOT'])) {
-			$this->echo_output_not = $GLOBALS['ECHO_NOT'];
-		}
-		if (isset($GLOBALS['PRINT_NOT']) && is_array($GLOBALS['PRINT_NOT'])) {
-			$this->print_output_not = $GLOBALS['PRINT_NOT'];
-		}
-
-		// all overrule
-		if (isset($GLOBALS['DEBUG_ALL'])) {
-			$this->debug_output_all = $GLOBALS['DEBUG_ALL'];
-		}
-		if (isset($GLOBALS['ECHO_ALL'])) {
-			$this->echo_output_all = $GLOBALS['ECHO_ALL'];
-		}
-		if (isset($GLOBALS['PRINT_ALL'])) {
-			$this->print_output_all = $GLOBALS['PRINT_ALL'];
-		}
-
-		// GLOBAL rules for log writing
-		if (isset($GLOBALS['LOG_PRINT_FILE_DATE'])) {
-			$this->log_print_file_date = $GLOBALS['LOG_PRINT_FILE_DATE'];
-		}
-		if (isset($GLOBALS['LOG_PER_LEVEL'])) {
-			$this->log_per_level = $GLOBALS['LOG_PER_LEVEL'];
-		}
-		if (isset($GLOBALS['LOG_PER_CLASS'])) {
-			$this->log_per_class = $GLOBALS['LOG_PER_CLASS'];
-		}
-		if (isset($GLOBALS['LOG_PER_PAGE'])) {
-			$this->log_per_page = $GLOBALS['LOG_PER_PAGE'];
-		}
-		if (isset($GLOBALS['LOG_PER_RUN'])) {
-			$this->log_per_run = $GLOBALS['LOG_PER_RUN'];
-		} */
 
 		// set the regex for checking emails
 		/** @deprecated */
@@ -430,37 +335,10 @@ class Basic
 	 *                              all html tags will be stripped and <br> changed to \n
 	 *                              this is only used for debug output
 	 * @return void                 has no return
+	 * @[TODO]deprecated Use $basic->log->debug() instead
 	 */
 	public function debug(string $level, string $string, bool $strip = false): void
 	{
-		/* if ($this->doDebugTrigger('debug', $level)) {
-			if (!isset($this->error_msg[$level])) {
-				$this->error_msg[$level] = '';
-			}
-			$error_string = '<div>';
-			$error_string .= '[<span style="font-weight: bold; color: #5e8600;">'.\CoreLibs\Debug\Support::printTime().'</span>] ';
-			$error_string .= '[<span style="font-weight: bold; color: #c56c00;">'.$level.'</span>] ';
-			$error_string .= '[<span style="color: #b000ab;">'.$this->host_name.'</span>] ';
-			$error_string .= '[<span style="color: #08b369;">'.$this->page_name.'</span>] ';
-			$error_string .= '[<span style="color: #0062A2;">'.$this->running_uid.'</span>] ';
-			$error_string .= '{<span style="font-style: italic; color: #928100;">'.get_class($this).'</span>} - '.$string;
-			$error_string .= "</div><!--#BR#-->";
-			if ($strip) {
-				// find any <br> and replace them with \n
-				$string = str_replace('<br>', "\n", $string);
-				// strip rest of html elements
-				$string = preg_replace("/(<\/?)(\w+)([^>]*>)/", '', $string);
-			}
-			// same string put for print (no html crap inside)
-			$error_string_print = '['.\CoreLibs\Debug\Support::printTime().'] ['.$this->host_name.'] ['.\CoreLibs\Get\System::getPageName(2).'] ['.$this->running_uid.'] {'.get_class($this).'} <'.$level.'> - '.$string;
-			$error_string_print .= "\n";
-			// write to file if set
-			$this->writeErrorMsg($level, $error_string_print);
-			// write to error level
-			if ($this->doDebugTrigger('echo', $level)) {
-				$this->error_msg[$level] .= $error_string;
-			}
-		} */
 		$this->log->debug($level, $string, $strip);
 	}
 
@@ -481,33 +359,10 @@ class Basic
 	 * prints out the error string
 	 * @param  string $string prefix string for header
 	 * @return string         error msg for all levels
+	 * @deprecated Use $basic->log->printErrorMsg() instead
 	 */
 	public function printErrorMsg(string $string = ''): string
 	{
-		/* $string_output = '';
-		if ($this->debug_output_all) {
-			if ($this->error_msg_prefix) {
-				$string = $this->error_msg_prefix;
-			}
-			$script_end = microtime(true) - $this->script_starttime;
-			foreach ($this->error_msg as $level => $temp_debug_output) {
-				if ($this->doDebugTrigger('debug', $level)) {
-					if ($this->doDebugTrigger('echo', $level)) {
-						$string_output .= '<div style="font-size: 12px;">[<span style="font-style: italic; color: #c56c00;">'.$level.'</span>] '.($string ? "<b>**** ".\CoreLibs\Convert\Html::htmlent($string)." ****</b>\n" : "").'</div>';
-						$string_output .= $temp_debug_output;
-					} // echo it out
-				} // do printout
-			} // for each level
-			// create the output wrapper around, so we have a nice formated output per class
-			if ($string_output) {
-				$string_prefix = '<div style="text-align: left; padding: 5px; font-size: 10px; font-family: sans-serif; border-top: 1px solid black; border-bottom: 1px solid black; margin: 10px 0 10px 0; background-color: white; color: black;">';
-				$string_prefix .= '<div style="font-size: 12px;">{<span style="font-style: italic; color: #928100;">'.get_class($this).'</span>}</div>';
-				$string_output = $string_prefix.$string_output;
-				$string_output .= '<div><span style="font-style: italic; color: #108db3;">Script Run Time:</span> '.$script_end.'</div>';
-				$string_output .= '</div>';
-			}
-		}
-		return $string_output; */
 		return $this->log->printErrorMsg($string);
 	}
 

@@ -27,10 +27,10 @@ namespace CoreLibs\Admin;
 class Backend extends \CoreLibs\DB\IO
 {
 	// page name
-	public $menu = array();
+	public $menu = [];
 	public $menu_show_flag = 0; // top menu flag (mostly string)
 	// action ids
-	public $action_list = array('action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag', 'action_menu', 'action_value', 'action_error', 'action_loaded');
+	public $action_list = ['action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag', 'action_menu', 'action_value', 'action_error', 'action_loaded'];
 	public $action;
 	public $action_id;
 	public $action_sub_id;
@@ -41,14 +41,14 @@ class Backend extends \CoreLibs\DB\IO
 	public $action_value;
 	public $action_error;
 	// ACL array variable if we want to set acl data from outisde
-	public $acl = array();
+	public $acl = [];
 	public $default_acl;
 	// queue key
 	public $queue_key;
 	// the current active edit access id
 	public $edit_access_id;
 	// error/warning/info messages
-	public $messages = array();
+	public $messages = [];
 	public $error = 0;
 	public $warning = 0;
 	public $info = 0;
@@ -88,7 +88,7 @@ class Backend extends \CoreLibs\DB\IO
 
 		// queue key
 		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action)) {
-			$this->queue_key = $this->randomKeyGen(3);
+			$this->queue_key = \CoreLibs\Create\RandomKey::randomKeyGen(3);
 		}
 	}
 
@@ -221,9 +221,9 @@ class Backend extends \CoreLibs\DB\IO
 		// get the session pages array
 		$PAGES = $_SESSION['PAGES'] ?? null;
 		if (!isset($PAGES) || !is_array($PAGES)) {
-			$PAGES = array();
+			$PAGES = [];
 		}
-		$pages = array();
+		$pages = [];
 		foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
 			$pages[] = $PAGE_DATA;
 		}
@@ -297,7 +297,7 @@ class Backend extends \CoreLibs\DB\IO
 					// if page name matchs -> set selected flag
 					$selected = 0;
 					if (isset($data['filename']) &&
-						$this->getPageName() == $data['filename'] &&
+						\CoreLibs\Get\System::getPageName() == $data['filename'] &&
 						(!isset($data['hostname']) || (
 							isset($data['hostname']) &&
 								(!$data['hostname'] || strstr($data['hostname'], CONTENT_PATH) !== false)
@@ -314,14 +314,14 @@ class Backend extends \CoreLibs\DB\IO
 						$enabled = 1;
 					}
 					// write in to view menu array
-					array_push($this->menu, array(
+					array_push($this->menu, [
 						'name' => $this->l->__($name),
 						'url' => $url,
 						'selected' => $selected,
 						'enabled' => $enabled,
 						'popup' => $type == 'popup' ? 1 : 0,
 						'type' => $type
-					));
+					]);
 				} // show page
 			} // online and in menu
 		} // for each page
@@ -355,11 +355,12 @@ class Backend extends \CoreLibs\DB\IO
 	 * @param  string|int|bool $key      key
 	 * @param  string|int|bool $value    value
 	 * @return array                     associative array
+	 * @deprecated \CoreLibs\Combined\ArrayHandler::genAssocArray()
 	 */
 	public function adbAssocArray(array $db_array, $key, $value): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->genAssocArray($db_array, $key, $value);
+		trigger_error('Method '.__METHOD__.' is deprecated: \CoreLibs\Combined\ArrayHandler::genAssocArray', E_USER_DEPRECATED);
+		return \CoreLibs\Combined\ArrayHandler::genAssocArray($db_array, $key, $value);
 	}
 
 	/**
@@ -367,11 +368,12 @@ class Backend extends \CoreLibs\DB\IO
 	 * converts bytes into formated string with KB, MB, etc
 	 * @param  string|int|float $number string or int or number
 	 * @return string                   formatted string
+	 * @deprecated \CoreLibs\Convert\Byte::humanReadableByteFormat()
 	 */
 	public function adbByteStringFormat($number): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->humanReadableByteFormat($number);
+		trigger_error('Method '.__METHOD__.' is deprecated: \CoreLibs\Convert\Byte::humanReadableByteFormat()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Byte::humanReadableByteFormat($number);
 	}
 
 	/**
@@ -383,11 +385,12 @@ class Backend extends \CoreLibs\DB\IO
 	 * @param  string      $dummy        empty, or file_type to show an icon instead of nothing if file is not found
 	 * @param  string      $path         if source start is not ROOT path, if empty ROOT is choosen
 	 * @return string|bool               thumbnail name, or false for error
+	 * @deprecated \CoreLibs\Output\Image::createThumbnail()
 	 */
 	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = '', $path = "", $cache = "")
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated', E_USER_DEPRECATED);
-		return $this->createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
+		trigger_error('Method '.__METHOD__.' is deprecated: \CoreLibs\Output\Image::createThumbnail()', E_USER_DEPRECATED);
+		return \CoreLibs\Output\Image::createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
 	}
 
 	/**
@@ -397,15 +400,15 @@ class Backend extends \CoreLibs\DB\IO
 	 * @param  array  $vars  optional data for a possible printf formated msg
 	 * @return void          has no return
 	 */
-	public function adbMsg(string $level, string $msg, array $vars = array()): void
+	public function adbMsg(string $level, string $msg, array $vars = []): void
 	{
 		if (!preg_match("/^info|warning|error$/", $level)) {
 			$level = "info";
 		}
-		$this->messages[] = array(
+		$this->messages[] = [
 			'msg' => vsprintf($this->l->__($msg), $vars),
 			'class' => $level
-		);
+		];
 		switch ($level) {
 			case 'info':
 				$this->info = 1;
@@ -487,13 +490,13 @@ class Backend extends \CoreLibs\DB\IO
 		bool $name_pos_back = false
 	) {
 		// get the build layout
-		$html_time = $this->printDateTime($year, $month, $day, $hour, $min, $suffix, $min_steps, $name_pos_back);
+		$html_time = \CoreLibs\Output\Form\Elements::printDateTime($year, $month, $day, $hour, $min, $suffix, $min_steps, $name_pos_back);
 		// translate the strings inside
-		foreach (array('Year ', 'Month ', 'Day ', 'Hour ', 'Minute ') as $_time) {
+		foreach (['Year ', 'Month ', 'Day ', 'Hour ', 'Minute '] as $_time) {
 			$html_time = str_replace($_time, $this->l->__(str_replace(' ', '', $_time)).' ', $html_time);
 		}
 		// replace week days in short
-		foreach (array('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun') as $_date) {
+		foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $_date) {
 			$html_time = str_replace('('.$_date.')', '('.$this->l->__($_date).')', $html_time);
 		}
 		// return the datetime select string with strings translated

@@ -80,7 +80,7 @@ print "S::FDEBUG: ".FileWriter::fdebug('CLASS TEST DEBUG FILE: '.date('Y-m-d H:i
 // error message
 // future DEPRECATED
 $basic->debug('BASIC CLASS', 'Debug test');
-print "BASIC:<br>".$basic->printErrorMsg();
+print "BASIC:<br>".$basic->log->printErrorMsg();
 
 print "</body></html>";
 

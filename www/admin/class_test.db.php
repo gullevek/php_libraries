@@ -200,7 +200,7 @@ print "ISSET: ".isset($res['null_varchar'])."<br>";
 print "EMPTY: ".empty($res['null_varchar'])."<br>";
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

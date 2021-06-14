@@ -55,7 +55,7 @@ print "D/__SHA1SHORT(off): $to_crc: ".$basic->__sha1short($to_crc)."<br>";
 print "D/__hash(d): $to_crc: ".$basic->__hash($to_crc)."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

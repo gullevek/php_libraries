@@ -52,7 +52,7 @@ $mime = 'fake/mime';
 $basic->mimeSetAppName($mime, 'This is a fake mime');
 print "MIME $mime: ".$basic->mimeGetAppName($mime)."<br>"; */
 
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

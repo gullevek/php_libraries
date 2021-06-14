@@ -56,7 +56,7 @@ echo "RANDOM KEY [default]: ".$basic->randomKeyGen()."<br>";
 echo "TIMED [hr]: ".$basic->hrRunningTime()."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

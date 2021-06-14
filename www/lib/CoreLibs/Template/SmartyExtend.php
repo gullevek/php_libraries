@@ -107,8 +107,8 @@ class SmartyExtend extends SmartyBC
 		// iinit lang
 		$this->l10n = new \CoreLibs\Language\L10n($this->lang);
 		// variable variable register
-		// $this->register_modifier('getvar', array(&$this, 'get_template_vars'));
-		$this->registerPlugin('modifier', 'getvar', array(&$this, 'get_template_vars'));
+		// $this->register_modifier('getvar', [&$this, 'get_template_vars']);
+		$this->registerPlugin('modifier', 'getvar', [&$this, 'get_template_vars']);
 
 		$this->page_name = pathinfo($_SERVER["PHP_SELF"])['basename'];
 
@@ -357,7 +357,7 @@ class SmartyExtend extends SmartyBC
 			// top menu
 			$this->DATA['nav_menu'] = $cms->adbTopMenu();
 			$this->DATA['nav_menu_count'] = is_array($this->DATA['nav_menu']) ? count($this->DATA['nav_menu']) : 0;
-			// messages = array('msg' =>, 'class' => 'error/warning/...')
+			// messages = ['msg' =>, 'class' => 'error/warning/...']
 			$this->DATA['messages'] = $cms->messages ?? [];
 			// the page name
 			$this->DATA['page_name'] = $this->page_name;
@@ -375,7 +375,7 @@ class SmartyExtend extends SmartyBC
 		// html title
 		// set local page title
 		$this->HEADER['HTML_TITLE'] = !$this->L_TITLE ?
-			ucfirst(str_replace('_', ' ', $cms->getPageName(1))).(defined(G_TITLE) ? ' - '.$this->l10n->__(G_TITLE) : '') :
+			ucfirst(str_replace('_', ' ', \CoreLibs\Get\System::getPageName(1))).(defined(G_TITLE) ? ' - '.$this->l10n->__(G_TITLE) : '') :
 			$this->l10n->__($this->L_TITLE);
 
 		// LANG
@@ -408,7 +408,7 @@ class SmartyExtend extends SmartyBC
 	public function mergeCmsSmartyVars(object $cms): void
 	{
 		// array merge HEADER, DATA, DEBUG DATA
-		foreach (array('HEADER', 'DATA', 'DEBUG_DATA') as $ext_smarty) {
+		foreach (['HEADER', 'DATA', 'DEBUG_DATA'] as $ext_smarty) {
 			if (isset($cms->{$ext_smarty}) &&
 				is_array($cms->{$ext_smarty})
 			) {

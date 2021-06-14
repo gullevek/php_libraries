@@ -50,7 +50,7 @@ print "FLOORP: ".$basic->floorp(5123456, -3)."<br>";
 print "INITNUMERIC: ".$basic->initNumeric('123')."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

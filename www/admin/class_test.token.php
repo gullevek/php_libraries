@@ -51,7 +51,7 @@ print "TOKEN: $token: (ID) ".$token_id." => (S) ".$_SESSION[$token]."<br>";
 print "VALIDATE: $token: ".(string)$basic->validateFormToken($token_id, $token)."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

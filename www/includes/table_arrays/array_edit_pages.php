@@ -1,101 +1,101 @@
 <?php declare(strict_types=1);
 
-$edit_pages = array(
-	'table_array' => array(
-		'edit_page_id' => array(
-			'value' => isset($GLOBALS['edit_page_id']) ? $GLOBALS['edit_page_id'] : '',
+$edit_pages = [
+	'table_array' => [
+		'edit_page_id' => [
+			'value' => $GLOBALS['edit_page_id'] ?? '',
 			'type' => 'hidden',
 			'pk' => 1
-		),
-		'filename' => array(
-			'value' => isset($GLOBALS['filename']) ? $GLOBALS['filename'] : '',
+		],
+		'filename' => [
+			'value' => $GLOBALS['filename'] ?? '',
 			'output_name' => 'Add File ...',
 			'mandatory' => 1,
 			'type' => 'drop_down_db',
-			'query' => "SELECT DISTINCT temp_files.filename AS id, temp_files.folder || temp_files.filename AS name ".
-				"FROM temp_files ".
-				"LEFT JOIN edit_page ep ON temp_files.filename = ep.filename ".
-				"WHERE ep.filename IS NULL"
-		),
-		'hostname' => array(
-			'value' => isset($GLOBALS['hostname']) ? $GLOBALS['hostname'] : '',
+			'query' => "SELECT DISTINCT temp_files.filename AS id, temp_files.folder || temp_files.filename AS name "
+				."FROM temp_files "
+				."LEFT JOIN edit_page ep ON temp_files.filename = ep.filename "
+				."WHERE ep.filename IS NULL"
+		],
+		'hostname' => [
+			'value' => $GLOBALS['hostname'] ?? '',
 			'output_name' => 'Hostname or folder',
 			'type' => 'text'
-		),
-		'name' => array(
-			'value' => isset($GLOBALS['name']) ? $GLOBALS['name'] : '',
+		],
+		'name' => [
+			'value' => $GLOBALS['name'] ?? '',
 			'output_name' => 'Page name',
 			'mandatory' => 1,
 			'type' => 'text'
-		),
-		'order_number' => array(
-			'value' => isset($GLOBALS['order_number']) ? $GLOBALS['order_number'] : '',
+		],
+		'order_number' => [
+			'value' => $GLOBALS['order_number'] ?? '',
 			'output_name' => 'Page order',
 			'type' => 'order',
 			'int' => 1,
 			'order' => 1
-		),
-		/* 'flag' => array(
+		],
+		/* 'flag' => [
 			'value' => isset($GLOBALS['flag']) ? $GLOBALS['flag'] : '',
 			'output_name' => 'Page Flag',
 			'type' => 'drop_down_array',
-			'query' => array(
+			'query' => [
 				'0' => '0',
 				'1' => '1',
 				'2' => '2',
 				'3' => '3',
 				'4' => '4',
 				'5' => '5'
-			)
-		),*/
-		'online' => array(
-			'value' => isset($GLOBALS['online']) ? $GLOBALS['online'] : '',
+			],
+		],*/
+		'online' => [
+			'value' => $GLOBALS['online'] ?? '',
 			'output_name' => 'Online',
 			'int' => 1,
 			'type' => 'binary',
-			'element_list' => array(
+			'element_list' => [
 				'1' => 'Yes',
 				'0' => 'No'
-			)
-		),
-		'menu' => array(
-			'value' => isset($GLOBALS['menu']) ? $GLOBALS['menu'] : '',
+			],
+		],
+		'menu' => [
+			'value' => $GLOBALS['menu'] ?? '',
 			'output_name' => 'Menu',
 			'int' => 1,
 			'type' => 'binary',
-			'element_list' => array(
+			'element_list' => [
 				 '1' => 'Yes',
 				 '0' => 'No'
-			)
-		),
-		'popup' => array(
-			'value' => isset($GLOBALS['popup']) ? $GLOBALS['popup'] : '',
+			],
+		],
+		'popup' => [
+			'value' => $GLOBALS['popup'] ?? '',
 			'output_name' => 'Popup',
 			'int' => 1,
 			'type' => 'binary',
-			'element_list' => array(
+			'element_list' => [
 				 '1' => 'Yes',
 				 '0' => 'No'
-			)
-		),
-		'popup_x' => array(
-			'value' => isset($GLOBALS['popup_x']) ? $GLOBALS['popup_x'] : '',
+			],
+		],
+		'popup_x' => [
+			'value' => $GLOBALS['popup_x'] ?? '',
 			'output_name' => 'Popup Width',
 			'int_null' => 1,
 			'type' => 'text',
 			'size' => 4,
 			'length' => 4
-		),
-		'popup_y' => array(
-			'value' => isset($GLOBALS['popup_y']) ? $GLOBALS['popup_y'] : '',
+		],
+		'popup_y' => [
+			'value' => $GLOBALS['popup_y'] ?? '',
 			'output_name' => 'Popup Height',
 			'int_null' =>  1,
 			'type' => 'text',
 			'size' => 4,
 			'length' => 4
-		),
-		'content_alias_edit_page_id' => array(
-			'value' => isset($GLOBALS['content_alias_edit_page_id']) ? $GLOBALS['content_alias_edit_page_id'] : '',
+		],
+		'content_alias_edit_page_id' => [
+			'value' => $GLOBALS['content_alias_edit_page_id'] ?? '',
 			'output_name' => 'Content Alias Source',
 			'int_null' => 1,
 			'type' => 'drop_down_db',
@@ -110,132 +110,132 @@ $edit_pages = array(
 				// "FROM edit_page ".
 				// (isset($GLOBALS['edit_page_id']) ? " WHERE edit_page_id <> ".$GLOBALS['edit_page_id'] : "")." ".
 				// "ORDER BY order_number"
-		)
-	),
+		],
+	],
 	'load_query' => "SELECT edit_page_id, CASE WHEN hostname IS NOT NULL THEN hostname ELSE ''::VARCHAR END || filename AS filename, name, online, menu, popup FROM edit_page ORDER BY order_number",
 	'table_name' => 'edit_page',
-	'show_fields' => array(
-		array(
+	'show_fields' => [
+		[
 			'name' => 'name'
-		),
-		array(
+		],
+		[
 			'name' => 'filename',
 			'before_value' => 'Filename: '
-		),
-		 array(
+		],
+		 [
 		   'name' => 'online',
-		   'binary' => array('Yes','No'),
+		   'binary' => ['Yes','No'],
 		   'before_value' => 'Online: '
-		 ),
-		 array(
+		 ],
+		 [
 			'name' => 'menu',
-			'binary' => array('Yes','No'),
+			'binary' => ['Yes','No'],
 			'before_value' => 'Menu: '
-		),
-		array(
+		],
+		[
 			'name' => 'popup',
-			'binary' => array('Yes','No'),
+			'binary' => ['Yes','No'],
 			'before_value' => 'Popup: '
-		)
-	),
-	'reference_arrays' => array(
-		'edit_visible_group' => array(
+		],
+	],
+	'reference_arrays' => [
+		'edit_visible_group' => [
 			'table_name' => 'edit_page_visible_group',
 			'other_table_pk' => 'edit_visible_group_id',
 			'output_name' => 'Visible Groups (access)',
 			'mandatory' => 1,
 			'select_size' => 10,
-			'selected' => isset($GLOBALS['edit_visible_group_id']) ? $GLOBALS['edit_visible_group_id'] : '',
+			'selected' => $GLOBALS['edit_visible_group_id'] ?? '',
 			'query' => "SELECT edit_visible_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag FROM edit_visible_group ORDER BY name"
-		),
-		'edit_menu_group' => array(
+		],
+		'edit_menu_group' => [
 			'table_name' => 'edit_page_menu_group',
 			'other_table_pk' => 'edit_menu_group_id',
 			'output_name' => 'Menu Groups (grouping)',
 			'mandatory' => 1,
 			'select_size' => 10,
-			'selected' => isset($GLOBALS['edit_menu_group_id']) ? $GLOBALS['edit_menu_group_id'] : '',
+			'selected' => $GLOBALS['edit_menu_group_id'] ?? '',
 			'query' => "SELECT edit_menu_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag FROM edit_menu_group ORDER BY order_number"
-		)
+		],
 
-	),
-	'element_list' => array(
-		'edit_query_string' => array(
+	],
+	'element_list' => [
+		'edit_query_string' => [
 			'output_name' => 'Query Strings',
 			'delete_name' => 'remove_query_string',
 			'prefix' => 'eqs',
-			'elements' => array(
-				'name' => array(
+			'elements' => [
+				'name' => [
 					'output_name' => 'Name',
 					'type' => 'text',
 					'error_check' => 'unique|alphanumeric',
 					'mandatory' => 1
-				),
-				'value' => array(
+				],
+				'value' => [
 					'output_name' => 'Value',
 					'type' => 'text'
-				),
-				'enabled' => array(
+				],
+				'enabled' => [
 					'output_name' => 'Enabled',
 					'int' => 1,
 					'type' => 'checkbox',
-					'element_list' => array(1)
-				),
-				'dynamic' => array(
+					'element_list' => [1],
+				],
+				'dynamic' => [
 					'output_name' => 'Dynamic',
 					'int' => 1,
 					'type' => 'checkbox',
-					'element_list' => array(1)
-				),
-				'edit_query_string_id' => array(
+					'element_list' => [1],
+				],
+				'edit_query_string_id' => [
 					'type' => 'hidden',
 					'pk_id' => 1
-				)
-			) // elements
-		), // query_string element list
-		'edit_page_content' => array(
+				],
+			], // elements
+		], // query_string element list
+		'edit_page_content' => [
 			'output_name' => 'Page Content',
 			'delete_name' => 'remove_page_content',
 			'prefix' => 'epc',
-			'elements' => array(
-				'name' => array(
+			'elements' => [
+				'name' => [
 					'output_name' => 'Content',
 					'type' => 'text',
 					'error_check' => 'alphanumeric',
 					'mandatory' => 1
-				),
-				'uid' => array(
+				],
+				'uid' => [
 					'output_name' => 'UID',
 					'type' => 'text',
 					'error_check' => 'unique|alphanumeric',
 					'mandatory' => 1
-				),
-				'order_number' => array(
+				],
+				'order_number' => [
 					'output_name' => 'Order',
 					'type' => 'text',
 					'error_check' => 'int',
 					'mandatory' => 1
-				),
-				'online' => array(
+				],
+				'online' => [
 					'output_name' => 'Online',
 					'int' => 1,
 					'type' => 'checkbox',
-					'element_list' => array(1)
-				),
-				'edit_access_right_id' => array(
+					'element_list' => [1],
+				],
+				'edit_access_right_id' => [
 					'type' => 'drop_down_db',
 					'output_name' => 'Access Level',
 					'int' => 1,
 					'preset' => 1, // first of the select
 					'query' => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level"
-				),
-				'edit_page_content_id' => array(
+				],
+				'edit_page_content_id' => [
 					'type' => 'hidden',
 					'pk_id' => 1
-				)
-			)
-		)
-	) // element list
-);
+				],
+			],
+		],
+	], // element list
+];
 
 // __END__

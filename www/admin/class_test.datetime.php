@@ -141,7 +141,7 @@ $compare_date = ['2021-05-01', '2021-05-10'];
 print "CALCDAYSINTERVAL(named): $compare_date[0] = $compare_date[1]: ".$basic->printAr($basic->calcDaysInterval($compare_date[0], $compare_date[1], true))."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

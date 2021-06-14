@@ -59,7 +59,7 @@ print "U-S::MIN: $min_version: ".(string)PhpVersion::checkPHPVersion($min_versio
 // print "MIN: $min_version: ".(string)$basic->checkPHPVersion($min_version)."<br>";
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

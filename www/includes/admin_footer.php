@@ -8,7 +8,7 @@
 *********************************************************************/
 
 // print debug messages
-echo $login->printErrorMsg();
-echo $cms->printErrorMsg();
+echo $login->log->printErrorMsg();
+echo $cms->log->printErrorMsg();
 
 // __END__

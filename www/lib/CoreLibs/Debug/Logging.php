@@ -83,20 +83,7 @@ class Logging
 		$this->setLogLevels();
 	}
 
-	/**
-	 * sets the internal log file prefix id
-	 * string must be a alphanumeric string
-	 * if non valid string is given it returns the previous set one only
-	 * @param  string $string log file id string value
-	 * @return string        returns the set log file id string
-	 */
-	public function basicSetLogId(string $string): string
-	{
-		if (preg_match("/^\w+$/", $string)) {
-			$this->log_file_id = $string;
-		}
-		return $this->log_file_id;
-	}
+	// *** PRIVATE ***
 
 	/**
 	 * init the basic log levels based on global set variables
@@ -140,8 +127,6 @@ class Logging
 		$this->log_per_page = $GLOBALS['LOG_PER_PAGE'] ?? false;
 		$this->log_per_run = $GLOBALS['LOG_PER_RUN'] ?? false;
 	}
-
-	// *** PRIVATE ***
 
 	/**
 	 * checks if we have a need to work on certain debug output
@@ -270,27 +255,116 @@ class Logging
 	// *** PUBLIC ***
 
 	/**
-	 * passes list of level names, to turn on debug
-	 * eg $foo->debugFor('print', 'on', ['LOG', 'DEBUG', 'INFO']);
-	 * @param  string $type  error, echo, print
+	 * sets the internal log file prefix id
+	 * string must be a alphanumeric string
+	 * if non valid string is given it returns the previous set one only
+	 * @param  string $string log file id string value
+	 * @return string        returns the set log file id string
+	 */
+	public function basicSetLogId(string $string): string
+	{
+		if (preg_match("/^\w+$/", $string)) {
+			$this->log_file_id = $string;
+		}
+		return $this->log_file_id;
+	}
+
+	/**
+	 * get the current log level setting for All level blocks
+	 * @param  string $type Type to get: debug, echo, print
+	 * @return bool         False on failure, or the boolean flag from the all var
+	 */
+	public function getLogLevelAll(string $type): bool
+	{
+		// type check for debug/echo/print
+		if (!in_array($type, ['debug', 'echo', 'print'])) {
+			return false;
+		}
+		return $this->{$type.'_output_all'};
+	}
+
+	/**
+	 * set log level settings for All types
+	 * if invalid type, skip
+	 * @param  string $type Type to get: debug, echo, print
+	 * @param  bool   $set  True or False
+	 * @return void         No return
+	 */
+	public function setLogLevelAll(string $type, bool $set): void
+	{
+		// skip set if not valid
+		if (!in_array($type, ['debug', 'echo', 'print'])) {
+			return;
+		}
+		$this->{$type.'_output_all'} = $set;
+	}
+
+	/**
+	 * old name for setLogLevel
+	 * @param  string $type  debug, echo, print
 	 * @param  string $flag  on/off
 	 *         array  $array of levels to turn on/off debug
 	 * @return void          has no return
 	 */
 	public function debugFor(string $type, string $flag): void
 	{
+		$this->setLogLevel(...[func_get_args()]);
+	}
+
+	/**
+	 * passes list of level names, to turn on debug
+	 * eg $foo->debugFor('print', 'on', ['LOG', 'DEBUG', 'INFO']);
+	 * @param  string $type  debug, echo, print
+	 * @param  string $flag  on/off
+	 *         array  $array of levels to turn on/off debug
+	 * @return void          has no return
+	 */
+	public function setLogLevel(string $type, string $flag): void
+	{
+		// abort if not valid type
+		if (!in_array($type, ['debug', 'echo', 'print'])) {
+			return;
+		}
+		// invalid flag type
+		if (!in_array($flag, ['on', 'off'])) {
+			return;
+		}
 		$debug_on = func_get_args();
 		array_shift($debug_on); // kick out type
 		array_shift($debug_on); // kick out flag (on/off)
 		if (count($debug_on) >= 1) {
 			foreach ($debug_on as $level) {
-				$switch = $type.'_output';
-				if ($flag == 'off') {
-					$switch .= '_not';
-				}
+				$switch = $type.'_output'.($flag == 'off' ? '_not' : '');
 				$this->{$switch}[$level] = true;
 			}
 		}
+	}
+
+	/**
+	 * return the log level for the array type normal and not (disable)
+	 * @param  string     $type  debug, echo, print
+	 * @param  string     $flag  on/off
+	 * @param  string     $level if not null then check if this array entry is set
+	 *                           else return false
+	 * @return bool|array        if $level is null, return array, else boolean true/false
+	 */
+	public function getLogLevel(string $type, string $flag, string $level = null)
+	{
+		// abort if not valid type
+		if (!in_array($type, ['debug', 'echo', 'print'])) {
+			return false;
+		}
+		// invalid flag type
+		if (!in_array($flag, ['on', 'off'])) {
+			return false;
+		}
+		$switch = $type.'_output'.($flag == 'off' ? '_not' : '');
+		// bool
+		if ($level !== null) {
+			return $this->{$switch}[$level] ?? false;
+		}
+		// array
+		return $this->{$switch};
 	}
 
 	/**

@@ -71,7 +71,7 @@ if (is_object($login) && isset($login->acl['unit'])) {
 	print "Something went wrong with the login<br>";
 }
 
-//	$basic->debug('SESSION', $basic->print_ar($_SESSION));
+//	$basic->log->debug('SESSION', \CoreLibs\Debug\Support::printAr($_SESSION));
 
 print '<form method="post" name="loginlogout">';
 print '<a href="javascript:document.loginlogout.login_logout.value=\'Logou\';document.loginlogout.submit();">Logout</a>';
@@ -79,22 +79,22 @@ print '<input type="hidden" name="login_logout" value="">';
 print '</form>';
 
 // print the debug core vars
-print "DEBUG OUT: ".$basic->debug_output."<br>";
-print "ECHO OUT: ".$basic->echo_output."<br>";
-print "PRINT OUT: ".$basic->print_output."<br>";
-print "NOT DEBUG OUT: ".$basic->debug_output_not."<br>";
-print "NOT ECHO OUT: ".$basic->echo_output_not."<br>";
-print "NOT PRINT OUT: ".$basic->print_output_not."<br>";
-print "DEBUG OUT ALL: ".$basic->debug_output_all."<br>";
-print "ECHO OUT ALL: ".$basic->echo_output_all."<br>";
-print "PRINT OUT ALL: ".$basic->print_output_all."<br>";
+foreach (['on', 'off'] as $flag) {
+	foreach (['debug', 'echo', 'print'] as $type) {
+		$prefix = $flag == 'off' ? 'NOT ' : '';
+		print $prefix.strtoupper($type).' OUT: '.\CoreLibs\Debug\Support::printAr($basic->log->getLogLevel($type, $flag)).'<br>';
+	}
+}
+foreach (['debug', 'echo', 'print'] as $type) {
+	print strtoupper($type).' OUT ALL: '.$basic->log->getLogLevelAll($type).'<br>';
+}
 
-$basic->debug('SOME MARK', 'Some error output');
+$basic->log->debug('SOME MARK', 'Some error output');
 
 print "EDIT ACCESS ID: ".$basic->edit_access_id."<br>";
 if (is_object($login)) {
 	//	print "ACL: <br>".$basic->print_ar($login->acl)."<br>";
-	$basic->debug('ACL', "ACL: ".$basic->printAr($login->acl));
+	$basic->log->debug('ACL', "ACL: ".\CoreLibs\Debug\Support::printAr($login->acl));
 	//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
 	//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
 	//	$result = array_flip(array_filter(array_flip($login->default_acl_list), function ($key) { if (is_numeric($key)) return $key; }));
@@ -104,8 +104,8 @@ if (is_object($login)) {
 }
 
 // print error messages
-// print $login->printErrorMsg();
-print $basic->printErrorMsg();
+// print $login->log->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

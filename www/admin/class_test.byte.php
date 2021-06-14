@@ -88,7 +88,7 @@ print "BYTE TO: $byte: ".$basic->humanReadableByteFormat($byte)."<br>";
 print "BYTE FROM: $string: ".$basic->stringByteFormat($string)."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

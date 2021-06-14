@@ -56,7 +56,7 @@ foreach ($email as $s_email) {
 } */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

@@ -49,7 +49,7 @@ print "S::UNIQID (sha256): ".$uids_class::uniqId('sha256')."<br>";
 print "/DUNIQID (d): ".$basic->uniqId()."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $basic->log->printErrorMsg();
 
 print "</body></html>";
 

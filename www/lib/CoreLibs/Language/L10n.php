@@ -40,8 +40,7 @@ class L10n extends \CoreLibs\Basic
 	 * @param string $lang language name (optional), fallback is en
 	 * @param string $path path, if empty fallback on default internal path
 	 */
-	public function __construct(string $lang = '', string $path = ''
-)
+	public function __construct(string $lang = '', string $path = '')
 	{
 		parent::__construct();
 		if (!$lang) {
