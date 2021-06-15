@@ -229,8 +229,8 @@ class Logging
 
 		$rpl_string = !$this->log_per_level ? '' : '_'.$level; // if request to write to one file
 		$fn = str_replace('##LEVEL##', $rpl_string, $fn); // create output filename
-
-		$rpl_string = !$this->log_per_class ? '' : '_'.str_replace('\\', '-', get_class($this)); // set sub class settings
+		// set per class, but don't use get_class as we will only get self
+		$rpl_string = !$this->log_per_class ? '' : '_'.str_replace('\\', '-', \CoreLibs\Debug\Support::getCallerClass()); // set sub class settings
 		$fn = str_replace('##CLASS##', $rpl_string, $fn); // create output filename
 
 		$rpl_string = !$this->log_per_page ? '' : '_'.\CoreLibs\Get\System::getPageName(1); // if request to write to one file
@@ -250,6 +250,19 @@ class Logging
 			echo "<!-- could not open file: $fn //-->";
 		}
 		return true;
+	}
+
+	/**
+	 * Superseeded by \CoreLibs\Debug\Support::getCallerClass() calls
+	 *
+	 * @return string Class name where called
+	 * @deprecated Use \CoreLibs\Debug\Support::getCallerClass() insteader
+	 */
+	private function getCallerClass(): string
+	{
+		// get the last class entry and wrie that
+		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) ?? [['class' => get_class($this)]];
+		return end($backtrace)['class'];
 	}
 
 	// *** PUBLIC ***
@@ -384,7 +397,7 @@ class Logging
 		if (!in_array($type, ['level', 'class', 'page', 'run'])) {
 			return;
 		}
-		$this->{'log_per'.$type} = $set;
+		$this->{'log_per_'.$type} = $set;
 	}
 
 	/**
@@ -397,7 +410,7 @@ class Logging
 		if (!in_array($type, ['level', 'class', 'page', 'run'])) {
 			return false;
 		}
-		return $this->{'log_per'.$type};
+		return $this->{'log_per_'.$type};
 	}
 
 	/**
@@ -418,8 +431,7 @@ class Logging
 			$this->error_msg[$level] = '';
 		}
 		// get the last class entry and wrie that
-		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) ?? [['class' => get_class($this)]];
-		$class = end($backtrace)['class'];
+		$class = \CoreLibs\Debug\Support::getCallerClass();
 		// get timestamp
 		$timestamp = \CoreLibs\Debug\Support::printTime();
 		// HTML string, create only if we have echo
@@ -502,7 +514,7 @@ class Logging
 			// create the output wrapper around, so we have a nice formated output per class
 			if ($string_output) {
 				$string_prefix = '<div style="text-align: left; padding: 5px; font-size: 10px; font-family: sans-serif; border-top: 1px solid black; border-bottom: 1px solid black; margin: 10px 0 10px 0; background-color: white; color: black;">'
-					.'<div style="font-size: 12px;">{<span style="font-style: italic; color: #928100;">'.get_class($this).'</span>}</div>';
+					.'<div style="font-size: 12px;">{<span style="font-style: italic; color: #928100;">'.\CoreLibs\Debug\Support::getCallerClass().'</span>}</div>';
 				$string_output = $string_prefix.$string_output
 					.'<div><span style="font-style: italic; color: #108db3;">Script Run Time:</span> '.$script_end.'</div>'
 					.'</div>';

@@ -55,6 +55,19 @@ class Support
 		}
 		return null;
 	}
+
+	/**
+	 * Get the current class where this function is called
+	 * Is mostly used in debug log statements to get the class where the debug was called
+	 * gets top level class
+	 *
+	 * @return string Class name with namespace
+	 */
+	public static function getCallerClass(): string
+	{
+		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) ?? [['class' => get_called_class()]];
+		return end($backtrace)['class'];
+	}
 }
 
 // __END__

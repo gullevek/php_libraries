@@ -16,15 +16,6 @@ if (defined('BASE')) {
 	DEFINE('CURRENT_WORKING_DIR', str_replace('lib', '', __DIR__));
 }
 
-// METHOD: MyErrorHandler
-// PARAMS: $type: the error code from PHP
-//         $message: the error message from php
-//         $file: in which file the error happend. this is the source file (eg include)
-//         $line: in which line the error happened
-//         $context: array with all the variable
-// RETURN: true, so cought errors do not get processed by the PHP error engine
-// DESC:   will catch any error except E_ERROR and try to write them to the log file in log/php_error-<DAY>.llog
-//         if this fails, it will print the data to the window via echo
 /**
  * will catch any error except E_ERROR and try to write them to the log file
  * in log/php_error-<DAY>.log

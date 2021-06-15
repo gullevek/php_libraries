@@ -120,11 +120,11 @@ class Login extends \CoreLibs\DB\IO
 	 */
 	public function __construct(array $db_config)
 	{
-		// log login data for this class only
-		$this->log->setLogPer('class', true);
-
 		// create db connection and init base class
 		parent::__construct($db_config);
+		// log login data for this class only
+		$this->log->setLogPer('class', true);
+		// set db special errors
 		if ($this->db_init_error === true) {
 			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
