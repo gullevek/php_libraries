@@ -1624,7 +1624,7 @@ class IO extends \CoreLibs\Basic
 		}
 		$result = $this->db_functions->__dbExecute($stm_name, $data);
 		if (!$result) {
-			$this->log->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[$stm_name]['result'].']: '.\CoreLibs\Debug\Support::printAr($data));
+			$this->log->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[$stm_name]['result'].']: '.$this->log->prAr($data));
 			$this->error_id = 22;
 			$this->__dbError($this->prepare_cursor[$stm_name]['result']);
 			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Execution failed</span>', 'DB_ERROR');

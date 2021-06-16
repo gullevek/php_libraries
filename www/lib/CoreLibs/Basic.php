@@ -446,11 +446,11 @@ class Basic
 	 * prints a html formatted (pre) array
 	 * @param  array  $array any array
 	 * @return string        formatted array for output with <pre> tag added
-	 * @deprecated Use \CoreLibs\Debug\Support::printAr() instead
+	 * @deprecated Use $this->log->prAr() instead
 	 */
-	public static function printAr(array $array): string
+	public function printAr(array $array): string
 	{
-		return \CoreLibs\Debug\Support::printAr($array);
+		return $this->log->prAr($array);
 	}
 
 	/**

@@ -50,7 +50,7 @@ if ($form->mobile_phone) {
 // smarty template engine (extended Translation version)
 $smarty = new CoreLibs\Template\SmartyExtend();
 
-// $form->debug('POST', $form->printAr($_POST));
+// $form->log->debug('POST', $form->log->prAr($_POST));
 
 if (TARGET == 'live' || TARGET == 'remote') {
 	// login
@@ -252,7 +252,7 @@ if ($form->my_page_name == 'edit_order') {
 	$DATA['GROUP_LEVEL'] = $_SESSION['GROUP_ACL_LEVEL'];
 	$PAGES = $_SESSION['PAGES'];
 
-	//$form->debug('menu', $form->printAr($PAGES));
+	//$form->log->debug('menu', $form->log->prAr($PAGES));
 
 	// build nav from $PAGES ...
 	if (!isset($PAGES) || !is_array($PAGES)) {
@@ -332,7 +332,7 @@ if ($form->my_page_name == 'edit_order') {
 			$menu_data[$i]['splitfactor_out'] = 0;
 		}
 	} // for
-	// $form->debug('MENU ARRAY', $form->printAr($menu_data));
+	// $form->log->debug('MENU ARRAY', $form->log->prAr($menu_data));
 	$DATA['menu_data'] = $menu_data;
 	$DATA['page_name'] = $menuarray[$position]['page_name'] ?? '-Undefined ['.$position.'] -';
 	$L_TITLE = $DATA['page_name'];
@@ -474,7 +474,7 @@ if ($form->my_page_name == 'edit_order') {
 				print '[No valid page definition given]';
 				break;
 		}
-		// $form->debug('edit', "Elements: <pre>".$form->printAr($elements));
+		// $form->log->debug('edit', "Elements: <pre>".$form->log->prAr($elements));
 		$DATA['elements'] = $elements;
 		$DATA['hidden'] = $form->formCreateHiddenFields();
 		$DATA['save_delete'] = $form->formCreateSaveDelete();

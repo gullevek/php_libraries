@@ -636,8 +636,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					$this->element_list[$element_list[$i]]['delete']
 				) {
 					// $this->log->debug('form_clean', 'ID [$id] [$prfx.$pk_name]');
-					// $this->log->debug('form_clean', 'ID arr: '.$this->printAr($_POST[$id]));
-					// $this->log->debug('form_clean', 'PK arr: '.$this->printAr($_POST[$prfx.$pk_name]));
+					// $this->log->debug('form_clean', 'ID arr: '.$this->log->prAr($_POST[$id]));
+					// $this->log->debug('form_clean', 'PK arr: '.$this->log->prAr($_POST[$prfx.$pk_name]));
 					for ($j = 0, $j_max = count($_POST[$prfx.$pk_name]); $j < $j_max; $j ++) {
 						if (!$_POST[$remove_name[$i]][$j] && $_POST[$prfx.$pk_name][$j]) {
 							$q = 'DELETE FROM '.$element_list[$i].' WHERE '.$pk_name.' = '.$_POST[$prfx.$pk_name][$j];
@@ -1198,7 +1198,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					// $this->log->debug('edit_error_chk', 'KEY: $prfx$key | count: '.count($_POST[$prfx.$key]).' | M: $max');
 					// $this->log->debug('edit_error_chk', 'K: '.$_POST[$prfx.$key].' | '.$_POST[$prfx.$key][0]);
 				}
-				$this->log->debug('POST ARRAY', \CoreLibs\Debug\Support::printAr($_POST));
+				$this->log->debug('POST ARRAY', $this->log->prAr($_POST));
 				// init variables before inner loop run
 				$mand_okay = 0;
 				$mand_name = '';
@@ -1561,7 +1561,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// $this->log->debug('edit_error', 'MAX: $max');
 				// check if there is a hidden key, update, else insert
 				foreach ($reference_array['elements'] as $el_name => $data_array) {
-					// $this->log->debug('edit_error_query', 'QUERY: '.$this->printAr($_POST));
+					// $this->log->debug('edit_error_query', 'QUERY: '.$this->log->prAr($_POST));
 					// go through all submitted data
 					// for ($i = 0; $i < count($_POST[$el_name]); $i ++)
 					for ($i = 0; $i < $max; $i ++) {
@@ -1581,14 +1581,17 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						) {
 							$no_write[$i] = 1;
 						}
-						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: MANDATORY: ".isset($data_array['mandatory'])." SET: ".isset($_POST[$prfx.$el_name][$i]).", EMPTY: ".empty($_POST[$prfx.$el_name][$i])." | DO ACTION ".((!isset($_POST[$prfx.$el_name][$i]) || (isset($_POST[$prfx.$el_name][$i]) && empty($_POST[$prfx.$el_name][$i]))) ? 'YES' : 'NO')." => NO WRITE: ".$no_write[$i]);
+						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: MANDATORY: ".isset($data_array['mandatory'])
+						// 	." SET: ".isset($_POST[$prfx.$el_name][$i]).", EMPTY: ".empty($_POST[$prfx.$el_name][$i])
+						// 	." | DO ACTION ".((!isset($_POST[$prfx.$el_name][$i]) || (isset($_POST[$prfx.$el_name][$i]) && empty($_POST[$prfx.$el_name][$i]))) ? 'YES' : 'NO')." => NO WRITE: ".$no_write[$i]);
 						if (!empty($reference_array['enable_name']) &&
 							isset($reference_array['delete']) && $reference_array['delete'] &&
 							(!isset($_POST[$reference_array['enable_name']][$i]) || empty($_POST[$reference_array['enable_name']][$i]))
 						) {
 							$no_write[$i] = 1;
 						}
-						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: ENABLED NAME: ".isset($reference_array['enable_name']).", DELETE: ".isset($reference_array['delete']).", NOT ENABLED FOR POS: ".(isset($reference_array['enable_name']) ? isset($_POST[$reference_array['enable_name']][$i]) : '-'));
+						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: ENABLED NAME: ".isset($reference_array['enable_name'])
+						// 	.", DELETE: ".isset($reference_array['delete']).", NOT ENABLED FOR POS: ".(isset($reference_array['enable_name']) ? isset($_POST[$reference_array['enable_name']][$i]) : '-'));
 						$this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: WRITE: ".$no_write[$i]);
 						// flag if data is in the text field and we are in a reference data set
 						if (isset($reference_array['type']) && $reference_array['type'] == 'reference_data') {
@@ -1600,7 +1603,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						} else {
 							$block_write[$i] = 1;
 						}
-						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: REFERENCE TYPE: ".isset($reference_array['type']).", SET REFERENCE TYPE: ".(isset($reference_array['type']) ? $reference_array['type'] : '-').", DATA TYPE: ".$data_array['type'].", SET: ".isset($_POST[$prfx.$el_name][$i]).", => BLOCK WIRTE: ".$block_write[$i]);
+						// $this->log->debug('REF ELEMENT', "[$i] [".$prfx.$el_name."]: REFERENCE TYPE: ".isset($reference_array['type'])
+						// .", SET REFERENCE TYPE: ".(isset($reference_array['type']) ? $reference_array['type'] : '-').", DATA TYPE: ".$data_array['type'].", SET: ".isset($_POST[$prfx.$el_name][$i]).", => BLOCK WIRTE: ".$block_write[$i]);
 						// set type and boundaries for insert/update
 						if (isset($data_array['pk_id']) &&
 							!empty($data_array['pk_id']) &&
@@ -1883,7 +1887,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$q_select = [];
 		$proto = [];
 		foreach ($this->element_list[$table_name]['elements'] as $el_name => $data_array) {
-			// $this->log->debug('CFG', 'El: '.$el_name.' -> '.$this->printAr($data_array));
+			// $this->log->debug('CFG', 'El: '.$el_name.' -> '.$this->log->prAr($data_array));
 			// if the element name matches the read array, then set the table as a name prefix
 			// this is for reading the data
 			$q_select[] = $el_name;
@@ -1922,7 +1926,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$data['element_list'][$el_name] = $data_array['element_list']; // this is for the checkboxes
 			}
 			$this->log->debug('CREATE ELEMENT LIST TABLE', 'Table: '.$table_name.', Post: '.$el_name.' => '.
-				((isset($_POST[$el_name]) && is_array($_POST[$el_name])) ? 'AS ARRAY'/*.$this->printAr($_POST[$el_name])*/ : 'NOT SET/OR NOT ARRAY').
+				((isset($_POST[$el_name]) && is_array($_POST[$el_name])) ? 'AS ARRAY'/*.$this->log->prAr($_POST[$el_name])*/ : 'NOT SET/OR NOT ARRAY').
 				((isset($_POST[$el_name]) && !is_array($_POST[$el_name])) ? $_POST[$el_name] : ''));
 			// if error, check new line addition so we don't loose it
 			if ($this->error) {
@@ -1937,9 +1941,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 			// $proto[$el_name] = $this->error ? $_POST[$el_name][(count($_POST[$el_name]) - 1)] : '';
 		}
-		// $this->log->debug('CFG DATA', 'Data: '.$this->printAr($data));
-		// $this->log->debug('CFG PROTO', 'Proto: '.$this->printAr($proto));
-		// $this->log->debug('CFG SELECT', 'Proto: '.$this->printAr($q_select));
+		// $this->log->debug('CFG DATA', 'Data: '.$this->log->prAr($data));
+		// $this->log->debug('CFG PROTO', 'Proto: '.$this->log->prAr($proto));
+		// $this->log->debug('CFG SELECT', 'Proto: '.$this->log->prAr($q_select));
 		// query for reading in the data
 		$this->log->debug('edit_error', 'ERR: '.$this->error);
 		// if we got a read data, build the read select for the read, and read out the 'selected'
@@ -2106,7 +2110,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				0 => isset($data['pos']) ? count($data['pos']) : 0
 			];
 		}
-		// $this->log->debug('CFG ELEMENT LIST FILL', 'Data array: '.$this->printAr($data));
+		// $this->log->debug('CFG ELEMENT LIST FILL', 'Data array: '.$this->log->prAr($data));
 		$type = 'element_list';
 		return [
 			'output_name' => $output_name,
