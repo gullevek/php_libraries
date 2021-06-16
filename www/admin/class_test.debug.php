@@ -100,6 +100,23 @@ print "CLASS EXTEND: DEBUG/tl: ".$tr->test('TESTR OUTSIDE')."<br>";
 print "CLASS EXTEND: DEBUG/tr: ".$tr->subTest()."<br>";
 print "CLASS EXTEND: PRINTERRORMSG: <br>".$tr->log->printErrorMsg()."<br>";
 
+// test attaching a logger from outside
+class AttachOutside
+{
+	public $log;
+	public function __construct(object $logger_class)
+	{
+		$this->log = $logger_class;
+	}
+	public function test()
+	{
+		$this->log->debug('ATTACHOUTSIDE', 'A test');
+		return get_class($this);
+	}
+}
+$ao = new AttachOutside($basic->log);
+print "AO-CLASS: DEBUG: ".$ao->test()."<br>";
+
 print "GETCALLERCLASS(NON CLASS): ".\CoreLibs\Debug\Support::getCallerClass()."<br>";
 
 // fdebug

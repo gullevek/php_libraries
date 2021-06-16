@@ -13,6 +13,7 @@
 *   basic class start class for ALL clases, holds basic vars, infos, methods, etc
 *
 * HISTORY:
+* 2021/06/16 (cs) CLASS MOSTLY DEPRECATED: moved all methids in their own classes
 * 2010/12/24 (cs) add crypt classes with auto detect what crypt we can use, add php version check class
 * 2008/08/07 (cs) fixed strange DEBUG_ALL on off behavour. data was written even thought DBEUG_ALL was off. now no debug logging is done at all if DEBUG_ALL is off
 * 2007/11/13 (cs) add Comparedate function
