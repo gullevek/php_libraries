@@ -325,7 +325,7 @@ class Basic
 	 *                              all html tags will be stripped and <br> changed to \n
 	 *                              this is only used for debug output
 	 * @return void                 has no return
-	 * @[TODO]deprecated Use $basic->log->debug() instead
+	 * @deprecated Use $basic->log->debug() instead
 	 */
 	public function debug(string $level, string $string, bool $strip = false): void
 	{
@@ -446,7 +446,6 @@ class Basic
 	 * prints a html formatted (pre) array
 	 * @param  array  $array any array
 	 * @return string        formatted array for output with <pre> tag added
-	 * DEPRCATE HARD LATER
 	 * @deprecated Use \CoreLibs\Debug\Support::printAr() instead
 	 */
 	public static function printAr(array $array): string

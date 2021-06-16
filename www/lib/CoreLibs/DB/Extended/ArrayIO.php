@@ -407,7 +407,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 				}
 				// integer is different
 				if (isset($this->table_array[$column]['int']) || isset($this->table_array[$column]['int_null'])) {
-					$this->debug('write_check', '['.$column.']['.$this->table_array[$column]['value'].']['.$this->table_array[$column]['type'].'] '.
+					$this->log->debug('write_check', '['.$column.']['.$this->table_array[$column]['value'].']['.$this->table_array[$column]['type'].'] '.
 						'VALUE SET: '.(string)isset($this->table_array[$column]['value']).
 						' | INT NULL: '.(string)isset($this->table_array[$column]['int_null']));
 					if (isset($this->table_array[$column]['value']) &&

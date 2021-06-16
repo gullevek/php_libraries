@@ -427,16 +427,37 @@ class Logging
 		if (!$this->doDebugTrigger('debug', $level)) {
 			return false;
 		}
-		if (!isset($this->error_msg[$level])) {
-			$this->error_msg[$level] = '';
-		}
 		// get the last class entry and wrie that
 		$class = \CoreLibs\Debug\Support::getCallerClass();
 		// get timestamp
 		$timestamp = \CoreLibs\Debug\Support::printTime();
-		// HTML string, create only if we have echo
+		// same string put for print (no html data inside)
+		// write to file if set
+		$this->writeErrorMsg(
+			$level,
+			'['.$timestamp.'] '
+			.'['.$this->host_name.'] '
+			.'['.\CoreLibs\Get\System::getPageName(2).'] '
+			.'['.$this->running_uid.'] '
+			.'{'.$class.'} '
+			.'<'.$level.'> - '
+			// if stripping all html, etc is requested, only for write error msg
+			.($strip ?
+				// find any <br> and replace them with \n
+				// strip rest of html elements (base only)
+				preg_replace("/(<\/?)(\w+)([^>]*>)/", '[\\2]', str_replace('<br>', "\n", $string)) :
+				$string
+			)
+			."\n"
+		);
+		// write to error level msg array if there is an echo request
 		if ($this->doDebugTrigger('echo', $level)) {
-			$error_string = '<div>'
+			// init if not set
+			if (!isset($this->error_msg[$level])) {
+				$this->error_msg[$level] = [];
+			}
+			// HTML string
+			$this->error_msg[$level][] = '<div>'
 				.'[<span style="font-weight: bold; color: #5e8600;">'.$timestamp.'</span>] '
 				.'[<span style="font-weight: bold; color: #c56c00;">'.$level.'</span>] '
 				.'[<span style="color: #b000ab;">'.$this->host_name.'</span>] '
@@ -444,29 +465,6 @@ class Logging
 				.'[<span style="color: #0062A2;">'.$this->running_uid.'</span>] '
 				.'{<span style="font-style: italic; color: #928100;">'.$class.'</span>} - '.\CoreLibs\Convert\Html::htmlent($string)
 				."</div><!--#BR#-->";
-		}
-		// if stripping all html, etc is requested
-		if ($strip) {
-			// find any <br> and replace them with \n
-			$string = str_replace('<br>', "\n", $string);
-			// strip rest of html elements
-			$string = preg_replace("/(<\/?)(\w+)([^>]*>)/", '', $string);
-		}
-		// same string put for print (no html data inside)
-		$error_string_print =
-			'['.$timestamp.'] '
-			.'['.$this->host_name.'] '
-			.'['.\CoreLibs\Get\System::getPageName(2).'] '
-			.'['.$this->running_uid.'] '
-			.'{'.$class.'} '
-			.'<'.$level.'> - '
-			.$string;
-		$error_string_print .= "\n";
-		// write to file if set
-		$this->writeErrorMsg($level, $error_string_print);
-		// write to error level
-		if ($this->doDebugTrigger('echo', $level)) {
-			$this->error_msg[$level] .= $error_string;
 		}
 		return true;
 	}
@@ -482,9 +480,7 @@ class Logging
 		if (!is_array($error_msg)) {
 			$error_msg = [];
 		}
-		foreach ($error_msg as $level => $msg) {
-			$this->error_msg[$level] .= $msg;
-		}
+		array_push($this->error_msg, ...$error_msg);
 	}
 
 	/**
@@ -503,11 +499,11 @@ class Logging
 			foreach ($this->error_msg as $level => $temp_debug_output) {
 				if ($this->doDebugTrigger('debug', $level)) {
 					if ($this->doDebugTrigger('echo', $level)) {
-						$string_output = '<div style="font-size: 12px;">'
+						$string_output .= '<div style="font-size: 12px;">'
 							.'[<span style="font-style: italic; color: #c56c00;">'.$level.'</span>] '
-							.($string ? "<b>**** ".\CoreLibs\Convert\Html::htmlent($string)." ****</b>\n" : "")
+							.($string ? "<b>**** ".\CoreLibs\Convert\Html::htmlent($string)." ****</br>\n" : "")
 							.'</div>'
-							.$temp_debug_output;
+							.join('', $temp_debug_output);
 					} // echo it out
 				} // do printout
 			} // for each level
