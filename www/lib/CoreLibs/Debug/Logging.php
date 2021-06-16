@@ -414,6 +414,20 @@ class Logging
 	}
 
 	/**
+	 * A replacement for the \CoreLibs\Debug\Support::printAr
+	 * But this does not wrap it in <pre></pre>
+	 * It uses some special code sets so we can convert that to pre flags
+	 * for echo output {##HTMLPRE##} ... {##/HTMLPRE##}
+	 * Do not use this without using it in a string in debug function
+	 * @param  array $a Array to format
+	 * @return string   print_r formated
+	 */
+	public function prAr(array $a): string
+	{
+		return '{##HTMLPRE##}'.print_r($a, true).'{##/HTMLPRE##}';
+	}
+
+	/**
 	 * write debug data to error_msg array
 	 * @param  string $level  id for error message, groups messages together
 	 * @param  string $string the actual error message
@@ -441,12 +455,17 @@ class Logging
 			.'['.$this->running_uid.'] '
 			.'{'.$class.'} '
 			.'<'.$level.'> - '
-			// if stripping all html, etc is requested, only for write error msg
-			.($strip ?
-				// find any <br> and replace them with \n
-				// strip rest of html elements (base only)
-				preg_replace("/(<\/?)(\w+)([^>]*>)/", '[\\2]', str_replace('<br>', "\n", $string)) :
-				$string
+			// strip the htmlpre special tags if exist
+			.preg_replace(
+				"/{##HTMLPRE##}((.|\n)*?){##\/HTMLPRE##}/m",
+				'\\1',
+				// if stripping all html, etc is requested, only for write error msg
+				($strip ?
+					// find any <br> and replace them with \n
+					// strip rest of html elements (base only)
+					preg_replace("/(<\/?)(\w+)([^>]*>)/", '', str_replace('<br>', "\n", $string)) :
+					$string
+				)
 			)
 			."\n"
 		);
@@ -463,7 +482,9 @@ class Logging
 				.'[<span style="color: #b000ab;">'.$this->host_name.'</span>] '
 				.'[<span style="color: #08b369;">'.$this->page_name.'</span>] '
 				.'[<span style="color: #0062A2;">'.$this->running_uid.'</span>] '
-				.'{<span style="font-style: italic; color: #928100;">'.$class.'</span>} - '.\CoreLibs\Convert\Html::htmlent($string)
+				.'{<span style="font-style: italic; color: #928100;">'.$class.'</span>} - '
+				// we replace special HTMLPRE with <pre> entries
+				.preg_replace("/{##HTMLPRE##}((.|\n)*?){##\/HTMLPRE##}/m", "<pre>\\1</pre>", \CoreLibs\Convert\Html::htmlent($string))
 				."</div><!--#BR#-->";
 		}
 		return true;

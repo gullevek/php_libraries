@@ -86,6 +86,7 @@ class TestR extends TestL
 		print "** GETCALLERCLASS(INSIDE EXTND CLASS): ".\CoreLibs\Debug\Support::getCallerClass()."<br>";
 		$this->log->debug('TESTR', 'Logging in class testR (extends testL)');
 		$this->test('TESTR INSIDE');
+		$this->log->debug('TESTR', 'Array: '.$this->log->prAr(['a', 'b']).', Other: '.$this->log->prAr(['a', 'b']));
 		return true;
 	}
 }
@@ -109,7 +110,7 @@ print "S::FDEBUG: ".FileWriter::fdebug('CLASS TEST DEBUG FILE: '.date('Y-m-d H:i
 // future DEPRECATED
 // $basic->debug('BASIC CLASS', 'Debug test');
 $basic->log->debug('BASIC CLASS', 'Debug test');
-print "BASIC:<br>".$basic->log->printErrorMsg();
+print "BASIC PRINTERRORMSG:<br>".$basic->log->printErrorMsg();
 
 print "</body></html>";
 
