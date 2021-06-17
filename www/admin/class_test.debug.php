@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+declare(strict_types=1);
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
@@ -59,6 +60,7 @@ print "C->DEBUG(html,strip): ".$debug->debug('CLASS-TEST-DEBUG', 'HTML TAG<br><b
 print "C->PRINTERRORMSG: <br>".$debug->printErrorMsg()."<br>";
 echo "<b>CLASS DEBUG CALL</b><br>";
 
+// @codingStandardsIgnoreLine
 class TestL
 {
 	public $log;
@@ -74,6 +76,7 @@ class TestL
 		return true;
 	}
 }
+// @codingStandardsIgnoreLine
 class TestR extends TestL
 {
 	public $foo;
@@ -101,6 +104,7 @@ print "CLASS EXTEND: DEBUG/tr: ".$tr->subTest()."<br>";
 print "CLASS EXTEND: PRINTERRORMSG: <br>".$tr->log->printErrorMsg()."<br>";
 
 // test attaching a logger from outside
+// @codingStandardsIgnoreLine
 class AttachOutside
 {
 	public $log;
