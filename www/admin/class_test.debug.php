@@ -121,6 +121,26 @@ class AttachOutside
 $ao = new AttachOutside($basic->log);
 print "AO-CLASS: DEBUG: ".$ao->test()."<br>";
 
+// @codingStandardsIgnoreLine
+class AttachFull
+{
+	public $main;
+	public function __construct(object $class)
+	{
+		$this->main = $class;
+	}
+	public function test()
+	{
+		// should trigger deprecated
+		return $this->main->rgb2hex(2, 3, 4);
+	}
+}
+
+$af = new AttachFull($basic);
+// should trigger deprecated
+print "DEPREACTEDTEST: ".$af->test()."<br>";
+
+
 print "GETCALLERCLASS(NON CLASS): ".\CoreLibs\Debug\Support::getCallerClass()."<br>";
 
 // fdebug

@@ -27,3 +27,9 @@ msgstr "Month"
 
 msgid "INPUT TEST"
 msgstr "OUTPUT TEST EN"
+
+msgid "I should be translated"
+msgstr "I should be translated: I WAS TRANSLATED"
+
+msgid "Are we translated?"
+msgstr "Are we translated? Yes, we are!"

@@ -30,7 +30,6 @@ class Email
 		'.*@disney\.ne\.jp$' => 'keitai_softbank_disney', # (kids)
 		'.*@willcom\.ne\.jp$' => 'keitai_willcom',
 		'.*@willcom\.com$' => 'keitai_willcom', # new for pdx.ne.jp address
-		'.*@willcom\.com$' => 'keitai_willcom', # new for pdx.ne.jp address
 		'.*@wcm\.ne\.jp$' => 'keitai_willcom', # old willcom wcm.ne.jp
 		'.*@pdx\.ne\.jp$' => 'keitai_willcom_pdx', # old pdx address for willcom
 		'.*@bandai\.jp$' => 'keitai_willcom_bandai', # willcom paipo! (kids)

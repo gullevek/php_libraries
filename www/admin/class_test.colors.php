@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+declare(strict_types=1);
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */

@@ -10,9 +10,9 @@
 // please be VERY carefull only to change the right side
 $DB_CONFIG = [
 	'test' => [
-		'db_name' => 'gullevek',
-		'db_user' => 'gullevek',
-		'db_pass' => 'gullevek',
+		'db_name' => 'clemens',
+		'db_user' => 'clemens',
+		'db_pass' => 'clemens',
 		'db_host' => 'db.tokyo.tequila.jp',
 		'db_port' => 5432,
 		'db_schema' => 'public',

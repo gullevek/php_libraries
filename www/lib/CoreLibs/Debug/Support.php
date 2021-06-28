@@ -68,6 +68,12 @@ class Support
 		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) ?? [['class' => get_called_class()]];
 		$class = null;
 		while ($class === null) {
+			// if current is
+			// [function] => debug
+			// [class] => CoreLibs\Debug\Logging
+			// then return
+			// (OUTSIDE) because it was not called from a class method
+			// or return file name
 			$class = array_pop($backtrace)['class'] ?? null;
 		}
 		return $class ?? '';

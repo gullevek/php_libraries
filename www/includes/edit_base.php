@@ -17,9 +17,9 @@
 * 2003-06-10: creation of this page
 *********************************************************************/
 
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
+$DEBUG_ALL = true;
+$PRINT_ALL = true;
+$DB_DEBUG = true;
 
 // TODO: only extract _POST data that is needed
 extract($_POST, EXTR_SKIP);
@@ -30,10 +30,10 @@ require 'config.php';
 $SET_SESSION_NAME = EDIT_SESSION_NAME;
 // overrride debug flags
 if (!DEBUG)	{
-	$DEBUG_ALL = 0;
-	$PRINT_ALL = 0;
-	$DB_DEBUG = 0;
-	$ECHO_ALL = 0;
+	$DEBUG_ALL = false;
+	$PRINT_ALL = false;
+	$DB_DEBUG = false;
+	$ECHO_ALL = false;
 }
 
 // should be utf8

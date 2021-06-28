@@ -10,5 +10,6 @@
 // print debug messages
 echo $login->log->printErrorMsg();
 echo $cms->log->printErrorMsg();
+$cms->log->debug('DEBUGEND', '==================================== [END]');
 
 // __END__

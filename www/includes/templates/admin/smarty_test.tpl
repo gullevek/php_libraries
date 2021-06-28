@@ -2,7 +2,10 @@
 	{$SMARTY_TEST}
 </div>
 <div>
-	TRANSLATION CLASS: {$TRANSLATE_TEST}
+	TRANSLATION CLASS (OUT): {$TRANSLATE_TEST}
+</div>
+<div>
+	TRANSLATION CLASS (SMARTY): {$TRANSLATE_TEST_SMARTY}
 </div>
 <div>
 	<select id="drop_down_test" name="drop_down_test">

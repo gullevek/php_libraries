@@ -311,7 +311,9 @@ class SmartyExtend extends SmartyBC
 	private function setSmartyVars($admin_call = false): void
 	{
 		global $cms;
-		$this->mergeCmsSmartyVars($cms);
+		if (is_object($cms)) {
+			$this->mergeCmsSmartyVars($cms);
+		}
 
 		// trigger flags
 		$this->HEADER['USE_PROTOTYPE'] = $this->USE_PROTOTYPE;
@@ -349,16 +351,24 @@ class SmartyExtend extends SmartyBC
 		// special for admin
 		if ($admin_call === true) {
 			// set ACL extra show
-			$this->DATA['show_ea_extra'] = $cms->acl['show_ea_extra'] ?? false;
-			$this->DATA['ADMIN'] = !empty($cms->acl['admin']) ? $cms->acl['admin'] : 0;
+			if (is_object($cms)) {
+				$this->DATA['show_ea_extra'] = $cms->acl['show_ea_extra'] ?? false;
+				$this->DATA['ADMIN'] = $cms->acl['admin'] ?? 0;
+				// top menu
+				$this->DATA['nav_menu'] = $cms->adbTopMenu() ?? [];
+				$this->DATA['nav_menu_count'] = is_array($this->DATA['nav_menu']) ? count($this->DATA['nav_menu']) : 0;
+				// messages = ['msg' =>, 'class' => 'error/warning/...']
+				$this->DATA['messages'] = $cms->messages ?? [];
+			} else {
+				$this->DATA['show_ea_extra'] = false;
+				$this->DATA['ADMIN'] = 0;
+				$this->DATA['nav_menu'] = [];
+				$this->DATA['nav_menu_count'] = 0;
+				$this->DATA['messages'] = [];
+			}
 			// set style sheets
 			$this->HEADER['STYLESHEET'] = $this->ADMIN_STYLESHEET ? $this->ADMIN_STYLESHEET : ADMIN_STYLESHEET;
 			$this->HEADER['JAVASCRIPT'] = $this->ADMIN_JAVASCRIPT ? $this->ADMIN_JAVASCRIPT : ADMIN_JAVASCRIPT;
-			// top menu
-			$this->DATA['nav_menu'] = $cms->adbTopMenu();
-			$this->DATA['nav_menu_count'] = is_array($this->DATA['nav_menu']) ? count($this->DATA['nav_menu']) : 0;
-			// messages = ['msg' =>, 'class' => 'error/warning/...']
-			$this->DATA['messages'] = $cms->messages ?? [];
 			// the page name
 			$this->DATA['page_name'] = $this->page_name;
 			$this->DATA['table_width'] = $this->PAGE_WIDTH ?? PAGE_WIDTH;

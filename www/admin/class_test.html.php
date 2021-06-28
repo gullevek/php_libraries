@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+declare(strict_types=1);
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
@@ -93,6 +94,14 @@ $magic_link = 'http://www.somelink.com/?with=1234|Some Title|';
 print "D/MAGICLINK: ".Html::htmlent($basic->magicLinks($magic_link))."<Br>";
 */
 
+$text = 'I am some text
+with some
+line breaks
+in there. Theis 
+is sucky';
+
+print "LB remove: ".\CoreLibs\Convert\Html::removeLB($text)."<br>";
+print "LB remove: ".\CoreLibs\Convert\Html::removeLB($text, '##BR##')."<br>";
 
 // error message
 print $basic->log->printErrorMsg();

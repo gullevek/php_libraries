@@ -10,6 +10,10 @@
 * - menu creation
 * - array vars for smarty
 *
+* CHANGE PLAN:
+* loads DB\IO + Logger and returns one group object
+* also checks all missing CONFIG vars from Basic class
+*
 * PUBLIC VARIABLES
 *
 * PRIVATE VARIABLES
@@ -224,14 +228,14 @@ class Backend extends \CoreLibs\DB\IO
 			$PAGES = [];
 		}
 		$pages = [];
-		foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
+		foreach ($PAGES as $PAGE_DATA) {
 			$pages[] = $PAGE_DATA;
 		}
 		// $this->debug('pages', $this->print_ar($pages));
 		// if flag is 0, then we show all, else, we show only the matching flagges array points
 		// array is already sorted after correct order
 		reset($pages);
-		foreach ($pages as $i => $data) {
+		foreach ($pages as $data) {
 		// for ($i = 0, $iMax = count($pages); $i < $iMax; $i ++) {
 			$show = 0;
 			// is it visible in the menu & is it online
@@ -329,11 +333,12 @@ class Backend extends \CoreLibs\DB\IO
 	}
 
 	/**
+	 * ONLY USED IN adbTopMenu
 	 * checks if this filename is in the current situation (user id, etc) available
 	 * @param  string|null $filename filename
 	 * @return bool                  true for visible/accessable menu point, false for not
 	 */
-	public function adbShowMenuPoint(?string $filename): bool
+	private function adbShowMenuPoint(?string $filename): bool
 	{
 		$enabled = false;
 		if ($filename === null) {

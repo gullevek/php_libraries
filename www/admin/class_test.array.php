@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+declare(strict_types=1);
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
@@ -96,6 +97,96 @@ print "ARRAYFLATFORKEY: ".DgS::printAr(ArrayHandler::arrayFlatForKey($test_array
 
 // DEPRECATED
 // print "ARRAYMERGERECURSIVE: ".DgS::printAr($basic->arrayMergeRecursive($array_1, $array_2, $array_3))."<br>";
+
+/**
+ * attach key/value to an array so it becomes nested
+ *
+ * @param string $pre  Attach to new (empty for new root node)
+ * @param string $cur  New node
+ * @param array  $node Previous created array
+ * @return array       Updated array
+ */
+function rec(string $pre, string $cur, array $node = [])
+{
+	if (!is_array($node)) {
+		$node = [];
+	}
+	print "<div style='color: green;'>#### PRE: ".$pre.", CUR: ".$cur.", N-c: ".count($node)." [".join('|', array_keys($node))."]</div>";
+	if (!$pre) {
+		print "** <span style='color: red;'>NEW</span><br>";
+		$node[$cur] = [];
+	} else {
+		if (array_key_exists($pre, $node)) {
+			print "+ <span style='color: orange;'>KEY FOUND:</span> ".$pre.", add: ".$cur."<br>";
+			$node[$pre][$cur] = [];
+		} else {
+			print "- NOT FOUND: loop<br>";
+			foreach ($node as $_pre => $_cur) {
+				print "> TRY: ".$_pre." => ".count($_cur)." [".join('|', array_keys($_cur))."]<br>";
+				if (count($_cur) > 0) {
+					$node[$_pre] = rec($pre, $cur, $_cur);
+				}
+			}
+		}
+	}
+	return $node;
+}
+
+/**
+ * flatten array down to own level
+ *
+ * @param array $array
+ * @param array $return
+ * @return array
+ */
+function flattenArrayKey(array $array, array $return = [])
+{
+	foreach ($array as $key => $sub) {
+		$return[] = $key;
+		if (count($sub) > 0) {
+			$return = flattenArrayKey($sub, $return);
+		}
+	}
+	return $return;
+}
+
+// $test = [
+// 	'A' => [
+// 		'B' => [],
+// 		'C' => [
+// 			'D' => [],
+// 			'E' => [
+// 				'F' => []
+// 			]
+// 		]
+// 	],
+// 	'1' => [],
+// 	'2' => [],
+// 	'3' => [
+// 		'G' => []
+// 	]
+// ];
+
+// build a tested array for flatten
+$test = [];
+// core
+$test = rec('', 'A', $test);
+$test = rec('', '1', $test);
+$test = rec('', '2', $test);
+$test = rec('', '3', $test);
+$test = rec('3', 'G', $test);
+$test = rec('A', 'B', $test);
+$test = rec('A', 'C', $test);
+$test = rec('C', 'D', $test);
+$test = rec('C', 'E', $test);
+$test = rec('E', 'F', $test);
+// new
+$test = rec('C', 'U', $test);
+$test = rec('F', 'U', $test);
+$test = rec('', 'Al', $test);
+$test = rec('B', 'B1', $test);
+print "ORIGINAL: ".\CoreLibs\Debug\Support::printAr($test)."<br>";
+print "FLATTEN: ".\CoreLibs\Debug\Support::printAr(flattenArrayKey($test))."<br>";
 
 // error message
 print $basic->log->printErrorMsg();

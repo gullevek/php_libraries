@@ -45,6 +45,7 @@ class Logging
 	// debug flags/settings
 	private $running_uid = ''; // unique ID set on class init and used in logging as prefix
 	// log file name
+	private $log_folder = '';
 	private $log_file_name_ext = 'log'; // use this for date rotate
 	private $log_max_filesize = 0; // set in kilobytes
 	private $log_print_file = 'error_msg##LOGID####LEVEL####CLASS####PAGENAME####DATE##';
@@ -60,6 +61,14 @@ class Logging
 
 	public function __construct()
 	{
+		// check must set constants
+		if (defined('BASE') && defined('LOG')) {
+			$this->log_folder = BASE.LOG;
+		} else {
+			// fallback + warning
+			trigger_error('constant BASE or LOG are not defined, fallback to getcwd()', E_USER_WARNING);
+			$this->log_folder = getcwd().DS;
+		}
 		// running time start for script
 		$this->script_starttime = microtime(true);
 		// set per run UID for logging
@@ -205,7 +214,7 @@ class Logging
 		// init output variable
 		$output = $error_string; // output formated error string to output file
 		// init base file path
-		$fn = BASE.LOG.$this->log_print_file.'.'.$this->log_file_name_ext;
+		$fn = $this->log_folder.$this->log_print_file.'.'.$this->log_file_name_ext;
 		// log ID prefix settings, if not valid, replace with empty
 		if (preg_match("/^[A-Za-z0-9]+$/", $this->log_file_id)) {
 			$rpl_string = '_'.$this->log_file_id;
@@ -434,9 +443,12 @@ class Logging
 	 * @param  bool   $strip  default on false, if set to true,
 	 *                        all html tags will be stripped and <br> changed to \n
 	 *                        this is only used for debug output
+	 * @param  string $prefix Attach some block before $string. Will not be stripped even
+	 *                        when strip is true
+	 *                        if strip is false, recommended to add that to $string
 	 * @return bool           True if logged, false if not logged
 	 */
-	public function debug(string $level, string $string, bool $strip = false): bool
+	public function debug(string $level, string $string, bool $strip = false, string $prefix = ''): bool
 	{
 		if (!$this->doDebugTrigger('debug', $level)) {
 			return false;
@@ -463,8 +475,8 @@ class Logging
 				($strip ?
 					// find any <br> and replace them with \n
 					// strip rest of html elements (base only)
-					preg_replace("/(<\/?)(\w+)([^>]*>)/", '', str_replace('<br>', "\n", $string)) :
-					$string
+					preg_replace("/(<\/?)(\w+)([^>]*>)/", '', str_replace('<br>', "\n", $prefix.$string)) :
+					$prefix.$string
 				)
 			)
 			."\n"
@@ -483,6 +495,8 @@ class Logging
 				.'[<span style="color: #08b369;">'.$this->page_name.'</span>] '
 				.'[<span style="color: #0062A2;">'.$this->running_uid.'</span>] '
 				.'{<span style="font-style: italic; color: #928100;">'.$class.'</span>} - '
+				// as is prefix, allow HTML
+				.$prefix
 				// we replace special HTMLPRE with <pre> entries
 				.preg_replace("/{##HTMLPRE##}((.|\n)*?){##\/HTMLPRE##}/m", "<pre>\\1</pre>", \CoreLibs\Convert\Html::htmlent($string))
 				."</div><!--#BR#-->";

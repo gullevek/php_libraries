@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+declare(strict_types=1);
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
@@ -56,6 +57,10 @@ print '<div><a href="class_test.randomkey.php">Class Test: RANDOM KEY</a></div>'
 print '<div><a href="class_test.system.php">Class Test: SYSTEM</a></div>';
 print '<div><a href="class_test.runningtime.php">Class Test: RUNNING TIME</a></div>';
 print '<div><a href="class_test.debug.php">Class Test: DEBUG</a></div>';
+print '<div><a href="class_test.form.php">Class Test: FORM</a></div>';
+print '<div><a href="class_test.backend.php">Class Test: BACKEND ADMIN CLASS</a></div>';
+print '<div><a href="class_test.lang.php">Class Test: LANG/L10n</a></div>';
+print '<div><a href="class_test.smarty.php">Class Test: SMARTY</a></div>';
 
 // set + check edit access id
 $edit_access_id = 3;
@@ -103,6 +108,17 @@ if (is_object($login)) {
 	// DEPRICATED CALL
 	//	$basic->adbSetACL($login->acl);
 }
+
+print "THIS HOST: ".HOST_NAME.", with PROTOCOL: ".HOST_PROTOCOL." is running SSL: ".HOST_SSL."<br>";
+print "DIR: ".DIR."<br>";
+print "BASE: ".BASE."<br>";
+print "ROOT: ".ROOT."<br>";
+print "HOST: ".HOST_NAME." => DB HOST: ".DB_CONFIG_NAME." => ".print_r(DB_CONFIG, true)."<br>";
+
+$ds = defined('DS') ? DS : DIRECTORY_SEPARATOR;
+$du = DS ?? DIRECTORY_SEPARATOR;
+print "DS is: ".$ds."<br>";
+print "SERVER HOST: ".$_SERVER['HTTP_HOST']."<br>";
 
 // print error messages
 // print $login->log->printErrorMsg();

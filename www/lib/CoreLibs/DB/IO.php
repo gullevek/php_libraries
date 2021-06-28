@@ -307,7 +307,7 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * main DB concstructor with auto connection to DB and failure set on failed connection
-	 * @param array $db_config        DB configuration array
+	 * @param array $db_config DB configuration array
 	 */
 	public function __construct(array $db_config)
 	{
@@ -317,6 +317,7 @@ class IO extends \CoreLibs\Basic
 		if (!is_array($db_config)) {
 			$db_config = [];
 		}
+		// TODO: check must set CONSTANTS
 		// sets the names (for connect/reconnect)
 		$this->db_name = $db_config['db_name'] ?? '';
 		$this->db_user = $db_config['db_user'] ?? '';
@@ -396,7 +397,7 @@ class IO extends \CoreLibs\Basic
 	public function __destruct()
 	{
 		$this->__closeDB();
-		parent::__destruct();
+		// parent::__destruct();
 	}
 
 	// *************************************************************
@@ -547,7 +548,7 @@ class IO extends \CoreLibs\Basic
 		if ($prefix) {
 			$prefix .= '- ';
 		}
-		$this->log->debug($debug_id, $prefix.$error_string, true);
+		$this->log->debug($debug_id, $error_string, true, $prefix);
 	}
 
 	/**
@@ -870,6 +871,24 @@ class IO extends \CoreLibs\Basic
 	}
 
 	/**
+	 * Switches db debug flag on or off
+	 * OR
+	 * with the optional parameter fix sets debug
+	 * returns current set stats
+	 * @param  bool|null $debug Flag to turn debug on off
+	 * @return bool True for debug is on, False for off
+	 */
+	public function dbToggleDebug(?bool $debug = null)
+	{
+		if ($debug !== null) {
+			$this->db_debug = $debug;
+		} else {
+			$this->db_debug = $this->db_debug ? false : true;
+		}
+		return $this->db_debug;
+	}
+
+	/**
 	 * set max query calls, set to --1 to disable loop
 	 * protection. this will generate a warning
 	 * empty call (null) will reset to default
@@ -1048,19 +1067,21 @@ class IO extends \CoreLibs\Basic
 	public function dbInfo(bool $show = true): string
 	{
 		$string = '';
-		$string .= '<b>-DB-info-></b> Connected to db <b>\''.$this->db_name.'\'</b> ';
-		$string .= 'with schema <b>\''.$this->db_schema.'\'</b> ';
-		$string .= 'as user <b>\''.$this->db_user.'\'</b> ';
-		$string .= 'at host <b>\''.$this->db_host.'\'</b> ';
-		$string .= 'on port <b>\''.$this->db_port.'\'</b> ';
-		$string .= 'with ssl mode <b>\''.$this->db_ssl.'\'</b><br>';
-		$string .= '<b>-DB-info-></b> DB IO Class debug output: <b>'.($this->db_debug ? 'Yes' : 'No').'</b>';
+		$string .= '{b}-DB-info->{/b} Connected to db {b}\''.$this->db_name.'\'{/b} ';
+		$string .= 'with schema {b}\''.$this->db_schema.'\'{/b} ';
+		$string .= 'as user {b}\''.$this->db_user.'\'{/b} ';
+		$string .= 'at host {b}\''.$this->db_host.'\'{/b} ';
+		$string .= 'on port {b}\''.$this->db_port.'\'{/b} ';
+		$string .= 'with ssl mode {b}\''.$this->db_ssl.'\'{/b}{br}';
+		$string .= '{b}-DB-info->{/b} DB IO Class debug output: {b}'.($this->db_debug ? 'Yes' : 'No').'{/b}';
 		if ($show === true) {
-			$this->__dbDebug('db', $string, 'dbInfo');
+			// if debug, remove / change b
+			$this->__dbDebug('db', str_replace(['{b}', '{/b}', '{br}'], ['', '', ' **** '], $string), 'dbInfo');
 		} else {
-			$string = $string.'<br>';
+			$string = $string.'{br}';
 		}
-		return $string;
+		// for direct print, change to html
+		return str_replace(['{b}', '{/b}', '{br}'], ['<b>', '</b>', '<br>'], $string);
 	}
 
 	/**
@@ -2123,24 +2144,6 @@ class IO extends \CoreLibs\Basic
 	public function dbGetNumRows()
 	{
 		return $this->num_rows ?? null;
-	}
-
-	/**
-	 * Switches db debug flag on or off
-	 * OR
-	 * with the optional parameter fix sets debug
-	 * returns current set stats
-	 * @param  bool|null $debug Flag to turn debug on off
-	 * @return bool True for debug is on, False for off
-	 */
-	public function dbToggleDebug(?bool $debug = null)
-	{
-		if ($debug !== null) {
-			$this->db_debug = $debug;
-		} else {
-			$this->db_debug = $this->db_debug ? false : true;
-		}
-		return $this->db_debug;
 	}
 
 	// DEPEREACTED CALLS
