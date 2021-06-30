@@ -65,7 +65,7 @@ class Byte
 				return $bytes.'B';
 			}
 			// labels in order of size [Y, Z]
-			$labels = array('', 'K', 'M', 'G', 'T', 'P', 'E');
+			$labels = ['', 'K', 'M', 'G', 'T', 'P', 'E'];
 			// exp position calculation
 			$exp = floor(log($abs_bytes, $unit));
 			// avoid printing out anything larger than max labels

@@ -89,7 +89,7 @@ class Encoding
 		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);
 		// if string does not match anymore we have a convert problem
 		if ($string != $compare) {
-			$failed = array();
+			$failed = [];
 			// go through each character and find the ones that do not match
 			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i ++) {
 				$char = mb_substr($string, $i, 1, $from_encoding);

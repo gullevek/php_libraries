@@ -41,7 +41,7 @@
 *   $class_name
 *     - the name of the class
 *   $class_version
-*     - the version as an array(major, minor, patchlvl, daypatch)
+*     - the version as an array [major, minor, patchlvl, daypatch]
 *   $class_last_changed
 *     - date (mysql format) for the last change
 *   $class_created
@@ -147,7 +147,7 @@
 *   _db_error()
 *     - INTERNAL ONLY!! error that occured during execution
 *   $string _print_array($array)
-*     - returns string of an array(only for interal use)
+*     - returns string of an array (only for interal use)
 *   1/0 _connect_to_db()
 *     - returns 1 for successfull DB connection or 0 for none
 *   1/0 _check_query_for_select($query)
@@ -643,7 +643,7 @@ class IO extends \CoreLibs\Basic
 		} else {
 			preg_match("/(INSERT INTO|DELETE FROM|UPDATE) (([\w_]+)\.)?([\w_]+) /i", $query, $matches);
 		}
-		return array($matches[3], $matches[4]);
+		return [$matches[3], $matches[4]];
 	}
 
 	/**
@@ -1871,7 +1871,7 @@ class IO extends \CoreLibs\Basic
 	 * writes into one table based on array of table columns
 	 * PARAM INFO: $primary key
 	 * this can be a plain string/int and will be internal transformed into the array form
-	 * or it takes the array form of array(row => column, value => pk value)
+	 * or it takes the array form of array [row => column, value => pk value]
 	 * @param  array            $write_array            list of elements to write
 	 * @param  int|string|array $primary_key            primary key string or array set
 	 * @param  string           $table                  name for the target table

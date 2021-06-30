@@ -34,7 +34,7 @@ function MyErrorHandler(int $type, string $message, string $file, int $line, arr
 		return false;
 	}
 	// ERROR LEVEL
-	$error_level = array(
+	$error_level = [
 		1 => 'E_ERROR',
 		2 => 'E_WARNING',
 		4 => 'E_PARSE',
@@ -51,7 +51,7 @@ function MyErrorHandler(int $type, string $message, string $file, int $line, arr
 		8192 => 'E_DEPRICATED',
 		16384 => 'E_USER_DEPRICATED',
 		30719 => 'E_ALL'
-	);
+	];
 
 	// get the current page name (strip path)
 	$page_temp = explode(DIRECTORY_SEPARATOR, $_SERVER["PHP_SELF"]);

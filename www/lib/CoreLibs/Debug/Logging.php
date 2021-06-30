@@ -569,6 +569,16 @@ class Logging
 			unset($this->error_msg[$level]);
 		}
 	}
+
+	/**
+	 * Get current error message array
+	 *
+	 * @return array error messages collected
+	 */
+	public function getErrorMsg(): array
+	{
+		return $this->error_msg;
+	}
 }
 
 // __END__

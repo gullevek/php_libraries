@@ -24,7 +24,7 @@ class Colors
 	public static function hex2rgb(string $hexStr, bool $returnAsString = false, string $seperator = ',')
 	{
 		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
-		$rgbArray = array();
+		$rgbArray = [];
 		if (strlen($hexStr) == 6) {
 			// If a proper hex code, convert using bitwise operation. No overhead... faster
 			$colorVal = hexdec($hexStr);
@@ -59,7 +59,7 @@ class Colors
 		if ($hex_prefix === true) {
 			$hex_color = '#';
 		}
-		foreach (array('red', 'green', 'blue') as $color) {
+		foreach (['red', 'green', 'blue'] as $color) {
 			// if not valid, set to gray
 			if ($$color < 0 || $$color > 255) {
 				$$color = 125;
@@ -82,7 +82,7 @@ class Colors
 	public static function rgb2hsb(int $red, int $green, int $blue): array
 	{
 		// check that rgb is from 0 to 255
-		foreach (array('red', 'green', 'blue') as $c) {
+		foreach (['red', 'green', 'blue'] as $c) {
 			if ($$c < 0 || $$c > 255) {
 				$$c = 0;
 			}
@@ -94,7 +94,7 @@ class Colors
 		$HUE = 0;
 
 		if ($MAX == $MIN) {
-			return array(0, 0, round($MAX * 100));
+			return [0, 0, round($MAX * 100)];
 		}
 		if ($red == $MAX) {
 			$HUE = ($green - $blue) / ($MAX - $MIN);
@@ -108,11 +108,11 @@ class Colors
 			$HUE += 360;
 		}
 
-		return array(
+		return [
 			(int)round($HUE),
 			(int)round((($MAX - $MIN) / $MAX) * 100),
 			(int)round($MAX * 100)
-		);
+		];
 	}
 
 	/**
@@ -140,7 +140,7 @@ class Colors
 		$V /= 100;
 
 		if ($S == 0) {
-			return array($V * 255, $V * 255, $V * 255);
+			return [$V * 255, $V * 255, $V * 255];
 		}
 
 		$Hi = floor($H / 60);
@@ -186,11 +186,11 @@ class Colors
 				$blue = 0;
 		}
 
-		return array(
+		return [
 			(int)round($red * 255),
 			(int)round($green * 255),
 			(int)round($blue * 255)
-		);
+		];
 	}
 
 	/**
@@ -205,7 +205,7 @@ class Colors
 	public static function rgb2hsl(int $red, int $green, int $blue): array
 	{
 		// check that rgb is from 0 to 255
-		foreach (array('red', 'green', 'blue') as $c) {
+		foreach (['red', 'green', 'blue'] as $c) {
 			if ($$c < 0 || $$c > 255) {
 				$$c = 0;
 			}
@@ -270,7 +270,7 @@ class Colors
 		$lum /= 100;
 		// if saturation is 0
 		if ($sat == 0) {
-			return array($lum * 255, $lum * 255, $lum * 255);
+			return [$lum * 255, $lum * 255, $lum * 255];
 		} else {
 			$m2 = $lum < 0.5 ? $lum * ($sat + 1) : ($lum + $sat) - ($lum * $sat);
 			$m1 = $lum * 2 - $m2;
@@ -292,11 +292,11 @@ class Colors
 				return $m1;
 			};
 
-			return array(
+			return [
 				(int)round(255 * $hueue($hue + (1 / 3))),
 				(int)round(255 * $hueue($hue)),
 				(int)round(255 * $hueue($hue - (1 / 3)))
-			);
+			];
 		}
 	}
 }

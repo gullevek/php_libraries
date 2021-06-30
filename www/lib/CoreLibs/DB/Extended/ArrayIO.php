@@ -6,7 +6,7 @@
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESC  :RIPTION:
 *   DB Array IO Class:
-*   writes, reads or deletes a complete array(one data set) in/out a
+*   writes, reads or deletes a complete array (one data set) in/out a
 *   table from the connected DB.
 *   you don't have to write any SQL queries, worry over update/insert
 *

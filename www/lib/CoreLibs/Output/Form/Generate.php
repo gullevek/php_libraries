@@ -1516,7 +1516,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// echo "PK NAME: ".$this->pk_name."/".$this->int_pk_name.": ".$this->table_array[$this->pk_name]['value']."/".$this->table_array[$this->int_pk_name]['value']."<br>";
 		// write the object
 		$this->dbWrite($addslashes);
-		// write reference array(s) if necessary
+		// write reference array (s) if necessary
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
 				$this->reference_array = [];

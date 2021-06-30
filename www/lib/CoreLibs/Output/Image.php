@@ -29,11 +29,11 @@ class Image
 		bool $clear_cache = false
 	) {
 		// get image type flags
-		$image_types = array(
+		$image_types = [
 			1 => 'gif',
 			2 => 'jpg',
 			3 => 'png'
-		);
+		];
 		$return_data = false;
 		$CONVERT = '';
 		// if CONVERT is not defined, abort

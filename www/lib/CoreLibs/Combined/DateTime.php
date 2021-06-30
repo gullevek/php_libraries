@@ -190,8 +190,8 @@ class DateTime
 		list ($start_year, $start_month, $start_day) = array_pad(preg_split('/[\/-]/', $start_date), 3, null);
 		list ($end_year, $end_month, $end_day) = array_pad(preg_split('/[\/-]/', $end_date), 3, null);
 		// check that month & day are two digits and then combine
-		foreach (array('start', 'end') as $prefix) {
-			foreach (array('month', 'day') as $date_part) {
+		foreach (['start', 'end'] as $prefix) {
+			foreach (['month', 'day'] as $date_part) {
 				$_date = $prefix.'_'.$date_part;
 				if (isset($$_date) && $$_date < 10 && !preg_match("/^0/", $$_date)) {
 					$$_date = '0'.$$_date;
@@ -199,7 +199,7 @@ class DateTime
 			}
 			$_date = $prefix.'_date';
 			$$_date = '';
-			foreach (array('year', 'month', 'day') as $date_part) {
+			foreach (['year', 'month', 'day'] as $date_part) {
 				$_sub_date = $prefix.'_'.$date_part;
 				$$_date .= $$_sub_date;
 			}
@@ -254,7 +254,7 @@ class DateTime
 	public static function calcDaysInterval($start_date, $end_date, bool $return_named = false): array
 	{
 		// pos 0 all, pos 1 weekday, pos 2 weekend
-		$days = array();
+		$days = [];
 		$start = new \DateTime($start_date);
 		$end = new \DateTime($end_date);
 		// so we include the last day too, we need to add +1 second in the time
@@ -275,11 +275,11 @@ class DateTime
 			}
 		}
 		if ($return_named === true) {
-			return array(
+			return [
 				'overall' => $days[0],
 				'weekday' => $days[1],
 				'weekend' => $days[2]
-			);
+			];
 		} else {
 			return $days;
 		}

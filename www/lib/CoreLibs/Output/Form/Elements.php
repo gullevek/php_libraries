@@ -121,7 +121,7 @@ class Elements
 	public static function magicLinks(string $string, string $target = "_blank"): string
 	{
 		$output = $string;
-		$protList = array("http", "https", "ftp", "news", "nntp");
+		$protList = ["http", "https", "ftp", "news", "nntp"];
 
 		// find urls w/o  protocol
 		$output = preg_replace("/([^\/])www\.([\w\.-]+)\.([a-zA-Z]{2,4})/", "\\1http://www.\\2.\\3", $output);

@@ -81,8 +81,8 @@ if (!$login->login) {
 // can be overridden when setting DEBUG_ALL_OVERRIDE on top of the script (for emergency debugging of one page only)
 if ((TARGET == 'live' || TARGET == 'remote') && !$DEBUG_ALL_OVERRIDE) {
 	foreach (['debug', 'echo', 'print'] as $target) {
-		$login->log->setLogLevelAll($type, false);
-		$cms->log->setLogLevelAll($type, false);
+		$login->log->setLogLevelAll($target, false);
+		$cms->log->setLogLevelAll($target, false);
 	}
 }
 $smarty->DATA['JS_DEBUG'] = DEBUG;

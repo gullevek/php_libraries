@@ -30,7 +30,7 @@ class Html
 	 */
 	public static function removeLB(string $string, string $replace = ' '): string
 	{
-		return str_replace(array("\r", "\n"), $replace, $string);
+		return str_replace(["\r", "\n"], $replace, $string);
 	}
 
 	/**

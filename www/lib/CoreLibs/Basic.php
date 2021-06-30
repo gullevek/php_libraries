@@ -646,7 +646,7 @@ class Basic
 
 	/**
 	 * array search simple. looks for key, value Combined, if found, returns true
-	 * @param  array      $array array(search in)
+	 * @param  array      $array array (search in)
 	 * @param  string|int $key   key (key to search in)
 	 * @param  string|int $value value (what to find)
 	 * @return bool              true on found, false on not found
@@ -731,7 +731,7 @@ class Basic
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated, use join()', E_USER_DEPRECATED);
 		if (!is_array($array)) {
-			$array = array();
+			$array = [];
 		}
 		return join($connect_char, $array);
 	}
@@ -755,7 +755,7 @@ class Basic
 	 * @return array          flattened keys array
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::flattenArrayKey() instead
 	 */
-	public static function flattenArrayKey(array $array/*, array $return = array()*/): array
+	public static function flattenArrayKey(array $array/*, array $return = []*/): array
 	{
 		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArrayKey()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::flattenArrayKey($array);
@@ -764,7 +764,7 @@ class Basic
 	/**
 	 * searches for key -> value in an array tree and writes the value one level up
 	 * this will remove this leaf will all other values
-	 * @param  array      $array  array(nested)
+	 * @param  array      $array  array (nested)
 	 * @param  string|int $search key to find that has no sub leaf and will be pushed up
 	 * @return array              modified, flattened array
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arrayFlatForKey() instead
@@ -1229,9 +1229,9 @@ class Basic
 	{
 		trigger_error('Method '.__METHOD__.' has been removed', E_USER_DEPRECATED);
 		/* // set default password cost: use default set automatically
-		$this->password_options = array(
+		$this->password_options = [
 			// 'cost' => PASSWORD_BCRYPT_DEFAULT_COST
-		); */
+		]; */
 	}
 
 	/**

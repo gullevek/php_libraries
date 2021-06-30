@@ -122,7 +122,7 @@ class ArrayHandler
 
 	/**
 	 * array search simple. looks for key, value combination, if found, returns true
-	 * @param  array      $array array(search in)
+	 * @param  array      $array search in as array
 	 * @param  string|int $key   key (key to search in)
 	 * @param  string|int $value value (what to find)
 	 * @return bool              true on found, false on not found
@@ -313,7 +313,7 @@ class ArrayHandler
 	/**
 	 * searches for key -> value in an array tree and writes the value one level up
 	 * this will remove this leaf will all other values
-	 * @param  array      $array  array(nested)
+	 * @param  array      $array  nested array
 	 * @param  string|int $search key to find that has no sub leaf and will be pushed up
 	 * @return array              modified, flattened array
 	 */

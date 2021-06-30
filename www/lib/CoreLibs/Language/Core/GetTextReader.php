@@ -50,7 +50,7 @@ class GetTextReader
 	private $total = 0;          // total string count
 	private $table_originals = null;  // table for original strings (offsets)
 	private $table_translations = null;  // table for translated strings (offsets)
-	private $cache_translations = array();  // original -> translation mapping
+	private $cache_translations = [];  // original -> translation mapping
 
 
 	/* Methods */
@@ -166,7 +166,7 @@ class GetTextReader
 		}
 
 		if ($this->enable_cache) {
-			$this->cache_translations = array();
+			$this->cache_translations = [];
 			/* read all strings in the cache */
 			for ($i = 0; $i < $this->total; $i++) {
 				$this->STREAM->seekto($this->table_originals[$i * 2 + 2]);
