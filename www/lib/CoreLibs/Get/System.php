@@ -80,6 +80,16 @@ class System
 			return $page_temp['basename'];
 		}
 	}
+
+	/**
+	 * similar to getPageName, but it retuns the raw array
+	 *
+	 * @return array pathinfo array from PHP SELF
+	 */
+	public static function getPageNameArray(): array
+	{
+		return pathinfo($_SERVER['PHP_SELF']);
+	}
 }
 
 // __END__

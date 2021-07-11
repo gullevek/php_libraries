@@ -52,6 +52,9 @@ print "S::GETCALLERMETHOD: ".DebugSupport::getCallerMethod(0)."<br>";
 print "S::GETCALLERMETHOD: ".test()."<br>";
 print "S::PRINTAR: ".DebugSupport::printAr(['Foo', 'Bar'])."<br>";
 print "V-S::PRINTAR: ".$debug_support_class::printAr(['Foo', 'Bar'])."<br>";
+print "S::DEBUSTRING(s): ".DebugSupport::debugString('SET')."<br>";
+print "S::DEBUSTRING(''): ".DebugSupport::debugString('')."<br>";
+print "S::DEBUSTRING(,s): ".DebugSupport::debugString(null, '{-}')."<br>";
 
 // debug
 print "C->DEBUG: ".$debug->debug('CLASS-TEST-DEBUG', 'Class Test Debug')."<br>";

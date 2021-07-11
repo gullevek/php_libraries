@@ -433,7 +433,7 @@ class Logging
 	 */
 	public function prAr(array $a): string
 	{
-		return '{##HTMLPRE##}'.print_r($a, true).'{##/HTMLPRE##}';
+		return '##HTMLPRE##'.print_r($a, true).'##/HTMLPRE##';
 	}
 
 	/**
@@ -468,9 +468,9 @@ class Logging
 			.'{'.$class.'} '
 			.'<'.$level.'> - '
 			// strip the htmlpre special tags if exist
-			.preg_replace(
-				"/{##HTMLPRE##}((.|\n)*?){##\/HTMLPRE##}/m",
-				'\\1',
+			.str_replace(
+				['##HTMLPRE##', '##/HTMLPRE##'],
+				'',
 				// if stripping all html, etc is requested, only for write error msg
 				($strip ?
 					// find any <br> and replace them with \n
@@ -498,7 +498,11 @@ class Logging
 				// as is prefix, allow HTML
 				.$prefix
 				// we replace special HTMLPRE with <pre> entries
-				.preg_replace("/{##HTMLPRE##}((.|\n)*?){##\/HTMLPRE##}/m", "<pre>\\1</pre>", \CoreLibs\Convert\Html::htmlent($string))
+				.str_replace(
+					['##HTMLPRE##', '##/HTMLPRE##'],
+					['<pre>', '</pre>'],
+					\CoreLibs\Convert\Html::htmlent($string)
+				)
 				."</div><!--#BR#-->";
 		}
 		return true;

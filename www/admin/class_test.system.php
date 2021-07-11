@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+declare(strict_types=1);
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
@@ -39,6 +40,7 @@ print "GETHOSTNAME: ".DgS::printAr(System::getHostName())."<br>";
 print "GETPAGENAME(0): ".System::getPageName()."<br>";
 print "GETPAGENAME(1): ".System::getPageName(1)."<br>";
 print "GETPAGENAME(2): ".System::getPageName(2)."<br>";
+print "GETPAGENAMEARRAY: ".\CoreLibs\Debug\Support::printAr(System::getPageNameArray())."<br>";
 // seting errro codes file upload
 print "FILEUPLOADERRORMESSAGE(): ".System::fileUploadErrorMessage(-1)."<br>";
 print "FILEUPLOADERRORMESSAGE(UPLOAD_ERR_CANT_WRITE): ".System::fileUploadErrorMessage(UPLOAD_ERR_CANT_WRITE)."<br>";

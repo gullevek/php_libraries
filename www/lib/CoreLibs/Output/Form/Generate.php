@@ -260,31 +260,45 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function __construct(array $db_config, int $table_width = 750)
 	{
-		$this->my_page_name = \CoreLibs\Get\System::getPageName(1);
+		// replace any non valid variable names
+		$this->my_page_name = str_replace(['.'], '_', \CoreLibs\Get\System::getPageName(1));
 		$this->setLangEncoding();
 		// init the language class
 		$this->l = new \CoreLibs\Language\L10n($this->lang);
 		// load config array
 		// get table array definitions for current page name
-		// WARNING: auto spl load does not work with this as it is an array and not a function/object
-		// check if this is the old path or the new path
-		if (is_dir(TABLE_ARRAYS)) {
-			if (is_file(TABLE_ARRAYS.'array_'.$this->my_page_name.'.php')) {
-				include(TABLE_ARRAYS.'array_'.$this->my_page_name.'.php');
-			}
+
+		// first check if we have a in page override as $table_arrays[page name]
+		if (isset($_GLOBALS['table_arrays']) &&
+			is_array($_GLOBALS['table_arrays']) &&
+			isset($_GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)]) &&
+			is_array($_GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)])
+		) {
+			$config_array = $_GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)];
 		} else {
-			if (is_file(BASE.INCLUDES.TABLE_ARRAYS.'array_'.$this->my_page_name.'.php')) {
+			// WARNING: auto spl load does not work with this as it is an array and not a function/object
+			// check if this is the old path or the new path
+			// check local folder in current path
+			// then check general global folder
+			if (is_dir(TABLE_ARRAYS) &&
+				is_file(TABLE_ARRAYS.'array_'.$this->my_page_name.'.php')
+			) {
+				include(TABLE_ARRAYS.'array_'.$this->my_page_name.'.php');
+			} elseif (is_dir(BASE.INCLUDES.TABLE_ARRAYS) &&
+				is_file(BASE.INCLUDES.TABLE_ARRAYS.'array_'.$this->my_page_name.'.php')
+			) {
 				include(BASE.INCLUDES.TABLE_ARRAYS.'array_'.$this->my_page_name.'.php');
 			}
-		}
-		if (isset(${$this->my_page_name}) && is_array(${$this->my_page_name})) {
-			$config_array = ${$this->my_page_name};
-		} else {
-			// dummy created
-			$config_array = [
-				'table_array' => [],
-				'table_name' => '',
-			];
+			// in the include file there must be a variable with the page name matching
+			if (isset(${$this->my_page_name}) && is_array(${$this->my_page_name})) {
+				$config_array = ${$this->my_page_name};
+			} else {
+				// dummy created
+				$config_array = [
+					'table_array' => [],
+					'table_name' => '',
+				];
+			}
 		}
 
 		// start the array_io class which will start db_io ...

@@ -920,7 +920,7 @@ class IO extends \CoreLibs\Basic
 			$max_calls > 0
 		) {
 			$this->MAX_QUERY_CALL = $max_calls;
-			$succes = true;
+			$success = true;
 		}
 		return $success;
 	}

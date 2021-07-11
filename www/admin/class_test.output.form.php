@@ -29,6 +29,31 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-form';
 ob_end_flush();
 
+// define an array for page use
+$table_arrays[\CoreLibs\Get\System::getPageName(1)] = [
+	// form fields mtaching up with db fields
+	'table_array' => [
+	],
+	// laod query
+	'load_query' => '',
+	// database table to load from
+	'table_name' => '',
+	// for load dro pdown, format output
+	'show_fields' => [
+		[
+			'name' => 'name'
+		],
+		[
+			'name' => 'enabled',
+			'binary' => ['Yes', 'No'],
+			'before_value' => 'Enabled: '
+		],
+	],
+	// a multi reference entry
+	'element_list' => [
+	]
+];
+
 $basic = new CoreLibs\Basic();
 $form = new CoreLibs\Output\Form\Generate(DB_CONFIG);
 // $db = new CoreLibs\DB\IO(DB_CONFIG, $basic->log);
@@ -37,7 +62,8 @@ print "<html><head><title>TEST CLASS: FORM GENERATE</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
-print "TODO<br>";
+print "MOBILE PHONE: ".$form->mobile_phone."<br>";
+print "MY PAGE NAME: ".$form->my_page_name."<br>"; // sets table array to include
 
 // error message
 print $basic->log->printErrorMsg();

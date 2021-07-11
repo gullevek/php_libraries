@@ -78,6 +78,21 @@ class Support
 		}
 		return $class ?? '';
 	}
+
+	/**
+	 * If a string is empty, sets '-' for return, or if given any other string
+	 *
+	 * @param  string|null $string  The string to check
+	 * @param  string      $replace [default '-'] What to replace the empty string with
+	 * @return string               String itself or the replaced value
+	 */
+	public static function debugString(?string $string, string $replace = '-'): string
+	{
+		if (empty($string)) {
+			return $replace;
+		}
+		return $string;
+	}
 }
 
 // __END__
