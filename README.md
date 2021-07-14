@@ -1,5 +1,13 @@
 # PHP Core Library
 
+## Code Standard
+
+ * Uses PSR-12
+ * tab indent instead of 4 spaces indent
+ * Warning at 120 character length, error at 240 character length
+
+## General information
+
 Base PHP class files to setup any project
   * login
   * database wrapper

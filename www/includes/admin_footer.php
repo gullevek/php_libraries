@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2008/08/14
@@ -6,6 +7,8 @@
 * URL redirect header
 * HISTORY:
 *********************************************************************/
+
+declare(strict_types=1);
 
 // print debug messages
 echo $login->log->printErrorMsg();

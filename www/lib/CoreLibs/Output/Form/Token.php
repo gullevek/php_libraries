@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * sets a form token in the _SESSION variable
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Output\Form;
 

@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * various file/file name functions
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Check;
 
@@ -26,7 +28,8 @@ class File
 	 */
 	public static function getLinesFromFile(string $file): int
 	{
-		if (is_file($file) &&
+		if (
+			is_file($file) &&
 			file_exists($file) &&
 			is_readable($file)
 		) {

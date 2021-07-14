@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * various math related function wrappers
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Convert;
 

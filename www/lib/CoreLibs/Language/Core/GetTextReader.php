@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /*
 	Copyright (c) 2003, 2009 Danilo Segan <danilo@kvota.net>.
 	Copyright (c) 2005 Nico Kaiser <nico@siriux.net>
@@ -19,6 +20,8 @@
 	along with PHP-gettext; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Language\Core;
 
@@ -95,10 +98,10 @@ class GetTextReader
 	{
 		if ($this->BYTEORDER == 0) {
 			// low endian
-			return unpack('V'.$count, $this->STREAM->read(4 * $count));
+			return unpack('V' . $count, $this->STREAM->read(4 * $count));
 		} else {
 			// big endian
-			return unpack('N'.$count, $this->STREAM->read(4 * $count));
+			return unpack('N' . $count, $this->STREAM->read(4 * $count));
 		}
 	}
 
@@ -149,9 +152,11 @@ class GetTextReader
 	*/
 	private function load_tables()
 	{
-		if (is_array($this->cache_translations) &&
+		if (
+			is_array($this->cache_translations) &&
 			is_array($this->table_originals) &&
-			is_array($this->table_translations)) {
+			is_array($this->table_translations)
+		) {
 			return;
 		}
 
@@ -319,7 +324,7 @@ class GetTextReader
 					$res .= ') : (';
 					break;
 				case ';':
-					$res .= str_repeat(')', $p).';';
+					$res .= str_repeat(')', $p) . ';';
 					$p = 0;
 					break;
 				default:
@@ -448,7 +453,7 @@ class GetTextReader
 	 */
 	public function pgettext($context, $msgid)
 	{
-		$key = $context.chr(4).$msgid;
+		$key = $context . chr(4) . $msgid;
 		$ret = $this->translate($key);
 		if (strpos($ret, "\004") !== false) {
 			return $msgid;
@@ -467,7 +472,7 @@ class GetTextReader
 	 */
 	public function npgettext($context, $singular, $plural, $number)
 	{
-		$key = $context.chr(4).$singular;
+		$key = $context . chr(4) . $singular;
 		$ret = $this->ngettext($key, $plural, $number);
 		if (strpos($ret, "\004") !== false) {
 			return $singular;

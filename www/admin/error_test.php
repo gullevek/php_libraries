@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -11,8 +13,8 @@ if ($DEBUG_ALL) {
 
 // sample config
 require 'config.php';
-echo "FILE: ".BASE.LIB."Error.Handling.php<br>";
-require(BASE.LIB."Error.Handling.php");
+echo "FILE: " . BASE . LIB . "Error.Handling.php<br>";
+require(BASE . LIB . "Error.Handling.php");
 
 if ($var) {
 	echo "OUT<br>";

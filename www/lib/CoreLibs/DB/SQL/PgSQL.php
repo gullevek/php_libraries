@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/04/09
@@ -11,7 +12,9 @@
 *  HISTORY:
 * 2008/04/16 (cs) wrapper for pg escape string
 * 2007/01/11 (cs) add prepare/execute for postgres
-* 2006/09/12 (cs) in case db_query retuns false, save the query and run the query through the send/get procedure to get correct error data from the db
+* 2006/09/12 (cs) in case db_query retuns false, save the query and
+*                 run the query through the send/get procedure to get
+*                 correct error data from the db
 * 2006/06/26 (cs) added port for db connection
 * 2006/04/03 (cs) added meta data for table
 * 2005/07/25 (cs) removed the plural s remove, not needed and not 100% working
@@ -40,6 +43,8 @@
 * pg_escape_string
 *
 */
+
+declare(strict_types=1);
 
 namespace CoreLibs\DB\SQL;
 
@@ -258,9 +263,9 @@ class PgSQL
 				// if (preg_match("/.*s$/i", $table))
 				// 	$table = substr($table, 0, -1);
 				// set pk_name to "id"
-				$pk_name = $table."_id";
+				$pk_name = $table . "_id";
 			}
-			$seq = ($schema ? $schema.'.' : '').$table."_".$pk_name."_seq";
+			$seq = ($schema ? $schema . '.' : '') . $table . "_" . $pk_name . "_seq";
 			$q = "SELECT CURRVAL('$seq') AS insert_id";
 			// I have to do manually or I overwrite the original insert internal vars ...
 			if ($q = $this->__dbQuery($q)) {
@@ -288,27 +293,28 @@ class PgSQL
 				$cursor = $this->__dbQuery($q);
 				$search_path = $this->__dbFetchArray($cursor)['search_path'];
 				if ($search_path != $schema) {
-					$table_prefix = $schema.'.';
+					$table_prefix = $schema . '.';
 				}
 			}
 			// read from table the PK name
 			// faster primary key get
-			$q = "SELECT pg_attribute.attname AS column_name, format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type ";
-			$q .= "FROM pg_index, pg_class, pg_attribute ";
+			$q = "SELECT pg_attribute.attname AS column_name, "
+				. "format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type "
+				. "FROM pg_index, pg_class, pg_attribute ";
 			if ($schema) {
 				$q .= ", pg_namespace ";
 			}
-			$q .= "WHERE ";
-			// regclass translates the OID to the name
-			$q .= "pg_class.oid = '".$table_prefix.$table."'::regclass AND ";
-				$q .= "indrelid = pg_class.oid AND ";
+			$q .= "WHERE "
+				// regclass translates the OID to the name
+				. "pg_class.oid = '" . $table_prefix . $table . "'::regclass AND "
+				. "indrelid = pg_class.oid AND ";
 			if ($schema) {
-				$q .= "nspname = '".$schema."' AND ";
-				$q .= "pg_class.relnamespace = pg_namespace.oid AND ";
+				$q .= "nspname = '" . $schema . "' AND "
+					. "pg_class.relnamespace = pg_namespace.oid AND ";
 			}
-			$q .= "pg_attribute.attrelid = pg_class.oid AND ";
-			$q .= "pg_attribute.attnum = any(pg_index.indkey) ";
-			$q .= "AND indisprimary";
+			$q .= "pg_attribute.attrelid = pg_class.oid AND "
+				. "pg_attribute.attnum = any(pg_index.indkey) "
+				. "AND indisprimary";
 			$cursor = $this->__dbQuery($q);
 			if ($cursor) {
 				return $this->__dbFetchArray($cursor)['column_name'] ?? false;
@@ -330,15 +336,23 @@ class PgSQL
 	 * @param  string    $db_ssl  SSL (allow is default)
 	 * @return ?resource          db handler resource or null on error
 	 */
-	public function __dbConnect(string $db_host, string $db_user, string $db_pass, string $db_name, int $db_port = 5432, string $db_ssl = 'allow')
-	{
+	public function __dbConnect(
+		string $db_host,
+		string $db_user,
+		string $db_pass,
+		string $db_name,
+		int $db_port = 5432,
+		string $db_ssl = 'allow'
+	) {
 		// to avoid empty db_port
 		if (!$db_port) {
 			$db_port = 5432;
 		}
-		$this->dbh = pg_connect("host=".$db_host." port=".$db_port." user=".$db_user." password=".$db_pass." dbname=".$db_name." sslmode=".$db_ssl);
+		$this->dbh = pg_connect("host=" . $db_host . " port=" . $db_port . " user="
+			. $db_user . " password=" . $db_pass . " dbname=" . $db_name . " sslmode=" . $db_ssl);
 		if (!$this->dbh) {
-			die("<!-- Can't connect [host=".$db_host." port=".$db_port." user=".$db_user." password=XXXX dbname=".$db_name." sslmode=".$db_ssl."] //-->");
+			die("<!-- Can't connect [host=" . $db_host . " port=" . $db_port . " user="
+				. $db_user . " password=XXXX dbname=" . $db_name . " sslmode=" . $db_ssl . "] //-->");
 			return null;
 		}
 		return $this->dbh;
@@ -359,7 +373,7 @@ class PgSQL
 			$cursor = pg_get_result($this->dbh);
 		}
 		if ($cursor && pg_result_error($cursor)) {
-			return "<span style=\"color: red;\"><b>-PostgreSQL-Error-></b> ".pg_result_error($cursor)."</span><br>";
+			return "<span style=\"color: red;\"><b>-PostgreSQL-Error-></b> " . pg_result_error($cursor) . "</span><br>";
 		} else {
 			return '';
 		}

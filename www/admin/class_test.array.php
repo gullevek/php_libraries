@@ -1,8 +1,10 @@
 <?php // phpcs:ignore warning
-declare(strict_types=1);
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -54,15 +56,19 @@ $test_array = [
 	],
 ];
 
-echo "SOURCE ARRAY: ".DgS::printAr($test_array)."<br>";
+echo "SOURCE ARRAY: " . DgS::printAr($test_array) . "<br>";
 // frist return
-echo "ARRAYSEARCHRECURSIVE(email, [array], type): ".DgS::printAr(ArrayHandler::arraySearchRecursive('email', $test_array, 'type'))."<br>";
-echo "ARRAYSEARCHRECURSIVE(email, [array]['input'], type): ".DgS::printAr(ArrayHandler::arraySearchRecursive('email', $test_array['input'], 'type'))."<br>";
+echo "ARRAYSEARCHRECURSIVE(email, [array], type): "
+	. DgS::printAr(ArrayHandler::arraySearchRecursive('email', $test_array, 'type')) . "<br>";
+echo "ARRAYSEARCHRECURSIVE(email, [array]['input'], type): "
+	. DgS::printAr(ArrayHandler::arraySearchRecursive('email', $test_array['input'], 'type')) . "<br>";
 // all return
-echo "ARRAYSEARCHRECURSIVEALL(email, [array], type): ".Dgs::printAr((array)ArrayHandler::arraySearchRecursiveAll('email', $test_array, 'type'))."<br>";
+echo "ARRAYSEARCHRECURSIVEALL(email, [array], type): "
+	. Dgs::printAr((array)ArrayHandler::arraySearchRecursiveAll('email', $test_array, 'type')) . "<br>";
 
 // simple search
-echo "ARRAYSEARCHSIMPLE([array], type, email): ".(string)ArrayHandler::arraySearchSimple($test_array, 'type', 'email')."<br>";
+echo "ARRAYSEARCHSIMPLE([array], type, email): "
+	. (string)ArrayHandler::arraySearchSimple($test_array, 'type', 'email') . "<br>";
 
 $array_1 = [
 	'foo' => 'bar'
@@ -76,7 +82,7 @@ $array_3 = [
 	]
 ];
 // recusrice merge
-print "ARRAYMERGERECURSIVE: ".DgS::printAr(ArrayHandler::arrayMergeRecursive($array_1, $array_2, $array_3))."<br>";
+print "ARRAYMERGERECURSIVE: " . DgS::printAr(ArrayHandler::arrayMergeRecursive($array_1, $array_2, $array_3)) . "<br>";
 // array difference
 $array_left = [
 	'same' => 'data',
@@ -86,14 +92,14 @@ $array_right = [
 	'same' => 'data',
 	'right' => 'has R'
 ];
-print "ARRAYDIFF: ".DgS::printAr(ArrayHandler::arrayDiff($array_left, $array_right))."<br>";
+print "ARRAYDIFF: " . DgS::printAr(ArrayHandler::arrayDiff($array_left, $array_right)) . "<br>";
 // in array check
-print "INARRAYANY([1,3], [array]): ".DgS::printAr(ArrayHandler::inArrayAny([1, 3], $array_2))."<br>";
+print "INARRAYANY([1,3], [array]): " . DgS::printAr(ArrayHandler::inArrayAny([1, 3], $array_2)) . "<br>";
 // flatten array
-print "FLATTENARRAY: ".DgS::printAr(ArrayHandler::flattenArray($test_array))."<br>";
-print "FLATTENARRAYKEY: ".DgS::printAr(ArrayHandler::flattenArrayKey($test_array))."<br>";
+print "FLATTENARRAY: " . DgS::printAr(ArrayHandler::flattenArray($test_array)) . "<br>";
+print "FLATTENARRAYKEY: " . DgS::printAr(ArrayHandler::flattenArrayKey($test_array)) . "<br>";
 // flatten for key set
-print "ARRAYFLATFORKEY: ".DgS::printAr(ArrayHandler::arrayFlatForKey($test_array, 'type'))."<br>";
+print "ARRAYFLATFORKEY: " . DgS::printAr(ArrayHandler::arrayFlatForKey($test_array, 'type')) . "<br>";
 
 // DEPRECATED
 // print "ARRAYMERGERECURSIVE: ".DgS::printAr($basic->arrayMergeRecursive($array_1, $array_2, $array_3))."<br>";
@@ -111,18 +117,19 @@ function rec(string $pre, string $cur, array $node = [])
 	if (!is_array($node)) {
 		$node = [];
 	}
-	print "<div style='color: green;'>#### PRE: ".$pre.", CUR: ".$cur.", N-c: ".count($node)." [".join('|', array_keys($node))."]</div>";
+	print "<div style='color: green;'>#### PRE: " . $pre . ", CUR: " . $cur . ", N-c: "
+		. count($node) . " [" . join('|', array_keys($node)) . "]</div>";
 	if (!$pre) {
 		print "** <span style='color: red;'>NEW</span><br>";
 		$node[$cur] = [];
 	} else {
 		if (array_key_exists($pre, $node)) {
-			print "+ <span style='color: orange;'>KEY FOUND:</span> ".$pre.", add: ".$cur."<br>";
+			print "+ <span style='color: orange;'>KEY FOUND:</span> " . $pre . ", add: " . $cur . "<br>";
 			$node[$pre][$cur] = [];
 		} else {
 			print "- NOT FOUND: loop<br>";
 			foreach ($node as $_pre => $_cur) {
-				print "> TRY: ".$_pre." => ".count($_cur)." [".join('|', array_keys($_cur))."]<br>";
+				print "> TRY: " . $_pre . " => " . count($_cur) . " [" . join('|', array_keys($_cur)) . "]<br>";
 				if (count($_cur) > 0) {
 					$node[$_pre] = rec($pre, $cur, $_cur);
 				}
@@ -185,8 +192,8 @@ $test = rec('C', 'U', $test);
 $test = rec('F', 'U', $test);
 $test = rec('', 'Al', $test);
 $test = rec('B', 'B1', $test);
-print "ORIGINAL: ".\CoreLibs\Debug\Support::printAr($test)."<br>";
-print "FLATTEN: ".\CoreLibs\Debug\Support::printAr(flattenArrayKey($test))."<br>";
+print "ORIGINAL: " . \CoreLibs\Debug\Support::printAr($test) . "<br>";
+print "FLATTEN: " . \CoreLibs\Debug\Support::printAr(flattenArrayKey($test)) . "<br>";
 
 // error message
 print $basic->log->printErrorMsg();

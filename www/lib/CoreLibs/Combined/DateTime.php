@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * image thumbnail, rotate, etc
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Combined;
 
@@ -21,7 +23,7 @@ class DateTime
 		list ($timestamp, $ms) = array_pad(explode('.', (string)round($timestamp, 4)), 2, null);
 		$string = date("Y-m-d H:i:s", (int)$timestamp);
 		if ($show_micro && $ms) {
-			$string .= ' '.$ms.'ms';
+			$string .= ' ' . $ms . 'ms';
 		}
 		return $string;
 	}
@@ -50,12 +52,12 @@ class DateTime
 			if ($timestamp == 0) {
 				$time_string = '0s';
 			} else {
-				for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i ++) {
+				for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i++) {
 					$output = floor((float)$timestamp / $timegroups[$i]);
 					$timestamp = (float)$timestamp % $timegroups[$i];
 					// output has days|hours|min|sec
 					if ($output || $time_string) {
-						$time_string .= $output.$labels[$i].(($i + 1) != count($timegroups) ? ' ' : '');
+						$time_string .= $output . $labels[$i] . (($i + 1) != count($timegroups) ? ' ' : '');
 					}
 				}
 			}
@@ -65,13 +67,13 @@ class DateTime
 				$ms = preg_replace("/^0+(\d+)$/", '${1}', $ms);
 				// add ms if there
 				if ($show_micro) {
-					$time_string .= ' '.(!$ms ? 0 : $ms).'ms';
+					$time_string .= ' ' . (!$ms ? 0 : $ms) . 'ms';
 				} elseif (!$time_string) {
-					$time_string .= (!$ms ? 0 : $ms).'ms';
+					$time_string .= (!$ms ? 0 : $ms) . 'ms';
 				}
 			}
 			if ($negative) {
-				$time_string = '-'.$time_string;
+				$time_string = '-' . $time_string;
 			}
 		} else {
 			$time_string = $timestamp;
@@ -108,7 +110,7 @@ class DateTime
 				}
 			}
 			if (isset($matches[10]) && is_numeric($matches[10])) {
-				$timestamp .= '.'.$matches[10];
+				$timestamp .= '.' . $matches[10];
 			}
 			if ($negative) {
 				$timestamp *= -1;
@@ -159,7 +161,8 @@ class DateTime
 		if (!is_numeric($hour) || !is_numeric($min)) {
 			return false;
 		}
-		if (($hour < 0 || $hour > 24) ||
+		if (
+			($hour < 0 || $hour > 24) ||
 			($min < 0 || $min > 60) ||
 			(is_numeric($sec) && ($sec < 0 || $sec > 60))
 		) {
@@ -192,15 +195,15 @@ class DateTime
 		// check that month & day are two digits and then combine
 		foreach (['start', 'end'] as $prefix) {
 			foreach (['month', 'day'] as $date_part) {
-				$_date = $prefix.'_'.$date_part;
+				$_date = $prefix . '_' . $date_part;
 				if (isset($$_date) && $$_date < 10 && !preg_match("/^0/", $$_date)) {
-					$$_date = '0'.$$_date;
+					$$_date = '0' . $$_date;
 				}
 			}
-			$_date = $prefix.'_date';
+			$_date = $prefix . '_date';
 			$$_date = '';
 			foreach (['year', 'month', 'day'] as $date_part) {
-				$_sub_date = $prefix.'_'.$date_part;
+				$_sub_date = $prefix . '_' . $date_part;
 				$$_date .= $$_sub_date;
 			}
 		}

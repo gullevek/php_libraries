@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/06/10
@@ -7,75 +8,77 @@
 * HISTORY:
 *********************************************************************/
 
+declare(strict_types=1);
+
 /************* PATHS *********************/
 // directory seperator
 define('DS', DIRECTORY_SEPARATOR);
 // ** NEW/BETTER DIR DECLARATIONS **
 // path to original file (if symlink)
-define('DIR', __DIR__.DS);
+define('DIR', __DIR__ . DS);
 // base dir root folder level
-define('BASE', str_replace('/configs', '', __DIR__).DS);
+define('BASE', str_replace('/configs', '', __DIR__) . DS);
 
 // ** OLD DIR DECLARATIONS **
 // path to document root of file called
-define('ROOT', getcwd().DS);
+define('ROOT', getcwd() .  DS);
 // libs path
-define('LIB', 'lib'.DS);
-define('LIBS', 'lib'.DS);
+define('LIB', 'lib' .  DS);
+define('LIBS', 'lib' .  DS);
 // configs folder
-define('CONFIGS', 'configs'.DS);
+define('CONFIGS', 'configs' .  DS);
 // includes (strings, arrays for static, etc)
-define('INCLUDES', 'includes'.DS);
+define('INCLUDES', 'includes' .  DS);
 // data folder (mostly in includes, or root for internal data)
-define('DATA', 'data'.DS);
+define('DATA', 'data' .  DS);
 // layout base path
-define('LAYOUT', 'layout'.DS);
+define('LAYOUT', 'layout' .  DS);
 // pic-root (compatible to CMS)
-define('PICTURES', 'images'.DS);
+define('PICTURES', 'images' .  DS);
 // images
-define('IMAGES', 'images'.DS);
+define('IMAGES', 'images' .  DS);
 // icons (below the images/ folder)
-define('ICONS', 'icons'.DS);
+define('ICONS', 'icons' .  DS);
 // media (accessable from outside)
-define('MEDIA', 'media'.DS);
+define('MEDIA', 'media' .  DS);
 // flash-root (below media or data)
-define('FLASH', 'flash'.DS);
+define('FLASH', 'flash' .  DS);
 // uploads (anything to keep or data)
-define('UPLOADS', 'uploads'.DS);
+define('UPLOADS', 'uploads' .  DS);
 // files (binaries) (below media or data)
-define('BINARIES', 'binaries'.DS);
+define('BINARIES', 'binaries' .  DS);
 // files (videos) (below media or data)
-define('VIDEOS', 'videos'.DS);
+define('VIDEOS', 'videos' .  DS);
 // files (documents) (below media or data)
-define('DOCUMENTS', 'documents'.DS);
+define('DOCUMENTS', 'documents' .  DS);
 // files (pdfs) (below media or data)
-define('PDFS', 'documents'.DS);
+define('PDFS', 'documents' .  DS);
 // files (general) (below media or data)
-define('FILES', 'files'.DS);
+define('FILES', 'files' .  DS);
 // CSV
-define('CSV', 'csv'.DS);
+define('CSV', 'csv' .  DS);
 // css
-define('CSS', 'css'.DS);
+define('CSS', 'css' .  DS);
 // font (web)
-define('FONT', 'font'.DS);
+define('FONT', 'font' .  DS);
 // js
-define('JS', 'javascript'.DS);
+define('JS', 'javascript' .  DS);
 // table arrays
-define('TABLE_ARRAYS', 'table_arrays'.DS);
+define('TABLE_ARRAYS', 'table_arrays' .  DS);
 // smarty libs path
-define('SMARTY', 'Smarty'.DS);
+define('SMARTY', 'Smarty' .  DS);
 // po langs
-define('LANG', 'lang'.DS);
+define('LANG', 'lang' .  DS);
 // cache path
-define('CACHE', 'cache'.DS);
+define('CACHE', 'cache' .  DS);
 // temp path
-define('TMP', 'tmp'.DS);
+define('TMP', 'tmp' .  DS);
 // log files
-define('LOG', 'log'.DS);
+define('LOG', 'log' .  DS);
 // compiled template folder
-define('TEMPLATES_C', 'templates_c'.DS);
+define('TEMPLATES_C', 'templates_c' .  DS);
 // template base
-define('TEMPLATES', 'templates'.DS);
+define('TEMPLATES', 'templates' .  DS);
 
 /************* HASH / ACL DEFAULT / ERROR SETTINGS / SMARTY *************/
 // default hash type
@@ -112,14 +115,14 @@ define('PASSWORD_SPECIAL_RANGE', '@$!%*?&');
 define('PASSWORD_LOWER', '(?=.*[a-z])');
 define('PASSWORD_UPPER', '(?=.*[A-Z])');
 define('PASSWORD_NUMBER', '(?=.*\d)');
-define('PASSWORD_SPECIAL', "(?=.*[".PASSWORD_SPECIAL_RANGE."])");
+define('PASSWORD_SPECIAL', "(?=.*[" . PASSWORD_SPECIAL_RANGE . "])");
 // define full regex
-define('PASSWORD_REGEX', "/^".
-	(defined('PASSWORD_LOWER') ? PASSWORD_LOWER : '').
-	(defined('PASSWORD_UPPER') ? PASSWORD_UPPER : '').
-	(defined('PASSWORD_NUMBER') ? PASSWORD_NUMBER : '').
-	(defined('PASSWORD_SPECIAL') ? PASSWORD_SPECIAL : '').
-	"[A-Za-z\d".PASSWORD_SPECIAL_RANGE."]{".PASSWORD_MIN_LENGTH.",".PASSWORD_MAX_LENGTH."}$/");
+define('PASSWORD_REGEX', "/^"
+	. (defined('PASSWORD_LOWER') ? PASSWORD_LOWER : '')
+	. (defined('PASSWORD_UPPER') ? PASSWORD_UPPER : '')
+	. (defined('PASSWORD_NUMBER') ? PASSWORD_NUMBER : '')
+	. (defined('PASSWORD_SPECIAL') ? PASSWORD_SPECIAL : '')
+	. "[A-Za-z\d" . PASSWORD_SPECIAL_RANGE . "]{" . PASSWORD_MIN_LENGTH . "," . PASSWORD_MAX_LENGTH . "}$/");
 
 /************* AJAX / ACCESS *************/
 // ajax request type
@@ -145,15 +148,15 @@ define('BASE_NAME', 'CoreLibs');
 define('SERVER_NAME_HASH', hash('crc32b', $_SERVER['HTTP_HOST']));
 define('SERVER_PATH_HASH', hash('crc32b', BASE));
 // backend
-define('EDIT_SESSION_NAME', BASE_NAME.'Admin'.SERVER_NAME_HASH.SERVER_PATH_HASH);
+define('EDIT_SESSION_NAME', BASE_NAME . 'Admin' . SERVER_NAME_HASH . SERVER_PATH_HASH);
 // frontend
-define('SESSION_NAME', BASE_NAME.SERVER_NAME_HASH.SERVER_PATH_HASH);
+define('SESSION_NAME', BASE_NAME . SERVER_NAME_HASH . SERVER_PATH_HASH);
 // SET_SESSION_NAME should be set in the header if a special session name is needed
 define('SET_SESSION_NAME', SESSION_NAME);
 
 /************* CACHE/COMPILE IDS *************/
-define('CACHE_ID', 'CACHE_'.BASE_NAME.'_'.SERVER_NAME_HASH);
-define('COMPILE_ID', 'COMPILE_'.BASE_NAME.'_'.SERVER_NAME_HASH);
+define('CACHE_ID', 'CACHE_' . BASE_NAME . '_' . SERVER_NAME_HASH);
+define('COMPILE_ID', 'COMPILE_' . BASE_NAME . '_' . SERVER_NAME_HASH);
 
 /************* LANGUAGE / ENCODING *******/
 define('DEFAULT_LANG', 'en_utf8');
@@ -183,22 +186,22 @@ define('GLOBAL_DB_SCHEMA', '');
 define('LOGIN_DB_SCHEMA', '');
 
 /************* CORE HOST SETTINGS *****************/
-if (file_exists(BASE.CONFIGS.'config.host.php')) {
-	require BASE.CONFIGS.'config.host.php';
+if (file_exists(BASE . CONFIGS . 'config.host.php')) {
+	require BASE . CONFIGS . 'config.host.php';
 }
 if (!isset($SITE_CONFIG)) {
 	$SITE_CONFIG = [];
 }
 /************* DB ACCESS *****************/
-if (file_exists(BASE.CONFIGS.'config.db.php')) {
-	require BASE.CONFIGS.'config.db.php';
+if (file_exists(BASE . CONFIGS . 'config.db.php')) {
+	require BASE . CONFIGS . 'config.db.php';
 }
 if (!isset($DB_CONFIG)) {
 	$DB_CONFIG = [];
 }
 /************* OTHER PATHS *****************/
-if (file_exists(BASE.CONFIGS.'config.path.php')) {
-	require BASE.CONFIGS.'config.path.php';
+if (file_exists(BASE . CONFIGS . 'config.path.php')) {
+	require BASE . CONFIGS . 'config.path.php';
 }
 
 /************* MASTER INIT *****************/
@@ -210,14 +213,15 @@ list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 define('HOST_NAME', $HOST_NAME);
 // BAIL ON MISSING MASTER SITE CONFIG
 if (!isset($SITE_CONFIG[HOST_NAME]['location'])) {
-	echo 'Missing SITE_CONFIG entry for: "'.HOST_NAME.'". Contact Administrator';
+	echo 'Missing SITE_CONFIG entry for: "' . HOST_NAME . '" .  Contact Administrator';
 	exit;
 }
 // BAIL ON MISSING DB CONFIG:
 // we have either no db selction for this host but have db config entries
 // or we have a db selection but no db config as array or empty
 // or we have a selection but no matching db config entry
-if ((!isset($SITE_CONFIG[HOST_NAME]['db_host']) && count($DB_CONFIG)) ||
+if (
+	(!isset($SITE_CONFIG[HOST_NAME]['db_host']) && count($DB_CONFIG)) ||
 	(isset($SITE_CONFIG[HOST_NAME]['db_host']) &&
 		// missing DB CONFIG
 		((is_array($DB_CONFIG) && !count($DB_CONFIG)) ||
@@ -226,12 +230,14 @@ if ((!isset($SITE_CONFIG[HOST_NAME]['db_host']) && count($DB_CONFIG)) ||
 		(is_array($DB_CONFIG) && count($DB_CONFIG) && !isset($DB_CONFIG[$SITE_CONFIG[HOST_NAME]['db_host']])))
 	)
 ) {
-	echo 'No matching DB config found for: "'.HOST_NAME.'". Contact Administrator';
+	echo 'No matching DB config found for: "' . HOST_NAME . '" .  Contact Administrator';
 	exit;
 }
 // set SSL on
-if ((array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
-	$_SERVER['SERVER_PORT'] == 443) {
+if (
+	(array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+	$_SERVER['SERVER_PORT'] == 443
+) {
 	define('HOST_SSL', true);
 	define('HOST_PROTOCOL', 'https://');
 } else {
@@ -244,8 +250,10 @@ define('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ? $DB_CONFIG[DB_CONFIG_NAM
 // define('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
 // define('DB_CONFIG_OTHER', SITE_CONFIG[$HOST_NAME]['db_host_other']);
 // override for login and global schemas
-// define('LOGIN_DB_SCHEMA', PUBLIC_SCHEMA); // where the edit* tables are
-// define('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA); // where global tables are that are used by all schemas (eg queue tables for online, etc)
+// where the edit* tables are
+// define('LOGIN_DB_SCHEMA', PUBLIC_SCHEMA);
+// where global tables are that are used by all schemas (eg queue tables for online, etc)
+// define('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA);
 // debug settings, site lang, etc
 define('TARGET', $SITE_CONFIG[HOST_NAME]['location']);
 define('DEBUG', $SITE_CONFIG[HOST_NAME]['debug_flag']);
@@ -271,8 +279,8 @@ define('JAVASCRIPT', 'frontend.js');
 // anything optional
 /************* INTERNAL ******************/
 // any other global definitons in the config.other.php
-if (file_exists(BASE.CONFIGS.'config.other.php')) {
-	require BASE.CONFIGS.'config.other.php';
+if (file_exists(BASE . CONFIGS . 'config.other.php')) {
+	require BASE . CONFIGS . 'config.other.php';
 }
 
 /************* DEBUG *******************/
@@ -295,6 +303,6 @@ if (defined('DEBUG') && DEBUG == false) {
 
 /************* AUTO LOADER *******************/
 // read auto loader
-require BASE.LIB.'autoloader.php';
+require BASE . LIB . 'autoloader.php';
 
 // __END__

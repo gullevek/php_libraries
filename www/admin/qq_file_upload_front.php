@@ -10,7 +10,7 @@ require 'config.php';
 $base = new CoreLibs\Basic();
 // set max upload size
 $MAX_UPLOAD_SIZE = $base->StringByteFormat(ini_get('upload_max_filesize'));
-$base->debug('UPLOADED FRONT', 'With max size: '.$MAX_UPLOAD_SIZE);
+$base->debug('UPLOADED FRONT', 'With max size: ' . $MAX_UPLOAD_SIZE);
 
 // very basic template output with super basic div for two file upload
 ?>

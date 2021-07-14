@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -40,17 +43,17 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $password = 'something1234';
 $enc_password = $_password->passwordSet($password);
-print "PASSWORD: $password: ".$enc_password."<br>";
-print "PASSWORD VERIFY: ".(string)$_password->passwordVerify($password, $enc_password)."<br>";
-print "PASSWORD REHASH: ".(string)$_password->passwordRehashCheck($enc_password)."<br>";
+print "PASSWORD: $password: " . $enc_password . "<br>";
+print "PASSWORD VERIFY: " . (string)$_password->passwordVerify($password, $enc_password) . "<br>";
+print "PASSWORD REHASH: " . (string)$_password->passwordRehashCheck($enc_password) . "<br>";
 // static verify
 $password = 'othername7890';
 $enc_password = $password_class::passwordSet($password);
-print "PASSWORD: $password: ".$enc_password."<br>";
-print "S-PASSWORD VERIFY: ".(string)$password_class::passwordVerify($password, $enc_password)."<br>";
-print "PASSWORD REHASH: ".(string)$password_class::passwordRehashCheck($enc_password)."<br>";
+print "PASSWORD: $password: " . $enc_password . "<br>";
+print "S-PASSWORD VERIFY: " . (string)$password_class::passwordVerify($password, $enc_password) . "<br>";
+print "PASSWORD REHASH: " . (string)$password_class::passwordRehashCheck($enc_password) . "<br>";
 // direct static
-print "S::PASSWORD VERFIY: ".(string)PwdChk::passwordVerify($password, $enc_password)."<br>";
+print "S::PASSWORD VERFIY: " . (string)PwdChk::passwordVerify($password, $enc_password) . "<br>";
 
 // DEPRECATED
 /* $password = 'deprecated4567';

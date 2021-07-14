@@ -1,8 +1,10 @@
 <?php // phpcs:ignore warning
-declare(strict_types=1);
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -43,21 +45,23 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $string = "Something < = > Other <br> Next line";
-print "HTMLENT: ".Html::htmlent($string).": ".$_html->htmlent($string)."<br>";
-print "REMOVELB: ".Html::htmlent($string).": ".$_html->removeLB($string)."<br>";
+print "HTMLENT: " . Html::htmlent($string) . ": " . $_html->htmlent($string) . "<br>";
+print "REMOVELB: " . Html::htmlent($string) . ": " . $_html->removeLB($string) . "<br>";
 $date_str = [2021, 5, 1, 11, 10];
-print "PRINTDATETIME: ".$_elements->printDateTime($date_str[0], $date_str[1], $date_str[2], $date_str[3], $date_str[4])."<br>";
+print "PRINTDATETIME: "
+	. $_elements->printDateTime($date_str[0], $date_str[1], $date_str[2], $date_str[3], $date_str[4]) . "<br>";
 // STATIC
 $string = "Something < = > Other <br> Next line";
-print "S::HTMLENT: ".Html::htmlent($string).": ".$html_class::htmlent($string)."<br>";
-print "S::REMOVELB: ".Html::htmlent($string).": ".$html_class::removeLB($string)."<br>";
+print "S::HTMLENT: " . Html::htmlent($string) . ": " . $html_class::htmlent($string) . "<br>";
+print "S::REMOVELB: " . Html::htmlent($string) . ": " . $html_class::removeLB($string) . "<br>";
 $date_str = [2021, 5, 1, 11, 10];
-print "S::PRINTDATETIME: ".$elements_class::printDateTime($date_str[0], $date_str[1], $date_str[2], $date_str[3], $date_str[4])."<br>";
+print "S::PRINTDATETIME: "
+	. $elements_class::printDateTime($date_str[0], $date_str[1], $date_str[2], $date_str[3], $date_str[4]) . "<br>";
 
 // STATIC use
-echo "U-S::HTML ENT INT: ".Html::htmlent(5)."<br>";
-echo "U-S::HTML ENT STRING: ".Html::htmlent('5<<>')."<br>";
-echo "U-S::HTML ENT NULL: ".Html::htmlent(null)."<br>";
+echo "U-S::HTML ENT INT: " . Html::htmlent(5) . "<br>";
+echo "U-S::HTML ENT STRING: " . Html::htmlent('5<<>') . "<br>";
+echo "U-S::HTML ENT NULL: " . Html::htmlent(null) . "<br>";
 
 // check convert
 $checked_list = [
@@ -67,8 +71,8 @@ $checked_list = [
 	['foo', ['bar']],
 ];
 foreach ($checked_list as $check) {
-	print "CHECKED(0): $check[0]: ".Html::checked($check[1], $check[0])."<br>";
-	print "CHECKED(1): $check[0]: ".Html::checked($check[1], $check[0], 1)."<br>";
+	print "CHECKED(0): $check[0]: " . Html::checked($check[1], $check[0]) . "<br>";
+	print "CHECKED(1): $check[0]: " . Html::checked($check[1], $check[0], 1) . "<br>";
 }
 
 // magic link creation test
@@ -81,7 +85,7 @@ $magic_links = [
 	'http://www.somelink.com/?with=1234 <br>Some Title',
 ];
 foreach ($magic_links as $magic_link) {
-	print "MAGICLINK: ".Html::htmlent($magic_link).": ".Html::htmlent(Elements::magicLinks($magic_link))."<br>";
+	print "MAGICLINK: " . Html::htmlent($magic_link) . ": " . Html::htmlent(Elements::magicLinks($magic_link)) . "<br>";
 }
 
 // DEPREACTED
@@ -89,7 +93,8 @@ foreach ($magic_links as $magic_link) {
 print "D/HTMLENT: $string: ".$basic->htmlent($string)."<br>";
 print "D/REMOVELB: $string: ".$basic->removeLB($string)."<br>";
 $date_str = [2021, 5, 1, 11, 10];
-print "D/PRINTDATETIME: ".$basic->printDateTime($date_str[0], $date_str[1], $date_str[2], $date_str[3], $date_str[4])."<br>";
+print "D/PRINTDATETIME: "
+	. $basic->printDateTime($date_str[0], $date_str[1], $date_str[2], $date_str[3], $date_str[4])."<br>";
 $magic_link = 'http://www.somelink.com/?with=1234|Some Title|';
 print "D/MAGICLINK: ".Html::htmlent($basic->magicLinks($magic_link))."<Br>";
 */
@@ -100,8 +105,8 @@ line breaks
 in there. Theis 
 is sucky';
 
-print "LB remove: ".\CoreLibs\Convert\Html::removeLB($text)."<br>";
-print "LB remove: ".\CoreLibs\Convert\Html::removeLB($text, '##BR##')."<br>";
+print "LB remove: " . \CoreLibs\Convert\Html::removeLB($text) . "<br>";
+print "LB remove: " . \CoreLibs\Convert\Html::removeLB($text, '##BR##') . "<br>";
 
 // error message
 print $basic->log->printErrorMsg();

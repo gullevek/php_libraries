@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2007/09/03
@@ -6,6 +7,8 @@
 * set paths & language variables
 * HISTORY:
 *********************************************************************/
+
+declare(strict_types=1);
 
 /******
 NOTE THAT THIS INCLUDE IS OBSOLETE

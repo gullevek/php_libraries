@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * elements for html output direct
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Output\Form;
 
@@ -15,24 +17,34 @@ class Elements
 	 * @param  int    $day           day d
 	 * @param  int    $hour          hour H
 	 * @param  int    $min           min i
-	 * @param  string $suffix        additional info printed after the date time variable in the drop down
+	 * @param  string $suffix        additional info printed after the date time
+	 *                               variable in the drop down
 	 *                               also used for ID in the on change JS call
-	 * @param  int    $min_steps     default is 1 (minute), can set to anything, is used as sum up from 0
+	 * @param  int    $min_steps     default is 1 (minute), can set to anything,
+	 *                               is used as sum up from 0
 	 * @param  bool   $name_pos_back default false, if set to true, the name will be printend
 	 *                               after the drop down and not before the drop down
 	 * @return string                HTML formated strings for drop down lists of date and time
 	 */
-	public static function printDateTime($year, $month, $day, $hour, $min, string $suffix = '', int $min_steps = 1, bool $name_pos_back = false)
-	{
+	public static function printDateTime(
+		$year,
+		$month,
+		$day,
+		$hour,
+		$min,
+		string $suffix = '',
+		int $min_steps = 1,
+		bool $name_pos_back = false
+	) {
 		// if suffix given, add _ before
 		if ($suffix) {
-			$suffix = '_'.$suffix;
+			$suffix = '_' . $suffix;
 		}
 		if ($min_steps < 1 || $min_steps > 59) {
 			$min_steps = 1;
 		}
 
-		$on_change_call = 'dt_list(\''.$suffix.'\');';
+		$on_change_call = 'dt_list(\'' . $suffix . '\');';
 
 		// always be 1h ahead (for safety)
 		$timestamp = time() + 3600; // in seconds
@@ -47,15 +59,15 @@ class Elements
 		$hour = !$hour ? date('H', $timestamp) : $hour;
 		$min = !$min ? date('i', $timestamp) : $min; // add to five min?
 		// max days in selected month
-		$days_in_month = date('t', strtotime($year.'-'.$month.'-'.$day.' '.$hour.':'.$min.':0'));
+		$days_in_month = date('t', strtotime($year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':0'));
 		$string = '';
 		// from now to ?
 		if ($name_pos_back === false) {
 			$string = 'Year ';
 		}
-		$string .= '<select id="year'.$suffix.'" name="year'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = date("Y"); $i <= $max_year; $i ++) {
-			$string .= '<option value="'.$i.'" '.($year == $i ? 'selected' : '').'>'.$i.'</option>';
+		$string .= '<select id="year' . $suffix . '" name="year' . $suffix . '" onChange="' . $on_change_call . '">';
+		for ($i = date("Y"); $i <= $max_year; $i++) {
+			$string .= '<option value="' . $i . '" ' . ($year == $i ? 'selected' : '') . '>' . $i . '</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {
@@ -64,9 +76,10 @@ class Elements
 		if ($name_pos_back === false) {
 			$string .= 'Month ';
 		}
-		$string .= '<select id="month'.$suffix.'" name="month'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 1; $i <= 12; $i ++) {
-			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($month == $i ? 'selected' : '').'>'.$i.'</option>';
+		$string .= '<select id="month' . $suffix . '" name="month' . $suffix . '" onChange="' . $on_change_call . '">';
+		for ($i = 1; $i <= 12; $i++) {
+			$string .= '<option value="' . ($i < 10 ? '0' . $i : $i) . '" '
+				. ($month == $i ? 'selected' : '') . '>' . $i . '</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {
@@ -75,10 +88,12 @@ class Elements
 		if ($name_pos_back === false) {
 			$string .= 'Day ';
 		}
-		$string .= '<select id="day'.$suffix.'" name="day'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 1; $i <= $days_in_month; $i ++) {
+		$string .= '<select id="day' . $suffix . '" name="day' . $suffix . '" onChange="' . $on_change_call . '">';
+		for ($i = 1; $i <= $days_in_month; $i++) {
 			// set weekday text based on current month ($month) and year ($year)
-			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($day == $i ? 'selected' : '').'>'.$i.' ('.date('D', mktime(0, 0, 0, $month, $i, $year)).')</option>';
+			$string .= '<option value="' . ($i < 10 ? '0' . $i : $i) . '" '
+				. ($day == $i ? 'selected' : '') . '>' . $i
+				. ' (' . date('D', mktime(0, 0, 0, $month, $i, $year)) . ')</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {
@@ -87,9 +102,10 @@ class Elements
 		if ($name_pos_back === false) {
 			$string .= 'Hour ';
 		}
-		$string .= '<select id="hour'.$suffix.'" name="hour'.$suffix.'" onChange="'.$on_change_call.'">';
+		$string .= '<select id="hour' . $suffix . '" name="hour' . $suffix . '" onChange="' . $on_change_call . '">';
 		for ($i = 0; $i <= 23; $i += $min_steps) {
-			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($hour == $i ? 'selected' : '').'>'.$i.'</option>';
+			$string .= '<option value="' . ($i < 10 ? '0' . $i : $i)
+				. '" ' . ($hour == $i ? 'selected' : '') . '>' . $i . '</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {
@@ -98,9 +114,11 @@ class Elements
 		if ($name_pos_back === false) {
 			$string .= 'Minute ';
 		}
-		$string .= '<select id="min'.$suffix.'" name="min'.$suffix.'" onChange="'.$on_change_call.'">';
-		for ($i = 0; $i <= 59; $i ++) {
-			$string .= '<option value="'.($i < 10 ? '0'.$i : $i).'" '.($min == $i ? 'selected' : '').'>'.$i.'</option>';
+		$string .= '<select id="min' . $suffix . '" name="min'
+			. $suffix . '" onChange="' . $on_change_call . '">';
+		for ($i = 0; $i <= 59; $i++) {
+			$string .= '<option value="' . ($i < 10 ? '0' . $i : $i)
+				. '" ' . ($min == $i ? 'selected' : '') . '>' . $i . '</option>';
 		}
 		$string .= '</select>';
 		if ($name_pos_back === true) {
@@ -152,7 +170,15 @@ class Elements
 		$output = preg_replace_callback(
 			"/(href=\")?(\>)?\b($protRegex)([\w\.\-?&=+%#~,;\/]+)\b([\.\-?&=+%#~,;\/]*)(\|([^\||^#]+)(#([^\|]+))?\|)?/",
 			function ($matches) {
-				return self::createUrl($matches[1] ?? '', $matches[2] ?? '', $matches[3] ?? '', $matches[4] ?? '', $matches[5] ?? '', $matches[7] ?? '', $matches[9] ?? '');
+				return self::createUrl(
+					$matches[1] ?? '',
+					$matches[2] ?? '',
+					$matches[3] ?? '',
+					$matches[4] ?? '',
+					$matches[5] ?? '',
+					$matches[7] ?? '',
+					$matches[9] ?? ''
+				);
 			},
 			$output
 		);
@@ -160,7 +186,15 @@ class Elements
 		$output = preg_replace_callback(
 			"/(mailto:)?(\>)?\b([\w\.-]+)@([\w\.\-]+)\.([a-zA-Z]{2,4})\b(\|([^\||^#]+)(#([^\|]+))?\|)?/",
 			function ($matches) {
-				return self::createEmail($matches[1] ?? '', $matches[2] ?? '', $matches[3] ?? '', $matches[4] ?? '', $matches[5] ?? '', $matches[7] ?? '', $matches[9] ?? '');
+				return self::createEmail(
+					$matches[1] ?? '',
+					$matches[2] ?? '',
+					$matches[3] ?? '',
+					$matches[4] ?? '',
+					$matches[5] ?? '',
+					$matches[7] ?? '',
+					$matches[9] ?? ''
+				);
 			},
 			$output
 		);
@@ -201,11 +235,14 @@ class Elements
 		}
 		// if it is a link already just return the original link do not touch anything
 		if (!$href && !$atag) {
-			return "##LT##a href=##QUOT##".$_1.$_2.$_3."##QUOT##".($class ? ' class=##QUOT##'.$class.'##QUOT##' : '').($target ? " target=##QUOT##".$target."##QUOT##" : '')."##GT##".($name ? $name : $_2.$_3)."##LT##/a##GT##";
+			return "##LT##a href=##QUOT##" . $_1 . $_2 . $_3 . "##QUOT##"
+				. ($class ? ' class=##QUOT##' . $class . '##QUOT##' : '')
+				. ($target ? " target=##QUOT##" . $target . "##QUOT##" : '')
+				. "##GT##" . ($name ? $name : $_2 . $_3) . "##LT##/a##GT##";
 		} elseif ($href && !$atag) {
 			return "href=##QUOT##$_1$_2$_3##QUOT##";
 		} elseif ($atag) {
-			return $atag.$_2.$_3;
+			return $atag . $_2 . $_3;
 		} else {
 			return $href;
 		}
@@ -224,13 +261,15 @@ class Elements
 	 */
 	private static function createEmail($mailto, $atag, $_1, $_2, $_3, $title, $class)
 	{
-		$email = $_1."@".$_2.".".$_3;
+		$email = $_1 . "@" . $_2 . "." . $_3;
 		if (!$mailto && !$atag) {
-			return "##LT##a href=##QUOT##mailto:".$email."##QUOT##".($class ? ' class=##QUOT##'.$class.'##QUOT##' : '')."##GT##".($title ? $title : $email)."##LT##/a##GT##";
+			return "##LT##a href=##QUOT##mailto:" . $email . "##QUOT##"
+				. ($class ? ' class=##QUOT##' . $class . '##QUOT##' : '')
+				. "##GT##" . ($title ? $title : $email) . "##LT##/a##GT##";
 		} elseif ($mailto && !$atag) {
-			return "mailto:".$email;
+			return "mailto:" . $email;
 		} elseif ($atag) {
-			return $atag.$email;
+			return $atag . $email;
 		}
 	}
 }

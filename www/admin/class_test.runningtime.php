@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -36,13 +39,13 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 RunningTime::hrRunningTime();
 RunningTime::runningTime();
-echo "RANDOM KEY [50]: ".\CoreLibs\Create\RandomKey::randomKeyGen(50)."<br>";
-echo "TIMED [hr]: ".RunningTime::hrRunningTime()."<br>";
-echo "TIMED [def]: ".RunningTime::runningTime()."<br>";
-echo "TIMED [string]: ".RunningTime::runningTimeString()."<br>";
+echo "RANDOM KEY [50]: " . \CoreLibs\Create\RandomKey::randomKeyGen(50) . "<br>";
+echo "TIMED [hr]: " . RunningTime::hrRunningTime() . "<br>";
+echo "TIMED [def]: " . RunningTime::runningTime() . "<br>";
+echo "TIMED [string]: " . RunningTime::runningTimeString() . "<br>";
 RunningTime::hrRunningTime();
-echo "RANDOM KEY [default]: ".\CoreLibs\Create\RandomKey::randomKeyGen()."<br>";
-echo "TIMED [hr]: ".RunningTime::hrRunningTime()."<br>";
+echo "RANDOM KEY [default]: " . \CoreLibs\Create\RandomKey::randomKeyGen() . "<br>";
+echo "TIMED [hr]: " . RunningTime::hrRunningTime() . "<br>";
 
 // DEPRECATED
 /* $basic->hrRunningTime();

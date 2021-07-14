@@ -1,8 +1,10 @@
 <?php // phpcs:ignore warning
-declare(strict_types=1);
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = true;
@@ -65,8 +67,8 @@ print '<div><a href="class_test.smarty.php">Class Test: SMARTY</a></div>';
 // set + check edit access id
 $edit_access_id = 3;
 if (is_object($login) && isset($login->acl['unit'])) {
-	print "ACL UNIT: ".print_r(array_keys($login->acl['unit']), true)."<br>";
-	print "ACCESS CHECK: ".(string)$login->loginCheckEditAccess($edit_access_id)."<br>";
+	print "ACL UNIT: " . print_r(array_keys($login->acl['unit']), true) . "<br>";
+	print "ACCESS CHECK: " . (string)$login->loginCheckEditAccess($edit_access_id) . "<br>";
 	if ($login->loginCheckEditAccess($edit_access_id)) {
 		$basic->edit_access_id = $edit_access_id;
 	} else {
@@ -79,7 +81,8 @@ if (is_object($login) && isset($login->acl['unit'])) {
 //	$basic->log->debug('SESSION', \CoreLibs\Debug\Support::printAr($_SESSION));
 
 print '<form method="post" name="loginlogout">';
-print '<a href="javascript:document.loginlogout.login_logout.value=\'Logou\';document.loginlogout.submit();">Logout</a>';
+print '<a href="javascript:document.loginlogout.login_logout.value=\'Logou\';'
+	. 'document.loginlogout.submit();">Logout</a>';
 print '<input type="hidden" name="login_logout" value="">';
 print '</form>';
 
@@ -87,38 +90,48 @@ print '</form>';
 foreach (['on', 'off'] as $flag) {
 	foreach (['debug', 'echo', 'print'] as $type) {
 		$prefix = $flag == 'off' ? 'NOT ' : '';
-		print $prefix.strtoupper($type).' OUT: '.\CoreLibs\Debug\Support::printAr($basic->log->getLogLevel($type, $flag)).'<br>';
+		print $prefix . strtoupper($type) . ' OUT: '
+			. \CoreLibs\Debug\Support::printAr($basic->log->getLogLevel($type, $flag)) . '<br>';
 	}
 }
 foreach (['debug', 'echo', 'print'] as $type) {
-	print strtoupper($type).' OUT ALL: '.$basic->log->getLogLevelAll($type).'<br>';
+	print strtoupper($type) . ' OUT ALL: ' . $basic->log->getLogLevelAll($type) . '<br>';
 }
 
 $basic->log->debug('SOME MARK', 'Some error output');
 
 // INTERNAL SET
-print "EDIT ACCESS ID: ".$basic->edit_access_id."<br>";
+print "EDIT ACCESS ID: " . $basic->edit_access_id . "<br>";
 if (is_object($login)) {
 	//	print "ACL: <br>".$basic->print_ar($login->acl)."<br>";
-	$basic->log->debug('ACL', "ACL: ".\CoreLibs\Debug\Support::printAr($login->acl));
+	$basic->log->debug('ACL', "ACL: " . \CoreLibs\Debug\Support::printAr($login->acl));
 	//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
 	//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
-	//	$result = array_flip(array_filter(array_flip($login->default_acl_list), function ($key) { if (is_numeric($key)) return $key; }));
+	// $result = array_flip(
+	// 	array_filter(
+	// 		array_flip($login->default_acl_list),
+	// 		function ($key) {
+	// 			if (is_numeric($key)) {
+	// 				return $key;
+	// 			}
+	// 		}
+	// 	)
+	// );
 	//	print "DEFAULT ACL: <br>".$basic->print_ar($result)."<br>";
 	// DEPRICATED CALL
 	//	$basic->adbSetACL($login->acl);
 }
 
-print "THIS HOST: ".HOST_NAME.", with PROTOCOL: ".HOST_PROTOCOL." is running SSL: ".HOST_SSL."<br>";
-print "DIR: ".DIR."<br>";
-print "BASE: ".BASE."<br>";
-print "ROOT: ".ROOT."<br>";
-print "HOST: ".HOST_NAME." => DB HOST: ".DB_CONFIG_NAME." => ".print_r(DB_CONFIG, true)."<br>";
+print "THIS HOST: " . HOST_NAME . ", with PROTOCOL: " . HOST_PROTOCOL . " is running SSL: " . HOST_SSL . "<br>";
+print "DIR: " . DIR . "<br>";
+print "BASE: " . BASE . "<br>";
+print "ROOT: " . ROOT . "<br>";
+print "HOST: " . HOST_NAME . " => DB HOST: " . DB_CONFIG_NAME . " => " . print_r(DB_CONFIG, true) . "<br>";
 
 $ds = defined('DS') ? DS : DIRECTORY_SEPARATOR;
 $du = DS ?? DIRECTORY_SEPARATOR;
-print "DS is: ".$ds."<br>";
-print "SERVER HOST: ".$_SERVER['HTTP_HOST']."<br>";
+print "DS is: " . $ds . "<br>";
+print "SERVER HOST: " . $_SERVER['HTTP_HOST'] . "<br>";
 
 // print error messages
 // print $login->log->printErrorMsg();

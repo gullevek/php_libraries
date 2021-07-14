@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2018/10/11
@@ -10,6 +11,8 @@
 * - site lang
 * HISTORY:
 *********************************************************************/
+
+declare(strict_types=1);
 
 // other master config to attach
 // $__LOCAL_CONFIG = [

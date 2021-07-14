@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Translates a mime id string into the actual application or file name
  * for example 'text/plain' will output 'Text file'
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Convert;
 

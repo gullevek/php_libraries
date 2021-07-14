@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * html convert functions
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Combined;
 
@@ -23,7 +25,8 @@ class ArrayHandler
 		if (!is_array($haystack)) {
 			$haystack = [];
 		}
-		if ($key_lookin != null &&
+		if (
+			$key_lookin != null &&
 			!empty($key_lookin) &&
 			array_key_exists($key_lookin, $haystack) &&
 			$needle === $haystack[$key_lookin]
@@ -31,20 +34,23 @@ class ArrayHandler
 			$path[] = $key_lookin;
 		} else {
 			foreach ($haystack as $key => $val) {
-				if (is_scalar($val) &&
+				if (
+					is_scalar($val) &&
 					$val === $needle &&
 					empty($key_lookin)
 				) {
 					$path[] = $key;
 					break;
-				} elseif (is_scalar($val) &&
+				} elseif (
+					is_scalar($val) &&
 					!empty($key_lookin) &&
 					$key === $key_lookin &&
 					$val == $needle
 				) {
 					$path[] = $key;
 					break;
-				} elseif (is_array($val) &&
+				} elseif (
+					is_array($val) &&
 					$path = self::arraySearchRecursive(
 						$needle,
 						(array)$val,
@@ -160,7 +166,7 @@ class ArrayHandler
 	{
 		// croak on not enough arguemnts (we need at least two)
 		if (func_num_args() < 2) {
-			trigger_error(__FUNCTION__ .' needs two or more array arguments', E_USER_WARNING);
+			trigger_error(__FUNCTION__ . ' needs two or more array arguments', E_USER_WARNING);
 			return false;
 		}
 		// default key is not string
@@ -174,14 +180,14 @@ class ArrayHandler
 		}
 		// check that arrays count is at least two, else we don't have enough to do anything
 		if (count($arrays) < 2) {
-			trigger_error(__FUNCTION__.' needs two or more array arguments', E_USER_WARNING);
+			trigger_error(__FUNCTION__ . ' needs two or more array arguments', E_USER_WARNING);
 			return false;
 		}
 		$merged = [];
 		while ($arrays) {
 			$array = array_shift($arrays);
 			if (!is_array($array)) {
-				trigger_error(__FUNCTION__ .' encountered a non array argument', E_USER_WARNING);
+				trigger_error(__FUNCTION__ . ' encountered a non array argument', E_USER_WARNING);
 				return false;
 			}
 			if (!$array) {
@@ -259,9 +265,10 @@ class ArrayHandler
 	{
 		$ret_array = [];
 		// do this to only run count once
-		for ($i = 0, $iMax = count($db_array); $i < $iMax; $i ++) {
+		for ($i = 0, $iMax = count($db_array); $i < $iMax; $i++) {
 			// if no key then we make an order reference
-			if ($key !== false &&
+			if (
+				$key !== false &&
 				$value !== false &&
 				(($set_only && $db_array[$i][$value]) || (!$set_only))
 			) {

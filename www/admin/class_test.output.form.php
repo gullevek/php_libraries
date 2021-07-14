@@ -1,8 +1,10 @@
 <?php // phpcs:ignore warning
-declare(strict_types=1);
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = true;
@@ -62,8 +64,9 @@ print "<html><head><title>TEST CLASS: FORM GENERATE</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
-print "MOBILE PHONE: ".$form->mobile_phone."<br>";
-print "MY PAGE NAME: ".$form->my_page_name."<br>"; // sets table array to include
+print "MOBILE PHONE: " . $form->mobile_phone . "<br>";
+// sets table array to include
+print "MY PAGE NAME: " . $form->my_page_name . "<br>";
 
 // error message
 print $basic->log->printErrorMsg();

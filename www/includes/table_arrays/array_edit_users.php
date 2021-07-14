@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 $edit_users = [
 	'table_array' => [
@@ -34,7 +36,8 @@ $edit_users = [
 		'password_change_interval' => [
 			'value' => $GLOBALS['password_change_interval'] ?? '',
 			'output_name' => 'Password change interval',
-			'error_check' => 'intervalshort', // can be any date length format. n Y/M/D [not H/M/S], only one set, no combination
+			// can be any date length format. n Y/M/D [not H/M/S], only one set, no combination
+			'error_check' => 'intervalshort',
 			'type' => 'text',
 			'interval' => 1, // interval needs NULL write for empty
 			'size' => 5, // make it 5 chars long
@@ -184,7 +187,8 @@ $edit_users = [
 			'cols' => 60
 		],
 	],
-	'load_query' => "SELECT edit_user_id, username, enabled, debug, db_debug, strict, locked, login_error_count FROM edit_user ORDER BY username",
+	'load_query' => "SELECT edit_user_id, username, enabled, debug, db_debug, strict, locked, login_error_count "
+		. "FROM edit_user ORDER BY username",
 	'table_name' => 'edit_user',
 	'show_fields' => [
 		[

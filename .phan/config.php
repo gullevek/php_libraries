@@ -1,7 +1,5 @@
 <?php
 
-use Phan\Config;
-
 /**
  * This configuration will be read and overlaid on top of the
  * default configuration. Command line arguments will be applied
@@ -24,6 +22,9 @@ use Phan\Config;
  * of the phan executable or a path passed in via the CLI
  * '-d' flag.
  */
+
+use Phan\Config;
+
 return [
 	// If true, missing properties will be created when
 	// they are first seen. If false, we'll report an

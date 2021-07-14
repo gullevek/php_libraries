@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2006/08/15
@@ -26,6 +27,8 @@
 *
 *********************************************************************/
 
+declare(strict_types=1);
+
 namespace CoreLibs\Admin;
 
 class Backend extends \CoreLibs\DB\IO
@@ -34,7 +37,10 @@ class Backend extends \CoreLibs\DB\IO
 	public $menu = [];
 	public $menu_show_flag = 0; // top menu flag (mostly string)
 	// action ids
-	public $action_list = ['action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag', 'action_menu', 'action_value', 'action_error', 'action_loaded'];
+	public $action_list = [
+		'action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag',
+		'action_menu', 'action_value', 'action_error', 'action_loaded'
+	];
 	public $action;
 	public $action_id;
 	public $action_sub_id;
@@ -138,7 +144,7 @@ class Backend extends \CoreLibs\DB\IO
 		// create the char lang encoding
 		$this->lang_short = substr($this->lang, 0, 2);
 		// set the language folder
-		$this->lang_dir = BASE.INCLUDES.LANG.CONTENT_PATH;
+		$this->lang_dir = BASE . INCLUDES . LANG . CONTENT_PATH;
 	}
 
 	// PUBLIC METHODS |=================================================>
@@ -182,32 +188,38 @@ class Backend extends \CoreLibs\DB\IO
 			$SCHEMA = 'public';
 		}
 
-		$q = "INSERT INTO ".$SCHEMA.".edit_log ";
-		$q .= "(euid, event_date, event, data, data_binary, page, ";
-		$q .= "ip, user_agent, referer, script_name, query_string, server_name, http_host, http_accept, http_accept_charset, http_accept_encoding, session_id, ";
-		$q .= "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) ";
-		$q .= "VALUES ";
-		$q .= "(".$this->dbEscapeString(isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ? $_SESSION['EUID'] : 'NULL').", ";
-		$q .= "NOW(), ";
-		$q .= "'".$this->dbEscapeString((string)$event)."', '".$data."', '".$data_binary."', '".$this->dbEscapeString((string)$this->page_name)."', ";
-		$q .= "'".@$_SERVER["REMOTE_ADDR"]."', '".$this->dbEscapeString(@$_SERVER['HTTP_USER_AGENT'])."', ";
-		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_REFERER'] ?? '')."', ";
-		$q .= "'".$this->dbEscapeString($_SERVER['SCRIPT_FILENAME'] ?? '')."', ";
-		$q .= "'".$this->dbEscapeString($_SERVER['QUERY_STRING'] ?? '')."', ";
-		$q .= "'".$this->dbEscapeString($_SERVER['SERVER_NAME'] ?? '')."', ";
-		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_HOST'] ?? '')."', ";
-		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_ACCEPT'] ?? '')."', ";
-		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_ACCEPT_CHARSET'] ?? '')."', ";
-		$q .= "'".$this->dbEscapeString($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '')."', ";
-		$q .= "'".session_id()."', ";
-		$q .= "'".$this->dbEscapeString($this->action)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_id)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_yes)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_flag)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_menu)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_loaded)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_value)."', ";
-		$q .= "'".$this->dbEscapeString($this->action_error)."')";
+		$q = "INSERT INTO " . $SCHEMA . ".edit_log "
+			. "(euid, event_date, event, data, data_binary, page, "
+			. "ip, user_agent, referer, script_name, query_string, server_name, http_host, "
+			. "http_accept, http_accept_charset, http_accept_encoding, session_id, "
+			. "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) "
+			. "VALUES "
+			. "(" . $this->dbEscapeString(isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
+				$_SESSION['EUID'] :
+				'NULL')
+			. ", "
+			. "NOW(), "
+			. "'" . $this->dbEscapeString((string)$event) . "', '" . $data . "', "
+			. "'" . $data_binary . "', '" . $this->dbEscapeString((string)$this->page_name) . "', "
+			. "'" . @$_SERVER["REMOTE_ADDR"] . "', "
+			. "'" . $this->dbEscapeString(@$_SERVER['HTTP_USER_AGENT']) . "', "
+			. "'" . $this->dbEscapeString($_SERVER['HTTP_REFERER'] ?? '') . "', "
+			. "'" . $this->dbEscapeString($_SERVER['SCRIPT_FILENAME'] ?? '') . "', "
+			. "'" . $this->dbEscapeString($_SERVER['QUERY_STRING'] ?? '') . "', "
+			. "'" . $this->dbEscapeString($_SERVER['SERVER_NAME'] ?? '') . "', "
+			. "'" . $this->dbEscapeString($_SERVER['HTTP_HOST'] ?? '') . "', "
+			. "'" . $this->dbEscapeString($_SERVER['HTTP_ACCEPT'] ?? '') . "', "
+			. "'" . $this->dbEscapeString($_SERVER['HTTP_ACCEPT_CHARSET'] ?? '') . "', "
+			. "'" . $this->dbEscapeString($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '') . "', "
+			. "'" . session_id() . "', "
+			. "'" . $this->dbEscapeString($this->action) . "', "
+			. "'" . $this->dbEscapeString($this->action_id) . "', "
+			. "'" . $this->dbEscapeString($this->action_yes) . "', "
+			. "'" . $this->dbEscapeString($this->action_flag) . "', "
+			. "'" . $this->dbEscapeString($this->action_menu) . "', "
+			. "'" . $this->dbEscapeString($this->action_loaded) . "', "
+			. "'" . $this->dbEscapeString($this->action_value) . "', "
+			. "'" . $this->dbEscapeString($this->action_error) . "')";
 		$this->dbExec($q, 'NULL');
 	}
 
@@ -262,20 +274,23 @@ class Backend extends \CoreLibs\DB\IO
 					}
 					$query_string = '';
 
-					if (isset($data['query']) &&
+					if (
+						isset($data['query']) &&
 						is_array($data['query']) &&
 						count($data['query'])
 					) {
 						// for ($j = 0, $jMax = count($pages[$i]['query']); $j < $jMax; $j ++) {
 						foreach ($data['query'] as $j => $query) {
-							if (!empty($query['name']) &&
+							if (
+								!empty($query['name']) &&
 								!empty($query['value'])
 							) {
 								if (strlen($query_string)) {
 									$query_string .= '&';
 								}
-								$query_string .= $query['name'].'=';
-								if (isset($query['dynamic']) &&
+								$query_string .= $query['name'] . '=';
+								if (
+									isset($query['dynamic']) &&
 									$query['dynamic']
 								) {
 									if (isset($_GET[$query['value']])) {
@@ -295,12 +310,13 @@ class Backend extends \CoreLibs\DB\IO
 					}
 					$url .= $data['filename'] ?? '';
 					if (strlen($query_string)) {
-						$url .= '?'.$query_string;
+						$url .= '?' . $query_string;
 					}
 					$name = $data['page_name'] ?? '';
 					// if page name matchs -> set selected flag
 					$selected = 0;
-					if (isset($data['filename']) &&
+					if (
+						isset($data['filename']) &&
 						\CoreLibs\Get\System::getPageName() == $data['filename'] &&
 						(!isset($data['hostname']) || (
 							isset($data['hostname']) &&
@@ -312,7 +328,8 @@ class Backend extends \CoreLibs\DB\IO
 					}
 					// last check, is this menu point okay to show
 					$enabled = 0;
-					if (isset($data['filename']) &&
+					if (
+						isset($data['filename']) &&
 						$this->adbShowMenuPoint($data['filename'])
 					) {
 						$enabled = 1;
@@ -364,7 +381,10 @@ class Backend extends \CoreLibs\DB\IO
 	 */
 	public function adbAssocArray(array $db_array, $key, $value): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated: \CoreLibs\Combined\ArrayHandler::genAssocArray', E_USER_DEPRECATED);
+		trigger_error(
+			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Combined\ArrayHandler::genAssocArray',
+			E_USER_DEPRECATED
+		);
 		return \CoreLibs\Combined\ArrayHandler::genAssocArray($db_array, $key, $value);
 	}
 
@@ -377,7 +397,10 @@ class Backend extends \CoreLibs\DB\IO
 	 */
 	public function adbByteStringFormat($number): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated: \CoreLibs\Convert\Byte::humanReadableByteFormat()', E_USER_DEPRECATED);
+		trigger_error(
+			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Convert\Byte::humanReadableByteFormat()',
+			E_USER_DEPRECATED
+		);
 		return \CoreLibs\Convert\Byte::humanReadableByteFormat($number);
 	}
 
@@ -394,7 +417,10 @@ class Backend extends \CoreLibs\DB\IO
 	 */
 	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = '', $path = "", $cache = "")
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated: \CoreLibs\Output\Image::createThumbnail()', E_USER_DEPRECATED);
+		trigger_error(
+			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Output\Image::createThumbnail()',
+			E_USER_DEPRECATED
+		);
 		return \CoreLibs\Output\Image::createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
 	}
 
@@ -458,14 +484,15 @@ class Backend extends \CoreLibs\DB\IO
 		} else {
 			$SCHEMA = 'public';
 		}
-		$q = "INSERT INTO ".$SCHEMA.".live_queue (";
-		$q .= "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file";
-		$q .= ") VALUES (";
-		$q .= "'".$this->dbEscapeString($queue_key)."', '".$this->dbEscapeString($key_value)."', ";
-		$q .= "'".$this->dbEscapeString($key_name)."', '".$this->dbEscapeString($type)."', ";
-		$q .= "'".$this->dbEscapeString($target)."', '".$this->dbEscapeString($data)."', ";
-		$q .= "'".$this->queue_key."', '".$this->action."', '".$this->dbEscapeString((string)$associate)."', ";
-		$q .= "'".$this->dbEscapeString((string)$file)."')";
+		$q = "INSERT INTO " . $SCHEMA . ".live_queue ("
+			. "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file"
+			. ") VALUES ("
+			. "'" . $this->dbEscapeString($queue_key) . "', '" . $this->dbEscapeString($key_value) . "', "
+			. "'" . $this->dbEscapeString($key_name) . "', '" . $this->dbEscapeString($type) . "', "
+			. "'" . $this->dbEscapeString($target) . "', '" . $this->dbEscapeString($data) . "', "
+			. "'" . $this->queue_key . "', '" . $this->action . "', "
+			. "'" . $this->dbEscapeString((string)$associate) . "', "
+			. "'" . $this->dbEscapeString((string)$file) . "')";
 		$this->dbExec($q);
 	}
 
@@ -495,14 +522,23 @@ class Backend extends \CoreLibs\DB\IO
 		bool $name_pos_back = false
 	) {
 		// get the build layout
-		$html_time = \CoreLibs\Output\Form\Elements::printDateTime($year, $month, $day, $hour, $min, $suffix, $min_steps, $name_pos_back);
+		$html_time = \CoreLibs\Output\Form\Elements::printDateTime(
+			$year,
+			$month,
+			$day,
+			$hour,
+			$min,
+			$suffix,
+			$min_steps,
+			$name_pos_back
+		);
 		// translate the strings inside
 		foreach (['Year ', 'Month ', 'Day ', 'Hour ', 'Minute '] as $_time) {
-			$html_time = str_replace($_time, $this->l->__(str_replace(' ', '', $_time)).' ', $html_time);
+			$html_time = str_replace($_time, $this->l->__(str_replace(' ', '', $_time)) . ' ', $html_time);
 		}
 		// replace week days in short
 		foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $_date) {
-			$html_time = str_replace('('.$_date.')', '('.$this->l->__($_date).')', $html_time);
+			$html_time = str_replace('(' . $_date . ')', '(' . $this->l->__($_date) . ')', $html_time);
 		}
 		// return the datetime select string with strings translated
 		return $html_time;

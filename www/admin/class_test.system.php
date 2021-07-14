@@ -1,8 +1,10 @@
 <?php // phpcs:ignore warning
-declare(strict_types=1);
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -36,14 +38,15 @@ print "<html><head><title>TEST CLASS: SYSTEM</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
-print "GETHOSTNAME: ".DgS::printAr(System::getHostName())."<br>";
-print "GETPAGENAME(0): ".System::getPageName()."<br>";
-print "GETPAGENAME(1): ".System::getPageName(1)."<br>";
-print "GETPAGENAME(2): ".System::getPageName(2)."<br>";
-print "GETPAGENAMEARRAY: ".\CoreLibs\Debug\Support::printAr(System::getPageNameArray())."<br>";
+print "GETHOSTNAME: " . DgS::printAr(System::getHostName()) . "<br>";
+print "GETPAGENAME(0): " . System::getPageName() . "<br>";
+print "GETPAGENAME(1): " . System::getPageName(1) . "<br>";
+print "GETPAGENAME(2): " . System::getPageName(2) . "<br>";
+print "GETPAGENAMEARRAY: " . \CoreLibs\Debug\Support::printAr(System::getPageNameArray()) . "<br>";
 // seting errro codes file upload
-print "FILEUPLOADERRORMESSAGE(): ".System::fileUploadErrorMessage(-1)."<br>";
-print "FILEUPLOADERRORMESSAGE(UPLOAD_ERR_CANT_WRITE): ".System::fileUploadErrorMessage(UPLOAD_ERR_CANT_WRITE)."<br>";
+print "FILEUPLOADERRORMESSAGE(): " . System::fileUploadErrorMessage(-1) . "<br>";
+print "FILEUPLOADERRORMESSAGE(UPLOAD_ERR_CANT_WRITE): "
+	. System::fileUploadErrorMessage(UPLOAD_ERR_CANT_WRITE) . "<br>";
 
 // error message
 print $basic->log->printErrorMsg();

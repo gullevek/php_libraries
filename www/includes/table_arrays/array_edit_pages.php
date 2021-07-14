@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 $edit_pages = [
 	'table_array' => [
@@ -13,9 +15,9 @@ $edit_pages = [
 			'mandatory' => 1,
 			'type' => 'drop_down_db',
 			'query' => "SELECT DISTINCT temp_files.filename AS id, temp_files.folder || temp_files.filename AS name "
-				."FROM temp_files "
-				."LEFT JOIN edit_page ep ON temp_files.filename = ep.filename "
-				."WHERE ep.filename IS NULL"
+				. "FROM temp_files "
+				. "LEFT JOIN edit_page ep ON temp_files.filename = ep.filename "
+				. "WHERE ep.filename IS NULL"
 		],
 		'hostname' => [
 			'value' => $GLOBALS['hostname'] ?? '',
@@ -112,7 +114,11 @@ $edit_pages = [
 				// "ORDER BY order_number"
 		],
 	],
-	'load_query' => "SELECT edit_page_id, CASE WHEN hostname IS NOT NULL THEN hostname ELSE ''::VARCHAR END || filename AS filename, name, online, menu, popup FROM edit_page ORDER BY order_number",
+	'load_query' => "SELECT edit_page_id, "
+		. "CASE WHEN hostname IS NOT NULL THEN hostname ELSE ''::VARCHAR END || filename AS filename, "
+		. "name, online, menu, popup "
+		. "FROM edit_page "
+		. "ORDER BY order_number",
 	'table_name' => 'edit_page',
 	'show_fields' => [
 		[
@@ -124,17 +130,17 @@ $edit_pages = [
 		],
 		 [
 		   'name' => 'online',
-		   'binary' => ['Yes','No'],
+		   'binary' => ['Yes', 'No'],
 		   'before_value' => 'Online: '
 		 ],
 		 [
 			'name' => 'menu',
-			'binary' => ['Yes','No'],
+			'binary' => ['Yes', 'No'],
 			'before_value' => 'Menu: '
 		],
 		[
 			'name' => 'popup',
-			'binary' => ['Yes','No'],
+			'binary' => ['Yes', 'No'],
 			'before_value' => 'Popup: '
 		],
 	],
@@ -146,7 +152,8 @@ $edit_pages = [
 			'mandatory' => 1,
 			'select_size' => 10,
 			'selected' => $GLOBALS['edit_visible_group_id'] ?? '',
-			'query' => "SELECT edit_visible_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag FROM edit_visible_group ORDER BY name"
+			'query' => "SELECT edit_visible_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag "
+				. "FROM edit_visible_group ORDER BY name"
 		],
 		'edit_menu_group' => [
 			'table_name' => 'edit_page_menu_group',
@@ -155,7 +162,8 @@ $edit_pages = [
 			'mandatory' => 1,
 			'select_size' => 10,
 			'selected' => $GLOBALS['edit_menu_group_id'] ?? '',
-			'query' => "SELECT edit_menu_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag FROM edit_menu_group ORDER BY order_number"
+			'query' => "SELECT edit_menu_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag "
+				. "FROM edit_menu_group ORDER BY order_number"
 		],
 
 	],

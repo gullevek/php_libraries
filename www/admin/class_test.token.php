@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -36,13 +39,13 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $token = 'test_form_token';
 $token_id = $_token->setFormToken($token);
-print "TOKEN: $token: (ID) ".$token_id." => (S) ".$_SESSION[$token]."<br>";
-print "VALIDATE: $token: ".(string)$_token->validateFormToken($token_id, $token)."<br>";
+print "TOKEN: $token: (ID) " . $token_id . " => (S) " . $_SESSION[$token] . "<br>";
+print "VALIDATE: $token: " . (string)$_token->validateFormToken($token_id, $token) . "<br>";
 
 $token = 'test_form_token_static';
 $token_id = $token_class::setFormToken($token);
-print "S-TOKEN: $token: (ID) ".$token_id." => (S) ".$_SESSION[$token]."<br>";
-print "S-VALIDATE: $token: ".(string)$token_class::validateFormToken($token_id, $token)."<br>";
+print "S-TOKEN: $token: (ID) " . $token_id . " => (S) " . $_SESSION[$token] . "<br>";
+print "S-VALIDATE: $token: " . (string)$token_class::validateFormToken($token_id, $token) . "<br>";
 
 // DEPRECATED
 /* $token = 'test_form_token_deprecated';

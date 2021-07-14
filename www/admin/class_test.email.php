@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -36,19 +39,19 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 // regex get
-print "S::GETEMAILREGEX(0): ".Email::getEmailRegex(0)."<br>";
-print "S::GETEMAILREGEX(2): ".Email::getEmailRegex(2)."<br>";
-print "S::GETEMAILREGEX(7): ".Email::getEmailRegex(7)."<br>";
-print "S::GETEMAILREGEX(8 invalid): ".Email::getEmailRegex(8)."<br>";
-print "S::GETEMAILREGEXCHECK: ".DgS::printAr(Email::getEmailRegexCheck())."<br>";
+print "S::GETEMAILREGEX(0): " . Email::getEmailRegex(0) . "<br>";
+print "S::GETEMAILREGEX(2): " . Email::getEmailRegex(2) . "<br>";
+print "S::GETEMAILREGEX(7): " . Email::getEmailRegex(7) . "<br>";
+print "S::GETEMAILREGEX(8 invalid): " . Email::getEmailRegex(8) . "<br>";
+print "S::GETEMAILREGEXCHECK: " . DgS::printAr(Email::getEmailRegexCheck()) . "<br>";
 
 $email = [
 	'foo@bar.org',
 	'foo@i.softbank.ne.jp'
 ];
 foreach ($email as $s_email) {
-	print "S::EMAIL: $s_email: ".Email::getEmailType($s_email)."<br>";
-	print "S::EMAIL SHORT: $s_email: ".Email::getEmailType($s_email, true)."<br>";
+	print "S::EMAIL: $s_email: " . Email::getEmailType($s_email) . "<br>";
+	print "S::EMAIL SHORT: $s_email: " . Email::getEmailType($s_email, true) . "<br>";
 }
 // DEPRECATED
 /* foreach ($email as $s_email) {

@@ -1,11 +1,14 @@
-<?php declare(strict_types=1);
+<?php
+
 /*********************************************************************
-* AUTHOR: Clemens Schwaighofer
-* CREATED: 2011/2/8
-* DESCRIPTION: pre function to collect all non critical errors into a log file if possible
-* include this file at the very beginning of the script to get the notices, strict, etc messages.
-* error etc will still be written to the log/display
-*********************************************************************/
+ * AUTHOR: Clemens Schwaighofer
+ * CREATED: 2011/2/8
+ * DESCRIPTION: pre function to collect all non critical errors into a log file if possible
+ * include this file at the very beginning of the script to get the notices, strict, etc messages.
+ * error etc will still be written to the log/display
+ *********************************************************************/
+
+ declare(strict_types=1);
 
 // define the base working directory outside because in the function it might return undefined
 // if we have config set BASE use this
@@ -62,23 +65,25 @@ function MyErrorHandler(int $type, string $message, string $file, int $line, arr
 	// <> the line number in this file
 	// [|] error name and error number
 	// : the php error message
-	$output = '{'.array_pop($page_temp).'} ['.$file.'] <'.$line.'> ['.$error_level[$type].'|'.$type.']: '.$message;
+	$output = '{' . array_pop($page_temp) . '} [' . $file . '] '
+		. '<' . $line . '> [' . $error_level[$type] . '|' . $type . ']: ' . $message;
 	# try to open file
 	$ROOT = CURRENT_WORKING_DIR;
-	$LOG = 'log'.DIRECTORY_SEPARATOR;
+	$LOG = 'log' . DIRECTORY_SEPARATOR;
 	// if the log folder is not found, try to create it
-	if (!is_dir($ROOT.$LOG) && !is_file($ROOT.LOG)) {
-		$ok = mkdir($ROOT.$LOG);
+	if (!is_dir($ROOT . $LOG) && !is_file($ROOT . LOG)) {
+		$ok = mkdir($ROOT . $LOG);
 	}
 	$error = 0;
 	// again, if the folder now exists, else set error flag
-	if (is_dir($ROOT.$LOG)) {
-		$fn = $ROOT.$LOG.'php_errors-'.date('Y-m-d').'.log';
-		// when opening, surpress the warning so we can catch the no file pointer below without throwing a warning for this
+	if (is_dir($ROOT . $LOG)) {
+		$fn = $ROOT . $LOG . 'php_errors-' . date('Y-m-d') . '.log';
+		// when opening, surpress the warning so we can catch
+		// the no file pointer below without throwing a warning for this
 		$fp = @fopen($fn, 'a');
 		// write if we have a file pointer, else set error flag
 		if ($fp) {
-			fwrite($fp, '['.date("Y-m-d H:i:s").'] '.$output."\n");
+			fwrite($fp, '[' . date("Y-m-d H:i:s") . '] ' . $output . "\n");
 			fclose($fp);
 		} else {
 			$error = 1;
@@ -92,9 +97,10 @@ function MyErrorHandler(int $type, string $message, string $file, int $line, arr
 		// if the display errors is on
 		// pretty print output for HTML
 		if (ini_get("display_errors")) {
-			echo "<div style='border: 1px dotted red; background-color: #ffffe5; color: #000000; padding: 5px; margin-bottom: 2px;'>";
-			echo "<div style='color: orange; font-weight: bold;'>".$error_level[$type].":</div>";
-			echo "<b>".$message."</b> on line <b>".$line."</b> in <b>".$file."</b>";
+			echo "<div style='border: 1px dotted red; background-color: #ffffe5; "
+				. "color: #000000; padding: 5px; margin-bottom: 2px;'>";
+			echo "<div style='color: orange; font-weight: bold;'>" . $error_level[$type] . ":</div>";
+			echo "<b>" . $message . "</b> on line <b>" . $line . "</b> in <b>" . $file . "</b>";
 			echo "</div>";
 		}
 		// if write to log is on

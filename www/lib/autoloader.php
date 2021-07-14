@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Autoloader;
 
@@ -17,7 +19,7 @@ if (class_exists('Autoload', false) === false) {
 			// set directory seperator (we need to replace from namespace)
 			$DS = defined('DS') ? DS : DIRECTORY_SEPARATOR;
 			// base lib
-			$LIB = defined('LIB') ? LIB : 'lib'.$DS;
+			$LIB = defined('LIB') ? LIB : 'lib' . $DS;
 			// if lib is in path at the end, do not add lib again
 			// note that $LIB can have a directory seperator at the end
 			// strip that out before we do a match
@@ -38,9 +40,9 @@ if (class_exists('Autoload', false) === false) {
 			// set default extension
 			$extension = '.php';
 			// set full include path
-			$path = __DIR__.$DS.$LIB.substr($class, $len);
+			$path = __DIR__ . $DS . $LIB . substr($class, $len);
 			// replace namespace \ with dir sepeator
-			$path = str_replace('\\', $DS, $path).$extension;
+			$path = str_replace('\\', $DS, $path) . $extension;
 			// print "(2) Class clean: $path<br>";
 			// if path is set and a valid file
 			if ($path !== false && is_file($path)) {
@@ -52,7 +54,8 @@ if (class_exists('Autoload', false) === false) {
 			}
 			return false;
 		}
-	} // end class define
+		// end class define
+	}
 
 	spl_autoload_register('Autoloader\Autoload::load', true, true);
 } // end check for already defined

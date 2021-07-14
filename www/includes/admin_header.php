@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2008/08/01
@@ -7,10 +8,12 @@
 * HISTORY:
 *********************************************************************/
 
+declare(strict_types=1);
+
 //------------------------------ variable init start
 // for dev test we set full error reporting; writes everything, except E_ERROR into logs/php_error-<day>.log
 if ($DEBUG_ALL && $ENABLE_ERROR_HANDLING) {
-	include BASE.LIBS."Error.Handling.php";
+	include BASE . LIBS . "Error.Handling.php";
 }
 // predefine vars
 $messages = array();
@@ -21,7 +24,7 @@ $messages = array();
 ob_start();
 // set the session name
 $SET_SESSION_NAME = EDIT_SESSION_NAME;
-$LOG_FILE_ID = BASE_NAME.'Admin';
+$LOG_FILE_ID = BASE_NAME . 'Admin';
 //------------------------------ library include end
 
 //------------------------------ basic variable settings start
@@ -37,7 +40,7 @@ if (!isset($ENCODING) || !$ENCODING) {
 }
 // end the stop of the output flow, but only if we didn't request a csv file download
 if (isset($_POST['action']) && $_POST['action'] != 'download_csv' && !$AJAX_PAGE) {
-	header("Content-type: text/html; charset=".$ENCODING);
+	header("Content-type: text/html; charset=" . $ENCODING);
 }
 if ($AJAX_PAGE && !$ZIP_STREAM) {
 	header("Content-Type: application/json; charset=UTF-8");

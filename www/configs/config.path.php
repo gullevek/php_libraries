@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2018/10/11
@@ -7,6 +8,8 @@
 * CSV target paths, and other download access URLS or paths needed
 * HISTORY:
 *********************************************************************/
+
+declare(strict_types=1);
 
 // File and Folder paths
 // ID is TARGET (first array element)

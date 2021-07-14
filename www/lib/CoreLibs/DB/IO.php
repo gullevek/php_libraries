@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2000/11/23
@@ -107,9 +108,11 @@
 *   _db_io()
 *     - pseudo deconstructor - functionality moved to db_close
 *   $string info($show=1)
-*     - returns a string various info about class (version, authoer, etc), if $show set to 0, it will not be appended to the error_msgs string
+*     - returns a string various info about class (version, authoer, etc)
+*     - if $show set to 0, it will not be appended to the error_msgs string
 *   $string db_info($show=1)
-*     - returns a string with info about db connection, etc, if $show set to 0, it will not be appended to the error_msgs string
+*     - returns a string with info about db connection, etc, if $show set to 0,
+*     - it will not be appended to the error_msgs string
 *   $string db_dump_data($query=0)
 *     - returns a string with all data of that query or if no query given with all data in the cursor_ext
 *   0/$cursor db_exec($query=0)
@@ -135,13 +138,15 @@
 *   $string db_boolean(string)
 *     - if the string value is 't' or 'f' it returns correct TRUE/FALSE for php
 *   $primary_key db_write_data($write_array, $not_write_array, $primary_key, $table, $data = [])
-*     - writes into one table based on arrays of columns to write and not write, reads data from global vars or optional array
+*     - writes into one table based on arrays of columns to write and not write,
+*     - reads data from global vars or optional array
 *   $boolean db_set_schema(schema)
 *     - sets search path to a schema
 *   $boolean db_set_encoding(encoding)
 *     - sets an encoding for this database output and input
 *   $string db_time_format($age/datetime diff, $micro_time = false/true)
-*     - returns a nice formatted time string based on a age or datetime difference (postgres only), micro time is default false
+*     - returns a nice formatted time string based on a age or datetime difference
+*     - (postgres only), micro time is default false
 *
 *   PRIVATE METHODS
 *   _db_error()
@@ -159,10 +164,12 @@
 *   string _db_debug_prepare($prepare_id, $data_array)
 *     - returns the prepared statement with the actual data. for debug purposes only
 *   none _db_debug($debug_id, $string, $id, $type)
-*     - wrapper for normal debug, adds prefix data from id & type and strips all HTML from the query data (color codes, etc) via flag to debug call
+*     - wrapper for normal debug, adds prefix data from id & type and strips
+*     - all HTML from the query data (color codes, etc) via flag to debug call
 *
 * HISTORY:
-* 2008/10/25 (cs) add db_boolean to fix the postgres to php boolean var problem (TODO: implement this in any select return)
+* 2008/10/25 (cs) add db_boolean to fix the postgres to php boolean var problem
+*                 (TODO: implement this in any select return)
 * 2008/07/03 (cs) add db_write_data function, original written for inventory tool "invSQLWriteData"
 * 2008/04/16 (cs) add db_escape_string function for correct string escape
 * 2007/11/14 (cs) add a prepare debug statement to replace the placeholders with the actual data in a prepared statement
@@ -240,6 +247,8 @@
 *   24.11.2000: erweitern um num_rows
 *   23.11.2000: erster Test
 *********************************************************************/
+
+declare(strict_types=1);
 
 namespace CoreLibs\DB;
 
@@ -324,7 +333,8 @@ class IO extends \CoreLibs\Basic
 		$this->db_pwd = $db_config['db_pass'] ?? '';
 		$this->db_host = $db_config['db_host'] ?? '';
 		$this->db_port = !empty($db_config['db_port']) ? $db_config['db_port'] : 5432;
-		$this->db_schema = !empty($db_config['db_schema']) ? $db_config['db_schema'] : ''; // do not set to 'public' if not set, because the default is already public
+		// do not set to 'public' if not set, because the default is already public
+		$this->db_schema = !empty($db_config['db_schema']) ? $db_config['db_schema'] : '';
 		$this->db_encoding = !empty($db_config['db_encoding']) ? $db_config['db_encoding'] : '';
 		$this->db_type = $db_config['db_type'] ?? '';
 		$this->db_ssl = !empty($db_config['db_ssl']) ? $db_config['db_ssl'] : 'allow';
@@ -343,16 +353,19 @@ class IO extends \CoreLibs\Basic
 		$this->error_string['14'] = 'Can\'t connect to DB server';
 		$this->error_string['15'] = 'Can\'t select DB';
 		$this->error_string['16'] = 'No DB Handler found / connect or reconnect failed';
-		$this->error_string['17'] = 'All dbReturn* methods work only with SELECT statements, please use dbExec for everything else';
+		$this->error_string['17'] = 'All dbReturn* methods work only with SELECT statements, '
+			. 'please use dbExec for everything else';
 		$this->error_string['18'] = 'Query not found in cache. Nothing has been reset';
 		$this->error_string['19'] = 'Wrong PK name given or no PK name given at all, can\'t get Insert ID';
-		$this->error_string['20'] = 'Found given Prepare Statement Name in array, Query not prepared, will use existing one';
+		$this->error_string['20'] = 'Found given Prepare Statement Name in array, '
+			. 'Query not prepared, will use existing one';
 		$this->error_string['21'] = 'Query Prepare failed';
 		$this->error_string['22'] = 'Query Execute failed';
 		$this->error_string['23'] = 'Query Execute failed, data array does not match placeholders';
 		$this->error_string['24'] = 'Missing prepared query entry for execute.';
 		$this->error_string['25'] = 'Prepare query data is not in array format.';
-		$this->error_string['30'] = 'Query call in a possible endless loop. Was called more than '.$this->MAX_QUERY_CALL.' times';
+		$this->error_string['30'] = 'Query call in a possible endless loop. '
+			. 'Was called more than ' . $this->MAX_QUERY_CALL . ' times';
 		$this->error_string['31'] = 'Could not fetch PK after query insert';
 		$this->error_string['32'] = 'Multiple PK return as array';
 		$this->error_string['33'] = 'Returning PK was not found';
@@ -412,7 +425,14 @@ class IO extends \CoreLibs\Basic
 	private function __connectToDB(): bool
 	{
 		// generate connect string
-		$this->dbh = $this->db_functions->__dbConnect($this->db_host, $this->db_user, $this->db_pwd, $this->db_name, $this->db_port, $this->db_ssl);
+		$this->dbh = $this->db_functions->__dbConnect(
+			$this->db_host,
+			$this->db_user,
+			$this->db_pwd,
+			$this->db_name,
+			$this->db_port,
+			$this->db_ssl
+		);
 		// if no dbh here, we couldn't connect to the DB itself
 		if (!$this->dbh) {
 			$this->error_id = 14;
@@ -515,13 +535,13 @@ class IO extends \CoreLibs\Basic
 			$array = [];
 		}
 		foreach ($array as $key => $value) {
-			$string .= $this->nbsp.'<b>'.$key.'</b> => ';
+			$string .= $this->nbsp . '<b>' . $key . '</b> => ';
 			if (is_array($value)) {
 				$this->nbsp .= '&nbsp;&nbsp;&nbsp;';
 				$string .= '<br>';
 				$string .= $this->__printArray($value);
 			} else {
-				$string .= $value.'<br>';
+				$string .= $value . '<br>';
 			}
 		}
 		$this->nbsp = substr_replace($this->nbsp, '', -18, 18);
@@ -540,10 +560,10 @@ class IO extends \CoreLibs\Basic
 	{
 		$prefix = '';
 		if ($id) {
-			$prefix .= '[<span style="color: #920069;">'.$id.'</span>] ';
+			$prefix .= '[<span style="color: #920069;">' . $id . '</span>] ';
 		}
 		if ($type) {
-			$prefix .= '{<span style="font-style: italic; color: #3f0092;">'.$type.'</span>} ';
+			$prefix .= '{<span style="font-style: italic; color: #3f0092;">' . $type . '</span>} ';
 		}
 		if ($prefix) {
 			$prefix .= '- ';
@@ -576,12 +596,26 @@ class IO extends \CoreLibs\Basic
 		// okay, an error occured
 		if ($this->error_id) {
 			// write error msg ...
-			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$this->error_id.': '.$this->error_string[$this->error_id].($msg ? ', '.$msg : '').'</span>', 'DB_ERROR', $where_called);
+			$this->__dbDebug(
+				'db',
+				'<span style="color: red;"><b>DB-Error</b> ' . $this->error_id . ': '
+					. $this->error_string[$this->error_id] . ($msg ? ', ' . $msg : '')
+					. '</span>',
+				'DB_ERROR',
+				$where_called
+			);
 			$this->had_error = $this->error_id;
 			// write detailed error log
 		}
 		if ($this->warning_id) {
-			$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$this->warning_id.': '.$this->error_string[$this->warning_id].($msg ? ', '.$msg : '').'</span>', 'DB_WARNING', $where_called);
+			$this->__dbDebug(
+				'db',
+				'<span style="color: orange;"><b>DB-Warning</b> ' . $this->warning_id . ': '
+					. $this->error_string[$this->warning_id]
+					. ($msg ? ', ' . $msg : '') . '</span>',
+				'DB_WARNING',
+				$where_called
+			);
 			$this->had_warning = $this->warning_id;
 		}
 		// unset the error/warning vars
@@ -597,7 +631,8 @@ class IO extends \CoreLibs\Basic
 	private function __dbConvertEncoding($row)
 	{
 		// only do if array, else pass through row (can be false)
-		if (!is_array($row) || empty($this->to_encoding) || empty($this->db_encoding)
+		if (
+			!is_array($row) || empty($this->to_encoding) || empty($this->db_encoding)
 		) {
 			return $row;
 		}
@@ -623,8 +658,8 @@ class IO extends \CoreLibs\Basic
 		// get the keys from data array
 		$keys = array_keys($data);
 		// because the placeholders start with $ and at 1, we need to increase each key and prefix it with a $ char
-		for ($i = 0, $iMax = count($keys); $i < $iMax; $i ++) {
-			$keys[$i] = '$'.($keys[$i] + 1);
+		for ($i = 0, $iMax = count($keys); $i < $iMax; $i++) {
+			$keys[$i] = '$' . ($keys[$i] + 1);
 		}
 		// simply replace the $1, $2, ... with the actual data and return it
 		return str_replace(array_reverse($keys), array_reverse($data), $this->prepare_cursor[$stm_name]['query']);
@@ -660,7 +695,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	private function __dbPrepareExec(string $query, string $pk_name)
 	{
-		$matches= [];
+		$matches = [];
 		// to either use the returning method or the guess method for getting primary keys
 		$this->returning_id = false;
 		// set the query
@@ -702,13 +737,13 @@ class IO extends \CoreLibs\Basic
 				if (!preg_match("/ returning /i", $this->query) && $this->pk_name && $this->pk_name != 'NULL') {
 					// check if this query has a ; at the end and remove it
 					$this->query = preg_replace("/(;\s*)$/", '', $this->query);
-					$this->query .= " RETURNING ".$this->pk_name;
+					$this->query .= " RETURNING " . $this->pk_name;
 					$this->returning_id = true;
 				} elseif (preg_match("/ returning (.*)/i", $this->query, $matches)) {
 					if ($this->pk_name && $this->pk_name != 'NULL') {
 						// add the primary key if it is not in the returning set
 						if (!preg_match("/$this->pk_name/", $matches[1])) {
-							$this->query .= " , ".$this->pk_name;
+							$this->query .= " , " . $this->pk_name;
 						}
 					}
 					$this->returning_id = true;
@@ -736,7 +771,8 @@ class IO extends \CoreLibs\Basic
 		}
 		// count up the run, if this is run more than the max_run then exit with error
 		// if set to -1, then ignore it
-		if ($this->MAX_QUERY_CALL != -1 &&
+		if (
+			$this->MAX_QUERY_CALL != -1 &&
 			$this->query_called[$md5] > $this->MAX_QUERY_CALL
 		) {
 				$this->error_id = 30;
@@ -775,14 +811,15 @@ class IO extends \CoreLibs\Basic
 				$this->num_fields = $this->db_functions->__dbNumFields($this->cursor);
 				// set field names
 				$this->field_names = [];
-				for ($i = 0; $i < $this->num_fields; $i ++) {
+				for ($i = 0; $i < $this->num_fields; $i++) {
 					$this->field_names[] = $this->db_functions->__dbFieldName($this->cursor, $i);
 				}
 			} elseif ($this->__checkQueryForInsert($this->query)) {
 				// if not select do here
 				// count affected rows
 				$this->num_rows = $this->db_functions->__dbAffectedRows($this->cursor);
-				if (($this->__checkQueryForInsert($this->query, true) && $this->pk_name != 'NULL') ||
+				if (
+					($this->__checkQueryForInsert($this->query, true) && $this->pk_name != 'NULL') ||
 					($this->__checkQueryForUpdate($this->query) && $this->returning_id)
 				) {
 					// set insert_id
@@ -798,22 +835,30 @@ class IO extends \CoreLibs\Basic
 						// echo "** PREPARE RETURNING FOR CURSOR: ".$this->cursor."<br>";
 						// we have returning, now we need to check if we get one or many returned
 						// we'll need to loop this, if we have multiple insert_id returns
-						while ($_insert_id = $this->db_functions->__dbFetchArray(
-							$this->cursor,
-							$this->db_functions->__dbResultType(true)
-						)) {
+						while (
+							$_insert_id = $this->db_functions->__dbFetchArray(
+								$this->cursor,
+								$this->db_functions->__dbResultType(true)
+							)
+						) {
 							// echo "*** RETURNING: ".print_r($_insert_id, true)."<br>";
 							$this->insert_id[] = $_insert_id;
 							$this->insert_id_arr[] = $_insert_id;
 						}
 						// if we have only one, revert from array to single
 						if (count($this->insert_id) == 1) {
-							// echo "* SINGLE DATA CONVERT: ".count($this->insert_id[0])." => ".array_key_exists($this->pk_name, $this->insert_id[0])."<br>";
-							// echo "* PK DIRECT: ".(isset($this->insert_id[0][$this->pk_name]) ? $this->insert_id[0][$this->pk_name] : '[NO PK NAME SET]' )."<Br>";
-							// if this has only the pk_name, then only return this, else array of all data (but without the position)
-							// example if insert_id[0]['foo'] && insert_id[0]['bar'] it will become insert_id['foo'] & insert_id['bar']
-							// if only ['foo_id'] and it is the PK then the PK is directly written to the insert_id
-							if (count($this->insert_id[0]) > 1 ||
+							// $this->log->debug('SINGLE DATA CONVERT', count($this->insert_id[0])." => "
+							//	.array_key_exists($this->pk_name, $this->insert_id[0]));
+							// $this->log->debug('PK DIRECT', (isset($this->insert_id[0][$this->pk_name]) ?
+							//	$this->insert_id[0][$this->pk_name] : '[NO PK NAME SET]' ));
+							// if this has only the pk_name, then only return this,
+							// else array of all data (but without the position)
+							// example if insert_id[0]['foo'] && insert_id[0]['bar']
+							// it will become insert_id['foo'] & insert_id['bar']
+							// if only ['foo_id'] and it is the PK then the
+							// PK is directly written to the insert_id
+							if (
+								count($this->insert_id[0]) > 1 ||
 								!array_key_exists($this->pk_name, $this->insert_id[0])
 							) {
 								$this->insert_id_ext = $this->insert_id[0];
@@ -916,7 +961,8 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		// ok entry, set
-		if ($max_calls == -1 ||
+		if (
+			$max_calls == -1 ||
 			$max_calls > 0
 		) {
 			$this->MAX_QUERY_CALL = $max_calls;
@@ -997,7 +1043,7 @@ class IO extends \CoreLibs\Basic
 		if (!$db_schema) {
 			return false;
 		}
-		$q = "SET search_path TO '".$this->dbEscapeString($db_schema)."'";
+		$q = "SET search_path TO '" . $this->dbEscapeString($db_schema) . "'";
 		return $this->dbExec($q);
 	}
 
@@ -1023,7 +1069,7 @@ class IO extends \CoreLibs\Basic
 		if (!$db_encoding) {
 			return false;
 		}
-		$q = "SET client_encoding TO '".$this->dbEscapeString($db_encoding)."'";
+		$q = "SET client_encoding TO '" . $this->dbEscapeString($db_encoding) . "'";
 		return $this->dbExec($q);
 	}
 
@@ -1067,18 +1113,18 @@ class IO extends \CoreLibs\Basic
 	public function dbInfo(bool $show = true): string
 	{
 		$string = '';
-		$string .= '{b}-DB-info->{/b} Connected to db {b}\''.$this->db_name.'\'{/b} ';
-		$string .= 'with schema {b}\''.$this->db_schema.'\'{/b} ';
-		$string .= 'as user {b}\''.$this->db_user.'\'{/b} ';
-		$string .= 'at host {b}\''.$this->db_host.'\'{/b} ';
-		$string .= 'on port {b}\''.$this->db_port.'\'{/b} ';
-		$string .= 'with ssl mode {b}\''.$this->db_ssl.'\'{/b}{br}';
-		$string .= '{b}-DB-info->{/b} DB IO Class debug output: {b}'.($this->db_debug ? 'Yes' : 'No').'{/b}';
+		$string .= '{b}-DB-info->{/b} Connected to db {b}\'' . $this->db_name . '\'{/b} ';
+		$string .= 'with schema {b}\'' . $this->db_schema . '\'{/b} ';
+		$string .= 'as user {b}\'' . $this->db_user . '\'{/b} ';
+		$string .= 'at host {b}\'' . $this->db_host . '\'{/b} ';
+		$string .= 'on port {b}\'' . $this->db_port . '\'{/b} ';
+		$string .= 'with ssl mode {b}\'' . $this->db_ssl . '\'{/b}{br}';
+		$string .= '{b}-DB-info->{/b} DB IO Class debug output: {b}' . ($this->db_debug ? 'Yes' : 'No') . '{/b}';
 		if ($show === true) {
 			// if debug, remove / change b
 			$this->__dbDebug('db', str_replace(['{b}', '{/b}', '{br}'], ['', '', ' **** '], $string), 'dbInfo');
 		} else {
-			$string = $string.'{br}';
+			$string = $string . '{br}';
 		}
 		// for direct print, change to html
 		return str_replace(['{b}', '{/b}', '{br}'], ['<b>', '</b>', '<br>'], $string);
@@ -1120,8 +1166,12 @@ class IO extends \CoreLibs\Basic
 	 * - if set to 3, after EACH row, the data will be reset,
 	 *   no caching is done except for basic (count, etc)
 	 * @param  string     $query Query string
-	 * @param  int        $reset reset status: 1: read cache, clean at the end, 2: read new, clean at end, 3: never cache
-	 * @param  bool       $assoc_only true to only returned the named and not index position ones
+	 * @param  int        $reset reset status:
+	 *                    1: read cache, clean at the end
+	 *                    2: read new, clean at end
+	 *                    3: never cache
+	 * @param  bool       $assoc_only true to only returned the named and not
+	 *                    index position ones
 	 * @return array|bool             return array data or false on error/end
 	 * @suppress PhanTypeMismatchDimFetch
 	 */
@@ -1161,7 +1211,9 @@ class IO extends \CoreLibs\Basic
 		if ($reset && !$this->cursor_ext[$md5]['pos']) {
 			$this->cursor_ext[$md5]['cursor'] = null;
 		}
-		// $this->debug('MENU', 'Reset: '.$reset.', Cursor: '.$this->cursor_ext[$md5]['cursor'].', Pos: '.$this->cursor_ext[$md5]['pos'].', Query: '.$query);
+		// $this->debug('MENU', 'Reset: '.$reset.', Cursor: '
+		//	.$this->cursor_ext[$md5]['cursor'].', Pos: '.$this->cursor_ext[$md5]['pos']
+		//	.', Query: '.$query);
 
 		// if no cursor yet, execute
 		if (!$this->cursor_ext[$md5]['cursor']) {
@@ -1203,12 +1255,18 @@ class IO extends \CoreLibs\Basic
 		if ($this->cursor_ext[$md5]['cursor']) {
 			if ($this->cursor_ext[$md5]['firstcall'] == 1) {
 				// count the rows returned (if select)
-				$this->cursor_ext[$md5]['num_rows'] = $this->db_functions->__dbNumRows($this->cursor_ext[$md5]['cursor']);
+				$this->cursor_ext[$md5]['num_rows'] =
+					$this->db_functions->__dbNumRows($this->cursor_ext[$md5]['cursor']);
 				// count the fields
-				$this->cursor_ext[$md5]['num_fields'] = $this->db_functions->__dbNumFields($this->cursor_ext[$md5]['cursor']);
+				$this->cursor_ext[$md5]['num_fields'] =
+					$this->db_functions->__dbNumFields($this->cursor_ext[$md5]['cursor']);
 				// set field names
-				for ($i = 0; $i < $this->cursor_ext[$md5]['num_fields']; $i ++) {
-					$this->cursor_ext[$md5]['field_names'][] = $this->db_functions->__dbFieldName($this->cursor_ext[$md5]['cursor'], $i);
+				for ($i = 0; $i < $this->cursor_ext[$md5]['num_fields']; $i++) {
+					$this->cursor_ext[$md5]['field_names'][] =
+						$this->db_functions->__dbFieldName(
+							$this->cursor_ext[$md5]['cursor'],
+							$i
+						);
 				}
 				// reset first call vars
 				$this->cursor_ext[$md5]['firstcall'] = 0;
@@ -1237,24 +1295,34 @@ class IO extends \CoreLibs\Basic
 				// check if end of output ...
 				if ($this->cursor_ext[$md5]['pos'] >= $this->cursor_ext[$md5]['num_rows']) {
 					$this->cursor_ext[$md5]['pos'] = 0;
-					# if not reset given, set the cursor to true, so in a cached call on a different page we don't get problems from DB connection (as those will be LOST)
+					// if not reset given, set the cursor to true, so in a cached
+					// call on a different page we don't get problems from
+					// DB connection (as those will be LOST)
 					$this->cursor_ext[$md5]['cursor'] = 1;
 					$return = false;
 				} else {
 					// unset return value ...
 					$return = [];
-					for ($i = 0; $i < $this->cursor_ext[$md5]['num_fields']; $i ++) {
+					for ($i = 0; $i < $this->cursor_ext[$md5]['num_fields']; $i++) {
 						// create mixed return array
-						if ($assoc_only === false && isset($this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i])) {
+						if (
+							$assoc_only === false &&
+							isset($this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i])
+						) {
 							$return[$i] = $this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i];
 						}
 						// named part
 						if (isset($this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i])) {
-							$return[$this->cursor_ext[$md5]['field_names'][$i]] = $this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i];
+							$return[$this->cursor_ext[$md5]['field_names'][$i]] =
+								$this->cursor_ext[$md5]['data']
+									[$this->cursor_ext[$md5]['pos']][$i];
 						} else {
-							// throws PhanTypeMismatchDimFetch error, but in this case we know we will access only named array parts
+							// throws PhanTypeMismatchDimFetch error, but in this
+							// case we know we will access only named array parts
 							// @suppress PhanTypeMismatchDimFetch
-							$return[$this->cursor_ext[$md5]['field_names'][$i]] = $this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$this->cursor_ext[$md5]['field_names'][$i]];
+							$return[$this->cursor_ext[$md5]['field_names'][$i]] =
+								$this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]
+									['pos']][$this->cursor_ext[$md5]['field_names'][$i]];
 						}
 					}
 					$this->cursor_ext[$md5]['pos'] ++;
@@ -1393,7 +1461,12 @@ class IO extends \CoreLibs\Basic
 		} else {
 			// if no async running print error
 			$this->error_id = 42;
-			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> No async query has been started yet.</span>', 'DB_ERROR');
+			$this->__dbDebug(
+				'db',
+				'<span style="color: red;"><b>DB-Error</b> No async query '
+					. 'has been started yet.</span>',
+				'DB_ERROR'
+			);
 			return false;
 		}
 	}
@@ -1471,7 +1544,7 @@ class IO extends \CoreLibs\Basic
 		$rows = [];
 		while ($res = $this->dbFetchArray($cursor, $assoc_only)) {
 			$data = [];
-			for ($i = 0; $i < $this->num_fields; $i ++) {
+			for ($i = 0; $i < $this->num_fields; $i++) {
 				$data[$this->field_names[$i]] = $res[$this->field_names[$i]];
 			}
 			$rows[] = $data;
@@ -1519,7 +1592,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function dbShowTableMetaData(string $table, string $schema = '')
 	{
-		$table = ($schema ? $schema.'.' : '').$table;
+		$table = ($schema ? $schema . '.' : '') . $table;
 
 		$array = $this->db_functions->__dbMetaData($table);
 		if (!is_array($array)) {
@@ -1580,12 +1653,15 @@ class IO extends \CoreLibs\Basic
 					}
 					// if no returning, then add it
 					if (!preg_match("/ returning /i", $query) && $this->prepare_cursor[$stm_name]['pk_name']) {
-						$query .= " RETURNING ".$this->prepare_cursor[$stm_name]['pk_name'];
+						$query .= " RETURNING " . $this->prepare_cursor[$stm_name]['pk_name'];
 						$this->prepare_cursor[$stm_name]['returning_id'] = true;
-					} elseif (preg_match("/ returning (.*)/i", $query, $matches) && $this->prepare_cursor[$stm_name]['pk_name']) {
+					} elseif (
+						preg_match("/ returning (.*)/i", $query, $matches) &&
+						$this->prepare_cursor[$stm_name]['pk_name']
+					) {
 						// if returning exists but not pk_name, add it
 						if (!preg_match("/{$this->prepare_cursor[$stm_name]['pk_name']}/", $matches[1])) {
-							$query .= " , ".$this->prepare_cursor[$stm_name]['pk_name'];
+							$query .= " , " . $this->prepare_cursor[$stm_name]['pk_name'];
 						}
 						$this->prepare_cursor[$stm_name]['returning_id'] = true;
 					}
@@ -1606,7 +1682,13 @@ class IO extends \CoreLibs\Basic
 			} else {
 				$this->error_id = 21;
 				$this->__dbError();
-				$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Prepare field with: '.$stm_name.' | '.$query.'</span>', 'DB_ERROR');
+				$this->__dbDebug(
+					'db',
+					'<span style="color: red;"><b>DB-Error</b> ' . $stm_name
+						. ': Prepare field with: ' . $stm_name . ' | '
+						. $query . '</span>',
+					'DB_ERROR'
+				);
 				return $result;
 			}
 		} else {
@@ -1627,17 +1709,34 @@ class IO extends \CoreLibs\Basic
 		// if we do not have no prepare cursor array entry for this statement name, abort
 		if (!is_array($this->prepare_cursor[$stm_name])) {
 			$this->error_id = 24;
-			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': We do not have a prepared query entry for this statement name.</span>', 'DB_ERROR');
+			$this->__dbDebug(
+				'db',
+				'<span style="color: red;"><b>DB-Error</b> ' . $stm_name
+					. ': We do not have a prepared query entry for this statement name.</span>',
+				'DB_ERROR'
+			);
 			return false;
 		}
 		if (!is_array($data)) {
 			$this->error_id = 25;
-			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Prepared query Data has to be given in array form.</span>', 'DB_ERROR');
+			$this->__dbDebug(
+				'db',
+				'<span style="color: red;"><b>DB-Error</b> ' . $stm_name
+					. ': Prepared query Data has to be given in array form.</span>',
+				'DB_ERROR'
+			);
 			return false;
 		}
 		if ($this->prepare_cursor[$stm_name]['count'] != count($data)) {
 			$this->error_id = 23;
-			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Array data count does not match prepared fields. Need: '.$this->prepare_cursor[$stm_name]['count'].', has: '.count($data).'</span>', 'DB_ERROR');
+			$this->__dbDebug(
+				'db',
+				'<span style="color: red;"><b>DB-Error</b> ' . $stm_name
+					. ': Array data count does not match prepared fields. Need: '
+					. $this->prepare_cursor[$stm_name]['count'] . ', has: '
+					. count($data) . '</span>',
+				'DB_ERROR'
+			);
 			return false;
 		}
 		if ($this->db_debug) {
@@ -1645,17 +1744,28 @@ class IO extends \CoreLibs\Basic
 		}
 		$result = $this->db_functions->__dbExecute($stm_name, $data);
 		if (!$result) {
-			$this->log->debug('ExecuteData', 'ERROR in STM['.$stm_name.'|'.$this->prepare_cursor[$stm_name]['result'].']: '.$this->log->prAr($data));
+			$this->log->debug('ExecuteData', 'ERROR in STM[' . $stm_name . '|'
+				. $this->prepare_cursor[$stm_name]['result'] . ']: '
+				. $this->log->prAr($data));
 			$this->error_id = 22;
 			$this->__dbError($this->prepare_cursor[$stm_name]['result']);
-			$this->__dbDebug('db', '<span style="color: red;"><b>DB-Error</b> '.$stm_name.': Execution failed</span>', 'DB_ERROR');
+			$this->__dbDebug(
+				'db',
+				'<span style="color: red;"><b>DB-Error</b> ' . $stm_name
+					. ': Execution failed</span>',
+				'DB_ERROR'
+			);
 			return false;
 		}
-		if ($this->__checkQueryForInsert($this->prepare_cursor[$stm_name]['query'], true) &&
+		if (
+			$this->__checkQueryForInsert($this->prepare_cursor[$stm_name]['query'], true) &&
 			$this->prepare_cursor[$stm_name]['pk_name'] != 'NULL'
 		) {
 			if (!$this->prepare_cursor[$stm_name]['returning_id']) {
-				$this->insert_id = $this->db_functions->__dbInsertId($this->prepare_cursor[$stm_name]['query'], $this->prepare_cursor[$stm_name]['pk_name']);
+				$this->insert_id = $this->db_functions->__dbInsertId(
+					$this->prepare_cursor[$stm_name]['query'],
+					$this->prepare_cursor[$stm_name]['pk_name']
+				);
 				$this->insert_id_ext = $this->insert_id;
 				$this->insert_id_arr[] = $this->insert_id;
 			} elseif ($result) {
@@ -1664,21 +1774,28 @@ class IO extends \CoreLibs\Basic
 				$this->insert_id_arr = [];
 				// we have returning, now we need to check if we get one or many returned
 				// we'll need to loop this, if we have multiple insert_id returns
-				while ($_insert_id = $this->db_functions->__dbFetchArray(
-					$result,
-					$this->db_functions->__dbResultType(true)
-				)) {
+				while (
+					$_insert_id = $this->db_functions->__dbFetchArray(
+						$result,
+						$this->db_functions->__dbResultType(true)
+					)
+				) {
 					$this->insert_id[] = $_insert_id;
 					$this->insert_id_arr[] = $_insert_id;
 				}
 				// if we have only one, revert from arry to single
 				if (count($this->insert_id) == 1) {
-					// echo "+ SINGLE DATA CONVERT: ".count($this->insert_id[0])." => ".array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])."<br>";
-					// echo "+ PK DIRECT: ".$this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]."<Br>";
-					// if this has only the pk_name, then only return this, else array of all data (but without the position)
-					// example if insert_id[0]['foo'] && insert_id[0]['bar'] it will become insert_id['foo'] & insert_id['bar']
-					// if only ['foo_id'] and it is the PK then the PK is directly written to the insert_id
-					if (count($this->insert_id[0]) > 1 ||
+					// $this->log->debug('SINGLE DATA CONVERT', count($this->insert_id[0])." => "
+					//	.array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0]));
+					// $this->log->debug('PK DIRECT', $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]);
+					// if this has only the pk_name, then only return this,
+					// else array of all data (but without the position)
+					// example if insert_id[0]['foo'] && insert_id[0]['bar']
+					// it will become insert_id['foo'] & insert_id['bar']
+					// if only ['foo_id'] and it is the PK then the PK is directly
+					// written to the insert_id
+					if (
+						count($this->insert_id[0]) > 1 ||
 						!array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])
 					) {
 						$this->insert_id_ext = $this->insert_id[0];
@@ -1691,19 +1808,34 @@ class IO extends \CoreLibs\Basic
 					$this->insert_id = '';
 					$this->warning_id = 33;
 					$this->__dbError();
-					$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id returned no data</span>', 'DB_WARNING');
+					$this->__dbDebug(
+						'db',
+						'<span style="color: orange;"><b>DB-Warning</b> ' . $stm_name
+							. ': insert id returned no data</span>',
+						'DB_WARNING'
+					);
 				}
 			}
 			// this error handling is only for pgsql
 			if (is_array($this->insert_id)) {
 				$this->warning_id = 32;
 				$this->__dbError();
-				$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': insert id data returned as array</span>', 'DB_WARNING');
+				$this->__dbDebug(
+					'db',
+					'<span style="color: orange;"><b>DB-Warning</b> ' . $stm_name
+						. ': insert id data returned as array</span>',
+					'DB_WARNING'
+				);
 			} elseif (!$this->insert_id) {
 				// NOTE should we keep this inside
 				$this->warning_id = 31;
 				$this->__dbError();
-				$this->__dbDebug('db', '<span style="color: orange;"><b>DB-Warning</b> '.$stm_name.': Could not get insert id</span>', 'DB_WARNING');
+				$this->__dbDebug(
+					'db',
+					'<span style="color: orange;"><b>DB-Warning</b> ' . $stm_name
+						. ': Could not get insert id</span>',
+					'DB_WARNING'
+				);
 			}
 		}
 		return $result;
@@ -1765,14 +1897,14 @@ class IO extends \CoreLibs\Basic
 		if (!$compare || !$to_master || !$to_minor) {
 			return false;
 		} else {
-			$to_version = $to_master.($to_minor < 10 ? '0' : '').$to_minor;
+			$to_version = $to_master . ($to_minor < 10 ? '0' : '') . $to_minor;
 		}
 		// db_version can return X.Y.Z
 		// we only compare the first two
 		preg_match("/^(\d{1,})\.(\d{1,})\.?(\d{1,})?/", $this->dbVersion(), $matches);
 		$master = $matches[1];
 		$minor = $matches[2];
-		$version = $master.($minor < 10 ? '0' : '').$minor;
+		$version = $master . ($minor < 10 ? '0' : '') . $minor;
 		$return = false;
 		// compare
 		switch ($compare) {
@@ -1852,8 +1984,13 @@ class IO extends \CoreLibs\Basic
 	 * @param  array    $data            data array to override _POST data
 	 * @return int|bool                  primary key
 	 */
-	public function dbWriteData(array $write_array, array $not_write_array, $primary_key, string $table, $data = [])
-	{
+	public function dbWriteData(
+		array $write_array,
+		array $not_write_array,
+		int $primary_key,
+		string $table,
+		array $data = []
+	) {
 		if (!is_array($write_array)) {
 			$write_array = [];
 		}
@@ -1864,7 +2001,14 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$not_write_update_array = [];
-		return $this->dbWriteDataExt($write_array, $primary_key, $table, $not_write_array, $not_write_update_array, $data);
+		return $this->dbWriteDataExt(
+			$write_array,
+			$primary_key,
+			$table,
+			$not_write_array,
+			$not_write_update_array,
+			$data
+		);
 	}
 
 	/**
@@ -1890,7 +2034,7 @@ class IO extends \CoreLibs\Basic
 	) {
 		if (!is_array($primary_key)) {
 			$primary_key = [
-				'row' => $table.'_id',
+				'row' => $table . '_id',
 				'value' => $primary_key
 			];
 		} else {
@@ -1905,13 +2049,14 @@ class IO extends \CoreLibs\Basic
 		$q_sub_value = '';
 		$q_sub_data = '';
 		// get the table layout and row types
-		$table_data = $this->dbShowTableMetaData(($this->db_schema ? $this->db_schema.'.' : '').$table);
+		$table_data = $this->dbShowTableMetaData(($this->db_schema ? $this->db_schema . '.' : '') . $table);
 		// @phan HACK
 		$primary_key['value'] = $primary_key['value'] ?? '';
 		$primary_key['row'] = $primary_key['row'] ?? '';
 		// loop through the write array and each field to build the query
 		foreach ($write_array as $field) {
-			if ((!$primary_key['value'] ||
+			if (
+				(!$primary_key['value'] ||
 					($primary_key['value'] &&
 					!in_array($field, $not_write_update_array))
 				) &&
@@ -1936,8 +2081,11 @@ class IO extends \CoreLibs\Basic
 				}
 				// we detect bool, so we can force a write on "false"
 				$is_bool = $table_data[$field]['type'] == 'bool' ? true : false;
-				// write if the field has to be not null, or if there is no data and the field has no default values or if there is data or if this is an update and there is no data (set null)
-				if (($not_null && $_data) ||
+				// write if the field has to be not null, or if there is
+				// no data and the field has no default values or if there
+				// is data or if this is an update and there is no data (set null)
+				if (
+					($not_null && $_data) ||
 					(!$has_default && !$_data) ||
 					(is_numeric($_data) && $_data) ||
 					($primary_key['value'] && !$_data) ||
@@ -1946,11 +2094,13 @@ class IO extends \CoreLibs\Basic
 					if ($q_sub_value && !$primary_key['value']) {
 						$q_sub_value .= ', ';
 					}
-					if ($q_sub_data) { // && (!$primary_key || ($primary_key && !in_array($field, $not_write_array))))
+					if ($q_sub_data) {
+						// && (!$primary_key ||
+						// ($primary_key && !in_array($field, $not_write_array))))
 						$q_sub_data .= ', ';
 					}
 					if ($primary_key['value']) {
-						$q_sub_data .= $field.' = ';
+						$q_sub_data .= $field . ' = ';
 					} else {
 						$q_sub_value .= $field;
 					}
@@ -1963,7 +2113,13 @@ class IO extends \CoreLibs\Basic
 						$q_sub_data .= is_numeric($_data) ? $_data : 'NULL';
 					} else {
 						// if bool -> set bool, else write data
-						$q_sub_data .= isset($_data) ? "'".($is_bool ? $this->dbBoolean($_data, true) : $this->dbEscapeString($_data))."'" : 'NULL';
+						$q_sub_data .= isset($_data) ?
+							"'" . (
+								$is_bool ?
+									$this->dbBoolean($_data, true) :
+									$this->dbEscapeString($_data)
+							) . "'" :
+							'NULL';
 					}
 				}
 			}
@@ -1971,12 +2127,12 @@ class IO extends \CoreLibs\Basic
 
 		// first work contact itself (we need contact id for everything else)
 		if ($primary_key['value'] && $primary_key['row']) {
-			$q = 'UPDATE '.$table.' SET ';
-			$q .= $q_sub_data.' ';
-			$q .= 'WHERE '.$primary_key['row'].' = '.$primary_key['value'];
+			$q = 'UPDATE ' . $table . ' SET ';
+			$q .= $q_sub_data . ' ';
+			$q .= 'WHERE ' . $primary_key['row'] . ' = ' . $primary_key['value'];
 			$this->temp_sql = $q_sub_data;
 		} else {
-			$q = 'INSERT INTO '.$table.' (';
+			$q = 'INSERT INTO ' . $table . ' (';
 			$q .= $q_sub_value;
 			$q .= ') VALUES (';
 			$q .= $q_sub_data;
@@ -2013,7 +2169,11 @@ class IO extends \CoreLibs\Basic
 		$seconds = $matches[4] != '00' ? preg_replace('/^0/', '', $matches[4]) : '';
 		$milliseconds = $matches[6];
 
-		return $prefix.($hour ? $hour.'h ' : '').($minutes ? $minutes.'m ' : '').($seconds ? $seconds.'s' : '').($show_micro && $milliseconds? ' '.$milliseconds.'ms' : '');
+		return $prefix
+			. ($hour ? $hour . 'h ' : '')
+			. ($minutes ? $minutes . 'm ' : '')
+			. ($seconds ? $seconds . 's' : '')
+			. ($show_micro && $milliseconds ? ' ' . $milliseconds . 'ms' : '');
 	}
 
 	/**
@@ -2043,10 +2203,10 @@ class IO extends \CoreLibs\Basic
 				$value = $value === '' ? "NULL" : floatval($value);
 				break;
 			case 't':
-				$value = $value === '' ? "NULL" : "'".$this->dbEscapeString($value)."'";
+				$value = $value === '' ? "NULL" : "'" . $this->dbEscapeString($value) . "'";
 				break;
 			case 'd':
-				$value = $value === '' ? "NULL" : "'".$this->dbEscapeString($value)."'";
+				$value = $value === '' ? "NULL" : "'" . $this->dbEscapeString($value) . "'";
 				break;
 			case 'i2':
 				$value = $value === '' ? 0 : intval($value);
@@ -2156,7 +2316,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function getInsertReturn($key = null)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use getReturningExt($key = null)', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use getReturningExt($key = null)', E_USER_DEPRECATED);
 		return $this->dbGetReturningExt($key);
 	}
 
@@ -2167,7 +2327,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function getReturning()
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetReturning()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetReturning()', E_USER_DEPRECATED);
 		return $this->dbGetReturning();
 	}
 
@@ -2178,7 +2338,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function getInsertPK()
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetInsertPK()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetInsertPK()', E_USER_DEPRECATED);
 		return $this->dbGetReturning();
 	}
 
@@ -2190,7 +2350,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function getReturningExt($key = null)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetReturningExt($key = null)', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetReturningExt($key = null)', E_USER_DEPRECATED);
 		return $this->dbGetReturningExt($key);
 	}
 
@@ -2202,7 +2362,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function getCursorExt($q = null)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetCursorExt($q = null)', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetCursorExt($q = null)', E_USER_DEPRECATED);
 		return $this->dbGetCursorExt($q);
 	}
 
@@ -2213,9 +2373,10 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function getNumRows()
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use dbGetNumRows()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetNumRows()', E_USER_DEPRECATED);
 		return $this->dbGetNumRows();
 	}
-} // end if db class
+	// end if db class
+}
 
 // __END__

@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * html convert functions
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Convert;
 
@@ -16,7 +18,7 @@ class Html
 	public static function htmlent($string)
 	{
 		if (is_string($string)) {
-			return htmlentities($string, ENT_COMPAT|ENT_HTML401, 'UTF-8', false);
+			return htmlentities($string, ENT_COMPAT | ENT_HTML401, 'UTF-8', false);
 		} else {
 			return $string;
 		}

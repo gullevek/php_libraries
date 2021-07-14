@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Convert color spaces
@@ -9,6 +9,8 @@
  * rgb to hsl
  * hsl to rgb
 */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Convert;
 

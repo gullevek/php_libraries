@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * core password set, check and rehash check wrapper functions
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Check;
 

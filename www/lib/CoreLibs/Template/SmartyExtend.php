@@ -1,8 +1,12 @@
-<?php declare(strict_types=1);
-// because smarty is symlinked folder
+<?php // phpcs:ignore PSR1.Files.SideEffects
+
 /**
  * @phan-file-suppress PhanRedefinedExtendedClass
  */
+
+// because smarty is symlinked folder
+
+declare(strict_types=1);
 
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
@@ -16,7 +20,7 @@
 namespace CoreLibs\Template;
 
 // I need to manually load Smarty BC here (it is not namespaced)
-require_once(BASE.LIB.SMARTY.'SmartyBC.class.php');
+require_once(BASE . LIB . SMARTY . 'SmartyBC.class.php');
 // So it doesn't start looking around in the wrong naemspace as smarty doesn't have one
 use SmartyBC;
 
@@ -149,7 +153,7 @@ class SmartyExtend extends SmartyBC
 		// create the char lang encoding
 		$this->lang_short = substr($this->lang, 0, 2);
 		// set the language folder
-		$this->lang_dir = BASE.INCLUDES.LANG.CONTENT_PATH;
+		$this->lang_dir = BASE . INCLUDES . LANG . CONTENT_PATH;
 	}
 
 	/**
@@ -159,45 +163,51 @@ class SmartyExtend extends SmartyBC
 	{
 		// core CS
 		$this->CSS_CORE_INCLUDE = '';
-		if (file_exists($this->CSS.$this->CSS_CORE_TEMPLATE_NAME) &&
-			is_file($this->CSS.$this->CSS_CORE_TEMPLATE_NAME)
+		if (
+			file_exists($this->CSS . $this->CSS_CORE_TEMPLATE_NAME) &&
+			is_file($this->CSS . $this->CSS_CORE_TEMPLATE_NAME)
 		) {
-			$this->CSS_CORE_INCLUDE = $this->CSS.$this->CSS_CORE_TEMPLATE_NAME;
+			$this->CSS_CORE_INCLUDE = $this->CSS . $this->CSS_CORE_TEMPLATE_NAME;
 		}
 		// core JS
 		$this->JS_CORE_INCLUDE = '';
-		if (file_exists($this->JAVASCRIPT.$this->JS_CORE_TEMPLATE_NAME) &&
-			is_file($this->JAVASCRIPT.$this->JS_CORE_TEMPLATE_NAME)
+		if (
+			file_exists($this->JAVASCRIPT . $this->JS_CORE_TEMPLATE_NAME) &&
+			is_file($this->JAVASCRIPT . $this->JS_CORE_TEMPLATE_NAME)
 		) {
-			$this->JS_CORE_INCLUDE = $this->JAVASCRIPT.$this->JS_CORE_TEMPLATE_NAME;
+			$this->JS_CORE_INCLUDE = $this->JAVASCRIPT . $this->JS_CORE_TEMPLATE_NAME;
 		}
 		// additional per page Javascript include
 		$this->JS_INCLUDE = '';
-		if (file_exists($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME) &&
-			is_file($this->JAVASCRIPT.$this->JS_TEMPLATE_NAME)
+		if (
+			file_exists($this->JAVASCRIPT . $this->JS_TEMPLATE_NAME) &&
+			is_file($this->JAVASCRIPT . $this->JS_TEMPLATE_NAME)
 		) {
-			$this->JS_INCLUDE = $this->JAVASCRIPT.$this->JS_TEMPLATE_NAME;
+			$this->JS_INCLUDE = $this->JAVASCRIPT . $this->JS_TEMPLATE_NAME;
 		}
 		// per page css file
 		$this->CSS_INCLUDE = '';
-		if (file_exists($this->CSS.$this->CSS_TEMPLATE_NAME) &&
-			is_file($this->CSS.$this->CSS_TEMPLATE_NAME)
+		if (
+			file_exists($this->CSS . $this->CSS_TEMPLATE_NAME) &&
+			is_file($this->CSS . $this->CSS_TEMPLATE_NAME)
 		) {
-			$this->CSS_INCLUDE = $this->CSS.$this->CSS_TEMPLATE_NAME;
+			$this->CSS_INCLUDE = $this->CSS . $this->CSS_TEMPLATE_NAME;
 		}
 		// optional CSS file
 		$this->CSS_SPECIAL_INCLUDE = '';
-		if (file_exists($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME) &&
-			is_file($this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME)
+		if (
+			file_exists($this->CSS . $this->CSS_SPECIAL_TEMPLATE_NAME) &&
+			is_file($this->CSS . $this->CSS_SPECIAL_TEMPLATE_NAME)
 		) {
-			$this->CSS_SPECIAL_INCLUDE = $this->CSS.$this->CSS_SPECIAL_TEMPLATE_NAME;
+			$this->CSS_SPECIAL_INCLUDE = $this->CSS . $this->CSS_SPECIAL_TEMPLATE_NAME;
 		}
 		// optional JS file
 		$this->JS_SPECIAL_INCLUDE = '';
-		if (file_exists($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME) &&
-			is_file($this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME)
+		if (
+			file_exists($this->JAVASCRIPT . $this->JS_SPECIAL_TEMPLATE_NAME) &&
+			is_file($this->JAVASCRIPT . $this->JS_SPECIAL_TEMPLATE_NAME)
 		) {
-			$this->JS_SPECIAL_INCLUDE = $this->JAVASCRIPT.$this->JS_SPECIAL_TEMPLATE_NAME;
+			$this->JS_SPECIAL_INCLUDE = $this->JAVASCRIPT . $this->JS_SPECIAL_TEMPLATE_NAME;
 		}
 	}
 
@@ -215,7 +225,7 @@ class SmartyExtend extends SmartyBC
 
 		// set include & template names
 		if (!isset($this->CONTENT_INCLUDE)) {
-			$this->CONTENT_INCLUDE = str_replace('.php', '', $this->page_name).'.tpl';
+			$this->CONTENT_INCLUDE = str_replace('.php', '', $this->page_name) . '.tpl';
 		}
 		// strip tpl and replace it with php
 		// php include file per page
@@ -226,60 +236,63 @@ class SmartyExtend extends SmartyBC
 		$this->CSS_TEMPLATE_NAME = str_replace('.tpl', '.css', $this->CONTENT_INCLUDE);
 
 		// set basic template path (tmp)
-		$this->INCLUDES = BASE.INCLUDES; // no longer in templates, only global
-		$this->TEMPLATE_PATH = BASE.INCLUDES.TEMPLATES.CONTENT_PATH;
+		$this->INCLUDES = BASE . INCLUDES; // no longer in templates, only global
+		$this->TEMPLATE_PATH = BASE . INCLUDES . TEMPLATES . CONTENT_PATH;
 		$this->setTemplateDir($this->TEMPLATE_PATH);
-		$this->JAVASCRIPT = LAYOUT.JS;
-		$this->CSS = LAYOUT.CSS;
-		$this->FONT = LAYOUT.FONT;
-		$this->PICTURES = LAYOUT.IMAGES;
-		$this->CACHE_PICTURES = LAYOUT.CACHE;
-		$this->CACHE_PICTURES_ROOT = ROOT.$this->CACHE_PICTURES;
+		$this->JAVASCRIPT = LAYOUT . JS;
+		$this->CSS = LAYOUT . CSS;
+		$this->FONT = LAYOUT . FONT;
+		$this->PICTURES = LAYOUT . IMAGES;
+		$this->CACHE_PICTURES = LAYOUT . CACHE;
+		$this->CACHE_PICTURES_ROOT = ROOT . $this->CACHE_PICTURES;
 		// check if we have an external file with the template name
-		if (file_exists($this->INCLUDES.$this->INC_TEMPLATE_NAME) &&
-			is_file($this->INCLUDES.$this->INC_TEMPLATE_NAME)
+		if (
+			file_exists($this->INCLUDES . $this->INC_TEMPLATE_NAME) &&
+			is_file($this->INCLUDES . $this->INC_TEMPLATE_NAME)
 		) {
-			include($this->INCLUDES.$this->INC_TEMPLATE_NAME);
+			include($this->INCLUDES . $this->INC_TEMPLATE_NAME);
 		}
 		// check for template include
-		if ($this->USE_INCLUDE_TEMPLATE === true &&
+		if (
+			$this->USE_INCLUDE_TEMPLATE === true &&
 			!$this->TEMPLATE_NAME
 		) {
 			$this->TEMPLATE_NAME = $this->CONTENT_INCLUDE;
 			// add to cache & compile id
-			$this->COMPILE_ID .= '_'.$this->TEMPLATE_NAME;
-			$this->CACHE_ID .= '_'.$this->TEMPLATE_NAME;
+			$this->COMPILE_ID .= '_' . $this->TEMPLATE_NAME;
+			$this->CACHE_ID .= '_' . $this->TEMPLATE_NAME;
 		}
 		// set all the additional CSS/JS parths
 		$this->setSmartCoreIncludeCssJs();
 		// check if template names exist
 		if (!$this->MASTER_TEMPLATE_NAME) {
 			exit('MASTER TEMPLATE is not set');
-		} elseif (!file_exists($this->getTemplateDir()[0].DS.$this->MASTER_TEMPLATE_NAME)) {
+		} elseif (!file_exists($this->getTemplateDir()[0] . DS . $this->MASTER_TEMPLATE_NAME)) {
 			// abort if master template could not be found
-			exit('MASTER TEMPLATE: '.$this->MASTER_TEMPLATE_NAME.' could not be found');
+			exit('MASTER TEMPLATE: ' . $this->MASTER_TEMPLATE_NAME . ' could not be found');
 		}
-		if ($this->TEMPLATE_NAME &&
-			!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_NAME)
+		if (
+			$this->TEMPLATE_NAME &&
+			!file_exists($this->getTemplateDir()[0] . DS . $this->TEMPLATE_NAME)
 		) {
-			exit('INCLUDE TEMPLATE: '.$this->TEMPLATE_NAME.' could not be found');
+			exit('INCLUDE TEMPLATE: ' . $this->TEMPLATE_NAME . ' could not be found');
 		}
 		// javascript translate data as template for auto translate
 		if (empty($this->TEMPLATE_TRANSLATE)) {
-			$this->TEMPLATE_TRANSLATE = 'jsTranslate_'.$this->lang.'.tpl';
+			$this->TEMPLATE_TRANSLATE = 'jsTranslate_' . $this->lang . '.tpl';
 		} else {
 			// we assume we have some fixed set
 			// we must add _<$this->lang>
 			// if .tpl, put before .tpl
 			// if not .tpl, add _<$this->lang>.tpl
 			if (strpos($this->TEMPLATE_TRANSLATE, '.tpl')) {
-				$this->TEMPLATE_TRANSLATE = str_replace('.tpl', '_'.$this->lang.'.tpl', $this->TEMPLATE_TRANSLATE);
+				$this->TEMPLATE_TRANSLATE = str_replace('.tpl', '_' . $this->lang . '.tpl', $this->TEMPLATE_TRANSLATE);
 			} else {
-				$this->TEMPLATE_TRANSLATE .= '_'.$this->lang.'.tpl';
+				$this->TEMPLATE_TRANSLATE .= '_' . $this->lang . '.tpl';
 			}
 		}
 		// if we can't find it, dump it
-		if (!file_exists($this->getTemplateDir()[0].DS.$this->TEMPLATE_TRANSLATE)) {
+		if (!file_exists($this->getTemplateDir()[0] . DS . $this->TEMPLATE_TRANSLATE)) {
 			$this->TEMPLATE_TRANSLATE = null;
 		}
 	}
@@ -385,7 +398,8 @@ class SmartyExtend extends SmartyBC
 		// html title
 		// set local page title
 		$this->HEADER['HTML_TITLE'] = !$this->L_TITLE ?
-			ucfirst(str_replace('_', ' ', \CoreLibs\Get\System::getPageName(1))).(defined(G_TITLE) ? ' - '.$this->l10n->__(G_TITLE) : '') :
+			ucfirst(str_replace('_', ' ', \CoreLibs\Get\System::getPageName(1)))
+				. (defined(G_TITLE) ? ' - ' . $this->l10n->__(G_TITLE) : '') :
 			$this->l10n->__($this->L_TITLE);
 
 		// LANG
@@ -405,7 +419,7 @@ class SmartyExtend extends SmartyBC
 		$this->DATA['TEMPLATE_NAME'] = $this->TEMPLATE_NAME;
 		$this->DATA['CONTENT_INCLUDE'] = $this->CONTENT_INCLUDE;
 		$this->DATA['TEMPLATE_TRANSLATE'] = $this->TEMPLATE_TRANSLATE ?? null;
-		$this->DATA['PAGE_FILE_NAME'] = str_replace('.php', '', $this->page_name).'.tpl';
+		$this->DATA['PAGE_FILE_NAME'] = str_replace('.php', '', $this->page_name) . '.tpl';
 		// render page
 		$this->renderSmarty();
 	}
@@ -419,7 +433,8 @@ class SmartyExtend extends SmartyBC
 	{
 		// array merge HEADER, DATA, DEBUG DATA
 		foreach (['HEADER', 'DATA', 'DEBUG_DATA'] as $ext_smarty) {
-			if (isset($cms->{$ext_smarty}) &&
+			if (
+				isset($cms->{$ext_smarty}) &&
 				is_array($cms->{$ext_smarty})
 			) {
 				$this->{$ext_smarty} = array_merge($this->{$ext_smarty}, $cms->{$ext_smarty});
@@ -439,16 +454,16 @@ class SmartyExtend extends SmartyBC
 		foreach ($this->CONTENT_DATA as $key => $value) {
 			$this->assign($key, $value);
 		}
-		if (is_dir(BASE.TEMPLATES_C)) {
-			$this->setCompileDir(BASE.TEMPLATES_C);
+		if (is_dir(BASE . TEMPLATES_C)) {
+			$this->setCompileDir(BASE . TEMPLATES_C);
 		}
-		if (is_dir(BASE.CACHE)) {
-			$this->setCacheDir(BASE.CACHE);
+		if (is_dir(BASE . CACHE)) {
+			$this->setCacheDir(BASE . CACHE);
 		}
 		$this->display(
 			$this->MASTER_TEMPLATE_NAME,
-			$this->CACHE_ID.($this->CACHE_ID ? '_' : '').$this->lang,
-			$this->COMPILE_ID.($this->COMPILE_ID ? '_' : '').$this->lang
+			$this->CACHE_ID . ($this->CACHE_ID ? '_' : '') . $this->lang,
+			$this->COMPILE_ID . ($this->COMPILE_ID ? '_' : '') . $this->lang
 		);
 	}
 }

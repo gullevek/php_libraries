@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2018/10/11
@@ -6,6 +7,8 @@
 * configuration file for database settings
 * HISTORY:
 *********************************************************************/
+
+declare(strict_types=1);
 
 // please be VERY carefull only to change the right side
 $DB_CONFIG = [

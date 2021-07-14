@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2005/07/19
@@ -6,6 +7,8 @@
 * preset date variables
 * HISTORY:
 *********************************************************************/
+
+declare(strict_types=1);
 
 $day_short = [
 	1 => 'Mon',

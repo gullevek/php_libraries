@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -43,17 +46,18 @@ $min_version_ss = '7.1';
 $min_version = '7.1.0';
 $max_version = '7.3.1';
 // class
-print "MIN: $min_version: ".(string)$_phpv->checkPHPVersion($min_version)."<br>";
-print "MIN/MAX: $min_version/$max_version: ".(string)$_phpv->checkPHPVersion($min_version, $max_version)."<br>";
-print "MIN/S: $min_version_s: ".(string)$_phpv->checkPHPVersion($min_version_s)."<br>";
-print "MIN/SS: $min_version_ss: ".(string)$_phpv->checkPHPVersion($min_version_ss)."<br>";
+print "MIN: $min_version: " . (string)$_phpv->checkPHPVersion($min_version) . "<br>";
+print "MIN/MAX: $min_version/$max_version: " . (string)$_phpv->checkPHPVersion($min_version, $max_version) . "<br>";
+print "MIN/S: $min_version_s: " . (string)$_phpv->checkPHPVersion($min_version_s) . "<br>";
+print "MIN/SS: $min_version_ss: " . (string)$_phpv->checkPHPVersion($min_version_ss) . "<br>";
 // static
-print "S::MIN: $min_version: ".(string)$phpv_class::checkPHPVersion($min_version)."<br>";
-print "S::MIN/MAX: $min_version/$max_version: ".(string)$phpv_class::checkPHPVersion($min_version, $max_version)."<br>";
-print "S::MIN/S: $min_version_s: ".(string)$phpv_class::checkPHPVersion($min_version_s)."<br>";
-print "S::MIN/SS: $min_version_ss: ".(string)$phpv_class::checkPHPVersion($min_version_ss)."<br>";
+print "S::MIN: $min_version: " . (string)$phpv_class::checkPHPVersion($min_version) . "<br>";
+print "S::MIN/MAX: $min_version/$max_version: "
+	. (string)$phpv_class::checkPHPVersion($min_version, $max_version) . "<br>";
+print "S::MIN/S: $min_version_s: " . (string)$phpv_class::checkPHPVersion($min_version_s) . "<br>";
+print "S::MIN/SS: $min_version_ss: " . (string)$phpv_class::checkPHPVersion($min_version_ss) . "<br>";
 // use stats
-print "U-S::MIN: $min_version: ".(string)PhpVersion::checkPHPVersion($min_version)."<br>";
+print "U-S::MIN: $min_version: " . (string)PhpVersion::checkPHPVersion($min_version) . "<br>";
 
 // DEPRECATED
 // print "MIN: $min_version: ".(string)$basic->checkPHPVersion($min_version)."<br>";

@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /*
 *	Class ProgressBar
 *
@@ -12,6 +13,8 @@
 *	Date:       2018.3.28 [PHPCS + namespace]
 *
 */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Output;
 
@@ -30,7 +33,7 @@ class ProgressBar
 	];
 
 	public $clear_buffer_size = 1; // we need to send this before the lfush to get browser output
-	public $clear_buffer_size_init = 1024*1024; // if I don't send that junk, it won't send anything
+	public $clear_buffer_size_init = 1024 * 1024; // if I don't send that junk, it won't send anything
 
 	// public vars
 
@@ -313,7 +316,10 @@ class ProgressBar
 					'type' => $type, // either percent or percentlbl
 					'value' => $value,
 					'left' => false,
-					'top' => round(($this->height - $font_size) / log($this->height - $font_size, 7), 0) - $this->pedding,
+					'top' => round(
+						($this->height - $font_size) / log($this->height - $font_size, 7),
+						0
+					) - $this->pedding,
 					'width' => $this->width,
 					'height' => 0,
 					'align' => 'center',
@@ -368,8 +374,14 @@ class ProgressBar
 	 * @param  string $align  alignment (left/right/etc), default empty
 	 * @return void           has no return
 	 */
-	public function setLabelPosition(string $name, int $left, int $top, int $width, int $height, string $align = ''): void
-	{
+	public function setLabelPosition(
+		string $name,
+		int $left,
+		int $top,
+		int $width,
+		int $height,
+		string $align = ''
+	): void {
 		// print "SET POSITION[$name]: $left<br>";
 		// if this is percent, we ignore anything, it is auto positioned
 		if ($this->label[$name]['type'] != 'percent') {
@@ -386,12 +398,17 @@ class ProgressBar
 		// init
 		if ($this->status != 'new') {
 			$output = '<script type="text/JavaScript">';
-			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.top="'.$this->label[$name]['top'].'px";';
-			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.left="'.$this->label[$name]['left'].'px";';
-			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.width="'.$this->label[$name]['width'].'px";';
-			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.height="'.$this->label[$name]['height'].'px";';
-			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.align="'.$this->label[$name]['align'].'";';
-			$output .= '</script>'."\n";
+			$output .= 'document.getElementById("plbl' . $name
+				. $this->code . '").style.top="' . $this->label[$name]['top'] . 'px";';
+			$output .= 'document.getElementById("plbl' . $name
+				. $this->code . '").style.left="' . $this->label[$name]['left'] . 'px";';
+			$output .= 'document.getElementById("plbl' . $name
+				. $this->code . '").style.width="' . $this->label[$name]['width'] . 'px";';
+			$output .= 'document.getElementById("plbl' . $name
+				. $this->code . '").style.height="' . $this->label[$name]['height'] . 'px";';
+			$output .= 'document.getElementById("plbl' . $name
+				. $this->code . '").style.align="' . $this->label[$name]['align'] . '";';
+			$output .= '</script>' . "\n";
 			echo $output;
 			$this->__flushCache();
 		}
@@ -407,7 +424,8 @@ class ProgressBar
 	{
 		$this->label[$name]['color'] = $color;
 		if ($this->status != 'new') {
-			echo '<script type="text/JavaScript">document.getElementById("plbl'.$name.$this->code.'").style.color="'.$color.'";</script>'."\n";
+			echo '<script type="text/JavaScript">document.getElementById("plbl' . $name
+				. $this->code . '").style.color="' . $color . '";</script>' . "\n";
 			$this->__flushCache();
 		}
 	}
@@ -422,7 +440,8 @@ class ProgressBar
 	{
 		$this->label[$name]['bgr_color'] = $color;
 		if ($this->status != 'new') {
-			echo '<script type="text/JavaScript">document.getElementById("plbl'.$name.$this->code.'").style.background="'.$color.'";</script>'."\n";
+			echo '<script type="text/JavaScript">document.getElementById("plbl' . $name
+				. $this->code . '").style.background="' . $color . '";</script>' . "\n";
 			$this->__flushCache();
 		}
 	}
@@ -447,9 +466,14 @@ class ProgressBar
 		}
 		// position the label new if this is percent
 		if ($this->label[$name]['type'] == 'percent') {
-			$this->label[$name]['top'] = round(($this->height - intval($size)) / log($this->height - intval($size), 7), 0) - $this->pedding;
+			$this->label[$name]['top'] = round(
+				($this->height - intval($size)) / log($this->height - intval($size), 7),
+				0
+			) - $this->pedding;
 		}
-		// print "HEIGHT: ".$this->height.", Size: ".intval($size).", Pedding: ".$this->pedding.", Calc: ".round($this->height - intval($size)).", Log: ".log($this->height - intval($size), 7)."<br>";
+		// print "HEIGHT: ".$this->height.", Size: ".intval($size)
+		//	.", Pedding: ".$this->pedding.", Calc: ".round($this->height - intval($size))
+		//	.", Log: ".log($this->height - intval($size), 7)."<br>";
 		// then set like usual
 		$this->label[$name]['font-size'] = intval($size);
 		if ($family != '') {
@@ -461,10 +485,13 @@ class ProgressBar
 
 		if ($this->status != 'new') {
 			$output = '<script type="text/JavaScript">';
-			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.font-size="'.$this->label[$name]['font-size'].'px";';
-			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.font-family="'.$this->label[$name]['font-family'].'";';
-			$output .= 'document.getElementById("plbl'.$name.$this->code.'").style.font-weight="'.$this->label[$name]['font-weight'].'";';
-			$output .= '</script>'."\n";
+			$output .= 'document.getElementById("plbl' . $name
+				. $this->code . '").style.font-size="' . $this->label[$name]['font-size'] . 'px";';
+			$output .= 'document.getElementById("plbl' . $name
+				. $this->code . '").style.font-family="' . $this->label[$name]['font-family'] . '";';
+			$output .= 'document.getElementById("plbl' . $name
+				. $this->code . '").style.font-weight="' . $this->label[$name]['font-weight'] . '";';
+			$output .= '</script>' . "\n";
 			echo $output;
 			$this->__flushCache();
 		}
@@ -481,7 +508,8 @@ class ProgressBar
 		$this->label[$name]['value'] = $value;
 		// print "NAME[$name], Status: ".$this->status.": ".$value."<Br>";
 		if ($this->status != 'new') {
-			echo '<script type="text/JavaScript">PBlabelText'.$this->code.'("'.$name.'","'.$this->label[$name]['value'].'");</script>'."\n";
+			echo '<script type="text/JavaScript">PBlabelText' . $this->code
+				. '("' . $name . '","' . $this->label[$name]['value'] . '");</script>' . "\n";
 			$this->__flushCache();
 		}
 	}
@@ -495,7 +523,8 @@ class ProgressBar
 	{
 		$this->color = $color;
 		if ($this->status != 'new') {
-			echo '<script type="text/JavaScript">document.getElementById("pbar'.$this->code.'").style.background="'.$color.'";</script>'."\n";
+			echo '<script type="text/JavaScript">document.getElementById("pbar' . $this->code
+				. '").style.background="' . $color . '";</script>' . "\n";
 			$this->__flushCache();
 		}
 	}
@@ -509,7 +538,8 @@ class ProgressBar
 	{
 		$this->bgr_color = $color;
 		if ($this->status != 'new') {
-			echo '<script type="text/JavaScript">document.getElementById("pbrd'.$this->code.'").style.background="'.$color.'";</script>'."\n";
+			echo '<script type="text/JavaScript">document.getElementById("pbrd' . $this->code
+				. '").style.background="' . $color . '";</script>' . "\n";
 			$this->__flushCache();
 		}
 	}
@@ -527,11 +557,11 @@ class ProgressBar
 			$this->position = $this->__calculatePosition($this->step);
 
 			echo '<script type="text/JavaScript">';
-			echo 'PBposition'.$this->code.'("left",'.$this->position['left'].');';
-			echo 'PBposition'.$this->code.'("top",'.$this->position['top'].');';
-			echo 'PBposition'.$this->code.'("width",'.$this->position['width'].');';
-			echo 'PBposition'.$this->code.'("height",'.$this->position['height'].');';
-			echo '</script>'."\n";
+			echo 'PBposition' . $this->code . '("left",' . $this->position['left'] . ');';
+			echo 'PBposition' . $this->code . '("top",' . $this->position['top'] . ');';
+			echo 'PBposition' . $this->code . '("width",' . $this->position['width'] . ');';
+			echo 'PBposition' . $this->code . '("height",' . $this->position['height'] . ');';
+			echo '</script>' . "\n";
 			$this->__flushCache();
 		}
 	}
@@ -552,48 +582,67 @@ class ProgressBar
 
 		$style_master = '';
 		if ($this->top || $this->left) {
-			$style_master = 'position:relative;top:'.$this->top.'px;left:'.$this->left.'px;width:'.($this->width + 10).'px;';
+			$style_master = 'position:relative;top:' . $this->top
+				. 'px;left:' . $this->left . 'px;width:' . ($this->width + 10) . 'px;';
 		}
-		$html = '<div id="pbm'.$this->code.'" style="'.$style_master.'background:'.$this->bgr_color_master.';">';
-		$style_brd = 'width:'.$this->width.'px;height:'.$this->height.'px;background:'.$this->bgr_color.';';
+		$html = '<div id="pbm' . $this->code . '" style="' . $style_master
+			. 'background:' . $this->bgr_color_master . ';">';
+		$style_brd = 'width:' . $this->width . 'px;height:' . $this->height
+			. 'px;background:' . $this->bgr_color . ';';
 		if ($this->border > 0) {
-			$style_brd .= 'border:'.$this->border.'px solid; border-color:'.$this->brd_color.'; -webkit-border-radius: 5px 5px 5px 5px; border-radius: 5px 5px 5px 5px; -webkit-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset;';
+			$style_brd .= 'border:'
+				. $this->border . 'px solid; border-color:'
+				. $this->brd_color . '; -webkit-border-radius: 5px 5px 5px 5px; '
+				. 'border-radius: 5px 5px 5px 5px; -webkit-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset; '
+				. 'box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset;';
 		}
 
-		$style_bar = 'position:relative;width:'.$this->position['width'].'px;height:'.$this->position['height'].'px;background:'.$this->color.';';
+		$style_bar = 'position:relative;width:' . $this->position['width']
+			. 'px;height:' . $this->position['height'] . 'px;background:' . $this->color . ';';
 		if ($this->position['top'] !== false) {
-			$style_bar .= 'top:'.$this->position['top'].'px;';
+			$style_bar .= 'top:' . $this->position['top'] . 'px;';
 		}
 		if ($this->position['left'] !== false) {
-			$style_bar .= 'left:'.$this->position['left'].'px;';
+			$style_bar .= 'left:' . $this->position['left'] . 'px;';
 		}
 		if ($this->border > 0) {
-			$style_bar .= '-webkit-border-radius: 5px 5px 5px 5px; border-radius: 5px 5px 5px 5px; -webkit-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset;';
+			$style_bar .= '-webkit-border-radius: 5px 5px 5px 5px; '
+				. 'border-radius: 5px 5px 5px 5px; -webkit-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset; '
+				. 'box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25) inset;';
 		}
 
 		if ($this->frame['show'] == true) {
 			$border = '';
 			if ($this->frame['border'] > 0) {
-				$border = 'border:'.$this->frame['border'].'px solid;border-color:'.$this->frame['brd_color'].';margin-top:2px;-webkit-border-radius: 5px 5px 5px 5px; border-radius: 5px 5px 5px 5px;';
+				$border = 'border:' . $this->frame['border']
+					. 'px solid;border-color:' . $this->frame['brd_color'] . ';margin-top:2px; '
+					. '-webkit-border-radius: 5px 5px 5px 5px; border-radius: 5px 5px 5px 5px;';
 			}
-			$html .= '<div id="pfrm'.$this->code.'" style="width:'.$this->frame['width'].'px;height:'.$this->frame['height'].'px;'.$border.'background:'.$this->frame['color'].';">'."\n";
+			$html .= '<div id="pfrm' . $this->code . '" style="width:'
+				. $this->frame['width'] . 'px;height:' . $this->frame['height'] . 'px;'
+				. $border . 'background:' . $this->frame['color'] . ';">' . "\n";
 		}
 
 		// temp write the bar here, we add that later, below all the html + progress %
-		$html_bar_top = '<div id="pbrd'.$this->code.'" style="'.$style_brd.($this->frame['show'] == true ? 'margin-left: 2px;margin-bottom:2px;' : '').'">'."\n";
-		$html_bar_top .= '<div id="pbar'.$this->code.'" style="'.$style_bar.'">';
+		$html_bar_top = '<div id="pbrd' . $this->code . '" style="' . $style_brd
+			. ($this->frame['show'] == true ? 'margin-left: 2px;margin-bottom:2px;' : '') . '">' . "\n";
+		$html_bar_top .= '<div id="pbar' . $this->code . '" style="' . $style_bar . '">';
 		// insert single percent there
-		$html_bar_bottom = '</div></div>'."\n";
+		$html_bar_bottom = '</div></div>' . "\n";
 
-		$js .= 'function PBposition'.$this->code.'(item,pixel) {'."\n";
-		$js .= ' pixel = parseInt(pixel);'."\n";
-		$js .= ' switch(item) {'."\n";
-		$js .= '  case "left": document.getElementById("pbar'.$this->code.'").style.left=(pixel) + \'px\'; break;'."\n";
-		$js .= '  case "top": document.getElementById("pbar'.$this->code.'").style.top=(pixel) + \'px\'; break;'."\n";
-		$js .= '  case "width": document.getElementById("pbar'.$this->code.'").style.width=(pixel) + \'px\'; break;'."\n";
-		$js .= '  case "height": document.getElementById("pbar'.$this->code.'").style.height=(pixel) + \'px\'; break;'."\n";
-		$js .= ' }'."\n";
-		$js .= '}'."\n";
+		$js .= 'function PBposition' . $this->code . '(item,pixel) {' . "\n";
+		$js .= ' pixel = parseInt(pixel);' . "\n";
+		$js .= ' switch(item) {' . "\n";
+		$js .= '  case "left": document.getElementById("pbar' . $this->code
+			. '").style.left=(pixel) + \'px\'; break;' . "\n";
+		$js .= '  case "top": document.getElementById("pbar' . $this->code
+			. '").style.top=(pixel) + \'px\'; break;' . "\n";
+		$js .= '  case "width": document.getElementById("pbar' . $this->code
+			. '").style.width=(pixel) + \'px\'; break;' . "\n";
+		$js .= '  case "height": document.getElementById("pbar' . $this->code
+			. '").style.height=(pixel) + \'px\'; break;' . "\n";
+		$js .= ' }' . "\n";
+		$js .= '}' . "\n";
 
 		// print "DUMP LABEL: <br><pre>".print_r($this->label, true)."</pre><br>";
 		foreach ($this->label as $name => $data) {
@@ -601,66 +650,80 @@ class ProgressBar
 			$move_prefix = $data['type'] == 'button' ? 'margin' : 'padding';
 			$style_lbl = 'position:relative;';
 			if ($data['top'] !== false) {
-				$style_lbl .= $move_prefix.'-top:'.$data['top'].'px;';
+				$style_lbl .= $move_prefix . '-top:' . $data['top'] . 'px;';
 			}
 			if ($data['left'] !== false) {
-				$style_lbl .= $move_prefix.'-left:'.$data['left'].'px;';
+				$style_lbl .= $move_prefix . '-left:' . $data['left'] . 'px;';
 			}
-			$style_lbl .= 'text-align:'.$data['align'].';';
+			$style_lbl .= 'text-align:' . $data['align'] . ';';
 			if ($data['width'] > 0) {
-				$style_lbl .= 'width:'.$data['width'].'px;';
+				$style_lbl .= 'width:' . $data['width'] . 'px;';
 			}
 			if ($data['height'] > 0) {
-				$style_lbl .= 'height:'.$data['height'].'px;';
+				$style_lbl .= 'height:' . $data['height'] . 'px;';
 			}
 
 			if (array_key_exists('font-size', $data)) {
-				$style_lbl .= 'font-size:'.$data['font-size'].'px;';
+				$style_lbl .= 'font-size:' . $data['font-size'] . 'px;';
 			}
 			if (array_key_exists('font-family', $data)) {
-				$style_lbl .= 'font-family:'.$data['font-family'].';';
+				$style_lbl .= 'font-family:' . $data['font-family'] . ';';
 			}
 			if (array_key_exists('font-weight', $data)) {
-				$style_lbl .= 'font-weight:'.$data['font-weight'].';';
+				$style_lbl .= 'font-weight:' . $data['font-weight'] . ';';
 			}
 			if (array_key_exists('bgr_color', $data) && ($data['bgr_color'] != '')) {
-				$style_lbl .= 'background:'.$data['bgr_color'].';';
+				$style_lbl .= 'background:' . $data['bgr_color'] . ';';
 			}
 
 			if (array_key_exists('type', $data)) {
 				switch ($data['type']) {
 					case 'text':
-						$html .= '<div id="plbl'.$name.$this->code.'" style="'.$style_lbl.'margin-bottom:2px;">'.$data['value'].'</div>'."\n";
+						$html .= '<div id="plbl' . $name . $this->code . '" style="'
+							. $style_lbl . 'margin-bottom:2px;">' . $data['value'] . '</div>' . "\n";
 						break;
 					case 'button':
-						$html_button .= '<div><input id="plbl'.$name.$this->code.'" type="button" value="'.$data['value'].'" style="'.$style_lbl.'margin-bottom:5px;" onclick="'.$data['target'].'.location.href=\''.$data['action'].'\'" /></div>'."\n";
+						$html_button .= '<div><input id="plbl' . $name
+							. $this->code . '" type="button" value="' . $data['value'] . '" style="'
+							. $style_lbl . 'margin-bottom:5px;" onclick="' . $data['target'] . '.location.href=\''
+							. $data['action'] . '\'" /></div>' . "\n";
 						break;
 					case 'step':
-						$html .= '<div id="plbl'.$name.$this->code.'" style="'.$style_lbl.'">'.$this->step.'</div>'."\n";
+						$html .= '<div id="plbl' . $name . $this->code . '" style="'
+							. $style_lbl . '">' . $this->step . '</div>' . "\n";
 						break;
 					case 'percent':
 						// only one inner percent
 						// print "STYLE[$name]: ".$style_lbl."<br>";
 						if (empty($html_percent)) {
-							$html_percent = '<div id="plbl'.$name.$this->code.'" style="'.$style_lbl.'width:'.$data['width'].'px;line-height:1;text-shadow: 0 0 .2em white, 0 0 .5em white;">'.$this->__calculatePercent($this->step).'%</div>'."\n";
+							$html_percent = '<div id="plbl' . $name . $this->code
+								. '" style="' . $style_lbl . 'width:' . $data['width']
+								. 'px;line-height:1;text-shadow: 0 0 .2em white, 0 0 .5em white;">'
+								. $this->__calculatePercent($this->step) . '%</div>' . "\n";
 						}
 						break;
 					case 'percentlbl':
-						$html .= '<div id="plbl'.$name.$this->code.'" style="'.$style_lbl.'width:'.$data['width'].'px;">'.$this->__calculatePercent($this->step).'%</div>'."\n";
+						$html .= '<div id="plbl' . $name . $this->code . '" style="'
+							. $style_lbl . 'width:' . $data['width'] . 'px;">'
+							. $this->__calculatePercent($this->step) . '%</div>' . "\n";
 						break;
 					case 'crossbar':
-						$html .= '<div id="plbl'.$name.$this->code.'" style="'.$style_lbl.'">'.$data['value'].'</div>'."\n";
+						$html .= '<div id="plbl' . $name . $this->code . '" style="'
+							. $style_lbl . '">' . $data['value'] . '</div>' . "\n";
 
-						$js .= 'function PBrotaryCross'.$name.$this->code.'() {'."\n";
-						$js .= ' cross = document.getElementById("plbl'.$name.$this->code.'").firstChild.nodeValue;'."\n";
-						$js .= ' switch(cross) {'."\n";
-						$js .= '  case "--": cross = "\\\\"; break;'."\n";
-						$js .= '  case "\\\\": cross = "|"; break;'."\n";
-						$js .= '  case "|": cross = "/"; break;'."\n";
-						$js .= '  default: cross = "--"; break;'."\n";
-						$js .= ' }'."\n";
-						$js .= ' document.getElementById("plbl'.$name.$this->code.'").firstChild.nodeValue = cross;'."\n";
-						$js .= '}'."\n";
+						$js .= 'function PBrotaryCross' . $name . $this->code . '() {'
+							. "\n"
+							. ' cross = document.getElementById("plbl' . $name
+							. $this->code . '").firstChild.nodeValue;' . "\n"
+							. ' switch(cross) {' . "\n"
+							. '  case "--": cross = "\\\\"; break;' . "\n"
+							. '  case "\\\\": cross = "|"; break;' . "\n"
+							. '  case "|": cross = "/"; break;' . "\n"
+							. '  default: cross = "--"; break;' . "\n"
+							. ' }' . "\n"
+							. ' document.getElementById("plbl' . $name
+							. $this->code . '").firstChild.nodeValue = cross;' . "\n"
+							. '}' . "\n";
 						break;
 				}
 			}
@@ -673,19 +736,19 @@ class ProgressBar
 		$html .= $html_button; // any buttons on bottom
 
 		if (count($this->label) > 0) {
-			$js .= 'function PBlabelText'.$this->code.'(name,text) {'."\n";
-			$js .= ' name = "plbl" + name + "'.$this->code.'";'."\n";
-			$js .= ' document.getElementById(name).innerHTML=text;'."\n";
-			$js .= '}'."\n";
+			$js .= 'function PBlabelText' . $this->code . '(name,text) {' . "\n";
+			$js .= ' name = "plbl" + name + "' . $this->code . '";' . "\n";
+			$js .= ' document.getElementById(name).innerHTML=text;' . "\n";
+			$js .= '}' . "\n";
 		}
 
 		if ($this->frame['show'] == true) {
-			$html .= '</div>'."\n";
+			$html .= '</div>' . "\n";
 		}
 
-		$html .= '<script type="text/JavaScript">'."\n";
+		$html .= '<script type="text/JavaScript">' . "\n";
 		$html .= $js;
-		$html .= '</script>'."\n";
+		$html .= '</script>' . "\n";
 
 		$html .= '</div>';
 
@@ -716,17 +779,23 @@ class ProgressBar
 
 		$js = '';
 		$new_position = $this->__calculatePosition($this->step);
-		if ($new_position['width'] != $this->position['width'] && ($this->direction == 'right' || $this->direction == 'left')) {
-			if ($this->direction=='left') {
-				$js .= 'PBposition'.$this->code.'("left",'.$new_position['left'].');';
+		if (
+			$new_position['width'] != $this->position['width'] &&
+			($this->direction == 'right' || $this->direction == 'left')
+		) {
+			if ($this->direction == 'left') {
+				$js .= 'PBposition' . $this->code . '("left",' . $new_position['left'] . ');';
 			}
-			$js .= 'PBposition'.$this->code.'("width",'.$new_position['width'].');';
+			$js .= 'PBposition' . $this->code . '("width",' . $new_position['width'] . ');';
 		}
-		if ($new_position['height'] != $this->position['height'] && ($this->direction == 'up' || $this->direction == 'down')) {
-			if ($this->direction=='up') {
-				$js .= 'PBposition'.$this->code.'("top",'.$new_position['top'].');';
+		if (
+			$new_position['height'] != $this->position['height'] &&
+			($this->direction == 'up' || $this->direction == 'down')
+		) {
+			if ($this->direction == 'up') {
+				$js .= 'PBposition' . $this->code . '("top",' . $new_position['top'] . ');';
 			}
-			$js .= 'PBposition'.$this->code.'("height",'.$new_position['height'].');';
+			$js .= 'PBposition' . $this->code . '("height",' . $new_position['height'] . ');';
 		}
 		$this->position = $new_position;
 		foreach ($this->label as $name => $data) {
@@ -734,24 +803,25 @@ class ProgressBar
 				switch ($data['type']) {
 					case 'step':
 						if ($this->step != $last_step) {
-							$js .= 'PBlabelText'.$this->code.'("'.$name.'","'.$this->step.'/'.$this->max.'");';
+							$js .= 'PBlabelText' . $this->code . '("'
+								. $name . '","' . $this->step . '/' . $this->max . '");';
 						}
 						break;
 					case 'percentlbl':
 					case 'percent':
 						$percent = $this->__calculatePercent($this->step);
 						if ($percent != $this->__calculatePercent($last_step)) {
-							$js .= 'PBlabelText'.$this->code.'("'.$name.'","'.$percent.'%");';
+							$js .= 'PBlabelText' . $this->code . '("' . $name . '","' . $percent . '%");';
 						}
 						break;
 					case 'crossbar':
-						$js .= 'PBrotaryCross'.$name.$this->code.'();';
+						$js .= 'PBrotaryCross' . $name . $this->code . '();';
 						break;
 				}
 			}
 		}
 		if ($js != '') {
-			echo '<script type="text/JavaScript">'.$js.'</script>'."\n";
+			echo '<script type="text/JavaScript">' . $js . '</script>' . "\n";
 			$this->__flushCache();
 		}
 	}
@@ -783,9 +853,11 @@ class ProgressBar
 		if ($this->status == 'show') {
 			$this->status = 'hide';
 
-			$output = '<script type="text/JavaScript">';
-			$output .= 'document.getElementById("pbm'.$this->code.'").style.visibility="hidden";document.getElementById("pbm'.$this->code.'").style.display="none";';
-			$output .= '</script>'."\n";
+			$output = '<script type="text/JavaScript">'
+				. 'document.getElementById("pbm' . $this->code
+				. '").style.visibility="hidden";document.getElementById("pbm'
+				. $this->code . '").style.display="none";'
+				. '</script>' . "\n";
 			echo $output;
 			$this->__flushCache();
 		}
@@ -800,9 +872,11 @@ class ProgressBar
 		if ($this->status == 'hide') {
 			$this->status = 'show';
 
-			$output = '<script type="text/JavaScript">';
-			$output .= 'document.getElementById("pbm'.$this->code.'").style.visibility="visible";document.getElementById("pbm'.$this->code.'").style.visibility="block";';
-			$output .= '</script>'."\n";
+			$output = '<script type="text/JavaScript">'
+				. 'document.getElementById("pbm' . $this->code
+				. '").style.visibility="visible";document.getElementById("pbm'
+				. $this->code . '").style.visibility="block";'
+				. '</script>' . "\n";
 			echo $output;
 			$this->__flushCache();
 		}

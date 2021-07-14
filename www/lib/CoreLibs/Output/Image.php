@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * image thumbnail, rotate, etc
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Output;
 
@@ -47,14 +49,14 @@ class Image
 		if (!empty($cache_source)) {
 			$tmp_src = $cache_source;
 		} else {
-			$tmp_src = BASE.TMP;
+			$tmp_src = BASE . TMP;
 		}
 		// check if pic has a path, and override next sets
 		if (strstr($pic, '/') === false) {
 			if (empty($path)) {
 				$path = BASE;
 			}
-			$filename = $path.MEDIA.PICTURES.$pic;
+			$filename = $path . MEDIA . PICTURES . $pic;
 		} else {
 			$filename = $pic;
 			// and get the last part for pic (the filename)
@@ -69,7 +71,7 @@ class Image
 			$delete_filename = '';
 			// check if we can skip the PDF creation: if we have size, if do not have type, we assume type png
 			if (!$type && is_numeric($size_x) && is_numeric($size_y)) {
-				$check_thumb = $tmp_src.'thumb_'.$pic.'_'.$size_x.'x'.$size_y.'.'.$image_types[3];
+				$check_thumb = $tmp_src . 'thumb_' . $pic . '_' . $size_x . 'x' . $size_y . '.' . $image_types[3];
 				if (!is_file($check_thumb)) {
 					$create_file = true;
 				} else {
@@ -83,7 +85,7 @@ class Image
 				// is this a PDF, if no, return from here with nothing
 				$convert_prefix = 'png:';
 				# TEMP convert to PNG, we then override the file name
-				$convert_string = $CONVERT.' '.$filename.' '.$convert_prefix.$filename.'_TEMP';
+				$convert_string = $CONVERT . ' ' . $filename . ' ' . $convert_prefix . $filename . '_TEMP';
 				$status = exec($convert_string, $output, $return);
 				$filename .= '_TEMP';
 				// for delete, in case we need to glob
@@ -101,13 +103,13 @@ class Image
 			if (!$size_y || $size_y < 1 || !is_numeric($size_y)) {
 				$size_y = $height;
 			}
-			$thumb = 'thumb_'.$pic.'_'.$size_x.'x'.$size_y.'.'.$image_types[$type];
-			$thumbnail = $tmp_src.$thumb;
+			$thumb = 'thumb_' . $pic . '_' . $size_x . 'x' . $size_y . '.' . $image_types[$type];
+			$thumbnail = $tmp_src . $thumb;
 			// check if we already have this picture converted
 			if (!is_file($thumbnail) || $clear_cache == true) {
 				// convert the picture
 				if ($width > $size_x) {
-					$convert_string = $CONVERT.' -geometry '.$size_x.'x '.$filename.' '.$thumbnail;
+					$convert_string = $CONVERT . ' -geometry ' . $size_x . 'x ' . $filename . ' ' . $thumbnail;
 					$status = exec($convert_string, $output, $return);
 					// get the size of the converted data, if converted
 					if (is_file($thumbnail)) {
@@ -115,7 +117,7 @@ class Image
 					}
 				}
 				if ($height > $size_y) {
-					$convert_string = $CONVERT.' -geometry x'.$size_y.' '.$filename.' '.$thumbnail;
+					$convert_string = $CONVERT . ' -geometry x' . $size_y . ' ' . $filename . ' ' . $thumbnail;
 					$status = exec($convert_string, $output, $return);
 				}
 			}
@@ -125,12 +127,12 @@ class Image
 			$return_data = $thumb;
 			// if we have a delete filename, delete here with glob
 			if ($delete_filename) {
-				array_map('unlink', glob($delete_filename.'*'));
+				array_map('unlink', glob($delete_filename . '*'));
 			}
 		} else {
 			if ($dummy && strstr($dummy, '/') === false) {
 				// check if we have the "dummy" image flag set
-				$filename = PICTURES.ICONS.strtoupper($dummy).".png";
+				$filename = PICTURES . ICONS . strtoupper($dummy) . ".png";
 				if ($dummy && file_exists($filename) && is_file($filename)) {
 					$return_data = $filename;
 				} else {
@@ -175,36 +177,40 @@ class Image
 		int $jpeg_quality = 80
 	) {
 		$thumbnail = false;
-		// $this->debug('IMAGE PREPARE', "FILE: $filename (exists ".(string)file_exists($filename)."), WIDTH: $thumb_width, HEIGHT: $thumb_height");
+		// $this->debug('IMAGE PREPARE', "FILE: $filename (exists "
+		//	.(string)file_exists($filename)."), WIDTH: $thumb_width, HEIGHT: $thumb_height");
 		// check that input image exists and is either jpeg or png
 		// also fail if the basic CACHE folder does not exist at all
-		if (file_exists($filename) &&
-			is_dir(BASE.LAYOUT.CONTENT_PATH.CACHE) &&
-			is_writable(BASE.LAYOUT.CONTENT_PATH.CACHE)
+		if (
+			file_exists($filename) &&
+			is_dir(BASE . LAYOUT . CONTENT_PATH . CACHE) &&
+			is_writable(BASE . LAYOUT . CONTENT_PATH . CACHE)
 		) {
 			// $this->debug('IMAGE PREPARE', "FILENAME OK, THUMB WIDTH/HEIGHT OK");
 			list($inc_width, $inc_height, $img_type) = getimagesize($filename);
 			$thumbnail_write_path = null;
 			$thumbnail_web_path = null;
 			// path set first
-			if ($img_type == IMAGETYPE_JPEG ||
+			if (
+				$img_type == IMAGETYPE_JPEG ||
 				$img_type == IMAGETYPE_PNG ||
 				$create_dummy === true
 			) {
 				// $this->debug('IMAGE PREPARE', "IMAGE TYPE OK: ".$inc_width.'x'.$inc_height);
 				// set thumbnail paths
-				$thumbnail_write_path = BASE.LAYOUT.CONTENT_PATH.CACHE.IMAGES;
-				$thumbnail_web_path = LAYOUT.CACHE.IMAGES;
+				$thumbnail_write_path = BASE . LAYOUT . CONTENT_PATH . CACHE . IMAGES;
+				$thumbnail_web_path = LAYOUT . CACHE . IMAGES;
 				// if images folder in cache does not exist create it, if failed, fall back to base cache folder
 				if (!is_dir($thumbnail_write_path)) {
 					if (false === mkdir($thumbnail_write_path)) {
-						$thumbnail_write_path = BASE.LAYOUT.CONTENT_PATH.CACHE;
-						$thumbnail_web_path = LAYOUT.CACHE;
+						$thumbnail_write_path = BASE . LAYOUT . CONTENT_PATH . CACHE;
+						$thumbnail_web_path = LAYOUT . CACHE;
 					}
 				}
 			}
 			// do resize or fall back on dummy run
-			if ($img_type == IMAGETYPE_JPEG ||
+			if (
+				$img_type == IMAGETYPE_JPEG ||
 				$img_type == IMAGETYPE_PNG
 			) {
 				// if missing width or height in thumb, use the set one
@@ -219,7 +225,8 @@ class Image
 					$thumb_width_r = 0;
 					$thumb_height_r = 0;
 					// we need to keep the aspect ration on longest side
-					if (($inc_height > $inc_width &&
+					if (
+						($inc_height > $inc_width &&
 						// and the height is bigger than thumb set
 							$inc_height > $thumb_height) ||
 						// or the height is smaller or equal width
@@ -240,9 +247,11 @@ class Image
 					}
 					// $this->debug('IMAGE PREPARE', "Ratio: $ratio, Target size $thumb_width_r x $thumb_height_r");
 					// set output thumbnail name
-					$thumbnail = 'thumb-'.pathinfo($filename)['filename'].'-'.$thumb_width_r.'x'.$thumb_height_r;
-					if ($use_cache === false ||
-						!file_exists($thumbnail_write_path.$thumbnail)
+					$thumbnail = 'thumb-' . pathinfo($filename)['filename'] . '-'
+						. $thumb_width_r . 'x' . $thumb_height_r;
+					if (
+						$use_cache === false ||
+						!file_exists($thumbnail_write_path . $thumbnail)
 					) {
 						// image, copy source image, offset in image, source x/y, new size, source image size
 						$thumb = imagecreatetruecolor($thumb_width_r, $thumb_height_r);
@@ -268,17 +277,39 @@ class Image
 						if ($source !== null) {
 							// resize no shift
 							if ($high_quality === true) {
-								imagecopyresized($thumb, $source, 0, 0, 0, 0, $thumb_width_r, $thumb_height_r, $inc_width, $inc_height);
+								imagecopyresized(
+									$thumb,
+									$source,
+									0,
+									0,
+									0,
+									0,
+									$thumb_width_r,
+									$thumb_height_r,
+									$inc_width,
+									$inc_height
+								);
 							} else {
-								imagecopyresampled($thumb, $source, 0, 0, 0, 0, $thumb_width_r, $thumb_height_r, $inc_width, $inc_height);
+								imagecopyresampled(
+									$thumb,
+									$source,
+									0,
+									0,
+									0,
+									0,
+									$thumb_width_r,
+									$thumb_height_r,
+									$inc_width,
+									$inc_height
+								);
 							}
 							// write file
 							switch ($img_type) {
 								case IMAGETYPE_JPEG:
-									imagejpeg($thumb, $thumbnail_write_path.$thumbnail, $jpeg_quality);
+									imagejpeg($thumb, $thumbnail_write_path . $thumbnail, $jpeg_quality);
 									break;
 								case IMAGETYPE_PNG:
-									imagepng($thumb, $thumbnail_write_path.$thumbnail);
+									imagepng($thumb, $thumbnail_write_path . $thumbnail);
 									break;
 							}
 							// free up resources (in case we are called in a loop)
@@ -290,16 +321,17 @@ class Image
 					}
 				} else {
 					// we just copy over the image as is, we never upscale
-					$thumbnail = 'thumb-'.pathinfo($filename)['filename'].'-'.$inc_width.'x'.$inc_height;
-					if ($use_cache === false ||
-						!file_exists($thumbnail_write_path.$thumbnail)
+					$thumbnail = 'thumb-' . pathinfo($filename)['filename'] . '-' . $inc_width . 'x' . $inc_height;
+					if (
+						$use_cache === false ||
+						!file_exists($thumbnail_write_path . $thumbnail)
 					) {
-						copy($filename, $thumbnail_write_path.$thumbnail);
+						copy($filename, $thumbnail_write_path . $thumbnail);
 					}
 				}
 				// add output path
 				if ($thumbnail !== false) {
-					$thumbnail = $thumbnail_web_path.$thumbnail;
+					$thumbnail = $thumbnail_web_path . $thumbnail;
 				}
 			} elseif ($create_dummy === true) {
 				// create dummy image in the thumbnail size
@@ -311,9 +343,10 @@ class Image
 					$thumb_height = $thumb_width;
 				}
 				// do we have an image already?
-				$thumbnail = 'thumb-'.pathinfo($filename)['filename'].'-'.$thumb_width.'x'.$thumb_height;
-				if ($use_cache === false ||
-					!file_exists($thumbnail_write_path.$thumbnail)
+				$thumbnail = 'thumb-' . pathinfo($filename)['filename'] . '-' . $thumb_width . 'x' . $thumb_height;
+				if (
+					$use_cache === false ||
+					!file_exists($thumbnail_write_path . $thumbnail)
 				) {
 					// if both are unset, set to 250
 					if ($thumb_height == 0) {
@@ -335,7 +368,14 @@ class Image
 					} else {
 						$width = (int)round(imagesy($thumb) / 100 * 5);
 					}
-					imagefilledrectangle($thumb, 0 + $width, 0 + $width, imagesx($thumb) - $width, imagesy($thumb) - $width, $white);
+					imagefilledrectangle(
+						$thumb,
+						0 + $width,
+						0 + $width,
+						imagesx($thumb) - $width,
+						imagesy($thumb) - $width,
+						$white
+					);
 					// add "No valid images source"
 					// OR add circle
 					// * find center
@@ -348,10 +388,10 @@ class Image
 					$center_y = (int)round(imagesy($thumb) / 2);
 					imagefilledellipse($thumb, $center_x, $center_y, $cross_width, $cross_width, $gray);
 					// find top left and bottom left for first line
-					imagepng($thumb, $thumbnail_write_path.$thumbnail);
+					imagepng($thumb, $thumbnail_write_path . $thumbnail);
 				}
 				// add web path
-				$thumbnail = $thumbnail_web_path.$thumbnail;
+				$thumbnail = $thumbnail_web_path . $thumbnail;
 			}
 		}
 		// either return false or the thumbnail name + output path web

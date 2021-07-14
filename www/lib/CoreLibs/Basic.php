@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+// phpcs:disable Generic.Files.LineLength
+
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2003/03/24
@@ -15,12 +18,15 @@
 * HISTORY:
 * 2021/06/16 (cs) CLASS MOSTLY DEPRECATED: moved all methids in their own classes
 * 2010/12/24 (cs) add crypt classes with auto detect what crypt we can use, add php version check class
-* 2008/08/07 (cs) fixed strange DEBUG_ALL on off behavour. data was written even thought DBEUG_ALL was off. now no debug logging is done at all if DEBUG_ALL is off
+* 2008/08/07 (cs) fixed strange DEBUG_ALL on off behavour. data was written even thought
+*                 DBEUG_ALL was off. now no debug logging is done at all if DEBUG_ALL is off
 * 2007/11/13 (cs) add Comparedate function
 * 2007/11/05 (cs) added GenAssocArray and CheckDate functions
-* 2007/10/10 (cs) magic links function can use http:///path as a local prefix. blank target is removed & http:// also
+* 2007/10/10 (cs) magic links function can use http:///path as a local prefix.
+*                 blank target is removed & http:// also
 * 2006/03/09 (cs) added Byte/TimeStringFormat functions
-* 2006/02/21 (cs) fix various problems with the mime magic function: || not always working, fix prefix replacement, etc
+* 2006/02/21 (cs) fix various problems with the mime magic function: || not always working,
+*                 fix prefix replacement, etc
 * 2006/02/09 (cs) added _mb_mime_encode function, replacement for php internal one
 * 2005/07/12 (cs) added some small stylesheet defs to debug output
 * 2005/06/24 (cs) made the check selected/checked function way easier
@@ -42,6 +48,8 @@
 * detection
 * 2003-03-24: start of stub/basic class
 *********************************************************************/
+
+declare(strict_types=1);
 
 namespace CoreLibs;
 
@@ -77,13 +85,19 @@ class Basic
 		// TODO make check dynamic for entries we MUST have depending on load type
 		// before we start any work, we should check that all MUST constants are defined
 		$abort = false;
-		foreach ([
-			'DS', 'DIR', 'BASE', 'ROOT', 'LIB', 'INCLUDES', 'LAYOUT', 'PICTURES', 'FLASH', 'VIDEOS', 'DOCUMENTS', 'PDFS', 'BINARIES', 'ICONS',
-			'UPLOADS', 'CSV', 'JS', 'CSS', 'TABLE_ARRAYS', 'SMARTY', 'LANG', 'CACHE', 'TMP', 'LOG', 'TEMPLATES', 'TEMPLATES_C',
-			'DEFAULT_LANG', 'DEFAULT_ENCODING', 'DEFAULT_HASH',
-			'DEFAULT_ACL_LEVEL', 'LOGOUT_TARGET', 'PASSWORD_CHANGE', 'AJAX_REQUEST_TYPE', 'USE_PROTOTYPE', 'USE_SCRIPTACULOUS', 'USE_JQUERY',
-			'PAGE_WIDTH', 'MASTER_TEMPLATE_NAME', 'PUBLIC_SCHEMA', 'TEST_SCHEMA', 'DEV_SCHEMA', 'LIVE_SCHEMA', 'DB_CONFIG_NAME', 'DB_CONFIG', 'TARGET', 'DEBUG', 'SHOW_ALL_ERRORS'
-		 ] as $constant) {
+		foreach (
+			[
+				'DS', 'DIR', 'BASE', 'ROOT', 'LIB', 'INCLUDES', 'LAYOUT', 'PICTURES', 'FLASH',
+				'VIDEOS', 'DOCUMENTS', 'PDFS', 'BINARIES', 'ICONS', 'UPLOADS', 'CSV', 'JS',
+				'CSS', 'TABLE_ARRAYS', 'SMARTY', 'LANG', 'CACHE', 'TMP', 'LOG', 'TEMPLATES',
+				'TEMPLATES_C', 'DEFAULT_LANG', 'DEFAULT_ENCODING', 'DEFAULT_HASH',
+				'DEFAULT_ACL_LEVEL', 'LOGOUT_TARGET', 'PASSWORD_CHANGE', 'AJAX_REQUEST_TYPE',
+				'USE_PROTOTYPE', 'USE_SCRIPTACULOUS', 'USE_JQUERY', 'PAGE_WIDTH',
+				'MASTER_TEMPLATE_NAME', 'PUBLIC_SCHEMA', 'TEST_SCHEMA', 'DEV_SCHEMA',
+				'LIVE_SCHEMA', 'DB_CONFIG_NAME', 'DB_CONFIG', 'TARGET', 'DEBUG',
+				'SHOW_ALL_ERRORS'
+			] as $constant
+		) {
 			if (!defined($constant)) {
 				echo "Constant $constant misssing<br>";
 				$abort = true;
@@ -167,7 +181,7 @@ class Basic
 	 */
 	public function basicSetLogId(string $string): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use $basic->log->basicSetLogId() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->basicSetLogId() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
 		return $this->log->basicSetLogId($string);
 	}
 
@@ -190,7 +204,7 @@ class Basic
 	 */
 	public function hrRunningTime(string $out_time = 'ms'): float
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Debug\RunningTime::hrRunningTime()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Debug\RunningTime::hrRunningTime()', E_USER_DEPRECATED);
 		return \CoreLibs\Debug\RunningTime::hrRunningTime($out_time);
 	}
 
@@ -205,7 +219,7 @@ class Basic
 	 */
 	public function runningTime(bool $simple = false): float
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Debug\RunningTime::runningTime()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Debug\RunningTime::runningTime()', E_USER_DEPRECATED);
 		return \CoreLibs\Debug\RunningTime::runningTime($simple);
 	}
 
@@ -221,7 +235,7 @@ class Basic
 	 */
 	public static function printTime(int $set_microtime = -1): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Debug\Support::printTime()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Debug\Support::printTime()', E_USER_DEPRECATED);
 		return \CoreLibs\Debug\Support::printTime($set_microtime);
 	}
 
@@ -238,7 +252,7 @@ class Basic
 	 */
 	public function fdebug(string $string, bool $enter = true): bool
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Debug\FileWriter::fdebug()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Debug\FileWriter::fdebug()', E_USER_DEPRECATED);
 		return \CoreLibs\Debug\FileWriter::fdebug($string, $enter);
 	}
 
@@ -256,7 +270,7 @@ class Basic
 	 */
 	public function debugFor(string $type, string $flag): void
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use $basic->log->debugFor() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->debugFor() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
 		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal */
 		$this->log->debugFor(...[func_get_args()]);
 	}
@@ -342,7 +356,7 @@ class Basic
 	 */
 	public function mergeErrors(array $error_msg = []): void
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use $basic->log->mergeErrors() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->mergeErrors() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
 		$this->log->mergeErrors($error_msg);
 	}
 
@@ -358,74 +372,6 @@ class Basic
 	}
 
 	/**
-	 * writes error msg data to file for current level
-	 * @param  string $level        the level to write
-	 * @param  string $error_string error string to write
-	 * @return void                 has no return
-	 */
-	/* private function writeErrorMsg(string $level, string $error_string): void
-	{
-		// only write if write is requested
-		if ($this->doDebugTrigger('debug', $level) &&
-			$this->doDebugTrigger('print', $level)
-		) {
-			// replace all html tags
-			// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "##\\2##", $error_string);
-			// $error_string = preg_replace("/(<\/?)(\w+)([^>]*>)/", "", $error_string);
-			// replace special line break tag
-			// $error_string = str_replace('<!--#BR#-->', "\n", $error_string);
-
-			// init output variable
-			$output = $error_string; // output formated error string to output file
-			// init base file path
-			$fn = BASE.LOG.$this->log_print_file.'.'.$this->log_file_name_ext;
-			// log ID prefix settings, if not valid, replace with empty
-			if (preg_match("/^[A-Za-z0-9]+$/", $this->log_file_id)) {
-				$rpl_string = '_'.$this->log_file_id;
-			} else {
-				$rpl_string = '';
-			}
-			$fn = str_replace('##LOGID##', $rpl_string, $fn); // log id (like a log file prefix)
-
-			if ($this->log_per_run) {
-				if (isset($GLOBALS['LOG_FILE_UNIQUE_ID'])) {
-					$this->log_file_unique_id = $GLOBALS['LOG_FILE_UNIQUE_ID'];
-				}
-				if (!$this->log_file_unique_id) {
-					$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id = date('Y-m-d_His').'_U_'.substr(hash('sha1', uniqid((string)mt_rand(), true)), 0, 8);
-				}
-				$rpl_string = '_'.$this->log_file_unique_id; // add 8 char unique string
-			} else {
-				$rpl_string = !$this->log_print_file_date ? '' : '_'.date('Y-m-d'); // add date to file
-			}
-			$fn = str_replace('##DATE##', $rpl_string, $fn); // create output filename
-
-			$rpl_string = !$this->log_per_level ? '' : '_'.$level; // if request to write to one file
-			$fn = str_replace('##LEVEL##', $rpl_string, $fn); // create output filename
-
-			$rpl_string = !$this->log_per_class ? '' : '_'.str_replace('\\', '-', get_class($this)); // set sub class settings
-			$fn = str_replace('##CLASS##', $rpl_string, $fn); // create output filename
-
-			$rpl_string = !$this->log_per_page ? '' : '_'.\CoreLibs\Get\System::getPageName(1); // if request to write to one file
-			$fn = str_replace('##PAGENAME##', $rpl_string, $fn); // create output filename
-
-			// write to file
-			// first check if max file size is is set and file is bigger
-			if ($this->log_max_filesize > 0 && ((filesize($fn) / 1024) > $this->log_max_filesize)) {
-				// for easy purpose, rename file only to attach timestamp, nur sequence numbering
-				rename($fn, $fn.'.'.date("YmdHis"));
-			}
-			$fp = fopen($fn, 'a');
-			if ($fp !== false) {
-				fwrite($fp, $output);
-				fclose($fp);
-			} else {
-				echo "<!-- could not open file: $fn //-->";
-			}
-		} // do write to file
-	} */
-
-	/**
 	 * unsests the error message array
 	 * can be used if writing is primary to file
 	 * if no level given resets all
@@ -435,7 +381,7 @@ class Basic
 	 */
 	public function resetErrorMsg(string $level = ''): void
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use $basic->log->resetErrorMsg() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->resetErrorMsg() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
 		$this->log->resetErrorMsg($level);
 	}
 
@@ -464,7 +410,7 @@ class Basic
 	 */
 	public static function getCallerMethod(int $level = 2): ?string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Debug\Support::getCallerMethod()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Debug\Support::getCallerMethod()', E_USER_DEPRECATED);
 		return \CoreLibs\Debug\Support::getCallerMethod($level);
 	}
 
@@ -480,7 +426,7 @@ class Basic
 	 */
 	public function fileUploadErrorMessage(int $error_code): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Get\System::fileUploadErrorMessage()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Get\System::fileUploadErrorMessage()', E_USER_DEPRECATED);
 		return \CoreLibs\Get\System::fileUploadErrorMessage($error_code);
 	}
 
@@ -499,7 +445,7 @@ class Basic
 	 */
 	public function initRandomKeyLength(int $key_length): bool
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\RandomKey::setRandomKeyLength()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\RandomKey::setRandomKeyLength()', E_USER_DEPRECATED);
 		return \CoreLibs\Create\RandomKey::setRandomKeyLength($key_length);
 	}
 
@@ -513,7 +459,7 @@ class Basic
 	 */
 	public function randomKeyGen(int $key_length = -1): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\RandomKey::randomKeyGen()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\RandomKey::randomKeyGen()', E_USER_DEPRECATED);
 		return \CoreLibs\Create\RandomKey::randomKeyGen($key_length);
 	}
 
@@ -533,7 +479,7 @@ class Basic
 	 */
 	public static function checked($haystack, $needle, int $type = 0): ?string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Html::checked()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Html::checked()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Html::checked($haystack, $needle, $type);
 	}
 
@@ -548,7 +494,7 @@ class Basic
 	 */
 	public function magicLinks(string $string, string $target = "_blank"): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Form\Elements::magicLinks()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Output\Form\Elements::magicLinks()', E_USER_DEPRECATED);
 		return \CoreLibs\Output\Form\Elements::magicLinks($string, $target);
 	}
 
@@ -563,7 +509,7 @@ class Basic
 	 */
 	public function getHostName(): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Get\System::getHostName()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Get\System::getHostName()', E_USER_DEPRECATED);
 		return \CoreLibs\Get\System::getHostName();
 	}
 
@@ -577,7 +523,7 @@ class Basic
 	 */
 	public static function getPageName(int $strip_ext = 0): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Get\System::getPageName()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Get\System::getPageName()', E_USER_DEPRECATED);
 		return \CoreLibs\Get\System::getPageName($strip_ext);
 	}
 
@@ -593,7 +539,7 @@ class Basic
 	 */
 	public static function getFilenameEnding(string $filename): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Check\File::getFilenameEnding()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Check\File::getFilenameEnding()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\File::getFilenameEnding($filename);
 	}
 
@@ -605,7 +551,7 @@ class Basic
 	 */
 	public static function getLinesFromFile(string $file): int
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Check\File::getLinesFromFile()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Check\File::getLinesFromFile()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\File::getLinesFromFile($file);
 	}
 
@@ -625,7 +571,7 @@ class Basic
 	 */
 	public static function arraySearchRecursive($needle, array $haystack, ?string $key_lookin = null): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchRecursive()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchRecursive()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::arraySearchRecursive($needle, $haystack, $key_lookin);
 	}
 
@@ -640,7 +586,7 @@ class Basic
 	 */
 	public static function arraySearchRecursiveAll($needle, array $haystack, $key, ?array $path = null): ?array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll($needle, $haystack, $key, $path);
 	}
 
@@ -654,7 +600,7 @@ class Basic
 	 */
 	public static function arraySearchSimple(array $array, $key, $value): bool
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchSimple()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchSimple()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::arraySearchSimple($array, $key, $value);
 	}
 
@@ -670,7 +616,7 @@ class Basic
 	 */
 	public static function arrayMergeRecursive()
 	{
-		trigger_error('MUST CHANGE: Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive()', E_USER_DEPRECATED);
+		trigger_error('MUST CHANGE: Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive(...func_get_args());
 	}
 
@@ -686,7 +632,7 @@ class Basic
 	 */
 	public static function arrayDiff(array $a, array $b): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayDiff()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayDiff()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::arrayDiff($a, $b);
 	}
 
@@ -700,7 +646,7 @@ class Basic
 	 */
 	public static function inArrayAny(array $needle, array $haystack)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::inArrayAny()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::inArrayAny()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::inArrayAny($needle, $haystack);
 	}
 
@@ -715,7 +661,7 @@ class Basic
 	 */
 	public static function genAssocArray(array $db_array, $key, $value, bool $set_only = false): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArray()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArray()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::genAssocArray($db_array, $key, $value, $set_only);
 	}
 
@@ -729,7 +675,7 @@ class Basic
 	 */
 	public static function arrayToString(array $array, string $connect_char): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use join()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use join()', E_USER_DEPRECATED);
 		if (!is_array($array)) {
 			$array = [];
 		}
@@ -745,7 +691,7 @@ class Basic
 	 */
 	public static function flattenArray(array $array): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArray()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArray()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::flattenArray($array);
 	}
 
@@ -757,7 +703,7 @@ class Basic
 	 */
 	public static function flattenArrayKey(array $array/*, array $return = []*/): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArrayKey()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::flattenArrayKey()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::flattenArrayKey($array);
 	}
 
@@ -771,7 +717,7 @@ class Basic
 	 */
 	public static function arrayFlatForKey(array $array, $search): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayFlatForKey()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arrayFlatForKey()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\ArrayHandler::arrayFlatForKey($array, $search);
 	}
 
@@ -789,7 +735,7 @@ class Basic
 	public static function __mbMimeEncode(string $string, string $encoding): string
 	{
 
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Language\Encoding::__mbMimeEncode()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Language\Encoding::__mbMimeEncode()', E_USER_DEPRECATED);
 		return \CoreLibs\Language\Encoding::__mbMimeEncode($string, $encoding);
 	}
 
@@ -809,7 +755,7 @@ class Basic
 	 */
 	public static function byteStringFormat($bytes, bool $space = true, bool $adjust = false, bool $si = false): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Byte::humanReadableByteFormat()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Byte::humanReadableByteFormat()', E_USER_DEPRECATED);
 		$flags = 0;
 		// match over the true/false flags to the new int style flag
 		// if space need to set 1
@@ -851,7 +797,7 @@ class Basic
 	 */
 	public static function humanReadableByteFormat($bytes, int $flags = 0): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Byte::humanReadableByteFormat()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Byte::humanReadableByteFormat()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Byte::humanReadableByteFormat($bytes, $flags);
 	}
 
@@ -863,7 +809,7 @@ class Basic
 	 */
 	public static function stringByteFormat($number)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Byte::stringByteFormat()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Byte::stringByteFormat()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Byte::stringByteFormat($number);
 	}
 
@@ -880,7 +826,7 @@ class Basic
 	 */
 	public static function dateStringFormat($timestamp, bool $show_micro = false): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::dateStringFormat()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Combined\DateTime::dateStringFormat()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\DateTime::dateStringFormat($timestamp, $show_micro);
 	}
 
@@ -893,7 +839,7 @@ class Basic
 	 */
 	public static function timeStringFormat($timestamp, bool $show_micro = true): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::timeStringFormat()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Combined\DateTime::timeStringFormat()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\DateTime::timeStringFormat($timestamp, $show_micro);
 	}
 
@@ -906,7 +852,7 @@ class Basic
 	 */
 	public static function stringToTime($timestring)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::stringToTime()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Combined\DateTime::stringToTime()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\DateTime::stringToTime($timestring);
 	}
 
@@ -918,7 +864,7 @@ class Basic
 	 */
 	public static function checkDate($date): bool
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::checkDate()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Combined\DateTime::checkDate()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\DateTime::checkDate($date);
 	}
 
@@ -930,7 +876,7 @@ class Basic
 	 */
 	public static function checkDateTime($datetime): bool
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::checkDateTime()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Combined\DateTime::checkDateTime()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\DateTime::checkDateTime($datetime);
 	}
 
@@ -948,7 +894,7 @@ class Basic
 	 */
 	public static function compareDate($start_date, $end_date)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::compareDate()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Combined\DateTime::compareDate()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\DateTime::compareDate($start_date, $end_date);
 	}
 
@@ -966,7 +912,7 @@ class Basic
 	 */
 	public static function compareDateTime($start_datetime, $end_datetime)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::compareDateTime()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Combined\DateTime::compareDateTime()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\DateTime::compareDateTime($start_datetime, $end_datetime);
 	}
 
@@ -982,7 +928,7 @@ class Basic
 	 */
 	public static function calcDaysInterval($start_date, $end_date, bool $return_named = false): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Combined\DateTime::calcDaysInterval()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Combined\DateTime::calcDaysInterval()', E_USER_DEPRECATED);
 		return \CoreLibs\Combined\DateTime::calcDaysInterval($start_date, $end_date, $return_named);
 	}
 
@@ -1013,7 +959,7 @@ class Basic
 		string $cache_source = '',
 		bool $clear_cache = false
 	) {
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Image::createThumbnail()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Output\Image::createThumbnail()', E_USER_DEPRECATED);
 		return \CoreLibs\Output\Image::createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache_source, $clear_cache);
 	}
 
@@ -1049,7 +995,7 @@ class Basic
 		bool $high_quality = true,
 		int $jpeg_quality = 80
 	) {
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Image::createThumbnailSimple()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Output\Image::createThumbnailSimple()', E_USER_DEPRECATED);
 		return \CoreLibs\Output\Image::createThumbnailSimple($filename, $thumb_width, $thumb_height, $thumbnail_path, $create_dummy, $use_cache, $high_quality, $jpeg_quality);
 	}
 
@@ -1063,7 +1009,7 @@ class Basic
 	 */
 	public function correctImageOrientation($filename): void
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Image::correctImageOrientation()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Output\Image::correctImageOrientation()', E_USER_DEPRECATED);
 		\CoreLibs\Output\Image::correctImageOrientation($filename);
 	}
 
@@ -1092,7 +1038,7 @@ class Basic
 	 */
 	public function checkConvertEncoding(string $string, string $from_encoding, string $to_encoding)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Language\Encoding::checkConvertEncoding()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Language\Encoding::checkConvertEncoding()', E_USER_DEPRECATED);
 		return \CoreLibs\Language\Encoding::checkConvertEncoding($string, $from_encoding, $to_encoding);
 	}
 
@@ -1113,7 +1059,7 @@ class Basic
 	 */
 	public static function convertEncoding(string $string, string $to_encoding, string $source_encoding = '', bool $auto_check = true): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Language\Encoding::convertEncoding()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Language\Encoding::convertEncoding()', E_USER_DEPRECATED);
 		return \CoreLibs\Language\Encoding::convertEncoding($string, $to_encoding, $source_encoding, $auto_check);
 	}
 
@@ -1131,7 +1077,7 @@ class Basic
 	 */
 	public function __crc32b(string $string): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Hash::__crc32b()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\Hash::__crc32b()', E_USER_DEPRECATED);
 		return \CoreLibs\Create\Hash::__crc32b($string);
 	}
 
@@ -1144,7 +1090,7 @@ class Basic
 	 */
 	public function __sha1Short(string $string, bool $use_sha = false): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Hash::__sha1Short()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\Hash::__sha1Short()', E_USER_DEPRECATED);
 		return \CoreLibs\Create\Hash::__sha1Short($string, $use_sha);
 	}
 
@@ -1160,7 +1106,7 @@ class Basic
 	 */
 	public function __hash(string $string, string $hash_type = 'adler32'): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Hash::__hash()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\Hash::__hash()', E_USER_DEPRECATED);
 		return \CoreLibs\Create\Hash::__hash($string, $hash_type);
 	}
 
@@ -1178,7 +1124,7 @@ class Basic
 	 */
 	public static function checkPHPVersion(string $min_version, string $max_version = ''): bool
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\PhpVersion::checkPHPVersion()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\PhpVersion::checkPHPVersion()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\PhpVersion::checkPHPVersion($min_version, $max_version);
 	}
 
@@ -1195,7 +1141,7 @@ class Basic
 	 */
 	public static function uuidv4(): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Uids::uuidv4()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\Uids::uuidv4()', E_USER_DEPRECATED);
 		return \CoreLibs\Create\Uids::uuidv4();
 	}
 
@@ -1210,7 +1156,7 @@ class Basic
 	 */
 	public function uniqId(string $type = ''): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Create\Uids::uniqId()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\Uids::uniqId()', E_USER_DEPRECATED);
 		return \CoreLibs\Create\Uids::uniqId($type);
 	}
 
@@ -1227,7 +1173,7 @@ class Basic
 	 */
 	private function passwordInit(): void
 	{
-		trigger_error('Method '.__METHOD__.' has been removed', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' has been removed', E_USER_DEPRECATED);
 		/* // set default password cost: use default set automatically
 		$this->password_options = [
 			// 'cost' => PASSWORD_BCRYPT_DEFAULT_COST
@@ -1242,7 +1188,7 @@ class Basic
 	 */
 	public function passwordSet(string $password): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Password::passwordSet()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Password::passwordSet()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\Password::passwordSet($password);
 	}
 
@@ -1255,7 +1201,7 @@ class Basic
 	 */
 	public function passwordVerify(string $password, string $hash): bool
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Password::passwordVerify()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Password::passwordVerify()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\Password::passwordVerify($password, $hash);
 	}
 
@@ -1267,7 +1213,7 @@ class Basic
 	 */
 	public function passwordRehashCheck(string $hash): bool
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Password::passwordRehashCheck()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Password::passwordRehashCheck()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\Password::passwordRehashCheck($hash);
 	}
 
@@ -1287,7 +1233,7 @@ class Basic
 	 */
 	public static function hex2rgb(string $hexStr, bool $returnAsString = false, string $seperator = ',')
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::hex2rgb()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::hex2rgb()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::hex2rgb($hexStr, $returnAsString, $seperator);
 	}
 
@@ -1303,7 +1249,7 @@ class Basic
 	 */
 	public static function rgb2hex(int $red, int $green, int $blue, bool $hex_prefix = true): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::rgb2hex()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::rgb2hex()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::rgb2hex($red, $green, $blue, $hex_prefix);
 	}
 
@@ -1317,7 +1263,7 @@ class Basic
 	 */
 	public static function rgb2html(int $red, int $green, int $blue): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::rgb2hex()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::rgb2hex()', E_USER_DEPRECATED);
 		// check that each color is between 0 and 255
 		return \CoreLibs\Convert\Colors::rgb2hex($red, $green, $blue, true);
 	}
@@ -1334,7 +1280,7 @@ class Basic
 	 */
 	public static function rgb2hsb(int $red, int $green, int $blue): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::rgb2hsb()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::rgb2hsb()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::rgb2hsb($red, $green, $blue);
 	}
 
@@ -1348,7 +1294,7 @@ class Basic
 	 */
 	public static function hsb2rgb(int $H, float $S, float $V): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::hsb2rgb()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::hsb2rgb()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::hsb2rgb($H, (int)round($S * 100), (int)round($V * 100));
 	}
 
@@ -1364,7 +1310,7 @@ class Basic
 	 */
 	public static function rgb2hsl(int $r, int $g, int $b): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::rgb2hsl()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::rgb2hsl()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::rgb2hsb($r, $g, $b);
 	}
 
@@ -1378,7 +1324,7 @@ class Basic
 	 */
 	public static function hsl2rgb(int $h, float $s, float $l): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Colors::hsl2rgb()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::hsl2rgb()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::hsl2rgb($h, $s * 100, $l * 100);
 	}
 
@@ -1398,7 +1344,7 @@ class Basic
 	 */
 	public function getEmailType(string $email, bool $short = false)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Email::getEmailType()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Email::getEmailType()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\Email::getEmailType($email, $short);
 	}
 
@@ -1410,7 +1356,7 @@ class Basic
 	 */
 	public function getShortEmailType(string $email_type)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Email::getShortEmailType()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Email::getShortEmailType()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\Email::getShortEmailType($email_type);
 	}
 
@@ -1437,7 +1383,7 @@ class Basic
 	 */
 	public static function printDateTime($year, $month, $day, $hour, $min, string $suffix = '', int $min_steps = 1, bool $name_pos_back = false)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Form\Elements::printDateTime()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Output\Form\Elements::printDateTime()', E_USER_DEPRECATED);
 		return \CoreLibs\Output\Form\Elements::printDateTime($year, $month, $day, $hour, $min, $suffix, $min_steps, $name_pos_back);
 	}
 
@@ -1451,7 +1397,7 @@ class Basic
 	 */
 	public static function htmlent($string)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Html::htmlent()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Html::htmlent()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Html::htmlent($string);
 	}
 
@@ -1464,7 +1410,7 @@ class Basic
 	 */
 	public static function removeLB(string $string, string $replace = ' '): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Html::removeLB()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Html::removeLB()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Html::removeLB($string, $replace);
 	}
 
@@ -1484,7 +1430,7 @@ class Basic
 	 */
 	public static function fceil(float $number, int $precision = 10): float
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Math::fceil()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Math::fceil()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Math::fceil($number, $precision);
 	}
 
@@ -1498,7 +1444,7 @@ class Basic
 	 */
 	public static function floorp(float $number, int $precision = -2): float
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Math::floorp()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Math::floorp()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Math::floorp($number, $precision);
 	}
 
@@ -1510,7 +1456,7 @@ class Basic
 	 */
 	public static function initNumeric($number): float
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\Math::initNumeric()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Math::initNumeric()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Math::initNumeric($number);
 	}
 
@@ -1528,7 +1474,7 @@ class Basic
 	 */
 	public static function setFormToken(string $name = 'form_token'): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Form\Token::setFormToken()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Output\Form\Token::setFormToken()', E_USER_DEPRECATED);
 		return \CoreLibs\Output\Form\Token::setFormToken($name);
 	}
 
@@ -1541,7 +1487,7 @@ class Basic
 	 */
 	public static function validateFormToken(string $token, string $name = 'form_token'): bool
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Output\Form\Token::validateFormToken()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Output\Form\Token::validateFormToken()', E_USER_DEPRECATED);
 		return \CoreLibs\Output\Form\Token::validateFormToken($token, $name);
 	}
 
@@ -1560,7 +1506,7 @@ class Basic
 	 */
 	public function mimeSetAppName(string $mime, string $app): void
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\MimeAppName()->mimeSetAppName()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\MimeAppName()->mimeSetAppName()', E_USER_DEPRECATED);
 		\CoreLibs\Convert\MimeAppName::mimeSetAppName($mime, $app);
 	}
 
@@ -1573,7 +1519,7 @@ class Basic
 	 */
 	public function mimeGetAppName(string $mime): string
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Convert\MimeAppName()->mimeGetAppName()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\MimeAppName()->mimeGetAppName()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\MimeAppName::mimeGetAppName($mime);
 	}
 
@@ -1597,7 +1543,7 @@ class Basic
 	 */
 	public function jsonConvertToArray(?string $json, bool $override = false): array
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Jason::jsonConvertToArray()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Jason::jsonConvertToArray()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\Jason::jsonConvertToArray($json, $override);
 	}
 
@@ -1612,11 +1558,13 @@ class Basic
 	 */
 	public function jsonGetLastError(bool $return_string = false)
 	{
-		trigger_error('Method '.__METHOD__.' is deprecated, use \CoreLibs\Check\Jason::jsonGetLastError()', E_USER_DEPRECATED);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Jason::jsonGetLastError()', E_USER_DEPRECATED);
 		return \CoreLibs\Check\Jason::jsonGetLastError($return_string);
 	}
 
 	// *** JSON END ***
 }
+
+// phpcs:enable
 
 // __END__

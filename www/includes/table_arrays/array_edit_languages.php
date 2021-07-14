@@ -1,6 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-$edit_languages=[
+declare(strict_types=1);
+
+$edit_languages = [
 	'table_array' => [
 		'edit_language_id' => [
 			'value' => $GLOBALS['edit_language_id'] ?? '',

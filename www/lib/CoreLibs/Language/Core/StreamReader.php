@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
 	Copyright (c) 2003, 2005, 2006, 2009 Danilo Segan <danilo@kvota.net>.
@@ -19,6 +19,8 @@
 	along with PHP-gettext; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Language\Core;
 

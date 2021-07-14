@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -36,13 +39,13 @@ print "<html><head><title>TEST CLASS: MATH</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
-print "FCEIL: ".$_math->fceil(5.1234567890, 5)."<br>";
-print "FLOORP: ".$_math->floorp(5123456, -3)."<br>";
-print "INITNUMERIC: ".$_math->initNumeric('123')."<br>";
+print "FCEIL: " . $_math->fceil(5.1234567890, 5) . "<br>";
+print "FLOORP: " . $_math->floorp(5123456, -3) . "<br>";
+print "INITNUMERIC: " . $_math->initNumeric('123') . "<br>";
 
-print "S-FCEIL: ".$math_class::fceil(5.1234567890, 5)."<br>";
-print "S-FLOORP: ".$math_class::floorp(5123456, -3)."<br>";
-print "S-INITNUMERIC: ".$math_class::initNumeric('123')."<br>";
+print "S-FCEIL: " . $math_class::fceil(5.1234567890, 5) . "<br>";
+print "S-FLOORP: " . $math_class::floorp(5123456, -3) . "<br>";
+print "S-INITNUMERIC: " . $math_class::initNumeric('123') . "<br>";
 
 // DEPRECATED
 /* print "FCEIL: ".$basic->fceil(5.1234567890, 5)."<br>";

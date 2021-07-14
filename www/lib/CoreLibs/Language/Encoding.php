@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * hash wrapper functions for old problem fixes
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Language;
 
@@ -91,11 +93,15 @@ class Encoding
 		if ($string != $compare) {
 			$failed = [];
 			// go through each character and find the ones that do not match
-			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i ++) {
+			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i++) {
 				$char = mb_substr($string, $i, 1, $from_encoding);
 				$r_char = mb_substr($compare, $i, 1, $from_encoding);
 				// the ord 194 is a hack to fix the IE7/IE8 bug with line break and illegal character
-				if ((($char != $r_char && !self::$mb_error_char) || ($char != $r_char && $r_char == self::$mb_error_char && self::$mb_error_char)) && ord($char) != 194) {
+				if (
+					(($char != $r_char && !self::$mb_error_char) ||
+					($char != $r_char && $r_char == self::$mb_error_char && self::$mb_error_char)) &&
+					ord($char) != 194
+				) {
 					$failed[] = $char;
 				}
 			}
@@ -119,15 +125,20 @@ class Encoding
 	 *                                 to what we sav the source is
 	 * @return string                  encoding converted string
 	 */
-	public static function convertEncoding(string $string, string $to_encoding, string $source_encoding = '', bool $auto_check = true): string
-	{
+	public static function convertEncoding(
+		string $string,
+		string $to_encoding,
+		string $source_encoding = '',
+		bool $auto_check = true
+	): string {
 		// set if not given
 		if (!$source_encoding) {
 			$source_encoding = mb_detect_encoding($string);
 		} else {
 			$_source_encoding = mb_detect_encoding($string);
 		}
-		if ($auto_check === true &&
+		if (
+			$auto_check === true &&
 			isset($_source_encoding) &&
 			$_source_encoding == $source_encoding
 		) {

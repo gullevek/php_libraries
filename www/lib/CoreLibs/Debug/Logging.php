@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Debug support functions
@@ -19,6 +19,8 @@
 　*	print_output
 　*	print_output_not
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Debug;
 
@@ -63,11 +65,11 @@ class Logging
 	{
 		// check must set constants
 		if (defined('BASE') && defined('LOG')) {
-			$this->log_folder = BASE.LOG;
+			$this->log_folder = BASE . LOG;
 		} else {
 			// fallback + warning
 			trigger_error('constant BASE or LOG are not defined, fallback to getcwd()', E_USER_WARNING);
-			$this->log_folder = getcwd().DS;
+			$this->log_folder = getcwd() . DS;
 		}
 		// running time start for script
 		$this->script_starttime = microtime(true);
@@ -79,7 +81,7 @@ class Logging
 		list($this->host_name , $this->host_port) = \CoreLibs\Get\System::getHostName();
 		// add port to host name if not port 80
 		if ($this->host_port != 80) {
-			$this->host_name .= ':'.$this->host_port;
+			$this->host_name .= ':' . $this->host_port;
 		}
 		// can be overridden with basicSetLogFileId
 		if (isset($GLOBALS['LOG_FILE_ID'])) {
@@ -152,7 +154,8 @@ class Logging
 		// check if we do debug, echo or print
 		switch ($target) {
 			case 'debug':
-				if ((
+				if (
+					(
 						(isset($this->debug_output[$level]) && $this->debug_output[$level]) ||
 						$this->debug_output_all
 					) &&
@@ -164,7 +167,8 @@ class Logging
 				}
 				break;
 			case 'echo':
-				if ((
+				if (
+					(
 						(isset($this->echo_output[$level]) && $this->echo_output[$level]) ||
 						$this->echo_output_all
 					) &&
@@ -176,7 +180,8 @@ class Logging
 				}
 				break;
 			case 'print':
-				if ((
+				if (
+					(
 						(isset($this->print_output[$level]) && $this->print_output[$level]) ||
 						$this->print_output_all
 					) &&
@@ -200,7 +205,8 @@ class Logging
 	private function writeErrorMsg(string $level, string $error_string): bool
 	{
 		// only write if write is requested
-		if (!($this->doDebugTrigger('debug', $level) &&
+		if (
+			!($this->doDebugTrigger('debug', $level) &&
 			$this->doDebugTrigger('print', $level))
 		) {
 			return false;
@@ -214,10 +220,10 @@ class Logging
 		// init output variable
 		$output = $error_string; // output formated error string to output file
 		// init base file path
-		$fn = $this->log_folder.$this->log_print_file.'.'.$this->log_file_name_ext;
+		$fn = $this->log_folder . $this->log_print_file . '.' . $this->log_file_name_ext;
 		// log ID prefix settings, if not valid, replace with empty
 		if (preg_match("/^[A-Za-z0-9]+$/", $this->log_file_id)) {
-			$rpl_string = '_'.$this->log_file_id;
+			$rpl_string = '_' . $this->log_file_id;
 		} else {
 			$rpl_string = '';
 		}
@@ -228,28 +234,33 @@ class Logging
 				$this->log_file_unique_id = $GLOBALS['LOG_FILE_UNIQUE_ID'];
 			}
 			if (!$this->log_file_unique_id) {
-				$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id = date('Y-m-d_His').'_U_'.substr(hash('sha1', uniqid((string)mt_rand(), true)), 0, 8);
+				$GLOBALS['LOG_FILE_UNIQUE_ID'] = $this->log_file_unique_id =
+					date('Y-m-d_His') . '_U_'
+						. substr(hash('sha1', uniqid((string)mt_rand(), true)), 0, 8);
 			}
-			$rpl_string = '_'.$this->log_file_unique_id; // add 8 char unique string
+			$rpl_string = '_' . $this->log_file_unique_id; // add 8 char unique string
 		} else {
-			$rpl_string = !$this->log_print_file_date ? '' : '_'.date('Y-m-d'); // add date to file
+			$rpl_string = !$this->log_print_file_date ? '' : '_' . date('Y-m-d'); // add date to file
 		}
 		$fn = str_replace('##DATE##', $rpl_string, $fn); // create output filename
 
-		$rpl_string = !$this->log_per_level ? '' : '_'.$level; // if request to write to one file
+		$rpl_string = !$this->log_per_level ? '' : '_' . $level; // if request to write to one file
 		$fn = str_replace('##LEVEL##', $rpl_string, $fn); // create output filename
 		// set per class, but don't use get_class as we will only get self
-		$rpl_string = !$this->log_per_class ? '' : '_'.str_replace('\\', '-', \CoreLibs\Debug\Support::getCallerClass()); // set sub class settings
+		$rpl_string = !$this->log_per_class ? '' : '_'
+			// set sub class settings
+			. str_replace('\\', '-', \CoreLibs\Debug\Support::getCallerClass());
 		$fn = str_replace('##CLASS##', $rpl_string, $fn); // create output filename
 
-		$rpl_string = !$this->log_per_page ? '' : '_'.\CoreLibs\Get\System::getPageName(1); // if request to write to one file
+		// if request to write to one file
+		$rpl_string = !$this->log_per_page ? '' : '_' . \CoreLibs\Get\System::getPageName(1);
 		$fn = str_replace('##PAGENAME##', $rpl_string, $fn); // create output filename
 
 		// write to file
 		// first check if max file size is is set and file is bigger
 		if ($this->log_max_filesize > 0 && ((filesize($fn) / 1024) > $this->log_max_filesize)) {
 			// for easy purpose, rename file only to attach timestamp, nur sequence numbering
-			rename($fn, $fn.'.'.date("YmdHis"));
+			rename($fn, $fn . '.' . date("YmdHis"));
 		}
 		$fp = fopen($fn, 'a');
 		if ($fp !== false) {
@@ -302,7 +313,7 @@ class Logging
 		if (!in_array($type, ['debug', 'echo', 'print'])) {
 			return false;
 		}
-		return $this->{$type.'_output_all'};
+		return $this->{$type . '_output_all'};
 	}
 
 	/**
@@ -318,7 +329,7 @@ class Logging
 		if (!in_array($type, ['debug', 'echo', 'print'])) {
 			return;
 		}
-		$this->{$type.'_output_all'} = $set;
+		$this->{$type . '_output_all'} = $set;
 	}
 
 	/**
@@ -358,7 +369,7 @@ class Logging
 		array_shift($debug_on); // kick out flag (on/off)
 		if (count($debug_on) >= 1) {
 			foreach ($debug_on as $level) {
-				$switch = $type.'_output'.($flag == 'off' ? '_not' : '');
+				$switch = $type . '_output' . ($flag == 'off' ? '_not' : '');
 				$this->{$switch}[$level] = true;
 			}
 		}
@@ -382,7 +393,7 @@ class Logging
 		if (!in_array($flag, ['on', 'off'])) {
 			return false;
 		}
-		$switch = $type.'_output'.($flag == 'off' ? '_not' : '');
+		$switch = $type . '_output' . ($flag == 'off' ? '_not' : '');
 		// bool
 		if ($level !== null) {
 			return $this->{$switch}[$level] ?? false;
@@ -406,7 +417,7 @@ class Logging
 		if (!in_array($type, ['level', 'class', 'page', 'run'])) {
 			return;
 		}
-		$this->{'log_per_'.$type} = $set;
+		$this->{'log_per_' . $type} = $set;
 	}
 
 	/**
@@ -419,7 +430,7 @@ class Logging
 		if (!in_array($type, ['level', 'class', 'page', 'run'])) {
 			return false;
 		}
-		return $this->{'log_per_'.$type};
+		return $this->{'log_per_' . $type};
 	}
 
 	/**
@@ -433,7 +444,7 @@ class Logging
 	 */
 	public function prAr(array $a): string
 	{
-		return '##HTMLPRE##'.print_r($a, true).'##/HTMLPRE##';
+		return '##HTMLPRE##' . print_r($a, true) . '##/HTMLPRE##';
 	}
 
 	/**
@@ -461,25 +472,25 @@ class Logging
 		// write to file if set
 		$this->writeErrorMsg(
 			$level,
-			'['.$timestamp.'] '
-			.'['.$this->host_name.'] '
-			.'['.\CoreLibs\Get\System::getPageName(2).'] '
-			.'['.$this->running_uid.'] '
-			.'{'.$class.'} '
-			.'<'.$level.'> - '
+			'[' . $timestamp . '] '
+			. '[' . $this->host_name . '] '
+			. '[' . \CoreLibs\Get\System::getPageName(2) . '] '
+			. '[' . $this->running_uid . '] '
+			. '{' . $class . '} '
+			. '<' . $level . '> - '
 			// strip the htmlpre special tags if exist
-			.str_replace(
+			. str_replace(
 				['##HTMLPRE##', '##/HTMLPRE##'],
 				'',
 				// if stripping all html, etc is requested, only for write error msg
 				($strip ?
 					// find any <br> and replace them with \n
 					// strip rest of html elements (base only)
-					preg_replace("/(<\/?)(\w+)([^>]*>)/", '', str_replace('<br>', "\n", $prefix.$string)) :
-					$prefix.$string
+					preg_replace("/(<\/?)(\w+)([^>]*>)/", '', str_replace('<br>', "\n", $prefix . $string)) :
+					$prefix . $string
 				)
 			)
-			."\n"
+			. "\n"
 		);
 		// write to error level msg array if there is an echo request
 		if ($this->doDebugTrigger('echo', $level)) {
@@ -489,21 +500,21 @@ class Logging
 			}
 			// HTML string
 			$this->error_msg[$level][] = '<div>'
-				.'[<span style="font-weight: bold; color: #5e8600;">'.$timestamp.'</span>] '
-				.'[<span style="font-weight: bold; color: #c56c00;">'.$level.'</span>] '
-				.'[<span style="color: #b000ab;">'.$this->host_name.'</span>] '
-				.'[<span style="color: #08b369;">'.$this->page_name.'</span>] '
-				.'[<span style="color: #0062A2;">'.$this->running_uid.'</span>] '
-				.'{<span style="font-style: italic; color: #928100;">'.$class.'</span>} - '
+				. '[<span style="font-weight: bold; color: #5e8600;">' . $timestamp . '</span>] '
+				. '[<span style="font-weight: bold; color: #c56c00;">' . $level . '</span>] '
+				. '[<span style="color: #b000ab;">' . $this->host_name . '</span>] '
+				. '[<span style="color: #08b369;">' . $this->page_name . '</span>] '
+				. '[<span style="color: #0062A2;">' . $this->running_uid . '</span>] '
+				. '{<span style="font-style: italic; color: #928100;">' . $class . '</span>} - '
 				// as is prefix, allow HTML
-				.$prefix
+				. $prefix
 				// we replace special HTMLPRE with <pre> entries
-				.str_replace(
+				. str_replace(
 					['##HTMLPRE##', '##/HTMLPRE##'],
 					['<pre>', '</pre>'],
 					\CoreLibs\Convert\Html::htmlent($string)
 				)
-				."</div><!--#BR#-->";
+				. "</div><!--#BR#-->";
 		}
 		return true;
 	}
@@ -539,20 +550,25 @@ class Logging
 				if ($this->doDebugTrigger('debug', $level)) {
 					if ($this->doDebugTrigger('echo', $level)) {
 						$string_output .= '<div style="font-size: 12px;">'
-							.'[<span style="font-style: italic; color: #c56c00;">'.$level.'</span>] '
-							.($string ? "<b>**** ".\CoreLibs\Convert\Html::htmlent($string)." ****</br>\n" : "")
-							.'</div>'
-							.join('', $temp_debug_output);
+							. '[<span style="font-style: italic; color: #c56c00;">' . $level . '</span>] '
+							. ($string ? "<b>**** " . \CoreLibs\Convert\Html::htmlent($string) . " ****</br>\n" : "")
+							. '</div>'
+							. join('', $temp_debug_output);
 					} // echo it out
 				} // do printout
 			} // for each level
 			// create the output wrapper around, so we have a nice formated output per class
 			if ($string_output) {
-				$string_prefix = '<div style="text-align: left; padding: 5px; font-size: 10px; font-family: sans-serif; border-top: 1px solid black; border-bottom: 1px solid black; margin: 10px 0 10px 0; background-color: white; color: black;">'
-					.'<div style="font-size: 12px;">{<span style="font-style: italic; color: #928100;">'.\CoreLibs\Debug\Support::getCallerClass().'</span>}</div>';
-				$string_output = $string_prefix.$string_output
-					.'<div><span style="font-style: italic; color: #108db3;">Script Run Time:</span> '.$script_end.'</div>'
-					.'</div>';
+				$string_prefix = '<div style="text-align: left; padding: 5px; font-size: 10px; '
+					. 'font-family: sans-serif; border-top: 1px solid black; '
+					. 'border-bottom: 1px solid black; margin: 10px 0 10px 0; '
+					. 'background-color: white; color: black;">'
+					. '<div style="font-size: 12px;">{<span style="font-style: italic; color: #928100;">'
+					. \CoreLibs\Debug\Support::getCallerClass() . '</span>}</div>';
+				$string_output = $string_prefix . $string_output
+					. '<div><span style="font-style: italic; color: #108db3;">Script Run Time:</span> '
+					. $script_end . '</div>'
+					. '</div>';
 			}
 		}
 		return $string_output;

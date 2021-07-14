@@ -1,17 +1,19 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * image thumbnail, rotate, etc
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Convert;
 
 class Byte
 {
 	// define byteFormat
-	const BYTE_FORMAT_NOSPACE = 1;
-	const BYTE_FORMAT_ADJUST = 2;
-	const BYTE_FORMAT_SI = 4;
+	public const BYTE_FORMAT_NOSPACE = 1;
+	public const BYTE_FORMAT_ADJUST = 2;
+	public const BYTE_FORMAT_SI = 4;
 
 	/**
 	 * This function replaces the old byteStringFormat
@@ -62,7 +64,7 @@ class Byte
 			$abs_bytes = $bytes == PHP_INT_MIN ? PHP_INT_MAX : abs($bytes);
 			// smaller than unit is always B
 			if ($abs_bytes < $unit) {
-				return $bytes.'B';
+				return $bytes . 'B';
 			}
 			// labels in order of size [Y, Z]
 			$labels = ['', 'K', 'M', 'G', 'T', 'P', 'E'];
@@ -75,13 +77,14 @@ class Byte
 			// deviation calculation
 			$dev = pow($unit, $exp) * ($unit - 0.05);
 			// shift the exp +1 for on the border units
-			if ($exp < 6 &&
+			if (
+				$exp < 6 &&
 				$abs_bytes > ($dev - (((int)$dev & 0xfff) == 0xd00 ? 52 : 0))
 			) {
-				$exp ++;
+				$exp++;
 			}
 			// label name, including leading space if flagged
-			$pre = ($space ? ' ' : '').($labels[$exp] ?? '>E').($si ? 'i' : '').'B';
+			$pre = ($space ? ' ' : '') . ($labels[$exp] ?? '>E') . ($si ? 'i' : '') . 'B';
 			$bytes_calc = $abs_bytes / pow($unit, $exp);
 			// if original is negative, reverse
 			if ($bytes < 0) {
@@ -90,7 +93,7 @@ class Byte
 			if ($adjust) {
 				return sprintf("%.2f%s", $bytes_calc, $pre);
 			} else {
-				return round($bytes_calc, 2).$pre;
+				return round($bytes_calc, 2) . $pre;
 			}
 		} else {
 			// if anything other return as string
@@ -120,7 +123,11 @@ class Byte
 		// all valid units
 		$valid_units_ = 'bkmgtpezy';
 		// detects up to exo bytes
-		preg_match("/([\d.,]*)\s?(eib|pib|tib|gib|mib|kib|eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/i", strtolower($number), $matches);
+		preg_match(
+			"/([\d.,]*)\s?(eib|pib|tib|gib|mib|kib|eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/i",
+			strtolower($number),
+			$matches
+		);
 		if (isset($matches[1]) && isset($matches[2])) {
 			// remove all non valid characters from the number
 			$number = preg_replace('/[^0-9\.]/', '', $matches[1]);

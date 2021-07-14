@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * html convert functions
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Create;
 
@@ -39,7 +41,8 @@ class RandomKey
 	 */
 	private static function validateRandomKeyLenght(int $key_length): bool
 	{
-		if (is_numeric($key_length) &&
+		if (
+			is_numeric($key_length) &&
 			$key_length > 0 &&
 			$key_length <= self::$max_key_length
 		) {
@@ -98,7 +101,7 @@ class RandomKey
 		}
 
 		$pieces = [];
-		for ($i = 1; $i <= $use_key_length; $i ++) {
+		for ($i = 1; $i <= $use_key_length; $i++) {
 			$pieces[] = self::$key_range[random_int(0, self::$one_key_length - 1)];
 		}
 		return join('', $pieces);

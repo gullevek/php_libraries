@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * various running time checkers
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Debug;
 
@@ -93,11 +95,11 @@ class RunningTime
 			self::$runningtime_string .= $simple ? 'End: ' : "<b>Stopped at</b>: ";
 		}
 		self::$runningtime_string .= date('Y-m-d H:i:s', (int)$timestamp);
-		self::$runningtime_string .= ' '.$micro.($simple ? ', ' : '<br>');
+		self::$runningtime_string .= ' ' . $micro . ($simple ? ', ' : '<br>');
 		// if both are set
 		if (self::$starttime && self::$endtime) {
 			$running_time = self::$endtime - self::$starttime;
-			self::$runningtime_string .= ($simple ? 'Run: ' : "<b>Script running time</b>: ").$running_time." s";
+			self::$runningtime_string .= ($simple ? 'Run: ' : "<b>Script running time</b>: ") . $running_time . " s";
 			// reset start & end time after run
 			self::$starttime = 0;
 			self::$endtime = 0;

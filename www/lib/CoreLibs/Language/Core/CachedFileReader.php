@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
 	Copyright (c) 2003, 2005, 2006, 2009 Danilo Segan <danilo@kvota.net>.
@@ -20,6 +20,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+declare(strict_types=1);
+
 namespace CoreLibs\Language\Core;
 
 // Preloads entire file in memory first, then creates a StringReader
@@ -27,7 +29,7 @@ namespace CoreLibs\Language\Core;
 class CachedFileReader extends \CoreLibs\Language\Core\StringReader
 {
 	public $error = 0;
-	public $_str = '';
+	public $fd_str = '';
 
 	public function __construct($filename)
 	{
@@ -39,7 +41,7 @@ class CachedFileReader extends \CoreLibs\Language\Core\StringReader
 			if (!$fd) {
 				$this->error = 3; // Cannot read file, probably permissions
 			}
-			$this->_str = fread($fd, $length);
+			$this->fd_str = fread($fd, $length);
 			fclose($fd);
 		} else {
 			$this->error = 2; // File doesn't exist

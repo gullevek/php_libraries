@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -39,8 +42,8 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 $byte = 254779258;
 $string = '242.98 MB';
 // static
-print "S::BYTE TO: $byte: ".$byte_class::humanReadableByteFormat($byte)."<br>";
-print "S::BYTE FROM: $string: ".$byte_class::stringByteFormat($string)."<br>";
+print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte) . "<br>";
+print "S::BYTE FROM: $string: " . $byte_class::stringByteFormat($string) . "<br>";
 
 // *** BYTES TEST ***
 $bytes = array(
@@ -59,9 +62,9 @@ foreach ($bytes as $byte) {
 	print '<div style="display: flex; border-bottom: 1px dashed gray;">';
 	//
 	print '<div style="width: 35%; text-align: right; padding-right: 2px;">';
-	print "(".number_format($byte)."/".$byte.") bytes :";
+	print "(" . number_format($byte) . "/" . $byte . ") bytes :";
 	$_bytes = Byte::humanReadableByteFormat($byte);
-	print '</div><div style="width: 10%;">'.$_bytes;
+	print '</div><div style="width: 10%;">' . $_bytes;
 	print '</div><div style="width: 10%;">';
 	print Byte::stringByteFormat($_bytes);
 	print "</div>";
@@ -73,7 +76,7 @@ foreach ($bytes as $byte) {
 	print '<div style="width: 35%; text-align: right; padding-right: 2px;">';
 	print "bytes [si]:";
 	$_bytes = Byte::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_SI);
-	print '</div><div style="width: 10%;">'.$_bytes;
+	print '</div><div style="width: 10%;">' . $_bytes;
 	print '</div><div style="width: 10%;">';
 	print Byte::stringByteFormat($_bytes);
 	print "</div>";

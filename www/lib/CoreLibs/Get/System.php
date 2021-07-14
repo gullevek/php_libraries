@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * system related functions to get self name, host name, error strings
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Get;
 

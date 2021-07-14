@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Converts a json string to array and stores error for later checking
  * can also return empty array on demand
  * and self set json as is on error as array
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Check;
 

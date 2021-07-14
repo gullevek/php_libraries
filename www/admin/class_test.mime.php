@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+ declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -34,22 +37,22 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $mime = 'application/illustrator';
-print "MIME $mime: ".$_mime->mimeGetAppName($mime)."<br>";
+print "MIME $mime: " . $_mime->mimeGetAppName($mime) . "<br>";
 $mime = 'fake/mime';
 $_mime->mimeSetAppName($mime, 'This is a fake mime');
-print "MIME $mime: ".$_mime->mimeGetAppName($mime)."<br>";
+print "MIME $mime: " . $_mime->mimeGetAppName($mime) . "<br>";
 
 // mime test
 $mime = 'application/vnd.ms-excel';
-print "App for mime $mime: ".$_mime->mimeGetAppName($mime)."<br>";
+print "App for mime $mime: " . $_mime->mimeGetAppName($mime) . "<br>";
 $_mime->mimeSetAppName($mime, 'Microsoft (better) Excel');
-print "App for mime changed $mime: ".$_mime->mimeGetAppName($mime)."<br>";
+print "App for mime changed $mime: " . $_mime->mimeGetAppName($mime) . "<br>";
 
 // static call test
 $mime = 'application/x-indesign';
-print "S::App for mime $mime: ".\CoreLibs\Convert\MimeAppName::mimeGetAppName($mime)."<br>";
+print "S::App for mime $mime: " . \CoreLibs\Convert\MimeAppName::mimeGetAppName($mime) . "<br>";
 $mime = 'application/vnd.ms-excel';
-print "S::App for mime $mime: ".\CoreLibs\Convert\MimeAppName::mimeGetAppName($mime)."<br>";
+print "S::App for mime $mime: " . \CoreLibs\Convert\MimeAppName::mimeGetAppName($mime) . "<br>";
 
 // DEPRECATED
 /* $mime = 'application/illustrator';

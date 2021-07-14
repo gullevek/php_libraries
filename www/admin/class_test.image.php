@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -42,17 +45,21 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 $thumb_width = 250;
 $thumb_height = 300;
 // class
-$image = BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture_square.jpg';
+$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture_square.jpg';
 // rotate image first
 $_image->correctImageOrientation($image);
 // thumbnail tests
-echo "<div>CLASS->CREATETHUMBNAILSIMPLE: ".basename($image).": WIDTH: $thumb_width<br><img src=".$_image->createThumbnailSimple($image, $thumb_width)."></div>";
+echo "<div>CLASS->CREATETHUMBNAILSIMPLE: "
+	. basename($image) . ": WIDTH: $thumb_width<br><img src="
+	. $_image->createThumbnailSimple($image, $thumb_width) . "></div>";
 // static
-$image = BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture.jpg';
+$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture.jpg';
 // rotate image first
 $image_class::correctImageOrientation($image);
 // thumbnail tests
-echo "<div>S::CREATETHUMBNAILSIMPLE: ".basename($image).": WIDTH: $thumb_width<br><img src=".$image_class::createThumbnailSimple($image, $thumb_width)."></div>";
+echo "<div>S::CREATETHUMBNAILSIMPLE: "
+	. basename($image) . ": WIDTH: $thumb_width<br><img src="
+	. $image_class::createThumbnailSimple($image, $thumb_width) . "></div>";
 
 echo "U-STATIC VARIOUS:<br>";
 // image thumbnail
@@ -76,17 +83,22 @@ $images = array(
 // return mime type ala mimetype
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 foreach ($images as $image) {
-	$image = BASE.LAYOUT.CONTENT_PATH.IMAGES.$image;
+	$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . $image;
 	list ($height, $width, $img_type) = getimagesize($image);
-	echo "<div><b>IMAGE INFO</b>: ".$height."x".$width.", TYPE: ".$img_type." [".$finfo->file($image)."]</div>";
+	echo "<div><b>IMAGE INFO</b>: " . $height . "x" . $width . ", TYPE: "
+		. $img_type . " [" . $finfo->file($image) . "]</div>";
 	// rotate image first
 	Image::correctImageOrientation($image);
 	// thumbnail tests
-	echo "<div>".basename($image).": WIDTH: $thumb_width<br><img src=".Image::createThumbnailSimple($image, $thumb_width)."></div>";
-	echo "<div>".basename($image).": HEIGHT: $thumb_height<br><img src=".Image::createThumbnailSimple($image, 0, $thumb_height)."></div>";
-	echo "<div>".basename($image).": WIDTH/HEIGHT: $thumb_width x $thumb_height<br><img src=".Image::createThumbnailSimple($image, $thumb_width, $thumb_height)."></div>";
+	echo "<div>" . basename($image) . ": WIDTH: $thumb_width<br><img src="
+		. Image::createThumbnailSimple($image, $thumb_width) . "></div>";
+	echo "<div>" . basename($image) . ": HEIGHT: $thumb_height<br><img src="
+		. Image::createThumbnailSimple($image, 0, $thumb_height) . "></div>";
+	echo "<div>" . basename($image) . ": WIDTH/HEIGHT: $thumb_width x $thumb_height<br><img src="
+		. Image::createThumbnailSimple($image, $thumb_width, $thumb_height) . "></div>";
 	// test with dummy
-	echo "<div>".basename($image).": WIDTH/HEIGHT: $thumb_width x $thumb_height (+DUMMY)<br><img src=".Image::createThumbnailSimple($image, $thumb_width, $thumb_height, null, true, false)."></div>";
+	echo "<div>" . basename($image) . ": WIDTH/HEIGHT: $thumb_width x $thumb_height (+DUMMY)<br><img src="
+		. Image::createThumbnailSimple($image, $thumb_width, $thumb_height, null, true, false) . "></div>";
 	echo "<hr>";
 }
 
@@ -96,7 +108,8 @@ foreach ($images as $image) {
 // rotate image first
 $basic->correctImageOrientation($image);
 // thumbnail tests
-echo "<div>S::CREATETHUMBNAILSIMPLE: ".basename($image).": WIDTH: $thumb_width<br><img src=".$basic->createThumbnailSimple($image, $thumb_width)."></div>"; */
+echo "<div>S::CREATETHUMBNAILSIMPLE: ".basename($image).": WIDTH: $thumb_width<br><img src="
+	. $basic->createThumbnailSimple($image, $thumb_width)."></div>"; */
 
 // error message
 print $basic->log->printErrorMsg();

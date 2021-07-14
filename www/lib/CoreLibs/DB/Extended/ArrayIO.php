@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2002/12/17
@@ -28,6 +29,8 @@
 // picture upload should be taken out from here and out in media_class
 // as it actually has nothing to do with this one here ? (or at least
 // put into separete function in this class)
+
+declare(strict_types=1);
 
 namespace CoreLibs\DB\Extended;
 
@@ -122,7 +125,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		reset($this->table_array);
 		$string = '';
 		foreach ($this->table_array as $column => $data_array) {
-			$string .= '<b>'.$column.'</b> -> '.$data_array['value'].'<br>';
+			$string .= '<b>' . $column . '</b> -> ' . $data_array['value'] . '<br>';
 		}
 		// add output to internal error_msg
 		if ($write === true) {
@@ -185,22 +188,23 @@ class ArrayIO extends \CoreLibs\DB\IO
 			return $this->table_array;
 		}
 		// delete query
-		$q = 'DELETE FROM '.$this->table_name.' WHERE ';
-		$q .= $this->pk_name.' = '.$this->table_array[$this->pk_name]['value'].' ';
+		$q = 'DELETE FROM ' . $this->table_name . ' WHERE ';
+		$q .= $this->pk_name . ' = ' . $this->table_array[$this->pk_name]['value'] . ' ';
 		// delete files and build FK query
 		reset($this->table_array);
 		$q_where = '';
 		foreach ($this->table_array as $column => $data_array) {
 			// suchen nach bildern und lschen ...
-			if (!empty($this->table_array[$column]['file']) &&
-				file_exists($this->table_array[$column]['url'].$this->table_array[$column]['value'])
+			if (
+				!empty($this->table_array[$column]['file']) &&
+				file_exists($this->table_array[$column]['url'] . $this->table_array[$column]['value'])
 			) {
-				if (file_exists($this->table_array[$column]['path'].$this->table_array[$column]['value'])) {
-					unlink($this->table_array[$column]['path'].$this->table_array[$column]['value']);
+				if (file_exists($this->table_array[$column]['path'] . $this->table_array[$column]['value'])) {
+					unlink($this->table_array[$column]['path'] . $this->table_array[$column]['value']);
 				}
 				$file_name = str_replace('_tn', '', $this->table_array[$column]['value']);
-				if (file_exists($this->table_array[$column]['path'].$file_name)) {
-					unlink($this->table_array[$column]['path'].$file_name);
+				if (file_exists($this->table_array[$column]['path'] . $file_name)) {
+					unlink($this->table_array[$column]['path'] . $file_name);
 				}
 			}
 			// if we have a foreign key
@@ -209,7 +213,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 				if ($q_where) {
 					$q_where .= ' AND ';
 				}
-				$q_where .= $column.' = '.$this->table_array[$column]['value'];
+				$q_where .= $column . ' = ' . $this->table_array[$column]['value'];
 			}
 			// allgemeines zurcksetzen des arrays
 			unset($this->table_array[$column]['value']);
@@ -217,7 +221,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 		// attach fk row if there ...
 		if ($q_where) {
-			$q .= ' AND '.$q_where;
+			$q .= ' AND ' . $q_where;
 		}
 		// if 0, error
 		$this->pk_id = null;
@@ -258,16 +262,16 @@ class ArrayIO extends \CoreLibs\DB\IO
 				if ($q_where) {
 					$q_where .= ' AND ';
 				}
-				$q_where .= $column .= ' = '.$this->table_array[$column]['value'];
+				$q_where .= $column .= ' = ' . $this->table_array[$column]['value'];
 			}
 		}
 
 		$q = 'SELECT ';
 		$q .= $q_select;
-		$q .= ' FROM '.$this->table_name.' WHERE ';
-		$q .= $this->pk_name.' = '.$this->table_array[$this->pk_name]['value'].' ';
+		$q .= ' FROM ' . $this->table_name . ' WHERE ';
+		$q .= $this->pk_name . ' = ' . $this->table_array[$this->pk_name]['value'] . ' ';
 		if ($q_where) {
-			$q .= ' AND '.$q_where;
+			$q .= ' AND ' . $q_where;
 		}
 
 		// if query was executed okay, else set error
@@ -277,11 +281,13 @@ class ArrayIO extends \CoreLibs\DB\IO
 				foreach ($this->table_array as $column => $data_array) {
 					// wenn "edit" dann gib daten wie in DB zurück, ansonten aufbereiten fr ausgabe
 					// ?? sollte das nicht drauen ??? man weis ja net was da drin steht --> is noch zu berlegen
-					// echo 'EDIT: $edit | Spalte: $column | type: '.$this->table_array[$column]['type'].' | Res: '.$res[$column].'<br>';
+					// $this->log->debug('DB READ', 'EDIT: $edit | Spalte: $column | type: '
+					//	.$this->table_array[$column]['type'].' | Res: '.$res[$column]);
 					if ($edit) {
 						$this->table_array[$column]['value'] = $res[$column];
 						// if password, also write to hidden
-						if (isset($this->table_array[$column]['type']) &&
+						if (
+							isset($this->table_array[$column]['type']) &&
 							$this->table_array[$column]['type'] == 'password'
 						) {
 							$this->table_array[$column]['HIDDEN_value'] = $res[$column];
@@ -336,12 +342,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 				// falls in 'delete' 'ja' dann loeschen (und gibts eh nur beim update)
 				if ($this->table_array[$column]['delete']) {
 					unset($this->table_array[$column]['delete']);
-					if (file_exists($this->table_array[$column]['path'].$this->table_array[$column]['value'])) {
-						unlink($this->table_array[$column]['path'].$this->table_array[$column]['value']);
+					if (file_exists($this->table_array[$column]['path'] . $this->table_array[$column]['value'])) {
+						unlink($this->table_array[$column]['path'] . $this->table_array[$column]['value']);
 					}
 					$file_name = str_replace('_tn', '', $this->table_array[$column]['value']);
-					if (file_exists($this->table_array[$column]['path'].$file_name)) {
-						unlink($this->table_array[$column]['path'].$file_name);
+					if (file_exists($this->table_array[$column]['path'] . $file_name)) {
+						unlink($this->table_array[$column]['path'] . $file_name);
 					}
 					$this->table_array[$column]['value'] = '';
 				} else {
@@ -351,26 +357,26 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 						// mozilla, patch
 						$fn_name = explode('/', $this->table_array[$column]['dn']);
-						$this->table_array[$column]['dn'] = $fn_name[count($fn_name)-1];
+						$this->table_array[$column]['dn'] = $fn_name[count($fn_name) - 1];
 						$filename_parts = explode('.', $this->table_array[$column]['dn']);
 						$ext = end($filename_parts);
 						array_splice($filename_parts, -1, 1);
 						$name = str_replace(' ', '_', implode('.', $filename_parts));
-						$file_name = $name.'.'.$ext;
+						$file_name = $name . '.' . $ext;
 						//echo 'Dn: $file_name';
-						copy($this->table_array[$column]['tmp'], $this->table_array[$column]['path'].$file_name);
+						copy($this->table_array[$column]['tmp'], $this->table_array[$column]['path'] . $file_name);
 						// automatisch thumbnail generieren, geht nur mit convert (ImageMagic!!!), aber nur bei bild ..
-						if (strtolower($ext) == 'jpeg' || strtolower($ext) == 'jpg' || strtolower($ext) == 'gif' || strtolower($ext) == 'png') {
-							$file_name_tn = $name.'_tn.'.$ext;
-							$input = $this->table_array[$column]['path'].$file_name;
-							$output = $this->table_array[$column]['path'].$file_name_tn;
-							$com = 'convert -geometry 115 '.$input.' '.$output;
+						if (in_array(strtolower($ext), ['jpeg', 'jpg', 'gif', 'png'])) {
+							$file_name_tn = $name . '_tn.' . $ext;
+							$input = $this->table_array[$column]['path'] . $file_name;
+							$output = $this->table_array[$column]['path'] . $file_name_tn;
+							$com = 'convert -geometry 115 ' . $input . ' ' . $output;
 							exec($com);
 							$this->table_array[$column]['value'] = $file_name_tn;
 						} else {
 							$this->table_array[$column]['value'] = $file_name;
 						}
-					} elseif (file_exists($this->table_array[$column]['path'].$this->table_array[$column]['value'])) {
+					} elseif (file_exists($this->table_array[$column]['path'] . $this->table_array[$column]['value'])) {
 						// mach gar nix, wenn bild schon da ???
 					}
 				} // delete or upload
@@ -378,13 +384,15 @@ class ArrayIO extends \CoreLibs\DB\IO
 			/********************************* END FILE **************************************/
 
 			// do not write 'pk' (primary key) or 'view' values
-			if (!isset($this->table_array[$column]['pk']) &&
+			if (
+				!isset($this->table_array[$column]['pk']) &&
 				isset($this->table_array[$column]['type']) &&
 				$this->table_array[$column]['type'] != 'view' &&
 				strlen($column) > 0
 			) {
 				// for password use hidden value if main is not set
-				if (isset($this->table_array[$column]['type']) &&
+				if (
+					isset($this->table_array[$column]['type']) &&
 					$this->table_array[$column]['type'] == 'password' &&
 					empty($this->table_array[$column]['value'])
 				) {
@@ -394,7 +402,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 					if (strlen($q_data)) {
 						$q_data .= ', ';
 					}
-					$q_data .= $column.' = ';
+					$q_data .= $column . ' = ';
 				} else {
 					// this is insert
 					if (strlen($q_data)) {
@@ -407,15 +415,18 @@ class ArrayIO extends \CoreLibs\DB\IO
 				}
 				// integer is different
 				if (isset($this->table_array[$column]['int']) || isset($this->table_array[$column]['int_null'])) {
-					$this->log->debug('write_check', '['.$column.']['.$this->table_array[$column]['value'].']['.$this->table_array[$column]['type'].'] '.
-						'VALUE SET: '.(string)isset($this->table_array[$column]['value']).
-						' | INT NULL: '.(string)isset($this->table_array[$column]['int_null']));
-					if (isset($this->table_array[$column]['value']) &&
+					$this->log->debug('WRITE CHECK', '[' . $column . '][' . $this->table_array[$column]['value'] . ']'
+						. '[' . $this->table_array[$column]['type'] . '] '
+						. 'VALUE SET: ' . (string)isset($this->table_array[$column]['value'])
+						. ' | INT NULL: ' . (string)isset($this->table_array[$column]['int_null']));
+					if (
+						isset($this->table_array[$column]['value']) &&
 						!$this->table_array[$column]['value'] &&
 						isset($this->table_array[$column]['int_null'])
 					) {
 						$_value = 'NULL';
-					} elseif (!isset($this->table_array[$column]['value']) ||
+					} elseif (
+						!isset($this->table_array[$column]['value']) ||
 						(isset($this->table_array[$column]['value']) && !$this->table_array[$column]['value'])
 					) {
 						$_value = 0;
@@ -425,10 +436,11 @@ class ArrayIO extends \CoreLibs\DB\IO
 					$q_data .= $_value;
 				} elseif (isset($this->table_array[$column]['bool'])) {
 					// boolean storeage (reverse check on ifset)
-					$q_data .= "'".$this->dbBoolean($this->table_array[$column]['value'], true)."'";
+					$q_data .= "'" . $this->dbBoolean($this->table_array[$column]['value'], true) . "'";
 				} elseif (isset($this->table_array[$column]['interval'])) {
 					// for interval we check if no value, then we set null
-					if (!isset($this->table_array[$column]['value']) ||
+					if (
+						!isset($this->table_array[$column]['value']) ||
 						(isset($this->table_array[$column]['value']) && !$this->table_array[$column]['value'])
 					) {
 						$_value = 'NULL';
@@ -442,9 +454,14 @@ class ArrayIO extends \CoreLibs\DB\IO
 				} else {
 					// if the error check is json, we set field to null if NOT set
 					// else normal string write
-					if (isset($this->table_array[$column]['error_check']) &&
+					if (
+						isset($this->table_array[$column]['error_check']) &&
 						$this->table_array[$column]['error_check'] == 'json' &&
-						(!isset($this->table_array[$column]['value']) || (isset($this->table_array[$column]['value']) && !$this->table_array[$column]['value']))
+						(
+							!isset($this->table_array[$column]['value']) ||
+							(isset($this->table_array[$column]['value']) &&
+							!$this->table_array[$column]['value'])
+						)
 					) {
 						$q_data .= 'NULL';
 					} else {
@@ -452,7 +469,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 						$q_data .= "'";
 						// if add slashes do convert & add slashes else write AS is
 						if ($addslashes) {
-							$q_data .= $this->dbEscapeString($this->convertEntities($this->table_array[$column]['value']));
+							$q_data .= $this->dbEscapeString(
+								$this->convertEntities($this->table_array[$column]['value'])
+							);
 						} else {
 							$q_data .= $this->dbEscapeString($this->table_array[$column]['value']);
 						}
@@ -472,14 +491,14 @@ class ArrayIO extends \CoreLibs\DB\IO
 				if (!empty($q_where)) {
 					$q_where .= ' AND ';
 				}
-				$q_where .= $column .= ' = '.$this->table_array[$column]['value'];
+				$q_where .= $column .= ' = ' . $this->table_array[$column]['value'];
 			}
 		}
 
 		// if no PK set, then get max ID from DB
 		if (!$this->table_array[$this->pk_name]['value']) {
 			// max id, falls INSERT
-			$q = 'SELECT MAX('.$this->pk_name.') + 1 AS pk_id FROM '.$this->table_name;
+			$q = 'SELECT MAX(' . $this->pk_name . ') + 1 AS pk_id FROM ' . $this->table_name;
 			$res = $this->dbReturnRow($q);
 			if (!isset($res['pk_id'])) {
 				$res['pk_id'] = 1;
@@ -488,19 +507,19 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 
 		if (!$insert) {
-			$q = 'UPDATE '.$this->table_name.' SET ';
+			$q = 'UPDATE ' . $this->table_name . ' SET ';
 			$q .= $q_data;
 			$q .= ' WHERE ';
-			$q .= $this->pk_name.' = '.$this->table_array[$this->pk_name]['value'].' ';
+			$q .= $this->pk_name . ' = ' . $this->table_array[$this->pk_name]['value'] . ' ';
 			if (!empty($q_where)) {
-				$q .= ' AND '.$q_where;
+				$q .= ' AND ' . $q_where;
 			}
 			// set pk_id ... if it has changed or so
 			$this->pk_id = $this->table_array[$this->pk_name]['value'];
 		} else {
-			$q = 'INSERT INTO '.$this->table_name.' ';
-			$q .= '('.$q_vars.') ';
-			$q .= 'VALUES ('.$q_data.')';
+			$q = 'INSERT INTO ' . $this->table_name . ' ';
+			$q .= '(' . $q_vars . ') ';
+			$q .= 'VALUES (' . $q_data . ')';
 			// write primary key too
 			// if ($q_data)
 			//	$q .= ", ";
@@ -520,6 +539,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// return the table if needed
 		return $this->table_array;
 	}
-} // end of class
+	// end of class
+}
 
 // __END__

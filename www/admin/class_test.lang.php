@@ -1,8 +1,10 @@
 <?php // phpcs:ignore warning
-declare(strict_types=1);
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -37,17 +39,17 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $string = 'INPUT TEST';
 
-echo "LANGUAGE SET: ".$l->__getLang()."<br>";
-echo "LANGUAGE FILE: ".$l->__getMoFile()."<br>";
-echo "INPUT TEST: ".$string." => ".$l->__($string)."<br>";
+echo "LANGUAGE SET: " . $l->__getLang() . "<br>";
+echo "LANGUAGE FILE: " . $l->__getMoFile() . "<br>";
+echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
 
 // switch to other language
 $lang = 'ja_utf8';
 $l->l10nReloadMOfile($lang);
 
-echo "LANGUAGE SET: ".$l->__getLang()."<br>";
-echo "LANGUAGE FILE: ".$l->__getMoFile()."<br>";
-echo "INPUT TEST: ".$string." => ".$l->__($string)."<br>";
+echo "LANGUAGE SET: " . $l->__getLang() . "<br>";
+echo "LANGUAGE FILE: " . $l->__getMoFile() . "<br>";
+echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
 // TODO: run compare check input must match output
 
 // error message

@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -46,7 +49,7 @@ $mime_encodes = [
 	['日本語ながい日本語ながい日本語ながい日本語ながい日本語ながい日本語ながい日本語ながい', 'ISO-2022-JP-MS'],
 ];
 foreach ($mime_encodes as $mime_encode) {
-	print "__MBMIMEENCODE: $mime_encode[0]: ".Encoding::__mbMimeEncode($mime_encode[0], $mime_encode[1])."<br>";
+	print "__MBMIMEENCODE: $mime_encode[0]: " . Encoding::__mbMimeEncode($mime_encode[0], $mime_encode[1]) . "<br>";
 }
 
 $enc_strings = [
@@ -59,26 +62,29 @@ $enc_strings = [
 $_encoding->setErrorChar('∴');
 foreach ($enc_strings as $_string) {
 	$string = $_encoding->checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
-	print "ENC CHECK: $_string: ".($string === false ? '-OK-' : $string)."<br>";
-	print "CONV ENCODING: $_string: ".$_encoding->convertEncoding($_string, 'ISO-2022-JP')."<br>";
-	print "CONV ENCODING (s): $_string: ".$_encoding->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8')."<br>";
-	print "CONV ENCODING (s,a-false): $_string: ".$_encoding->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8', false)."<br>";
+	print "ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
+	print "CONV ENCODING: $_string: " . $_encoding->convertEncoding($_string, 'ISO-2022-JP') . "<br>";
+	print "CONV ENCODING (s): $_string: " . $_encoding->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8') . "<br>";
+	print "CONV ENCODING (s,a-false): $_string: "
+		. $_encoding->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8', false) . "<br>";
 }
-print "ERROR CHAR: ".$_encoding->getErrorChar()."<br>";
+print "ERROR CHAR: " . $_encoding->getErrorChar() . "<br>";
 // static
 $encoding_class::setErrorChar('∴');
 foreach ($enc_strings as $_string) {
 	$string = $encoding_class::checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
-	print "S::ENC CHECK: $_string: ".($string === false ? '-OK-' : $string)."<br>";
-	print "S::CONV ENCODING: $_string: ".$encoding_class::convertEncoding($_string, 'ISO-2022-JP')."<br>";
-	print "S::CONV ENCODING (s): $_string: ".$encoding_class::convertEncoding($_string, 'ISO-2022-JP', 'UTF-8')."<br>";
-	print "S::CONV ENCODING (s,a-false): $_string: ".$encoding_class::convertEncoding($_string, 'ISO-2022-JP', 'UTF-8', false)."<br>";
+	print "S::ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
+	print "S::CONV ENCODING: $_string: " . $encoding_class::convertEncoding($_string, 'ISO-2022-JP') . "<br>";
+	print "S::CONV ENCODING (s): $_string: "
+		. $encoding_class::convertEncoding($_string, 'ISO-2022-JP', 'UTF-8') . "<br>";
+	print "S::CONV ENCODING (s,a-false): $_string: "
+		. $encoding_class::convertEncoding($_string, 'ISO-2022-JP', 'UTF-8', false) . "<br>";
 }
-print "S::ERROR CHAR: ".$encoding_class::getErrorChar()."<br>";
+print "S::ERROR CHAR: " . $encoding_class::getErrorChar() . "<br>";
 // static use
 $_string = $enc_strings[1];
 $string = Encoding::checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
-print "S::ENC CHECK: $_string: ".($string === false ? '-OK-' : $string)."<br>";
+print "S::ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
 
 // DEPRECATED
 /* $string = $basic->checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');

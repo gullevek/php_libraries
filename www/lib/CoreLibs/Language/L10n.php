@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2004/11/18
@@ -23,10 +24,12 @@
 * 2005/10/17 (cs) made an on the fly switch method (reload of lang)
 *********************************************************************/
 
+declare(strict_types=1);
+
 namespace CoreLibs\Language;
 
-use \CoreLibs\Language\Core\FileReader;
-use \CoreLibs\Language\Core\GetTextReader;
+use CoreLibs\Language\Core\FileReader;
+use CoreLibs\Language\Core\GetTextReader;
 
 class L10n extends \CoreLibs\Basic
 {
@@ -51,10 +54,10 @@ class L10n extends \CoreLibs\Basic
 
 		// override path check
 		if (!is_dir($path)) {
-			$path = BASE.INCLUDES.LANG.CONTENT_PATH;
+			$path = BASE . INCLUDES . LANG . CONTENT_PATH;
 		}
 
-		$this->mofile = $path.$this->lang.".mo";
+		$this->mofile = $path . $this->lang . ".mo";
 
 		// check if get a readable mofile
 		if (is_readable($this->mofile)) {
@@ -81,10 +84,10 @@ class L10n extends \CoreLibs\Basic
 
 		// override path check
 		if (!is_dir($path)) {
-			$path = BASE.INCLUDES.LANG.CONTENT_PATH;
+			$path = BASE . INCLUDES . LANG . CONTENT_PATH;
 		}
 
-		$this->mofile = $path.$this->lang.".mo";
+		$this->mofile = $path . $this->lang . ".mo";
 
 		// check if get a readable mofile
 		if (is_readable($this->mofile)) {

@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * direct write to log file
  * must have BASE folder and LOG foder defined
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Debug;
 
@@ -40,10 +42,10 @@ class FileWriter
 		if (!self::$debug_filename) {
 			return false;
 		}
-		if (!is_writeable(BASE.LOG)) {
+		if (!is_writeable(BASE . LOG)) {
 			return false;
 		}
-		$filename = BASE.LOG.self::$debug_filename;
+		$filename = BASE . LOG . self::$debug_filename;
 		$fh = fopen($filename, 'a');
 		if ($fh === false) {
 			return false;
@@ -51,7 +53,8 @@ class FileWriter
 		if ($enter === true) {
 			$string .= "\n";
 		}
-		$string = "[".\CoreLibs\Debug\Support::printTime()."] [".\CoreLibs\Get\System::getPageName(2)."] - ".$string;
+		$string = "[" . \CoreLibs\Debug\Support::printTime() . "] "
+			. "[" . \CoreLibs\Get\System::getPageName(2) . "] - " . $string;
 		fwrite($fh, $string);
 		fclose($fh);
 		return true;

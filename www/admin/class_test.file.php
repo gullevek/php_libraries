@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php // phpcs:ignore warning
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = 1;
@@ -35,9 +38,9 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $file = '/some/path/to/some/file.txt';
-print "GETFILENAMEENDING: $file: ".File::getFilenameEnding($file)."<br>";
-$file = getcwd().DIRECTORY_SEPARATOR.'class_test.file.php';
-print "GETLINESFROMFILE: $file: ".File::getLinesFromFile($file)."<br>";
+print "GETFILENAMEENDING: $file: " . File::getFilenameEnding($file) . "<br>";
+$file = getcwd() . DIRECTORY_SEPARATOR . 'class_test.file.php';
+print "GETLINESFROMFILE: $file: " . File::getLinesFromFile($file) . "<br>";
 
 // error message
 print $basic->log->printErrorMsg();

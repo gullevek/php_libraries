@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2019/10/28
@@ -6,6 +7,8 @@
 * other global constant variables
 * HISTORY:
 *********************************************************************/
+
+declare(strict_types=1);
 
 // DEFINE('SOME_ID', <SOME VALUE>);
 
@@ -18,9 +21,9 @@ $paths = [
 ];
 // find convert
 foreach ($paths as $path) {
-	if (file_exists($path.DS.'convert') && is_file($path.DS.'convert')) {
+	if (file_exists($path . DS . 'convert') && is_file($path . DS . 'convert')) {
 		// image magick convert location
-		define('CONVERT', $path.DS.'convert');
+		define('CONVERT', $path . DS . 'convert');
 	}
 }
 unset($paths);

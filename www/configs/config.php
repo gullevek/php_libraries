@@ -1,5 +1,5 @@
 <?php // phpcs:ignore warning
-declare(strict_types=1);
+
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2018/10/11
@@ -8,13 +8,15 @@ declare(strict_types=1);
 * HISTORY:
 *********************************************************************/
 
-define('CONFIG_PATH', 'configs'.DIRECTORY_SEPARATOR);
+declare(strict_types=1);
+
+define('CONFIG_PATH', 'configs' . DIRECTORY_SEPARATOR);
 // config path prefix search, start with 0, got down each level __DIR__ has, if nothing found -> bail
 $CONFIG_PATH_PREFIX = '';
-for ($dir_pos = 0, $dir_max = count(explode(DIRECTORY_SEPARATOR, __DIR__)); $dir_pos <= $dir_max; $dir_pos ++) {
-	$CONFIG_PATH_PREFIX .= '..'.DIRECTORY_SEPARATOR;
-	if (file_exists($CONFIG_PATH_PREFIX.CONFIG_PATH.'config.master.php')) {
-		require $CONFIG_PATH_PREFIX.CONFIG_PATH.'config.master.php';
+for ($dir_pos = 0, $dir_max = count(explode(DIRECTORY_SEPARATOR, __DIR__)); $dir_pos <= $dir_max; $dir_pos++) {
+	$CONFIG_PATH_PREFIX .= '..' . DIRECTORY_SEPARATOR;
+	if (file_exists($CONFIG_PATH_PREFIX . CONFIG_PATH . 'config.master.php')) {
+		require $CONFIG_PATH_PREFIX . CONFIG_PATH . 'config.master.php';
 		break;
 	}
 }
@@ -24,8 +26,8 @@ if (!defined('DS')) {
 }
 // find trigger name "admin/" or "frontend/" in the getcwd() folder
 foreach (['admin', 'frontend'] as $folder) {
-	if (strstr(getcwd(), DS.$folder)) {
-		define('CONTENT_PATH', $folder.DS);
+	if (strstr(getcwd(), DS . $folder)) {
+		define('CONTENT_PATH', $folder . DS);
 		break;
 	}
 }

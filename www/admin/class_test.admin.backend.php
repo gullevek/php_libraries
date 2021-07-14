@@ -1,8 +1,10 @@
 <?php // phpcs:ignore warning
-declare(strict_types=1);
+
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
+
+declare(strict_types=1);
 
 $DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = true;
@@ -37,12 +39,12 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 // set acl, from eg login acl
-print "SETACL[]: ".$backend->setACL([])."<br>";
-print "ADBEDITLOG: ".$backend->adbEditLog('CLASSTEST-ADMIN', 'Some info stirng')."<br>";
-print "ADBTOPMENU(0): ".\CoreLibs\Debug\Support::printAr($backend->adbTopMenu())."<br>";
-print "ADBMSG: ".$backend->adbMsg('info', 'Message: %1$d', [1])."<br>";
-print "Messaes: ".\CoreLibs\Debug\Support::printAr($this->messages)."<br>";
-print "ADBPRINTDATETIME:<br>".$backend->adbPrintDateTime(2021, 6, 21, 6, 38, '_test')."<br>";
+print "SETACL[]: " . $backend->setACL([]) . "<br>";
+print "ADBEDITLOG: " . $backend->adbEditLog('CLASSTEST-ADMIN', 'Some info stirng') . "<br>";
+print "ADBTOPMENU(0): " . \CoreLibs\Debug\Support::printAr($backend->adbTopMenu()) . "<br>";
+print "ADBMSG: " . $backend->adbMsg('info', 'Message: %1$d', [1]) . "<br>";
+print "Messaes: " . \CoreLibs\Debug\Support::printAr($this->messages) . "<br>";
+print "ADBPRINTDATETIME:<br>" . $backend->adbPrintDateTime(2021, 6, 21, 6, 38, '_test') . "<br>";
 
 // error message
 print $basic->log->printErrorMsg();

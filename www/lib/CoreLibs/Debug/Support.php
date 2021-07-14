@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * Debug support functions
  */
+
+declare(strict_types=1);
 
 namespace CoreLibs\Debug;
 
@@ -34,7 +36,7 @@ class Support
 	 */
 	public static function printAr(array $array): string
 	{
-		return "<pre>".print_r($array, true)."</pre>";
+		return "<pre>" . print_r($array, true) . "</pre>";
 	}
 
 	/**

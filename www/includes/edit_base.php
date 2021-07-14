@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /********************************************************************
 * AUTHOR: Clemens "Gullevek" Schwaighofer (www.gullevek.org)
 * CREATED: 2003/06/10
@@ -12,10 +13,15 @@
 *	 - edit_visible_group.php
 * HISTORY:
 * 2005/06/30 (cs) remove color settings, they are in CSS File now
-* 2005/06/22 (cs) moved load of config array into form class, set lang and lang is must set var for form class; removed the page name setting, moved it into the form class, remove all HTML from main page
+* 2005/06/22 (cs) moved load of config array into form class, set lang
+*                 and lang is must set var for form class; removed the
+*                 page name setting, moved it into the form class,
+*                 emove all HTML from main page
 * 2004/09/30 (cs) changed layout to fit default layout & changed LIBS, etc
 * 2003-06-10: creation of this page
 *********************************************************************/
+
+declare(strict_types=1);
 
 $DEBUG_ALL = true;
 $PRINT_ALL = true;
@@ -37,7 +43,7 @@ if (!DEBUG)	{
 }
 
 // should be utf8
-header("Content-type: text/html; charset=".DEFAULT_ENCODING);
+header("Content-type: text/html; charset=" . DEFAULT_ENCODING);
 ob_end_flush();
 $login = new CoreLibs\ACL\Login(DB_CONFIG);
 
@@ -71,9 +77,9 @@ $DEBUG_DATA = [];
 // set the template dir
 // WARNING: this has a special check for the mailing tool layout (old layout)
 if (defined('LAYOUT')) {
-	$smarty->setTemplateDir(BASE.INCLUDES.TEMPLATES.CONTENT_PATH);
-	$DATA['css'] = LAYOUT.CSS;
-	$DATA['js'] = LAYOUT.JS;
+	$smarty->setTemplateDir(BASE . INCLUDES . TEMPLATES . CONTENT_PATH);
+	$DATA['css'] = LAYOUT . CSS;
+	$DATA['js'] = LAYOUT . JS;
 } else {
 	$smarty->setTemplateDir(TEMPLATES);
 	$DATA['css'] = CSS;
@@ -115,17 +121,22 @@ if ($form->my_page_name == 'edit_order') {
 				// this gets temp, id before that, gets actual (moves one "down")
 				// this gets the old before (moves one "up")
 				// is done for every element in row
-				// echo "A: ".$row_data_id[$position[$i]]." (".$row_data_order[$position[$i]].") -- ".$row_data_id[$position[$i]-1]." (".$row_data_order[$position[$i]-1].")<br>";
+				// echo "A: ".$row_data_id[$position[$i]]
+				//	." (".$row_data_order[$position[$i]].") -- ".$row_data_id[$position[$i]-1]
+				//	." (".$row_data_order[$position[$i]-1].")<br>";
 				$temp_id = $row_data_id[$position[$i]] ?? null;
 				$row_data_id[$position[$i]] = $row_data_id[$position[$i] - 1] ?? null;
 				$row_data_id[$position[$i] - 1] = $temp_id;
-				// echo "A: ".$row_data_id[$position[$i]]." (".$row_data_order[$position[$i]].") -- ".$row_data_id[$position[$i]-1]." (".$row_data_order[$position[$i]-1].")<br>";
+				// echo "A: ".$row_data_id[$position[$i]]
+				//	." (".$row_data_order[$position[$i]].") -- "
+				//	.$row_data_id[$position[$i]-1]." (".$row_data_order[$position[$i]-1].")<br>";
 			} // for
 		} // if up
 
-		// the last position id from position array is not to be the count-1 of row_data_id array, or it is the last element
+		// the last position id from position array is not to be the count - 1 of
+		// row_data_id array, or it is the last element
 		if (isset($down) && ($position[count($position) - 1] != (count($row_data_id) - 1))) {
-			for ($i = count($position) - 1; $i >= 0; $i --)	{
+			for ($i = count($position) - 1; $i >= 0; $i--) {
 				// same as up, just up in other way, starts from bottom (last element) and moves "up"
 				// element before actuel gets temp, this element, becomes element after this,
 				// element after this, gets this
@@ -136,12 +147,15 @@ if ($form->my_page_name == 'edit_order') {
 		} // if down
 
 		// write data ... (which has to be abstrackt ...)
-		if ((isset($up) && $position[0] > 0) ||
+		if (
+			(isset($up) && $position[0] > 0) ||
 			(isset($down) && ($position[count($position) - 1] != (count($row_data_id) - 1)))
 		) {
-			for ($i = 0; $i < count($row_data_id); $i ++) {
+			for ($i = 0; $i < count($row_data_id); $i++) {
 				if (isset($row_data_order[$i]) && isset($row_data_id[$i])) {
-					$q = "UPDATE ".$table_name." SET order_number = ".$row_data_order[$i]." WHERE ".$table_name."_id = ".$row_data_id[$i];
+					$q = "UPDATE " . $table_name
+						. " SET order_number = " . $row_data_order[$i]
+						. " WHERE " . $table_name . "_id = " . $row_data_id[$i];
 					$q = $form->dbExec($q);
 				}
 			} // for all article ids ...
@@ -149,7 +163,7 @@ if ($form->my_page_name == 'edit_order') {
 	} // if there is something to move
 
 	// get ...
-	$q = "SELECT ".$table_name."_id, name, order_number FROM ".$table_name." ";
+	$q = "SELECT " . $table_name . "_id, name, order_number FROM " . $table_name . " ";
 	if (!empty($where_string)) {
 		$q .= "WHERE $where_string ";
 	}
@@ -163,7 +177,7 @@ if ($form->my_page_name == 'edit_order') {
 	// DB read data for menu
 	while ($res = $form->dbReturn($q)) {
 		$row_data[] = [
-			"id" => $res[$table_name."_id"],
+			"id" => $res[$table_name . "_id"],
 			"name" => $res["name"],
 			"order" => $res["order_number"]
 		];
@@ -187,13 +201,14 @@ if ($form->my_page_name == 'edit_order') {
 	$DATA['form_error_msg'] = $messages;
 
 	// all the row data
-	for ($i = 0; $i < count($row_data); $i ++) {
+	for ($i = 0; $i < count($row_data); $i++) {
 		$options_id[] = $i;
 		$options_name[] = $row_data[$i]['name'];
 		// list of points to order
 		for ($j = 0; $j < count($position); $j++) {
 			// if matches, put into select array
-			if (isset($original_id[$position[$j]]) && isset($row_data[$i]['id']) &&
+			if (
+				isset($original_id[$position[$j]]) && isset($row_data[$i]['id']) &&
 				$original_id[$position[$j]] == $row_data[$i]['id']
 			) {
 				$options_selected[] = $i;
@@ -288,11 +303,11 @@ if ($form->my_page_name == 'edit_order') {
 			(isset($data['hostname']) && $data['hostname'] ?
 				$data['hostname'] :
 				''
-			).
+			)
 			// filename
-			($data['filename'] ?? '').
+			. ($data['filename'] ?? '')
 			// query string
-			(isset($data['query_string']) && $data['query_string'] ?
+			. (isset($data['query_string']) && $data['query_string'] ?
 				$data['query_string'] :
 				''
 			);
@@ -302,7 +317,8 @@ if ($form->my_page_name == 'edit_order') {
 			$menu_data[$i]['splitfactor_in'] = 0;
 		}
 		// on matching, we also need to check if we are in the same folder
-		if (isset($data['filename']) &&
+		if (
+			isset($data['filename']) &&
 			$data['filename'] == \CoreLibs\Get\System::getPageName() &&
 			(!isset($data['hostname']) || (
 				isset($data['hostname']) &&
@@ -334,7 +350,7 @@ if ($form->my_page_name == 'edit_order') {
 	} // for
 	// $form->log->debug('MENU ARRAY', $form->log->prAr($menu_data));
 	$DATA['menu_data'] = $menu_data;
-	$DATA['page_name'] = $menuarray[$position]['page_name'] ?? '-Undefined ['.$position.'] -';
+	$DATA['page_name'] = $menuarray[$position]['page_name'] ?? '-Undefined [' . $position . '] -';
 	$L_TITLE = $DATA['page_name'];
 	// html title
 	$HEADER['HTML_TITLE'] = $form->l->__($L_TITLE);
@@ -391,13 +407,13 @@ if ($form->my_page_name == 'edit_order') {
 					$search_glob = [];
 					foreach ($folders as $folder) {
 						// make sure this folder actually exists
-						if (is_dir(ROOT.$folder)) {
+						if (is_dir(ROOT . $folder)) {
 							foreach ($files as $file) {
-								$search_glob[] = $folder.$file;
+								$search_glob[] = $folder . $file;
 							}
 						}
 					}
-					$crap = exec('ls '.join(' ', $search_glob), $output, $status);
+					$crap = exec('ls ' . join(' ', $search_glob), $output, $status);
 					// now get all that are NOT in de DB
 					$q = "INSERT INTO temp_files (folder, filename) VALUES ";
 					$t_q = '';
@@ -410,10 +426,11 @@ if ($form->my_page_name == 'edit_order') {
 							if ($t_q) {
 								$t_q .= ', ';
 							}
-							$t_q .= "('".$form->dbEscapeString($matches[1])."', '".$form->dbEscapeString($matches[2])."')";
+							$t_q .= "('" . $form->dbEscapeString($matches[1]) . "', '"
+								. $form->dbEscapeString($matches[2]) . "')";
 						}
 					}
-					$form->dbExec($q.$t_q, 'NULL');
+					$form->dbExec($q . $t_q, 'NULL');
 					$elements[] = $form->formCreateElement('filename');
 				} else {
 					// show file menu
@@ -493,13 +510,13 @@ $CONTENT_DATA = array_merge($HEADER, $DATA, $DEBUG_DATA);
 foreach ($CONTENT_DATA as $key => $value) {
 	$smarty->assign($key, $value);
 }
-if (is_dir(BASE.TEMPLATES_C)) {
-	$smarty->setCompileDir(BASE.TEMPLATES_C);
+if (is_dir(BASE . TEMPLATES_C)) {
+	$smarty->setCompileDir(BASE . TEMPLATES_C);
 }
-if (is_dir(BASE.CACHE)) {
-	$smarty->setCacheDir(BASE.CACHE);
+if (is_dir(BASE . CACHE)) {
+	$smarty->setCacheDir(BASE . CACHE);
 }
-$smarty->display($EDIT_TEMPLATE, 'editAdmin_'.$smarty->lang, 'editAdmin_'.$smarty->lang);
+$smarty->display($EDIT_TEMPLATE, 'editAdmin_' . $smarty->lang, 'editAdmin_' . $smarty->lang);
 
 // debug output
 echo $login->log->printErrorMsg();
