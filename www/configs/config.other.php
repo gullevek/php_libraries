@@ -17,7 +17,7 @@ declare(strict_types=1);
 $paths = [
 	'/bin',
 	'/usr/bin',
-	'/usr/local/bin'
+	'/usr/local/bin',
 ];
 // find convert
 foreach ($paths as $path) {

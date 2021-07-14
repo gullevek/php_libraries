@@ -22,7 +22,7 @@ $DB_CONFIG = [
 		'db_type' => 'pgsql',
 		'db_encoding' => '',
 		'db_ssl' => 'disable' // allow, disable, require, prefer
-	]
+	],
 ];
 
 // __END__

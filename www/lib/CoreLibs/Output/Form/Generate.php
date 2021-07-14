@@ -291,14 +291,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// then check general global folder
 			if (
 				is_dir(TABLE_ARRAYS) &&
-				is_file(TABLE_ARRAYS . 'array_' . $this->my_page_name . ' . php')
+				is_file(TABLE_ARRAYS . 'array_' . $this->my_page_name . '.php')
 			) {
-				include(TABLE_ARRAYS . 'array_' . $this->my_page_name . ' . php');
+				include(TABLE_ARRAYS . 'array_' . $this->my_page_name . '.php');
 			} elseif (
 				is_dir(BASE . INCLUDES . TABLE_ARRAYS) &&
-				is_file(BASE . INCLUDES . TABLE_ARRAYS . 'array_' . $this->my_page_name . ' . php')
+				is_file(BASE . INCLUDES . TABLE_ARRAYS . 'array_' . $this->my_page_name . '.php')
 			) {
-				include(BASE . INCLUDES . TABLE_ARRAYS . 'array_' . $this->my_page_name . ' . php');
+				include(BASE . INCLUDES . TABLE_ARRAYS . 'array_' . $this->my_page_name . '.php');
 			}
 			// in the include file there must be a variable with the page name matching
 			if (isset(${$this->my_page_name}) && is_array(${$this->my_page_name})) {
