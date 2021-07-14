@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore PSR1.Files.SideEffects
 
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
