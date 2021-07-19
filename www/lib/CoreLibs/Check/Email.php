@@ -120,7 +120,13 @@ class Email
 	 */
 	public static function getEmailRegexCheck(): array
 	{
-		return self::$email_regex_check;
+		// return all but the first
+		return array_slice(
+			self::$email_regex_check,
+			1,
+			count(self::$email_regex_check) - 1,
+			true
+		);
 	}
 
 	/**
