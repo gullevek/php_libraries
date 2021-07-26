@@ -1,23 +1,16 @@
-<?php
+<?php // phpcs:ignore PSR1.Files.SideEffects
 
 /*********************************************************************
  * AUTHOR: Clemens Schwaighofer
  * CREATED: 2011/2/8
- * DESCRIPTION: pre function to collect all non critical errors into a log file if possible
- * include this file at the very beginning of the script to get the notices, strict, etc messages.
+ * DESCRIPTION: pre function to collect all non critical errors
+ * into a log file if possible
+ * include this file at the very beginning of the script to get the notices,
+ * strict, etc messages.
  * error etc will still be written to the log/display
  *********************************************************************/
 
  declare(strict_types=1);
-
-// define the base working directory outside because in the function it might return undefined
-// if we have config set BASE use this
-if (defined('BASE')) {
-	DEFINE('CURRENT_WORKING_DIR', BASE);
-} else {
-	// else we set. We fully assuem that Error.Handling is where it should be, in lib dir
-	DEFINE('CURRENT_WORKING_DIR', str_replace('lib', '', __DIR__));
-}
 
 /**
  * will catch any error except E_ERROR and try to write them to the log file
@@ -67,8 +60,15 @@ function MyErrorHandler(int $type, string $message, string $file, int $line, arr
 	// : the php error message
 	$output = '{' . array_pop($page_temp) . '} [' . $file . '] '
 		. '<' . $line . '> [' . $error_level[$type] . '|' . $type . ']: ' . $message;
-	# try to open file
-	$ROOT = CURRENT_WORKING_DIR;
+	// define the base working directory outside because in the function it might return undefined
+	// if we have config set BASE use this
+	$ROOT = '';
+	if (defined('BASE')) {
+		$ROOT = BASE;
+	} else {
+		// else we set. We fully assuem that Error.Handling is where it should be, in lib dir
+		$ROOT = str_replace('lib', '', __DIR__);
+	}
 	$LOG = 'log' . DIRECTORY_SEPARATOR;
 	// if the log folder is not found, try to create it
 	if (!is_dir($ROOT . $LOG) && !is_file($ROOT . LOG)) {

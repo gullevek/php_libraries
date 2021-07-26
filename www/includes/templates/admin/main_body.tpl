@@ -100,10 +100,10 @@
 	</script>
 	<!-- /TinyMCE -->
 	{/if}
-	{popup_init src="`$js`/overlib/overlib.js"}
 </head>
 <body>
-<div style="margin: 2px; width: {$table_width}px; margin-bottom: 10px;">
+{popup_init src="`$js`/overlib/overlib.js"}
+<div style="margin: 2px; width: {$table_width}; margin-bottom: 10px;">
 	<div style="position: relative; height: 20px;" class="menu">
 		<div style="position: absolute; width: 200px;">{t 1=$USER_NAME|upper}Hello %1{/t}</div>
 		<div style="position: absolute; text-align: right; right: 0px; width: 120px;">
@@ -127,13 +127,13 @@
 	{/if}
 {/foreach}
 	</div>
-	<div class="pagename">
+	<div id="pagename" class="pagename">
 		{$page_name}
 	</div>
 </div>
 {* error/warning *}
 {if $messages}
-<div style="margin: 2px; width: {$table_width}px;">
+<div style="margin: 2px; width: {$table_width};">
 	{foreach from=$messages item=item key=key}
 	<div class="{$item.class}">{$item.msg}</div>
 	{/foreach}
@@ -143,7 +143,7 @@
 
 {* debug info *}
 {if $DEBUG}
-<div style="width:{$table_width}px;" class="debug_message">
+<div style="width:{$table_width};" class="debug_message">
 {$Id}<br>
 	<b>{$smarty.now|date_format:"%Y-%m-%d %H:%M:%S"}</b><br>
 {$debug_error_msg}

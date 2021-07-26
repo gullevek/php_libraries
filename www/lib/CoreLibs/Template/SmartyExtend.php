@@ -361,6 +361,11 @@ class SmartyExtend extends SmartyBC
 		$this->HEADER['ENCODING'] = $this->encoding;
 		$this->HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
 
+		// form name
+		$this->DATA['FORM_NAME'] = !$this->FORM_NAME ?
+			str_replace('.php', '', $this->page_name) :
+			$this->FORM_NAME;
+		$this->DATA['FORM_ACTION'] = $this->FORM_ACTION;
 		// special for admin
 		if ($admin_call === true) {
 			// set ACL extra show
@@ -385,6 +390,7 @@ class SmartyExtend extends SmartyBC
 			// the page name
 			$this->DATA['page_name'] = $this->page_name;
 			$this->DATA['table_width'] = $this->PAGE_WIDTH ?? PAGE_WIDTH;
+			$this->DATA['form_name'] = $this->DATA['FORM_NAME'];
 			// for tinymce special
 			$this->DATA['TINYMCE_LANG'] = $this->lang_short;
 			// include flags
@@ -404,11 +410,6 @@ class SmartyExtend extends SmartyBC
 
 		// LANG
 		$this->DATA['LANG'] = $this->lang;
-		// form name
-		$this->DATA['FORM_NAME'] = !$this->FORM_NAME ?
-			str_replace('.php', '', $this->page_name) :
-			$this->FORM_NAME;
-		$this->DATA['FORM_ACTION'] = $this->FORM_ACTION;
 		// include flags
 		$this->DATA['JS_DATEPICKR'] = $this->JS_DATEPICKR;
 		$this->DATA['JS_FLATPICKR'] = $this->JS_FLATPICKR;

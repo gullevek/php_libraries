@@ -133,8 +133,8 @@ define('USE_SCRIPTACULOUS', false);
 define('USE_JQUERY', true);
 
 /************* LAYOUT WIDTHS *************/
-define('PAGE_WIDTH', 800);
-define('CONTENT_WIDTH', 800);
+define('PAGE_WIDTH', '100%');
+define('CONTENT_WIDTH', '100%');
 // the default template name
 define('MASTER_TEMPLATE_NAME', 'main_body.tpl');
 

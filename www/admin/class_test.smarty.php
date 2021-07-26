@@ -84,6 +84,7 @@ $options = [
 ];
 
 $smarty->DATA['drop_down_test'] = $options;
+$smarty->DATA['drop_down_test_selected'] = '';
 $smarty->DATA['loop_start'] = 2;
 // require BASE.INCLUDES.'admin_smarty.php';
 $smarty->setSmartyVarsAdmin();

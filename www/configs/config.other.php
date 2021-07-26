@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-// DEFINE('SOME_ID', <SOME VALUE>);
+// define('SOME_ID', <SOME VALUE>);
 
 /************* CONVERT *******************/
 // this only needed if the external thumbnail create is used

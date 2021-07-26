@@ -288,7 +288,7 @@ class IO extends \CoreLibs\Basic
 	private $nbsp = ''; // used by print_array recursion function
 	// error & warning id
 	protected $error_id;
-	private $had_error;
+	private $had_error = 0;
 	private $warning_id;
 	private $had_warning;
 	// error thrown on class init if we cannot connect to db
@@ -1097,6 +1097,25 @@ class IO extends \CoreLibs\Basic
 			case 'user':
 				$setting = $this->db_user;
 				break;
+			case 'encoding':
+				$setting = $this->db_encoding;
+				break;
+			case 'schema':
+				$setting = $this->db_schema;
+				break;
+			case 'host':
+				$setting = $this->db_host;
+				break;
+			case 'port':
+				$setting = $this->db_port;
+				break;
+			case 'ssl':
+				$setting = $this->db_ssl;
+				break;
+			// we return *** and never the actual password
+			case 'password':
+				$setting = '***';
+				break;
 			default:
 				$setting = false;
 				break;
@@ -1439,9 +1458,10 @@ class IO extends \CoreLibs\Basic
 	/**
 	 * checks a previous async query and returns data if finished
 	 * NEEDS : dbExecAsync
-	 * @return bool true if the query is still running, false if an error occured or cursor of that query
+	 * @return bool|resource cursor resource if the query is still running,
+	 *                       false if an error occured or cursor of that query
 	 */
-	public function dbCheckAsync(): bool
+	public function dbCheckAsync()
 	{
 		// if there is actually a async query there
 		if ($this->async_running) {
@@ -2375,6 +2395,17 @@ class IO extends \CoreLibs\Basic
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetNumRows()', E_USER_DEPRECATED);
 		return $this->dbGetNumRows();
+	}
+
+	/**
+	 * Sets error number that was last
+	 * So we always have the last error number stored even if a new one is created
+	 *
+	 * @return int last error number
+	 */
+	public function getHadError()
+	{
+		return $this->had_error;
 	}
 	// end if db class
 }
