@@ -321,9 +321,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (isset($config_array['load_query']) && $config_array['load_query']) {
 			$this->load_query = $config_array['load_query'];
 		}
-		$this->archive_pk_name = 'a_' . $this->pk_name;
-		$this->col_name = str_replace('_id', '', $this->pk_name);
-		$this->int_pk_name = $this->pk_name;
+		$this->archive_pk_name = 'a_' . $this->pk_name ?? '';
+		$this->col_name = str_replace('_id', '', $this->pk_name ?? '');
+		$this->int_pk_name = $this->pk_name ?? '';
 		// check if reference_arrays are given and proceed them
 		if (isset($config_array['reference_arrays']) && is_array($config_array['reference_arrays'])) {
 			foreach ($config_array['reference_arrays'] as $key => $value) {

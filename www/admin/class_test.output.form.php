@@ -32,6 +32,7 @@ $LOG_FILE_ID = 'classTest-form';
 ob_end_flush();
 
 // define an array for page use
+$table_arrays = [];
 $table_arrays[\CoreLibs\Get\System::getPageName(1)] = [
 	// form fields mtaching up with db fields
 	'table_array' => [
