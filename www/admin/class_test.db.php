@@ -63,9 +63,9 @@ while ($res = $db->dbReturn("SELECT * FROM max_test")) {
 print "<pre>";
 $status = $db->dbExec("INSERT INTO foo (test) VALUES ('FOO TEST " . time() . "') RETURNING test");
 print "DIRECT INSERT STATUS: $status | "
-	 . "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
-	 . "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
-	 . "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 // should throw deprecated error
 // $db->getReturningExt();
@@ -74,9 +74,9 @@ print "DIRECT INSERT PREVIOUS INSERTED: "
 $db->dbPrepare("ins_foo", "INSERT INTO foo (test) VALUES ($1)");
 $status = $db->dbExecute("ins_foo", array('BAR TEST ' . time()));
 print "PREPARE INSERT STATUS: $status | "
-	 . "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
-	 . "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
-	 . "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 print "PREPARE INSERT PREVIOUS INSERTED: "
 	. print_r($db->dbReturnRow("SELECT foo_id, test FROM foo WHERE foo_id = " . $db->dbGetInsertPK()), true) . "<br>";
@@ -96,22 +96,22 @@ $status = $db->dbExec(
 	. "RETURNING foo_id, test"
 );
 print "DIRECT MULTIPLE INSERT STATUS: $status | "
-	 . "PRIMARY KEYS: " . print_r($db->dbGetInsertPK(), true) . " | "
-	 . "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
-	 . "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+	. "PRIMARY KEYS: " . print_r($db->dbGetInsertPK(), true) . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 // no returning, but not needed ;
 $status = $db->dbExec("INSERT INTO foo (test) VALUES ('FOO; TEST " . time() . "');");
 print "DIRECT INSERT STATUS: $status | "
-	 . "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
-	 . "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
-	 . "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 // UPDATE WITH RETURNING
 $status = $db->dbExec("UPDATE foo SET test = 'SOMETHING DIFFERENT' WHERE foo_id = 3688452 RETURNING test");
 print "UPDATE STATUS: $status | "
-	 . "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
-	 . "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 print "</pre>";
 
 // REEAD PREPARE

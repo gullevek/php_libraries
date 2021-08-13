@@ -33,7 +33,7 @@ use CoreLibs\Combined\DateTime;
 use CoreLibs\Debug\Support as DgS;
 
 $basic = new CoreLibs\Basic();
-$datetime_class = 'CoreLibs\Combination\DateTime';
+$datetime_class = 'CoreLibs\Combined\DateTime';
 
 print "<html><head><title>TEST CLASS: DATE/TIME</title><head>";
 print "<body>";

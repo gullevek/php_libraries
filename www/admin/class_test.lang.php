@@ -52,9 +52,6 @@ echo "LANGUAGE FILE: " . $l->__getMoFile() . "<br>";
 echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
 // TODO: run compare check input must match output
 
-// error message
-print $basic->log->printErrorMsg();
-
 print "</body></html>";
 
 // __END__
