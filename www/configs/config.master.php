@@ -41,8 +41,6 @@ define('IMAGES', 'images' .  DS);
 define('ICONS', 'icons' .  DS);
 // media (accessable from outside)
 define('MEDIA', 'media' .  DS);
-// flash-root (below media or data)
-define('FLASH', 'flash' .  DS);
 // uploads (anything to keep or data)
 define('UPLOADS', 'uploads' .  DS);
 // files (binaries) (below media or data)

@@ -115,7 +115,7 @@ class Basic
 		// set the paths matching to the valid file types
 		$this->data_path = [
 			'P' => PICTURES,
-			'F' => FLASH,
+			'F' => DATA,
 			'V' => VIDEOS,
 			'D' => DOCUMENTS,
 			'A' => PDFS,
