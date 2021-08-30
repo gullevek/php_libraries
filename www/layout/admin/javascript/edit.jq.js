@@ -40,7 +40,7 @@ function expandTA(ta_id) {
 		ta = document.getElementById(ta_id);
 	}
 	var maxChars = ta.cols;
-	var theRows = ta.value.split("\n");
+	var theRows = ta.value.split('\n');
 	var numNewRows = 0;
 
 	for ( var i = 0; i < theRows.length; i++ ) {
@@ -214,14 +214,14 @@ function convertLBtoBR(string)
  */
 if (!String.prototype.escapeHTML) {
 	String.prototype.escapeHTML = function() {
-		return this.replace(/[&<>"'\/]/g, function (s) {
+		return this.replace(/[&<>"'/]/g, function (s) {
 			var entityMap = {
-				"&": "&amp;",
-				"<": "&lt;",
-				">": "&gt;",
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
 				'"': '&quot;',
-				"'": '&#39;',
-				"/": '&#x2F;'
+				'\'': '&#39;',
+				'/': '&#x2F;'
 			};
 
 			return entityMap[s];
@@ -238,12 +238,12 @@ if (!String.prototype.unescapeHTML) {
 	String.prototype.unescapeHTML = function() {
 		return this.replace(/&[#\w]+;/g, function (s) {
 			var entityMap = {
-				"&amp;": "&",
-				"&lt;": "<",
-				"&gt;": ">",
+				'&amp;': '&',
+				'&lt;': '<',
+				'&gt;': '>',
 				'&quot;': '"',
-				'&#39;': "'",
-				'&#x2F;': "/"
+				'&#39;': '\'',
+				'&#x2F;': '/'
 			};
 
 			return entityMap[s];
@@ -403,7 +403,7 @@ function valueInObject(object, value)
 function deepCopyFunction(inObject)
 {
 	var outObject, value, key;
-	if (typeof inObject !== "object" || inObject === null) {
+	if (typeof inObject !== 'object' || inObject === null) {
 		return inObject; // Return the value if inObject is not an object
 	}
 	// Create an array or object to hold the values
@@ -441,7 +441,8 @@ function formatBytes(bytes)
 		bytes = bytes / 1024;
 		i++;
 	} while (bytes > 99);
-	return parseFloat(Math.round(bytes * Math.pow(10, 2)) / Math.pow(10, 2)) + ['kB', 'MB', 'GB', 'TB', 'PB', 'EB'][i];
+	return parseFloat(Math.round(bytes * Math.pow(10, 2)) / Math.pow(10, 2)) +
+		['kB', 'MB', 'GB', 'TB', 'PB', 'EB'][i];
 }
 
 /**
@@ -1067,6 +1068,7 @@ function html_options_block(name, data, selected = '', multiple = 0, options_onl
 	var element_option;
 	var data_list = []; // for sorted output
 	var value;
+	var options = {};
 	// var option;
 	if (multiple > 0) {
 		select_options.multiple = '';
@@ -1190,17 +1192,17 @@ function parseQueryString(query = '', return_key = '') {
 	if (!query) {
 		query = window.location.search.substring(1);
 	}
-	var vars = query.split("&");
+	var vars = query.split('&');
 	var query_string = {};
 	for (var i = 0; i < vars.length; i++) {
-		var pair = vars[i].split("=");
+		var pair = vars[i].split('=');
 		var key = decodeURIComponent(pair[0]);
 		var value = decodeURIComponent(pair[1]);
 		// If first entry with this name
-		if (typeof query_string[key] === "undefined") {
+		if (typeof query_string[key] === 'undefined') {
 			query_string[key] = decodeURIComponent(value);
 			// If second entry with this name
-		} else if (typeof query_string[key] === "string") {
+		} else if (typeof query_string[key] === 'string') {
 			var arr = [query_string[key], decodeURIComponent(value)];
 			query_string[key] = arr;
 			// If third or later entry with this name

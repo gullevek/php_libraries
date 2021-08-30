@@ -87,7 +87,7 @@ class Basic
 		$abort = false;
 		foreach (
 			[
-				'DS', 'DIR', 'BASE', 'ROOT', 'LIB', 'INCLUDES', 'LAYOUT', 'PICTURES', 'FLASH',
+				'DS', 'DIR', 'BASE', 'ROOT', 'LIB', 'INCLUDES', 'LAYOUT', 'PICTURES', 'DATA',
 				'VIDEOS', 'DOCUMENTS', 'PDFS', 'BINARIES', 'ICONS', 'UPLOADS', 'CSV', 'JS',
 				'CSS', 'TABLE_ARRAYS', 'SMARTY', 'LANG', 'CACHE', 'TMP', 'LOG', 'TEMPLATES',
 				'TEMPLATES_C', 'DEFAULT_LANG', 'DEFAULT_ENCODING', 'DEFAULT_HASH',
