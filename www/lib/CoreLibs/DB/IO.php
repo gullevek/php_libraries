@@ -722,7 +722,8 @@ class IO extends \CoreLibs\Basic
 			$this->__dbError();
 			return false;
 		}
-		// if we do have an insert, check if there is no RETURNING pk_id, add it if I can get the PK id
+		// if we do have an insert, check if there is no RETURNING pk_id,
+		// add it if I can get the PK id
 		if ($this->__checkQueryForInsert($this->query, true)) {
 			$this->pk_name = $pk_name;
 			if ($this->pk_name != 'NULL') {

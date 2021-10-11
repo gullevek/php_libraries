@@ -64,6 +64,10 @@ print '<div><a href="class_test.backend.php">Class Test: BACKEND ADMIN CLASS</a>
 print '<div><a href="class_test.lang.php">Class Test: LANG/L10n</a></div>';
 print '<div><a href="class_test.smarty.php">Class Test: SMARTY</a></div>';
 
+print "<hr>";
+// print all _ENV vars set
+print "<div>READ _ENV ARRAY:</div>";
+print "<pre>" . print_r(array_map('htmlentities', $_ENV), true) . "</pre>";
 // set + check edit access id
 $edit_access_id = 3;
 if (is_object($login) && isset($login->acl['unit'])) {

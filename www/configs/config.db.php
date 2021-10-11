@@ -13,15 +13,15 @@ declare(strict_types=1);
 // please be VERY carefull only to change the right side
 $DB_CONFIG = [
 	'test' => [
-		'db_name' => 'clemens',
-		'db_user' => 'clemens',
-		'db_pass' => 'clemens',
-		'db_host' => 'db.tokyo.tequila.jp',
+		'db_name' => $_ENV['DB_NAME_TEST'] ?? '',
+		'db_user' => $_ENV['DB_USER_TEST'] ?? '',
+		'db_pass' => $_ENV['DB_PASS_TEST'] ?? '',
+		'db_host' => $_ENV['DB_HOST_TEST'] ?? '',
 		'db_port' => 5432,
 		'db_schema' => 'public',
 		'db_type' => 'pgsql',
 		'db_encoding' => '',
-		'db_ssl' => 'disable' // allow, disable, require, prefer
+		'db_ssl' => 'allow' // allow, disable, require, prefer
 	],
 ];
 

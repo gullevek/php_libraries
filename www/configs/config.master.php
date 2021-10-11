@@ -84,7 +84,7 @@ define('DEFAULT_HASH', 'sha256');
 // default acl level
 define('DEFAULT_ACL_LEVEL', 80);
 // SSL host name
-// define('SSL_HOST', 'ssl.host.name');
+// define('SSL_HOST', $_ENV['SSL_HOST'] ?? '');
 // error page strictness, Default is 3
 // 1: only show error page as the last mesure if really no mid & aid can be loaded and found at all
 // 2: if template not found, do not search, show error template
@@ -139,7 +139,8 @@ define('MASTER_TEMPLATE_NAME', 'main_body.tpl');
 /************* OVERALL CONTROL NAMES *************/
 // BELOW has HAS to be changed
 // base name for all session and log names
-define('BASE_NAME', 'CoreLibs');
+// only alphanumeric characters, strip all others
+define('BASE_NAME', preg_replace('/[^A-Za-z0-9]/', '', $_ENV['BASE_NAME'] ?? ''));
 
 /************* SESSION NAMES *************/
 // server name HASH
@@ -266,7 +267,7 @@ define('LOGIN_ENABLED', $SITE_CONFIG[HOST_NAME]['login_enabled']);
 define('SHOW_ALL_ERRORS', true);
 
 /************* GENERAL PAGE TITLE ********/
-define('G_TITLE', '<OVERALL FALLBACK PAGE TITLE>');
+define('G_TITLE', $_ENV['G_TITLE'] ?? '');
 
 /************ STYLE SHEETS / JS **********/
 define('ADMIN_STYLESHEET', 'edit.css');

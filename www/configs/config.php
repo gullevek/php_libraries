@@ -16,6 +16,13 @@ $CONFIG_PATH_PREFIX = '';
 for ($dir_pos = 0, $dir_max = count(explode(DIRECTORY_SEPARATOR, __DIR__)); $dir_pos <= $dir_max; $dir_pos++) {
 	$CONFIG_PATH_PREFIX .= '..' . DIRECTORY_SEPARATOR;
 	if (file_exists($CONFIG_PATH_PREFIX . CONFIG_PATH . 'config.master.php')) {
+		// check if there is an read env file, load it
+		if (file_exists($CONFIG_PATH_PREFIX . CONFIG_PATH . 'read_env_file.php')) {
+			require $CONFIG_PATH_PREFIX . CONFIG_PATH . 'read_env_file.php';
+			// load env variables first
+			readEnvFile($CONFIG_PATH_PREFIX . CONFIG_PATH);
+		}
+		// then load master config file that loads all other config files
 		require $CONFIG_PATH_PREFIX . CONFIG_PATH . 'config.master.php';
 		break;
 	}

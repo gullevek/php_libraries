@@ -3,6 +3,8 @@
 
 /* jshint esversion: 6 */
 
+/* global i18n */
+
 // debug set
 /*var FRONTEND_DEBUG = false;
 var DEBUG = true;
@@ -22,7 +24,8 @@ var GL_OB_BASE = 30;
  * @param {String} winName  window name
  * @param {Object} features popup features
  */
-function pop(theURL, winName, features) {
+function pop(theURL, winName, features) // eslint-disable-line no-unused-vars
+{
 	winName = window.open(theURL, winName, features);
 	winName.focus();
 }
@@ -31,7 +34,8 @@ function pop(theURL, winName, features) {
  * automatically resize a text area based on the amount of lines in it
  * @param {[string} ta_id element id
  */
-function expandTA(ta_id) {
+function expandTA(ta_id) // eslint-disable-line no-unused-vars
+{
 	var ta;
 	// if a string comes, its a get by id, else use it as an element pass on
 	if (!ta_id.length) {
@@ -124,7 +128,7 @@ function setCenter(id, left, top)
  * @param {Number} [duration=500]     animation time, default 500ms
  * @param {String} [base='body,html'] base element for offset scroll
  */
-function goToPos(element, offset = 0, duration = 500, base = 'body,html')
+function goToPos(element, offset = 0, duration = 500, base = 'body,html') // eslint-disable-line no-unused-vars
 {
 	try {
 		if ($('#' + element).length) {
@@ -190,7 +194,7 @@ if (Number.prototype.round) {
  * @param  {Number} x number to be formated
  * @return {String}   formatted with , in thousands
  */
-function numberWithCommas(x)
+function numberWithCommas(x) // eslint-disable-line no-unused-vars
 {
 	var parts = x.toString().split('.');
 	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -202,7 +206,7 @@ function numberWithCommas(x)
  * @param  {String} string any string
  * @return {String}        string with <br>
  */
-function convertLBtoBR(string)
+function convertLBtoBR(string) // eslint-disable-line no-unused-vars
 {
 	return string.replace(/(?:\r\n|\r|\n)/g, '<br>');
 }
@@ -255,7 +259,7 @@ if (!String.prototype.unescapeHTML) {
  * returns current timestamp (unix timestamp)
  * @return {Number} timestamp (in milliseconds)
  */
-function getTimestamp()
+function getTimestamp() // eslint-disable-line no-unused-vars
 {
 	var date = new Date();
 	return date.getTime();
@@ -278,7 +282,7 @@ function dec2hex(dec)
  * @param  {Number} len length of unique id string
  * @return {String}     random string in length of len
  */
-function generateId(len)
+function generateId(len) // eslint-disable-line no-unused-vars
 {
 	var arr = new Uint8Array((len || 40) / 2);
 	(window.crypto || window.msCrypto).getRandomValues(arr);
@@ -291,7 +295,7 @@ function generateId(len)
  * after many runs it will create duplicates
  * @return {String} not true random string
  */
-function randomIdF()
+function randomIdF() // eslint-disable-line no-unused-vars
 {
 	return Math.random().toString(36).substring(2);
 }
@@ -301,7 +305,7 @@ function randomIdF()
  * @param  {string}  name Name of function to check if exists
  * @return {Boolean}      true/false
  */
-function isFunction(name)
+function isFunction(name) // eslint-disable-line no-unused-vars
 {
 	if (typeof window[name] !== 'undefined' &&
 		typeof window[name] === 'function') {
@@ -320,7 +324,7 @@ function isFunction(name)
  *                               hidden next are all the arguments
  * @return {mixed}               Return values from functon
  */
-function executeFunctionByName(functionName, context /*, args */)
+function executeFunctionByName(functionName, context /*, args */) // eslint-disable-line no-unused-vars
 {
 	var args = Array.prototype.slice.call(arguments, 2);
 	var namespaces = functionName.split('.');
@@ -362,7 +366,7 @@ function getObjectCount(object)
  */
 function keyInObject(key, object)
 {
-	return (Object.prototype.hasOwnProperty.call(object, key)) ? true : false;
+	return Object.prototype.hasOwnProperty.call(object, key) ? true : false;
 }
 
 /**
@@ -371,7 +375,7 @@ function keyInObject(key, object)
  * @param  {Mixed}  value any value (String, Number, etc)
  * @return {String}       the key found for the first matching value
  */
-function getKeyByValue(object, value)
+function getKeyByValue(object, value) // eslint-disable-line no-unused-vars
 {
 	return Object.keys(object).find(key => object[key] === value);
 	// return Object.keys(object).find(function (key) {
@@ -385,9 +389,9 @@ function getKeyByValue(object, value)
  * @param  {Mixed}   value any value (String, Number, etc)
  * @return {Boolean}       true on value found, false on not found
  */
-function valueInObject(object, value)
+function valueInObject(object, value) // eslint-disable-line no-unused-vars
 {
-	return (Object.keys(object).find(key => object[key] === value)) ? true : false;
+	return Object.keys(object).find(key => object[key] === value) ? true : false;
 	// return Object.keys(object).find(function (key) {
 	// 	return object[key] === value;
 	// }) ? true : false;
@@ -434,7 +438,7 @@ function exists(id)
  * @param  {Number} bytes bytes in int
  * @return {String}       string in GB/MB/KB
  */
-function formatBytes(bytes)
+function formatBytes(bytes) // eslint-disable-line no-unused-vars
 {
 	var i = -1;
 	do {
@@ -450,7 +454,7 @@ function formatBytes(bytes)
  * @param  {Number} bytes bytes in int
  * @return {String}       string in GB/MB/KB
  */
-function formatBytesLong(bytes)
+function formatBytesLong(bytes) // eslint-disable-line no-unused-vars
 {
 	var i = Math.floor(Math.log(bytes) / Math.log(1024));
 	var sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
@@ -462,7 +466,7 @@ function formatBytesLong(bytes)
  * @param  {String|Number} bytes Any string with B/K/M/etc
  * @return {String|Number}       A byte number, or original string as is
  */
-function stringByteFormat(bytes)
+function stringByteFormat(bytes) // eslint-disable-line no-unused-vars
 {
 	// if anything not string return
 	if (!(typeof bytes === 'string' || bytes instanceof String)) {
@@ -537,7 +541,7 @@ function errorCatch(err)
  *                                 default empty. for console.log
  * @param {Boolean} [overlay=true] override the auto hide/show over the overlay div block
  */
-function actionIndicator(loc, overlay = true)
+function actionIndicator(loc, overlay = true) // eslint-disable-line no-unused-vars
 {
 	if ($('#indicator').is(':visible')) {
 		actionIndicatorHide(loc, overlay);
@@ -614,7 +618,7 @@ function overlayBoxHide()
 /**
  * position the overlay block box and shows it
  */
-function setOverlayBox()
+function setOverlayBox() // eslint-disable-line no-unused-vars
 {
 	if (!$('#overlayBox').is(':visible')) {
 		$('#overlayBox').show();
@@ -624,7 +628,7 @@ function setOverlayBox()
 /**
  * opposite of set, always hides overlay box
  */
-function hideOverlayBox()
+function hideOverlayBox() // eslint-disable-line no-unused-vars
 {
 	if ($('#overlayBox').is(':visible')) {
 		$('#overlayBox').hide();
@@ -634,7 +638,7 @@ function hideOverlayBox()
 /**
  * the abort call, clears the action box and hides it and the overlay box
  */
-function ClearCall()
+function ClearCall() // eslint-disable-line no-unused-vars
 {
 	$('#actionBox').html('');
 	$('#actionBox').hide();
@@ -655,7 +659,7 @@ function ClearCall()
  * - indicator is page centered
  * @param {String} loc ID string, only used for console log
  */
-function showActionIndicator(loc)
+function showActionIndicator(loc) // eslint-disable-line no-unused-vars
 {
 	// console.log('Indicator: SHOW [%s]', loc);
 	// check if indicator element exists
@@ -693,7 +697,7 @@ function showActionIndicator(loc)
  * is set to this value
  * @param {String} loc ID string, only used for console log
  */
-function hideActionIndicator(loc)
+function hideActionIndicator(loc) // eslint-disable-line no-unused-vars
 {
 	// console.log('Indicator: HIDE [%s]', loc);
 	// check if indicator is visible
@@ -733,7 +737,7 @@ function checkOverlayExists()
  * if visible, add +1 to the GL_OB_S variable and
  * up zIndex by this value
  */
-function showOverlayBoxLayers(el_id)
+function showOverlayBoxLayers(el_id) // eslint-disable-line no-unused-vars
 {
 	// console.log('SHOW overlaybox: %s', GL_OB_S);
 	// if overlay box is not visible show and set zIndex to 0
@@ -790,7 +794,7 @@ function hideOverlayBoxLayers(el_id)
 /**
  * only for single action box
  */
-function clearCallActionBox()
+function clearCallActionBox() // eslint-disable-line no-unused-vars
 {
 	$('#actionBox').html('');
 	$('#actionBox').hide();
@@ -873,7 +877,7 @@ function aelx(base, ...attach)
  * @param  {Array}  attach array of objects to attach
  * @return {Object}        "none", technically there is no return needed, global attach
  */
-function aelxar(base, attach)
+function aelxar(base, attach) // eslint-disable-line no-unused-vars
 {
 	for (var i = 0; i < attach.length; i ++) {
 		// base.sub.push(Object.assign({}, attach[i]));
@@ -887,7 +891,7 @@ function aelxar(base, attach)
  * @param  {Object} base cel created element
  * @return {Object}      returns reset base element
  */
-function rel(base)
+function rel(base) // eslint-disable-line no-unused-vars
 {
 	base.sub = [];
 	return base;
@@ -931,7 +935,7 @@ function acssel(_element, css)
  * @param  {String} acss     style to add (name)
  * @return {Object}          returns full element
  */
-function scssel(_element, rcss, acss)
+function scssel(_element, rcss, acss) // eslint-disable-line no-unused-vars
 {
 	rcssel(_element, rcss);
 	acssel(_element, acss);
@@ -1009,7 +1013,7 @@ function phfo(tree)
  * @param  {Array}  list Array of cel created objects
  * @return {String}      HTML String
  */
-function phfa(list)
+function phfa(list) // eslint-disable-line no-unused-vars
 {
 	var content = [];
 	for (var i = 0; i < list.length; i ++) {
@@ -1035,7 +1039,7 @@ function phfa(list)
  *                                         'values' all others are ignored
  * @return {String}                        html with build options block
  */
-function html_options(name, data, selected = '', options_only = false, return_string = false, sort = '')
+function html_options(name, data, selected = '', options_only = false, return_string = false, sort = '') // eslint-disable-line no-unused-vars
 {
 	// wrapper to new call
 	return html_options_block(name, data, selected, false, options_only, return_string, sort);
@@ -1141,7 +1145,7 @@ function html_options_block(name, data, selected = '', multiple = 0, options_onl
  * @param {String} [sort=''] if empty as is, else allowed 'keys', 'values'
  *                            all others are ignored
  */
-function html_options_refill(name, data, sort = '')
+function html_options_refill(name, data, sort = '') // eslint-disable-line no-unused-vars
 {
 	var element_option;
 	var option_selected;
@@ -1188,7 +1192,8 @@ function html_options_refill(name, data, sort = '')
  *                                         or empty for none
  * @return {Object|String}                 parameter entry list
  */
-function parseQueryString(query = '', return_key = '') {
+function parseQueryString(query = '', return_key = '') // eslint-disable-line no-unused-vars
+{
 	if (!query) {
 		query = window.location.search.substring(1);
 	}
@@ -1198,6 +1203,10 @@ function parseQueryString(query = '', return_key = '') {
 		var pair = vars[i].split('=');
 		var key = decodeURIComponent(pair[0]);
 		var value = decodeURIComponent(pair[1]);
+		// skip over run if there is nothing
+		if (!key || value === 'undefined') {
+			continue;
+		}
 		// If first entry with this name
 		if (typeof query_string[key] === 'undefined') {
 			query_string[key] = decodeURIComponent(value);
@@ -1222,26 +1231,59 @@ function parseQueryString(query = '', return_key = '') {
 }
 
 /**
- * searchs the current url for a parameter
- * @param  {String} key uid key to get data for
- * @return {String}     value for the key or '' for not found
+ * searches query parameters for entry and returns data either as string or array
+ * if no search is given the whole parameters are returned as an object
+ * if a parameter is set several times it will be returned as an array
+ * if search parameter set and nothing found and empty string is returned
+ * if no parametes exist and no serach is set and empty object is returned
+ * @param  {String}        [search='']    if set searches for this entry, if empty
+ *                                        all parameters are returned
+ * @param  {String}        [query='']     different query string to parse, if not
+ *                                        set (default) the current window href is used
+ * @param  {Bool}          [single=false] if set to true then only the first found
+ *                                        will be returned
+ * @return {Object|Array|String}          if search is empty, object, if search is set
+ *                                        and only one entry, then string, else array
+ *                                        unless single is true
  */
-function getQueryStringParam(key)
+function getQueryStringParam(search = '', query = '', single = false) // eslint-disable-line no-unused-vars
 {
-	var url = new URL(window.location.href);
-	var param = url.searchParams.get(key);
-	if (param) {
-		return param;
-	} else {
-		return '';
+	if (!query) {
+		query = window.location.href;
 	}
+	const url = new URL(query);
+	let param = '';
+	if (search) {
+		let _params = url.searchParams.getAll(search);
+		if (_params.length == 1 || single === true) {
+			param = _params[0];
+		} else if (_params.length > 1) {
+			param = _params;
+		}
+	} else {
+		// will be object, so declare it one
+		param = {};
+		// loop over paramenters
+		for (const [key] of url.searchParams.entries()) {
+			// check if not yet set
+			if (typeof param[key] === 'undefined') {
+				// get the parameters multiple
+				let _params = url.searchParams.getAll(key);
+				// if 1 set as string, else attach array as is
+				param[key] = _params.length < 2 || single === true ?
+					_params[0] :
+					_params;
+			}
+		}
+	}
+	return param;
 }
 
 // *** MASTER logout call
 /**
  * submits basic data for form logout
  */
-function loginLogout()
+function loginLogout() // eslint-disable-line no-unused-vars
 {
 	const form = document.createElement('form');
 	form.method = 'post';
@@ -1261,7 +1303,7 @@ function loginLogout()
  *                                          if not set mainHeader is assumed
  *                                          this is the target div for the "loginRow"
  */
-function createLoginRow(login_string, header_id = 'mainHeader')
+function createLoginRow(login_string, header_id = 'mainHeader') // eslint-disable-line no-unused-vars
 {
 	// if header does not exist, we do nothing
 	if (exists(header_id)) {
@@ -1295,7 +1337,8 @@ function createLoginRow(login_string, header_id = 'mainHeader')
  *                                          if not set mainHeader is assumed
  *                                          this is the target div for the "menuRow"
  */
-function createNavMenu(nav_menu, header_id = 'mainHeader') {
+function createNavMenu(nav_menu, header_id = 'mainHeader') // eslint-disable-line no-unused-vars
+{
 	// must be an object
 	if (isObject(nav_menu) && getObjectCount(nav_menu) > 1) {
 		// do we have more than one entry, if not, do not show (single page)
