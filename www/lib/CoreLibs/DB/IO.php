@@ -332,7 +332,7 @@ class IO extends \CoreLibs\Basic
 		$this->db_user = $db_config['db_user'] ?? '';
 		$this->db_pwd = $db_config['db_pass'] ?? '';
 		$this->db_host = $db_config['db_host'] ?? '';
-		$this->db_port = !empty($db_config['db_port']) ? $db_config['db_port'] : 5432;
+		$this->db_port = !empty($db_config['db_port']) ? (int)$db_config['db_port'] : 5432;
 		// do not set to 'public' if not set, because the default is already public
 		$this->db_schema = !empty($db_config['db_schema']) ? $db_config['db_schema'] : '';
 		$this->db_encoding = !empty($db_config['db_encoding']) ? $db_config['db_encoding'] : '';
