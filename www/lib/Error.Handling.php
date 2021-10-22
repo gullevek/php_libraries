@@ -10,22 +10,24 @@
  * error etc will still be written to the log/display
  *********************************************************************/
 
- declare(strict_types=1);
+declare(strict_types=1);
 
 /**
  * will catch any error except E_ERROR and try to write them to the log file
  * in log/php_error-<DAY>.log
  * if this fails, it will print the data to the window via echo
- * @param  int    $type    the error code from PHP
- * @param  string $message the error message from php
- * @param  string $file    in which file the error happend. this is the source file (eg include)
- * @param  int    $line    in which line the error happened
- * @param  array  $context array with all the variable
- * @return bool           true, so cought errors do not get processed by the PHP error engine
+ * @param  int          $type    the error code from PHP
+ * @param  string       $message the error message from php
+ * @param  string       $file    in which file the error happend.
+ *                               this is the source file (eg include)
+ * @param  int          $line    in which line the error happened
+ * @param  array<mixed> $context array with all the variable
+ * @return bool                  True, so cought errors do not get processed
+ *                               by the PHP error engine
  */
 function MyErrorHandler(int $type, string $message, string $file, int $line, array $context): bool
 {
-	if (!(error_reporting() & $type) && !SHOW_ALL_ERRORS) {
+	if (!(error_reporting() & $type) && empty(SHOW_ALL_ERRORS)) {
 		// This error code is not included in error_reporting
 		return false;
 	}

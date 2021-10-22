@@ -11,6 +11,7 @@ namespace CoreLibs\Debug;
 
 class FileWriter
 {
+	/** @var string */
 	private static $debug_filename = 'debug_file.log'; // where to write output
 
 	/**

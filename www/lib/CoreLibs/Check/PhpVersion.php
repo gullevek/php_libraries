@@ -40,14 +40,10 @@ class PhpVersion
 			define('PHP_VERSION_ID', (int)$version[0] * 10000 + (int)$version[1] * 100 + (int)$version[2]);
 		}
 		// check if matching for version
-		if ($min_version && !$max_version) {
-			if (PHP_VERSION_ID >= $min_version) {
-				return true;
-			}
-		} elseif ($min_version && $max_version) {
-			if (PHP_VERSION_ID >= $min_version && PHP_VERSION_ID <= $max_version) {
-				return true;
-			}
+		if (!$max_version && PHP_VERSION_ID >= $min_version) {
+			return true;
+		} elseif (PHP_VERSION_ID >= $min_version && PHP_VERSION_ID <= $max_version) {
+			return true;
 		}
 		// if no previous return, fail
 		return false;

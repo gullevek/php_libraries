@@ -33,3 +33,13 @@ last tested PHP 5.6 and PHP 7.0
 ### namespace
 
 The new namespace branch. This is the development area for the master branch
+
+## Static checks
+
+With phpstan
+`phpstan`
+
+With phan
+`phan --progress-bar -C --analyze-twice`
+
+pslam is setup but not configured

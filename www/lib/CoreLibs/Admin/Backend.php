@@ -178,7 +178,7 @@ class Backend extends \CoreLibs\DB\IO
 		}
 
 		// check schema
-		if (defined('LOGIN_DB_SCHEMA') && LOGIN_DB_SCHEMA) {
+		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
 			$SCHEMA = LOGIN_DB_SCHEMA;
 		} elseif ($this->dbGetSchema()) {
 			$SCHEMA = $this->dbGetSchema();
@@ -475,7 +475,7 @@ class Backend extends \CoreLibs\DB\IO
 		string $associate = null,
 		string $file = null
 	): void {
-		if (defined('GLOBAL_DB_SCHEMA') && GLOBAL_DB_SCHEMA) {
+		if (defined('GLOBAL_DB_SCHEMA') && !empty(GLOBAL_DB_SCHEMA)) {
 			$SCHEMA = GLOBAL_DB_SCHEMA;
 		} elseif ($this->dbGetSchema()) {
 			$SCHEMA = $this->dbGetSchema();

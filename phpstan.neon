@@ -2,7 +2,7 @@
 
 parameters:
 	tmpDir: /tmp/phpstan-corelibs
-	level: 1
+	level: 5
 	paths:
 		- %currentWorkingDirectory%/www
 	bootstrapFiles:
@@ -20,6 +20,8 @@ parameters:
 		# no check admin
 		- www/admin/qq_file_upload_front.php
 		- www/admin/qq_file_upload_ajax.php
+		- www/admin/class_test*php
+		- www/admin/error_test.php
 		# admin synlink files
 		- www/admin/edit_access.php
 		- www/admin/edit_groups.php
@@ -50,7 +52,10 @@ parameters:
 		# ignore the smartyextend
 		- www/lib/CoreLibs/Template/SmartyExtend.php
 	# ignore errores with
-	# ignoreErrors:
+	ignoreErrors:
+		# -
+		# 	message: '#Reflection error: [a-zA-Z0-9\\_]+ not found.#'
+		# 	path: www/includes/edit_base.php
 		#- 'error regex'
 		#-
 		#	message: 'error regex'

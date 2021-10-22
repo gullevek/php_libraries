@@ -214,6 +214,8 @@ class DateTime
 			return 0;
 		} elseif ($start_date > $end_date) {
 			return 1;
+		} else {
+			return false;
 		}
 	}
 
@@ -242,6 +244,8 @@ class DateTime
 			return 0;
 		} elseif ($start_timestamp > $end_timestamp) {
 			return 1;
+		} else {
+			return false;
 		}
 	}
 

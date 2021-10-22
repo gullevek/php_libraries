@@ -910,7 +910,7 @@ class IO extends \CoreLibs\Basic
 			$this->db_debug = 0;
 		} elseif ($this->db_debug) {
 			$this->db_debug = 0;
-		} elseif (!$this->db_debug) {
+		} else {
 			$this->db_debug = 1;
 		}
 		return $this->db_debug;
@@ -1789,7 +1789,7 @@ class IO extends \CoreLibs\Basic
 				);
 				$this->insert_id_ext = $this->insert_id;
 				$this->insert_id_arr[] = $this->insert_id;
-			} elseif ($result) {
+			} elseif (!empty($result)) {
 				$this->insert_id = [];
 				$this->insert_id_ext = [];
 				$this->insert_id_arr = [];
@@ -1988,8 +1988,6 @@ class IO extends \CoreLibs\Basic
 				return 'f';
 			}
 		}
-		// if neither, just return data as is
-		return $string;
 	}
 
 	// ** REMARK **
@@ -2017,9 +2015,6 @@ class IO extends \CoreLibs\Basic
 		}
 		if (!is_array($not_write_array)) {
 			$not_write_array = [];
-		}
-		if (is_array($table)) {
-			return false;
 		}
 		$not_write_update_array = [];
 		return $this->dbWriteDataExt(
@@ -2077,8 +2072,8 @@ class IO extends \CoreLibs\Basic
 		// loop through the write array and each field to build the query
 		foreach ($write_array as $field) {
 			if (
-				(!$primary_key['value'] ||
-					($primary_key['value'] &&
+				(empty($primary_key['value']) ||
+					(!empty($primary_key['value']) &&
 					!in_array($field, $not_write_update_array))
 				) &&
 				!in_array($field, $not_write_array)

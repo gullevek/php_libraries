@@ -22,9 +22,13 @@ class ProgressBar
 {
 	// private vars
 
+	/** @var string */
 	public $code;	// unique code
+	/** @var string */
 	public $status = 'new';	// current status (new,show,hide)
+	/** @var int */
 	public $step = 0;	// current step
+	/** @var array<string,?int> */
 	public $position = [ // current bar position
 		'left' => null,
 		'top' => null,
@@ -32,27 +36,43 @@ class ProgressBar
 		'height' => null,
 	];
 
+	/** @var int */
 	public $clear_buffer_size = 1; // we need to send this before the lfush to get browser output
+	/** @var int */
 	public $clear_buffer_size_init = 1024 * 1024; // if I don't send that junk, it won't send anything
 
 	// public vars
 
+	/** @var int */
 	public $min = 0;	// minimal steps
+	/** @var int */
 	public $max = 100;	// maximal steps
 
+	/** @var int */
 	public $left = 5;	// bar position from left
+	/** @var int */
 	public $top = 5;	// bar position from top
+	/** @var int */
 	public $width = 300;	// bar width
+	/** @var int */
 	public $height = 25;	// bar height
+	/** @var int */
 	public $pedding = 0;	// bar pedding
+	/** @var string */
 	public $color = '#0033ff';	// bar color
+	/** @var string */
 	public $bgr_color = '#c0c0c0';	// bar background color
+	/** @var string */
 	public $bgr_color_master = '#ffffff';	// master div background color
+	/** @var int */
 	public $border = 1;			// bar border width
+	/** @var string */
 	public $brd_color = '#000000';	// bar border color
 
+	/** @var string */
 	public $direction = 'right';	// direction of motion (right,left,up,down)
 
+	/** @var array<string,mixed> */
 	public $frame = ['show' => false];	// ProgressBar Frame
 	/*	'show' => false,	# frame show (true/false)
 		'left' => 200,	# frame position from left
@@ -64,6 +84,7 @@ class ProgressBar
 		'brd_color' => '#dfdfdf #404040 #404040 #dfdfdf'	# frame border color
 	*/
 
+	/** @var array<mixed> */
 	public $label = [];	// ProgressBar Labels
 	/*	'name' => [	# label name
 			'type' => 'text',	# label type (text,button,step,percent,crossbar)
@@ -81,6 +102,7 @@ class ProgressBar
 		]
 	*/
 
+	/** @var string */
 	// output strings
 	public $prefix_message = '';
 
@@ -141,8 +163,8 @@ class ProgressBar
 
 	/**
 	 * calculate position in bar step
-	 * @param  float $step percent step to do
-	 * @return array       bar position as array
+	 * @param  float        $step percent step to do
+	 * @return array<mixed>       bar position as array
 	 */
 	private function __calculatePosition(float $step): array
 	{

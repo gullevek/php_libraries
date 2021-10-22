@@ -239,9 +239,9 @@ class PgSQL
 	 * if there is no pk_name tries to auto built it from the table name
 	 * this only works if db schema is after "no plural names. and pk name is table name + _id
 	 * detects schema prefix in table name
-	 * @param  string     $query   query string
-	 * @param  string     $pk_name primary key name, if '' then auto detect
-	 * @return string|int          primary key value
+	 * @param  string           $query   query string
+	 * @param  string           $pk_name primary key name, if '' then auto detect
+	 * @return string|int|false          primary key value
 	 */
 	public function __dbInsertId(string $query, string $pk_name)
 	{
@@ -274,6 +274,9 @@ class PgSQL
 				$id = [-1, $q];
 			}
 			return $id;
+		} else {
+			//if not insert, return false
+			return false;
 		}
 	}
 
@@ -351,9 +354,7 @@ class PgSQL
 		$this->dbh = pg_connect("host=" . $db_host . " port=" . $db_port . " user="
 			. $db_user . " password=" . $db_pass . " dbname=" . $db_name . " sslmode=" . $db_ssl);
 		if (!$this->dbh) {
-			die("<!-- Can't connect [host=" . $db_host . " port=" . $db_port . " user="
-				. $db_user . " password=XXXX dbname=" . $db_name . " sslmode=" . $db_ssl . "] //-->");
-			return null;
+			die("<!-- Can't connect to database //-->");
 		}
 		return $this->dbh;
 	}

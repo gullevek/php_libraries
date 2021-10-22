@@ -10,21 +10,26 @@ if (class_exists('Autoload', false) === false) {
 	// define the auto loader class
 	class Autoload
 	{
-		// we do it simple here
-		// passes on the class to load and we search here in namespace
-		// to load that class
-		public static function load($class)
+		/**
+		 * we do it simple here
+		 * passes on the class to load and we search here in namespace
+		 * to load that class
+		 *
+		 * @param string $class Namespace + class to load
+		 * @return void
+		 */
+		public static function load(string $class)
 		{
 			// print "(1) Class: $class / DIR: ".__DIR__."<br>";
 			// set directory seperator (we need to replace from namespace)
-			$DS = defined('DS') ? DS : DIRECTORY_SEPARATOR;
+			$DS = DIRECTORY_SEPARATOR;
 			// base lib
 			$LIB = defined('LIB') ? LIB : 'lib' . $DS;
 			// if lib is in path at the end, do not add lib again
 			// note that $LIB can have a directory seperator at the end
 			// strip that out before we do a match
 			$_LIB = rtrim($LIB, $DS);
-			if (preg_match("|$_LIB$|", __DIR__) === false) {
+			if (!preg_match("|$_LIB$|", __DIR__)) {
 				$LIB .= $DS;
 			} else {
 				$LIB = '';
@@ -50,9 +55,7 @@ if (class_exists('Autoload', false) === false) {
 				// we should sub that
 				// self::loadFile($path);
 				include $path;
-				return true;
 			}
-			return false;
 		}
 		// end class define
 	}

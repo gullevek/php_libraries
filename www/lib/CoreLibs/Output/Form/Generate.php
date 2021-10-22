@@ -267,6 +267,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function __construct(array $db_config, int $table_width = 750)
 	{
+		global $table_arrays;
 		// replace any non valid variable names
 		// TODO extracft only alphanumeric and _ after . to _ replacement
 		$this->my_page_name = str_replace(['.'], '_', \CoreLibs\Get\System::getPageName(1));
@@ -278,12 +279,15 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 		// first check if we have a in page override as $table_arrays[page name]
 		if (
-			isset($_GLOBALS['table_arrays']) &&
-			is_array($_GLOBALS['table_arrays']) &&
-			isset($_GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)]) &&
-			is_array($_GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)])
+			/* isset($GLOBALS['table_arrays']) &&
+			is_array($GLOBALS['table_arrays']) &&
+			isset($GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)]) &&
+			is_array($GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)]) */
+			isset($table_arrays[\CoreLibs\Get\System::getPageName(1)]) &&
+			is_array($table_arrays[\CoreLibs\Get\System::getPageName(1)])
 		) {
-			$config_array = $_GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)];
+			// $config_array = $GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)];
+			$config_array = $table_arrays[\CoreLibs\Get\System::getPageName(1)];
 		} else {
 			// WARNING: auto spl load does not work with this as it is an array and not a function/object
 			// check if this is the old path or the new path
@@ -810,7 +814,6 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			(isset($this->security_level['delete']) &&
 				$this->base_acl_level >= $this->security_level['delete'])
 		) {
-			$old_school_hidden = 0;
 			if ($this->base_acl_level >= $this->security_level['save']) {
 				$seclevel_okay = 1;
 				if (empty($this->table_array[$this->int_pk_name]['value'])) {
@@ -819,7 +822,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					$save = $this->l->__('Update');
 				}
 				// print the old_school hidden if requestet
-				if ($old_school_hidden) {
+				if ($old_school_hidden == 1) {
 					$pk_name = $this->int_pk_name;
 					$pk_value = $this->table_array[$this->int_pk_name]['value'];
 				}
@@ -1270,7 +1273,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// if mandatory && no input
 				// $this->log->debug('form', 'A: ' . $this->table_array[$key]['type'] . ' -- '
 				//	. $this->table_array[$key]['input_value'] . ' -- ' . $this->table_array[$key]['value']);
-				if (!$this->table_array[$key]['value'] && $this->table_array[$key]['type'] != 'binary') {
+				if (
+					empty($this->table_array[$key]['value']) &&
+					$this->table_array[$key]['type'] != 'binary'
+				) {
 					$this->msg .= sprintf(
 						$this->l->__('Please enter something into the <b>%s</b> field!<br>'),
 						$this->table_array[$key]['output_name']
@@ -1505,7 +1511,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if ($order_name) {
 			// first check out of order ...
 
-			if (!$this->table_array[$order_name]['value']) {
+			if (empty($this->table_array[$order_name]['value'])) {
 				// set order (read max)
 				$q = 'SELECT MAX(' . $order_name . ') + 1 AS max_page_order FROM ' . $this->table_name;
 				list($this->table_array[$order_name]['value']) = $this->dbReturnRow($q);
@@ -1513,7 +1519,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				if (!$this->table_array[$order_name]['value']) {
 					$this->table_array[$order_name]['value'] = 1;
 				}
-			} elseif ($this->table_array[$this->int_pk_name]['value']) {
+			} elseif (!empty($this->table_array[$this->int_pk_name]['value'])) {
 				$q = 'SELECT ' . $order_name
 					. ' FROM ' . $this->table_name
 					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
@@ -2377,7 +2383,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$this->element_list[$table_name]['max_empty'] = 10;
 			}
 			// check if we need to fill fields
-			$element_count = (isset($data['content']) && is_array($data['content'])) ? count($data['content']) : 0;
+			$element_count = count($data['content'] ?? []);
 			$missing_empty_count = $this->element_list[$table_name]['max_empty'] - $element_count;
 			$this->log->debug('CFG MAX', 'Max empty: '
 				. $this->element_list[$table_name]['max_empty'] . ', Missing: ' . $missing_empty_count

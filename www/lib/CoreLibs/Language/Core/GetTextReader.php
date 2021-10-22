@@ -108,13 +108,13 @@ class GetTextReader
 	/**
 	* Constructor
 	*
-	* @param object $Reader       the StreamReader object
-	* @param bool   $enable_cache Enable or disable caching of strings (default on)
+	* @param object|bool $Reader       the StreamReader object
+	* @param bool        $enable_cache Enable or disable caching of strings (default on)
 	*/
 	public function __construct($Reader, $enable_cache = true)
 	{
 		// If there isn't a StreamReader, turn on short circuit mode.
-		if (!$Reader || $Reader->error) {
+		if ((!is_object($Reader) && !$Reader) || (is_object($Reader) && $Reader->error)) {
 			$this->short_circuit = true;
 			return;
 		}
@@ -125,7 +125,7 @@ class GetTextReader
 		$MAGIC1 = "\x95\x04\x12\xde";
 		$MAGIC2 = "\xde\x12\x04\x95";
 
-		$this->STREAM = $Reader;
+		$this->STREAM = (object)$Reader;
 		$magic = $this->read(4);
 		if ($magic == $MAGIC1) {
 			$this->BYTEORDER = 1;
@@ -351,7 +351,7 @@ class GetTextReader
 		return $expr;
 	}
 
-  /**
+	/**
 	* Get possible plural forms from MO header
 	*
 	* @access private
@@ -394,6 +394,7 @@ class GetTextReader
 		$plural = 0;
 
 		eval("$string");
+		/** @phpstan-ignore-next-line */
 		if ($plural >= $total) {
 			$plural = $total - 1;
 		}

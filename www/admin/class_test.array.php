@@ -33,7 +33,7 @@ use CoreLibs\Combined\ArrayHandler;
 use CoreLibs\Debug\Support as DgS;
 
 $basic = new CoreLibs\Basic();
-// $_array= new CoreLibs\Combined\ArrayHandler();
+// $_array = new CoreLibs\Combined\ArrayHandler();
 // $array_class = 'CoreLibs\Combination\ArrayHandler';
 
 print "<html><head><title>TEST CLASS: ARRAY HANDLER</title><head>";

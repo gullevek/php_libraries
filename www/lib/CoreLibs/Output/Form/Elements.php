@@ -270,6 +270,9 @@ class Elements
 			return "mailto:" . $email;
 		} elseif ($atag) {
 			return $atag . $email;
+		} else {
+			// else just return email as is
+			return $email;
 		}
 	}
 }

@@ -11,12 +11,6 @@
     <projectFiles>
 		<file name="admin/class_test.php" />
         <file name="admin/config.php" />
-        <file name="admin/error_test.php" />
-        <file name="admin/l10n_test.php" />
-        <file name="admin/namespace_test.php" />
-        <file name="admin/other_test.php" />
-        <file name="admin/smarty_test.php" />
-        <file name="admin/various_class_test.php" />
         <directory name="configs" />
         <directory name="frontend" />
         <directory name="includes" />
@@ -58,7 +52,6 @@
         <MissingReturnType errorLevel="error" />
         <MissingPropertyType errorLevel="error" />
         <InvalidDocblock errorLevel="error" />
-        <MisplacedRequiredParam errorLevel="error" />
 
         <PropertyNotSetInConstructor errorLevel="error" />
         <MissingConstructor errorLevel="error" />

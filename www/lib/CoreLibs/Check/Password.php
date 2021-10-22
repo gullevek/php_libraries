@@ -35,8 +35,6 @@ class Password
 		} else {
 			return false;
 		}
-		// in case something strange, return false on default
-		return false;
 	}
 
 	/**
@@ -51,8 +49,6 @@ class Password
 		} else {
 			return false;
 		}
-		// in case of strange, force re-hash
-		return true;
 	}
 }
 

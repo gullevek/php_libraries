@@ -130,10 +130,10 @@ class Image
 				array_map('unlink', glob($delete_filename . '*'));
 			}
 		} else {
-			if ($dummy && strstr($dummy, '/') === false) {
+			if (!empty($dummy) && strstr($dummy, '/') === false) {
 				// check if we have the "dummy" image flag set
 				$filename = PICTURES . ICONS . strtoupper($dummy) . ".png";
-				if ($dummy && file_exists($filename) && is_file($filename)) {
+				if (!empty($dummy) && file_exists($filename) && is_file($filename)) {
 					$return_data = $filename;
 				} else {
 					$return_data = false;
