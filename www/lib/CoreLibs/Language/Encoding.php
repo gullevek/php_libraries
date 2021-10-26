@@ -10,6 +10,7 @@ namespace CoreLibs\Language;
 
 class Encoding
 {
+	/** @var string */
 	private static $mb_error_char = '';
 
 	/**
@@ -82,7 +83,7 @@ class Encoding
 	 * @param  string     $string        string to test
 	 * @param  string     $from_encoding encoding of string to test
 	 * @param  string     $to_encoding   target encoding
-	 * @return bool|array            false if no error or array with failed characters
+	 * @return bool|array<string>        false if no error or array with failed characters
 	 */
 	public static function checkConvertEncoding(string $string, string $from_encoding, string $to_encoding)
 	{

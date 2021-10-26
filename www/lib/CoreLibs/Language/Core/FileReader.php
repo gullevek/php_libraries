@@ -26,9 +26,13 @@ namespace CoreLibs\Language\Core;
 
 class FileReader
 {
+	/** @var int */
 	public $fr_pos;
+	/** @var resource|bool */
 	public $fr_fd;
+	/** @var int */
 	public $fr_length;
+	/** @var int */
 	public $error = 0;
 
 	/**
@@ -38,10 +42,10 @@ class FileReader
 	public function __construct($filename)
 	{
 		if (file_exists($filename)) {
-			$this->fr_length = filesize($filename);
+			$this->fr_length = filesize($filename) ?: 0;
 			$this->fr_pos = 0;
 			$this->fr_fd = fopen($filename, 'rb');
-			if (!$this->fr_fd) {
+			if (!is_resource($this->fr_fd)) {
 				$this->error = 3; // Cannot read file, probably permissions
 			}
 		} else {
@@ -56,23 +60,25 @@ class FileReader
 	 */
 	public function read($bytes)
 	{
-		if ($bytes) {
-			fseek($this->fr_fd, $this->fr_pos);
-
-			// PHP 5.1.1 does not read more than 8192 bytes in one fread()
-			// the discussions at PHP Bugs suggest it's the intended behaviour
-			$data = '';
-			while ($bytes > 0) {
-				$chunk = fread($this->fr_fd, $bytes);
-				$data .= $chunk;
-				$bytes -= strlen($chunk);
-			}
-			$this->fr_pos = ftell($this->fr_fd);
-
-			return $data;
-		} else {
+		if (!$bytes || !is_resource($this->fr_fd)) {
 			return '';
 		}
+		fseek($this->fr_fd, $this->fr_pos);
+
+		// PHP 5.1.1 does not read more than 8192 bytes in one fread()
+		// the discussions at PHP Bugs suggest it's the intended behaviour
+		$data = '';
+		while ($bytes > 0) {
+			$chunk = fread($this->fr_fd, $bytes);
+			if ($chunk === false) {
+				break;
+			}
+			$data .= $chunk;
+			$bytes -= strlen($chunk);
+		}
+		$this->fr_pos = ftell($this->fr_fd) ?: 0;
+
+		return $data;
 	}
 
 	/**
@@ -82,8 +88,11 @@ class FileReader
 	 */
 	public function seekto($pos)
 	{
+		if (!is_resource($this->fr_fd)) {
+			return 0;
+		}
 		fseek($this->fr_fd, $pos);
-		$this->fr_pos = ftell($this->fr_fd);
+		$this->fr_pos = ftell($this->fr_fd) ?: 0;
 		return $this->fr_pos;
 	}
 
@@ -111,7 +120,9 @@ class FileReader
 	 */
 	public function close(): void
 	{
-		fclose($this->fr_fd);
+		if (is_resource($this->fr_fd)) {
+			fclose($this->fr_fd);
+		}
 	}
 }
 

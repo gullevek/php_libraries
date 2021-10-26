@@ -2,17 +2,29 @@
 
 namespace FileUpload;
 
-// use \FileUpload\Core;
+use FileUpload\Core;
 
-class qqFileUploader
+// TODO: find all usages from qqFileUploader and name to Qq
+class qqFileUploader // phpcs:ignore Squiz.Classes.ValidClassName.NotCamelCaps
 {
-	private $allowedExtensions = array();
+	/** @var array<mixed> */
+	private $allowedExtensions = [];
+	/** @var int */
 	private $sizeLimit = 10485760;
+	/** @var null|Core\qqUploadedFileXhr|Core\qqUploadedFileForm */
 	private $file;
+	/** @var string */
 	public $uploadFileName;
+	/** @var string */
 	public $uploadFileExt;
 
-	public function __construct(array $allowedExtensions = array(), $sizeLimit = 10485760)
+	/**
+	 * Undocumented function
+	 *
+	 * @param array<mixed> $allowedExtensions
+	 * @param integer $sizeLimit
+	 */
+	public function __construct(array $allowedExtensions = [], int $sizeLimit = 10485760)
 	{
 		$allowedExtensions = array_map("strtolower", $allowedExtensions);
 
@@ -22,18 +34,23 @@ class qqFileUploader
 		$this->checkServerSettings();
 
 		if (isset($_GET['qqfile'])) {
-			$this->file = new \FileUpload\Core\qqUploadedFileXhr();
+			$this->file = new Core\qqUploadedFileXhr();
 		} elseif (isset($_FILES['qqfile'])) {
-			$this->file = new \FileUpload\Core\qqUploadedFileForm();
+			$this->file = new Core\qqUploadedFileForm();
 		} else {
-			$this->file = false;
+			$this->file = null;
 		}
 	}
 
-	private function checkServerSettings()
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	private function checkServerSettings(): void
 	{
-		$postSize = $this->toBytes(ini_get('post_max_size'));
-		$uploadSize = $this->toBytes(ini_get('upload_max_filesize'));
+		$postSize = $this->toBytes(ini_get('post_max_size') ?: '');
+		$uploadSize = $this->toBytes(ini_get('upload_max_filesize') ?: '');
 
 		if ($postSize < $this->sizeLimit || $uploadSize < $this->sizeLimit) {
 			$size = max(1, $this->sizeLimit / 1024 / 1024) . 'M';
@@ -41,10 +58,16 @@ class qqFileUploader
 		}
 	}
 
-	private function toBytes($str)
+	/**
+	 * Undocumented function
+	 *
+	 * @param string $str
+	 * @return integer
+	 */
+	private function toBytes(string $str): int
 	{
 		$val = (int)trim($str);
-		$last = strtolower($str[strlen($str)-1]);
+		$last = strtolower($str[strlen($str) - 1]);
 		switch ($last) {
 			case 'g':
 				$val *= 1024;
@@ -59,36 +82,42 @@ class qqFileUploader
 	}
 
 	/**
-	 * Returns array('success'=>true) or array('error'=>'error message')
+	 * Undocumented function
+	 *
+	 * @param  string  $uploadDirectory
+	 * @param  boolean $replaceOldFile
+	 * @return array<string,string|bool> Returns ['success'=>true] or
+	 *                                   ['error'=>'error message']
 	 */
-	public function handleUpload($uploadDirectory, $replaceOldFile = false)
+	public function handleUpload(string $uploadDirectory, bool $replaceOldFile = false): array
 	{
 		if (!is_writable($uploadDirectory)) {
-			return array('error' => "Server error. Upload directory isn't writable.");
+			return ['error' => "Server error. Upload directory isn't writable."];
 		}
 
-		if (!$this->file) {
-			return array('error' => 'No files were uploaded.');
+		if (!is_object($this->file)) {
+			return ['error' => 'No files were uploaded.'];
 		}
 
+		$size = 0;
 		$size = $this->file->getSize();
 
 		if ($size == 0) {
-			return array('error' => 'File is empty');
+			return ['error' => 'File is empty'];
 		}
 
 		if ($size > $this->sizeLimit) {
-			return array('error' => 'File is too large');
+			return ['error' => 'File is too large'];
 		}
 
 		$pathinfo = pathinfo($this->file->getName());
-		$filename = $pathinfo['filename'];
+		$filename = $pathinfo['filename'] ?? '';
 		//$filename = md5(uniqid());
 		$ext = $pathinfo['extension'] ?? '';
 
 		if ($this->allowedExtensions && !in_array(strtolower($ext), $this->allowedExtensions)) {
 			$these = implode(', ', $this->allowedExtensions);
-			return array('error' => 'File has an invalid extension, it should be one of '. $these . '.');
+			return ['error' => 'File has an invalid extension, it should be one of ' . $these . '.'];
 		}
 
 		if (!$replaceOldFile) {
@@ -102,10 +131,12 @@ class qqFileUploader
 		$this->uploadFileExt = $ext;
 
 		if ($this->file->save($uploadDirectory . $filename . '.' . $ext)) {
-			return array('success' => true);
+			return ['success' => true];
 		} else {
-			return array('error' => 'Could not save uploaded file.' .
-				'The upload was cancelled, or server error encountered');
+			return [
+				'error' => 'Could not save uploaded file.' .
+				'The upload was cancelled, or server error encountered'
+			];
 		}
 	}
 }

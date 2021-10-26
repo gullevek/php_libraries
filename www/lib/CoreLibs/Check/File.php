@@ -34,9 +34,12 @@ class File
 			is_readable($file)
 		) {
 			$f = fopen($file, 'rb');
+			if (!is_resource($f)) {
+				return 0;
+			}
 			$lines = 0;
 			while (!feof($f)) {
-				$lines += substr_count(fread($f, 8192), "\n");
+				$lines += substr_count(fread($f, 8192) ?: '', "\n");
 			}
 			fclose($f);
 		} else {

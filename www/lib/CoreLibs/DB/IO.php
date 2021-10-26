@@ -257,66 +257,105 @@ class IO extends \CoreLibs\Basic
 	// recommend to set private/protected and only allow setting via method
 	// can bet set from outside
 	// encoding to
+	/** @var string */
 	public $to_encoding = '';
+	/** @var string */
 	public $query; // the query string at the moment
 	// only inside
 	// basic vars
-	private $dbh; // the dbh handler
-	public $db_debug; // DB_DEBUG ... (if set prints out debug msgs)
+	/** @var resource|bool|int|null */
+	private $dbh; // the dbh handler, if disconnected by command is null, bool:false/int:-1 on error,
+	/** @var int|bool */
+	public $db_debug; // DB_DEBUG ... (if set prints out debug msgs) [should be bool only]
+	/** @var string */
 	private $db_name; // the DB connected to
+	/** @var string */
 	private $db_user; // the username used
+	/** @var string */
 	private $db_pwd; // the password used
+	/** @var string */
 	private $db_host; // the hostname
+	/** @var int */
 	private $db_port; // default db port
+	/** @var string */
 	private $db_schema; // optional DB schema, if not set uses public
+	/** @var string */
 	private $db_encoding; // optional auto encoding convert, not used if not set
+	/** @var string */
 	private $db_type; // type of db (mysql,postgres,...)
+	/** @var string */
 	private $db_ssl; // ssl flag (for postgres only), disable, allow, prefer, require
 	// FOR BELOW: (This should be private and only readable through some method)
 	// cursor array for cached readings
+	/** @var array<mixed,mixed> */
 	public $cursor_ext; // hash of hashes
 	// per query vars
+	/** @var resource */
 	public $cursor; // actual cursor (DBH)
+	/** @var int */
 	public $num_rows; // how many rows have been found
+	/** @var int */
 	public $num_fields; // how many fields has the query
+	/** @var array<mixed> */
 	public $field_names = []; // array with the field names of the current query
+	// FIXME: insert_id and insert_id_ext should not be such a mixed mess
+	/** @var string|int|bool|array<mixed> */
 	public $insert_id; // last inserted ID
+	/** @var string|int|bool|array<mixed> */
 	public $insert_id_ext; // extended insert ID (for data outside only primary key)
+	/** @var array<mixed> */
 	public $insert_id_arr; // always return as array, even if only one
+	/** @var string */
 	private $temp_sql;
 	// other vars
+	/** @var string */
 	private $nbsp = ''; // used by print_array recursion function
 	// error & warning id
+	/** @var int */
 	protected $error_id;
+	/** @var int */
 	private $had_error = 0;
+	/** @var int */
 	private $warning_id;
+	/** @var int */
 	private $had_warning;
 	// error thrown on class init if we cannot connect to db
+	/** @var bool */
 	protected $db_init_error = false;
 	// sub include with the database functions
+	/** @var \CoreLibs\DB\SQL\PgSQL */
 	private $db_functions;
 
 	// endless loop protection
+	/** @var int */
 	private $MAX_QUERY_CALL;
+	/** @var int */
 	private $DEFAULT_MAX_QUERY_CALL = 20; // default
+	/** @var array<mixed> */
 	private $query_called = [];
 	// error string
+	/** @var array<mixed> */
 	protected $error_string = [];
 	// prepared list
+	/** @var array<mixed> */
 	public $prepare_cursor = [];
 	// primary key per table list
 	// format is 'table' => 'pk_name'
+	/** @var array<mixed> */
 	public $pk_name_table = [];
 	// internal primary key name, for cross calls in async
+	/** @var string */
 	public $pk_name;
 	// if we use RETURNING in the INSERT call
+	/** @var bool */
 	private $returning_id = false;
 	// if a sync is running holds the md5 key of the query
+	/** @var string */
 	private $async_running;
 
 	/**
 	 * main DB concstructor with auto connection to DB and failure set on failed connection
-	 * @param array $db_config DB configuration array
+	 * @param array<mixed> $db_config DB configuration array
 	 */
 	public function __construct(array $db_config)
 	{
@@ -525,8 +564,8 @@ class IO extends \CoreLibs\Basic
 	 * internal funktion that creates the array
 	 * NOTE:
 	 * used in db_dump_data only
-	 * @param  array  $array array to print
-	 * @return string        string with printed and formated array
+	 * @param  array<mixed> $array array to print
+	 * @return string              string with printed and formated array
 	 */
 	private function __printArray(array $array): string
 	{
@@ -577,14 +616,14 @@ class IO extends \CoreLibs\Basic
 	 * needed to make public so it can be called from DB.Array.IO too
 	 * @param  resource|bool $cursor current cursor for pg_result_error, mysql uses dbh,
 	 *                               pg_last_error too, but pg_result_error is more accurate
-	 * @param  string    $msg        optional message
+	 * @param  string         $msg   optional message
 	 * @return void                  has no return
 	 */
 	public function __dbError($cursor = false, string $msg = ''): void
 	{
 		$pg_error_string = '';
 		$where_called = (string)\CoreLibs\Debug\Support::getCallerMethod();
-		if ($cursor) {
+		if (is_resource($cursor)) {
 			$pg_error_string = $this->db_functions->__dbPrintError($cursor);
 		}
 		if (!$cursor && method_exists($this->db_functions, '__dbPrintError')) {
@@ -625,11 +664,14 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * if there is the 'to_encoding' var set, and the field is in the wrong encoding converts it to the target
-	 * @param  array|bool|null $row array from fetch_row
-	 * @return array|bool|null            convert fetch_row array, or false
+	 * @param  array<mixed>|bool|null $row array from fetch_row
+	 * @return array<mixed>|bool           convert fetch_row array, or false
 	 */
 	private function __dbConvertEncoding($row)
 	{
+		if ($row === null) {
+			return false;
+		}
 		// only do if array, else pass through row (can be false)
 		if (
 			!is_array($row) || empty($this->to_encoding) || empty($this->db_encoding)
@@ -640,7 +682,11 @@ class IO extends \CoreLibs\Basic
 		foreach ($row as $key => $value) {
 			$from_encoding = mb_detect_encoding($value);
 			// convert only if encoding doesn't match and source is not pure ASCII
-			if ($from_encoding != $this->to_encoding && $from_encoding != 'ASCII') {
+			if (
+				$from_encoding !== false &&
+				$from_encoding != $this->to_encoding &&
+				$from_encoding != 'ASCII'
+			) {
 				$row[$key] = mb_convert_encoding($value, $this->to_encoding, $from_encoding);
 			}
 		}
@@ -649,9 +695,9 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * for debug purpose replaces $1, $2, etc with actual data
-	 * @param  string $stm_name prepared statement name
-	 * @param  array  $data     the data array
-	 * @return string           string of query with data inside
+	 * @param  string       $stm_name prepared statement name
+	 * @param  array<mixed> $data     the data array
+	 * @return string                 string of query with data inside
 	 */
 	private function __dbDebugPrepare(string $stm_name, array $data = []): string
 	{
@@ -667,8 +713,8 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * extracts schema and table from the query, if no schema returns just empty string
-	 * @param  string $query insert/select/update/delete query
-	 * @return array         array with schema and table
+	 * @param  string       $query insert/select/update/delete query
+	 * @return array<mixed>        array with schema and table
 	 */
 	private function __dbReturnTable(string $query): array
 	{
@@ -737,7 +783,9 @@ class IO extends \CoreLibs\Basic
 				}
 				if (!preg_match("/ returning /i", $this->query) && $this->pk_name && $this->pk_name != 'NULL') {
 					// check if this query has a ; at the end and remove it
-					$this->query = preg_replace("/(;\s*)$/", '', $this->query);
+					$__query = preg_replace("/(;\s*)$/", '', $this->query);
+					// must be query, if preg replace failed, use query as before
+					$this->query = !is_string($__query) ? $this->query : $query;
 					$this->query .= " RETURNING " . $this->pk_name;
 					$this->returning_id = true;
 				} elseif (preg_match("/ returning (.*)/i", $this->query, $matches)) {
@@ -794,7 +842,7 @@ class IO extends \CoreLibs\Basic
 	{
 		// if FALSE returned, set error stuff
 		// if either the cursor is false
-		if (!$this->cursor || $this->db_functions->__dbLastErrorQuery()) {
+		if (!is_resource($this->cursor) || $this->db_functions->__dbLastErrorQuery()) {
 			// printout Query if debug is turned on
 			if ($this->db_debug) {
 				$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
@@ -859,17 +907,24 @@ class IO extends \CoreLibs\Basic
 							// if only ['foo_id'] and it is the PK then the
 							// PK is directly written to the insert_id
 							if (
+								// FIXME: everything should be an array
+								/** @phpstan-ignore-next-line */
 								count($this->insert_id[0]) > 1 ||
+								/** @phpstan-ignore-next-line */
 								!array_key_exists($this->pk_name, $this->insert_id[0])
 							) {
 								$this->insert_id_ext = $this->insert_id[0];
+								/** @phpstan-ignore-next-line */
 								if (isset($this->insert_id[0][$this->pk_name])) {
 									$this->insert_id = $this->insert_id[0][$this->pk_name];
 								}
 							} elseif (isset($this->insert_id[0][$this->pk_name])) {
 								$this->insert_id = $this->insert_id[0][$this->pk_name];
 							}
-						} elseif (count($this->insert_id) == 0) {
+						} elseif (
+							!is_array($this->insert_id) ||
+							count($this->insert_id) == 0
+						) {
 							// if we have non -> error
 							// failed to get insert id
 							$this->insert_id = '';
@@ -922,7 +977,7 @@ class IO extends \CoreLibs\Basic
 	 * with the optional parameter fix sets debug
 	 * returns current set stats
 	 * @param  bool|null $debug Flag to turn debug on off
-	 * @return bool True for debug is on, False for off
+	 * @return bool             True for debug is on, False for off
 	 */
 	public function dbToggleDebug(?bool $debug = null)
 	{
@@ -1045,7 +1100,7 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$q = "SET search_path TO '" . $this->dbEscapeString($db_schema) . "'";
-		return $this->dbExec($q);
+		return $this->dbExec($q) ? true : false;
 	}
 
 	/**
@@ -1059,7 +1114,8 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * sets the client encoding in the postgres database
-	 * @param  string $db_encoding valid encoding name, so the the data gets converted to this encoding
+	 * @param  string $db_encoding valid encoding name,
+	 *                             so the the data gets converted to this encoding
 	 * @return bool                false, or true of db exec encoding set
 	 */
 	public function dbSetEncoding(string $db_encoding = ''): bool
@@ -1071,7 +1127,7 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		$q = "SET client_encoding TO '" . $this->dbEscapeString($db_encoding) . "'";
-		return $this->dbExec($q);
+		return $this->dbExec($q) ? true : false;
 	}
 
 	/**
@@ -1080,7 +1136,11 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function dbGetEncoding(): string
 	{
-		return $this->dbReturnRow('SHOW client_encoding')['client_encoding'];
+		$client_encoding = $this->dbReturnRow('SHOW client_encoding');
+		if (!is_array($client_encoding)) {
+			return '';
+		}
+		return $client_encoding['client_encoding'] ?? '';
 	}
 
 	/**
@@ -1159,7 +1219,7 @@ class IO extends \CoreLibs\Basic
 	{
 		// set start array
 		if ($query) {
-			$array = $this->cursor_ext[md5($query)];
+			$array = $this->cursor_ext[md5($query)] ?? [];
 		} else {
 			$array = $this->cursor_ext;
 		}
@@ -1185,15 +1245,15 @@ class IO extends \CoreLibs\Basic
 	 *   (wheres 1 reads cache AND destroys at end of read)
 	 * - if set to 3, after EACH row, the data will be reset,
 	 *   no caching is done except for basic (count, etc)
-	 * @param  string     $query Query string
-	 * @param  int        $reset reset status:
-	 *                    1: read cache, clean at the end
-	 *                    2: read new, clean at end
-	 *                    3: never cache
+	 * @param  string     $query      Query string
+	 * @param  int        $reset      reset status:
+	 *                                1: read cache, clean at the end
+	 *                                2: read new, clean at end
+	 *                                3: never cache
 	 * @param  bool       $assoc_only true to only returned the named and not
-	 *                    index position ones
-	 * @return array|bool             return array data or false on error/end
-	 * @suppress PhanTypeMismatchDimFetch
+	 *                    index       position ones
+	 * @return array<mixed>|bool      return array data or false on error/end
+	 * @#suppress PhanTypeMismatchDimFetch
 	 */
 	public function dbReturn(string $query, int $reset = 0, bool $assoc_only = false)
 	{
@@ -1213,7 +1273,8 @@ class IO extends \CoreLibs\Basic
 				'firstcall' => 0,
 				'num_rows' => 0,
 				'num_fields' => 0,
-				'read_rows' => 0
+				'read_rows' => 0,
+				'data' => []
 			];
 		}
 		// set the query
@@ -1324,25 +1385,33 @@ class IO extends \CoreLibs\Basic
 					// unset return value ...
 					$return = [];
 					for ($i = 0; $i < $this->cursor_ext[$md5]['num_fields']; $i++) {
+						// FIXME: find out why phan throws all those array errors
 						// create mixed return array
 						if (
 							$assoc_only === false &&
 							isset($this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i])
 						) {
+							/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 							$return[$i] = $this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i];
 						}
 						// named part
-						if (isset($this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i])) {
-							$return[$this->cursor_ext[$md5]['field_names'][$i]] =
-								$this->cursor_ext[$md5]['data']
-									[$this->cursor_ext[$md5]['pos']][$i];
-						} else {
-							// throws PhanTypeMismatchDimFetch error, but in this
-							// case we know we will access only named array parts
-							// @suppress PhanTypeMismatchDimFetch
-							$return[$this->cursor_ext[$md5]['field_names'][$i]] =
-								$this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]
-									['pos']][$this->cursor_ext[$md5]['field_names'][$i]];
+						if (!empty($this->cursor_ext[$md5]['field_names'][$i])) {
+							if (isset($this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]['pos']][$i])) {
+								/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
+								$return[$this->cursor_ext[$md5]['field_names'][$i]] =
+									/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
+									$this->cursor_ext[$md5]['data']
+										[$this->cursor_ext[$md5]['pos']][$i];
+							} else {
+								// throws PhanTypeMismatchDimFetch error, but in this
+								// case we know we will access only named array parts
+								/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
+								$return[$this->cursor_ext[$md5]['field_names'][$i]] =
+									/** @phan-suppress-next-line PhanTypeMismatchDimFetch,PhanTypeArraySuspiciousNullable */
+									$this->cursor_ext[$md5]['data'][$this->cursor_ext[$md5]
+										/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
+										['pos']][$this->cursor_ext[$md5]['field_names'][$i]];
+							}
 						}
 					}
 					$this->cursor_ext[$md5]['pos'] ++;
@@ -1404,8 +1473,10 @@ class IO extends \CoreLibs\Basic
 	 * additional read from the database for the PK NAME
 	 * @param  string         $query   the query, if not given, the query class var will be used
 	 *                                 (if this was not set, method will quit with a 0 (failure)
-	 * @param  string         $pk_name optional primary key name, for insert id return if the pk name is very different
-	 *                                 if pk name is table name and _id, pk_name is not needed to be set
+	 * @param  string         $pk_name optional primary key name, for insert id
+	 *                                 return if the pk name is very different
+	 *                                 if pk name is table name and _id, pk_name
+	 *                                 is not needed to be set
 	 *                                 if NULL is given here, no RETURNING will be auto added
 	 * @return resource|false          cursor for this query or false on error
 	 */
@@ -1417,7 +1488,11 @@ class IO extends \CoreLibs\Basic
 			return false;
 		}
 		// ** actual db exec call
-		$this->cursor = $this->db_functions->__dbQuery($this->query);
+		$cursor = $this->db_functions->__dbQuery($this->query);
+		if (!is_resource($cursor)) {
+			return false;
+		}
+		$this->cursor = $cursor;
 		// if FALSE returned, set error stuff
 		// run the post exec processing
 		if (!$this->__dbPostExec()) {
@@ -1429,11 +1504,13 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * executres the query async so other methods can be run during this
-	 * for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
+	 * for INSERT INTO queries it is highly recommended to set the pk_name
+	 * to avoid an additional
 	 * read from the database for the PK NAME
 	 * NEEDS : dbCheckAsync
 	 * @param  string $query   query to run
-	 * @param  string $pk_name optional primary key name, only used with insert for returning call
+	 * @param  string $pk_name optional primary key name, only used with
+	 *                         insert for returning call
 	 * @return bool            true if async query was sent ok, false if error happened
 	 */
 	public function dbExecAsync(string $query, string $pk_name = ''): bool
@@ -1450,7 +1527,7 @@ class IO extends \CoreLibs\Basic
 			$this->__dbError();
 			return false;
 		} else {
-			$this->async_running = $md5;
+			$this->async_running = (string)$md5;
 			// all ok, we return true (as would be from the original send query function)
 			return true;
 		}
@@ -1469,8 +1546,12 @@ class IO extends \CoreLibs\Basic
 			if ($this->db_functions->__dbConnectionBusy()) {
 				return true;
 			} else {
+				$cursor = $this->db_functions->__dbGetResult();
+				if (!is_resource($cursor)) {
+					return false;
+				}
 				// get the result/or error
-				$this->cursor = $this->db_functions->__dbGetResult();
+				$this->cursor = $cursor;
 				$this->async_running = '';
 				// run the post exec processing
 				if (!$this->__dbPostExec()) {
@@ -1494,18 +1575,20 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * executes a cursor and returns the data, if no more data 0 will be returned
-	 * @param  resource|false $cursor     the cursor from db_exec or pg_query/pg_exec/mysql_query
-	 *                                    if not set will use internal cursor, if not found, stops with 0 (error)
-	 * @param  bool           $assoc_only false is default, if true only assoc rows
-	 * @return array|bool                 row array or false on error
+	 * @param  resource|false   $cursor      the cursor from db_exec or
+	 *                                       pg_query/pg_exec/mysql_query
+	 *                                       if not set will use internal cursor,
+	 *                                       if not found, stops with 0 (error)
+	 * @param  bool              $assoc_only false is default, if true only assoc rows
+	 * @return array<mixed>|bool             row array or false on error
 	 */
 	public function dbFetchArray($cursor = false, bool $assoc_only = false)
 	{
 		// return false if no query or cursor set ...
-		if (!$cursor) {
+		if (!is_resource($cursor)) {
 			$cursor = $this->cursor;
 		}
-		if (!$cursor) {
+		if (!is_resource($cursor)) {
 			$this->error_id = 12;
 			$this->__dbError();
 			return false;
@@ -1522,7 +1605,7 @@ class IO extends \CoreLibs\Basic
 	 * returns the FIRST row of the given query
 	 * @param  string     $query      the query to be executed
 	 * @param  bool       $assoc_only if true, only return assoc entry, else both (pgsql)
-	 * @return array|bool             row array or false on error
+	 * @return array<mixed>|bool      row array or false on error
 	 */
 	public function dbReturnRow(string $query, bool $assoc_only = false)
 	{
@@ -1546,7 +1629,7 @@ class IO extends \CoreLibs\Basic
 	 * createds an array of hashes of the query (all data)
 	 * @param  string     $query      the query to be executed
 	 * @param  bool       $assoc_only if true, only name ref are returned
-	 * @return array|bool             array of hashes (row -> fields), false on error
+	 * @return array<mixed>|bool      array of hashes (row -> fields), false on error
 	 */
 	public function dbReturnArray(string $query, bool $assoc_only = false)
 	{
@@ -1563,10 +1646,10 @@ class IO extends \CoreLibs\Basic
 		}
 		$cursor = $this->dbExec($query);
 		$rows = [];
-		while ($res = $this->dbFetchArray($cursor, $assoc_only)) {
+		while (is_array($res = $this->dbFetchArray($cursor, $assoc_only))) {
 			$data = [];
 			for ($i = 0; $i < $this->num_fields; $i++) {
-				$data[$this->field_names[$i]] = $res[$this->field_names[$i]];
+				$data[$this->field_names[$i]] = $res[$this->field_names[$i]] ?? null;
 			}
 			$rows[] = $data;
 		}
@@ -1609,7 +1692,7 @@ class IO extends \CoreLibs\Basic
 	 * returns an array of the table with columns and values. FALSE on no table found
 	 * @param  string     $table  table name
 	 * @param  string     $schema optional schema name
-	 * @return array|bool         array of table data, false on error (table not found)
+	 * @return array<mixed>|bool         array of table data, false on error (table not found)
 	 */
 	public function dbShowTableMetaData(string $table, string $schema = '')
 	{
@@ -1721,9 +1804,9 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * runs a prepare query
-	 * @param  string        $stm_name statement name for the query to run
-	 * @param  array         $data     data to run for this query, empty array for none
-	 * @return ?mixed                  false on error, or result on OK
+	 * @param  string       $stm_name statement name for the query to run
+	 * @param  array<mixed> $data     data to run for this query, empty array for none
+	 * @return ?mixed                 false on error, or result on OK
 	 */
 	public function dbExecute(string $stm_name, array $data = [])
 	{
@@ -1764,7 +1847,7 @@ class IO extends \CoreLibs\Basic
 			$this->__dbDebug('db', $this->__dbDebugPrepare($stm_name, $data), 'dbExecPrep', 'Q');
 		}
 		$result = $this->db_functions->__dbExecute($stm_name, $data);
-		if (!$result) {
+		if (!is_resource($result)) {
 			$this->log->debug('ExecuteData', 'ERROR in STM[' . $stm_name . '|'
 				. $this->prepare_cursor[$stm_name]['result'] . ']: '
 				. $this->log->prAr($data));
@@ -1816,10 +1899,14 @@ class IO extends \CoreLibs\Basic
 					// if only ['foo_id'] and it is the PK then the PK is directly
 					// written to the insert_id
 					if (
+						// FIXME: all return insert_id should be array only
+						/** @phpstan-ignore-next-line */
 						count($this->insert_id[0]) > 1 ||
+						/** @phpstan-ignore-next-line */
 						!array_key_exists($this->prepare_cursor[$stm_name]['pk_name'], $this->insert_id[0])
 					) {
 						$this->insert_id_ext = $this->insert_id[0];
+						/** @phpstan-ignore-next-line */
 						$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
 					} elseif ($this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']]) {
 						$this->insert_id = $this->insert_id[0][$this->prepare_cursor[$stm_name]['pk_name']];
@@ -1996,12 +2083,12 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * writes into one table based on array of table columns
-	 * @param  array    $write_array     list of elements to write
-	 * @param  array    $not_write_array list of elements not to write
-	 * @param  int      $primary_key     id key to decide if we write insert or update
-	 * @param  string   $table           name for the target table
-	 * @param  array    $data            data array to override _POST data
-	 * @return int|bool                  primary key
+	 * @param  array<mixed> $write_array     list of elements to write
+	 * @param  array<mixed> $not_write_array list of elements not to write
+	 * @param  int          $primary_key     id key to decide if we write insert or update
+	 * @param  string       $table           name for the target table
+	 * @param  array<mixed> $data            data array to override _POST data
+	 * @return int|bool                      primary key
 	 */
 	public function dbWriteData(
 		array $write_array,
@@ -2032,13 +2119,15 @@ class IO extends \CoreLibs\Basic
 	 * PARAM INFO: $primary key
 	 * this can be a plain string/int and will be internal transformed into the array form
 	 * or it takes the array form of array [row => column, value => pk value]
-	 * @param  array            $write_array            list of elements to write
-	 * @param  int|string|array $primary_key            primary key string or array set
-	 * @param  string           $table                  name for the target table
-	 * @param  array            $not_write_array        list of elements not to write (optional)
-	 * @param  array            $not_write_update_array list of elements not to write during update (optional)
-	 * @param  array            $data                   optional array with data, if not _POST vars are used
-	 * @return int|bool                          primary key
+	 * @param  array<mixed>            $write_array     list of elements to write
+	 * @param  int|string|array<mixed> $primary_key     primary key string or array set
+	 * @param  string                  $table           name for the target table
+	 * @param  array<mixed>            $not_write_array list of elements not to write (optional)
+	 * @param  array<mixed>            $not_write_update_array list of elements not
+	 *                                                         to write during update (optional)
+	 * @param  array<mixed>            $data            optional array with data
+	 *                                                  if not _POST vars are used
+	 * @return int|bool                                 primary key
 	 */
 	public function dbWriteDataExt(
 		array $write_array,
@@ -2066,6 +2155,9 @@ class IO extends \CoreLibs\Basic
 		$q_sub_data = '';
 		// get the table layout and row types
 		$table_data = $this->dbShowTableMetaData(($this->db_schema ? $this->db_schema . '.' : '') . $table);
+		if (!is_array($table_data)) {
+			return false;
+		}
 		// @phan HACK
 		$primary_key['value'] = $primary_key['value'] ?? '';
 		$primary_key['row'] = $primary_key['row'] ?? '';
@@ -2186,21 +2278,22 @@ class IO extends \CoreLibs\Basic
 		$milliseconds = $matches[6];
 
 		return $prefix
-			. ($hour ? $hour . 'h ' : '')
-			. ($minutes ? $minutes . 'm ' : '')
-			. ($seconds ? $seconds . 's' : '')
-			. ($show_micro && $milliseconds ? ' ' . $milliseconds . 'ms' : '');
+			. (!empty($hour) && is_string($hour) ? $hour . 'h ' : '')
+			. (!empty($minutes) && is_string($minutes) ? $minutes . 'm ' : '')
+			. (!empty($seconds) && is_string($seconds) ? $seconds . 's' : '')
+			. ($show_micro && !empty($milliseconds) ? ' ' . $milliseconds . 'ms' : '');
 	}
 
 	/**
 	 * this is only needed for Postgresql. Converts postgresql arrays to PHP
 	 * @param  string $text input text to parse to an array
-	 * @return array        PHP array of the parsed data
+	 * @return array<mixed> PHP array of the parsed data
 	 */
 	public function dbArrayParse(string $text): array
 	{
 		$output = [];
-		return $this->db_functions->__dbArrayParse($text, $output);
+		$__db_array_parse = $this->db_functions->__dbArrayParse($text, $output);
+		return is_array($__db_array_parse) ? $__db_array_parse : [];
 	}
 
 	/**
@@ -2228,7 +2321,7 @@ class IO extends \CoreLibs\Basic
 				$value = $value === '' ? 0 : intval($value);
 				break;
 		}
-		return $value;
+		return (string)$value;
 	}
 
 	// ***************************
@@ -2237,42 +2330,48 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * return current set insert_id as is
-	 * @return array|string|int|null Primary key value, most likely int
-	 *                               Array for multiple return set
-	 *                               Empty string for unset
-	 *                               Null for error
+	 * @return array<mixed>|string|int|bool|null Primary key value, most likely int
+	 *                                           Array for multiple return set
+	 *                                           Empty string for unset
+	 *                                           Null for error
 	 */
 	public function dbGetReturning()
 	{
+		// FIXME: this should be only an array
 		return $this->insert_id;
 	}
 
 	/**
 	 * alternative name, returns insert_id
-	 * @return array|string|int|null Primary key value, most likely int
-	 *                               Array for multiple return set
-	 *                               Empty string for unset
-	 *                               Null for error
+	 * @return array<mixed>|string|int|bool|null Primary key value, most likely int
+	 *                                      Array for multiple return set
+	 *                                      Empty string for unset
+	 *                                      Null for error
 	 */
 	public function dbGetInsertPK()
 	{
+		// FIXME: this should be only an array
 		return $this->dbGetReturning();
 	}
 
 	/**
 	 * return the extended insert return string set
 	 * Most likely Array
-	 * @param  string|null       $key Optional key for insert_id_ext array
-	 *                                if found will return only this element,
-	 *                                else will return null
-	 * @return array|string|null      RETURNING values as array
-	 *                                Empty string for unset
-	 *                                Null for error
+	 * @param  string|null $key         Optional key for insert_id_ext array
+	 *                                  if found will return only this element,
+	 *                                  else will return null
+	 * @return array<mixed>|string|int|bool|null RETURNING values as array
+	 *                                  Empty string for unset
+	 *                                  Null for error
 	 */
 	public function dbGetReturningExt($key = null)
 	{
+		// FIXME: this has to be better as in return
 		if ($key !== null) {
-			if (isset($this->insert_id_ext[$key])) {
+			if (
+				is_array($this->insert_id_ext) &&
+				isset($this->insert_id_ext[$key])
+			) {
 				return $this->insert_id_ext[$key];
 			} else {
 				return null;
@@ -2283,7 +2382,7 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * Always returns the returning block as an array
-	 * @return array All returning data as array. even if one row only
+	 * @return array<mixed> All returning data as array. even if one row only
 	 */
 	public function dbGetReturningArray(): array
 	{
@@ -2292,17 +2391,20 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * returns the full array for cursor ext
-	 * @param  string|null $q Query string, if not null convert to md5
-	 *                        and return set cursor ext for only this
-	 *                        if not found or null return null
-	 * @return array|null     Cursor Extended array
-	 *                        Key is md5 string from query run
+	 * @param  string|null $q    Query string, if not null convert to md5
+	 *                           and return set cursor ext for only this
+	 *                           if not found or null return null
+	 * @return array<mixed>|null Cursor Extended array
+	 *                           Key is md5 string from query run
 	 */
 	public function dbGetCursorExt($q = null)
 	{
 		if ($q !== null) {
 			$q_md5 = md5($q);
-			if (isset($this->cursor_ext[$q_md5])) {
+			if (
+				is_array($this->cursor_ext) &&
+				isset($this->cursor_ext[$q_md5])
+			) {
 				return $this->cursor_ext[$q_md5];
 			} else {
 				return null;
@@ -2326,8 +2428,8 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * old call for getInserReturnExt
-	 * @param  string|null       $key See above
-	 * @return array|string|null      See above
+	 * @param  string|null              $key See above
+	 * @return array<mixed>|string|int|bool|null      See above
 	 * @deprecated use getReturningExt($key = null) instead
 	 */
 	public function getInsertReturn($key = null)
@@ -2338,7 +2440,7 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * DEPRECATED: getReturning
-	 * @return array|string|int|null [DEPRECATED]
+	 * @return array<mixed>|string|int|bool|null [DEPRECATED]
 	 * @deprecated use dbGetReturning() instead
 	 */
 	public function getReturning()
@@ -2349,7 +2451,7 @@ class IO extends \CoreLibs\Basic
 
 	/**
 	 * DEPRECATED: getInsertPK
-	 * @return array|string|int|null [DEPRECATED]
+	 * @return array<mixed>|string|int|bool|null [DEPRECATED]
 	 * @deprecated use dbGetInsertPK() instead
 	 */
 	public function getInsertPK()
@@ -2361,7 +2463,7 @@ class IO extends \CoreLibs\Basic
 	/**
 	 * DEPRECATED: getReturningExt
 	 * @param  string|null $key [DEPRECATED]
-	 * @return array|string|null [DEPRECATED]
+	 * @return array<mixed>|string|bool|int|null [DEPRECATED]
 	 * @deprecated use dbGetReturningExt($key = null) instead
 	 */
 	public function getReturningExt($key = null)
@@ -2373,7 +2475,7 @@ class IO extends \CoreLibs\Basic
 	/**
 	 * DEPRECATED: getCursorExt
 	 * @param  string|null $q [DEPRECATED]
-	 * @return array|null [DEPRECATED]
+	 * @return array<mixed>|null [DEPRECATED]
 	 * @deprecated use dbGetCursorExt($q = null) instead
 	 */
 	public function getCursorExt($q = null)

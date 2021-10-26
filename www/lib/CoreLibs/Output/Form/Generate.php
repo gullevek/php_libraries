@@ -222,48 +222,78 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 {
 	// for the load statetment describes which elements from
 	// the load query should be shown and i which format
+	/** @var array<mixed> */
 	public $field_array = [];
+	/** @var string */
 	public $load_query; // the query needed for loading a data set (one row in the table)
+	/** @var string */
 	public $col_name; // the name of the columen (before _<type>) [used for order button]
+	/** @var int */
 	public $yes; // the yes flag that triggers the template to show ALL and not only new/load
+	/** @var string */
 	public $msg; // the error msg
+	/** @var int */
 	public $error; // the error flag set for printing red error msg
+	/** @var int */
 	public $warning; // warning flag, for information (saved, loaded, etc)
+	/** @var string */
 	public $archive_pk_name; // the pk name for the load select form
+	/** @var string */
 	private $int_pk_name; // primary key, only internal usage
+	/** @var array<mixed> */
 	public $reference_array = []; // reference arrays -> stored in $this->reference_array[$table_name] => [];
+	/** @var array<mixed> */
 	public $element_list; // element list for elements next to each other as a special sub group
+	/** @var array<mixed> */
 	public $table_array = [];
+	/** @var string */
 	public $my_page_name; // the name of the page without .php extension
+	/** @var bool */
 	public $mobile_phone = false;
 	// buttons and checkboxes
+	/** @var string */
 	public $archive;
+	/** @var string */
 	public $new;
+	/** @var string */
 	public $really_new;
+	/** @var string */
 	public $delete;
+	/** @var string */
 	public $really_delete;
+	/** @var string */
 	public $save;
+	/** @var string */
 	public $remove_button;
 	// security publics
+	/** @var int */
 	public $base_acl_level;
+	/** @var array<mixed> */
 	public $security_level;
 	// layout publics
+	/** @var int */
 	public $table_width;
 	// internal lang & encoding vars
+	/** @var string */
 	public $lang_dir = '';
+	/** @var string */
 	public $lang;
+	/** @var string */
 	public $lang_short;
+	/** @var string */
 	public $encoding;
 	// language
+	/** @var \CoreLibs\Language\L10n */
 	public $l;
 
 	// now some default error msgs (english)
+	/** @var array<mixed> */
 	public $language_array = [];
 
 	/**
 	 * construct form generator
-	 * @param array       $db_config   db config array
-	 * @param int|integer $table_width table/div width (default 750)
+	 * @param array<mixed> $db_config   db config array
+	 * @param int|integer  $table_width table/div width (default 750)
 	 */
 	public function __construct(array $db_config, int $table_width = 750)
 	{
@@ -478,7 +508,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * array of fields
 	 * @param  string      $want_key  the key where you want the data from
 	 * @param  string|null $key_value if set searches for special right value
-	 * @return array                  found key fields
+	 * @return array<mixed>           found key fields
 	 */
 	public function formGetColNameArrayFromKey(string $want_key, ?string $key_value = null): array
 	{
@@ -500,7 +530,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * formated output for the error && warning msg
-	 * @return array error message with msg, width, clas
+	 * @return array<string,string|int> error message with msg, width, clas
 	 */
 	public function formPrintMsg(): array
 	{
@@ -605,9 +635,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * default delete procedure
-	 * @param  array $element_list element array that should be removed
-	 * @param  array $remove_name  key names that should be removed
-	 * @return void                has no return
+	 * @param  array<mixed> $element_list element array that should be removed
+	 * @param  array<mixed> $remove_name  key names that should be removed
+	 * @return void                       has no return
 	 */
 	public function formProcedureDeleteFromElementList(array $element_list, array $remove_name): void
 	{
@@ -704,7 +734,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * create the load list and return it as an array
-	 * @return array load list array with primary key, name and selected entry
+	 * @return array<string,mixed> load list array with primary key, name and selected entry
 	 */
 	public function formCreateLoad(): array
 	{
@@ -721,7 +751,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 			// load list data
 			$this->dbExec($this->load_query);
-			while ($res = $this->dbFetchArray()) {
+			while (is_array($res = $this->dbFetchArray())) {
 				$pk_ids[] = $res[$this->int_pk_name];
 				if (
 					isset($this->table_array[$this->int_pk_name]['value']) &&
@@ -766,8 +796,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * Create new entry element for HTML output
-	 * @param  bool $hide_new_checkbox show or hide the new checkbox, default is false
-	 * @return array                   return the new create array with name & checkbox show flag
+	 * @param  bool $hide_new_checkbox  show or hide the new checkbox, default is false
+	 * @return array<string,string|int> return the new create array with name & checkbox show flag
 	 */
 	public function formCreateNew($hide_new_checkbox = false): array
 	{
@@ -798,7 +828,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * create the save and delete element html group data
 	 * @param  bool  $hide_delete          hide the delete button (default false)
 	 * @param  bool  $hide_delete_checkbox hide the delete checkbox (default false)
-	 * @return array                       return the hide/show delete framework for html creation
+	 * @return array<string,mixed>         return the hide/show delete framework
+	 *                                     for html creation
 	 */
 	public function formCreateSaveDelete($hide_delete = false, $hide_delete_checkbox = false): array
 	{
@@ -853,8 +884,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * @param  string      $element_name the name from the array, you want to have build
 	 * @param  string|null $query        can overrule internal query data,
 	 *                                   for drop down, as data comes from a reference table
-	 *                                   for drop_down_text it has to be an array with $key->$valu
-	 * @return array                     html settings array
+	 *                                   for drop_down_text it has to be an
+	 *                                   array with $key->$value
+	 * @return array<string,mixed>       html settings array
 	 */
 	public function formCreateElement(string $element_name, ?string $query = null): array
 	{
@@ -993,7 +1025,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$data['name'] = $element_name;
 			$data['value'][] = '';
 			$data['output'][] = $this->l->__('Please choose .. . ');
-			while ($res = $this->dbReturn($query)) {
+			while (is_array($res = $this->dbReturn($query))) {
 				$data['value'][] = $res[0];
 				$data['output'][] = $res[1];
 				if (
@@ -1309,22 +1341,18 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 		} // while
 		// do check for reference tables
-		if (is_array($this->reference_array)) {
-			reset($this->reference_array);
-			foreach ($this->reference_array as $key => $value) {
-				if (
-					isset($this->reference_array[$key]['mandatory']) &&
-					$this->reference_array[$key]['mandatory'] &&
-					!$this->reference_array[$key]['selected'][0]
-				) {
-					$this->msg .= sprintf(
-						$this->l->__('Please select at least one Element from field <b>%s</b>!<br>'),
-						$this->reference_array[$key]['output_name']
-					);
-				}
+		reset($this->reference_array);
+		foreach ($this->reference_array as $key => $value) {
+			if (
+				isset($this->reference_array[$key]['mandatory']) &&
+				$this->reference_array[$key]['mandatory'] &&
+				!$this->reference_array[$key]['selected'][0]
+			) {
+				$this->msg .= sprintf(
+					$this->l->__('Please select at least one Element from field <b>%s</b>!<br>'),
+					$this->reference_array[$key]['output_name']
+				);
 			}
-		} else {
-			$this->reference_array = [];
 		}
 		// $this->log->debug('edit_error', 'QS: <pre>' . print_r($_POST, true) . '</pre>');
 		if (is_array($this->element_list)) {
@@ -1502,7 +1530,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * sets the order to the maximum, if order flag is set in array
-	 * @return array table array with set order number
+	 * @return array<mixed> table array with set order number
 	 */
 	public function formSetOrder(): array
 	{
@@ -1593,7 +1621,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$q = 'SELECT ' . $this->reference_array[$key]['other_table_pk']
 					. ' FROM ' . $this->reference_array[$key]['table_name']
 					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
-				while ($res = $this->dbReturn($q)) {
+				while (is_array($res = $this->dbReturn($q))) {
 					$this->reference_array[$key]['selected'][] = $res[$this->reference_array[$key]['other_table_pk']];
 				}
 			}
@@ -1646,7 +1674,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						. ' (' . $this->table_array[$key]['input_name'] . ') VALUES ('
 						. "'" . $this->dbEscapeString($this->table_array[$key]['input_value']) . "')";
 					$this->dbExec($q);
-					if (!empty($this->table_array[$key]['where'])) {
+					if (!empty($this->table_array[$key]['where']) && is_numeric($this->insert_id)) {
 						// make an update on the just inseted data with the where data als update values
 						$q = 'UPDATE ' . $this->table_array[$key]['table_name'] . ' SET ';
 						$q .= $this->table_array[$key]['where'] . ' ';
@@ -2039,8 +2067,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * creates HTML hidden input fields out of an hash array
-	 * @param  array $hidden_array The list of fields to be added as hidden
-	 * @return array               key -> value list of hidden fileds data
+	 * @param  array<mixed> $hidden_array The list of fields to be added as hidden
+	 * @return array<mixed>               key -> value list of hidden fileds data
 	 */
 	public function formCreateHiddenFields(array $hidden_array = []): array
 	{
@@ -2072,8 +2100,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * creates the multiple select part for a reference_table
-	 * @param  string $table_name Table name for reference array lookup
-	 * @return array              Reference table output array
+	 * @param  string $table_name  Table name for reference array lookup
+	 * @return array<string,mixed> Reference table output array
 	 */
 	public function formCreateElementReferenceTable(string $table_name): array
 	{
@@ -2087,7 +2115,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		$data['name'] = $this->reference_array[$table_name]['other_table_pk'];
 		$data['size'] = $this->reference_array[$table_name]['select_size'];
-		while ($res = $this->dbReturn($this->reference_array[$table_name]['query'])) {
+		while (is_array($res = $this->dbReturn($this->reference_array[$table_name]['query']))) {
 			$data['value'][] = $res[0];
 			$data['output'][] = $res[1];
 			$data['selected'][] = (\CoreLibs\Convert\Html::checked(
@@ -2109,8 +2137,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * this currently only works for a list that is filled from a sub table and creates
 	 * only a connection to this one new version will allow a sub list with free input
 	 * fields to directly fill a sub table to a master table
-	 * @param  string $table_name which element entry to create
-	 * @return array              element for html creation
+	 * @param  string $table_name  Which element entry to create
+	 * @return array<string,mixed> Element for html creation
 	 */
 	public function formCreateElementListTable(string $table_name): array
 	{
@@ -2189,7 +2217,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// only two elements are allowed: pos 0 is key, pso 1 is visible output name
 			if (isset($data_array['type']) && $data_array['type'] == 'drop_down_db') {
 				$md_q = md5($data_array['query']);
-				while ($res = $this->dbReturn($data_array['query'])) {
+				while (is_array($res = $this->dbReturn($data_array['query']))) {
 					/** @phan-suppress-next-line PhanTypeInvalidDimOffset */
 					$this->log->debug('edit', 'Q[' . $md_q . '] pos: ' . $this->cursor_ext[$md_q]['pos']
 						. ' | want: ' . ($data_array['preset'] ?? '-')
@@ -2332,7 +2360,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (isset($q)) {
 			$pos = 0; // position in while for overwrite if needed
 			// read out the list and add the selected data if needed
-			while ($res = $this->dbReturn($q)) {
+			while (is_array($res = $this->dbReturn($q))) {
 				$_data = [];
 				$prfx = $data['prefix'] ?? ''; // short
 				// go through each res

@@ -26,7 +26,7 @@ class ProgressBar
 	public $code;	// unique code
 	/** @var string */
 	public $status = 'new';	// current status (new,show,hide)
-	/** @var int */
+	/** @var float|int */
 	public $step = 0;	// current step
 	/** @var array<string,?int> */
 	public $position = [ // current bar position
@@ -223,8 +223,8 @@ class ProgressBar
 
 	/**
 	 * set the step
-	 * @param  float  $step percent step to do
-	 * @return void         has no return
+	 * @param  float $step percent step to do
+	 * @return void
 	 */
 	private function __setStep(float $step): void
 	{
@@ -242,7 +242,7 @@ class ProgressBar
 	 * set frame layout
 	 * @param  integer $width  bar width
 	 * @param  integer $height bar height
-	 * @return void            has no return
+	 * @return void
 	 */
 	public function setFrame(int $width = 0, int $height = 0): void
 	{
@@ -271,7 +271,7 @@ class ProgressBar
 	 * @param  string $type  label type
 	 * @param  string $name  label name (internal)
 	 * @param  string $value label output name (optional)
-	 * @return void          has no return
+	 * @return void
 	 */
 	public function addLabel(string $type, string $name, string $value = '&nbsp;'): void
 	{
@@ -377,7 +377,7 @@ class ProgressBar
 	 * @param  string $value  button text (output)
 	 * @param  string $action button action (link)
 	 * @param  string $target button action target (default self)
-	 * @return void           has no return
+	 * @return void
 	 */
 	public function addButton(string $name, string $value, string $action, string $target = 'self'): void
 	{
@@ -394,7 +394,7 @@ class ProgressBar
 	 * @param  int    $width  width px
 	 * @param  int    $height height px
 	 * @param  string $align  alignment (left/right/etc), default empty
-	 * @return void           has no return
+	 * @return void
 	 */
 	public function setLabelPosition(
 		string $name,
@@ -440,7 +440,7 @@ class ProgressBar
 	 * set label color
 	 * @param  string $name  label name to set
 	 * @param  string $color color value in rgb html hex
-	 * @return void          has no return
+	 * @return void
 	 */
 	public function setLabelColor(string $name, string $color): void
 	{
@@ -456,7 +456,7 @@ class ProgressBar
 	 * set the label background color
 	 * @param  string $name  label name to set
 	 * @param  string $color background color to set in rgb html hex
-	 * @return void          has no return
+	 * @return void
 	 */
 	public function setLabelBackground(string $name, string $color): void
 	{
@@ -474,7 +474,7 @@ class ProgressBar
 	 * @param  int    $size   font size in px
 	 * @param  string $family font family (default empty)
 	 * @param  string $weight font weight (default empty)
-	 * @return void           has no return
+	 * @return void
 	 */
 	public function setLabelFont(string $name, int $size, string $family = '', string $weight = ''): void
 	{
@@ -523,7 +523,7 @@ class ProgressBar
 	 * set the label valeu
 	 * @param  string $name  label name to set
 	 * @param  string $value label value (output)
-	 * @return void          has no return
+	 * @return void
 	 */
 	public function setLabelValue(string $name, string $value): void
 	{
@@ -539,7 +539,7 @@ class ProgressBar
 	/**
 	 * set the bar color
 	 * @param  string $color color for the progress bar in rgb html hex
-	 * @return void          has no return
+	 * @return void
 	 */
 	public function setBarColor(string $color): void
 	{
@@ -554,7 +554,7 @@ class ProgressBar
 	/**
 	 * set the progress bar background color
 	 * @param  string $color background color in rgb html hex
-	 * @return void          has no return
+	 * @return void
 	 */
 	public function setBarBackground(string $color): void
 	{
@@ -569,7 +569,7 @@ class ProgressBar
 	/**
 	 * progress bar direct (left/right)
 	 * @param  string $direction set direction as left/right
-	 * @return void              has no return
+	 * @return void
 	 */
 	public function setBarDirection(string $direction): void
 	{

@@ -50,7 +50,9 @@ namespace CoreLibs\DB\SQL;
 
 class PgSQL
 {
+	/** @var string */
 	private $last_error_query;
+	/** @var resource|bool */
 	private $dbh;
 
 	/**
@@ -81,6 +83,9 @@ class PgSQL
 	public function __dbQuery(string $query)
 	{
 		$this->last_error_query = '';
+		if (!is_resource($this->dbh)) {
+			return false;
+		}
 		// read out the query status and save the query if needed
 		$result = pg_query($this->dbh, $query);
 		if (!$result) {
@@ -96,7 +101,11 @@ class PgSQL
 	 */
 	public function __dbSendQuery(string $query): bool
 	{
-		return pg_send_query($this->dbh, $query);
+		if (!is_resource($this->dbh)) {
+			return false;
+		}
+		$result = pg_send_query($this->dbh, $query);
+		return $result ? true : false;
 	}
 
 	/**
@@ -106,7 +115,13 @@ class PgSQL
 	public function __dbGetResult()
 	{
 		$this->last_error_query = '';
+		if (!is_resource($this->dbh)) {
+			return false;
+		}
 		$result = pg_get_result($this->dbh);
+		if (!is_resource($result)) {
+			return false;
+		}
 		if ($error = pg_result_error($result)) {
 			$this->last_error_query = $error;
 		}
@@ -119,10 +134,11 @@ class PgSQL
 	 */
 	public function __dbClose(): void
 	{
-		if (is_resource($this->dbh)) {
-			if (pg_connection_status($this->dbh) === PGSQL_CONNECTION_OK) {
-				pg_close($this->dbh);
-			}
+		if (!is_resource($this->dbh)) {
+			return;
+		}
+		if (pg_connection_status($this->dbh) === PGSQL_CONNECTION_OK) {
+			pg_close($this->dbh);
 		}
 	}
 
@@ -134,6 +150,9 @@ class PgSQL
 	 */
 	public function __dbPrepare(string $name, string $query)
 	{
+		if (!is_resource($this->dbh)) {
+			return false;
+		}
 		$result = pg_prepare($this->dbh, $name, $query);
 		if (!$result) {
 			$this->last_error_query = $query;
@@ -144,11 +163,14 @@ class PgSQL
 	/**
 	 * wrapper for pg_execute for running a prepared statement
 	 * @param  string        $name statement name
-	 * @param  array         $data data array
+	 * @param  array<mixed>  $data data array
 	 * @return resource|bool returns status or false for error
 	 */
 	public function __dbExecute(string $name, array $data)
 	{
+		if (!is_resource($this->dbh)) {
+			return false;
+		}
 		$result = pg_execute($this->dbh, $name, $data);
 		if (!$result) {
 			$this->last_error_query = $name;
@@ -192,7 +214,7 @@ class PgSQL
 	 * if through/true false, use __dbResultType(true)
 	 * @param  resource $cursor      cursor resource
 	 * @param  int      $result_type result type as int number
-	 * @return array|bool            array result data or false on end/error
+	 * @return array<mixed>|bool     array result data or false on end/error
 	 */
 	public function __dbFetchArray($cursor, int $result_type = PGSQL_BOTH)
 	{
@@ -217,7 +239,7 @@ class PgSQL
 	/**
 	 * wrapper for pg_fetch_all
 	 * @param  resource   $cursor cursor resource
-	 * @return array|bool         data array or false for end/error
+	 * @return array<mixed>|bool  data array or false for end/error
 	 */
 	public function __dbFetchAll($cursor)
 	{
@@ -269,7 +291,11 @@ class PgSQL
 			$q = "SELECT CURRVAL('$seq') AS insert_id";
 			// I have to do manually or I overwrite the original insert internal vars ...
 			if ($q = $this->__dbQuery($q)) {
-				list($id) = $this->__dbFetchArray($q);
+				// abort if this is not an resource
+				if (!is_resource($q)) {
+					return false;
+				}
+				list($id) = $this->__dbFetchArray($q) ?: [];
 			} else {
 				$id = [-1, $q];
 			}
@@ -294,7 +320,14 @@ class PgSQL
 			if ($schema) {
 				$q = "SHOW search_path";
 				$cursor = $this->__dbQuery($q);
-				$search_path = $this->__dbFetchArray($cursor)['search_path'];
+				if (!is_resource($cursor)) {
+					return false;
+				}
+				$__db_fetch_array = $this->__dbFetchArray($cursor);
+				if (!is_array($__db_fetch_array)) {
+					return false;
+				}
+				$search_path = $__db_fetch_array['search_path'] ?? '';
 				if ($search_path != $schema) {
 					$table_prefix = $schema . '.';
 				}
@@ -319,8 +352,12 @@ class PgSQL
 				. "pg_attribute.attnum = any(pg_index.indkey) "
 				. "AND indisprimary";
 			$cursor = $this->__dbQuery($q);
-			if ($cursor) {
-				return $this->__dbFetchArray($cursor)['column_name'] ?? false;
+			if (is_resource($cursor)) {
+				$__db_fetch_array = $this->__dbFetchArray($cursor);
+				if (!is_array($__db_fetch_array)) {
+					return false;
+				}
+				return $__db_fetch_array['column_name'] ?? false;
 			} else {
 				return false;
 			}
@@ -331,13 +368,13 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_connect, writes out failure to screen if error occurs (hidden var)
-	 * @param  string    $db_host host name
-	 * @param  string    $db_user user name
-	 * @param  string    $db_pass password
-	 * @param  string    $db_name databse name
-	 * @param  integer   $db_port port (int, 5432 is default)
-	 * @param  string    $db_ssl  SSL (allow is default)
-	 * @return ?resource          db handler resource or null on error
+	 * @param  string        $db_host host name
+	 * @param  string        $db_user user name
+	 * @param  string        $db_pass password
+	 * @param  string        $db_name databse name
+	 * @param  integer       $db_port port (int, 5432 is default)
+	 * @param  string        $db_ssl  SSL (allow is default)
+	 * @return resource|bool          db handler resource or false on error
 	 */
 	public function __dbConnect(
 		string $db_host,
@@ -353,9 +390,9 @@ class PgSQL
 		}
 		$this->dbh = pg_connect("host=" . $db_host . " port=" . $db_port . " user="
 			. $db_user . " password=" . $db_pass . " dbname=" . $db_name . " sslmode=" . $db_ssl);
-		if (!$this->dbh) {
-			die("<!-- Can't connect to database //-->");
-		}
+		// if (!$this->dbh) {
+		// 	die("<!-- Can't connect to database //-->");
+		// }
 		return $this->dbh;
 	}
 
@@ -367,6 +404,9 @@ class PgSQL
 	 */
 	public function __dbPrintError($cursor = null): string
 	{
+		if (!is_resource($this->dbh)) {
+			return '';
+		}
 		// run the query again for the error result here
 		if (!$cursor && $this->last_error_query) {
 			pg_send_query($this->dbh, $this->last_error_query);
@@ -382,12 +422,15 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_meta_data
-	 * @param  string $table    table name
-	 * @param  bool   $extended show extended info (default false)
-	 * @return array|bool       array data for the table info or false on error
+	 * @param  string $table     table name
+	 * @param  bool   $extended  show extended info (default false)
+	 * @return array<mixed>|bool array data for the table info or false on error
 	 */
 	public function __dbMetaData(string $table, $extended = false)
 	{
+		if (!is_resource($this->dbh)) {
+			return false;
+		}
 		// needs to prefixed with @ or it throws a warning on not existing table
 		return @pg_meta_data($this->dbh, $table, $extended);
 	}
@@ -399,6 +442,9 @@ class PgSQL
 	 */
 	public function __dbEscapeString($string): string
 	{
+		if (!is_resource($this->dbh)) {
+			return '';
+		}
 		return pg_escape_string($this->dbh, (string)$string);
 	}
 
@@ -411,6 +457,9 @@ class PgSQL
 	 */
 	public function __dbEscapeLiteral($string): string
 	{
+		if (!is_resource($this->dbh)) {
+			return '';
+		}
 		return pg_escape_string($this->dbh, (string)$string);
 	}
 
@@ -421,6 +470,9 @@ class PgSQL
 	 */
 	public function __dbEscapeBytea($bytea): string
 	{
+		if (!is_resource($this->dbh)) {
+			return '';
+		}
 		return pg_escape_bytea($this->dbh, $bytea);
 	}
 
@@ -430,6 +482,9 @@ class PgSQL
 	 */
 	public function __dbConnectionBusy(): bool
 	{
+		if (!is_resource($this->dbh)) {
+			return false;
+		}
 		return pg_connection_busy($this->dbh);
 	}
 
@@ -441,6 +496,9 @@ class PgSQL
 	 */
 	public function __dbVersion(): string
 	{
+		if (!is_resource($this->dbh)) {
+			return '';
+		}
 		// array has client, protocol, server
 		// we just need the server
 		$v = pg_version($this->dbh);
@@ -449,11 +507,12 @@ class PgSQL
 
 	/**
 	 * postgresql array to php array
-	 * @param  string   $text    array text from PostgreSQL
-	 * @param  array    $output  (internal) recursive pass on for nested arrays
-	 * @param  bool|int $limit   (internal) max limit to not overshoot the end, start with false
-	 * @param  integer  $offset  (internal) shift offset for {}
-	 * @return array|int         converted PHP array, interal recusrive int position
+	 * @param  string           $text   array text from PostgreSQL
+	 * @param  array<mixed>     $output (internal) recursive pass on for nested arrays
+	 * @param  bool|int         $limit  (internal) max limit to not overshoot
+	 *                                  the end, start with false
+	 * @param  integer          $offset (internal) shift offset for {}
+	 * @return array<mixed>|int         converted PHP array, interal recusrive int position
 	 */
 	public function __dbArrayParse($text, &$output, $limit = false, $offset = 1)
 	{

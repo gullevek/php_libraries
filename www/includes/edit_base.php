@@ -175,7 +175,7 @@ if ($form->my_page_name == 'edit_order') {
 	$options_name = [];
 	$options_selected = [];
 	// DB read data for menu
-	while ($res = $form->dbReturn($q)) {
+	while (is_array($res = $form->dbReturn($q))) {
 		$row_data[] = [
 			"id" => $res[$table_name . "_id"],
 			"name" => $res["name"],

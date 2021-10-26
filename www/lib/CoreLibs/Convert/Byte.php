@@ -125,7 +125,7 @@ class Byte
 		// detects up to exo bytes
 		preg_match(
 			"/([\d.,]*)\s?(eib|pib|tib|gib|mib|kib|eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/i",
-			strtolower($number),
+			strtolower((string)$number),
 			$matches
 		);
 		if (isset($matches[1]) && isset($matches[2])) {
@@ -136,7 +136,7 @@ class Byte
 			// convert any mb/gb/etc to single m/b
 			$unit = preg_replace('/[^bkmgtpezy]/i', '', $matches[2]);
 			if ($unit) {
-				$number = $number * pow($si ? 1000 : 1024, stripos($valid_units_, $unit[0]));
+				$number = $number * pow($si ? 1000 : 1024, stripos($valid_units_, $unit[0]) ?: 0);
 			}
 			// convert to INT to avoid +E output
 			$number = (int)round($number);

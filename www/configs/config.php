@@ -33,7 +33,7 @@ if (!defined('DS')) {
 }
 // find trigger name "admin/" or "frontend/" in the getcwd() folder
 foreach (['admin', 'frontend'] as $folder) {
-	if (strstr(getcwd(), DS . $folder)) {
+	if (strstr(getcwd() ?: '', DS . $folder)) {
 		define('CONTENT_PATH', $folder . DS);
 		break;
 	}

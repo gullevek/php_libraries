@@ -34,51 +34,80 @@ namespace CoreLibs\Admin;
 class Backend extends \CoreLibs\DB\IO
 {
 	// page name
+	/** @var array<mixed> */
 	public $menu = [];
+	/** @var int|string */
 	public $menu_show_flag = 0; // top menu flag (mostly string)
 	// action ids
+	/** @var array<string> */
 	public $action_list = [
 		'action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag',
 		'action_menu', 'action_value', 'action_error', 'action_loaded'
 	];
+	/** @var string */
 	public $action;
+	/** @var string|int */
 	public $action_id;
+	/** @var string|int */
 	public $action_sub_id;
+	/** @var string|int|bool */
 	public $action_yes;
+	/** @var string */
 	public $action_flag;
+	/** @var string */
 	public $action_menu;
+	/** @var string */
 	public $action_loaded;
+	/** @var string */
 	public $action_value;
+	/** @var string */
 	public $action_error;
 	// ACL array variable if we want to set acl data from outisde
+	/** @var array<mixed> */
 	public $acl = [];
+	/** @var int */
 	public $default_acl;
 	// queue key
+	/** @var string */
 	public $queue_key;
 	// the current active edit access id
+	/** @var int */
 	public $edit_access_id;
 	// error/warning/info messages
+	/** @var array<mixed> */
 	public $messages = [];
+	/** @var int */
 	public $error = 0;
+	/** @var int */
 	public $warning = 0;
+	/** @var int */
 	public $info = 0;
 	// internal lang & encoding vars
+	/** @var string */
 	public $lang_dir = '';
+	/** @var string */
 	public $lang;
+	/** @var string */
 	public $lang_short;
+	/** @var string */
 	public $encoding;
 	// language
+	/** @var \CoreLibs\Language\L10n */
 	public $l;
 	// smarty publics [end processing in smarty class]
+	/** @var array<mixed> */
 	public $DATA;
+	/** @var array<mixed> */
 	public $HEADER;
+	/** @var array<mixed> */
 	public $DEBUG_DATA;
+	/** @var array<mixed> */
 	public $CONTENT_DATA;
 
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**
 	 * main class constructor
-	 * @param array $db_config db config array
+	 * @param array<mixed> $db_config db config array
 	 */
 	public function __construct(array $db_config)
 	{
@@ -151,7 +180,7 @@ class Backend extends \CoreLibs\DB\IO
 
 	/**
 	 * set internal ACL from login ACL
-	 * @param array $acl login acl array
+	 * @param array<mixed> $acl login acl array
 	 */
 	public function setACL(array $acl): void
 	{
@@ -160,16 +189,16 @@ class Backend extends \CoreLibs\DB\IO
 
 	/**
 	 * writes all action vars plus other info into edit_log tabl
-	 * @param  string       $event      any kind of event description,
-	 * @param  string|array $data       any kind of data related to that event
-	 * @param  string       $write_type write type can bei STRING or BINARY
-	 * @return void                     has no return
+	 * @param  string              $event      any kind of event description,
+	 * @param  string|array<mixed> $data       any kind of data related to that event
+	 * @param  string              $write_type write type can bei STRING or BINARY
+	 * @return void
 	 */
 	public function adbEditLog(string $event = '', $data = '', string $write_type = 'STRING'): void
 	{
 		$data_binary = '';
 		if ($write_type == 'BINARY') {
-			$data_binary = $this->dbEscapeBytea(bzcompress(serialize($data)));
+			$data_binary = $this->dbEscapeBytea((string)bzcompress(serialize($data)));
 			$data = 'see bzip compressed data_binary field';
 		}
 		if ($write_type == 'STRING') {
@@ -178,16 +207,15 @@ class Backend extends \CoreLibs\DB\IO
 		}
 
 		// check schema
+		$SCHEMA = 'public';
 		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
 			$SCHEMA = LOGIN_DB_SCHEMA;
 		} elseif ($this->dbGetSchema()) {
 			$SCHEMA = $this->dbGetSchema();
 		} elseif (defined('PUBLIC_SCHEMA')) {
 			$SCHEMA = PUBLIC_SCHEMA;
-		} else {
-			$SCHEMA = 'public';
 		}
-
+		/** @phpstan-ignore-next-line for whatever reason $SCHEMA is seen as possible array */
 		$q = "INSERT INTO " . $SCHEMA . ".edit_log "
 			. "(euid, event_date, event, data, data_binary, page, "
 			. "ip, user_agent, referer, script_name, query_string, server_name, http_host, "
@@ -225,8 +253,8 @@ class Backend extends \CoreLibs\DB\IO
 
 	/**
 	 * menu creater (from login menu session pages)
-	 * @param  int $flag visible flag trigger
-	 * @return array     menu array for output on page (smarty)
+	 * @param  int $flag    visible flag trigger
+	 * @return array<mixed> menu array for output on page (smarty)
 	 */
 	public function adbTopMenu(int $flag = 0): array
 	{
@@ -373,10 +401,10 @@ class Backend extends \CoreLibs\DB\IO
 	/**
 	 * @deprecated
 	 * creates out of a normal db_return array an assoc array
-	 * @param  array           $db_array input array
+	 * @param  array<mixed>    $db_array input array
 	 * @param  string|int|bool $key      key
 	 * @param  string|int|bool $value    value
-	 * @return array                     associative array
+	 * @return array<mixed>              associative array
 	 * @deprecated \CoreLibs\Combined\ArrayHandler::genAssocArray()
 	 */
 	public function adbAssocArray(array $db_array, $key, $value): array
@@ -407,16 +435,24 @@ class Backend extends \CoreLibs\DB\IO
 	/**
 	 * @deprecated
 	 * converts picture to a thumbnail with max x and max y size
-	 * @param  string      $pic          source image file with or without path
-	 * @param  int         $size_x       maximum size width
-	 * @param  int         $size_y       maximum size height
-	 * @param  string      $dummy        empty, or file_type to show an icon instead of nothing if file is not found
-	 * @param  string      $path         if source start is not ROOT path, if empty ROOT is choosen
-	 * @return string|bool               thumbnail name, or false for error
+	 * @param  string      $pic    source image file with or without path
+	 * @param  int         $size_x maximum size width
+	 * @param  int         $size_y maximum size height
+	 * @param  string      $dummy  empty, or file_type to show an icon
+	 *                             instead of nothing if file is not found
+	 * @param  string      $path   if source start is not ROOT path
+	 *                             if empty ROOT is choosen
+	 * @return string|bool         thumbnail name, or false for error
 	 * @deprecated \CoreLibs\Output\Image::createThumbnail()
 	 */
-	public function adbCreateThumbnail($pic, $size_x, $size_y, $dummy = '', $path = "", $cache = "")
-	{
+	public function adbCreateThumbnail(
+		string $pic,
+		int $size_x,
+		int $size_y,
+		string $dummy = '',
+		string $path = '',
+		string $cache = ''
+	) {
 		trigger_error(
 			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Output\Image::createThumbnail()',
 			E_USER_DEPRECATED
@@ -426,10 +462,10 @@ class Backend extends \CoreLibs\DB\IO
 
 	/**
 	 * wrapper function to fill up the mssages array
-	 * @param  string $level info/warning/error
-	 * @param  string $msg   string, can be printf formated
-	 * @param  array  $vars  optional data for a possible printf formated msg
-	 * @return void          has no return
+	 * @param  string       $level info/warning/error
+	 * @param  string       $msg   string, can be printf formated
+	 * @param  array<mixed> $vars  optional data for a possible printf formated msg
+	 * @return void                has no return
 	 */
 	public function adbMsg(string $level, string $msg, array $vars = []): void
 	{

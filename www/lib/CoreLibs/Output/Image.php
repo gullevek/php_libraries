@@ -127,7 +127,7 @@ class Image
 			$return_data = $thumb;
 			// if we have a delete filename, delete here with glob
 			if ($delete_filename) {
-				array_map('unlink', glob($delete_filename . '*'));
+				array_map('unlink', glob($delete_filename . '*') ?: []);
 			}
 		} else {
 			if (!empty($dummy) && strstr($dummy, '/') === false) {
@@ -255,11 +255,18 @@ class Image
 					) {
 						// image, copy source image, offset in image, source x/y, new size, source image size
 						$thumb = imagecreatetruecolor($thumb_width_r, $thumb_height_r);
+						if ($thumb === false) {
+							return false;
+						}
 						if ($img_type == IMAGETYPE_PNG) {
+							$imagecolorallocatealpha = imagecolorallocatealpha($thumb, 0, 0, 0, 127);
+							if ($imagecolorallocatealpha === false) {
+								return false;
+							}
 							// preservere transaprency
 							imagecolortransparent(
 								$thumb,
-								imagecolorallocatealpha($thumb, 0, 0, 0, 127)
+								$imagecolorallocatealpha
 							);
 							imagealphablending($thumb, false);
 							imagesavealpha($thumb, true);
@@ -274,7 +281,7 @@ class Image
 								break;
 						}
 						// check that we have a source image resource
-						if ($source !== null) {
+						if ($source !== null && $source !== false) {
 							// resize no shift
 							if ($high_quality === true) {
 								imagecopyresized(
@@ -356,10 +363,16 @@ class Image
 						$thumb_width = 250;
 					}
 					$thumb = imagecreatetruecolor($thumb_width, $thumb_height);
+					if ($thumb === false) {
+						return false;
+					}
 					// add outside border px = 5% (rounded up)
 					// eg 50px -> 2.5px
 					$gray = imagecolorallocate($thumb, 200, 200, 200);
 					$white = imagecolorallocate($thumb, 255, 255, 255);
+					if ($gray === false || $white === false) {
+						return false;
+					}
 					// fill gray background
 					imagefill($thumb, 0, 0, $gray);
 					// now create rectangle
@@ -407,55 +420,66 @@ class Image
 	 */
 	public static function correctImageOrientation($filename): void
 	{
-		if (function_exists('exif_read_data') && is_writeable($filename)) {
-			list($inc_width, $inc_height, $img_type) = getimagesize($filename);
-			// add @ to avoid "file not supported error"
-			$exif = @exif_read_data($filename);
-			$orientation = null;
-			$img = null;
-			if ($exif && isset($exif['Orientation'])) {
-				$orientation = $exif['Orientation'];
-			}
-			if ($orientation != 1) {
-				switch ($img_type) {
-					case IMAGETYPE_JPEG:
-						$img = imagecreatefromjpeg($filename);
-						break;
-					case IMAGETYPE_PNG:
-						$img = imagecreatefrompng($filename);
-						break;
-				}
-				$deg = 0;
-				// 1 top, 6: left, 8: right, 3: bottom
-				switch ($orientation) {
-					case 3:
-						$deg = 180;
-						break;
-					case 6:
-						$deg = -90;
-						break;
-					case 8:
-						$deg = 90;
-						break;
-				}
-				if ($img !== null) {
-					if ($deg) {
-						$img = imagerotate($img, $deg, 0);
-					}
-					// then rewrite the rotated image back to the disk as $filename
-					switch ($img_type) {
-						case IMAGETYPE_JPEG:
-							imagejpeg($img, $filename);
-							break;
-						case IMAGETYPE_PNG:
-							imagepng($img, $filename);
-							break;
-					}
-					// clean up image if we have an image
-					imagedestroy($img);
-				}
-			} // only if we need to rotate
-		} // function exists & file is writeable, else do nothing
+		// function exists & file is writeable, else do nothing
+		if (!function_exists('exif_read_data') || !is_writeable($filename)) {
+			return;
+		}
+		list($inc_width, $inc_height, $img_type) = getimagesize($filename);
+		// add @ to avoid "file not supported error"
+		$exif = @exif_read_data($filename);
+		$orientation = null;
+		$img = null;
+		if ($exif && isset($exif['Orientation'])) {
+			$orientation = $exif['Orientation'];
+		}
+		 // only if we need to rotate, if 1 it is already upright
+		if ($orientation === null || $orientation == 1) {
+			return;
+		}
+		switch ($img_type) {
+			case IMAGETYPE_JPEG:
+				$img = imagecreatefromjpeg($filename);
+				break;
+			case IMAGETYPE_PNG:
+				$img = imagecreatefrompng($filename);
+				break;
+		}
+		// no image loaded (wrong type)
+		if ($img === null || $img === false) {
+			return;
+		}
+		$deg = 0;
+		// 1 top, 6: left, 8: right, 3: bottom
+		switch ($orientation) {
+			case 3:
+				$deg = 180;
+				break;
+			case 6:
+				$deg = -90;
+				break;
+			case 8:
+				$deg = 90;
+				break;
+		}
+		// rotate if needed
+		if ($deg) {
+			$img = imagerotate($img, $deg, 0);
+		}
+		// rotate failed
+		if ($img === false) {
+			return;
+		}
+		// then rewrite the rotated image back to the disk as $filename
+		switch ($img_type) {
+			case IMAGETYPE_JPEG:
+				imagejpeg($img, $filename);
+				break;
+			case IMAGETYPE_PNG:
+				imagepng($img, $filename);
+				break;
+		}
+		// clean up image if we have an image
+		imagedestroy($img);
 	}
 }
 

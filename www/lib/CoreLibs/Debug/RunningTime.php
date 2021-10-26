@@ -11,12 +11,18 @@ namespace CoreLibs\Debug;
 class RunningTime
 {
 	// hr
+	/** @var float */
 	private static $hr_starttime;
+	/** @var float */
 	private static $hr_runtime;
+	/** @var float */
 	private static $hr_endtime;
 	// normal
+	/** @var float */
 	private static $starttime;
+	/** @var float */
 	private static $endtime;
+	/** @var string */
 	private static $runningtime_string;
 
 	/**
@@ -77,8 +83,8 @@ class RunningTime
 	 * on second call it sends the end time and then also prints the running time
 	 * Sets the internal runningtime_string variable with Start/End/Run time string
 	 * NOTE: for pure running time check it is recommended to use hrRunningTime method
-	 * @param  bool|boolean $simple     if true prints HTML strings, default text only
-	 * @return float                    running time as float number
+	 * @param  bool  $simple if true prints HTML strings, default text only
+	 * @return float         running time as float number
 	 */
 	public static function runningTime(bool $simple = false): float
 	{

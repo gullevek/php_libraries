@@ -11,9 +11,13 @@ namespace CoreLibs\Create;
 class RandomKey
 {
 	// key generation
+	/** @var array<mixed> */
 	private static $key_range = [];
+	/** @var int */
 	private static $one_key_length;
+	/** @var int */
 	private static $key_length = 4; // default key length
+	/** @var int */
 	private static $max_key_length = 256; // max allowed length
 
 	/**

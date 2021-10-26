@@ -57,24 +57,34 @@ namespace CoreLibs;
 class Basic
 {
 	// page and host name
+	/** @var string */
 	public $page_name;
+	/** @var string */
 	public $host_name;
+	/** @var int */
 	public $host_port;
 	// logging interface, Debug\Logging class
+	/** @var \CoreLibs\Debug\Logging */
 	public $log;
 
 	// email valid checks
+	/** @var array<mixed> */
 	public $email_regex_check = [];
+	/** @var string */
 	public $email_regex; // regex var for email check
 
 	// data path for files
+	/** @var array<mixed> */
 	public $data_path = [];
 
 	// session name
+	/** @var string */
 	private $session_name = '';
+	/** @var string */
 	private $session_id = '';
 
 	// ajax flag
+	/** @var bool */
 	protected $ajax_page_flag = false;
 
 	/**
@@ -154,7 +164,7 @@ class Basic
 			// start session
 			session_start();
 			// set internal session id, we can use that later for protection check
-			$this->session_id = session_id();
+			$this->session_id = session_id() ?: '';
 		}
 	}
 
@@ -264,14 +274,14 @@ class Basic
 	 * eg $foo->debugFor('print', 'on', ['LOG', 'DEBUG', 'INFO']);
 	 * @param  string $type  error, echo, print
 	 * @param  string $flag  on/off
-	 *         array  $array of levels to turn on/off debug
+	 *         array<mixed> $array of levels to turn on/off debug
 	 * @return void          has no return
 	 * @deprecated Use $basic->log->debugFor() instead
 	 */
 	public function debugFor(string $type, string $flag): void
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->debugFor() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
-		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal */
+		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal @phpstan-ignore-next-line */
 		$this->log->debugFor(...[func_get_args()]);
 	}
 
@@ -350,8 +360,8 @@ class Basic
 	/**
 	 * merges the given error array with the one from this class
 	 * only merges visible ones
-	 * @param  array  $error_msg error array
-	 * @return void              has no return
+	 * @param  array<mixed>  $error_msg error array
+	 * @return void
 	 * @deprecated Use $basic->log->mergeErrors() instead
 	 */
 	public function mergeErrors(array $error_msg = []): void
@@ -391,8 +401,8 @@ class Basic
 
 	/**
 	 * prints a html formatted (pre) array
-	 * @param  array  $array any array
-	 * @return string        formatted array for output with <pre> tag added
+	 * @param  array<mixed> $array any array
+	 * @return string              formatted array for output with <pre> tag added
 	 * @deprecated Use $this->log->prAr() instead
 	 */
 	public function printAr(array $array): string
@@ -405,7 +415,8 @@ class Basic
 	 * eg for debugging, this function does this
 	 * call this method in the child method and you get the parent function that called
 	 * @param  int    $level debug level, default 2
-	 * @return ?string       null or the function that called the function where this method is called
+	 * @return ?string       null or the function that called the function
+	 *                       where this method is called
 	 * @deprecated Use \CoreLibs\Debug\Support::getCallerMethod() instead
 	 */
 	public static function getCallerMethod(int $level = 2): ?string
@@ -471,7 +482,7 @@ class Basic
 	 * returns 'checked' or 'selected' if okay
 	 * $needle is a var, $haystack an array or a string
 	 * **** THE RETURN: VALUE WILL CHANGE TO A DEFAULT NULL IF NOT FOUND ****
-	 * @param  array|string $haystack (search in) haystack can be an array or a string
+	 * @param  array<mixed>|string $haystack (search in) haystack can be an array or a string
 	 * @param  string       $needle   needle (search for)
 	 * @param  int          $type     type: 0: returns selected, 1, returns checked
 	 * @return ?string                returns checked or selected, else returns null
@@ -504,7 +515,7 @@ class Basic
 
 	/**
 	 * get the host name without the port as given by the SELF var
-	 * @return array host name/port name
+	 * @return array<mixed> host name/port name
 	 * @deprecated Use \CoreLibs\Get\System::getHostName() instead
 	 */
 	public function getHostName(): array
@@ -563,9 +574,9 @@ class Basic
 	 * searches key = value in an array / array
 	 * only returns the first one found
 	 * @param  string|int  $needle     needle (search for)
-	 * @param  array       $haystack   haystack (search in)
+	 * @param  array<mixed>       $haystack   haystack (search in)
 	 * @param  string|null $key_lookin the key to look out for, default empty
-	 * @return array                   array with the elements where the needle can be
+	 * @return array<mixed>                   array with the elements where the needle can be
 	 *                                 found in the haystack array
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arraySearchRecursive() instead
 	 */
@@ -577,11 +588,11 @@ class Basic
 
 	/**
 	 * recursive array search function, which returns all found not only the first one
-	 * @param  string|int $needle   needle (search for)
-	 * @param  array      $haystack haystack (search in)
-	 * @param  string|int $key      the key to look for in
-	 * @param  array|null $path     recursive call for previous path
-	 * @return ?array               all array elements paths where the element was found
+	 * @param  string|int   $needle   needle (search for)
+	 * @param  array<mixed> $haystack haystack (search in)
+	 * @param  string|int   $key      the key to look for in
+	 * @param  array<mixed>|null $path recursive call for previous path
+	 * @return ?array<mixed>           all array elements paths where the element was found
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll() instead
 	 */
 	public static function arraySearchRecursiveAll($needle, array $haystack, $key, ?array $path = null): ?array
@@ -592,7 +603,7 @@ class Basic
 
 	/**
 	 * array search simple. looks for key, value Combined, if found, returns true
-	 * @param  array      $array array (search in)
+	 * @param  array<mixed>      $array array (search in)
 	 * @param  string|int $key   key (key to search in)
 	 * @param  string|int $value value (what to find)
 	 * @return bool              true on found, false on not found
@@ -611,7 +622,7 @@ class Basic
 	 *         ...   etc
 	 *         bool  key flag: true: handle keys as string or int
 	 *               default false: all keys are string
-	 * @return array|bool merged array
+	 * @return array<mixed>|bool merged array
 	 * @deprecated MUSER BE CONVERTED TO \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive() instead
 	 */
 	public static function arrayMergeRecursive()
@@ -625,9 +636,9 @@ class Basic
 	 * array_diff only checks elements from A that are not in B, but not the
 	 * other way around.
 	 * Note that like array_diff this only checks first level values not keys
-	 * @param  array  $a array to compare a
-	 * @param  array  $b array to compare b
-	 * @return array     array with missing elements from a & b
+	 * @param  array<mixed>  $a array to compare a
+	 * @param  array<mixed>  $b array to compare b
+	 * @return array<mixed>     array with missing elements from a & b
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arrayDiff() instead
 	 */
 	public static function arrayDiff(array $a, array $b): array
@@ -639,9 +650,9 @@ class Basic
 	/**
 	 * search for the needle array elements in haystack and return the ones found as an array,
 	 * is there nothing found, it returns FALSE (boolean)
-	 * @param  array $needle   elements to search for
-	 * @param  array $haystack array where the $needle elements should be searched int
-	 * @return array|bool      either the found elements or false for nothing found or error
+	 * @param  array<mixed> $needle   elements to search for
+	 * @param  array<mixed> $haystack array where the $needle elements should be searched int
+	 * @return array<mixed>|bool      either the found elements or false for nothing found or error
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::inArrayAny() instead
 	 */
 	public static function inArrayAny(array $needle, array $haystack)
@@ -652,11 +663,11 @@ class Basic
 
 	/**
 	 * creates out of a normal db_return array an assoc array
-	 * @param  array           $db_array return array from the database
+	 * @param  array<mixed>           $db_array return array from the database
 	 * @param  string|int|bool $key      key set, false for not set
 	 * @param  string|int|bool $value    value set, false for not set
 	 * @param  bool            $set_only flag to return all (default), or set only
-	 * @return array                     associative array
+	 * @return array<mixed>                     associative array
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::genAssocArray() instead
 	 */
 	public static function genAssocArray(array $db_array, $key, $value, bool $set_only = false): array
@@ -668,7 +679,7 @@ class Basic
 	/**
 	 * [NOTE]: This is an old function and is deprecated
 	 * wrapper for join, but checks if input is an array and if not returns null
-	 * @param  array  $array        array to convert
+	 * @param  array<mixed>  $array        array to convert
 	 * @param  string $connect_char connection character
 	 * @return string               joined string
 	 * @deprecated use join() instead
@@ -685,8 +696,8 @@ class Basic
 	/**
 	 * converts multi dimensional array to a flat array
 	 * does NOT preserve keys
-	 * @param  array  $array ulti dimensionial array
-	 * @return array         flattened array
+	 * @param  array<mixed>  $array ulti dimensionial array
+	 * @return array<mixed>         flattened array
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::flattenArray() instead
 	 */
 	public static function flattenArray(array $array): array
@@ -697,8 +708,8 @@ class Basic
 
 	/**
 	 * will loop through an array recursivly and write the array keys back
-	 * @param  array  $array  multidemnsional array to flatten
-	 * @return array          flattened keys array
+	 * @param  array<mixed>  $array  multidemnsional array to flatten
+	 * @return array<mixed>          flattened keys array
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::flattenArrayKey() instead
 	 */
 	public static function flattenArrayKey(array $array/*, array $return = []*/): array
@@ -710,9 +721,9 @@ class Basic
 	/**
 	 * searches for key -> value in an array tree and writes the value one level up
 	 * this will remove this leaf will all other values
-	 * @param  array      $array  array (nested)
+	 * @param  array<mixed>      $array  array (nested)
 	 * @param  string|int $search key to find that has no sub leaf and will be pushed up
-	 * @return array              modified, flattened array
+	 * @return array<mixed>              modified, flattened array
 	 * @deprecated Use \CoreLibs\Combined\ArrayHandler::arrayFlatForKey() instead
 	 */
 	public static function arrayFlatForKey(array $array, $search): array
@@ -923,7 +934,7 @@ class Basic
 	 * @param  string $start_date   valid start date (y/m/d)
 	 * @param  string $end_date     valid end date (y/m/d)
 	 * @param  bool   $return_named return array type, false (default), true for named
-	 * @return array                0/overall, 1/weekday, 2/weekend
+	 * @return array<mixed>                0/overall, 1/weekday, 2/weekend
 	 * @deprecated Use \CoreLibs\Combined\DateTime::calcDaysInterval() instead
 	 */
 	public static function calcDaysInterval($start_date, $end_date, bool $return_named = false): array
@@ -1033,7 +1044,7 @@ class Basic
 	 * @param  string     $string        string to test
 	 * @param  string     $from_encoding encoding of string to test
 	 * @param  string     $to_encoding   target encoding
-	 * @return bool|array            false if no error or array with failed characters
+	 * @return bool|array<mixed>         false if no error or array with failed characters
 	 * @deprecated use \CoreLibs\Language\Encoding::checkConvertEncoding() instead
 	 */
 	public function checkConvertEncoding(string $string, string $from_encoding, string $to_encoding)
@@ -1228,7 +1239,8 @@ class Basic
 	 * @param  string            $hexStr         RGB hexstring
 	 * @param  bool              $returnAsString flag to return as string
 	 * @param  string            $seperator      string seperator: default: ","
-	 * @return string|array|bool                 false on error or array with RGB or a string with the seperator
+	 * @return string|array<mixed>|bool          false on error or array with RGB or
+	 *                                           a string with the seperator
 	 * @deprecated use \CoreLibs\Convert\Colors::hex2rgb() instead
 	 */
 	public static function hex2rgb(string $hexStr, bool $returnAsString = false, string $seperator = ',')
@@ -1275,7 +1287,7 @@ class Basic
 	 * @param  int   $red   red 0-255
 	 * @param  int   $green green 0-255
 	 * @param  int   $blue  blue 0-255
-	 * @return array        Hue, Sat, Brightness/Value
+	 * @return array<mixed>        Hue, Sat, Brightness/Value
 	 * @deprecated use \CoreLibs\Convert\Colors::rgb2hsb() instead
 	 */
 	public static function rgb2hsb(int $red, int $green, int $blue): array
@@ -1289,7 +1301,7 @@ class Basic
 	 * @param  int    $H hue 0-360
 	 * @param  float  $S saturation 0-1 (float)
 	 * @param  float  $V brightness/value 0-1 (float)
-	 * @return array     0 red/1 green/2 blue array
+	 * @return array<mixed>     0 red/1 green/2 blue array
 	 * @deprecated use \CoreLibs\Convert\Colors::hsb2rgb() instead
 	 */
 	public static function hsb2rgb(int $H, float $S, float $V): array
@@ -1305,7 +1317,7 @@ class Basic
 	 * @param  int    $r red 0-255
 	 * @param  int    $g green 0-255
 	 * @param  int    $b blue 0-255
-	 * @return array     hue/sat/luminance
+	 * @return array<mixed>     hue/sat/luminance
 	 * @deprecated use \CoreLibs\Convert\Colors::rgb2hsl() instead
 	 */
 	public static function rgb2hsl(int $r, int $g, int $b): array
@@ -1319,7 +1331,7 @@ class Basic
 	 * @param  int    $h hue: 0-360 (degrees)
 	 * @param  float  $s saturation: 0-1
 	 * @param  float  $l luminance: 0-1
-	 * @return array     red/blue/green 0-255 each
+	 * @return array<mixed>     red/blue/green 0-255 each
 	 * @deprecated use \CoreLibs\Convert\Colors::hsl2rgb() instead
 	 */
 	public static function hsl2rgb(int $h, float $s, float $l): array
@@ -1538,7 +1550,7 @@ class Basic
 	 * @param  string|null $json     a json string, or null data
 	 * @param  bool        $override if set to true, then on json error
 	 *                               set original value as array
-	 * @return array                 returns an array from the json values
+	 * @return array<mixed>                 returns an array from the json values
 	 * @deprecated use \CoreLibs\Check\Jason::jsonConvertToArray() instead
 	 */
 	public function jsonConvertToArray(?string $json, bool $override = false): array

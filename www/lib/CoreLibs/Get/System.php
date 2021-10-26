@@ -48,7 +48,7 @@ class System
 
 	/**
 	 * get the host name without the port as given by the SELF var
-	 * @return array host name/port name
+	 * @return array<mixed> host name/port name
 	 */
 	public static function getHostName(): array
 	{
@@ -86,7 +86,7 @@ class System
 	/**
 	 * similar to getPageName, but it retuns the raw array
 	 *
-	 * @return array pathinfo array from PHP SELF
+	 * @return array<string> pathinfo array from PHP SELF
 	 */
 	public static function getPageNameArray(): array
 	{

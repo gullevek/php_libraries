@@ -5,26 +5,40 @@ namespace FileUpload\Core;
 /**
  * Handle file uploads via regular form post (uses the $_FILES array)
  */
-class qqUploadedFileForm
+class qqUploadedFileForm implements qqUploadedFile // phpcs:ignore Squiz.Classes.ValidClassName.NotCamelCaps
 {
 	/**
 	 * Save the file to the specified path
+	 *
+	 * @param string $path
 	 * @return boolean TRUE on success
 	 */
-	public function save($path)
+	public function save(string $path): bool
 	{
 		if (!move_uploaded_file($_FILES['qqfile']['tmp_name'], $path)) {
 			return false;
 		}
 		return true;
 	}
-	public function getName()
+
+	/**
+	 * get qqfile name from _FILES array
+	 *
+	 * @return string
+	 */
+	public function getName(): string
 	{
-		return $_FILES['qqfile']['name'];
+		return $_FILES['qqfile']['name'] ?? '';
 	}
-	public function getSize()
+
+	/**
+	 * get files size from _FILES array
+	 *
+	 * @return int
+	 */
+	public function getSize(): int
 	{
-		return $_FILES['qqfile']['size'];
+		return (int)$_FILES['qqfile']['size'] ?? 0;
 	}
 }
 

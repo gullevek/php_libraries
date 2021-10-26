@@ -38,7 +38,7 @@ class DateTime
 	{
 		// check if the timestamp has any h/m/s/ms inside, if yes skip
 		if (!preg_match("/(h|m|s|ms)/", (string)$timestamp)) {
-			list($timestamp, $ms) = array_pad(explode('.', (string)round($timestamp, 4)), 2, null);
+			list($timestamp, $ms) = array_pad(explode('.', (string)round((float)$timestamp, 4)), 2, null);
 			// if negative remember
 			$negative = false;
 			if ((int)$timestamp < 0) {
@@ -65,11 +65,14 @@ class DateTime
 			if ($ms !== null) {
 				// if we have ms and it has leading zeros, remove them, but only if it is nut just 0
 				$ms = preg_replace("/^0+(\d+)$/", '${1}', $ms);
+				if (!is_string($ms) || empty($ms)) {
+					$ms = '0';
+				}
 				// add ms if there
 				if ($show_micro) {
-					$time_string .= ' ' . (!$ms ? 0 : $ms) . 'ms';
+					$time_string .= ' ' . $ms . 'ms';
 				} elseif (!$time_string) {
-					$time_string .= (!$ms ? 0 : $ms) . 'ms';
+					$time_string .= $ms . 'ms';
 				}
 			}
 			if ($negative) {
@@ -78,7 +81,7 @@ class DateTime
 		} else {
 			$time_string = $timestamp;
 		}
-		return $time_string;
+		return (string)$time_string;
 	}
 
 	/**
@@ -90,7 +93,8 @@ class DateTime
 	public static function stringToTime($timestring)
 	{
 		$timestamp = 0;
-		if (preg_match("/(d|h|m|s|ms)/", $timestring)) {
+		if (preg_match("/(d|h|m|s|ms)/", (string)$timestring)) {
+			$timestring = (string)$timestring;
 			// pos for preg match read + multiply factor
 			$timegroups = [2 => 86400, 4 => 3600, 6 => 60, 8 => 1];
 			$matches = [];
@@ -131,7 +135,11 @@ class DateTime
 		if (!$date) {
 			return false;
 		}
-		list ($year, $month, $day) = array_pad(preg_split("/[\/-]/", $date), 3, null);
+		list ($year, $month, $day) = array_pad(
+			preg_split("/[\/-]/", $date) ?: [],
+			3,
+			null
+		);
 		if (!$year || !$month || !$day) {
 			return false;
 		}
@@ -146,12 +154,16 @@ class DateTime
 	 * @param  string $datetime date (YYYY-MM-DD) + time (HH:MM:SS), SS can be dropped
 	 * @return bool             true if valid date, false if date not valid
 	 */
-	public static function checkDateTime($datetime): bool
+	public static function checkDateTime(string $datetime): bool
 	{
 		if (!$datetime) {
 			return false;
 		}
-		list ($year, $month, $day, $hour, $min, $sec) = array_pad(preg_split("/[\/\- :]/", $datetime), 6, null);
+		list ($year, $month, $day, $hour, $min, $sec) = array_pad(
+			preg_split("/[\/\- :]/", $datetime) ?: [],
+			6,
+			null
+		);
 		if (!$year || !$month || !$day) {
 			return false;
 		}
@@ -190,8 +202,16 @@ class DateTime
 		}
 
 		// splits the data up with / or -
-		list ($start_year, $start_month, $start_day) = array_pad(preg_split('/[\/-]/', $start_date), 3, null);
-		list ($end_year, $end_month, $end_day) = array_pad(preg_split('/[\/-]/', $end_date), 3, null);
+		list ($start_year, $start_month, $start_day) = array_pad(
+			preg_split('/[\/-]/', $start_date) ?: [],
+			3,
+			null
+		);
+		list ($end_year, $end_month, $end_day) = array_pad(
+			preg_split('/[\/-]/', $end_date) ?: [],
+			3,
+			null
+		);
 		// check that month & day are two digits and then combine
 		foreach (['start', 'end'] as $prefix) {
 			foreach (['month', 'day'] as $date_part) {
@@ -256,7 +276,7 @@ class DateTime
 	 * @param  string $start_date   valid start date (y/m/d)
 	 * @param  string $end_date     valid end date (y/m/d)
 	 * @param  bool   $return_named return array type, false (default), true for named
-	 * @return array                0/overall, 1/weekday, 2/weekend
+	 * @return array<mixed>         0/overall, 1/weekday, 2/weekend
 	 */
 	public static function calcDaysInterval($start_date, $end_date, bool $return_named = false): array
 	{

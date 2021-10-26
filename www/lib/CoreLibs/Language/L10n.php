@@ -33,9 +33,13 @@ use CoreLibs\Language\Core\GetTextReader;
 
 class L10n extends \CoreLibs\Basic
 {
+	/** @var string */
 	private $lang = '';
+	/** @var string */
 	private $mofile = '';
+	/** @var FileReader|bool */
 	private $input;
+	/** @var GetTextReader */
 	private $l10n;
 
 	/**

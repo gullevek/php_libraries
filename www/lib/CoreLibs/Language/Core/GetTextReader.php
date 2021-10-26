@@ -40,19 +40,31 @@ namespace CoreLibs\Language\Core;
 class GetTextReader
 {
 	// public:
+	/** @var int */
 	public $error = 0; // public variable that holds error code (0 if no error)
 
 	// private:
+	/** @var int */
 	private $BYTEORDER = 0;        // 0: low endian, 1: big endian
-	private $STREAM = null;
+	/** @var FileReader */
+	private $STREAM;
+	/** @var bool */
 	private $short_circuit = false;
+	/** @var bool */
 	private $enable_cache = false;
-	private $originals = null;      // offset of original table
-	private $translations = null;    // offset of translation table
-	private $pluralheader = null;    // cache header field for plural forms
+	/** @var int */
+	private $originals = 0;      // offset of original table
+	/** @var int */
+	private $translations = 0;    // offset of translation table
+	/** @var string */
+	private $pluralheader = '';    // cache header field for plural forms
+	/** @var int */
 	private $total = 0;          // total string count
+	/** @var array<mixed>|null */
 	private $table_originals = null;  // table for original strings (offsets)
+	/** @var array<mixed>|null */
 	private $table_translations = null;  // table for translated strings (offsets)
+	/** @var array<mixed> */
 	private $cache_translations = [];  // original -> translation mapping
 
 
@@ -69,13 +81,12 @@ class GetTextReader
 	{
 		if ($this->BYTEORDER == 0) {
 			// low endian
-			$input = unpack('V', $this->STREAM->read(4));
-			return array_shift($input);
+			$input = unpack('V', $this->STREAM->read(4)) ?: [];
 		} else {
 			// big endian
-			$input = unpack('N', $this->STREAM->read(4));
-			return array_shift($input);
+			$input = unpack('N', $this->STREAM->read(4)) ?: [];
 		}
+		return array_shift($input);
 	}
 
 	/**
@@ -92,29 +103,34 @@ class GetTextReader
 	* Reads an array of Integers from the Stream
 	*
 	* @param  int   $count How many elements should be read
-	* @return array        Array of Integers
+	* @return array<mixed> Array of Integers
 	*/
 	public function readintarray($count)
 	{
 		if ($this->BYTEORDER == 0) {
 			// low endian
-			return unpack('V' . $count, $this->STREAM->read(4 * $count));
+			return unpack('V' . $count, $this->STREAM->read(4 * $count)) ?: [];
 		} else {
 			// big endian
-			return unpack('N' . $count, $this->STREAM->read(4 * $count));
+			return unpack('N' . $count, $this->STREAM->read(4 * $count)) ?: [];
 		}
 	}
 
 	/**
 	* Constructor
 	*
-	* @param object|bool $Reader       the StreamReader object
-	* @param bool        $enable_cache Enable or disable caching of strings (default on)
+	* @param FileReader|bool $Reader       the StreamReader object
+	* @param bool            $enable_cache Enable or disable caching of strings (default on)
 	*/
 	public function __construct($Reader, $enable_cache = true)
 	{
 		// If there isn't a StreamReader, turn on short circuit mode.
 		if ((!is_object($Reader) && !$Reader) || (is_object($Reader) && $Reader->error)) {
+			$this->short_circuit = true;
+			return;
+		}
+		// bail out for sure if this is not an objet here
+		if (!is_object($Reader)) {
 			$this->short_circuit = true;
 			return;
 		}
@@ -125,7 +141,7 @@ class GetTextReader
 		$MAGIC1 = "\x95\x04\x12\xde";
 		$MAGIC2 = "\xde\x12\x04\x95";
 
-		$this->STREAM = (object)$Reader;
+		$this->STREAM = $Reader;
 		$magic = $this->read(4);
 		if ($magic == $MAGIC1) {
 			$this->BYTEORDER = 1;
@@ -149,8 +165,9 @@ class GetTextReader
 	* to speed up translation lookups
 	*
 	* @access private
+	* @return void
 	*/
-	private function load_tables()
+	private function loadTables(): void
 	{
 		if (
 			is_array($this->cache_translations) &&
@@ -190,10 +207,10 @@ class GetTextReader
 	* @param  int    $num Offset number of original string
 	* @return string      Requested string if found, otherwise ''
 	*/
-	private function get_original_string($num)
+	private function getOriginalString($num)
 	{
-		$length = $this->table_originals[$num * 2 + 1];
-		$offset = $this->table_originals[$num * 2 + 2];
+		$length = $this->table_originals[$num * 2 + 1] ?? 0;
+		$offset = $this->table_originals[$num * 2 + 2] ?? 0;
 		if (!$length) {
 			return '';
 		}
@@ -209,10 +226,10 @@ class GetTextReader
 	* @param  int    $num Offset number of original string
 	* @return string      Requested string if found, otherwise ''
 	*/
-	private function get_translation_string($num)
+	private function getTranslationString($num)
 	{
-		$length = $this->table_translations[$num * 2 + 1];
-		$offset = $this->table_translations[$num * 2 + 2];
+		$length = $this->table_translations[$num * 2 + 1] ?? 0;
+		$offset = $this->table_translations[$num * 2 + 2] ?? 0;
 		if (!$length) {
 			return '';
 		}
@@ -228,18 +245,18 @@ class GetTextReader
 	* @param  string           $string string to find
 	* @param  int              $start  (internally used in recursive function)
 	* @param  int              $end    (internally used in recursive function)
-	* @return int|string|float         (offset in originals table)
+	* @return int                      (offset in originals table)
 	*/
-	private function find_string($string, $start = -1, $end = -1)
+	private function findString($string, $start = -1, $end = -1)
 	{
 		if (($start == -1) or ($end == -1)) {
-			// find_string is called with only one parameter, set start end end
+			// findString is called with only one parameter, set start end end
 			$start = 0;
 			$end = $this->total;
 		}
 		if (abs($start - $end) <= 1) {
 			// We're done, now we either found the string, or it doesn't exist
-			$txt = $this->get_original_string($start);
+			$txt = $this->getOriginalString($start);
 			if ($string == $txt) {
 				return $start;
 			} else {
@@ -247,20 +264,20 @@ class GetTextReader
 			}
 		} elseif ($start > $end) {
 			// start > end -> turn around and start over
-			return $this->find_string($string, $end, $start);
+			return $this->findString($string, $end, $start);
 		} else {
 			// Divide table in two parts
 			$half = (int)(($start + $end) / 2);
-			$cmp = strcmp($string, $this->get_original_string($half));
+			$cmp = strcmp($string, $this->getOriginalString($half));
 			if ($cmp == 0) {
 				// string is exactly in the middle => return it
 				return $half;
 			} elseif ($cmp < 0) {
 				// The string is in the upper half
-				return $this->find_string($string, $start, $half);
+				return $this->findString($string, $start, $half);
 			} else {
 				// Translateshe string is in the lower half
-				return $this->find_string($string, $half, $end);
+				return $this->findString($string, $half, $end);
 			}
 		}
 	}
@@ -277,7 +294,7 @@ class GetTextReader
 		if ($this->short_circuit) {
 			return $string;
 		}
-		$this->load_tables();
+		$this->loadTables();
 
 		if ($this->enable_cache) {
 			// Caching enabled, get translated string from cache
@@ -288,11 +305,11 @@ class GetTextReader
 			}
 		} else {
 			// Caching not enabled, try to find string
-			$num = $this->find_string($string);
+			$num = $this->findString($string);
 			if ($num == -1) {
 				return $string;
 			} else {
-				return $this->get_translation_string($num);
+				return $this->getTranslationString($num);
 			}
 		}
 	}
@@ -304,7 +321,7 @@ class GetTextReader
 	* @param  string $expr an expression to match
 	* @return string       sanitized plural form expression
 	*/
-	private function sanitize_plural_expression($expr)
+	private function sanitizePluralExpression($expr)
 	{
 		// Get rid of disallowed characters.
 		$expr = preg_replace('@[^a-zA-Z0-9_:;\(\)\?\|\&=!<>+*/\%-]@', '', $expr);
@@ -341,7 +358,7 @@ class GetTextReader
 	* @param  string $header header search in plurals
 	* @return string         verbatim plural form header field
 	*/
-	private function extract_plural_forms_header_from_po_header($header)
+	private function extractPluralFormsHeaderFromPoHeader($header)
 	{
 		if (preg_match("/(^|\n)plural-forms: ([^\n]*)\n/i", $header, $regs)) {
 			$expr = $regs[2];
@@ -357,21 +374,21 @@ class GetTextReader
 	* @access private
 	* @return string plural form header
 	*/
-	private function get_plural_forms()
+	private function getPluralForms()
 	{
 		// lets assume message number 0 is header
 		// this is true, right?
-		$this->load_tables();
+		$this->loadTables();
 
 		// cache header field for plural forms
 		if (! is_string($this->pluralheader)) {
 			if ($this->enable_cache) {
 				$header = $this->cache_translations[''];
 			} else {
-				$header = $this->get_translation_string(0);
+				$header = $this->getTranslationString(0);
 			}
-			$expr = $this->extract_plural_forms_header_from_po_header($header);
-			$this->pluralheader = $this->sanitize_plural_expression($expr);
+			$expr = $this->extractPluralFormsHeaderFromPoHeader($header);
+			$this->pluralheader = $this->sanitizePluralExpression($expr);
 		}
 		return $this->pluralheader;
 	}
@@ -383,9 +400,9 @@ class GetTextReader
 	* @param  string $n count
 	* @return int       array index of the right plural form
 	*/
-	private function select_string($n)
+	private function selectString($n)
 	{
-		$string = $this->get_plural_forms();
+		$string = $this->getPluralForms();
 		$string = str_replace('nplurals', "\$total", $string);
 		$string = str_replace("n", $n, $string);
 		$string = str_replace('plural', "\$plural", $string);
@@ -421,7 +438,7 @@ class GetTextReader
 		}
 
 		// find out the appropriate form
-		$select = $this->select_string($number);
+		$select = $this->selectString($number);
 
 		// this should contains all strings separated by NULLs
 		$key = $single . chr(0) . $plural;
@@ -435,11 +452,11 @@ class GetTextReader
 				return $list[$select];
 			}
 		} else {
-			$num = $this->find_string($key);
+			$num = $this->findString($key);
 			if ($num == -1) {
 				return ($number != 1) ? $plural : $single;
 			} else {
-				$result = $this->get_translation_string($num);
+				$result = $this->getTranslationString($num);
 				$list = explode(chr(0), $result);
 				return $list[$select];
 			}

@@ -18,14 +18,18 @@ class Colors
 {
 	/**
 	 * converts a hex RGB color to the int numbers
-	 * @param  string            $hexStr         RGB hexstring
-	 * @param  bool              $returnAsString flag to return as string
-	 * @param  string            $seperator      string seperator: default: ","
-	 * @return string|array|bool                 false on error or array with RGB or a string with the seperator
+	 * @param  string $hexStr         RGB hexstring
+	 * @param  bool   $returnAsString flag to return as string
+	 * @param  string $seperator      string seperator: default: ","
+	 * @return string|array<string,float|int>|bool false on error or array with RGB
+	 *                                             or a string with the seperator
 	 */
 	public static function hex2rgb(string $hexStr, bool $returnAsString = false, string $seperator = ',')
 	{
 		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
+		if (!is_string($hexStr)) {
+			return false;
+		}
 		$rgbArray = [];
 		if (strlen($hexStr) == 6) {
 			// If a proper hex code, convert using bitwise operation. No overhead... faster
@@ -76,10 +80,10 @@ class Colors
 	 * converts RGB to HSB/V values
 	 * returns:
 	 * array with hue (0-360), sat (0-100%), brightness/value (0-100%)
-	 * @param  int   $red   red 0-255
-	 * @param  int   $green green 0-255
-	 * @param  int   $blue  blue 0-255
-	 * @return array         Hue, Sat, Brightness/Value
+	 * @param  int   $red       red 0-255
+	 * @param  int   $green     green 0-255
+	 * @param  int   $blue      blue 0-255
+	 * @return array<int|float> Hue, Sat, Brightness/Value
 	 */
 	public static function rgb2hsb(int $red, int $green, int $blue): array
 	{
@@ -119,10 +123,10 @@ class Colors
 
 	/**
 	 * converts HSB/V to RGB values RGB is full INT
-	 * @param  int   $H hue 0-360
-	 * @param  int   $S saturation 0-100 (int)
-	 * @param  int   $V brightness/value 0-100 (int)
-	 * @return array    0 red/1 green/2 blue array as 0-255
+	 * @param  int        $H hue 0-360
+	 * @param  int        $S saturation 0-100 (int)
+	 * @param  int        $V brightness/value 0-100 (int)
+	 * @return array<int>    0 red/1 green/2 blue array as 0-255
 	 */
 	public static function hsb2rgb(int $H, int $S, int $V): array
 	{
@@ -199,10 +203,10 @@ class Colors
 	 * converts a RGB (0-255) to HSL
 	 * return:
 	 * array with hue (0-360), saturation (0-100%) and luminance (0-100%)
-	 * @param  int   $red   red 0-255
-	 * @param  int   $green green 0-255
-	 * @param  int   $blue  blue 0-255
-	 * @return array         hue/sat/luminance
+	 * @param  int          $red   red 0-255
+	 * @param  int          $green green 0-255
+	 * @param  int          $blue  blue 0-255
+	 * @return array<float>        hue/sat/luminance
 	 */
 	public static function rgb2hsl(int $red, int $green, int $blue): array
 	{
@@ -253,7 +257,7 @@ class Colors
 	 * @param  int   $hue hue: 0-360 (degrees)
 	 * @param  float $sat saturation: 0-100
 	 * @param  float $lum luminance: 0-100
-	 * @return array      red/blue/green 0-255 each
+	 * @return array<int,float|int> red/blue/green 0-255 each
 	 */
 	public static function hsl2rgb(int $hue, float $sat, float $lum): array
 	{

@@ -26,7 +26,9 @@ namespace CoreLibs\Language\Core;
 
 class StringReader
 {
+	/** @var int */
 	public $sr_pos;
+	/** @var string */
 	public $sr_str;
 
 	/**

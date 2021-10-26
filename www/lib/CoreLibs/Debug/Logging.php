@@ -27,38 +27,65 @@ namespace CoreLibs\Debug;
 class Logging
 {
 	// page and host name
+	/** @var string */
 	private $page_name;
+	/** @var string */
 	private $host_name;
+	/** @var int */
 	private $host_port;
 	// internal error reporting vars
+	/** @var array<mixed> */
 	private $error_msg = []; // the "connection" to the outside errors
 	// debug output prefix
+	/** @var string */
 	private $error_msg_prefix = ''; // prefix to the error string (the class name)
 	// debug flags
+	/** @var array<mixed> */
 	private $debug_output = []; // if this is true, show debug on desconstructor
+	/** @var array<mixed> */
 	private $debug_output_not = [];
+	/** @var bool */
 	private $debug_output_all = false;
+	/** @var array<mixed> */
 	private $echo_output = []; // errors: echo out, default is 1
+	/** @var array<mixed> */
 	private $echo_output_not = [];
+	/** @var bool */
 	private $echo_output_all = false;
+	/** @var array<mixed> */
 	private $print_output = []; // errors: print to file, default is 0
+	/** @var array<mixed> */
 	private $print_output_not = [];
+	/** @var bool */
 	private $print_output_all = false;
 	// debug flags/settings
+	/** @var string */
 	private $running_uid = ''; // unique ID set on class init and used in logging as prefix
 	// log file name
+	/** @var string */
 	private $log_folder = '';
+	/** @var string */
 	private $log_file_name_ext = 'log'; // use this for date rotate
+	/** @var int */
 	private $log_max_filesize = 0; // set in kilobytes
+	/** @var string */
 	private $log_print_file = 'error_msg##LOGID####LEVEL####CLASS####PAGENAME####DATE##';
+	/** @var string */
 	private $log_file_unique_id; // a unique ID set only once for call derived from this class
+	/** @var bool */
 	private $log_print_file_date = true; // if set add Y-m-d and do automatic daily rotation
+	/** @var string */
 	private $log_file_id = ''; // a alphanumeric name that has to be set as global definition
+	/** @var bool */
 	private $log_per_level = false; // set, it will split per level (first parameter in debug call)
+	/** @var bool */
 	private $log_per_class = false; // set, will split log per class
+	/** @var bool */
 	private $log_per_page = false; // set, will split log per called file
+	/** @var bool */
 	private $log_per_run = false; // create a new log file per run (time stamp + unique ID)
 	// script running time
+	/** @var float */
 	private $script_starttime;
 
 	public function __construct()
@@ -282,7 +309,8 @@ class Logging
 	{
 		// get the last class entry and wrie that
 		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) ?? [['class' => get_class($this)]];
-		return end($backtrace)['class'];
+		// make sure if false it is an array and then check if not class set return empty string
+		return (end($backtrace) ?: [])['class'] ?? '';
 	}
 
 	// *** PUBLIC ***
@@ -381,7 +409,7 @@ class Logging
 	 * @param  string      $flag  on/off
 	 * @param  string|null $level if not null then check if this array entry is set
 	 *                            else return false
-	 * @return bool|array         if $level is null, return array, else boolean true/false
+	 * @return bool|array<mixed>  if $level is null, return array, else boolean true/false
 	 */
 	public function getLogLevel(string $type, string $flag, ?string $level = null)
 	{
@@ -439,8 +467,8 @@ class Logging
 	 * It uses some special code sets so we can convert that to pre flags
 	 * for echo output {##HTMLPRE##} ... {##/HTMLPRE##}
 	 * Do not use this without using it in a string in debug function
-	 * @param  array $a Array to format
-	 * @return string   print_r formated
+	 * @param  array<mixed> $a Array to format
+	 * @return string          print_r formated
 	 */
 	public function prAr(array $a): string
 	{
@@ -486,9 +514,13 @@ class Logging
 				($strip ?
 					// find any <br> and replace them with \n
 					// strip rest of html elements (base only)
-					preg_replace("/(<\/?)(\w+)([^>]*>)/", '', str_replace('<br>', "\n", $prefix . $string)) :
+					preg_replace(
+						"/(<\/?)(\w+)([^>]*>)/",
+						'',
+						str_replace('<br>', "\n", $prefix . $string)
+					) :
 					$prefix . $string
-				)
+				) ?: ''
 			)
 			. "\n"
 		);
@@ -522,8 +554,8 @@ class Logging
 	/**
 	 * merges the given error array with the one from this class
 	 * only merges visible ones
-	 * @param  array  $error_msg error array
-	 * @return void              has no return
+	 * @param  array<mixed> $error_msg error array
+	 * @return void                    has no return
 	 */
 	public function mergeErrors(array $error_msg = []): void
 	{
@@ -593,7 +625,7 @@ class Logging
 	/**
 	 * Get current error message array
 	 *
-	 * @return array error messages collected
+	 * @return array<mixed> error messages collected
 	 */
 	public function getErrorMsg(): array
 	{

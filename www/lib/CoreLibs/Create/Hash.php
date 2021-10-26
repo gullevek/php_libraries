@@ -12,6 +12,9 @@ class Hash
 {
 	/**
 	 * checks php version and if >=5.2.7 it will flip the string
+	 * can return empty string if none of string sets work
+	 * hash returns false
+	 * preg_replace fails for older php version
 	 * @param  string $string string to crc
 	 * @return string         crc32b hash (old type)
 	 */
@@ -23,6 +26,9 @@ class Hash
 		if (\CoreLibs\Check\PhpVersion::checkPHPVersion('5.2.7')) {
 			// flip it back to old (two char groups)
 			$string = preg_replace("/^([a-z0-9]{2})([a-z0-9]{2})([a-z0-9]{2})([a-z0-9]{2})$/", "$4$3$2$1", $string);
+		}
+		if (!is_string($string)) {
+			$string = '';
 		}
 		return $string;
 	}

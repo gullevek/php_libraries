@@ -59,7 +59,10 @@ class Elements
 		$hour = !$hour ? date('H', $timestamp) : $hour;
 		$min = !$min ? date('i', $timestamp) : $min; // add to five min?
 		// max days in selected month
-		$days_in_month = date('t', strtotime($year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':0'));
+		$days_in_month = date(
+			't',
+			strtotime($year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':0') ?: null
+		);
 		$string = '';
 		// from now to ?
 		if ($name_pos_back === false) {
@@ -93,7 +96,7 @@ class Elements
 			// set weekday text based on current month ($month) and year ($year)
 			$string .= '<option value="' . ($i < 10 ? '0' . $i : $i) . '" '
 				. ($day == $i ? 'selected' : '') . '>' . $i
-				. ' (' . date('D', mktime(0, 0, 0, $month, $i, $year)) . ')</option>';
+				. ' (' . date('D', mktime(0, 0, 0, (int)$month, $i, (int)$year) ?: null) . ')</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {
@@ -142,8 +145,8 @@ class Elements
 		$protList = ["http", "https", "ftp", "news", "nntp"];
 
 		// find urls w/o  protocol
-		$output = preg_replace("/([^\/])www\.([\w\.-]+)\.([a-zA-Z]{2,4})/", "\\1http://www.\\2.\\3", $output);
-		$output = preg_replace("/([^\/])ftp\.([\w\.-]+)\.([a-zA-Z]{2,4})/", "\\1ftp://ftp.\\2.\\3", $output);
+		$output = preg_replace("/([^\/])www\.([\w\.-]+)\.([a-zA-Z]{2,4})/", "\\1http://www.\\2.\\3", $output) ?: '';
+		$output = preg_replace("/([^\/])ftp\.([\w\.-]+)\.([a-zA-Z]{2,4})/", "\\1ftp://ftp.\\2.\\3", $output) ?: '';
 
 		// remove doubles, generate protocol-regex
 		// DIRTY HACK
@@ -181,7 +184,7 @@ class Elements
 				);
 			},
 			$output
-		);
+		) ?: '';
 		// find email-addresses, but not mailto prefix ones
 		$output = preg_replace_callback(
 			"/(mailto:)?(\>)?\b([\w\.-]+)@([\w\.\-]+)\.([a-zA-Z]{2,4})\b(\|([^\||^#]+)(#([^\|]+))?\|)?/",
@@ -197,7 +200,7 @@ class Elements
 				);
 			},
 			$output
-		);
+		) ?: '';
 
 		// we have one slashes after the Protocol -> internal link no domain, strip out the proto
 		// $output = preg_replace("/($protRegex)\/(.*)/e", "\\2", $ouput);

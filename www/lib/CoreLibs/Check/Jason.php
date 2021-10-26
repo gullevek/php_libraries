@@ -12,6 +12,7 @@ namespace CoreLibs\Check;
 
 class Jason
 {
+	/** @var int */
 	private static $json_last_error;
 
 	/**
@@ -23,7 +24,7 @@ class Jason
 	 * @param  string|null $json     a json string, or null data
 	 * @param  bool        $override if set to true, then on json error
 	 *                               set original value as array
-	 * @return array                 returns an array from the json values
+	 * @return array<mixed>          returns an array from the json values
 	 */
 	public static function jsonConvertToArray(?string $json, bool $override = false): array
 	{

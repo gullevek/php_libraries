@@ -7,6 +7,7 @@ namespace CoreLibs\Check;
 class Email
 {
 	// this is for error check parts in where the email regex failed
+	/** @var array<int,string> */
 	private static $email_regex_check = [
 		0 => "^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@"
 			. "[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$", // MASTER
@@ -19,6 +20,7 @@ class Email
 		7 => "@.*\.$" // ends with a dot, top level, domain missing
 	];
 	// the array with the mobile types that are valid
+	/** @var array<string,string> */
 	private static $mobile_email_type = [
 		'.*@docomo\.ne\.jp$' => 'keitai_docomo',
 		// correct are a[2-4], b2, c[1-9], e[2-9], h[2-4], t[1-9]
@@ -57,6 +59,7 @@ class Email
 		'.*@emobile-s\.ne\.jp$' => 'keitai_willcom_emnet' # e-mobile, group will willcom
 	];
 	// short list for mobile email types
+	/** @var array<string,string> */
 	private static $mobile_email_type_short = [
 		'keitai_docomo' => 'docomo',
 		'keitai_kddi_ezweb' => 'kddi',
@@ -116,7 +119,7 @@ class Email
 	 * get the full check array
 	 * this will be deprected at some point
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public static function getEmailRegexCheck(): array
 	{
@@ -132,9 +135,11 @@ class Email
 	/**
 	 * guesses the email type (mostly for mobile) from the domain
 	 * if second is set to true, it will return short naming scheme (only provider)
-	 * @param  string $email email string
-	 * @param  bool   $short default false, if true, returns only short type (pc instead of pc_html)
-	 * @return string|bool   email type, eg "pc", "docomo", etc, false for invalid short type
+	 * @param  string      $email email string
+	 * @param  bool        $short default false, if true,
+	 *                            returns only short type (pc instead of pc_html)
+	 * @return string|bool        email type, eg "pc", "docomo", etc,
+	 *                            false for invalid short type
 	 */
 	public static function getEmailType(string $email, bool $short = false)
 	{

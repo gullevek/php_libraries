@@ -28,21 +28,27 @@ namespace CoreLibs\Language\Core;
 // over it (it assumes knowledge of StringReader internals)
 class CachedFileReader extends \CoreLibs\Language\Core\StringReader
 {
+	/** @var int */
 	public $error = 0;
+	/** @var string */
 	public $fd_str = '';
 
-	public function __construct($filename)
+	/**
+	 * Undocumented function
+	 *
+	 * @param string $filename
+	 */
+	public function __construct(string $filename)
 	{
 		parent::__construct();
 		if (file_exists($filename)) {
-			$length = filesize($filename);
 			$fd = fopen($filename, 'rb');
-
-			if (!$fd) {
+			if (!is_resource($fd)) {
 				$this->error = 3; // Cannot read file, probably permissions
+			} else {
+				$this->fd_str = fread($fd, filesize($filename) ?: 0) ?: '';
+				fclose($fd);
 			}
-			$this->fd_str = fread($fd, $length);
-			fclose($fd);
 		} else {
 			$this->error = 2; // File doesn't exist
 		}

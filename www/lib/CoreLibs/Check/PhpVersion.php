@@ -35,7 +35,7 @@ class PhpVersion
 		}
 		// set the php version id
 		if (!defined('PHP_VERSION_ID')) {
-			$version = explode('.', phpversion());
+			$version = explode('.', phpversion() ?: '');
 			// creates something like 50107
 			define('PHP_VERSION_ID', (int)$version[0] * 10000 + (int)$version[1] * 100 + (int)$version[2]);
 		}

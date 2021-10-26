@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 //------------------------------ variable init start
 // for dev test we set full error reporting; writes everything, except E_ERROR into logs/php_error-<day>.log
-if ($DEBUG_ALL && $ENABLE_ERROR_HANDLING) {
+if (!empty($DEBUG_ALL) && !empty($ENABLE_ERROR_HANDLING)) {
 	include BASE . LIBS . "Error.Handling.php";
 }
 // predefine vars
@@ -82,7 +82,7 @@ if (!$login->login) {
 
 // automatic hide for DEBUG messages on live server
 // can be overridden when setting DEBUG_ALL_OVERRIDE on top of the script (for emergency debugging of one page only)
-if ((TARGET == 'live' || TARGET == 'remote') && !$DEBUG_ALL_OVERRIDE) {
+if ((TARGET == 'live' || TARGET == 'remote') && !empty($DEBUG_ALL_OVERRIDE)) {
 	foreach (['debug', 'echo', 'print'] as $target) {
 		$login->log->setLogLevelAll($target, false);
 		$cms->log->setLogLevelAll($target, false);

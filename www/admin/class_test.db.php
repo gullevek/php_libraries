@@ -52,13 +52,17 @@ echo "DB_CONFIG_SET constant: <pre>" . print_r(DB_CONFIG, true) . "</pre><br>";
 // DB client encoding
 print "DB Client encoding: " . $db->dbGetEncoding() . "<br>";
 
-while ($res = $db->dbReturn("SELECT * FROM max_test", 0, true)) {
+while (is_array($res = $db->dbReturn("SELECT * FROM max_test", 0, true))) {
 	print "TIME: " . $res['time'] . "<br>";
 }
 print "CACHED DATA: <pre>" . print_r($db->cursor_ext, true) . "</pre><br>";
-while ($res = $db->dbReturn("SELECT * FROM max_test")) {
+while (is_array($res = $db->dbReturn("SELECT * FROM max_test"))) {
 	print "[CACHED] TIME: " . $res['time'] . "<br>";
 }
+// alternate check for valid data
+// while (($res = $db->dbReturn("SELECT * FROM max_test")) !== false) {
+// 	print "[CACHED] TIME: " . $res['time'] . "<br>";
+// }
 
 print "<pre>";
 $status = $db->dbExec("INSERT INTO foo (test) VALUES ('FOO TEST " . time() . "') RETURNING test");

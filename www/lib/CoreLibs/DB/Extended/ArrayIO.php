@@ -38,17 +38,21 @@ namespace CoreLibs\DB\Extended;
 class ArrayIO extends \CoreLibs\DB\IO
 {
 	// main calss variables
+	/** @var array<mixed> */
 	public $table_array; // the array from the table to work on
+	/** @var string */
 	public $table_name; // the table_name
+	/** @var string */
 	public $pk_name; // the primary key from this table
+	/** @var int|string|null */
 	public $pk_id; // the PK id
 
 	/**
 	 * constructor for the array io class, set the
 	 * primary key name automatically (from array)
-	 * @param array  $db_config   db connection config
-	 * @param array  $table_array table array config
-	 * @param string $table_name  table name string
+	 * @param array<mixed> $db_config   db connection config
+	 * @param array<mixed> $table_array table array config
+	 * @param string       $table_name  table name string
 	 */
 	public function __construct(array $db_config, array $table_array, string $table_name)
 	{
@@ -174,9 +178,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * deletes one dataset
-	 * @param  array  $table_array optional override for table array set
-	 *                             set this as new table array too
-	 * @return array               returns the table array that was deleted
+	 * @param  array<mixed> $table_array optional override for table array set
+	 *                                   set this as new table array too
+	 * @return array<mixed>              returns the table array that was deleted
 	 */
 	public function dbDelete($table_array = [])
 	{
@@ -234,9 +238,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * reads one row into the array
-	 * @param  boolean $edit        on true convert data, else as is
-	 * @param  array   $table_array optional table array, overwrites internal set array
-	 * @return array                set table array with values
+	 * @param  boolean      $edit        on true convert data, else as is
+	 * @param  array<mixed> $table_array optional table array, overwrites internal set array
+	 * @return array<mixed>              set table array with values
 	 */
 	public function dbRead($edit = false, $table_array = [])
 	{
@@ -276,7 +280,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 		// if query was executed okay, else set error
 		if ($this->dbExec($q)) {
-			if ($res = $this->dbFetchArray()) {
+			if (is_array($res = $this->dbFetchArray())) {
 				reset($this->table_array);
 				foreach ($this->table_array as $column => $data_array) {
 					// wenn "edit" dann gib daten wie in DB zurück, ansonten aufbereiten fr ausgabe
@@ -309,9 +313,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * writes one set into DB or updates one set (if PK exists)
-	 * @param  boolean $addslashes  old convert entities and set set escape
-	 * @param  array   $table_array optional table array, overwrites internal one
-	 * @return array                table array or null
+	 * @param  boolean      $addslashes  old convert entities and set set escape
+	 * @param  array<mixed> $table_array optional table array, overwrites internal one
+	 * @return array<mixed>              table array or null
 	 */
 	public function dbWrite($addslashes = false, $table_array = [])
 	{
@@ -499,11 +503,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 		if (!$this->table_array[$this->pk_name]['value']) {
 			// max id, falls INSERT
 			$q = 'SELECT MAX(' . $this->pk_name . ') + 1 AS pk_id FROM ' . $this->table_name;
-			$res = $this->dbReturnRow($q);
-			if (!isset($res['pk_id'])) {
-				$res['pk_id'] = 1;
+			if (is_array($res = $this->dbReturnRow($q))) {
+				$pk_id = $res['pkd_id'];
+			} else {
+				$pk_id = 1;
 			}
-			$this->table_array[$this->pk_name]['value'] = $res['pk_id'];
+			$this->table_array[$this->pk_name]['value'] = $pk_id;
 		}
 
 		if (!$insert) {
@@ -533,8 +538,13 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// set primary key
 		if ($insert) {
-			$this->table_array[$this->pk_name]['value'] = $this->insert_id;
-			$this->pk_id = $this->insert_id;
+			// FIXME: this has to be fixes by fixing DB::IO clas
+			$insert_id = $this->dbGetReturning();
+			if (is_bool($insert_id) || is_array($insert_id)) {
+				$insert_id = 0;
+			}
+			$this->table_array[$this->pk_name]['value'] = $insert_id;
+			$this->pk_id = $insert_id;
 		}
 		// return the table if needed
 		return $this->table_array;

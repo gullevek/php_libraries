@@ -31,8 +31,8 @@ class Support
 
 	/**
 	 * prints a html formatted (pre) array
-	 * @param  array  $array any array
-	 * @return string        formatted array for output with <pre> tag added
+	 * @param  array<mixed> $array any array
+	 * @return string              formatted array for output with <pre> tag added
 	 */
 	public static function printAr(array $array): string
 	{
