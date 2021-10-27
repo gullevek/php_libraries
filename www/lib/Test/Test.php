@@ -8,8 +8,12 @@ declare(strict_types=1);
 
 namespace Test;
 
+use Test\DB;
+
 class Test
 {
+	/** @var DB\TestDB */
+	private $test_db;
 
 	public function __construct()
 	{
@@ -17,6 +21,9 @@ class Test
 		$this->testPrivate();
 		$this->testProtected();
 		$this->testPublic();
+
+		// call intern
+		$this->test_db = new DB\TestDB();
 	}
 
 	public function __destruct()
@@ -55,6 +62,16 @@ class Test
 	{
 		$string = 'TEST Public';
 		return $string;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public function testClasses(): void
+	{
+		$this->test_db->testRunDB();
 	}
 }
 
