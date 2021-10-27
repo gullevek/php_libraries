@@ -262,10 +262,10 @@ class PgSQL
 	 * this only works if db schema is after "no plural names. and pk name is table name + _id
 	 * detects schema prefix in table name
 	 * @param  string           $query   query string
-	 * @param  string           $pk_name primary key name, if '' then auto detect
+	 * @param  string|null      $pk_name primary key name, if '' then auto detect
 	 * @return string|int|false          primary key value
 	 */
-	public function __dbInsertId(string $query, string $pk_name)
+	public function __dbInsertId(string $query, ?string $pk_name)
 	{
 		// only if an insert has been done
 		if (preg_match("/^insert /i", $query)) {
@@ -280,7 +280,7 @@ class PgSQL
 				$table = $_table;
 			}
 			// no PK name given at all
-			if (!$pk_name) {
+			if (empty($pk_name)) {
 				// if name is plurar, make it singular
 				// if (preg_match("/.*s$/i", $table))
 				// 	$table = substr($table, 0, -1);

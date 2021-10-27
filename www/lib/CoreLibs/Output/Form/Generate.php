@@ -1674,14 +1674,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						. ' (' . $this->table_array[$key]['input_name'] . ') VALUES ('
 						. "'" . $this->dbEscapeString($this->table_array[$key]['input_value']) . "')";
 					$this->dbExec($q);
-					if (!empty($this->table_array[$key]['where']) && is_numeric($this->insert_id)) {
+					if (!empty($this->table_array[$key]['where']) && is_numeric($this->dbGetInsertPK())) {
 						// make an update on the just inseted data with the where data als update values
 						$q = 'UPDATE ' . $this->table_array[$key]['table_name'] . ' SET ';
 						$q .= $this->table_array[$key]['where'] . ' ';
-						$q .= 'WHERE ' . $this->table_array[$key]['pk_name'] . ' = ' . $this->insert_id;
+						$q .= 'WHERE ' . $this->table_array[$key]['pk_name'] . ' = ' . $this->dbGetInsertPK();
 						$this->dbExec($q);
 					}
-					$this->table_array[$key]['value'] = $this->insert_id;
+					$this->table_array[$key]['value'] = $this->dbGetInsertPK();
 				} // set value from DB through select or insert
 				unset($this->table_array[$key]['input_value']);
 			} // if it is certain field type && if there is something in the temp field

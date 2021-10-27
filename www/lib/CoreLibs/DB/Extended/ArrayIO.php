@@ -539,8 +539,8 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// set primary key
 		if ($insert) {
 			// FIXME: this has to be fixes by fixing DB::IO clas
-			$insert_id = $this->dbGetReturning();
-			if (is_bool($insert_id) || is_array($insert_id)) {
+			$insert_id = $this->dbGetInsertPK();
+			if (is_array($insert_id)) {
 				$insert_id = 0;
 			}
 			$this->table_array[$this->pk_name]['value'] = $insert_id;

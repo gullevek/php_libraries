@@ -70,14 +70,14 @@ return [
 	// Thus, both first-party and third-party code being used by
 	// your application should be included in this list.
 	'directory_list' => [
-		 // Change this to include the folders you wish to analyze
-		 // (and the folders of their dependencies)
-		 'www',
-		 // To speed up analysis, we recommend going back later and
-		 // limiting this to only the vendor/ subdirectories your
-		 // project depends on.
-		 // `phan --init` will generate a list of folders for you
-		 //'www/vendor',
+		// Change this to include the folders you wish to analyze
+		// (and the folders of their dependencies)
+		'www',
+		// To speed up analysis, we recommend going back later and
+		// limiting this to only the vendor/ subdirectories your
+		// project depends on.
+		// `phan --init` will generate a list of folders for you
+		//'www/vendor',
 	],
 
 
