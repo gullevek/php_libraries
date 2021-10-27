@@ -2,6 +2,14 @@
 
 /*
  * TEST sets only
+ *
+ * composer.json
+ * autoloader: {
+ * 		...
+ *      "psr-4": {
+ *           "gullevek\\CoreLibs\\": "src/"
+ *      }
+ * }
  */
 
 declare(strict_types=1);

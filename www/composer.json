@@ -1,5 +1,5 @@
 {
-    "name": "gullevek/www",
+    "name": "gullevek/corelibs",
     "description": "CoreLibs",
     "type": "library",
     "authors": [
@@ -8,5 +8,12 @@
             "email": "clemens.schwaighofer@egplusww.com"
         }
     ],
-    "require": {}
+    "autoload": {
+        "classmap": [
+            "libs/"
+        ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    }
 }

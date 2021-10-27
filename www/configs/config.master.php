@@ -303,5 +303,7 @@ if (defined('DEBUG') && DEBUG == false) {
 /************* AUTO LOADER *******************/
 // read auto loader
 require BASE . LIB . 'autoloader.php';
+// composer auto loader
+require BASE . 'venoder' . DS . 'autoloader.php';
 
 // __END__
