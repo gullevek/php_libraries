@@ -15,8 +15,6 @@ declare(strict_types=1);
 if (!empty($DEBUG_ALL) && !empty($ENABLE_ERROR_HANDLING)) {
 	include BASE . LIBS . "Error.Handling.php";
 }
-// predefine vars
-$messages = array();
 //------------------------------ variable init end
 
 //------------------------------ library include start

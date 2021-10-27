@@ -7,6 +7,8 @@ parameters:
 		- %currentWorkingDirectory%/www
 	bootstrapFiles:
 		- %currentWorkingDirectory%/phpstan-bootstrap.php
+		# - %currentWorkingDirectory%/www/lib/autoloader.php
+		- %currentWorkingDirectory%/www/vendor/autoload.php
 	scanDirectories:
 		- www/lib/Smarty
 	scanFiles:
