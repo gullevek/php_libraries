@@ -63,6 +63,7 @@ print '<div><a href="class_test.form.php">Class Test: FORM</a></div>';
 print '<div><a href="class_test.backend.php">Class Test: BACKEND ADMIN CLASS</a></div>';
 print '<div><a href="class_test.lang.php">Class Test: LANG/L10n</a></div>';
 print '<div><a href="class_test.smarty.php">Class Test: SMARTY</a></div>';
+print '<div><a href="class_test.autoloader.php">Class Test: AUTOLOADER</a></div>';
 
 print "<hr>";
 // print all _ENV vars set

@@ -20,80 +20,140 @@ declare(strict_types=1);
 namespace CoreLibs\Template;
 
 // I need to manually load Smarty BC here (it is not namespaced)
-require_once(BASE . LIB . SMARTY . 'SmartyBC.class.php');
+// require_once(BASE . LIB . SMARTY . 'SmartyBC.class.php');
+// we set this hard coded so it works with all checkers
+// HARD CODED path:
+// __DIR__: lib/CoreLibs/Template/
+// smarty located in lib/Smarty/
+require_once(__DIR__ . '/../../Smarty/SmartyBC.class.php');
 // So it doesn't start looking around in the wrong naemspace as smarty doesn't have one
 use SmartyBC;
 
 class SmartyExtend extends SmartyBC
 {
 	// internal translation engine
+	/** @var \CoreLibs\Language\L10n */
 	public $l10n;
 
 	// lang & encoding
+	/** @var string */
 	public $lang_dir = '';
+	/** @var string */
 	public $lang;
+	/** @var string */
 	public $lang_short;
+	/** @var string */
 	public $encoding;
 	// page name
+	/** @var string */
 	public $page_name;
 
 	// array for data parsing
+	/** @var array<mixed> */
 	public $HEADER = [];
+	/** @var array<mixed> */
 	public $DATA = [];
+	/** @var array<mixed> */
 	public $DEBUG_DATA = [];
+	/** @var array<mixed> */
 	private $CONTENT_DATA = [];
 	// control vars
+	/** @var bool */
 	public $USE_PROTOTYPE = USE_PROTOTYPE;
+	/** @var bool */
 	public $USE_JQUERY = USE_JQUERY;
+	/** @var bool */
 	public $USE_SCRIPTACULOUS = USE_SCRIPTACULOUS;
 	// sub content input vars
+	/** @var bool */
 	public $USE_TINY_MCE = false;
+	/** @var bool */
 	public $JS_DATEPICKR = false;
+	/** @var bool */
 	public $JS_FLATPICKR = false;
+	/** @var bool */
 	public $JS_FILE_UPLOADER = false;
+	/** @var bool */
 	public $DEBUG_TMPL = false;
+	/** @var bool */
 	public $USE_INCLUDE_TEMPLATE = false;
 	// cache & compile
+	/** @var string */
 	public $CACHE_ID = '';
+	/** @var string */
 	public $COMPILE_ID = '';
 	// template vars
+	/** @var string */
 	public $MASTER_TEMPLATE_NAME;
+	/** @var string */
 	public $PAGE_FILE_NAME;
+	/** @var string */
 	public $CONTENT_INCLUDE;
+	/** @var string */
 	public $FORM_NAME;
+	/** @var string */
 	public $FORM_ACTION;
+	/** @var string */
 	public $L_TITLE;
+	/** @var string|int */
 	public $PAGE_WIDTH;
 	// smarty include/set var
+	/** @var string */
 	public $TEMPLATE_PATH;
+	/** @var string */
 	public $TEMPLATE_NAME;
+	/** @var string */
 	public $INC_TEMPLATE_NAME;
+	/** @var string */
 	public $JS_TEMPLATE_NAME;
+	/** @var string */
 	public $CSS_TEMPLATE_NAME;
+	/** @var string|null */
 	public $TEMPLATE_TRANSLATE;
 	// core group
+	/** @var string */
 	public $JS_CORE_TEMPLATE_NAME;
+	/** @var string */
 	public $CSS_CORE_TEMPLATE_NAME;
+	/** @var string */
 	public $JS_CORE_INCLUDE;
+	/** @var string */
 	public $CSS_CORE_INCLUDE;
 	// local names
+	/** @var string */
 	public $JS_SPECIAL_TEMPLATE_NAME = '';
+	/** @var string */
 	public $CSS_SPECIAL_TEMPLATE_NAME = '';
+	/** @var string */
 	public $JS_INCLUDE;
+	/** @var string */
 	public $CSS_INCLUDE;
+	/** @var string */
 	public $JS_SPECIAL_INCLUDE;
+	/** @var string */
 	public $CSS_SPECIAL_INCLUDE;
+	/** @var string */
 	public $ADMIN_JAVASCRIPT;
+	/** @var string */
 	public $ADMIN_STYLESHEET;
+	/** @var string */
 	public $FRONTEND_JAVASCRIPT;
+	/** @var string */
 	public $FRONTEND_STYLESHEET;
 	// other smarty folder vars
+	/** @var string */
 	public $INCLUDES;
+	/** @var string */
 	public $JAVASCRIPT;
+	/** @var string */
 	public $CSS;
+	/** @var string */
 	public $FONT;
+	/** @var string */
 	public $PICTURES;
+	/** @var string */
 	public $CACHE_PICTURES;
+	/** @var string */
 	public $CACHE_PICTURES_ROOT;
 
 	// constructor class, just sets the language stuff
@@ -112,6 +172,7 @@ class SmartyExtend extends SmartyBC
 		$this->l10n = new \CoreLibs\Language\L10n($this->lang);
 		// variable variable register
 		// $this->register_modifier('getvar', [&$this, 'get_template_vars']);
+		/** @phpstan-ignore-next-line */
 		$this->registerPlugin('modifier', 'getvar', [&$this, 'get_template_vars']);
 
 		$this->page_name = pathinfo($_SERVER["PHP_SELF"])['basename'];
@@ -323,6 +384,7 @@ class SmartyExtend extends SmartyBC
 	 */
 	private function setSmartyVars($admin_call = false): void
 	{
+		/** @var \CoreLibs\Admin\Backend This is an assumption */
 		global $cms;
 		if (is_object($cms)) {
 			$this->mergeCmsSmartyVars($cms);
@@ -377,7 +439,7 @@ class SmartyExtend extends SmartyBC
 				$this->DATA['nav_menu_count'] = is_array($this->DATA['nav_menu']) ? count($this->DATA['nav_menu']) : 0;
 				// messages = ['msg' =>, 'class' => 'error/warning/...']
 				$this->DATA['messages'] = $cms->messages ?? [];
-			} else {
+			} else { /** @phpstan-ignore-line Because I assume object for phpstan */
 				$this->DATA['show_ea_extra'] = false;
 				$this->DATA['ADMIN'] = 0;
 				$this->DATA['nav_menu'] = [];

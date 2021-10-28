@@ -14,10 +14,10 @@ parameters:
 	scanFiles:
 		- www/configs/config.php
 		- www/configs/config.master.php
-		- www/lib/autoloader.php
+		# if composer.json autoloader defined, this is not needed
+		# - www/lib/autoloader.php
 		- www/vendor/autoload.php
 		- www/lib/Smarty/Autoloader.php
-		- www/lib/CoreLibs/Template/SmartyExtend.php
 	excludes_analyse:
 		# do not check old qq file uploader tests
 		- www/admin/qq_file_upload_*.php
@@ -38,13 +38,11 @@ parameters:
 		- www/log
 		- www/media
 		- www/tmp
+		# external libs are not checked
 		- www/lib/pChart*
 		- www/lib/Smarty*
-		- www/lib/smarty*
 		# ignore composer
 		- www/vendor
-		# ignore the smartyextend
-		- www/lib/CoreLibs/Template/SmartyExtend.php
 	# ignore errores with
 	ignoreErrors:
 		# -

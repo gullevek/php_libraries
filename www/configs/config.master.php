@@ -301,9 +301,15 @@ if (defined('DEBUG') && DEBUG == false) {
 }
 
 /************* AUTO LOADER *******************/
-// read auto loader
-require BASE . LIB . 'autoloader.php';
-// composer auto loader
-require BASE . 'venoder' . DS . 'autoloader.php';
+// read auto loader for lib only
+// require BASE . LIB . 'autoloader.php';
+// composer auto loader, IF composer.json file includes classmap for lib/:
+// "autoload": {
+// 	"classmap": [
+// 		"lib/"
+// 	]
+// },
+// NOTE BASE: __DIR__ . DIRECTORY_SEPARATOR . '..' DIRECTORY_SEPARATOR;
+require BASE . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 // __END__

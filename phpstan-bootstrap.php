@@ -6,6 +6,7 @@ $_SERVER['HTTP_HOST'] = 'soba.tokyo.tequila.jp';
 // so www/includes/edit_base.php works
 require_once('www/lib/Smarty/SmartyBC.class.php');
 // for whatever reason it does not load that from the confing.master.php
+// for includes/admin_header.php
 define('BASE_NAME', '');
 
 // __END__
