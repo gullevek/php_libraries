@@ -28,6 +28,8 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-autoloader';
 ob_end_flush();
 
+# Test if composer autoloader works here
+
 use CoreLibs\Convert\Byte;
 
 print "<html><head><title>TEST CLASS: AUTOLOADER</title><head>";
