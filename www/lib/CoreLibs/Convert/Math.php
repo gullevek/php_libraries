@@ -31,6 +31,11 @@ class Math
 	 */
 	public static function floorp(float $number, int $precision = -2): float
 	{
+		// if precision is requal or larger than the number length,
+		// set precision to length -1
+		if (abs($precision) >= strlen((string)$number)) {
+			$precision = (strlen((string)$number) - 1) * -1;
+		}
 		$mult = pow(10, $precision); // Can be cached in lookup table
 		return floor($number * $mult) / $mult;
 	}

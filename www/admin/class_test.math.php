@@ -41,11 +41,15 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 print "FCEIL: " . $_math->fceil(5.1234567890, 5) . "<br>";
 print "FLOORP: " . $_math->floorp(5123456, -3) . "<br>";
+print "FLOORP: " . $_math->floorp(5123456, -10) . "<br>";
 print "INITNUMERIC: " . $_math->initNumeric('123') . "<br>";
 
 print "S-FCEIL: " . $math_class::fceil(5.1234567890, 5) . "<br>";
 print "S-FLOORP: " . $math_class::floorp(5123456, -3) . "<br>";
+print "S-INITNUMERIC: " . $math_class::initNumeric(123) . "<br>";
+print "S-INITNUMERIC: " . $math_class::initNumeric(123.456) . "<br>";
 print "S-INITNUMERIC: " . $math_class::initNumeric('123') . "<br>";
+print "S-INITNUMERIC: " . $math_class::initNumeric('123.456') . "<br>";
 
 // DEPRECATED
 /* print "FCEIL: ".$basic->fceil(5.1234567890, 5)."<br>";

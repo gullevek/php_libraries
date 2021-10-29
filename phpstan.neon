@@ -43,6 +43,8 @@ parameters:
 		- www/lib/Smarty*
 		# ignore composer
 		- www/vendor
+		# ignore tst folder
+		- www/tests
 	# ignore errores with
 	ignoreErrors:
 		# -

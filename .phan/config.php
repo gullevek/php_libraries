@@ -85,9 +85,7 @@ return [
 	// to parse, but not analyze
 	"exclude_analysis_directory_list" => [
 		'www/vendor',
-		// 'www/lib/FileUpload',
-		'www/lib/pChart',
-		'www/lib/pChart2.1.4',
+		'www/tests',
 		'www/lib/Smarty',
 		'www/lib/smarty-3.1.30',
 		'www/templates_c',

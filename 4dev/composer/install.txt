@@ -1,21 +1,27 @@
 Install composer:
-curl -sS https://getcomposer.org/installer | /usr/local/php-7.3-httpd-2.4/bin/php
+# old
+curl -sS https://getcomposer.org/installer | /usr/local/php-8.0-httpd-2.4/bin/php
+# new (4 steps) https://getcomposer.org/download/
+/usr/local/php-8.0-httpd-2.4/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+/usr/local/php-8.0-httpd-2.4/bin/php -r "if (hash_file('sha384', 'composer-setup.php') === '906a84df04cea2aa72f40b5f787e49f22d4c2f19492ac310e8cba5b96ac8b64115ac402c8cd292b8a03482574915d1a8') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+/usr/local/php-8.0-httpd-2.4/bin/php composer-setup.php
+/usr/local/php-8.0-httpd-2.4/bin/php -r "unlink('composer-setup.php');
 
 Update composer phar file
-/usr/local/php-7.3-httpd-2.4/bin/php composer.phar selfupdate
+/usr/local/php-8.0-httpd-2.4/bin/php composer.phar selfupdate
 
 Install something:
-/usr/local/php-7.3-httpd-2.4/bin/php composer.phar require something/something
+/usr/local/php-8.0-httpd-2.4/bin/php composer.phar require something/something
 
 Update all installed:
-/usr/local/php-7.3-httpd-2.4/bin/php composer.phar update
+/usr/local/php-8.0-httpd-2.4/bin/php composer.phar update
 
 Or update only one package:
-/usr/local/php-7.3-httpd-2.4/bin/php composer.phar something/something
+/usr/local/php-8.0-httpd-2.4/bin/php composer.phar something/something
 
 Install AWS SDK:
-/usr/local/php-7.3-httpd-2.4/bin/php -d memory_limit=-1 composer.phar require aws/aws-sdk-php
+/usr/local/php-8.0-httpd-2.4/bin/php -d memory_limit=-1 composer.phar require aws/aws-sdk-php
 
 Install zipStream:
-/usr/local/php-7.3-httpd-2.4/bin/php composer.phar require maennchen/zipstream-php
+/usr/local/php-8.0-httpd-2.4/bin/php composer.phar require maennchen/zipstream-php
 
