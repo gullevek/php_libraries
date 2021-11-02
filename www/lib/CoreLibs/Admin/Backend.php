@@ -44,7 +44,7 @@ class Backend extends \CoreLibs\DB\IO
 		'action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag',
 		'action_menu', 'action_value', 'action_error', 'action_loaded'
 	];
-	/** @var string */
+	/** @var string|null */
 	public $action;
 	/** @var string|int */
 	public $action_id;
@@ -76,12 +76,12 @@ class Backend extends \CoreLibs\DB\IO
 	// error/warning/info messages
 	/** @var array<mixed> */
 	public $messages = [];
-	/** @var int */
-	public $error = 0;
-	/** @var int */
-	public $warning = 0;
-	/** @var int */
-	public $info = 0;
+	/** @var bool */
+	public $error = false;
+	/** @var bool */
+	public $warning = false;
+	/** @var bool */
+	public $info = false;
 	// internal lang & encoding vars
 	/** @var string */
 	public $lang_dir = '';
@@ -479,13 +479,13 @@ class Backend extends \CoreLibs\DB\IO
 		];
 		switch ($level) {
 			case 'info':
-				$this->info = 1;
+				$this->info = true;
 				break;
 			case 'warning':
-				$this->warning = 1;
+				$this->warning = true;
 				break;
 			case 'error':
-				$this->error = 1;
+				$this->error = true;
 				break;
 		}
 	}
