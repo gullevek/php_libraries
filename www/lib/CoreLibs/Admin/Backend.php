@@ -44,7 +44,7 @@ class Backend extends \CoreLibs\DB\IO
 		'action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag',
 		'action_menu', 'action_value', 'action_error', 'action_loaded'
 	];
-	/** @var string|null */
+	/** @var string */
 	public $action;
 	/** @var string|int */
 	public $action_id;
