@@ -208,6 +208,7 @@ class Backend extends \CoreLibs\DB\IO
 
 		// check schema
 		$SCHEMA = 'public';
+		/** @phpstan-ignore-next-line */
 		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
 			$SCHEMA = LOGIN_DB_SCHEMA;
 		} elseif ($this->dbGetSchema()) {
@@ -511,6 +512,7 @@ class Backend extends \CoreLibs\DB\IO
 		string $associate = null,
 		string $file = null
 	): void {
+		/** @phpstan-ignore-next-line */
 		if (defined('GLOBAL_DB_SCHEMA') && !empty(GLOBAL_DB_SCHEMA)) {
 			$SCHEMA = GLOBAL_DB_SCHEMA;
 		} elseif ($this->dbGetSchema()) {

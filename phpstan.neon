@@ -48,7 +48,7 @@ parameters:
 	# ignore errores with
 	ignoreErrors:
 		# this is ignored for now
-		- '#Expression in empty\(\) is always falsy.#'
+		# - '#Expression in empty\(\) is always falsy.#'
 		# -
 		# 	message: '#Reflection error: [a-zA-Z0-9\\_]+ not found.#'
 		# 	path: www/includes/edit_base.php

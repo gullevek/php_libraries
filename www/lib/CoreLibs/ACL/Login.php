@@ -191,7 +191,8 @@ class Login extends \CoreLibs\DB\IO
 			exit;
 		}
 
-		// set global is ajax page for if we show the data directly, or need to pass it back
+		// set global is ajax page for if we show the data directly,
+		// or need to pass it back
 		// to the continue AJAX class for output back to the user
 		$this->login_is_ajax_page = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
 		// set the default lang
@@ -207,6 +208,7 @@ class Login extends \CoreLibs\DB\IO
 		// check what schema to use. if there is a login schema use this, else check
 		// if there is a schema set in the config, or fall back to DB_SCHEMA
 		// if this exists, if this also does not exists use public schema
+		/** @phpstan-ignore-next-line */
 		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
 			$SCHEMA = LOGIN_DB_SCHEMA;
 		} elseif (isset($db_config['db_schema']) && $db_config['db_schema']) {
@@ -216,6 +218,7 @@ class Login extends \CoreLibs\DB\IO
 		} else {
 			$SCHEMA = 'public';
 		}
+		// echo "<h1>*****SCHEMA******</h1>: $SCHEMA<br>";
 		// set schema if schema differs to schema set in db conneciton
 		if ($this->dbGetSchema() && $this->dbGetSchema() != $SCHEMA) {
 			$this->dbExec("SET search_path TO " . $SCHEMA);
