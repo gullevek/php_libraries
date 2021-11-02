@@ -44,6 +44,7 @@ print "S::GETEMAILREGEX(2): " . Email::getEmailRegex(2) . "<br>";
 print "S::GETEMAILREGEX(7): " . Email::getEmailRegex(7) . "<br>";
 print "S::GETEMAILREGEX(8 invalid): " . Email::getEmailRegex(8) . "<br>";
 print "S::GETEMAILREGEXCHECK: " . DgS::printAr(Email::getEmailRegexCheck()) . "<br>";
+print "S::GETEMAILREGEXERRORMESSAGE " . Dgs::printAr(Email::getEmailRegexErrorMessage(1)) . "<br>";
 
 $email = [
 	'foo@bar.org',
@@ -52,6 +53,23 @@ $email = [
 foreach ($email as $s_email) {
 	print "S::EMAIL: $s_email: " . Email::getEmailType($s_email) . "<br>";
 	print "S::EMAIL SHORT: $s_email: " . Email::getEmailType($s_email, true) . "<br>";
+}
+$email = [
+	'test@test.com',
+	'',
+	'-@-',
+	'.test@test.com',
+	'test@t_est.com',
+	'test@@test.com',
+	'test@test..com',
+	'test@@test..com',
+	'test@test.',
+	'test@test.j',
+];
+foreach ($email as $s_email) {
+	print "S::CHECKEMAIL: " . $s_email . ": " . (Email::checkEmail($s_email) ? 'Yes' : 'No') . "<br>";
+	print "S::CHECKEMAILFULL: " . $s_email . ": " . Dgs::printAr(Email::checkEmailFull($s_email)) . "<br>";
+	print "S::CHECKEMAILFULL(true): " . $s_email . ": " . Dgs::printAr(Email::checkEmailFull($s_email, true)) . "<br>";
 }
 // DEPRECATED
 /* foreach ($email as $s_email) {

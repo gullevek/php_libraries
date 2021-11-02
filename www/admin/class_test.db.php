@@ -125,10 +125,18 @@ print "DIRECT INSERT NO RETURN STATUS: $status | "
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+$last_insert_pk = $db->dbGetInsertPK();
+
+// is_array read test
+$q = "SELECT test_foo_id, test FROM test_foo WHERE test_foo_id = " . $last_insert_pk;
+if (is_array($s_res = $db->dbReturnRow($q)) && !empty($s_res['test'])) {
+	print "WE HAVE DATA FOR: " . $last_insert_pk . " WITH: " . $s_res['test'] . "<br>";
+}
 
 // UPDATE WITH RETURNING
-$status = $db->dbExec("UPDATE test_foo SET test = 'SOMETHING DIFFERENT' WHERE test_foo_id = 3688452 RETURNING test");
-print "UPDATE WITH RETURN STATUS: $status | "
+$status = $db->dbExec("UPDATE test_foo SET test = 'SOMETHING DIFFERENT' "
+	. "WHERE test_foo_id = " . $last_insert_pk . " RETURNING test");
+print "UPDATE WITH PK " . $last_insert_pk . " RETURN STATUS: $status | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 

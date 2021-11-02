@@ -60,25 +60,30 @@ class Support
 
 	/**
 	 * Get the current class where this function is called
-	 * Is mostly used in debug log statements to get the class where the debug was called
+	 * Is mostly used in debug log statements to get the class where the debug
+	 * was called
 	 * gets top level class
 	 *　loops over the debug backtrace until if finds the first class (from the end)
 	 * @return string Class name with namespace
 	 */
 	public static function getCallerClass(): string
 	{
-		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) ?? [['class' => get_called_class()]];
+		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+		// ?? [['class' => get_called_class()]];
+		// TODO make sure that this doesn't loop forver
 		$class = null;
-		while ($class === null) {
+		while ($class === null && count($backtrace) > 0) {
 			// if current is
 			// [function] => debug
 			// [class] => CoreLibs\Debug\Logging
 			// then return
 			// (OUTSIDE) because it was not called from a class method
 			// or return file name
-			$class = array_pop($backtrace)['class'] ?? null;
+			$get_class = array_pop($backtrace);
+			$class = $get_class['class'] ?? null;
 		}
-		return $class ?? '';
+		// on null or empty return empty string
+		return empty($class) ? '' : $class;
 	}
 
 	/**

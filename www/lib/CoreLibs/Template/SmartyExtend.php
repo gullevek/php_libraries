@@ -280,12 +280,12 @@ class SmartyExtend extends SmartyBC
 	public function setSmartyPaths(): void
 	{
 		// master template
-		if (!isset($this->MASTER_TEMPLATE_NAME)) {
+		if (empty($this->MASTER_TEMPLATE_NAME)) {
 			$this->MASTER_TEMPLATE_NAME = MASTER_TEMPLATE_NAME;
 		}
 
 		// set include & template names
-		if (!isset($this->CONTENT_INCLUDE)) {
+		if (empty($this->CONTENT_INCLUDE)) {
 			$this->CONTENT_INCLUDE = str_replace('.php', '', $this->page_name) . '.tpl';
 		}
 		// strip tpl and replace it with php
@@ -435,10 +435,10 @@ class SmartyExtend extends SmartyBC
 				$this->DATA['show_ea_extra'] = $cms->acl['show_ea_extra'] ?? false;
 				$this->DATA['ADMIN'] = $cms->acl['admin'] ?? 0;
 				// top menu
-				$this->DATA['nav_menu'] = $cms->adbTopMenu() ?? [];
+				$this->DATA['nav_menu'] = $cms->adbTopMenu();
 				$this->DATA['nav_menu_count'] = is_array($this->DATA['nav_menu']) ? count($this->DATA['nav_menu']) : 0;
 				// messages = ['msg' =>, 'class' => 'error/warning/...']
-				$this->DATA['messages'] = $cms->messages ?? [];
+				$this->DATA['messages'] = $cms->messages;
 			} else { /** @phpstan-ignore-line Because I assume object for phpstan */
 				$this->DATA['show_ea_extra'] = false;
 				$this->DATA['ADMIN'] = 0;
@@ -451,7 +451,7 @@ class SmartyExtend extends SmartyBC
 			$this->HEADER['JAVASCRIPT'] = $this->ADMIN_JAVASCRIPT ? $this->ADMIN_JAVASCRIPT : ADMIN_JAVASCRIPT;
 			// the page name
 			$this->DATA['page_name'] = $this->page_name;
-			$this->DATA['table_width'] = $this->PAGE_WIDTH ?? PAGE_WIDTH;
+			$this->DATA['table_width'] = empty($this->PAGE_WIDTH) ?: PAGE_WIDTH;
 			$this->DATA['form_name'] = $this->DATA['FORM_NAME'];
 			// for tinymce special
 			$this->DATA['TINYMCE_LANG'] = $this->lang_short;

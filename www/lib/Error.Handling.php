@@ -27,7 +27,7 @@ declare(strict_types=1);
  */
 function MyErrorHandler(int $type, string $message, string $file, int $line, array $context): bool
 {
-	if (!(error_reporting() & $type) && empty(SHOW_ALL_ERRORS)) {
+	if (!(error_reporting() & $type) && SHOW_ALL_ERRORS == false) {
 		// This error code is not included in error_reporting
 		return false;
 	}

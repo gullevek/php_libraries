@@ -28,7 +28,7 @@ class qqUploadedFileForm implements qqUploadedFile // phpcs:ignore Squiz.Classes
 	 */
 	public function getName(): string
 	{
-		return $_FILES['qqfile']['name'] ?? '';
+		return (string)$_FILES['qqfile']['name'];
 	}
 
 	/**
@@ -38,7 +38,7 @@ class qqUploadedFileForm implements qqUploadedFile // phpcs:ignore Squiz.Classes
 	 */
 	public function getSize(): int
 	{
-		return (int)$_FILES['qqfile']['size'] ?? 0;
+		return (int)$_FILES['qqfile']['size'];
 	}
 }
 

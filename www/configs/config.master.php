@@ -21,62 +21,62 @@ define('BASE', str_replace('/configs', '', __DIR__) . DS);
 
 // ** OLD DIR DECLARATIONS **
 // path to document root of file called
-define('ROOT', getcwd() .  DS);
+define('ROOT', getcwd() . DS);
 // libs path
-define('LIB', 'lib' .  DS);
-define('LIBS', 'lib' .  DS);
+define('LIB', 'lib' . DS);
+define('LIBS', 'lib' . DS);
 // configs folder
-define('CONFIGS', 'configs' .  DS);
+define('CONFIGS', 'configs' . DS);
 // includes (strings, arrays for static, etc)
-define('INCLUDES', 'includes' .  DS);
+define('INCLUDES', 'includes' . DS);
 // data folder (mostly in includes, or root for internal data)
-define('DATA', 'data' .  DS);
+define('DATA', 'data' . DS);
 // layout base path
-define('LAYOUT', 'layout' .  DS);
+define('LAYOUT', 'layout' . DS);
 // pic-root (compatible to CMS)
-define('PICTURES', 'images' .  DS);
+define('PICTURES', 'images' . DS);
 // images
-define('IMAGES', 'images' .  DS);
+define('IMAGES', 'images' . DS);
 // icons (below the images/ folder)
-define('ICONS', 'icons' .  DS);
+define('ICONS', 'icons' . DS);
 // media (accessable from outside)
-define('MEDIA', 'media' .  DS);
+define('MEDIA', 'media' . DS);
 // uploads (anything to keep or data)
-define('UPLOADS', 'uploads' .  DS);
+define('UPLOADS', 'uploads' . DS);
 // files (binaries) (below media or data)
-define('BINARIES', 'binaries' .  DS);
+define('BINARIES', 'binaries' . DS);
 // files (videos) (below media or data)
-define('VIDEOS', 'videos' .  DS);
+define('VIDEOS', 'videos' . DS);
 // files (documents) (below media or data)
-define('DOCUMENTS', 'documents' .  DS);
+define('DOCUMENTS', 'documents' . DS);
 // files (pdfs) (below media or data)
-define('PDFS', 'documents' .  DS);
+define('PDFS', 'documents' . DS);
 // files (general) (below media or data)
-define('FILES', 'files' .  DS);
+define('FILES', 'files' . DS);
 // CSV
-define('CSV', 'csv' .  DS);
+define('CSV', 'csv' . DS);
 // css
-define('CSS', 'css' .  DS);
+define('CSS', 'css' . DS);
 // font (web)
-define('FONT', 'font' .  DS);
+define('FONT', 'font' . DS);
 // js
-define('JS', 'javascript' .  DS);
+define('JS', 'javascript' . DS);
 // table arrays
-define('TABLE_ARRAYS', 'table_arrays' .  DS);
+define('TABLE_ARRAYS', 'table_arrays' . DS);
 // smarty libs path
-define('SMARTY', 'Smarty' .  DS);
+define('SMARTY', 'Smarty' . DS);
 // po langs
-define('LANG', 'lang' .  DS);
+define('LANG', 'lang' . DS);
 // cache path
-define('CACHE', 'cache' .  DS);
+define('CACHE', 'cache' . DS);
 // temp path
-define('TMP', 'tmp' .  DS);
+define('TMP', 'tmp' . DS);
 // log files
-define('LOG', 'log' .  DS);
+define('LOG', 'log' . DS);
 // compiled template folder
-define('TEMPLATES_C', 'templates_c' .  DS);
+define('TEMPLATES_C', 'templates_c' . DS);
 // template base
-define('TEMPLATES', 'templates' .  DS);
+define('TEMPLATES', 'templates' . DS);
 
 /************* HASH / ACL DEFAULT / ERROR SETTINGS / SMARTY *************/
 // default hash type
@@ -212,7 +212,7 @@ list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 define('HOST_NAME', $HOST_NAME);
 // BAIL ON MISSING MASTER SITE CONFIG
 if (!isset($SITE_CONFIG[HOST_NAME]['location'])) {
-	echo 'Missing SITE_CONFIG entry for: "' . HOST_NAME . '" .  Contact Administrator';
+	echo 'Missing SITE_CONFIG entry for: "' . HOST_NAME . '" . Contact Administrator';
 	exit;
 }
 // BAIL ON MISSING DB CONFIG:
@@ -229,7 +229,7 @@ if (
 		(is_array($DB_CONFIG) && count($DB_CONFIG) && !isset($DB_CONFIG[$SITE_CONFIG[HOST_NAME]['db_host']])))
 	)
 ) {
-	echo 'No matching DB config found for: "' . HOST_NAME . '" .  Contact Administrator';
+	echo 'No matching DB config found for: "' . HOST_NAME . '" . Contact Administrator';
 	exit;
 }
 // set SSL on

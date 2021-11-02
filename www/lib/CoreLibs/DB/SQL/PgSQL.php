@@ -295,7 +295,11 @@ class PgSQL
 				if (!is_resource($q)) {
 					return false;
 				}
-				list($id) = $this->__dbFetchArray($q) ?: [];
+				if (is_array($res = $this->__dbFetchArray($q))) {
+					list($id) = $res;
+				} else {
+					return false;
+				}
 			} else {
 				$id = [-1, $q];
 			}

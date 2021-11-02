@@ -65,7 +65,7 @@ class Image
 		}
 		// does this picture exist and is it a picture
 		if (file_exists($filename) && is_file($filename)) {
-			list($width, $height, $type) = getimagesize($filename);
+			[$width, $height, $type] = getimagesize($filename) ?: [];
 			$convert_prefix = '';
 			$create_file = false;
 			$delete_filename = '';
@@ -94,7 +94,7 @@ class Image
 				if (!is_file($filename)) {
 					$filename .= '-0';
 				}
-				list($width, $height, $type) = getimagesize($filename);
+				[$width, $height, $type] = getimagesize($filename) ?: [];
 			}
 			// if no size given, set size to original
 			if (!$size_x || $size_x < 1 || !is_numeric($size_x)) {
@@ -113,7 +113,7 @@ class Image
 					$status = exec($convert_string, $output, $return);
 					// get the size of the converted data, if converted
 					if (is_file($thumbnail)) {
-						list ($width, $height, $type) = getimagesize($thumbnail);
+						[$width, $height, $type] = getimagesize($thumbnail) ?: [];
 					}
 				}
 				if ($height > $size_y) {
@@ -133,6 +133,7 @@ class Image
 			if (!empty($dummy) && strstr($dummy, '/') === false) {
 				// check if we have the "dummy" image flag set
 				$filename = PICTURES . ICONS . strtoupper($dummy) . ".png";
+				/** @phpstan-ignore-next-line */
 				if (!empty($dummy) && file_exists($filename) && is_file($filename)) {
 					$return_data = $filename;
 				} else {
@@ -187,7 +188,7 @@ class Image
 			is_writable(BASE . LAYOUT . CONTENT_PATH . CACHE)
 		) {
 			// $this->debug('IMAGE PREPARE', "FILENAME OK, THUMB WIDTH/HEIGHT OK");
-			list($inc_width, $inc_height, $img_type) = getimagesize($filename);
+			[$inc_width, $inc_height, $img_type] = getimagesize($filename) ?: [];
 			$thumbnail_write_path = null;
 			$thumbnail_web_path = null;
 			// path set first
@@ -424,7 +425,7 @@ class Image
 		if (!function_exists('exif_read_data') || !is_writeable($filename)) {
 			return;
 		}
-		list($inc_width, $inc_height, $img_type) = getimagesize($filename);
+		[$inc_width, $inc_height, $img_type] = getimagesize($filename) ?: [];
 		// add @ to avoid "file not supported error"
 		$exif = @exif_read_data($filename);
 		$orientation = null;

@@ -27,7 +27,6 @@ class ArrayHandler
 		}
 		if (
 			$key_lookin != null &&
-			!empty($key_lookin) &&
 			array_key_exists($key_lookin, $haystack) &&
 			$needle === $haystack[$key_lookin]
 		) {

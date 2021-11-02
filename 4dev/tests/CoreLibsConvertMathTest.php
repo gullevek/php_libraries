@@ -1,10 +1,5 @@
 <?php
 
-/*
- * Tests for
- * \CoreLibs\Convert\Math
- */
-
 declare(strict_types=1);
 
 namespace tests;
@@ -17,11 +12,10 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsConvertMathTest extends TestCase
 {
-
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function fceilProvider(): array
 	{
@@ -38,7 +32,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * @dataProvider fceilProvider
 	 * @testdox Math::fceil: Input $input must be $expected
 	 *
-	 * @param int $input
+	 * @param float $input
 	 * @param int $expected
 	 * @return void
 	 */
@@ -53,7 +47,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function floorProvider(): array
 	{
@@ -85,7 +79,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function initNumericProvider(): array
 	{
@@ -105,6 +99,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 *
 	 * @param int|float|string $input
 	 * @param float $expected
+	 * @param string $info
 	 * @return void
 	 */
 	public function testMathInitNumericValue($input, float $expected, string $info): void
@@ -122,7 +117,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * @testWith [123.123, 123.123, "float"]
 	 *           ["123.123", 123.123, "string"]
 	 *
-	 * @param [type] $input
+	 * @param int|float|string $input
 	 * @param float $expected
 	 * @param string $info
 	 * @return void
@@ -135,3 +130,5 @@ final class CoreLibsConvertMathTest extends TestCase
 		);
 	}
 }
+
+// __END__

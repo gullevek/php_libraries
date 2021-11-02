@@ -81,7 +81,7 @@ class Basic
 	/** @var string */
 	private $session_name = '';
 	/** @var string */
-	private $session_id = '';
+	private $session_id = ''; /** @phpstan-ignore-line */
 
 	// ajax flag
 	/** @var bool */
@@ -164,7 +164,7 @@ class Basic
 			// start session
 			session_start();
 			// set internal session id, we can use that later for protection check
-			$this->session_id = session_id() ?: '';
+			$this->session_id = (string)session_id();
 		}
 	}
 
@@ -1172,24 +1172,6 @@ class Basic
 	}
 
 	// *** UIDS END
-
-	// *** BETTER PASSWORD OPTIONS, must be used ***
-	// [!!! DEPRECATED !!!]
-	// moved to \CoreLibs\Check\Password
-	/**
-	 * inits the password options set
-	 * currently this is et empty, and the default options are used
-	 * @return void has no reutrn
-	 * @deprecated use This function has been removed
-	 */
-	private function passwordInit(): void
-	{
-		trigger_error('Method ' . __METHOD__ . ' has been removed', E_USER_DEPRECATED);
-		/* // set default password cost: use default set automatically
-		$this->password_options = [
-			// 'cost' => PASSWORD_BCRYPT_DEFAULT_COST
-		]; */
-	}
 
 	/**
 	 * creates the password hash

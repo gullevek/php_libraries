@@ -111,7 +111,7 @@ class qqFileUploader // phpcs:ignore Squiz.Classes.ValidClassName.NotCamelCaps
 		}
 
 		$pathinfo = pathinfo($this->file->getName());
-		$filename = $pathinfo['filename'] ?? '';
+		$filename = $pathinfo['filename'];
 		//$filename = md5(uniqid());
 		$ext = $pathinfo['extension'] ?? '';
 

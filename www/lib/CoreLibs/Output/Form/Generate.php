@@ -355,9 +355,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (isset($config_array['load_query']) && $config_array['load_query']) {
 			$this->load_query = $config_array['load_query'];
 		}
-		$this->archive_pk_name = 'a_' . $this->pk_name ?? '';
-		$this->col_name = str_replace('_id', '', $this->pk_name ?? '');
-		$this->int_pk_name = $this->pk_name ?? '';
+		$this->archive_pk_name = 'a_' . $this->pk_name;
+		$this->col_name = str_replace('_id', '', $this->pk_name);
+		$this->int_pk_name = $this->pk_name;
 		// check if reference_arrays are given and proceed them
 		if (isset($config_array['reference_arrays']) && is_array($config_array['reference_arrays'])) {
 			foreach ($config_array['reference_arrays'] as $key => $value) {
@@ -1197,16 +1197,18 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							break;
 						// check unique, check if field in table is not yet exist
 						case 'unique':
-							$q = 'SELECT ' . $key
-								. ' FROM ' . $this->table_name
-								. ' WHERE ' . $key . ' = '
+							$q = 'SELECT ' . $key . ' AS unique_row '
+								. 'FROM ' . $this->table_name . ' '
+								. 'WHERE ' . $key . ' = '
 								. "'" . $this->dbEscapeString($this->table_array[$key]['value']) . "'";
 							if ($this->table_array[$this->int_pk_name]['value']) {
 								$q .= ' AND ' . $this->int_pk_name . ' <> '
 									. $this->table_array[$this->int_pk_name]['value'];
 							}
-							list($$key) = $this->dbReturnRow($q);
-							if ($$key) {
+							if (
+								is_array($s_res = $this->dbReturnRow($q)) &&
+								!empty($s_res['unique_row'])
+							) {
 								$this->msg .= sprintf(
 									$this->l->__('The field <b>%s</b> can be used only once!<br>'),
 									$this->table_array[$key]['output_name']
@@ -1538,20 +1540,30 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$order_name = $this->formGetColNameFromKey('order');
 		if ($order_name) {
 			// first check out of order ...
-
 			if (empty($this->table_array[$order_name]['value'])) {
 				// set order (read max)
-				$q = 'SELECT MAX(' . $order_name . ') + 1 AS max_page_order FROM ' . $this->table_name;
-				list($this->table_array[$order_name]['value']) = $this->dbReturnRow($q);
+				$q = 'SELECT MAX(' . $order_name . ') + 1 AS max_page_order '
+					. 'FROM ' . $this->table_name;
+				if (
+					is_array($res = $this->dbReturnRow($q)) &&
+					!empty($res['max_page_order'])
+				) {
+					$this->table_array[$order_name]['value'] = $res['max_page_order'];
+				}
 				// frist element is 0 because NULL gets returned, set to 1
 				if (!$this->table_array[$order_name]['value']) {
 					$this->table_array[$order_name]['value'] = 1;
 				}
 			} elseif (!empty($this->table_array[$this->int_pk_name]['value'])) {
-				$q = 'SELECT ' . $order_name
-					. ' FROM ' . $this->table_name
-					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
-				list($this->table_array[$order_name]['value']) = $this->dbReturnRow($q);
+				$q = 'SELECT ' . $order_name . ' AS order_name '
+					. 'FROM ' . $this->table_name . ' '
+					. 'WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
+				if (
+					is_array($res = $this->dbReturnRow($q)) &&
+					!empty($res['order_name'])
+				) {
+					$this->table_array[$order_name]['value'] = $res['order_name'];
+				}
 			}
 		}
 		return $this->table_array;
@@ -1656,7 +1668,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			) {
 				// $this->log->debug('form', 'HERE');
 				// check if this text name already exists (lowercase compare)
-				$q = 'SELECT ' . $this->table_array[$key]['pk_name']
+				$q = 'SELECT ' . $this->table_array[$key]['pk_name'] . ' AS pk_name '
 					. ' FROM ' . $this->table_array[$key]['table_name']
 					. ' WHERE LCASE(' . $this->table_array[$key]['input_name'] . ') = '
 					. "'" . $this->dbEscapeString(strtolower($this->table_array[$key]['input_value'])) . "'";
@@ -1664,9 +1676,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				if ($this->table_array[$key]['where']) {
 					$q .= ' AND ' . $this->table_array[$key]['where'];
 				}
-				list($pk_name_temp) = $this->dbReturnRow($q);
-				if ($this->num_rows >= 1) {
-					$this->table_array[$key]['value'] = $pk_name_temp;
+				if (
+					is_array($s_res = $this->dbReturnRow($q)) &&
+					!empty($s_res['pk_name'])
+				) {
+					// $this->table_array[$key]['value'] = $pk_name_temp;
+					$this->table_array[$key]['value'] = $s_res['pk_name'];
 				} else {
 					// if a where was given, set this key also [dangerous!]
 					// postgreSQL compatible insert
@@ -1694,7 +1709,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// if drop down & input are different
 				if ($this->table_array[$key]['input_value'] != $this->table_array[$key]['value']) {
 					// check if 'right input' is in DB
-					$q = 'SELECT ' . $this->table_array[$key]['input_name']
+					$q = 'SELECT ' . $this->table_array[$key]['input_name'] . ' AS temp '
 						. ' FROM ' . $this->table_array[$key]['table_name']
 						. ' WHERE LCASE(' . $this->table_array[$key]['input_name'] . ') = '
 						. "'" . strtolower($this->dbEscapeString($this->table_array[$key]['input_value'])) . "'";
@@ -1702,9 +1717,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					if ($this->table_array[$key]['where']) {
 						$q .= ' AND ' . $this->table_array[$key]['where'];
 					}
-					list($temp) = $this->dbReturnRow($q);
-					// nothing found in table, use new inserted key
-					if (!$temp) {
+					if (
+						is_array($s_res = $this->dbReturnRow($q)) &&
+						empty($s_res['temp'])
+					) {
 						$this->table_array[$key]['value'] = $this->table_array[$key]['input_value'];
 					} else {
 						// found in DB
@@ -1800,7 +1816,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			} // foreach reference arrays
 		} // if reference arrays
 		// write element list
-		if (isset($this->element_list) && is_array($this->element_list)) {
+		if (is_array($this->element_list)) {
 			$type = [];
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $reference_array) {
@@ -2294,7 +2310,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				}
 			}
 			// @phan HACK
-			$data['prefix'] = $data['prefix'] ?? '';
+			$data['prefix'] = $data['prefix'];
 			// set the rest of the data so we can print something out
 			/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 			$data['type'][$data['prefix'] . $this->element_list[$table_name]['read_data']['name']] = 'string';
@@ -2362,7 +2378,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// read out the list and add the selected data if needed
 			while (is_array($res = $this->dbReturn($q))) {
 				$_data = [];
-				$prfx = $data['prefix'] ?? ''; // short
+				$prfx = $data['prefix']; // short
 				// go through each res
 				for ($i = 0, $i_max = count($q_select); $i < $i_max; $i++) {
 					// query select part, set to the element name
@@ -2411,7 +2427,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$this->element_list[$table_name]['max_empty'] = 10;
 			}
 			// check if we need to fill fields
-			$element_count = count($data['content'] ?? []);
+			$element_count = count($data['content']);
 			$missing_empty_count = $this->element_list[$table_name]['max_empty'] - $element_count;
 			$this->log->debug('CFG MAX', 'Max empty: '
 				. $this->element_list[$table_name]['max_empty'] . ', Missing: ' . $missing_empty_count
@@ -2428,22 +2444,18 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					$pos++
 				) {
 					$_data = [];
-					// just in case
-					if (!isset($data['type'])) {
-						$data['type'] = [];
-					}
 					// the fields that need to be filled are in data->type array:
 					// pk fields are unfilled
 					// fk fields are filled with the fk_id 'int_pk_name' value
 					foreach ($data['type'] as $el_name => $type) {
 						$_data[$el_name] = '';
 						if (
-							isset($data['pk_name']) &&
+							!empty($data['pk_name']) &&
 							$el_name == $data['pk_name']
 						) {
 							// do nothing for pk name
 						} elseif (
-							isset($data['fk_name']) &&
+							!empty($data['fk_name']) &&
 							$el_name == $data['fk_name'] &&
 							isset($this->table_array[$this->int_pk_name]['value'])
 						) {
@@ -2466,7 +2478,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$data['content'][] = $proto;
 			// we also need the pos add or we through an error in smarty
 			$data['pos'][] = [
-				0 => isset($data['pos']) ? count($data['pos']) : 0
+				0 => count($data['pos'])
 			];
 		}
 		// $this->log->debug('CFG ELEMENT LIST FILL', 'Data array: ' . $this->log->prAr($data));

@@ -308,7 +308,7 @@ class Logging
 	private function getCallerClass(): string
 	{
 		// get the last class entry and wrie that
-		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) ?? [['class' => get_class($this)]];
+		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 		// make sure if false it is an array and then check if not class set return empty string
 		return (end($backtrace) ?: [])['class'] ?? '';
 	}

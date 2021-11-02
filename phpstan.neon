@@ -2,7 +2,7 @@
 
 parameters:
 	tmpDir: /tmp/phpstan-corelibs
-	level: max
+	level: 8 # max is now 9
 	paths:
 		- %currentWorkingDirectory%/www
 	bootstrapFiles:
@@ -18,7 +18,7 @@ parameters:
 		# - www/lib/autoloader.php
 		- www/vendor/autoload.php
 		- www/lib/Smarty/Autoloader.php
-	excludes_analyse:
+	excludePaths:
 		# do not check old qq file uploader tests
 		- www/admin/qq_file_upload_*.php
 		# ignore all test files
@@ -39,14 +39,16 @@ parameters:
 		- www/media
 		- www/tmp
 		# external libs are not checked
-		- www/lib/pChart*
-		- www/lib/Smarty*
+		- www/lib/Smarty/
+		- www/lib/smarty-*/
 		# ignore composer
 		- www/vendor
 		# ignore tst folder
 		- www/tests
 	# ignore errores with
 	ignoreErrors:
+		# this is ignored for now
+		- '#Expression in empty\(\) is always falsy.#'
 		# -
 		# 	message: '#Reflection error: [a-zA-Z0-9\\_]+ not found.#'
 		# 	path: www/includes/edit_base.php

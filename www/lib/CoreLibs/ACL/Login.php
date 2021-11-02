@@ -98,7 +98,7 @@ class Login extends \CoreLibs\DB\IO
 	/** @var bool */
 	private $password_forgot = false;
 	/** @var bool */
-	private $password_forgot_ok = false; // password forgot mail send ok
+	// private $password_forgot_ok = false; // password forgot mail send ok
 	/** @var string */
 	private $change_password;
 	/** @var string */
@@ -196,7 +196,7 @@ class Login extends \CoreLibs\DB\IO
 		$this->login_is_ajax_page = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
 		// set the default lang
 		$lang = 'en_utf8';
-		if (session_id() && isset($_SESSION['DEFAULT_LANG']) && $_SESSION['DEFAULT_LANG']) {
+		if (session_id() !== false && !empty($_SESSION['DEFAULT_LANG'])) {
 			$lang = $_SESSION['DEFAULT_LANG'];
 		} else {
 			$lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
@@ -922,8 +922,11 @@ class Login extends \CoreLibs\DB\IO
 						. "FROM edit_user "
 						. "WHERE enabled = 1 "
 						. "AND username = '" . $this->dbEscapeString($this->pw_username) . "'";
-					list ($edit_user_id) = $this->dbReturnRow($q);
-					if (!$edit_user_id) {
+					$res = $this->dbReturnRow($q);
+					if (
+						!is_array($res) ||
+						(is_array($res) && empty($res['edit_user_id']))
+					) {
 						// username wrong
 						$this->login_error = 201;
 						$data = 'User could not be found';
@@ -935,8 +938,17 @@ class Login extends \CoreLibs\DB\IO
 						. "FROM edit_user "
 						. "WHERE enabled = 1 "
 						. "AND username = '" . $this->dbEscapeString($this->pw_username) . "'";
-					list ($edit_user_id, $old_password_hash) = $this->dbReturnRow($q);
-					if (!$edit_user_id || !$this->loginPasswordCheck($old_password_hash, $this->pw_old_password)) {
+					$edit_user_id = '';
+					$res = $this->dbReturnRow($q);
+					if (is_array($res)) {
+						$edit_user_id = $res['edit_user_id'];
+					}
+					if (
+						!is_array($res) ||
+						(is_array($res) &&
+						(empty($res['edit_user_id']) ||
+						!$this->loginPasswordCheck($res['old_password_hash'], $this->pw_old_password)))
+					) {
 						// old password wrong
 						$this->login_error = 202;
 						$data = 'The old password does not match';
@@ -1096,7 +1108,7 @@ class Login extends \CoreLibs\DB\IO
 		// write to LOG table ...
 		if ($this->login_error || $this->login || $this->logout) {
 			$username = '';
-			$password = '';
+			// $password = '';
 			// set event
 			if ($this->login) {
 				$event = 'Login';
@@ -1109,7 +1121,10 @@ class Login extends \CoreLibs\DB\IO
 			if ($this->euid) {
 				// get user from user table
 				$q = "SELECT username FROM edit_user WHERE edit_user_id = " . $this->euid;
-				list($username) = $this->dbReturnRow($q);
+				$username = '';
+				if (is_array($res = $this->dbReturnRow($q))) {
+					$username = $res['username'];
+				}
 			} // if euid is set, get username (or try)
 			$this->writeLog($event, '', $this->login_error, $username);
 		} // write log under certain settings

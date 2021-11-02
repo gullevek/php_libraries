@@ -302,8 +302,6 @@ class IO extends \CoreLibs\Basic
 	private $insert_id_arr; // always return as array, even if only one
 	/** @var string */
 	private $insert_id_pk_name; // primary key name for insert recovery from insert_id_arr
-	/** @var string */
-	private $temp_sql;
 	// other vars
 	/** @var string */
 	private $nbsp = ''; // used by print_array recursion function
@@ -932,10 +930,7 @@ class IO extends \CoreLibs\Basic
 				$this->warning_id = 31;
 				$this->__dbError($cursor, '[dbExec]');
 			}
-		} elseif (
-			$stm_name === null ||
-			($stm_name !== null && !empty($cursor))
-		) {
+		} else { // was stm_name null or not null and cursor
 			// we have returning, now we need to check if we get one or many returned
 			// we'll need to loop this, if we have multiple insert_id returns
 			while (
@@ -2202,14 +2197,12 @@ class IO extends \CoreLibs\Basic
 			$q = 'UPDATE ' . $table . ' SET ';
 			$q .= $q_sub_data . ' ';
 			$q .= 'WHERE ' . $primary_key['row'] . ' = ' . $primary_key['value'];
-			$this->temp_sql = $q_sub_data;
 		} else {
 			$q = 'INSERT INTO ' . $table . ' (';
 			$q .= $q_sub_value;
 			$q .= ') VALUES (';
 			$q .= $q_sub_data;
 			$q .= ')';
-			$this->temp_sql = $q;
 		}
 		if (!$this->dbExec($q)) {
 			return false;
@@ -2426,7 +2419,7 @@ class IO extends \CoreLibs\Basic
 	 */
 	public function dbGetNumRows()
 	{
-		return $this->num_rows ?? null;
+		return $this->num_rows;
 	}
 
 	/**
@@ -2438,6 +2431,17 @@ class IO extends \CoreLibs\Basic
 	public function getHadError()
 	{
 		return $this->had_error;
+	}
+
+	/**
+	 * Sets warning number that was last
+	 * So we always have the last warning number stored even if a new one is created
+	 *
+	 * @return int last error number
+	 */
+	public function getHadWarning()
+	{
+		return $this->had_warning;
 	}
 
 	// DEPEREACTED CALLS

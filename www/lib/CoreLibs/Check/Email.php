@@ -12,12 +12,24 @@ class Email
 		0 => "^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@"
 			. "[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$", // MASTER
 		1 => "@(.*)@(.*)", // double @
-		2 => "^[A-Za-z0-9!#$%&'*+-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+-\/=?^_`{|}~\.]{0,63}@", // wrong part before @
+		2 => "^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@", // wrong part before @
 		3 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$", // wrong part after @
 		4 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.", // wrong domain name part
 		5 => "\.([a-zA-Z]{2,6}){1}$", // wrong top level part
 		6 => "@(.*)\.{2,}", // double .. in domain name part
 		7 => "@.*\.$" // ends with a dot, top level, domain missing
+	];
+	// for above position, description string below
+	/** @var array<int,string> */
+	private static $email_regex_check_message = [
+		0 => 'Invalid email address',
+		1 => 'Double @ mark in email address',
+		2 => 'Invalid email part before @ sign',
+		3 => 'Invalid domain part after @ sign',
+		4 => 'Invalid domain name part',
+		5 => 'Wrong domain top level part',
+		6 => 'Double consecutive dots in domain name (..)',
+		7 => 'Domain ends with a dot or is missing top level part'
 	];
 	// the array with the mobile types that are valid
 	/** @var array<string,string> */
@@ -100,7 +112,7 @@ class Email
 	];
 
 	/**
-	 * Undocumented function
+	 * get one position from the regex check list
 	 *
 	 * @param int     $type Which position in the regex list to get
 	 *                      if not set or not valid get default pos 0
@@ -116,8 +128,10 @@ class Email
 	}
 
 	/**
-	 * get the full check array
-	 * this will be deprected at some point
+	 * get the full check array, except position 0, but preserve keys
+	 * Currently used to add per error level type from
+	 * getEmailRegex to error reporting
+	 * Might be deprecated at some point
 	 *
 	 * @return array<mixed>
 	 */
@@ -130,6 +144,22 @@ class Email
 			count(self::$email_regex_check) - 1,
 			true
 		);
+	}
+
+	/**
+	 * Returns error message for email ergex error, or empty string if not set
+	 *
+	 * @param  int $error
+	 * @return array<string,string|int> Error message and regex
+	 */
+	public static function getEmailRegexErrorMessage(int $error): array
+	{
+		// return error message and regex
+		return [
+			'error' => $error,
+			'message' => self::$email_regex_check_message[$error] ?? '',
+			'regex' => self::$email_regex_check[$error] ?? '',
+		];
 	}
 
 	/**
@@ -179,6 +209,54 @@ class Email
 			// return false on not found
 			return false;
 		}
+	}
+
+	/**
+	 * simple email check with the basic email eregex
+	 *
+	 * @param  string $email Email address, will be checkd as lower
+	 * @return bool          True if email is ok, or false if regex failed
+	 */
+	public static function checkEmail(string $email): bool
+	{
+		$email_regex = self::getEmailRegex();
+		if (!preg_match("/$email_regex/", strtolower($email))) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string $email           Email address, will be checkd as lower
+	 * @param  bool   $error_code_only If this is set to true it will only return
+	 *                                 the error pos, instead of detailed array
+	 * @return array<mixed> Errors as array with message and regex
+	 */
+	public static function checkEmailFull(string $email, bool $error_code_only = false): array
+	{
+		$errors = [];
+		foreach (self::$email_regex_check as $pos => $email_regex) {
+			$match = preg_match("/$email_regex/", strtolower($email));
+			// if the first does not fail, quit as ok
+			if ($pos == 0 && $match) {
+				break;
+			}
+			// else do error storage
+			// not that for 1, 6, 7 the regex is matching
+			if (
+				(!$match && in_array($pos, [0, 2, 3, 4, 5])) ||
+				($match && in_array($pos, [1, 6, 7]))
+			) {
+				if ($error_code_only === true) {
+					$errors[] = $pos;
+				} else {
+					$errors[] = self::getEmailRegexErrorMessage($pos);
+				}
+			}
+		}
+		return $errors;
 	}
 }
 
