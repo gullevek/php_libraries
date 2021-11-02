@@ -21,12 +21,12 @@ class qqFileUploader // phpcs:ignore Squiz.Classes.ValidClassName.NotCamelCaps
 	/**
 	 * Undocumented function
 	 *
-	 * @param array<mixed> $allowedExtensions
+	 * @param array<string> $allowedExtensions
 	 * @param integer $sizeLimit
 	 */
 	public function __construct(array $allowedExtensions = [], int $sizeLimit = 10485760)
 	{
-		$allowedExtensions = array_map("strtolower", $allowedExtensions);
+		$allowedExtensions = array_map('strtolower', $allowedExtensions);
 
 		$this->allowedExtensions = $allowedExtensions;
 		$this->sizeLimit = $sizeLimit;

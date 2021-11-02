@@ -242,6 +242,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	private $int_pk_name; // primary key, only internal usage
 	/** @var array<mixed> */
 	public $reference_array = []; // reference arrays -> stored in $this->reference_array[$table_name] => [];
+	// NOTE: should be changed to this @var mixed[]
 	/** @var array<mixed> */
 	public $element_list; // element list for elements next to each other as a special sub group
 	/** @var array<mixed> */
@@ -651,8 +652,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (
 			isset($this->security_level['delete']) &&
 			$this->base_acl_level >= $this->security_level['delete'] &&
-			(!isset($this->table_array['protected']['value']) ||
-			(isset($this->table_array['protected']['value']) && !$this->table_array['protected']['value'])) &&
+			empty($this->table_array['protected']['value']) &&
 			!$this->error
 		) {
 			if (!is_array($element_list)) {
@@ -663,7 +663,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				//	. is_array($this->element_list[$element_list[$i]]['read_data']) . ' | '
 				//	. $this->element_list[$element_list[$i]]['delete']);
 				// if prefix, set it
-				$prfx = ($this->element_list[$element_list[$i]]['prefix']) ?
+				$prfx = !empty($this->element_list[$element_list[$i]]['prefix']) ?
 					$this->element_list[$element_list[$i]]['prefix'] . '_' :
 					'';
 				// get the primary key

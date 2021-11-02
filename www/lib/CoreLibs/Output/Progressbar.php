@@ -28,7 +28,7 @@ class ProgressBar
 	public $status = 'new';	// current status (new,show,hide)
 	/** @var float|int */
 	public $step = 0;	// current step
-	/** @var array<string,?int> */
+	/** @var array<string,null|int|float> */
 	public $position = [ // current bar position
 		'left' => null,
 		'top' => null,
@@ -72,7 +72,7 @@ class ProgressBar
 	/** @var string */
 	public $direction = 'right';	// direction of motion (right,left,up,down)
 
-	/** @var array<string,mixed> */
+	/** @var array<string,string|bool|int> */
 	public $frame = ['show' => false];	// ProgressBar Frame
 	/*	'show' => false,	# frame show (true/false)
 		'left' => 200,	# frame position from left
@@ -84,7 +84,8 @@ class ProgressBar
 		'brd_color' => '#dfdfdf #404040 #404040 #dfdfdf'	# frame border color
 	*/
 
-	/** @var array<mixed> */
+	/** @#var array{string}{string: string|int} */
+	/** @var mixed[][] */
 	public $label = [];	// ProgressBar Labels
 	/*	'name' => [	# label name
 			'type' => 'text',	# label type (text,button,step,percent,crossbar)
@@ -164,7 +165,7 @@ class ProgressBar
 	/**
 	 * calculate position in bar step
 	 * @param  float        $step percent step to do
-	 * @return array<mixed>       bar position as array
+	 * @return array<string,int|float> bar position as array
 	 */
 	private function __calculatePosition(float $step): array
 	{
