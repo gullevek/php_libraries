@@ -281,7 +281,7 @@ class Basic
 	public function debugFor(string $type, string $flag): void
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->debugFor() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
-		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal @phpstan-ignore-next-line */
+		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal, PhanParamTooFew @phpstan-ignore-next-line */
 		$this->log->debugFor(...[func_get_args()]);
 	}
 

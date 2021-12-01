@@ -24,6 +24,7 @@ foreach ($paths as $path) {
 	if (file_exists($path . DS . 'convert') && is_file($path . DS . 'convert')) {
 		// image magick convert location
 		define('CONVERT', $path . DS . 'convert');
+		break;
 	}
 }
 unset($paths);

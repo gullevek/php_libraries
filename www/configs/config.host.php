@@ -23,6 +23,14 @@ declare(strict_types=1);
 //	'login_enabled' => true
 // ];
 
+$__LOCAL_CONFIG = [
+	'db_host' => 'test',
+	'location' => 'test',
+	'debug_flag' => true,
+	'site_lang' => 'en_utf8',
+	'login_enabled' => true
+];
+
 // each host has a different db_host
 $SITE_CONFIG = [
 	// development host
@@ -42,6 +50,7 @@ $SITE_CONFIG = [
 		'login_enabled' => true
 	],
 	// 'other.host.com' => $__LOCAL_CONFIG
+	'soba-dev.tequila.jp' => $__LOCAL_CONFIG
 ];
 
 // __END__

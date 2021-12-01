@@ -369,7 +369,7 @@ class Logging
 	 */
 	public function debugFor(string $type, string $flag): void
 	{
-		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal @phpstan-ignore-next-line */
+		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal, PhanParamTooFew @phpstan-ignore-next-line */
 		$this->setLogLevel(...[func_get_args()]);
 	}
 
