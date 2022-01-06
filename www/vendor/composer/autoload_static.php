@@ -911,21 +911,6 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'TheSeer\\Tokenizer\\TokenCollectionException' => __DIR__ . '/..' . '/theseer/tokenizer/src/TokenCollectionException.php',
         'TheSeer\\Tokenizer\\Tokenizer' => __DIR__ . '/..' . '/theseer/tokenizer/src/Tokenizer.php',
         'TheSeer\\Tokenizer\\XMLSerializer' => __DIR__ . '/..' . '/theseer/tokenizer/src/XMLSerializer.php',
-        'pBarcode128' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pBarcode128.class.php',
-        'pBarcode39' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pBarcode39.class.php',
-        'pBubble' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pBubble.class.php',
-        'pCache' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pCache.class.php',
-        'pData' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pData.class.php',
-        'pDraw' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pDraw.class.php',
-        'pImage' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pImage.class.php',
-        'pIndicator' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pIndicator.class.php',
-        'pPie' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pPie.class.php',
-        'pRadar' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pRadar.class.php',
-        'pScatter' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pScatter.class.php',
-        'pSplit' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pSplit.class.php',
-        'pSpring' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pSpring.class.php',
-        'pStock' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pStock.class.php',
-        'pSurface' => __DIR__ . '/../..' . '/lib/pChart2.1.4/class/pSurface.class.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
