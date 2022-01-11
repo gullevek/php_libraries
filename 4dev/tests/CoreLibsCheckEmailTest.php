@@ -41,7 +41,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	 * Test regex level return
 	 *
 	 * @dataProvider emailRegexProvider
-	 * @testdox Email::getEmailRegex $input will be $expected [$_dataName]
+	 * @testdox getEmailRegex $input will be $expected [$_dataName]
 	 *
 	 * @param int $input
 	 * @param string $expected
@@ -94,7 +94,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider emailCheckProvider
-	 * @testdox Email::checkEmail $input will be $expected [$_dataName]
+	 * @testdox checkEmail $input will be $expected [$_dataName]
 	 *
 	 * @return void
 	 */
@@ -125,7 +125,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider emailCheckFullProvider
-	 * @testdox Email::checkEmailFull $input will be $expected [$_dataName]
+	 * @testdox checkEmailFull $input will be $expected [$_dataName]
 	 *
 	 * @param string $input
 	 * @param array $expected
@@ -219,7 +219,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider emailRegexErrorProvider
-	 * @testdox Email::getEmailRegexErrorMessage $input will be $expected [$_dataName]
+	 * @testdox getEmailRegexErrorMessage $input will be $expected [$_dataName]
 	 *
 	 * @param integer $input
 	 * @param array $expected
@@ -283,7 +283,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider emailTypeProviderLong
-	 * @testdox Email::getEmailType $input will be normal $expected [$_dataName]
+	 * @testdox getEmailType $input will be normal $expected [$_dataName]
 	 *
 	 * @param string $input
 	 * @param string $expected
@@ -301,7 +301,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider emailTypeProviderShort
-	 * @testdox Email::getEmailType $input will be short $expected [$_dataName]
+	 * @testdox getEmailType $input will be short $expected [$_dataName]
 	 *
 	 * @param string $input
 	 * @param string $expected
@@ -355,7 +355,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider emailProviderTypeLongToShort
-	 * @testdox Email::getShortEmailType $input will be $expected [$_dataName]
+	 * @testdox getShortEmailType $input will be $expected [$_dataName]
 	 *
 	 * @param string $input
 	 * @param string|bool $expected

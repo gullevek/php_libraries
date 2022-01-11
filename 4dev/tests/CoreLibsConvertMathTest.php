@@ -30,7 +30,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider fceilProvider
-	 * @testdox Math::fceil: Input $input must be $expected
+	 * @testdox fceil: Input $input must be $expected
 	 *
 	 * @param float $input
 	 * @param int $expected
@@ -61,7 +61,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider floorProvider
-	 * @testdox Math::floor: Input $input with cutoff $cutoff must be $expected
+	 * @testdox floor: Input $input with cutoff $cutoff must be $expected
 	 *
 	 * @param int $input
 	 * @param int $cutoff
@@ -95,7 +95,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider initNumericProvider
-	 * @testdox Math::initNumeric: Input $info $input must match $expected [$_dataName]
+	 * @testdox initNumeric: Input $info $input must match $expected [$_dataName]
 	 *
 	 * @param int|float|string $input
 	 * @param float $expected
@@ -113,7 +113,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	/**
 	 * A testWith sample
 	 *
-	 * @testdox Math::initNumeric: alternate tests $input => $expected ($info) [$_dataName]
+	 * @testdox initNumeric: alternate tests $input => $expected ($info) [$_dataName]
 	 * @testWith [123.123, 123.123, "float"]
 	 *           ["123.123", 123.123, "string"]
 	 *
