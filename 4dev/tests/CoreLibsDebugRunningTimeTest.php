@@ -1,7 +1,5 @@
 <?php
 
-// phpcs:disable Generic.Files.LineLength
-
 declare(strict_types=1);
 
 namespace tests;
@@ -20,7 +18,7 @@ final class CoreLibsDebugRunningTimeTest extends TestCase
 		return [
 			'default time' => [
 				0 => null,
-				1 => '/^\d{4}\.\d{5,}$/'
+				1 => '/^\d{4}\.\d{1,}$/'
 			],
 			'nanoseconds' => [
 				0 => 'ns',
@@ -28,19 +26,19 @@ final class CoreLibsDebugRunningTimeTest extends TestCase
 			],
 			'microseconds' => [
 				0 => 'ys',
-				1 => '/^\d{7}\.\d{3}$/'
+				1 => '/^\d{7}\.\d{1,}$/'
 			],
 			'milliseconds' => [
 				0 => 'ms',
-				1 => '/^\d{4}\.\d{6}$/'
+				1 => '/^\d{4}\.\d{1,}$/'
 			],
 			'seconds' => [
 				0 => 's',
-				1 => '/^\d{1}\.\d{9}$/'
+				1 => '/^\d{1}\.\d{4,}$/'
 			],
 			'invalid fallback to ms' => [
 				0 => 'invalid',
-				1 => '/^\d{4}\.\d{6}$/'
+				1 => '/^\d{4}\.\d{1,}$/'
 			]
 		];
 	}
@@ -49,9 +47,11 @@ final class CoreLibsDebugRunningTimeTest extends TestCase
 	{
 		return [
 			'run time test' => [
-				0 => '/^\d{1}$/',
-				1 => '/^Start: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} 0\.\d{7,}$/',
-				2 => '/^Start:$/'
+				0 => '/^\d{1,}\.\d{1,}$/',
+				1 => '/^Start: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} 0\.\d{8}, $/',
+				2 => '/^Start: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} 0\.\d{8}, '
+					. 'End: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} 0\.\d{8}, '
+					. 'Run: \d{1,}\.\d{1,} s$/'
 			]
 		];
 	}
@@ -80,6 +80,7 @@ final class CoreLibsDebugRunningTimeTest extends TestCase
 		} else {
 			$end = \CoreLibs\Debug\RunningTime::hrRunningTime($out_time);
 		}
+		// print "E: " . $end . "\n";
 		$this->assertMatchesRegularExpression(
 			$expected,
 			(string)$end
@@ -100,20 +101,24 @@ final class CoreLibsDebugRunningTimeTest extends TestCase
 	public function testRunningTime(string $expected_number, string $expected_start, string $expected_end): void
 	{
 		$start = \CoreLibs\Debug\RunningTime::runningTime(true);
+		// print "Start: " . $start . "\n";
 		$this->assertEquals(
 			0,
 			$start
 		);
+		// print "STRING: " . \CoreLibs\Debug\RunningTime::runningTimeString() . "\n";
 		$this->assertMatchesRegularExpression(
 			$expected_start,
 			\CoreLibs\Debug\RunningTime::runningTimeString()
 		);
 		time_nanosleep(1, 500);
 		$end = \CoreLibs\Debug\RunningTime::runningTime(true);
+		// print "Start: " . $end . "\n";
 		$this->assertMatchesRegularExpression(
 			$expected_number,
 			(string)$end
 		);
+		// print "STRING: " . \CoreLibs\Debug\RunningTime::runningTimeString() . "\n";
 		$this->assertMatchesRegularExpression(
 			$expected_end,
 			\CoreLibs\Debug\RunningTime::runningTimeString()

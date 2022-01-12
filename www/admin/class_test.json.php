@@ -29,11 +29,12 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-json';
 ob_end_flush();
 
-use CoreLibs\Check\Jason;
+use CoreLibs\Check\Json;
+// use CoreLibs\Check\Jason;
 use CoreLibs\Debug\Support as DgS;
 
 $basic = new CoreLibs\Basic();
-$json_class = 'CoreLibs\Check\Jason';
+$json_class = 'CoreLibs\Check\Json';
 
 // define a list of from to color sets for conversion test
 
@@ -42,14 +43,14 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $json = '{"foo": "bar"}';
-$output = Jason::jsonConvertToArray($json);
+$output = Json::jsonConvertToArray($json);
 print "S::JSON: $json: " . DgS::printAr($output) . "<br>";
-print "S::JSON ERROR: " . Jason::jsonGetLastError() . ": " . Jason::jsonGetLastError(true) . "<br>";
+print "S::JSON ERROR: " . Json::jsonGetLastError() . ": " . Json::jsonGetLastError(true) . "<br>";
 
 $json = '["f: {b"""ar}]';
-$output = Jason::jsonConvertToArray($json);
+$output = Json::jsonConvertToArray($json);
 print "S::E-JSON: $json: " . DgS::printAr($output) . "<br>";
-print "S::E-JSON ERROR: " . Jason::jsonGetLastError() . ": " . Jason::jsonGetLastError(true) . "<br>";
+print "S::E-JSON ERROR: " . Json::jsonGetLastError() . ": " . Json::jsonGetLastError(true) . "<br>";
 
 // direct
 $json = '{"direct": "static function call"}';
@@ -67,6 +68,11 @@ print "J/S::E-JSON ERROR: " . $json_class::jsonGetLastError() . ": " . $json_cla
 $output = $basic->jsonConvertToArray($json);
 print "E-JSON: $json: ".DgS::printAr($output)."<br>";
 print "E-JSON ERROR: ".$basic->jsonGetLastError().": ".$basic->jsonGetLastError(true)."<br>"; */
+
+// $json = '{"foo": "bar"}';
+// $output = Jason::jsonConvertToArray($json);
+// print "S::JSON: $json: " . DgS::printAr($output) . "<br>";
+// print "S::JSON ERROR: " . Jason::jsonGetLastError() . ": " . Jason::jsonGetLastError(true) . "<br>";
 
 // error message
 print $basic->log->printErrorMsg();

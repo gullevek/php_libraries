@@ -43,10 +43,23 @@ $byte = 254779258;
 $string = '242.98 MB';
 // static
 print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte) . "<br>";
+print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_SI) . "<br>";
+print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_ADJUST) . "<br>";
+print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_NOSPACE) . "<br>";
+print "S::BYTE FROM: $string: " . $byte_class::stringByteFormat($string) . "<br>";
+//
+$byte = 314572800;
+$string = '300 MB';
+print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte) . "<br>";
+print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_SI) . "<br>";
+print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_ADJUST) . "<br>";
+print "S::BYTE TO: $byte: "
+	. $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_ADJUST | Byte::BYTE_FORMAT_NOSPACE) . "<br>";
+print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_NOSPACE) . "<br>";
 print "S::BYTE FROM: $string: " . $byte_class::stringByteFormat($string) . "<br>";
 
 // *** BYTES TEST ***
-$bytes = array(
+$bytes = [
 	-123123123,
 	999999, // KB-1
 	999999999, // MB-1
@@ -56,7 +69,7 @@ $bytes = array(
 	999999999999999999, // PB-1
 	9223372036854775807, // MAX INT
 	999999999999999999999, // EB-1
-);
+];
 print "<b>BYTE FORMAT TESTS</b><br>";
 foreach ($bytes as $byte) {
 	print '<div style="display: flex; border-bottom: 1px dashed gray;">';

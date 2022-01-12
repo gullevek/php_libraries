@@ -72,7 +72,7 @@ $checked_list = [
 ];
 foreach ($checked_list as $check) {
 	print "CHECKED(0): $check[0]: " . Html::checked($check[1], $check[0]) . "<br>";
-	print "CHECKED(1): $check[0]: " . Html::checked($check[1], $check[0], 1) . "<br>";
+	print "CHECKED(1): $check[0]: " . Html::checked($check[1], $check[0], Html::CHECKED) . "<br>";
 }
 
 // magic link creation test

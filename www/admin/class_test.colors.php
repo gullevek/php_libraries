@@ -43,7 +43,7 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 // A(out of bounds)
 print "C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: " . CoreLibs\Convert\Colors::rgb2hex(-1, -1, -1) . "<br>";
-print "\$C::S/COLOR invalid rgb->hex (gary 125): -1, -1, -1: " . $color_class::rgb2hex(-1, -1, -1) . "<br>";
+print "\$C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: " . $color_class::rgb2hex(-1, -1, -1) . "<br>";
 // B(valid)
 $rgb = [10, 20, 30];
 $hex = '#0a141e';
@@ -62,6 +62,10 @@ print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
 	. DgS::printAr(Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])) . "<br>";
 print "S::COLOR hsl->rgb: $hsl[0], $hsl[1], $hsl[2]: "
 	. DgS::printAr(Colors::hsl2rgb($hsl[0], $hsl[1], $hsl[2])) . "<br>";
+
+$hsb = [0, 0, 5];
+print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
+	. DgS::printAr(Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])) . "<br>";
 
 // TODO: run compare check input must match output
 

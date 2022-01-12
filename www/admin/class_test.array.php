@@ -65,6 +65,8 @@ echo "ARRAYSEARCHRECURSIVE(email, [array]['input'], type): "
 // all return
 echo "ARRAYSEARCHRECURSIVEALL(email, [array], type): "
 	. Dgs::printAr((array)ArrayHandler::arraySearchRecursiveAll('email', $test_array, 'type')) . "<br>";
+	echo "ARRAYSEARCHRECURSIVEALL(email, [array], type, false): "
+	. Dgs::printAr((array)ArrayHandler::arraySearchRecursiveAll('email', $test_array, 'type', false)) . "<br>";
 
 // simple search
 echo "ARRAYSEARCHSIMPLE([array], type, email): "
@@ -139,24 +141,6 @@ function rec(string $pre, string $cur, array $node = [])
 	return $node;
 }
 
-/**
- * flatten array down to own level
- *
- * @param array $array
- * @param array $return
- * @return array
- */
-function flattenArrayKey(array $array, array $return = [])
-{
-	foreach ($array as $key => $sub) {
-		$return[] = $key;
-		if (count($sub) > 0) {
-			$return = flattenArrayKey($sub, $return);
-		}
-	}
-	return $return;
-}
-
 // $test = [
 // 	'A' => [
 // 		'B' => [],
@@ -193,7 +177,34 @@ $test = rec('F', 'U', $test);
 $test = rec('', 'Al', $test);
 $test = rec('B', 'B1', $test);
 print "ORIGINAL: " . \CoreLibs\Debug\Support::printAr($test) . "<br>";
-print "FLATTEN: " . \CoreLibs\Debug\Support::printAr(flattenArrayKey($test)) . "<br>";
+print "FLATTEN-c: " . \CoreLibs\Debug\Support::printAr(ArrayHandler::flattenArrayKey($test)) . "<br>";
+
+$test = [
+	'a' => ['a1' => 'a1foo', 'a2' => 'a1bar'],
+	1 => 'bar',
+	'c' => [2, 3, 4],
+	'd' => [
+		'e' => [
+			'de1' => 'subfoo', 'de2' => 'subbar', 'a2' => 'a1bar'
+		]
+	]
+];
+print "ORIGINAL: " . \CoreLibs\Debug\Support::printAr($test) . "<br>";
+print "FLATTEN: " . \CoreLibs\Debug\Support::printAr(ArrayHandler::flattenArrayKey($test)) . "<br>";
+
+// genAssocArray
+$db_array = [
+	0 => ['a' => 'a1', 'b' => 2],
+	1 => ['a' => 'a2', 'b' => 3],
+	2 => ['a' => '', 'b' => ''],
+];
+// $key = false;
+$key = 'a';
+// $value = false;
+$value = 'b';
+$flag = false;
+$output = \CoreLibs\Combined\ArrayHandler::genAssocArray($db_array, $key, $value, $flag);
+print "OUTPUT: " . \CoreLibs\Debug\Support::printAr($output) . "<br>";
 
 // error message
 print $basic->log->printErrorMsg();
