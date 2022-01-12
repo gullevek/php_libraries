@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Convert\MimeAppName
- * @testdox CoreLibs\Convert\MimeAppName method tests
+ * @coversDefaultClass \CoreLibs\Convert\MimeAppName
+ * @testdox \CoreLibs\Convert\MimeAppName method tests
  */
 final class CoreLibsConvertMimeAppNameTest extends TestCase
 {
@@ -37,6 +38,8 @@ final class CoreLibsConvertMimeAppNameTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::mimeGetAppName
+	 * @covers ::mimeSetAppName
 	 * @dataProvider mimeProvider
 	 * @testdox mimeSetAppName set $mime with $app and will be $expected [$_dataName]
 	 *

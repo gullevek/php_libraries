@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Check\Json
- * @testdox CoreLibs\Convert\Json method tests
+ * @coversDefaultClass \CoreLibs\Convert\Json
+ * @testdox \CoreLibs\Convert\Json method tests
  */
 final class CoreLibsCheckJsonTest extends TestCase
 {
@@ -121,6 +122,7 @@ final class CoreLibsCheckJsonTest extends TestCase
 	/**
 	 * test json convert states
 	 *
+	 * @covers ::jsonConvertToArray
 	 * @dataProvider jsonProvider
 	 * @testdox jsonConvertToArray $input (Override: $flag) will be $expected [$_dataName]
 	 *
@@ -140,6 +142,7 @@ final class CoreLibsCheckJsonTest extends TestCase
 	/**
 	 * test json error states
 	 *
+	 * @covers ::jsonGetLastError
 	 * @dataProvider jsonErrorProvider
 	 * @testdox jsonGetLastError $input will be $expected_i/$expected_s [$_dataName]
 	 *

@@ -11,7 +11,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Convert\Byte
- * @testdox CoreLibs\Convert\Byte method tests
+ * @coversDefaultClass \CoreLibs\Convert\Byte
+ * @testdox \CoreLibs\Convert\Byte method tests
  */
 final class CoreLibsConvertByteTest extends TestCase
 {
@@ -143,6 +144,7 @@ final class CoreLibsConvertByteTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::humanReadableByteFormat
 	 * @dataProvider byteProvider
 	 * @testdox humanReadableByteFormat $input will be $expected, $expected_si SI, $expected_no_space no space, $expected_adjust adjust, $expected_si_no_space SI/no space [$_dataName]
 	 *
@@ -195,6 +197,7 @@ final class CoreLibsConvertByteTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::stringByteFormat
 	 * @dataProvider byteStringProvider
 	 * @testdox stringByteFormat $input will be $expected and $expected_si SI [$_dataName]
 	 *

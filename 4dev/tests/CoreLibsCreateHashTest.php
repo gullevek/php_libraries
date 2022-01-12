@@ -8,32 +8,38 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Create\Hash
- * @testdox CoreLibs\Create\Hash method tests
+ * @coversDefaultClass \CoreLibs\Create\Hash
+ * @testdox \CoreLibs\Create\Hash method tests
  */
 final class CoreLibsCreateHashTest extends TestCase
 {
 
-	public function hashProvider(): array
+	public function hashData(): array
 	{
 		return [
 			'any string' => [
 				'text' => 'Some String Text',
 				'crc32b_reverse' => 'c5c21d91', // crc32b (in revere)
-				'sha1Short' => '', // sha1Short
+				'sha1Short' => '4d2bc9ba0', // sha1Short
 				// via hash
-				'crc32b' => '', // hash: crc32b
-				'alder32' => '', // hash: alder32
-				'fnv132' => '', // hash: fnv132
-				'fnv1a32' => '', // hash: fnv1a32
-				'joaat' => '', // hash: joaat
+				'crc32b' => '911dc2c5', // hash: crc32b
+				'adler32' => '31aa05f1', // hash: alder32
+				'fnv132' => '9df444f9', // hash: fnv132
+				'fnv1a32' => '2c5f91b9', // hash: fnv1a32
+				'joaat' => '50dab846', // hash: joaat
 			]
 		];
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function crc32bProvider(): array
 	{
 		$list = [];
-		foreach ($this->hashProvider() as $name => $values) {
+		foreach ($this->hashData() as $name => $values) {
 			$list[$name . ' to crc32b reverse'] = [
 				0 => $values['text'],
 				1 => $values['crc32b_reverse'],
@@ -45,6 +51,53 @@ final class CoreLibsCreateHashTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @return array
+	 */
+	public function sha1ShortProvider(): array
+	{
+		$list = [];
+		foreach ($this->hashData() as $name => $values) {
+			$list[$name . ' to sha1 short'] = [
+				0 => $values['text'],
+				1 => $values['crc32b_reverse'],
+				2 => $values['sha1Short'],
+			];
+		}
+		return $list;
+	}
+
+	/**
+	 * test all hash functions
+	 * NOTE: if we add new hash functions in the __hash method
+	 * they need to be added here too (and in the master hashData array too)
+	 *
+	 * @return array
+	 */
+	public function hashProvider(): array
+	{
+		$list = [];
+		foreach ($this->hashData() as $name => $values) {
+			foreach ([null, 'crc32b', 'adler32', 'fnv132', 'fnv1a32', 'joaat'] as $_hash_type) {
+				// default value test
+				if ($_hash_type === null) {
+					$hash_type = 'crc32b';
+				} else {
+					$hash_type = $_hash_type;
+				}
+				$list[$name . ' to ' . $hash_type] = [
+					0 => $values['text'],
+					1 => $_hash_type,
+					2 => $values[$hash_type]
+				];
+			}
+		}
+		return $list;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::__crc32b
 	 * @dataProvider crc32bProvider
 	 * @testdox __crc32b $input will be $expected [$_dataName]
 	 *
@@ -57,6 +110,80 @@ final class CoreLibsCreateHashTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Create\Hash::__crc32b($input)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::__sha1Short
+	 * @dataProvider sha1ShortProvider
+	 * @testdox __sha1Short $input will be $expected (crc32b) and $expected_sha1 (sha1 short) [$_dataName]
+	 *
+	 * @param string $input
+	 * @param string $expected
+	 * @return void
+	 */
+	public function testSha1Short(string $input, string $expected, string $expected_sha1): void
+	{
+		// uses crc32b
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Create\Hash::__sha1Short($input)
+		);
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Create\Hash::__sha1Short($input, false)
+		);
+		// sha1 type
+		$this->assertEquals(
+			$expected_sha1,
+			\CoreLibs\Create\Hash::__sha1Short($input, true)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::__hash
+	 * @dataProvider hashProvider
+	 * @testdox __hash $input with $hash_type will be $expected [$_dataName]
+	 *
+	 * @param string $input
+	 * @param string|null $hash_type
+	 * @param string $expected
+	 * @return void
+	 */
+	public function testHash(string $input, ?string $hash_type, string $expected): void
+	{
+		if ($hash_type === null) {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Create\Hash::__hash($input)
+			);
+		} else {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Create\Hash::__hash($input, $hash_type)
+			);
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::__uniqueID
+	 * @testWith [8]
+	 * @testdox __uniqId will be length $expected [$_dataName]
+	 *
+	 * @param integer $expected
+	 * @return void
+	 */
+	public function testUniqID(int $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			strlen(\CoreLibs\Create\Hash::__uniqId())
 		);
 	}
 }

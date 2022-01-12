@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Check\Password
- * @testdox CoreLibs\Check\Password method tests
+ * @coversDefaultClass \CoreLibs\Check\Password
+ * @testdox \CoreLibs\Check\Password method tests
  */
 final class CoreLibsCheckPasswordTest extends TestCase
 {
@@ -31,8 +32,10 @@ final class CoreLibsCheckPasswordTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::passwordVerify
+	 * @covers ::passwordSet
 	 * @dataProvider passwordProvider
-	 * @testdox passwordVerify $input compare to $input_hash: $expected [$_dataName]
+	 * @testdox passwordSet $input compare to $input_hash: passwordVerify $expected [$_dataName]
 	 *
 	 * @param string $input
 	 * @param string $input_hash
@@ -50,6 +53,7 @@ final class CoreLibsCheckPasswordTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::passwordRehashCheck
 	 * @dataProvider passwordRehashProvider
 	 * @testdox passwordRehashCheck $input will be $expected [$_dataName]
 	 *

@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Undocumented class
- * @testdox CoreLibs\Convert\Math method tests
+ * @coversDefaultClass \CoreLibs\Convert\Math
+ * @testdox \CoreLibs\Convert\Math method tests
  */
 final class CoreLibsConvertMathTest extends TestCase
 {
@@ -29,6 +30,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::fceil
 	 * @dataProvider fceilProvider
 	 * @testdox fceil: Input $input must be $expected
 	 *
@@ -60,6 +62,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::floorp
 	 * @dataProvider floorProvider
 	 * @testdox floor: Input $input with cutoff $cutoff must be $expected
 	 *
@@ -94,6 +97,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::initNumeric
 	 * @dataProvider initNumericProvider
 	 * @testdox initNumeric: Input $info $input must match $expected [$_dataName]
 	 *
@@ -103,26 +107,6 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * @return void
 	 */
 	public function testMathInitNumericValue($input, float $expected, string $info): void
-	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Convert\Math::initNumeric($input)
-		);
-	}
-
-	/**
-	 * A testWith sample
-	 *
-	 * @testdox initNumeric: alternate tests $input => $expected ($info) [$_dataName]
-	 * @testWith [123.123, 123.123, "float"]
-	 *           ["123.123", 123.123, "string"]
-	 *
-	 * @param int|float|string $input
-	 * @param float $expected
-	 * @param string $info
-	 * @return void
-	 */
-	public function testMathInitNumericValueAlt($input, float $expected, string $info): void
 	{
 		$this->assertEquals(
 			$expected,

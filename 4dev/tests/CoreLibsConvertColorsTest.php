@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Convert\Colors
- * @testdox CoreLibs\Convert\Colors method tests
+ * @coversDefaultClass \CoreLibs\Convert\Colors
+ * @testdox \CoreLibs\Convert\Colors method tests
  */
 final class CoreLibsConvertColorsTest extends TestCase
 {
@@ -226,6 +227,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * Undocumented function
 	 * TODO: add cross convert check
 	 *
+	 * @covers ::rgb2hex
 	 * @dataProvider rgb2hexColorProvider
 	 * @testdox rgb2hex $input_r,$input_g,$input_b will be $expected [$_dataName]
 	 *
@@ -265,6 +267,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::hex2rgb
 	 * @dataProvider hex2rgbColorProvider
 	 * @testdox hex2rgb $input will be $expected, $expected_str str[,], $expected_str_sep str[$separator] [$_dataName]
 	 *
@@ -299,6 +302,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::rgb2hsb
 	 * @dataProvider rgb2hsbColorProvider
 	 * @testdox rgb2hsb $input_r,$input_g,$input_b will be $expected [$_dataName]
 	 *
@@ -319,6 +323,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::hsb2rgb
 	 * @dataProvider hsb2rgbColorProvider
 	 * @testdox hsb2rgb $input_h,$input_s,$input_b will be $expected [$_dataName]
 	 *
@@ -339,6 +344,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::rgb2hsl
 	 * @dataProvider rgb2hslColorProvider
 	 * @testdox rgb2hsl $input_r,$input_g,$input_b will be $expected [$_dataName]
 	 *
@@ -359,6 +365,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::hsl2rgb
 	 * @dataProvider hsl2rgbColorProvider
 	 * @testdox hsl2rgb $input_h,$input_s,$input_l will be $expected [$_dataName]
 	 *

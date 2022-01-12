@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Undocumented class
- * @testdox CoreLibs\Check\Email method tests
+ * @coversDefaultClass \CoreLibs\Check\Email
+ * @testdox \CoreLibs\Check\Email method tests
  */
 final class CoreLibsCheckEmailTest extends TestCase
 {
@@ -40,6 +41,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	/**
 	 * Test regex level return
 	 *
+	 * @covers ::getEmailRegex
 	 * @dataProvider emailRegexProvider
 	 * @testdox getEmailRegex $input will be $expected [$_dataName]
 	 *
@@ -93,6 +95,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::checkEmail
 	 * @dataProvider emailCheckProvider
 	 * @testdox checkEmail $input will be $expected [$_dataName]
 	 *
@@ -124,6 +127,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::checkEmailFull
 	 * @dataProvider emailCheckFullProvider
 	 * @testdox checkEmailFull $input will be $expected [$_dataName]
 	 *
@@ -218,6 +222,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::getEmailRegexErrorMessage
 	 * @dataProvider emailRegexErrorProvider
 	 * @testdox getEmailRegexErrorMessage $input will be $expected [$_dataName]
 	 *
@@ -282,6 +287,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::getEmailType
 	 * @dataProvider emailTypeProviderLong
 	 * @testdox getEmailType $input will be normal $expected [$_dataName]
 	 *
@@ -300,6 +306,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::getEmailType
 	 * @dataProvider emailTypeProviderShort
 	 * @testdox getEmailType $input will be short $expected [$_dataName]
 	 *
@@ -354,6 +361,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::getShortEmailType
 	 * @dataProvider emailProviderTypeLongToShort
 	 * @testdox getShortEmailType $input will be $expected [$_dataName]
 	 *

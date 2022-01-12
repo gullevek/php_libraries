@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Combined\DateTime
- * @testdox CoreLibs\Combined\DateTime method tests
+ * @coversDefaultClass \CoreLibs\Combined\DateTime
+ * @testdox \CoreLibs\Combined\DateTime method tests
  */
 final class CoreLibsCombinedDateTimeTest extends TestCase
 {
@@ -444,6 +445,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * date string convert test
 	 *
+	 * @covers ::dateStringFormat
 	 * @dataProvider timestampProvider
 	 * @testdox dateStringFormat $input (microtime $flag) will be $expected [$_dataName]
 	 *
@@ -463,6 +465,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * interval convert test
 	 *
+	 * @covers ::timeStringFormat
 	 * @dataProvider intervalProvider
 	 * @testdox timeStringFormat $input (microtime $flag) will be $expected [$_dataName]
 	 *
@@ -482,6 +485,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::stringToTime
 	 * @dataProvider reverseIntervalProvider
 	 * @testdox stringToTime $input will be $expected [$_dataName]
 	 *
@@ -500,6 +504,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::checkDate
 	 * @dataProvider dateProvider
 	 * @testdox checkDate $input will be $expected [$_dataName]
 	 *
@@ -518,6 +523,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::checkDateTime
 	 * @dataProvider dateTimeProvider
 	 * @testdox checkDateTime $input will be $expected [$_dataName]
 	 *
@@ -536,6 +542,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::compareDate
 	 * @dataProvider dateCompareProvider
 	 * @testdox compareDate $input_a compared to $input_b will be $expected [$_dataName]
 	 *
@@ -555,6 +562,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::compareDateTime
 	 * @dataProvider dateTimeCompareProvider
 	 * @testdox compareDateTime $input_a compared to $input_b will be $expected [$_dataName]
 	 *
@@ -574,6 +582,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::calcDaysInterval
 	 * @dataProvider daysIntervalProvider
 	 * @testdox calcDaysInterval $input_a compared to $input_b will be $expected [$_dataName]
 	 * @medium

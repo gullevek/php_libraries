@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Convert\Html
- * @testdox CoreLibs\Convert\Html method tests
+ * @coversDefaultClass \CoreLibs\Convert\Html
+ * @testdox \CoreLibs\Convert\Html method tests
  */
 final class CoreLibsConvertHtmlTest extends TestCase
 {
@@ -119,6 +120,7 @@ final class CoreLibsConvertHtmlTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::htmlent
 	 * @dataProvider htmlentProvider
 	 * @testdox htmlent $input will be $expected [$_dataName]
 	 *
@@ -137,6 +139,7 @@ final class CoreLibsConvertHtmlTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::removeLB
 	 * @dataProvider removeLBProvider
 	 * @testdox removeLB $input with replace $replace will be $expected [$_dataName]
 	 *
@@ -163,6 +166,7 @@ final class CoreLibsConvertHtmlTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::checked
 	 * @dataProvider checkedProvider
 	 * @testdox checked find $needle in $haystack and return $type will be $expected [$_dataName]
 	 *

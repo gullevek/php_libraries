@@ -11,7 +11,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Combined\ArrayHandler
- * @testdox CoreLibs\Combined\ArrayHandler method tests
+ * @coversDefaultClass \CoreLibs\Combined\ArrayHandler
+ * @testdox \CoreLibs\Combined\ArrayHandler method tests
  */
 final class CoreLibsCombinedArrayHandlerTest extends TestCase
 {
@@ -562,6 +563,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::arraySearchRecursive
 	 * @dataProvider arraySearchRecursiveProvider
 	 * @testdox arraySearchRecursive $needle (key $key_search_for) in $input and will be $expected [$_dataName]
 	 *
@@ -581,6 +583,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::arraySearchRecursiveAll
 	 * @dataProvider arraySearchRecursiveAllProvider
 	 * @testdox arraySearchRecursiveAll $needle (key $key_search_for) in $input and will be $expected (old: $flag) [$_dataName]
 	 *
@@ -601,6 +604,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::arraySearchSimple
 	 * @dataProvider arraySearchSimpleProvider
 	 * @testdox arraySearchSimple $input searched with key: $key / value: $value (strict: $flag) will be $expected [$_dataName]
 	 *
@@ -621,6 +625,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::arrayMergeRecursive
 	 * @#dataProvider arrayMergeRecursiveProvider
 	 * @testdox arrayMergeRecursive ... will be $expected [$_dataName]
 	 *
@@ -641,6 +646,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::arrayDiff
 	 * @dataProvider arrayCompareProvider
 	 * @testdox arrayDiff $input_a diff $input_b will be $expected [$_dataName]
 	 *
@@ -660,6 +666,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::inArrayAny
 	 * @dataProvider inArrayAnyProvider
 	 * @testdox inArrayAny needle $input_a in haystack $input_b will be $expected [$_dataName]
 	 *
@@ -679,6 +686,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::genAssocArray
 	 * @dataProvider genAssocArrayProvider
 	 * @testdox genAssocArray array $input with $key or $value and flag set only $flag will be $expected [$_dataName]
 	 *
@@ -700,6 +708,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::flattenArray
 	 * @dataProvider flattenArrayProvider
 	 * @testdox testFlattenArray array $input will be $expected [$_dataName]
 	 *
@@ -718,6 +727,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::flattenArrayKey
 	 * @dataProvider flattenArrayKeyProvider
 	 * @testdox flattenArrayKey array $input will be $expected [$_dataName]
 	 *
@@ -736,6 +746,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::flattenArrayKeyLeavesOnly
 	 * @dataProvider flattenArrayKeyLeavesOnlyProvider
 	 * @testdox flattenArrayKeyLeavesOnly array $input will be $expected [$_dataName]
 	 *
@@ -754,6 +765,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::arrayFlatForKey
 	 * @dataProvider arrayFlatForKeyProvider
 	 * @testdox arrayFlatForKey array $input will be $expected [$_dataName]
 	 *

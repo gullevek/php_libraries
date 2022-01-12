@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Check\File
- * @testdox CoreLibs\Check\File method tests
+ * @coversDefaultClass \CoreLibs\Check\File
+ * @testdox \CoreLibs\Check\File method tests
  */
 final class CoreLibsCheckFileTest extends TestCase
 {
@@ -65,6 +66,7 @@ final class CoreLibsCheckFileTest extends TestCase
 	/**
 	 * Tests if file extension matches
 	 *
+	 * @covers ::getFilenameEnding
 	 * @dataProvider filesExtensionProvider
 	 * @testdox getFilenameEnding $input must be extension $expected [$_dataName]
 	 *
@@ -84,6 +86,7 @@ final class CoreLibsCheckFileTest extends TestCase
 	/**
 	 * Tests the file line read
 	 *
+	 * @covers ::getLinesFromFile
 	 * @dataProvider filesLinesProvider
 	 * @testdox getLinesFromFile $input must have $expected lines [$_dataName]
 	 *

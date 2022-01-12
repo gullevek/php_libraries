@@ -8,7 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Check\PHPVersion
- * @testdox CoreLibs\Check\PHPVersion method tests
+ * @coversDefaultClass \CoreLibs\Check\PHPVersion
+ * @testdox \CoreLibs\Check\PHPVersion method tests
  */
 final class CoreLibsCheckPHPVersionTest extends TestCase
 {
@@ -42,6 +43,7 @@ final class CoreLibsCheckPHPVersionTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::checkPHPVersion
 	 * @dataProvider phpVersionProvider
 	 * @testdox checkPHPVersion $input_min and $input_max will be $expected [$_dataName]
 	 *
