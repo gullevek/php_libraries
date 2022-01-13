@@ -10,7 +10,12 @@ namespace CoreLibs\Get;
 
 class System
 {
-		/**
+	public const WITH_EXTENSION = 0;
+	public const NO_EXTENSION = 1;
+	public const FULL_PATH = 2;
+	private const DEFAULT_PORT = '80';
+
+	/**
 	 * helper function for PHP file upload error messgaes to messge string
 	 * @param  int    $error_code integer _FILE upload error code
 	 * @return string                     message string, translated
@@ -52,33 +57,30 @@ class System
 	 */
 	public static function getHostName(): array
 	{
-		$port = '';
-		if ($_SERVER['HTTP_HOST'] && preg_match("/:/", $_SERVER['HTTP_HOST'])) {
-			list($host_name, $port) = explode(":", $_SERVER['HTTP_HOST']);
-		} elseif ($_SERVER['HTTP_HOST']) {
-			$host_name = $_SERVER['HTTP_HOST'];
-		} else {
-			$host_name = 'NA';
-		}
-		return [$host_name, ($port ? $port : 80)];
+		$host = $_SERVER['HTTP_HOST'] ?? 'NOHOST:NOPORT';
+		list($host_name, $port) = array_pad(explode(':', $host), 2, self::DEFAULT_PORT);
+		return [$host_name, $port];
 	}
 
 	/**
 	 * get the page name of the curronte page
-	 * @param  int    $strip_ext 1: strip page file name extension
-	 *                           0: keep filename as is
-	 *                           2: keep filename as is, but add dirname too
+	 * @param  int    $strip_ext WITH_EXTENSION: keep filename as is (default)
+	 *                           NO_EXTENSION: strip page file name extension
+	 *                           FULL_PATH: keep filename as is, but add dirname too
 	 * @return string            filename
 	 */
-	public static function getPageName(int $strip_ext = 0): string
+	public static function getPageName(int $strip_ext = self::WITH_EXTENSION): string
 	{
 		// get the file info
 		$page_temp = pathinfo($_SERVER['PHP_SELF']);
-		if ($strip_ext == 1) {
+		if ($strip_ext == self::NO_EXTENSION) {
+			// no extension
 			return $page_temp['filename'];
-		} elseif ($strip_ext == 2) {
+		} elseif ($strip_ext == self::FULL_PATH) {
+			// full path
 			return $_SERVER['PHP_SELF'];
 		} else {
+			// with extension
 			return $page_temp['basename'];
 		}
 	}

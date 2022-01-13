@@ -15,6 +15,7 @@ class Hash
 	 * can return empty string if none of string sets work
 	 * hash returns false
 	 * preg_replace fails for older php version
+	 * Use __hash with crc32b or hash('crc32b', ...) for correct output
 	 * @param  string $string string to crc
 	 * @return string         crc32b hash (old type)
 	 */
@@ -52,7 +53,7 @@ class Hash
 	/**
 	 * replacemend for __crc32b call (alternate)
 	 * defaults to adler 32
-	 * allowed adler32, fnv132, fnv1a32, joaat
+	 * allowed crc32b, adler32, fnv132, fnv1a32, joaat
 	 * all that create 8 char long hashes
 	 * @param  string $string    string to hash
 	 * @param  string $hash_type hash type (default adler32)
@@ -60,7 +61,12 @@ class Hash
 	 */
 	public static function __hash(string $string, string $hash_type = 'adler32'): string
 	{
-		if (!in_array($hash_type, ['adler32', 'fnv132', 'fnv1a32', 'joaat'])) {
+		if (
+			!in_array(
+				$hash_type,
+				['crc32b', 'adler32', 'fnv132', 'fnv1a32', 'joaat']
+			)
+		) {
 			$hash_type = 'adler32';
 		}
 		return hash($hash_type, $string);

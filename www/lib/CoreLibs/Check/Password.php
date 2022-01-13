@@ -18,7 +18,8 @@ class Password
 	public static function passwordSet(string $password): string
 	{
 		// always use the PHP default for the password
-		// password options ca be set in the password init, but should be kept as default
+		// password options ca be set in the password init,
+		// but should be kept as default
 		return password_hash($password, PASSWORD_DEFAULT);
 	}
 

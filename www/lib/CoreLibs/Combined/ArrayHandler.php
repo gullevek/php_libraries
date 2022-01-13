@@ -13,38 +13,39 @@ class ArrayHandler
 	/**
 	 * searches key = value in an array / array
 	 * only returns the first one found
-	 * @param  string|int   $needle     needle (search for)
-	 * @param  array<mixed> $haystack   haystack (search in)
-	 * @param  string|null  $key_lookin the key to look out for, default empty
-	 * @return array<mixed>             array with the elements where the needle can be
-	 *                                  found in the haystack array
+	 * @param  string|int   $needle         needle (search for)
+	 * @param  array<mixed> $haystack       haystack (search in)
+	 * @param  string|null  $key_search_for the key to look out for, default empty
+	 * @return array<mixed>                 array with the elements where
+	 *                                      the needle can be found in the
+	 *                                      haystack array
 	 */
-	public static function arraySearchRecursive($needle, array $haystack, ?string $key_lookin = null): array
+	public static function arraySearchRecursive($needle, array $haystack, ?string $key_search_for = null): array
 	{
 		$path = [];
 		if (!is_array($haystack)) {
 			$haystack = [];
 		}
 		if (
-			$key_lookin != null &&
-			array_key_exists($key_lookin, $haystack) &&
-			$needle === $haystack[$key_lookin]
+			$key_search_for != null &&
+			array_key_exists($key_search_for, $haystack) &&
+			$needle === $haystack[$key_search_for]
 		) {
-			$path[] = $key_lookin;
+			$path[] = $key_search_for;
 		} else {
 			foreach ($haystack as $key => $val) {
 				if (
 					is_scalar($val) &&
 					$val === $needle &&
-					empty($key_lookin)
+					empty($key_search_for)
 				) {
 					$path[] = $key;
 					break;
 				} elseif (
 					is_scalar($val) &&
-					!empty($key_lookin) &&
-					$key === $key_lookin &&
-					$val == $needle
+					!empty($key_search_for) &&
+					$key === $key_search_for &&
+					$val === $needle
 				) {
 					$path[] = $key;
 					break;
@@ -54,7 +55,7 @@ class ArrayHandler
 						$needle,
 						(array)$val,
 						// to avoid PhanTypeMismatchArgumentNullable
-						($key_lookin === null ? $key_lookin : (string)$key_lookin)
+						($key_search_for === null ? $key_search_for : (string)$key_search_for)
 					)
 				) {
 					array_unshift($path, $key);
@@ -67,14 +68,21 @@ class ArrayHandler
 
 	/**
 	 * recursive array search function, which returns all found not only the first one
-	 * @param  string|int        $needle   needle (search for)
-	 * @param  array<mixed>      $haystack haystack (search in)
-	 * @param  string|int        $key      the key to look for in
-	 * @param  array<mixed>|null $path     recursive call for previous path
-	 * @return array<mixed>|null           all array elements paths where the element was found
+	 * @param  string|int        $needle         needle (search for)
+	 * @param  array<mixed>      $haystack       haystack (search in)
+	 * @param  string|int        $key_search_for the key to look for in
+	 * @param  bool              $old            [true], if set to false will return new flat layout
+	 * @param  array<mixed>|null $path           recursive call for previous path
+	 * @return array<mixed>|null                 all array elements paths where
+	 *                                           the element was found
 	 */
-	public static function arraySearchRecursiveAll($needle, array $haystack, $key, ?array $path = null): ?array
-	{
+	public static function arraySearchRecursiveAll(
+		$needle,
+		array $haystack,
+		$key_search_for,
+		bool $old = true,
+		?array $path = null
+	): ?array {
 		// init if not set on null
 		if ($path === null) {
 			$path = [
@@ -97,11 +105,20 @@ class ArrayHandler
 
 		// go through the array,
 		foreach ($haystack as $_key => $_value) {
-			if (is_scalar($_value) && $_value == $needle && !$key) {
+			if (
+				is_scalar($_value) &&
+				$_value === $needle &&
+				empty($key_search_for)
+			) {
 				// only value matches
 				$path['work'][$path['level'] ?? 0] = $_key;
 				$path['found'][] = $path['work'];
-			} elseif (is_scalar($_value) && $_value == $needle && $_key == $key) {
+			} elseif (
+				is_scalar($_value) &&
+				!empty($key_search_for) &&
+				$_key === $key_search_for &&
+				$_value === $needle
+			) {
 				// key and value matches
 				$path['work'][$path['level'] ?? 0] = $_key;
 				$path['found'][] = $path['work'];
@@ -111,7 +128,7 @@ class ArrayHandler
 				// we will up a level
 				$path['level'] += 1;
 				// call recursive
-				$path = self::arraySearchRecursiveAll($needle, $_value, $key, $path);
+				$path = self::arraySearchRecursiveAll($needle, $_value, $key_search_for, $old, $path);
 			}
 		}
 		// be 100% sure the array elements are set
@@ -121,17 +138,23 @@ class ArrayHandler
 		array_splice($path['work'], $path['level']);
 		// step back a level
 		$path['level'] -= 1;
-		return $path;
+		if ($old === false && $path['level'] == -1) {
+			return $path['found'] ?? [];
+		} else {
+			return $path;
+		}
 	}
 
 	/**
 	 * array search simple. looks for key, value combination, if found, returns true
+	 * on default does not strict check, so string '4' will match int 4 and vica versa
 	 * @param  array<mixed> $array search in as array
 	 * @param  string|int  $key    key (key to search in)
 	 * @param  string|int  $value  value (what to find)
+	 * @param  bool        $strict [false], if set to true, will strict check key/value
 	 * @return bool                true on found, false on not found
 	 */
-	public static function arraySearchSimple(array $array, $key, $value): bool
+	public static function arraySearchSimple(array $array, $key, $value, bool $strict = false): bool
 	{
 		if (!is_array($array)) {
 			$array = [];
@@ -140,10 +163,12 @@ class ArrayHandler
 			// if value is an array, we search
 			if (is_array($_value)) {
 				// call recursive, and return result if it is true, else continue
-				if (($result = self::arraySearchSimple($_value, $key, $value)) !== false) {
+				if (($result = self::arraySearchSimple($_value, $key, $value, $strict)) !== false) {
 					return $result;
 				}
-			} elseif ($_key == $key && $_value == $value) {
+			} elseif ($strict === false && $_key == $key && $_value == $value) {
+				return true;
+			} elseif ($strict === true && $_key === $key && $_value === $value) {
 				return true;
 			}
 		}
@@ -152,7 +177,8 @@ class ArrayHandler
 	}
 
 	/**
-	 * correctly recursive merges as an array as array_merge_recursive just glues things together
+	 * correctly recursive merges as an array as array_merge_recursive
+	 * just glues things together
 	 *         array first array to merge
 	 *         array second array to merge
 	 *         ...   etc
@@ -224,7 +250,8 @@ class ArrayHandler
 	}
 
 	/**
-	 * search for the needle array elements in haystack and return the ones found as an array,
+	 * search for the needle array elements in haystack and
+	 * return the ones found as an array,
 	 * is there nothing found, it returns FALSE (boolean)
 	 * @param  array<mixed> $needle   elements to search for
 	 * @param  array<mixed> $haystack array where the $needle elements should be searched int
@@ -232,12 +259,6 @@ class ArrayHandler
 	 */
 	public static function inArrayAny(array $needle, array $haystack)
 	{
-		if (!is_array($needle)) {
-			return false;
-		}
-		if (!is_array($haystack)) {
-			return false;
-		}
 		$found = [];
 		foreach ($needle as $element) {
 			if (in_array($element, $haystack)) {
@@ -268,12 +289,20 @@ class ArrayHandler
 			if (
 				$key !== false &&
 				$value !== false &&
-				(($set_only && $db_array[$i][$value]) || (!$set_only))
+				(($set_only && !empty($db_array[$i][$value])) ||
+				(!$set_only && isset($db_array[$i][$value]))) &&
+				!empty($db_array[$i][$key])
 			) {
 				$ret_array[$db_array[$i][$key]] = $db_array[$i][$value];
-			} elseif ($key === false && $value !== false) {
+			} elseif (
+				$key === false && $value !== false &&
+				isset($db_array[$i][$value])
+			) {
 				$ret_array[] = $db_array[$i][$value];
-			} elseif ($key !== false && $value === false) {
+			} elseif (
+				$key !== false && $value === false &&
+				!empty($db_array[$i][$key])
+			) {
 				$ret_array[$db_array[$i][$key]] = $i;
 			}
 		}
@@ -283,7 +312,7 @@ class ArrayHandler
 	/**
 	 * converts multi dimensional array to a flat array
 	 * does NOT preserve keys
-	 * @param  array<mixed> $array ulti dimensionial array
+	 * @param  array<mixed> $array multi dimensionial array
 	 * @return array<mixed>        flattened array
 	 */
 	public static function flattenArray(array $array): array
@@ -303,7 +332,24 @@ class ArrayHandler
 	 * @param  array<mixed> $array  multidemnsional array to flatten
 	 * @return array<mixed>         flattened keys array
 	 */
-	public static function flattenArrayKey(array $array): array
+	public static function flattenArrayKey(array $array, array $return = []): array
+	{
+		foreach ($array as $key => $sub) {
+			$return[] = $key;
+			if (is_array($sub) && count($sub) > 0) {
+				$return = self::flattenArrayKey($sub, $return);
+			}
+		}
+		return $return;
+	}
+
+	/**
+	 * as above will flatten an array, but in this case only the outmost
+	 * leave nodes, all other keyswill be skipped
+	 * @param  array<mixed> $array multidemnsional array to flatten
+	 * @return array<mixed>        flattened keys array
+	 */
+	public static function flattenArrayKeyLeavesOnly(array $array): array
 	{
 		$return = [];
 		array_walk_recursive(
@@ -319,7 +365,8 @@ class ArrayHandler
 	 * searches for key -> value in an array tree and writes the value one level up
 	 * this will remove this leaf will all other values
 	 * @param  array<mixed> $array  nested array
-	 * @param  string|int   $search key to find that has no sub leaf and will be pushed up
+	 * @param  string|int   $search key to find that has no sub leaf
+	 *                              and will be pushed up
 	 * @return array<mixed>         modified, flattened array
 	 */
 	public static function arrayFlatForKey(array $array, $search): array
@@ -329,16 +376,17 @@ class ArrayHandler
 		}
 		foreach ($array as $key => $value) {
 			// if it is not an array do just nothing
-			if (is_array($value)) {
-				// probe it has search key
-				if (isset($value[$search])) {
-					// set as current
-					$array[$key] = $value[$search];
-				} else {
-					// call up next node down
-					// $array[$key] = call_user_func(__METHOD__, $value, $search);
-					$array[$key] = self::arrayFlatForKey($value, $search);
-				}
+			if (!is_array($value)) {
+				continue;
+			}
+			// probe it has search key
+			if (isset($value[$search])) {
+				// set as current
+				$array[$key] = $value[$search];
+			} else {
+				// call up next node down
+				// $array[$key] = call_user_func(__METHOD__, $value, $search);
+				$array[$key] = self::arrayFlatForKey($value, $search);
 			}
 		}
 		return $array;

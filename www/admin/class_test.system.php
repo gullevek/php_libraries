@@ -40,8 +40,8 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 print "GETHOSTNAME: " . DgS::printAr(System::getHostName()) . "<br>";
 print "GETPAGENAME(0): " . System::getPageName() . "<br>";
-print "GETPAGENAME(1): " . System::getPageName(1) . "<br>";
-print "GETPAGENAME(2): " . System::getPageName(2) . "<br>";
+print "GETPAGENAME(1): " . System::getPageName(System::NO_EXTENSION) . "<br>";
+print "GETPAGENAME(2): " . System::getPageName(System::FULL_PATH) . "<br>";
 print "GETPAGENAMEARRAY: " . \CoreLibs\Debug\Support::printAr(System::getPageNameArray()) . "<br>";
 // seting errro codes file upload
 print "FILEUPLOADERRORMESSAGE(): " . System::fileUploadErrorMessage(-1) . "<br>";

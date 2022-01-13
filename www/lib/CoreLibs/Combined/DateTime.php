@@ -8,10 +8,13 @@ declare(strict_types=1);
 
 namespace CoreLibs\Combined;
 
+use Exception;
+
 class DateTime
 {
 	/**
 	 * a simple wrapper for the date format
+	 * if an invalid timestamp is give zero timestamp unix time is used
 	 * @param  int|float $timestamp  unix timestamp
 	 * @param  bool      $show_micro show the micro time (default false)
 	 * @return string                formated date+time in Y-M-D h:m:s ms
@@ -85,7 +88,7 @@ class DateTime
 	}
 
 	/**
-	 * does a reverse of the TimeStringFormat and converts the string from
+	 * does a reverse of the timeStringFormat and converts the string from
 	 * xd xh xm xs xms to a timestamp.microtime format
 	 * @param  string|int|float $timestring formatted interval
 	 * @return string|int|float             converted float interval, or string as is
@@ -159,9 +162,10 @@ class DateTime
 		if (!$datetime) {
 			return false;
 		}
-		list ($year, $month, $day, $hour, $min, $sec) = array_pad(
+		// catch last overflow if sec has - in front
+		list ($year, $month, $day, $hour, $min, $sec, $sec_overflow) = array_pad(
 			preg_split("/[\/\- :]/", $datetime) ?: [],
-			6,
+			7,
 			null
 		);
 		if (!$year || !$month || !$day) {
@@ -173,10 +177,19 @@ class DateTime
 		if (!is_numeric($hour) || !is_numeric($min)) {
 			return false;
 		}
+		if (!empty($sec) && !is_numeric($sec)) {
+			return false;
+		}
+		if (!empty($sec) && ($sec < 0 || $sec > 60)) {
+			return false;
+		};
+		// in case we have - for seconds
+		if (!empty($sec_overflow)) {
+			return false;
+		}
 		if (
 			($hour < 0 || $hour > 24) ||
-			($min < 0 || $min > 60) ||
-			(is_numeric($sec) && ($sec < 0 || $sec > 60))
+			($min < 0 || $min > 60)
 		) {
 			return false;
 		}
@@ -200,39 +213,23 @@ class DateTime
 		if ($start_date == '--' || $end_date == '--' || !$start_date || !$end_date) {
 			return false;
 		}
-
-		// splits the data up with / or -
-		list ($start_year, $start_month, $start_day) = array_pad(
-			preg_split('/[\/-]/', $start_date) ?: [],
-			3,
-			null
-		);
-		list ($end_year, $end_month, $end_day) = array_pad(
-			preg_split('/[\/-]/', $end_date) ?: [],
-			3,
-			null
-		);
-		// check that month & day are two digits and then combine
-		foreach (['start', 'end'] as $prefix) {
-			foreach (['month', 'day'] as $date_part) {
-				$_date = $prefix . '_' . $date_part;
-				if (isset($$_date) && $$_date < 10 && !preg_match("/^0/", $$_date)) {
-					$$_date = '0' . $$_date;
-				}
-			}
-			$_date = $prefix . '_date';
-			$$_date = '';
-			foreach (['year', 'month', 'day'] as $date_part) {
-				$_sub_date = $prefix . '_' . $date_part;
-				$$_date .= $$_sub_date;
-			}
+		// if invalid, quit
+		if (($start_timestamp = strtotime($start_date)) === false) {
+			return false;
 		}
-		// now do the compare
-		if ($start_date < $end_date) {
+		if (($end_timestamp = strtotime($end_date)) === false) {
+			return false;
+		}
+		// convert anything to Y-m-d and then to timestamp
+		// this is to remove any time parts
+		$start_timestamp = strtotime(date('Y-m-d', $start_timestamp));
+		$end_timestamp = strtotime(date('Y-m-d', $end_timestamp));
+		// compare, or end with false
+		if ($start_timestamp < $end_timestamp) {
 			return -1;
-		} elseif ($start_date == $end_date) {
+		} elseif ($start_timestamp == $end_timestamp) {
 			return 0;
-		} elseif ($start_date > $end_date) {
+		} elseif ($start_timestamp > $end_timestamp) {
 			return 1;
 		} else {
 			return false;
@@ -256,8 +253,14 @@ class DateTime
 		if ($start_datetime == '--' || $end_datetime == '--' || !$start_datetime || !$end_datetime) {
 			return false;
 		}
-		$start_timestamp = strtotime($start_datetime);
-		$end_timestamp = strtotime($end_datetime);
+		// quit if invalid timestamp
+		if (($start_timestamp = strtotime($start_datetime)) === false) {
+			return false;
+		}
+		if (($end_timestamp = strtotime($end_datetime)) === false) {
+			return false;
+		}
+		// compare, or return false
 		if ($start_timestamp < $end_timestamp) {
 			return -1;
 		} elseif ($start_timestamp == $end_timestamp) {
@@ -282,17 +285,29 @@ class DateTime
 	{
 		// pos 0 all, pos 1 weekday, pos 2 weekend
 		$days = [];
-		$start = new \DateTime($start_date);
-		$end = new \DateTime($end_date);
+		// if anything invalid, return 0,0,0
+		try {
+			$start = new \DateTime($start_date);
+			$end = new \DateTime($end_date);
+		} catch (Exception) {
+			if ($return_named === true) {
+				return [
+					'overall' => 0,
+					'weekday' => 0,
+					'weekend' => 0,
+				];
+			} else {
+				return [0, 0, 0];
+			}
+		}
 		// so we include the last day too, we need to add +1 second in the time
 		$end->setTime(0, 0, 1);
-
+		// if end date before start date, only this will be filled
 		$days[0] = $end->diff($start)->days;
 		$days[1] = 0;
 		$days[2] = 0;
-
+		// get period for weekends/weekdays
 		$period = new \DatePeriod($start, new \DateInterval('P1D'), $end);
-
 		foreach ($period as $dt) {
 			$curr = $dt->format('D');
 			if ($curr == 'Sat' || $curr == 'Sun') {
@@ -305,7 +320,7 @@ class DateTime
 			return [
 				'overall' => $days[0],
 				'weekday' => $days[1],
-				'weekend' => $days[2]
+				'weekend' => $days[2],
 			];
 		} else {
 			return $days;

@@ -124,22 +124,26 @@ class Byte
 		$valid_units_ = 'bkmgtpezy';
 		// detects up to exo bytes
 		preg_match(
-			"/([\d.,]*)\s?(eib|pib|tib|gib|mib|kib|eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/i",
+			"/(-)?([\d.,]*)\s?(eib|pib|tib|gib|mib|kib|eb|pb|tb|gb|mb|kb|e|p|t|g|m|k|b)$/i",
 			strtolower((string)$number),
 			$matches
 		);
-		if (isset($matches[1]) && isset($matches[2])) {
+		if (isset($matches[2]) && isset($matches[3])) {
 			// remove all non valid characters from the number
-			$number = preg_replace('/[^0-9\.]/', '', $matches[1]);
+			$number = preg_replace('/[^0-9\.]/', '', $matches[2]);
 			// final clean up and convert to float
 			$number = (float)trim($number);
 			// convert any mb/gb/etc to single m/b
-			$unit = preg_replace('/[^bkmgtpezy]/i', '', $matches[2]);
+			$unit = preg_replace('/[^bkmgtpezy]/i', '', $matches[3]);
 			if ($unit) {
 				$number = $number * pow($si ? 1000 : 1024, stripos($valid_units_, $unit[0]) ?: 0);
 			}
 			// convert to INT to avoid +E output
 			$number = (int)round($number);
+			// if negative input, keep nnegative
+			if (!empty($matches[1])) {
+				$number *= -1;
+			}
 		}
 		// if not matching return as is
 		return $number;

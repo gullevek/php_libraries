@@ -10,6 +10,9 @@ namespace CoreLibs\Convert;
 
 class Html
 {
+	public const SELECTED = 0;
+	public const CHECKED = 1;
+
 	/**
 	 * full wrapper for html entities
 	 * @param  mixed $string string to html encode
@@ -32,7 +35,7 @@ class Html
 	 */
 	public static function removeLB(string $string, string $replace = ' '): string
 	{
-		return str_replace(["\r", "\n"], $replace, $string);
+		return str_replace(["\n\r", "\r", "\n"], $replace, $string);
 	}
 
 	/**
@@ -44,10 +47,10 @@ class Html
 	 * @param  int                 $type     type: 0: returns selected, 1, returns checked
 	 * @return ?string                       returns checked or selected, else returns null
 	 */
-	public static function checked($haystack, $needle, int $type = 0): ?string
+	public static function checked($haystack, string $needle, int $type = 0): ?string
 	{
 		if (is_array($haystack)) {
-			if (in_array((string)$needle, $haystack)) {
+			if (in_array($needle, $haystack)) {
 				return $type ? 'checked' : 'selected';
 			}
 		} else {

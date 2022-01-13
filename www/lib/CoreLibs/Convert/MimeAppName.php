@@ -61,6 +61,10 @@ class MimeAppName
 	 */
 	public static function mimeSetAppName(string $mime, string $app): void
 	{
+		// if empty, don't set
+		if (empty($mime) || empty($app)) {
+			return;
+		}
 		self::$mime_apps[$mime] = $app;
 	}
 

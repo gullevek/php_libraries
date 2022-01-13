@@ -31,7 +31,7 @@ namespace CoreLibs\Language;
 use CoreLibs\Language\Core\FileReader;
 use CoreLibs\Language\Core\GetTextReader;
 
-class L10n extends \CoreLibs\Basic
+class L10n
 {
 	/** @var string */
 	private $lang = '';
@@ -49,7 +49,7 @@ class L10n extends \CoreLibs\Basic
 	 */
 	public function __construct(string $lang = '', string $path = '')
 	{
-		parent::__construct();
+		// parent::__construct();
 		if (!$lang) {
 			$this->lang = 'en';
 		} else {

@@ -15,11 +15,11 @@ class PhpVersion
 	public static function checkPHPVersion(string $min_version, string $max_version = ''): bool
 	{
 		// exit with false if the min/max strings are wrong
-		if (!preg_match("/^\d{1}(\.\d{1})?(\.\d{1,2})?$/", $min_version)) {
+		if (!preg_match("/^\d{1,2}(\.\d{1,2})?(\.\d{1,2})?$/", $min_version)) {
 			return false;
 		}
 		// max is only chcked if it is set
-		if ($max_version && !preg_match("/^\d{1}(\.\d{1})?(\.\d{1,2})?$/", $max_version)) {
+		if ($max_version && !preg_match("/^\d{1,2}(\.\d{1,2})?(\.\d{1,2})?$/", $max_version)) {
 			return false;
 		}
 		// split up the version strings to calc the compare number

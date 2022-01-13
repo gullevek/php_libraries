@@ -13,6 +13,31 @@ class FileWriter
 {
 	/** @var string */
 	private static $debug_filename = 'debug_file.log'; // where to write output
+	private static $debug_folder;
+
+		/**
+	 * Set a debug log folder, if not set BASE+LOG folders are set
+	 * if they are defined
+	 * This folder name must exist and must be writeable
+	 *
+	 * @param  string  $folder Folder name to where the log file will be written
+	 * @return boolean         True for valid folder name, False for invalid
+	 */
+	public static function fsetFolder(string $folder): bool
+	{
+		if (!preg_match("/^[\w\-\/]+/", $folder)) {
+			return false;
+		}
+		if (!is_writeable($folder)) {
+			return false;
+		}
+		// if last is not / then add
+		if (substr($folder, -1, 1) != DIRECTORY_SEPARATOR) {
+			$folder .= DIRECTORY_SEPARATOR;
+		}
+		self::$debug_folder = $folder;
+		return true;
+	}
 
 	/**
 	 * set new debug file name
@@ -25,7 +50,7 @@ class FileWriter
 	public static function fsetFilename(string $filename): bool
 	{
 		// valid file. must be only ascii & _, must end with .log
-		if (!preg_match("/^[A-Za-z_-]+\.log$/", $filename)) {
+		if (!preg_match("/^[\w\-]+\.log$/", $filename)) {
 			return false;
 		}
 		self::$debug_filename = $filename;
@@ -40,13 +65,21 @@ class FileWriter
 	 */
 	public static function fdebug(string $string, bool $enter = true): bool
 	{
-		if (!self::$debug_filename) {
+		if (empty(self::$debug_filename)) {
 			return false;
 		}
-		if (!is_writeable(BASE . LOG)) {
+		// if empty try to set base log folder
+		if (
+			empty(self::$debug_folder) &&
+			defined('BASE') && !empty(BASE) &&
+			defined('LOG') && !empty(LOG)
+		) {
+			self::$debug_folder = BASE . LOG;
+		}
+		if (!is_writeable(self::$debug_folder)) {
 			return false;
 		}
-		$filename = BASE . LOG . self::$debug_filename;
+		$filename = self::$debug_folder . self::$debug_filename;
 		$fh = fopen($filename, 'a');
 		if ($fh === false) {
 			return false;

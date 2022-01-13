@@ -86,6 +86,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Convert\\Byte' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Byte.php',
         'CoreLibs\\Convert\\Colors' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Colors.php',
         'CoreLibs\\Convert\\Html' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Html.php',
+        'CoreLibs\\Convert\\Json' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Json.php',
         'CoreLibs\\Convert\\Math' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Math.php',
         'CoreLibs\\Convert\\MimeAppName' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/MimeAppName.php',
         'CoreLibs\\Create\\Hash' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/Hash.php',

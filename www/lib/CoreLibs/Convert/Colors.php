@@ -2,8 +2,8 @@
 
 /*
  * Convert color spaces
- * hex to rgb
  * rgb to hex
+ * hex to rgb
  * rgb to hsb
  * hsb to rgb
  * rgb to hsl
@@ -17,58 +17,26 @@ namespace CoreLibs\Convert;
 class Colors
 {
 	/**
-	 * converts a hex RGB color to the int numbers
-	 * @param  string $hexStr         RGB hexstring
-	 * @param  bool   $returnAsString flag to return as string
-	 * @param  string $seperator      string seperator: default: ","
-	 * @return string|array<string,float|int>|bool false on error or array with RGB
-	 *                                             or a string with the seperator
-	 */
-	public static function hex2rgb(string $hexStr, bool $returnAsString = false, string $seperator = ',')
-	{
-		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
-		if (!is_string($hexStr)) {
-			return false;
-		}
-		$rgbArray = [];
-		if (strlen($hexStr) == 6) {
-			// If a proper hex code, convert using bitwise operation. No overhead... faster
-			$colorVal = hexdec($hexStr);
-			$rgbArray['R'] = 0xFF & ($colorVal >> 0x10);
-			$rgbArray['G'] = 0xFF & ($colorVal >> 0x8);
-			$rgbArray['B'] = 0xFF & $colorVal;
-		} elseif (strlen($hexStr) == 3) {
-			// If shorthand notation, need some string manipulations
-			$rgbArray['R'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
-			$rgbArray['G'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
-			$rgbArray['B'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
-		} else {
-			// Invalid hex color code
-			return false;
-		}
-		// returns the rgb string or the associative array
-		return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray;
-	}
-
-	/**
 	 * converts the rgb values from int data to the valid rgb html hex string
 	 * optional can turn of leading #
+	 * if one value is invalid, will return false
 	 * @param  int    $red        red 0-255
 	 * @param  int    $green      green 0-255
 	 * @param  int    $blue       blue 0-255
 	 * @param  bool   $hex_prefix default true, prefix with "#"
-	 * @return string             rgb in hex values with leading # if set
+	 * @return string|bool        rgb in hex values with leading # if set,
+	 *                            false for invalid color
 	 */
-	public static function rgb2hex(int $red, int $green, int $blue, bool $hex_prefix = true): string
+	public static function rgb2hex(int $red, int $green, int $blue, bool $hex_prefix = true)
 	{
 		$hex_color = '';
 		if ($hex_prefix === true) {
 			$hex_color = '#';
 		}
 		foreach (['red', 'green', 'blue'] as $color) {
-			// if not valid, set to gray
+			// if not valid, abort
 			if ($$color < 0 || $$color > 255) {
-				$$color = 125;
+				return false;
 			}
 			// pad left with 0
 			$hex_color .= str_pad(dechex($$color), 2, '0', STR_PAD_LEFT);
@@ -77,20 +45,59 @@ class Colors
 	}
 
 	/**
+	 * converts a hex RGB color to the int numbers
+	 * @param  string $hexStr           RGB hexstring
+	 * @param  bool   $return_as_string flag to return as string
+	 * @param  string $seperator        string seperator: default: ","
+	 * @return string|array<string,float|int>|bool false on error or array with RGB
+	 *                                             or a string with the seperator
+	 */
+	public static function hex2rgb(
+		string $hexStr,
+		bool $return_as_string = false,
+		string $seperator = ','
+	) {
+		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
+		if (!is_string($hexStr)) {
+			return false;
+		}
+		$rgbArray = [];
+		if (strlen($hexStr) == 6) {
+			// If a proper hex code, convert using bitwise operation. No overhead... faster
+			$colorVal = hexdec($hexStr);
+			$rgbArray['r'] = 0xFF & ($colorVal >> 0x10);
+			$rgbArray['g'] = 0xFF & ($colorVal >> 0x8);
+			$rgbArray['b'] = 0xFF & $colorVal;
+		} elseif (strlen($hexStr) == 3) {
+			// If shorthand notation, need some string manipulations
+			$rgbArray['r'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
+			$rgbArray['g'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
+			$rgbArray['b'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
+		} else {
+			// Invalid hex color code
+			return false;
+		}
+		// returns the rgb string or the associative array
+		return $return_as_string ? implode($seperator, $rgbArray) : $rgbArray;
+	}
+
+	/**
+	 * rgb2hsb does not clean convert back to rgb in a round trip
 	 * converts RGB to HSB/V values
 	 * returns:
 	 * array with hue (0-360), sat (0-100%), brightness/value (0-100%)
-	 * @param  int   $red       red 0-255
-	 * @param  int   $green     green 0-255
-	 * @param  int   $blue      blue 0-255
-	 * @return array<int|float> Hue, Sat, Brightness/Value
+	 * @param  int $red              red 0-255
+	 * @param  int $green            green 0-255
+	 * @param  int $blue             blue 0-255
+	 * @return array<int|float>|bool Hue, Sat, Brightness/Value
+	 *                               false for input value error
 	 */
-	public static function rgb2hsb(int $red, int $green, int $blue): array
+	public static function rgb2hsb(int $red, int $green, int $blue)
 	{
 		// check that rgb is from 0 to 255
 		foreach (['red', 'green', 'blue'] as $c) {
 			if ($$c < 0 || $$c > 255) {
-				$$c = 0;
+				return false;
 			}
 			$$c = $$c / 255;
 		}
@@ -122,31 +129,35 @@ class Colors
 	}
 
 	/**
+	 * hsb2rgb does not clean convert back to hsb in a round trip
 	 * converts HSB/V to RGB values RGB is full INT
-	 * @param  int        $H hue 0-360
-	 * @param  int        $S saturation 0-100 (int)
-	 * @param  int        $V brightness/value 0-100 (int)
-	 * @return array<int>    0 red/1 green/2 blue array as 0-255
+	 * if HSB/V value is invalid, sets this value to 0
+	 * @param  int $H          hue 0-360 (int)
+	 * @param  int $S          saturation 0-100 (int)
+	 * @param  int $V          brightness/value 0-100 (int)
+	 * @return array<int>|bool 0 red/1 green/2 blue array as 0-255
+	 *                         false for input value error
 	 */
-	public static function hsb2rgb(int $H, int $S, int $V): array
+	public static function hsb2rgb(int $H, int $S, int $V)
 	{
 		// check that H is 0 to 359, 360 = 0
 		// and S and V are 0 to 1
 		if ($H < 0 || $H > 359) {
-			$H = 0;
+			return false;
 		}
 		if ($S < 0 || $S > 100) {
-			$S = 0;
+			return false;
 		}
 		if ($V < 0 || $V > 100) {
-			$V = 0;
+			return false;
 		}
 		// convert to internal 0-1 format
 		$S /= 100;
 		$V /= 100;
 
 		if ($S == 0) {
-			return [$V * 255, $V * 255, $V * 255];
+			$V = (int)round($V * 255);
+			return [$V, $V, $V];
 		}
 
 		$Hi = floor($H / 60);
@@ -203,17 +214,18 @@ class Colors
 	 * converts a RGB (0-255) to HSL
 	 * return:
 	 * array with hue (0-360), saturation (0-100%) and luminance (0-100%)
-	 * @param  int          $red   red 0-255
-	 * @param  int          $green green 0-255
-	 * @param  int          $blue  blue 0-255
-	 * @return array<float>        hue/sat/luminance
+	 * @param  int $red          red 0-255
+	 * @param  int $green        green 0-255
+	 * @param  int $blue         blue 0-255
+	 * @return array<float>|bool hue/sat/luminance
+	 *                           false for input value error
 	 */
-	public static function rgb2hsl(int $red, int $green, int $blue): array
+	public static function rgb2hsl(int $red, int $green, int $blue)
 	{
 		// check that rgb is from 0 to 255
 		foreach (['red', 'green', 'blue'] as $c) {
 			if ($$c < 0 || $$c > 255) {
-				$$c = 0;
+				return false;
 			}
 			$$c = $$c / 255;
 		}
@@ -254,21 +266,25 @@ class Colors
 
 	/**
 	 * converts an HSL to RGB
-	 * @param  int   $hue hue: 0-360 (degrees)
-	 * @param  float $sat saturation: 0-100
-	 * @param  float $lum luminance: 0-100
-	 * @return array<int,float|int> red/blue/green 0-255 each
+	 * if HSL value is invalid, set this value to 0
+	 * @param  int|float   $hue                hue: 0-360 (degrees)
+	 * @param  float $sat                saturation: 0-100
+	 * @param  float $lum                luminance: 0-100
+	 * @return array<int,float|int>|bool red/blue/green 0-255 each
 	 */
-	public static function hsl2rgb(int $hue, float $sat, float $lum): array
+	public static function hsl2rgb($hue, float $sat, float $lum)
 	{
+		if (!is_numeric($hue)) {
+			return false;
+		}
 		if ($hue < 0 || $hue > 359) {
-			$hue = 0;
+			return false;
 		}
 		if ($sat < 0 || $sat > 100) {
-			$sat = 0;
+			return false;
 		}
 		if ($lum < 0 || $lum > 100) {
-			$lum = 0;
+			return false;
 		}
 		$hue = (1 / 360) * $hue; // calc to internal convert value for hue
 		// convert to internal 0-1 format
@@ -276,7 +292,8 @@ class Colors
 		$lum /= 100;
 		// if saturation is 0
 		if ($sat == 0) {
-			return [$lum * 255, $lum * 255, $lum * 255];
+			$lum = (int)round($lum * 255);
+			return [$lum, $lum, $lum];
 		} else {
 			$m2 = $lum < 0.5 ? $lum * ($sat + 1) : ($lum + $sat) - ($lum * $sat);
 			$m1 = $lum * 2 - $m2;

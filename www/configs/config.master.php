@@ -309,6 +309,7 @@ if (defined('DEBUG') && DEBUG == false) {
 // 		"lib/"
 // 	]
 // },
+// NOTE: MUST RUN composer dump-autoload if file/class names are changed or added
 // NOTE BASE: __DIR__ . DIRECTORY_SEPARATOR . '..' DIRECTORY_SEPARATOR;
 require BASE . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 

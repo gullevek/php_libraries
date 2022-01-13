@@ -467,7 +467,7 @@ class SmartyExtend extends SmartyBC
 		// set local page title
 		$this->HEADER['HTML_TITLE'] = !$this->L_TITLE ?
 			ucfirst(str_replace('_', ' ', \CoreLibs\Get\System::getPageName(1)))
-				. (defined(G_TITLE) ? ' - ' . $this->l10n->__(G_TITLE) : '') :
+				. (defined('G_TITLE') ? ' - ' . $this->l10n->__(G_TITLE) : '') :
 			$this->l10n->__($this->L_TITLE);
 
 		// LANG

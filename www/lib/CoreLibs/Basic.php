@@ -598,7 +598,7 @@ class Basic
 	public static function arraySearchRecursiveAll($needle, array $haystack, $key, ?array $path = null): ?array
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use  \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll()', E_USER_DEPRECATED);
-		return \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll($needle, $haystack, $key, $path);
+		return \CoreLibs\Combined\ArrayHandler::arraySearchRecursiveAll($needle, $haystack, $key, true, $path);
 	}
 
 	/**
@@ -1533,12 +1533,12 @@ class Basic
 	 * @param  bool        $override if set to true, then on json error
 	 *                               set original value as array
 	 * @return array<mixed>                 returns an array from the json values
-	 * @deprecated use \CoreLibs\Check\Jason::jsonConvertToArray() instead
+	 * @deprecated use \CoreLibs\Check\Json::jsonConvertToArray() instead
 	 */
 	public function jsonConvertToArray(?string $json, bool $override = false): array
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Jason::jsonConvertToArray()', E_USER_DEPRECATED);
-		return \CoreLibs\Check\Jason::jsonConvertToArray($json, $override);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Json::jsonConvertToArray()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Json::jsonConvertToArray($json, $override);
 	}
 
 	/**
@@ -1548,12 +1548,12 @@ class Basic
 	 *                                     the error number
 	 * @return int|string                  Either error number (0 for no error)
 	 *                                     or error string ('' for no error)
-	 * @deprecated use \CoreLibs\Check\Jason::jsonGetLastError() instead
+	 * @deprecated use \CoreLibs\Check\Json::jsonGetLastError() instead
 	 */
 	public function jsonGetLastError(bool $return_string = false)
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Jason::jsonGetLastError()', E_USER_DEPRECATED);
-		return \CoreLibs\Check\Jason::jsonGetLastError($return_string);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Json::jsonGetLastError()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Json::jsonGetLastError($return_string);
 	}
 
 	// *** JSON END ***

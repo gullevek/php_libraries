@@ -21,6 +21,7 @@ return array(
     'CoreLibs\\Convert\\Byte' => $baseDir . '/lib/CoreLibs/Convert/Byte.php',
     'CoreLibs\\Convert\\Colors' => $baseDir . '/lib/CoreLibs/Convert/Colors.php',
     'CoreLibs\\Convert\\Html' => $baseDir . '/lib/CoreLibs/Convert/Html.php',
+    'CoreLibs\\Convert\\Json' => $baseDir . '/lib/CoreLibs/Convert/Json.php',
     'CoreLibs\\Convert\\Math' => $baseDir . '/lib/CoreLibs/Convert/Math.php',
     'CoreLibs\\Convert\\MimeAppName' => $baseDir . '/lib/CoreLibs/Convert/MimeAppName.php',
     'CoreLibs\\Create\\Hash' => $baseDir . '/lib/CoreLibs/Create/Hash.php',

@@ -9,7 +9,7 @@
 *
 * pgsql wrapper calls
 *
-*  HISTORY:
+* HISTORY:
 * 2008/04/16 (cs) wrapper for pg escape string
 * 2007/01/11 (cs) add prepare/execute for postgres
 * 2006/09/12 (cs) in case db_query retuns false, save the query and
@@ -21,10 +21,9 @@
 * 2005/07/07 (cs) the default it is table_name _ id
 * 2005/01/19 (cs) changed the pgsql connect, so it dies if it can't connect to the DB
 * 2004/09/30 (cs) layout cleanup
-* /
-
+*
+*
 * collection of PostgreSQL wrappers
-* REQUIRES 5.x PHP!!!
 *
 * pg_prepare
 * pg_execute

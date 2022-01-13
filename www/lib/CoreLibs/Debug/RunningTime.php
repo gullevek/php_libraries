@@ -31,7 +31,7 @@ class RunningTime
 	 * first call sets start time and returns 0,
 	 * second call sets end time and returns the run time
 	 * the out_time parameter can be:
-	 * n/ns (nano), y/ys (micro), m/ms (milli), s
+	 * n/ns (nano), y/ys (micro), m/ms (milli), s (seconds)
 	 * default is milliseconds
 	 * @param  string $out_time set return time adjustment calculation
 	 * @return float            running time without out_time suffix
