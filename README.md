@@ -30,16 +30,21 @@ The old non namepsace format layout.
 This is fully deprecated and will no longer be maintaned.
 last tested PHP 5.6 and PHP 7.0
 
-### namespace
+### development
 
-The new namespace branch. This is the development area for the master branch
+Any current development is done here
 
 ## Static checks
 
-With phpstan
+With phpstan (`4dev/checking/phpstan.sh`)
 `phpstan`
 
-With phan
+With phan (`4dev/checking/phan.sh`)
 `phan --progress-bar -C --analyze-twice`
 
 pslam is setup but not configured
+
+## Unit tests
+
+With phpunit (`4dev/checking/phpunit.sh`)
+`phpunit -c $phpunit.xml 4dev/tests/`

@@ -60,7 +60,7 @@ class Uids
 				// fallback to this hash type
 				$hash = self::FALLBACK_HASH;
 				if (
-					defined('DEFAULT_HASH') && !empty(DEFAULT_HASH) &&
+					defined('DEFAULT_HASH') &&
 					in_array(DEFAULT_HASH, hash_algos())
 				) {
 					$hash = DEFAULT_HASH;

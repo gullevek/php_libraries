@@ -330,6 +330,7 @@ class ArrayHandler
 	/**
 	 * will loop through an array recursivly and write the array keys back
 	 * @param  array<mixed> $array  multidemnsional array to flatten
+	 * @param  array<mixed> $return recoursive pass on array of keys
 	 * @return array<mixed>         flattened keys array
 	 */
 	public static function flattenArrayKey(array $array, array $return = []): array

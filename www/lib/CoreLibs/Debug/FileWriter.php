@@ -13,6 +13,7 @@ class FileWriter
 {
 	/** @var string */
 	private static $debug_filename = 'debug_file.log'; // where to write output
+	/** @var string */
 	private static $debug_folder;
 
 		/**
@@ -71,8 +72,7 @@ class FileWriter
 		// if empty try to set base log folder
 		if (
 			empty(self::$debug_folder) &&
-			defined('BASE') && !empty(BASE) &&
-			defined('LOG') && !empty(LOG)
+			defined('BASE') && defined('LOG')
 		) {
 			self::$debug_folder = BASE . LOG;
 		}

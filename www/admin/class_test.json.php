@@ -29,12 +29,11 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-json';
 ob_end_flush();
 
-use CoreLibs\Check\Json;
-// use CoreLibs\Check\Jason;
+use CoreLibs\Convert\Json;
 use CoreLibs\Debug\Support as DgS;
 
 $basic = new CoreLibs\Basic();
-$json_class = 'CoreLibs\Check\Json';
+$json_class = 'CoreLibs\Convert\Json';
 
 // define a list of from to color sets for conversion test
 

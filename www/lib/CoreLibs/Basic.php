@@ -1238,10 +1238,10 @@ class Basic
 	 * @param  int    $green      green 0-255
 	 * @param  int    $blue       blue 0-255
 	 * @param  bool   $hex_prefix default true, prefix with "#"
-	 * @return string             rgb in hex values with leading # if set
+	 * @return string|bool        rgb in hex values with leading # if set
 	 * @deprecated use \CoreLibs\Convert\Colors::rgb2hex() instead
 	 */
-	public static function rgb2hex(int $red, int $green, int $blue, bool $hex_prefix = true): string
+	public static function rgb2hex(int $red, int $green, int $blue, bool $hex_prefix = true)
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::rgb2hex()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::rgb2hex($red, $green, $blue, $hex_prefix);
@@ -1252,10 +1252,10 @@ class Basic
 	 * @param  int    $red   red 0-255
 	 * @param  int    $green green 0-255
 	 * @param  int    $blue  blue 0-255
-	 * @return string        hex rgb string
+	 * @return string|bool   hex rgb string
 	 * @deprecated use rgb2hex instead
 	 */
-	public static function rgb2html(int $red, int $green, int $blue): string
+	public static function rgb2html(int $red, int $green, int $blue)
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::rgb2hex()', E_USER_DEPRECATED);
 		// check that each color is between 0 and 255
@@ -1269,10 +1269,10 @@ class Basic
 	 * @param  int   $red   red 0-255
 	 * @param  int   $green green 0-255
 	 * @param  int   $blue  blue 0-255
-	 * @return array<mixed>        Hue, Sat, Brightness/Value
+	 * @return array<mixed>|bool  Hue, Sat, Brightness/Value
 	 * @deprecated use \CoreLibs\Convert\Colors::rgb2hsb() instead
 	 */
-	public static function rgb2hsb(int $red, int $green, int $blue): array
+	public static function rgb2hsb(int $red, int $green, int $blue)
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::rgb2hsb()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::rgb2hsb($red, $green, $blue);
@@ -1283,10 +1283,10 @@ class Basic
 	 * @param  int    $H hue 0-360
 	 * @param  float  $S saturation 0-1 (float)
 	 * @param  float  $V brightness/value 0-1 (float)
-	 * @return array<mixed>     0 red/1 green/2 blue array
+	 * @return array<mixed>|bool  0 red/1 green/2 blue array
 	 * @deprecated use \CoreLibs\Convert\Colors::hsb2rgb() instead
 	 */
-	public static function hsb2rgb(int $H, float $S, float $V): array
+	public static function hsb2rgb(int $H, float $S, float $V)
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::hsb2rgb()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::hsb2rgb($H, (int)round($S * 100), (int)round($V * 100));
@@ -1299,10 +1299,10 @@ class Basic
 	 * @param  int    $r red 0-255
 	 * @param  int    $g green 0-255
 	 * @param  int    $b blue 0-255
-	 * @return array<mixed>     hue/sat/luminance
+	 * @return array<mixed>|bool  hue/sat/luminance
 	 * @deprecated use \CoreLibs\Convert\Colors::rgb2hsl() instead
 	 */
-	public static function rgb2hsl(int $r, int $g, int $b): array
+	public static function rgb2hsl(int $r, int $g, int $b)
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::rgb2hsl()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::rgb2hsb($r, $g, $b);
@@ -1313,10 +1313,10 @@ class Basic
 	 * @param  int    $h hue: 0-360 (degrees)
 	 * @param  float  $s saturation: 0-1
 	 * @param  float  $l luminance: 0-1
-	 * @return array<mixed>     red/blue/green 0-255 each
+	 * @return array<mixed>|bool  red/blue/green 0-255 each
 	 * @deprecated use \CoreLibs\Convert\Colors::hsl2rgb() instead
 	 */
-	public static function hsl2rgb(int $h, float $s, float $l): array
+	public static function hsl2rgb(int $h, float $s, float $l)
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Colors::hsl2rgb()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Colors::hsl2rgb($h, $s * 100, $l * 100);
