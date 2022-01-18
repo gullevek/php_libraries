@@ -901,7 +901,7 @@ class IO
 	 * - if many this will also hold all non pk names too
 	 * then try to fill insert_id_arr, this is always multi level
 	 * - fill key: value as single array or multi array
-	 * insert_id_ext
+	 * insert_id_ext [DEPRECATED, all in insert_id_arr]
 	 * - holds all returning as array
 	 * TODO: Only use insert_id_arr and use functions to get ok array or single
 	 * @param boolean     $returning_id
@@ -2343,6 +2343,8 @@ class IO
 	 * If key was set only returns those values directly or as array
 	 *
 	 * On multiple insert return the position for which to return can be set too
+	 *
+	 * Replacement for insert_id_ext array access before
 	 *
 	 * @param  string|null  $key
 	 * @param  integer|null $pos
