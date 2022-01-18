@@ -73,6 +73,8 @@ class Backend extends \CoreLibs\DB\IO
 	// the current active edit access id
 	/** @var int */
 	public $edit_access_id;
+	/** @var string */
+	public $page_name;
 	// error/warning/info messages
 	/** @var array<mixed> */
 	public $messages = [];
@@ -108,15 +110,25 @@ class Backend extends \CoreLibs\DB\IO
 	/**
 	 * main class constructor
 	 * @param array<mixed> $db_config db config array
+	 * @param \CoreLibs\Debug\Logging|null $log Logging class, default set if not set
 	 */
-	public function __construct(array $db_config)
-	{
+	public function __construct(
+		array $db_config,
+		?\CoreLibs\Debug\Logging $log = null
+	) {
+		// set to log not per class
+		if ($log !== null) {
+			$log->setLogPer('class', false);
+		}
 		$this->setLangEncoding();
 		// get the language sub class & init it
 		$this->l = new \CoreLibs\Language\L10n($this->lang);
 
 		// init the database class
-		parent::__construct($db_config);
+		parent::__construct($db_config, $log ?? new \CoreLibs\Debug\Logging());
+
+		// set the page name
+		$this->page_name = \CoreLibs\Get\System::getPageName();
 
 		// set the action ids
 		foreach ($this->action_list as $_action) {

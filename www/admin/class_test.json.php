@@ -32,7 +32,17 @@ ob_end_flush();
 use CoreLibs\Convert\Json;
 use CoreLibs\Debug\Support as DgS;
 
-$basic = new CoreLibs\Basic();
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
 $json_class = 'CoreLibs\Convert\Json';
 
 // define a list of from to color sets for conversion test
@@ -74,7 +84,7 @@ print "E-JSON ERROR: ".$basic->jsonGetLastError().": ".$basic->jsonGetLastError(
 // print "S::JSON ERROR: " . Jason::jsonGetLastError() . ": " . Jason::jsonGetLastError(true) . "<br>";
 
 // error message
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

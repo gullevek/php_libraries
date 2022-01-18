@@ -77,21 +77,19 @@ class Basic
 	/** @var array<mixed> */
 	public $data_path = [];
 
-	// session name
-	/** @var string */
-	private $session_name = '';
-	/** @var string */
-	private $session_id = ''; /** @phpstan-ignore-line */
-
 	// ajax flag
 	/** @var bool */
 	protected $ajax_page_flag = false;
 
 	/**
 	 * main Basic constructor to init and check base settings
+	 * @param \CoreLibs\Debug\Logging|null $log Logging class
+	 * @param string|null $session_name Set session name
 	 */
-	public function __construct()
-	{
+	public function __construct(
+		\CoreLibs\Debug\Logging $log = null,
+		?string $session_name = null
+	) {
 		// TODO make check dynamic for entries we MUST have depending on load type
 		// before we start any work, we should check that all MUST constants are defined
 		$abort = false;
@@ -117,6 +115,9 @@ class Basic
 			die('Core Constant missing. Check config file.');
 		}
 
+		// logging interface moved here (->debug is now ->log->debug)
+		$this->log = $log ?? new \CoreLibs\Debug\Logging();
+
 		// set ajax page flag based on the AJAX_PAGE varaibles
 		// convert to true/false so if AJAX_PAGE is 0 or false it is
 		// always boolean false
@@ -136,8 +137,6 @@ class Basic
 		$this->page_name = \CoreLibs\Get\System::getPageName();
 		// set host name
 		list($this->host_name , $this->host_port) = \CoreLibs\Get\System::getHostName();
-		// logging interface moved here (->debug is now ->log->debug)
-		$this->log = new \CoreLibs\Debug\Logging();
 
 		// set the regex for checking emails
 		/** @deprecated */
@@ -147,25 +146,7 @@ class Basic
 		$this->email_regex_check = \CoreLibs\Check\Email::getEmailRegexCheck();
 
 		// initial the session if there is no session running already
-		if (!session_id()) {
-			// check if we have an external session name given, else skip this step
-			if (defined('SET_SESSION_NAME')) {
-				// set the session name for possible later check
-				$this->session_name = SET_SESSION_NAME;
-			}
-			// override with global if set
-			if (isset($GLOBALS['SET_SESSION_NAME'])) {
-				$this->session_name = $GLOBALS['SET_SESSION_NAME'];
-			}
-			// if set, set special session name
-			if ($this->session_name) {
-				session_name($this->session_name);
-			}
-			// start session
-			session_start();
-			// set internal session id, we can use that later for protection check
-			$this->session_id = (string)session_id();
-		}
+		\CoreLibs\Create\Session::startSession($session_name);
 	}
 
 	/**

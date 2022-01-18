@@ -31,7 +31,17 @@ ob_end_flush();
 
 use CoreLibs\Convert\Byte;
 
-$basic = new CoreLibs\Basic();
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
 $byte_class = 'CoreLibs\Convert\Byte';
 
 print "<html><head><title>TEST CLASS: BYTE CONVERT</title><head>";
@@ -104,7 +114,7 @@ print "BYTE TO: $byte: ".$basic->humanReadableByteFormat($byte)."<br>";
 print "BYTE FROM: $string: ".$basic->stringByteFormat($string)."<br>"; */
 
 // error message
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

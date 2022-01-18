@@ -218,6 +218,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\Output\Form;
 
+use CoreLibs\Get\System;
+
 class Generate extends \CoreLibs\DB\Extended\ArrayIO
 {
 	// for the load statetment describes which elements from
@@ -251,6 +253,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public $my_page_name; // the name of the page without .php extension
 	/** @var bool */
 	public $mobile_phone = false;
+	/** @var string */
+	public $email_regex;
 	// buttons and checkboxes
 	/** @var string */
 	public $archive;
@@ -294,14 +298,16 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	/**
 	 * construct form generator
 	 * @param array<mixed> $db_config   db config array
-	 * @param int|integer  $table_width table/div width (default 750)
+	 * @param \CoreLibs\Debug\Logging|null $log Logging class
 	 */
-	public function __construct(array $db_config, int $table_width = 750)
-	{
+	public function __construct(
+		array $db_config,
+		\CoreLibs\Debug\Logging $log = null
+	) {
 		global $table_arrays;
 		// replace any non valid variable names
-		// TODO extracft only alphanumeric and _ after . to _ replacement
-		$this->my_page_name = str_replace(['.'], '_', \CoreLibs\Get\System::getPageName(1));
+		// TODO extract only alphanumeric and _ after . to _ replacement
+		$this->my_page_name = str_replace(['.'], '_', System::getPageName(System::NO_EXTENSION));
 		$this->setLangEncoding();
 		// init the language class
 		$this->l = new \CoreLibs\Language\L10n($this->lang);
@@ -312,13 +318,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (
 			/* isset($GLOBALS['table_arrays']) &&
 			is_array($GLOBALS['table_arrays']) &&
-			isset($GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)]) &&
-			is_array($GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)]) */
-			isset($table_arrays[\CoreLibs\Get\System::getPageName(1)]) &&
-			is_array($table_arrays[\CoreLibs\Get\System::getPageName(1)])
+			isset($GLOBALS['table_arrays'][System::getPageName(System::NO_EXTENSION)]) &&
+			is_array($GLOBALS['table_arrays'][System::getPageName(System::NO_EXTENSION)]) */
+			isset($table_arrays[System::getPageName(System::NO_EXTENSION)]) &&
+			is_array($table_arrays[System::getPageName(System::NO_EXTENSION)])
 		) {
-			// $config_array = $GLOBALS['table_arrays'][\CoreLibs\Get\System::getPageName(1)];
-			$config_array = $table_arrays[\CoreLibs\Get\System::getPageName(1)];
+			// $config_array = $GLOBALS['table_arrays'][System::getPageName(1)];
+			$config_array = $table_arrays[System::getPageName(1)];
 		} else {
 			// WARNING: auto spl load does not work with this as it is an array and not a function/object
 			// check if this is the old path or the new path
@@ -346,9 +352,17 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				];
 			}
 		}
-
+		// don't log per class
+		if ($log !== null) {
+			$log->setLogPer('class', false);
+		}
 		// start the array_io class which will start db_io ...
-		parent::__construct($db_config, $config_array['table_array'], $config_array['table_name']);
+		parent::__construct(
+			$db_config,
+			$config_array['table_array'],
+			$config_array['table_name'],
+			$log ?? new \CoreLibs\Debug\Logging()
+		);
 		// here should be a check if the config_array is correct ...
 		if (isset($config_array['show_fields']) && is_array($config_array['show_fields'])) {
 			$this->field_array = $config_array['show_fields'];
@@ -370,9 +384,6 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$this->element_list[$key] = $value;
 			}
 		}
-
-		// layout
-		$this->table_width = $table_width;
 
 		// set button vars
 		$this->archive = $_POST['archive'] ?? '';
@@ -411,6 +422,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					'delete' => 100
 				];
 		}
+
+		// set email regex
+		$this->email_regex = \CoreLibs\Check\Email::getEmailRegex();
 	}
 
 	/**

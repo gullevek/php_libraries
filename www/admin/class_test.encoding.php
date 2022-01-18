@@ -31,7 +31,17 @@ ob_end_flush();
 
 use CoreLibs\Language\Encoding;
 
-$basic = new CoreLibs\Basic();
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
 $_encoding = new CoreLibs\Language\Encoding();
 $encoding_class = 'CoreLibs\Language\Encoding';
 
@@ -93,7 +103,7 @@ print "CONV ENCODING: $_string: ".$basic->convertEncoding($_string, 'ISO-2022-JP
 print "D/__MBMIMEENCODE: ".$basic->__mbMimeEncode('Some Text', 'UTF-8')."<br>"; */
 
 // error message
-print $basic->log->printErrorMsg();
+print $basic->printErrorMsg();
 
 print "</body></html>";
 

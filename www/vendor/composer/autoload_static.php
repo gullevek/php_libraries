@@ -91,6 +91,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Convert\\MimeAppName' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/MimeAppName.php',
         'CoreLibs\\Create\\Hash' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/Hash.php',
         'CoreLibs\\Create\\RandomKey' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/RandomKey.php',
+        'CoreLibs\\Create\\Session' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/Session.php',
         'CoreLibs\\Create\\Uids' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/Uids.php',
         'CoreLibs\\DB\\Extended\\ArrayIO' => __DIR__ . '/../..' . '/lib/CoreLibs/DB/Extended/ArrayIO.php',
         'CoreLibs\\DB\\IO' => __DIR__ . '/../..' . '/lib/CoreLibs/DB/IO.php',

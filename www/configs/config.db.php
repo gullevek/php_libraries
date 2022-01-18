@@ -21,7 +21,8 @@ $DB_CONFIG = [
 		'db_schema' => 'public',
 		'db_type' => 'pgsql',
 		'db_encoding' => '',
-		'db_ssl' => 'allow' // allow, disable, require, prefer
+		'db_ssl' => 'allow', // allow, disable, require, prefer
+		'db_debug' => true, // turn on logging or not
 	],
 ];
 

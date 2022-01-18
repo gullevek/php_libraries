@@ -46,12 +46,33 @@ if ($AJAX_PAGE && !$ZIP_STREAM) {
 //------------------------------ basic variable settings start
 
 //------------------------------ class init start
+// create logger
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => LOG_FILE_ID,
+	'print_file_date' => true,
+	'per_class' => true,
+	'debug_all' => $DEBUG_ALL,
+	'echo_all' => $ECHO_ALL,
+	'print_all' => $PRINT_ALL,
+]);
+// automatic hide for DEBUG messages on live server
+// can be overridden when setting DEBUG_ALL_OVERRIDE on top of the script
+// (for emergency debugging of one page only)
+if ((TARGET == 'live' || TARGET == 'remote') && !empty($DEBUG_ALL_OVERRIDE)) {
+	foreach (['debug', 'echo', 'print'] as $target) {
+		$log->setLogLevelAll($target, false);
+	}
+}
+// start session
+CoreLibs\Create\Session::startSession();
 // login & page access check
-$login = new CoreLibs\ACL\Login(DB_CONFIG);
+$login = new CoreLibs\ACL\Login(DB_CONFIG, $log);
 // create smarty object
 $smarty = new CoreLibs\Template\SmartyExtend();
 // create new DB class
-$cms = new CoreLibs\Admin\Backend(DB_CONFIG);
+$log->setLogPer('class', false);
+$cms = new CoreLibs\Admin\Backend(DB_CONFIG, $log);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db nfo
@@ -65,12 +86,12 @@ ob_end_flush();
 //------------------------------ logging start
 // log backend data
 // data part creation
-$data = array(
+$data = [
 	'_SESSION' => $_SESSION,
 	'_GET' => $_GET,
 	'_POST' => $_POST,
 	'_FILES' => $_FILES
-);
+];
 // log action
 // no log if login
 if (!$login->login) {
@@ -78,14 +99,7 @@ if (!$login->login) {
 }
 //------------------------------ logging end
 
-// automatic hide for DEBUG messages on live server
-// can be overridden when setting DEBUG_ALL_OVERRIDE on top of the script (for emergency debugging of one page only)
-if ((TARGET == 'live' || TARGET == 'remote') && !empty($DEBUG_ALL_OVERRIDE)) {
-	foreach (['debug', 'echo', 'print'] as $target) {
-		$login->log->setLogLevelAll($target, false);
-		$cms->log->setLogLevelAll($target, false);
-	}
-}
+// pass on DEBUG flag to JS via smarty variable
 $smarty->DATA['JS_DEBUG'] = DEBUG;
 
 // __END__

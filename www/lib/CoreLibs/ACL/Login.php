@@ -117,6 +117,8 @@ class Login extends \CoreLibs\DB\IO
 	private $max_login_error_count = -1;
 	/** @var array<string> */
 	private $lock_deny_users = [];
+	/** @var string */
+	private $page_name;
 
 	// if we have password change we need to define some rules
 	/** @var int */
@@ -160,13 +162,20 @@ class Login extends \CoreLibs\DB\IO
 	/**
 	 * constructor, does ALL, opens db, works through connection checks, closes itself
 	 * @param array<mixed> $db_config db config array
+	 * @param \CoreLibs\Debug\Logging|null $log Logging class, if null, auto set
+	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class, if null, auto set
 	 */
-	public function __construct(array $db_config)
-	{
+	public function __construct(
+		array $db_config,
+		?\CoreLibs\Debug\Logging $log = null,
+		?\CoreLibs\Language\L10n $l10n = null
+	) {
 		// create db connection and init base class
-		parent::__construct($db_config);
+		parent::__construct($db_config, $log ?? new \CoreLibs\Debug\Logging());
 		// log login data for this class only
 		$this->log->setLogPer('class', true);
+		// set internal page name
+		$this->page_name = \CoreLibs\Get\System::getPageName();
 		// set db special errors
 		if ($this->db_init_error === true) {
 			echo 'Could not connect to DB<br>';
@@ -174,7 +183,10 @@ class Login extends \CoreLibs\DB\IO
 			exit;
 		}
 
-		// no session could be found at all
+		// initial the session if there is no session running already
+		// TODO: move that to outside
+		\CoreLibs\Create\Session::startSession();
+		// check if session exists
 		if (!session_id()) {
 			echo '<b>Session not started!</b><br>Use \'session_start();\'.<br>';
 			echo 'For less problems with other session, you can set a session name with \'session_name("name");\'.<br>';
@@ -202,7 +214,7 @@ class Login extends \CoreLibs\DB\IO
 		} else {
 			$lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
 		}
-		$this->l = new \CoreLibs\Language\L10n($lang);
+		$this->l = $l10n ?? new \CoreLibs\Language\L10n($lang);
 
 		// if we have a search path we need to set it, to use the correct DB to login
 		// check what schema to use. if there is a login schema use this, else check

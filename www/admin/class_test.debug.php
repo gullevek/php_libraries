@@ -63,6 +63,31 @@ print "C->DEBUG: " . $debug->debug('CLASS-TEST-DEBUG', 'Class Test Debug') . "<b
 print "C->DEBUG(html): " . $debug->debug('CLASS-TEST-DEBUG', 'HTML TAG<br><b>BOLD</b>') . "<br>";
 print "C->DEBUG(html,strip): " . $debug->debug('CLASS-TEST-DEBUG', 'HTML TAG<br><b>BOLD</b>', true) . "<br>";
 print "C->PRINTERRORMSG: <br>" . $debug->printErrorMsg() . "<br>";
+
+echo "<b>OPTIONS DEBUG CALL</b><br>";
+
+// new log type with options
+$new_log = new CoreLibs\Debug\Logging([
+	'log_folder' => '../log/',
+	'file_id' => 'DebugTestNewLogger',
+	// add file date
+	'print_file_date' => true,
+	// split into level (debug code)
+	'per_level' => false,
+	// per class called
+	'per_class' => false,
+	// per page
+	'per_page' => false,
+	// for each page call
+	'per_run' => false,
+	// set debug and print flags
+	'debug_all' => true,
+	'echo_all' => true,
+	'print_all' => true,
+]);
+$new_log->debug('OPTIONS TYPE', 'New Type error');
+print "OPTIONS LOGGER:<br>" . $new_log->printErrorMsg();
+
 echo "<b>CLASS DEBUG CALL</b><br>";
 
 // @codingStandardsIgnoreLine

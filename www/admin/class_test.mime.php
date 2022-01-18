@@ -29,7 +29,17 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-mime';
 ob_end_flush();
 
-$basic = new CoreLibs\Basic();
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
 $_mime = new CoreLibs\Convert\MimeAppName();
 
 print "<html><head><title>TEST CLASS: MIME</title><head>";
@@ -61,7 +71,7 @@ $mime = 'fake/mime';
 $basic->mimeSetAppName($mime, 'This is a fake mime');
 print "MIME $mime: ".$basic->mimeGetAppName($mime)."<br>"; */
 
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

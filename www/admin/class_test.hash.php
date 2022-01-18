@@ -31,7 +31,17 @@ ob_end_flush();
 
 use CoreLibs\Create\Hash;
 
-$basic = new CoreLibs\Basic();
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
 $hash_class = 'CoreLibs\Create\Hash';
 
 // define a list of from to color sets for conversion test
@@ -58,7 +68,7 @@ print "D/__SHA1SHORT(off): $to_crc: ".$basic->__sha1short($to_crc)."<br>";
 print "D/__hash(d): $to_crc: ".$basic->__hash($to_crc)."<br>"; */
 
 // error message
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

@@ -32,8 +32,20 @@ $LOG_FILE_ID = 'classTest-db';
 ob_end_flush();
 
 use CoreLibs\Debug\Support as DgS;
+use CoreLibs\DB\IO as DbIo;
 
-$db = $basic = new CoreLibs\Admin\Backend(DB_CONFIG);
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
+$db = new CoreLibs\Admin\Backend(DB_CONFIG, $log);
 
 // NEXT STEP
 // $basic = new CoreLibs\Basic();
@@ -46,13 +58,15 @@ print "<html><head><title>TEST CLASS: DB</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
+print "LOGFILE NAME: " . $db->log->getSetting('log_file_name') . "<br>";
+print "LOGFILE ID: " . $db->log->getSetting('log_file_id') . "<br>";
 print "DBINFO: " . $db->dbInfo() . "<br>";
 echo "DB_CONFIG_SET constant: <pre>" . print_r(DB_CONFIG, true) . "</pre><br>";
 
 // DB client encoding
 print "DB Client encoding: " . $db->dbGetEncoding() . "<br>";
 
-while (is_array($res = $db->dbReturn("SELECT * FROM max_test", 0, true))) {
+while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::USE_CACHE, true))) {
 	print "TIME: " . $res['time'] . "<br>";
 }
 print "CACHED DATA: <pre>" . print_r($db->cursor_ext, true) . "</pre><br>";
@@ -324,7 +338,7 @@ print "ISSET: " . isset($res['null_varchar']) . "<br>";
 print "EMPTY: " . empty($res['null_varchar']) . "<br>";
 
 // error message
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

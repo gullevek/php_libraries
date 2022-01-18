@@ -57,8 +57,18 @@ $table_arrays[\CoreLibs\Get\System::getPageName(1)] = [
 	]
 ];
 
-$basic = new CoreLibs\Basic();
-$form = new CoreLibs\Output\Form\Generate(DB_CONFIG);
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
+$form = new CoreLibs\Output\Form\Generate(DB_CONFIG, $log);
 // $db = new CoreLibs\DB\IO(DB_CONFIG, $basic->log);
 
 print "<html><head><title>TEST CLASS: FORM GENERATE</title><head>";
@@ -70,7 +80,7 @@ print "MOBILE PHONE: " . $form->mobile_phone . "<br>";
 print "MY PAGE NAME: " . $form->my_page_name . "<br>";
 
 // error message
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

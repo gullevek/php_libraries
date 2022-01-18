@@ -31,7 +31,17 @@ ob_end_flush();
 
 use CoreLibs\Check\Password as PwdChk;
 
-$basic = new CoreLibs\Basic();
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
 $_password = new CoreLibs\Check\Password();
 $password_class = 'CoreLibs\Check\Password';
 
@@ -63,7 +73,7 @@ print "PASSWORD VERIFY: ".(string)$basic->passwordVerify($password, $enc_passwor
 print "PASSWORD REHASH: ".(string)$basic->passwordRehashCheck($enc_password)."<br>"; */
 
 // error message
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

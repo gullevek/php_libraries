@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 $DEBUG_ALL = true;
 $PRINT_ALL = true;
+$ECHO_ALL = false;
 $DB_DEBUG = true;
 
 // TODO: only extract _POST data that is needed
@@ -33,7 +34,7 @@ extract($_POST, EXTR_SKIP);
 ob_start();
 require 'config.php';
 // set session name here
-$SET_SESSION_NAME = EDIT_SESSION_NAME;
+// $SET_SESSION_NAME = EDIT_SESSION_NAME;
 // overrride debug flags
 if (!DEBUG)	{
 	$DEBUG_ALL = false;
@@ -44,11 +45,26 @@ if (!DEBUG)	{
 
 // should be utf8
 header("Content-type: text/html; charset=" . DEFAULT_ENCODING);
+// set session
+\CoreLibs\Create\Session::startSession(EDIT_SESSION_NAME);
+// init logger
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => LOG_FILE_ID . 'EditBase',
+	'print_file_date' => true,
+	'per_class' => true,
+	'debug_all' => $DEBUG_ALL,
+	'echo_all' => $ECHO_ALL,
+	'print_all' => $PRINT_ALL,
+]);
+// login page
+$login = new CoreLibs\ACL\Login(DB_CONFIG, $log);
+// flush and start
 ob_end_flush();
-$login = new CoreLibs\ACL\Login(DB_CONFIG);
-
+// turn off set log per class
+$log->setLogPer('class', false);
 // create form class
-$form = new CoreLibs\Output\Form\Generate(DB_CONFIG);
+$form = new CoreLibs\Output\Form\Generate(DB_CONFIG, $log);
 if ($form->mobile_phone) {
 	echo "I am sorry, but this page cannot be viewed by a mobile phone";
 	exit;

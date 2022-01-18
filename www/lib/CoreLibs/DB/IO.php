@@ -101,7 +101,7 @@
 *     - used for recursive function [var might disappear if I have time to recode the recursive function]
 *
 *   PUBLIC METHODS
-*   $mixed db_return($query,$reset=0)
+*   $mixed db_return($query,$reset=self::USE_CACHE)
 *     - executes query, returns data & caches it (1 = reset/destroy, 2 = reset/cache, 3 = reset/no cache)
 *   1/0 db_cache_reset($query)
 *     - resets the cache for one query
@@ -252,8 +252,21 @@ declare(strict_types=1);
 
 namespace CoreLibs\DB;
 
-class IO extends \CoreLibs\Basic
+class IO
 {
+	// 0: normal read, store in cache
+	// 1: read cache, clean at the end
+	// 2: read new, clean at end
+	// 3: never cache
+	/** @var int */
+	public const USE_CACHE = 0;
+	/** @var int */
+	public const CLEAR_CACHE = 1;
+	/** @var int */
+	public const READ_NEW = 2;
+	/** @var int */
+	public const NO_CACHE = 3;
+
 	// recommend to set private/protected and only allow setting via method
 	// can bet set from outside
 	// encoding to
@@ -265,8 +278,8 @@ class IO extends \CoreLibs\Basic
 	// basic vars
 	/** @var resource|bool|int|null */
 	private $dbh; // the dbh handler, if disconnected by command is null, bool:false/int:-1 on error,
-	/** @var int|bool */
-	public $db_debug; // DB_DEBUG ... (if set prints out debug msgs) [should be bool only]
+	/** @var bool */
+	public $db_debug = false; // DB_DEBUG ... (if set prints out debug msgs)
 	/** @var string */
 	private $db_name; // the DB connected to
 	/** @var string */
@@ -320,12 +333,11 @@ class IO extends \CoreLibs\Basic
 	// sub include with the database functions
 	/** @var \CoreLibs\DB\SQL\PgSQL */
 	private $db_functions;
-
 	// endless loop protection
 	/** @var int */
 	private $MAX_QUERY_CALL;
 	/** @var int */
-	private $DEFAULT_MAX_QUERY_CALL = 20; // default
+	private const DEFAULT_MAX_QUERY_CALL = 20; // default
 	/** @var array<mixed> */
 	private $query_called = [];
 	// error string
@@ -347,20 +359,21 @@ class IO extends \CoreLibs\Basic
 	// if a sync is running holds the md5 key of the query
 	/** @var string */
 	private $async_running;
+	// logging class, must be public so settings can be changed
+	/** @var \CoreLibs\Debug\Logging */
+	public $log;
 
 	/**
 	 * main DB concstructor with auto connection to DB and failure set on failed connection
 	 * @param array<mixed> $db_config DB configuration array
+	 * @param \CoreLibs\Debug\Logging|null $log Logging class
 	 */
-	public function __construct(array $db_config)
-	{
-		// start basic class
-		parent::__construct();
-		// dummy init array for db config if not array
-		if (!is_array($db_config)) {
-			$db_config = [];
-		}
-		// TODO: check must set CONSTANTS
+	public function __construct(
+		array $db_config,
+		?\CoreLibs\Debug\Logging $log = null
+	) {
+		// attach logger
+		$this->log = $log ?? new \CoreLibs\Debug\Logging();
 		// sets the names (for connect/reconnect)
 		$this->db_name = $db_config['db_name'] ?? '';
 		$this->db_user = $db_config['db_user'] ?? '';
@@ -372,12 +385,14 @@ class IO extends \CoreLibs\Basic
 		$this->db_encoding = !empty($db_config['db_encoding']) ? $db_config['db_encoding'] : '';
 		$this->db_type = $db_config['db_type'] ?? '';
 		$this->db_ssl = !empty($db_config['db_ssl']) ? $db_config['db_ssl'] : 'allow';
+		// set debug, either via global var, or from config, else set to false
+		$this->dbSetDebug($GLOBALS['DB_DEBUG'] ?? $db_config['db_debug'] ?? false);
 
 		// set the target encoding to the DEFAULT_ENCODING if it is one of them: EUC, Shift_JIS, UTF-8
 		// @ the moment set only from outside
 
 		// set loop protection max count
-		$this->MAX_QUERY_CALL = 20;
+		$this->MAX_QUERY_CALL = self::DEFAULT_MAX_QUERY_CALL;
 
 		// error & debug stuff, error & warning ids are the same, its just in which var they get written
 		$this->error_string['10'] = 'Could not load DB interface functions';
@@ -409,13 +424,6 @@ class IO extends \CoreLibs\Basic
 		$this->error_string['50'] = 'Setting max query call to -1 will disable loop protection for all subsequent runs';
 		$this->error_string['51'] = 'Max query call needs to be set to at least 1';
 
-		// set debug, either via global var, or debug var during call
-		$this->db_debug = false;
-		// global overrules local
-		if (isset($GLOBALS['DB_DEBUG'])) {
-			$this->db_debug = $GLOBALS['DB_DEBUG'];
-		}
-
 		// based on $this->db_type
 		// here we need to load the db pgsql include one
 		// How can we do this dynamic? eg for non PgSQL
@@ -444,7 +452,6 @@ class IO extends \CoreLibs\Basic
 	public function __destruct()
 	{
 		$this->__closeDB();
-		// parent::__destruct();
 	}
 
 	// *************************************************************
@@ -982,18 +989,16 @@ class IO extends \CoreLibs\Basic
 	 * the previous setting to either then on or off
 	 * else override with boolean true/false
 	 * @param  bool|null $debug true/false or null for no set
-	 * @return int              debug flag in int
+	 * @return bool              debug flag in int
 	 */
-	public function dbSetDebug($debug = null): int
+	public function dbSetDebug($debug = null): bool
 	{
 		if ($debug === true) {
-			$this->db_debug = 1;
+			$this->db_debug = true;
 		} elseif ($debug === false) {
-			$this->db_debug = 0;
-		} elseif ($this->db_debug) {
-			$this->db_debug = 0;
-		} else {
-			$this->db_debug = 1;
+			$this->db_debug = false;
+		} elseif ($this->db_debug === null) {
+			$this->db_debug = false;
 		}
 		return $this->db_debug;
 	}
@@ -1006,7 +1011,7 @@ class IO extends \CoreLibs\Basic
 	 * @param  bool|null $debug Flag to turn debug on off
 	 * @return bool             True for debug is on, False for off
 	 */
-	public function dbToggleDebug(?bool $debug = null)
+	public function dbToggleDebug(?bool $debug = null): bool
 	{
 		if ($debug !== null) {
 			$this->db_debug = $debug;
@@ -1028,7 +1033,7 @@ class IO extends \CoreLibs\Basic
 		$success = false;
 		// if null then reset to default
 		if ($max_calls === null) {
-			$max_calls = $this->DEFAULT_MAX_QUERY_CALL;
+			$max_calls = self::DEFAULT_MAX_QUERY_CALL;
 		}
 		// if -1 then disable loop check
 		// DANGEROUS, WARN USER
@@ -1272,17 +1277,18 @@ class IO extends \CoreLibs\Basic
 	 *   (wheres 1 reads cache AND destroys at end of read)
 	 * - if set to 3, after EACH row, the data will be reset,
 	 *   no caching is done except for basic (count, etc)
-	 * @param  string     $query      Query string
-	 * @param  int        $reset      reset status:
-	 *                                1: read cache, clean at the end
-	 *                                2: read new, clean at end
-	 *                                3: never cache
-	 * @param  bool       $assoc_only true to only returned the named and not
-	 *                    index       position ones
-	 * @return array<mixed>|bool      return array data or false on error/end
+	 * @param  string $query      Query string
+	 * @param  int    $reset      reset status:
+	 *                            USE_CACHE/0: normal read from cache on second run
+	 *                            CLEAR_CACHE/1: read cache, clean at the end
+	 *                            READ_NEW/2: read new, clean at end
+	 *                            NO_CACHE/3: never cache
+	 * @param  bool   $assoc_only True to only returned the named and not
+	 *                            index position ones
+	 * @return array<mixed>|bool  return array data or false on error/end
 	 * @#suppress PhanTypeMismatchDimFetch
 	 */
-	public function dbReturn(string $query, int $reset = 0, bool $assoc_only = false)
+	public function dbReturn(string $query, int $reset = self::USE_CACHE, bool $assoc_only = false)
 	{
 		if (!$query) {
 			$this->error_id = 11;
@@ -1445,11 +1451,18 @@ class IO extends \CoreLibs\Basic
 				}
 			} else {
 				// return row, if last && reset, then unset the hole md5 array
-				if (!$return && ($reset == 1 || $reset == 3) && $this->cursor_ext[$md5]['pos']) {
+				if (
+					!$return &&
+					($reset == self::CLEAR_CACHE || $reset == self::NO_CACHE) &&
+					$this->cursor_ext[$md5]['pos']
+				) {
 					// unset only the field names here of course
 					$this->cursor_ext[$md5]['field_names'] = null;
 					$this->cursor_ext[$md5]['pos'] = 0;
-				} elseif (!$return && $reset == 2 && $this->cursor_ext[$md5]['pos']) {
+				} elseif (
+					!$return && $reset == self::READ_NEW &&
+					$this->cursor_ext[$md5]['pos']
+				) {
 					// at end of read reset pos & set cursor to 1 (so it does not get lost in session transfer)
 					$this->cursor_ext[$md5]['pos'] = 0;
 					$this->cursor_ext[$md5]['cursor'] = 1;
@@ -1461,7 +1474,7 @@ class IO extends \CoreLibs\Basic
 					$this->cursor_ext[$md5]['pos'] ++;
 					$this->cursor_ext[$md5]['read_rows'] ++;
 					// if reset is <3 caching is done, else no
-					if ($reset < 3) {
+					if ($reset < self::NO_CACHE) {
 						$temp = [];
 						foreach ($return as $field_name => $data) {
 							$temp[$field_name] = $data;

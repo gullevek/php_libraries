@@ -29,7 +29,17 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-math';
 ob_end_flush();
 
-$basic = new CoreLibs\Basic();
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
 $_math = new CoreLibs\Convert\Math();
 $math_class = 'CoreLibs\Convert\Math';
 
@@ -57,7 +67,7 @@ print "FLOORP: ".$basic->floorp(5123456, -3)."<br>";
 print "INITNUMERIC: ".$basic->initNumeric('123')."<br>"; */
 
 // error message
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

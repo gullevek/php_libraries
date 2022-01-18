@@ -22,7 +22,8 @@ There are three branches:
 
 ### master
 
-The active branch, which is the namespace branch
+The active branch, which is the namespace branch.
+Currently compatible with PHP 7.4 and 8.0
 
 ### legacy
 
@@ -48,3 +49,38 @@ pslam is setup but not configured
 
 With phpunit (`4dev/checking/phpunit.sh`)
 `phpunit -c $phpunit.xml 4dev/tests/`
+
+
+## Other Notes
+
+### Session used
+
+The following classes use _SESSION
+The main one is ACL\Login, this class will fail without a session started
+
+  * \CoreLibs\ACL\Login
+  * \CoreLibs\Admin\Backend
+  * \CoreLibs\Output\Form\Generate
+  * \CoreLibs\Output\Form\Token
+  * \CoreLibs\Template\SmartyExtend
+
+### Class extends
+
+The following classes extend these classes
+
+  * \CoreLibs\ACL\Login extends \CoreLibs\DB\IO
+  * \CoreLibs\Admin\Backend extends \CoreLibs\DB\IO
+  * \CoreLibs\DB\Extended\ArrayIO extends \CoreLibs\DB\IO
+  * \CoreLibs\Output\Form\Generate extends \CoreLibs\DB\Extended\ArrayIO
+  * \CoreLibs\Template\SmartyExtend extends SmartyBC
+
+### Class used
+
+The following classes use the following classes
+
+* \CoreLibs\ACL\Login uses \CoreLibs\Debug\Logger, \CoreLibs\Language\L10n
+* \CoreLibs\DB\IO uses \CoreLibs\Debug\Logger, \CoreLibs\DB\SQL\PgSQL
+* \CoreLibs\Admin\Backend uses \CoreLibs\Debug\Logger, \CoreLibs\Language\L10n
+* \CoreLibs\Output\Form\Generate uses \CoreLibs\Debug\Logger, \CoreLibs\Language\L10n
+* \CoreLibs\Template\SmartyExtend uses \CoreLibs\Language\L10n
+* \CoreLibs\Language\L10n uses FileReader, GetTextReader

@@ -32,7 +32,17 @@ ob_end_flush();
 use CoreLibs\Convert\Colors;
 use CoreLibs\Debug\Support as DgS;
 
-$basic = new CoreLibs\Basic();
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
 $color_class = 'CoreLibs\Convert\Colors';
 
 print "<html><head><title>TEST CLASS: COLORS</title><head>";
@@ -70,7 +80,7 @@ print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
 // TODO: run compare check input must match output
 
 // error message
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

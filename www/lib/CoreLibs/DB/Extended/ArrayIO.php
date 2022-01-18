@@ -53,11 +53,16 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param array<mixed> $db_config   db connection config
 	 * @param array<mixed> $table_array table array config
 	 * @param string       $table_name  table name string
+	 * @param \CoreLibs\Debug\Logging|null $log Logging class, default set if not set
 	 */
-	public function __construct(array $db_config, array $table_array, string $table_name)
-	{
+	public function __construct(
+		array $db_config,
+		array $table_array,
+		string $table_name,
+		\CoreLibs\Debug\Logging $log = null
+	) {
 		// instance db_io class
-		parent::__construct($db_config);
+		parent::__construct($db_config, $log ?? new \CoreLibs\Debug\Logging());
 		// more error vars for this class
 		$this->error_string['91'] = 'No Primary Key given';
 		$this->error_string['92'] = 'Could not run Array Query';

@@ -26,6 +26,7 @@ return array(
     'CoreLibs\\Convert\\MimeAppName' => $baseDir . '/lib/CoreLibs/Convert/MimeAppName.php',
     'CoreLibs\\Create\\Hash' => $baseDir . '/lib/CoreLibs/Create/Hash.php',
     'CoreLibs\\Create\\RandomKey' => $baseDir . '/lib/CoreLibs/Create/RandomKey.php',
+    'CoreLibs\\Create\\Session' => $baseDir . '/lib/CoreLibs/Create/Session.php',
     'CoreLibs\\Create\\Uids' => $baseDir . '/lib/CoreLibs/Create/Uids.php',
     'CoreLibs\\DB\\Extended\\ArrayIO' => $baseDir . '/lib/CoreLibs/DB/Extended/ArrayIO.php',
     'CoreLibs\\DB\\IO' => $baseDir . '/lib/CoreLibs/DB/IO.php',

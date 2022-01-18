@@ -32,7 +32,17 @@ ob_end_flush();
 use CoreLibs\Combined\DateTime;
 use CoreLibs\Debug\Support as DgS;
 
-$basic = new CoreLibs\Basic();
+$log = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	// add file date
+	'print_file_date' => true,
+	// set debug and print flags
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
+]);
+$basic = new CoreLibs\Basic($log);
 $datetime_class = 'CoreLibs\Combined\DateTime';
 
 print "<html><head><title>TEST CLASS: DATE/TIME</title><head>";
@@ -152,7 +162,7 @@ print "CALCDAYSINTERVAL(named): $compare_date[0] = $compare_date[1]: "
 	. DgS::printAr($basic->calcDaysInterval($compare_date[0], $compare_date[1], true))."<br>"; */
 
 // error message
-print $basic->log->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

@@ -23,21 +23,27 @@ final class CoreLibsDebugLoggingTest extends TestCase
 					'log_folder' => '/tmp'
 				],
 				[
-					'log_folder' => '/tmp/'
+					'log_folder' => '/tmp/',
+					'debug_all' => false,
+					'print_all' => false,
 				],
 				[]
 			],
 			'nothing set' => [
 				null,
 				[
-					'log_folder' => getcwd() . DIRECTORY_SEPARATOR
+					'log_folder' => getcwd() . DIRECTORY_SEPARATOR,
+					'debug_all' => false,
+					'print_all' => false,
 				],
 				[]
 			],
 			'no options set, constant set' => [
 				null,
 				[
-					'log_folder' => '/tmp/'
+					'log_folder' => '/tmp/',
+					'debug_all' => false,
+					'print_all' => false,
 				],
 				[
 					'constant' => [
@@ -46,6 +52,19 @@ final class CoreLibsDebugLoggingTest extends TestCase
 					]
 				]
 			],
+			'standard test set' => [
+				[
+					'log_folder' => '/tmp',
+					'debug_all' => true,
+					'print_all' => true,
+				],
+				[
+					'log_folder' => '/tmp/',
+					'debug_all' => true,
+					'print_all' => true,
+				],
+				[]
+			]
 		];
 	}
 
@@ -76,11 +95,21 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			$this->log = new \CoreLibs\Debug\Logging($options);
 		}
 		// check that settings match
-		// print "LOG: " . $this->log->getSetting('log_folder') . "\n";
 		$this->assertEquals(
 			$expected['log_folder'],
 			$this->log->getSetting('log_folder')
 		);
+		$this->assertEquals(
+			$expected['debug_all'],
+			$this->log->getSetting('debug_all')
+		);
+		$this->assertEquals(
+			$expected['print_all'],
+			$this->log->getSetting('print_all')
+		);
+		print "LOG: " . $this->log->getSetting('log_folder') . "\n";
+		print "DEBUG: " . $this->log->getSetting('debug_all') . "\n";
+		print "PRINT: " . $this->log->getSetting('print_all') . "\n";
 	}
 
 	// setting tests

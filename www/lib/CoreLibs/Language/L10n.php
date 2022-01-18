@@ -49,7 +49,6 @@ class L10n
 	 */
 	public function __construct(string $lang = '', string $path = '')
 	{
-		// parent::__construct();
 		if (!$lang) {
 			$this->lang = 'en';
 		} else {
