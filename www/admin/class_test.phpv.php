@@ -55,6 +55,9 @@ $min_version_s = '7';
 $min_version_ss = '7.1';
 $min_version = '7.1.0';
 $max_version = '7.3.1';
+$max_version_ss = '8.1';
+
+print "CURRENT: " . phpversion() . "<br>";
 // class
 print "MIN: $min_version: " . (string)$_phpv->checkPHPVersion($min_version) . "<br>";
 print "MIN/MAX: $min_version/$max_version: " . (string)$_phpv->checkPHPVersion($min_version, $max_version) . "<br>";
@@ -66,6 +69,7 @@ print "S::MIN/MAX: $min_version/$max_version: "
 	. (string)$phpv_class::checkPHPVersion($min_version, $max_version) . "<br>";
 print "S::MIN/S: $min_version_s: " . (string)$phpv_class::checkPHPVersion($min_version_s) . "<br>";
 print "S::MIN/SS: $min_version_ss: " . (string)$phpv_class::checkPHPVersion($min_version_ss) . "<br>";
+print "S::MAX $max_version_ss: " . (string)$phpv_class::checkPHPVersion(null, $max_version_ss) . "<br>";
 // use stats
 print "U-S::MIN: $min_version: " . (string)PhpVersion::checkPHPVersion($min_version) . "<br>";
 

@@ -29,14 +29,23 @@ final class CoreLibsCheckPHPVersionTest extends TestCase
 			'min 10' => ['10', '', false],
 			'min 10.0' => ['10.0', '', false],
 			'min 10.0.0' => ['10.0.0', '', false],
-			// max version, NOTE: update if php version bigger than 10
-			'max 10' => ['7', '10', true],
-			'max 10.0' => ['7', '10.0', true],
-			'max 10.0.0' => ['7', '10.0.0', true],
-			// max version
-			'max 7' => ['5', '7', false],
-			'max 7.4' => ['5', '7.4', false],
-			'max 7.4.1' => ['5', '7.4.1', false],
+			// min/max version, NOTE: update if php version bigger than 10
+			'min 7/max 10' => ['7', '10', true],
+			'min 7/max 10.0' => ['7', '10.0', true],
+			'min 7/max 10.0.0' => ['7', '10.0.0', true],
+			// min/max version
+			'min 5/max 7' => ['5', '7', false],
+			'min 5/max 7.4' => ['5', '7.4', false],
+			'min 5/max 7.4.1' => ['5', '7.4.1', false],
+			// max only
+			'max 7' => ['', '7', false],
+			'max 7.4' => ['', '7.4', false],
+			'max 7.4.1' => ['', '7.4.1', false],
+			// max over
+			'max 10' => ['', '10', true],
+			'max 10.0' => ['', '10.0', true],
+			'max 10.0.0' => ['', '10.0.0', true],
+			// TODO: add null tests
 		];
 	}
 

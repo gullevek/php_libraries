@@ -276,7 +276,7 @@ class IO
 	public $query; // the query string at the moment
 	// only inside
 	// basic vars
-	/** @var resource|bool|int|null */
+	/** @var PgSql\Connection|resource|bool|int|null */
 	private $dbh; // the dbh handler, if disconnected by command is null, bool:false/int:-1 on error,
 	/** @var bool */
 	public $db_debug = false; // DB_DEBUG ... (if set prints out debug msgs)
@@ -303,7 +303,7 @@ class IO
 	/** @var array<mixed,mixed> */
 	public $cursor_ext; // hash of hashes
 	// per query vars
-	/** @var resource */
+	/** @var PgSql\Result|resource */
 	public $cursor; // actual cursor (DBH)
 	/** @var int */
 	public $num_rows; // how many rows have been found
@@ -312,7 +312,7 @@ class IO
 	/** @var array<mixed> */
 	public $field_names = []; // array with the field names of the current query
 	/** @var array<mixed> */
-	private $insert_id_arr; // always return as array, even if only one
+	private $insert_id_arr = []; // always return as array, even if only one
 	/** @var string */
 	private $insert_id_pk_name; // primary key name for insert recovery from insert_id_arr
 	// other vars
@@ -506,7 +506,7 @@ class IO
 	 */
 	private function __closeDB(): void
 	{
-		if (isset($this->dbh) && $this->dbh) {
+		if (!empty($this->dbh) && $this->dbh !== false) {
 			$this->db_functions->__dbClose();
 			$this->dbh = null;
 		}
@@ -624,7 +624,7 @@ class IO
 	 * if error_id set, writes long error string into error_msg
 	 * NOTE:
 	 * needed to make public so it can be called from DB.Array.IO too
-	 * @param  resource|bool $cursor current cursor for pg_result_error, mysql uses dbh,
+	 * @param  PgSql\Result|resource|bool $cursor current cursor for pg_result_error, mysql uses dbh,
 	 *                               pg_last_error too, but pg_result_error is more accurate
 	 * @param  string         $msg   optional message
 	 * @return void                  has no return
@@ -633,10 +633,10 @@ class IO
 	{
 		$pg_error_string = '';
 		$where_called = (string)\CoreLibs\Debug\Support::getCallerMethod();
-		if (is_resource($cursor)) {
+		if ($cursor !== false) {
 			$pg_error_string = $this->db_functions->__dbPrintError($cursor);
 		}
-		if (!$cursor && method_exists($this->db_functions, '__dbPrintError')) {
+		if ($cursor === false && method_exists($this->db_functions, '__dbPrintError')) {
 			$pg_error_string = $this->db_functions->__dbPrintError();
 		}
 		if ($pg_error_string) {
@@ -850,7 +850,7 @@ class IO
 	{
 		// if FALSE returned, set error stuff
 		// if either the cursor is false
-		if (!is_resource($this->cursor) || $this->db_functions->__dbLastErrorQuery()) {
+		if ($this->cursor === false || $this->db_functions->__dbLastErrorQuery()) {
 			// printout Query if debug is turned on
 			if ($this->db_debug) {
 				$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
@@ -907,7 +907,7 @@ class IO
 	 * @param boolean     $returning_id
 	 * @param string      $query
 	 * @param string|null $pk_name
-	 * @param resource    $cursor
+	 * @param PgSql\Result|resource    $cursor
 	 * @param string|null $stm_name     If not null, is dbExecutre run
 	 * @return void
 	 */
@@ -1518,7 +1518,7 @@ class IO
 	 *                                 if pk name is table name and _id, pk_name
 	 *                                 is not needed to be set
 	 *                                 if NULL is given here, no RETURNING will be auto added
-	 * @return resource|false          cursor for this query or false on error
+	 * @return PgSql\Result|resource|false          cursor for this query or false on error
 	 */
 	public function dbExec(string $query = '', string $pk_name = '')
 	{
@@ -1529,7 +1529,7 @@ class IO
 		}
 		// ** actual db exec call
 		$cursor = $this->db_functions->__dbQuery($this->query);
-		if (!is_resource($cursor)) {
+		if ($cursor === false) {
 			return false;
 		}
 		$this->cursor = $cursor;
@@ -1576,7 +1576,7 @@ class IO
 	/**
 	 * checks a previous async query and returns data if finished
 	 * NEEDS : dbExecAsync
-	 * @return bool|resource cursor resource if the query is still running,
+	 * @return bool|PgSql\Result|resource cursor resource if the query is still running,
 	 *                       false if an error occured or cursor of that query
 	 */
 	public function dbCheckAsync()
@@ -1587,7 +1587,7 @@ class IO
 				return true;
 			} else {
 				$cursor = $this->db_functions->__dbGetResult();
-				if (!is_resource($cursor)) {
+				if ($cursor === false) {
 					return false;
 				}
 				// get the result/or error
@@ -1615,7 +1615,7 @@ class IO
 
 	/**
 	 * executes a cursor and returns the data, if no more data 0 will be returned
-	 * @param  resource|false   $cursor      the cursor from db_exec or
+	 * @param  PgSql\Result|resource|false   $cursor      the cursor from db_exec or
 	 *                                       pg_query/pg_exec/mysql_query
 	 *                                       if not set will use internal cursor,
 	 *                                       if not found, stops with 0 (error)
@@ -1625,10 +1625,10 @@ class IO
 	public function dbFetchArray($cursor = false, bool $assoc_only = false)
 	{
 		// return false if no query or cursor set ...
-		if (!is_resource($cursor)) {
+		if ($cursor === false) {
 			$cursor = $this->cursor;
 		}
-		if (!is_resource($cursor)) {
+		if ($cursor === false) {
 			$this->error_id = 12;
 			$this->__dbError();
 			return false;
@@ -1752,7 +1752,7 @@ class IO
 	 * @param  string        $stm_name statement name
 	 * @param  string        $query    queryt string to run
 	 * @param  string        $pk_name  optional primary key
-	 * @return bool|resource           false on error, true on warning or result on full ok
+	 * @return bool|PgSql\Result|resource           false on error, true on warning or result on full ok
 	 */
 	public function dbPrepare(string $stm_name, string $query, string $pk_name = '')
 	{
@@ -1887,7 +1887,7 @@ class IO
 			$this->__dbDebug('db', $this->__dbDebugPrepare($stm_name, $data), 'dbExecPrep', 'Q');
 		}
 		$result = $this->db_functions->__dbExecute($stm_name, $data);
-		if (!is_resource($result)) {
+		if ($result === false) {
 			$this->log->debug('ExecuteData', 'ERROR in STM[' . $stm_name . '|'
 				. $this->prepare_cursor[$stm_name]['result'] . ']: '
 				. $this->log->prAr($data));
@@ -2340,7 +2340,7 @@ class IO
 	 * Either as single array level for single insert
 	 * Or nested array for multiple insert values
 	 *
-	 * If key was set only returns those values directly or as array
+	 * If key was set only returns tghose values directly or as array
 	 *
 	 * On multiple insert return the position for which to return can be set too
 	 *

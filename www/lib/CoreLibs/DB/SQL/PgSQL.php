@@ -51,7 +51,8 @@ class PgSQL
 {
 	/** @var string */
 	private $last_error_query;
-	/** @var resource|bool */
+	// NOTE for PHP 8.1 this is no longer a resource
+	/** @var PgSql\Connection|resource|bool */
 	private $dbh;
 
 	/**
@@ -77,17 +78,17 @@ class PgSQL
 	/**
 	 * wrapper for gp_query, catches error and stores it in class var
 	 * @param  string      $query query string
-	 * @return resource|bool      query result
+	 * @return PgSql\Result|resource|bool      query result
 	 */
 	public function __dbQuery(string $query)
 	{
 		$this->last_error_query = '';
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return false;
 		}
 		// read out the query status and save the query if needed
 		$result = pg_query($this->dbh, $query);
-		if (!$result) {
+		if ($result === false) {
 			$this->last_error_query = $query;
 		}
 		return $result;
@@ -100,7 +101,7 @@ class PgSQL
 	 */
 	public function __dbSendQuery(string $query): bool
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return false;
 		}
 		$result = pg_send_query($this->dbh, $query);
@@ -109,16 +110,16 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_get_result
-	 * @return resource|bool resource handler or false for error
+	 * @return PgSql\Result|resource|bool resource handler or false for error
 	 */
 	public function __dbGetResult()
 	{
 		$this->last_error_query = '';
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return false;
 		}
 		$result = pg_get_result($this->dbh);
-		if (!is_resource($result)) {
+		if ($result === false) {
 			return false;
 		}
 		if ($error = pg_result_error($result)) {
@@ -133,11 +134,12 @@ class PgSQL
 	 */
 	public function __dbClose(): void
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return;
 		}
 		if (pg_connection_status($this->dbh) === PGSQL_CONNECTION_OK) {
-			pg_close($this->dbh);
+			// in 8.1 this throws an error, and we don't need that anyway
+			// pg_close($this->dbh);
 		}
 	}
 
@@ -145,11 +147,11 @@ class PgSQL
 	 * wrapper for pg_prepare
 	 * @param  string $name  statement name
 	 * @param  string $query query string
-	 * @return resource|bool prepare statement handler or false for error
+	 * @return PgSql\Result|resource|bool prepare statement handler or false for error
 	 */
 	public function __dbPrepare(string $name, string $query)
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return false;
 		}
 		$result = pg_prepare($this->dbh, $name, $query);
@@ -163,11 +165,11 @@ class PgSQL
 	 * wrapper for pg_execute for running a prepared statement
 	 * @param  string        $name statement name
 	 * @param  array<mixed>  $data data array
-	 * @return resource|bool returns status or false for error
+	 * @return PgSql\Result|resource|bool returns status or false for error
 	 */
 	public function __dbExecute(string $name, array $data)
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return false;
 		}
 		$result = pg_execute($this->dbh, $name, $data);
@@ -179,7 +181,7 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_num_rows
-	 * @param  resource $cursor cursor resource
+	 * @param  PgSql\Result|resource $cursor cursor PgSql\Result (former resource)
 	 * @return int              number of rows, -1 on error
 	 */
 	public function __dbNumRows($cursor): int
@@ -189,7 +191,7 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_num_fields
-	 * @param  resource $cursor cursor resource
+	 * @param  PgSql\Result|resource $cursor cursor PgSql\Result (former resource)
 	 * @return int              number for fields in result, -1 on error
 	 */
 	public function __dbNumFields($cursor): int
@@ -199,7 +201,7 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_field_name
-	 * @param  resource    $cursor cursor resource
+	 * @param  PgSql\Result|resource    $cursor cursor PgSql\Result (former resource)
 	 * @param  int         $i      field position
 	 * @return string|bool         name or false on error
 	 */
@@ -211,7 +213,7 @@ class PgSQL
 	/**
 	 * wrapper for pg_fetch_array
 	 * if through/true false, use __dbResultType(true)
-	 * @param  resource $cursor      cursor resource
+	 * @param  PgSql\Result|resource $cursor      cursor PgSql\Result (former resource)
 	 * @param  int      $result_type result type as int number
 	 * @return array<mixed>|bool     array result data or false on end/error
 	 */
@@ -237,7 +239,7 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_fetch_all
-	 * @param  resource   $cursor cursor resource
+	 * @param  PgSql\Result|resource   $cursor cursor PgSql\Result (former resource)
 	 * @return array<mixed>|bool  data array or false for end/error
 	 */
 	public function __dbFetchAll($cursor)
@@ -247,7 +249,7 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_affected_rows
-	 * @param  resource $cursor cursor resource
+	 * @param  PgSql\Result|resource $cursor cursor PgSql\Result (former resource)
 	 * @return int              affected rows, 0 for none
 	 */
 	public function __dbAffectedRows($cursor): int
@@ -291,7 +293,7 @@ class PgSQL
 			// I have to do manually or I overwrite the original insert internal vars ...
 			if ($q = $this->__dbQuery($q)) {
 				// abort if this is not an resource
-				if (!is_resource($q)) {
+				if ($q === false) {
 					return false;
 				}
 				if (is_array($res = $this->__dbFetchArray($q))) {
@@ -323,7 +325,7 @@ class PgSQL
 			if ($schema) {
 				$q = "SHOW search_path";
 				$cursor = $this->__dbQuery($q);
-				if (!is_resource($cursor)) {
+				if ($cursor === false) {
 					return false;
 				}
 				$__db_fetch_array = $this->__dbFetchArray($cursor);
@@ -355,7 +357,7 @@ class PgSQL
 				. "pg_attribute.attnum = any(pg_index.indkey) "
 				. "AND indisprimary";
 			$cursor = $this->__dbQuery($q);
-			if (is_resource($cursor)) {
+			if ($cursor !== false) {
 				$__db_fetch_array = $this->__dbFetchArray($cursor);
 				if (!is_array($__db_fetch_array)) {
 					return false;
@@ -377,7 +379,7 @@ class PgSQL
 	 * @param  string        $db_name databse name
 	 * @param  integer       $db_port port (int, 5432 is default)
 	 * @param  string        $db_ssl  SSL (allow is default)
-	 * @return resource|bool          db handler resource or false on error
+	 * @return PgSql\Connection|resource|bool db handler PgSql\Connection  or false on error
 	 */
 	public function __dbConnect(
 		string $db_host,
@@ -402,12 +404,12 @@ class PgSQL
 	/**
 	 * reads the last error for this cursor and returns
 	 * html formatted string with error name
-	 * @param  ?resource $cursor cursor resource or null
+	 * @param  null|PgSql\Result|resource $cursor cursor PgSql\Result (former resource) or null
 	 * @return string            error string
 	 */
 	public function __dbPrintError($cursor = null): string
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return '';
 		}
 		// run the query again for the error result here
@@ -431,7 +433,7 @@ class PgSQL
 	 */
 	public function __dbMetaData(string $table, $extended = false)
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return false;
 		}
 		// needs to prefixed with @ or it throws a warning on not existing table
@@ -445,7 +447,7 @@ class PgSQL
 	 */
 	public function __dbEscapeString($string): string
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return '';
 		}
 		return pg_escape_string($this->dbh, (string)$string);
@@ -460,7 +462,7 @@ class PgSQL
 	 */
 	public function __dbEscapeLiteral($string): string
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return '';
 		}
 		return pg_escape_string($this->dbh, (string)$string);
@@ -473,7 +475,7 @@ class PgSQL
 	 */
 	public function __dbEscapeBytea($bytea): string
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return '';
 		}
 		return pg_escape_bytea($this->dbh, $bytea);
@@ -485,7 +487,7 @@ class PgSQL
 	 */
 	public function __dbConnectionBusy(): bool
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return false;
 		}
 		return pg_connection_busy($this->dbh);
@@ -499,7 +501,7 @@ class PgSQL
 	 */
 	public function __dbVersion(): string
 	{
-		if (!is_resource($this->dbh)) {
+		if ($this->dbh === false) {
 			return '';
 		}
 		// array has client, protocol, server

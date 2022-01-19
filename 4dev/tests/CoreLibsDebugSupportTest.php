@@ -62,6 +62,67 @@ final class CoreLibsDebugSupportTest extends TestCase
 		];
 	}
 
+	public function printToStringProvider(): array
+	{
+		return [
+			'string' => [
+				'a string',
+				null,
+				'a string',
+			],
+			'a number' => [
+				1234,
+				null,
+				'1234',
+			],
+			'a float number' => [
+				1234.5678,
+				null,
+				'1234.5678',
+			],
+			'bool true' => [
+				true,
+				null,
+				'TRUE',
+			],
+			'bool false' => [
+				false,
+				null,
+				'FALSE',
+			],
+			'an array default' => [
+				['a', 'b'],
+				null,
+				"<pre>Array\n(\n"
+					. "    [0] => a\n"
+					. "    [1] => b\n"
+					. ")\n</pre>",
+			],
+			'an array, no html' => [
+				['a', 'b'],
+				true,
+				"##HTMLPRE##"
+					. "Array\n(\n"
+					. "    [0] => a\n"
+					. "    [1] => b\n"
+					. ")\n"
+					. "##/HTMLPRE##",
+			],
+			// resource
+			'a resource' => [
+				tmpfile(),
+				null,
+				'/^Resource id #\d+$/',
+			],
+			// object
+			'an object' => [
+				new \CoreLibs\Debug\Support(),
+				null,
+				'CoreLibs\Debug\Support',
+			]
+		];
+	}
+
 	/**
 	 * Undocumented function
 	 *
@@ -119,7 +180,7 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 *
 	 * @cover ::printAr
 	 * @dataProvider printArProvider
-	 * @testdox printAr $input will be $expected[$_dataName]
+	 * @testdox printAr $input will be $expected [$_dataName]
 	 *
 	 * @param array $input
 	 * @param string $expected
@@ -131,6 +192,41 @@ final class CoreLibsDebugSupportTest extends TestCase
 			$expected,
 			\CoreLibs\Debug\Support::printAr($input)
 		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::printToString
+	 * @dataProvider printToStringProvider
+	 * @testdox printToString $input with $flag will be $expected [$_dataName]
+	 *
+	 * @param mixed $input
+	 * @param boolean|null $flag
+	 * @param string $expected
+	 * @return void
+	 */
+	public function testPrintToString($input, ?bool $flag, string $expected): void
+	{
+		if ($flag === null) {
+			// if expected starts with / and ends with / then this is a regex compare
+			if (substr($expected, 0, 1) == '/' && substr($expected, -1, 1) == '/') {
+				$this->assertMatchesRegularExpression(
+					$expected,
+					\CoreLibs\Debug\Support::printToString($input)
+				);
+			} else {
+				$this->assertEquals(
+					$expected,
+					\CoreLibs\Debug\Support::printToString($input)
+				);
+			}
+		} else {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Debug\Support::printToString($input, $flag)
+			);
+		}
 	}
 
 	/**

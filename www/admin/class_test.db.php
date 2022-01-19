@@ -33,6 +33,7 @@ ob_end_flush();
 
 use CoreLibs\Debug\Support as DgS;
 use CoreLibs\DB\IO as DbIo;
+use CoreLibs\Debug\Support;
 
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
@@ -46,6 +47,7 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $basic = new CoreLibs\Basic($log);
 $db = new CoreLibs\Admin\Backend(DB_CONFIG, $log);
+$db->log->debug('START', '=============================>');
 
 // NEXT STEP
 // $basic = new CoreLibs\Basic();
@@ -89,7 +91,8 @@ $query = "TRUNCATE test_foobar";
 $db->dbExec($query);
 
 $status = $db->dbExec("INSERT INTO test_foo (test) VALUES ('FOO TEST " . time() . "') RETURNING test");
-print "DIRECT INSERT STATUS: $status | "
+print "DIRECT INSERT STATUS: " . Support::printToString($status) . "| "
+	. "DB OBJECT: <pre>" . print_r($status, true) . "</pre>| "
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING EXT[test]: " . print_r($db->dbGetReturningExt('test'), true) . " | "
@@ -104,7 +107,7 @@ print "DIRECT INSERT PREVIOUS INSERTED: "
 // PREPARED INSERT
 $db->dbPrepare("ins_test_foo", "INSERT INTO test_foo (test) VALUES ($1) RETURNING test");
 $status = $db->dbExecute("ins_test_foo", array('BAR TEST ' . time()));
-print "PREPARE INSERT[ins_test_foo] STATUS: $status | "
+print "PREPARE INSERT[ins_test_foo] STATUS: " . Support::printToString($status) . " | "
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -127,7 +130,7 @@ $status = $db->dbExec(
 	. "('BAR 3 " . time() . "') "
 	. "RETURNING test_foo_id, test"
 );
-print "DIRECT MULTIPLE INSERT WITH RETURN STATUS: $status | "
+print "DIRECT MULTIPLE INSERT WITH RETURN STATUS: " . Support::printToString($status) . " | "
 	. "PRIMARY KEYS: " . print_r($db->dbGetInsertPK(), true) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING EXT[test]: " . print_r($db->dbGetReturningExt('test'), true) . " | "
@@ -135,7 +138,7 @@ print "DIRECT MULTIPLE INSERT WITH RETURN STATUS: $status | "
 
 // no returning, but not needed ;
 $status = $db->dbExec("INSERT INTO test_foo (test) VALUES ('FOO; TEST " . time() . "');");
-print "DIRECT INSERT NO RETURN STATUS: $status | "
+print "DIRECT INSERT NO RETURN STATUS: " . Support::printToString($status) . " | "
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -150,20 +153,21 @@ if (is_array($s_res = $db->dbReturnRow($q)) && !empty($s_res['test'])) {
 // UPDATE WITH RETURNING
 $status = $db->dbExec("UPDATE test_foo SET test = 'SOMETHING DIFFERENT' "
 	. "WHERE test_foo_id = " . $last_insert_pk . " RETURNING test");
-print "UPDATE WITH PK " . $last_insert_pk . " RETURN STATUS: $status | "
+print "UPDATE WITH PK " . $last_insert_pk
+	. " RETURN STATUS: " . Support::printToString($status) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 
 // INSERT WITH NO RETURNING
 $status = $db->dbExec("INSERT INTO test_foobar (type, integer) VALUES ('WITH DATA', 123)");
-print "INSERT WITH NO PRIMARY KEY NO RETURNING STATUS: $status | "
+print "INSERT WITH NO PRIMARY KEY NO RETURNING STATUS: " . Support::printToString($status) . " | "
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 $status = $db->dbExec("INSERT INTO test_foobar (type, integer) VALUES ('WITH DATA', 123) RETURNING type, integer");
-print "INSERT WITH NO PRIMARY KEY WITH RETURNING STATUS: $status | "
+print "INSERT WITH NO PRIMARY KEY WITH RETURNING STATUS: " . Support::printToString($status) . " | "
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -327,7 +331,9 @@ $status = $db->dbExec(
 	. "('TIME: " . time() . "', " . rand(1, 10) . ")"
 );
 print "OTHER SCHEMA INSERT STATUS: "
-	. $status . " | PK NAME: " . $db->dbGetInsertPKName() . ", PRIMARY KEY: " . $db->dbGetInsertPK() . "<br>";
+	. Support::printToString($status)
+	. " | PK NAME: " . $db->dbGetInsertPKName()
+	. ", PRIMARY KEY: " . $db->dbGetInsertPK() . "<br>";
 
 print "<b>NULL TEST DB READ</b><br>";
 $q = "SELECT uid, null_varchar, null_int FROM test_null_data WHERE uid = 'A'";

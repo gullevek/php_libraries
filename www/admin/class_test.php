@@ -48,12 +48,12 @@ print "<html><head><title>TEST CLASS</title><head>";
 print "<body>";
 
 print '<div><a href="class_test.db.php">Class Test: DB</a></div>';
-print '<div><a href="class_test.colors.php">Class Test: Colors</a></div>';
+print '<div><a href="class_test.colors.php">Class Test: COLORS</a></div>';
 print '<div><a href="class_test.mime.php">Class Test: MIME</a></div>';
-print '<div><a href="class_test.json.php">Class Test: Json</a></div>';
-print '<div><a href="class_test.token.php">Class Test: Form Token</a></div>';
-print '<div><a href="class_test.password.php">Class Test: Password</a></div>';
-print '<div><a href="class_test.math.php">Class Test: Math</a></div>';
+print '<div><a href="class_test.json.php">Class Test: JSON</a></div>';
+print '<div><a href="class_test.token.php">Class Test: FORM TOKEN</a></div>';
+print '<div><a href="class_test.password.php">Class Test: PASSWORD</a></div>';
+print '<div><a href="class_test.math.php">Class Test: MATH</a></div>';
 print '<div><a href="class_test.html.php">Class Test: HTML/ELEMENTS</a></div>';
 print '<div><a href="class_test.email.php">Class Test: EMAIL</a></div>';
 print '<div><a href="class_test.uids.php">Class Test: UIDS</a></div>';

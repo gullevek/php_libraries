@@ -25,10 +25,14 @@ namespace CoreLibs\Template;
 // HARD CODED path:
 // __DIR__: lib/CoreLibs/Template/
 // smarty located in lib/Smarty/
+// require_once(__DIR__ . '/../../Smarty/Smarty.class.php');
 require_once(__DIR__ . '/../../Smarty/SmartyBC.class.php');
 // So it doesn't start looking around in the wrong naemspace as smarty doesn't have one
+// use Smarty;
 use SmartyBC;
 
+// technically this can be Smarty
+// class SmartyExtend extends Smarty
 class SmartyExtend extends SmartyBC
 {
 	// internal translation engine
@@ -170,8 +174,6 @@ class SmartyExtend extends SmartyBC
 		$this->setLangEncoding();
 		// iinit lang
 		$this->l10n = new \CoreLibs\Language\L10n($this->lang);
-		// variable variable register
-		// $this->register_modifier('getvar', [&$this, 'get_template_vars']);
 		/** @phpstan-ignore-next-line */
 		$this->registerPlugin('modifier', 'getvar', [&$this, 'get_template_vars']);
 

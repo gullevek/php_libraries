@@ -31,12 +31,44 @@ class Support
 
 	/**
 	 * prints a html formatted (pre) array
-	 * @param  array<mixed> $array any array
-	 * @return string              formatted array for output with <pre> tag added
+	 * @param  array<mixed> $array   any array
+	 * @param  bool         $no_html set to true to use ##HTMLPRE##
+	 * @return string                formatted array for output with <pre> tag added
 	 */
-	public static function printAr(array $array): string
+	public static function printAr(array $array, bool $no_html = false): string
 	{
-		return "<pre>" . print_r($array, true) . "</pre>";
+		if ($no_html === false) {
+			return "<pre>" . print_r($array, true) . "</pre>";
+		} else {
+			return '##HTMLPRE##' . print_r($array, true) . '##/HTMLPRE##';
+		}
+	}
+
+	/**
+	 * print out any data as string
+	 * will convert boolean to TRUE/FALSE
+	 * if object return get_class
+	 * for array use printAr function, can be controlled with no_html for
+	 * Debug\Logging compatible output
+	 * @param  mixed  $mixed
+	 * @param  bool   $no_html set to true to use ##HTMLPRE##
+	 * @return string
+	 */
+	public static function printToString($mixed, bool $no_html = false): string
+	{
+		if (is_bool($mixed)) {
+			return $mixed ? 'TRUE' : 'FALSE';
+		} elseif (is_resource($mixed)) {
+			return (string)$mixed;
+		} elseif (is_object($mixed)) {
+			return get_class($mixed);
+		} elseif (is_array($mixed)) {
+			// use the pre one OR debug one
+			return self::printAr($mixed, $no_html);
+		} else {
+			// should be int/float/string
+			return (string)$mixed;
+		}
 	}
 
 	/**
