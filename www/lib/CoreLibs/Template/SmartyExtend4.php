@@ -172,7 +172,7 @@ class SmartyExtend4 extends Smarty
 		// iinit lang
 		$this->l10n = new \CoreLibs\Language\L10n($this->lang);
 		/** @phpstan-ignore-next-line */
-		$this->registerPlugin('modifier', 'getvar', [&$this, 'get_template_vars']);
+		$this->registerPlugin('modifier', 'getvar', [&$this, 'getTemplateVars']);
 
 		$this->page_name = pathinfo($_SERVER["PHP_SELF"])['basename'];
 
