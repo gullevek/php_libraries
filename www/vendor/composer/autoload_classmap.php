@@ -49,6 +49,7 @@ return array(
     'CoreLibs\\Output\\Image' => $baseDir . '/lib/CoreLibs/Output/Image.php',
     'CoreLibs\\Output\\ProgressBar' => $baseDir . '/lib/CoreLibs/Output/Progressbar.php',
     'CoreLibs\\Template\\SmartyExtend' => $baseDir . '/lib/CoreLibs/Template/SmartyExtend.php',
+    'CoreLibs\\Template\\SmartyExtend4' => $baseDir . '/lib/CoreLibs/Template/SmartyExtend4.php',
     'FileUpload\\Core\\qqUploadedFile' => $baseDir . '/lib/FileUpload/Core/qqUploadedFile.php',
     'FileUpload\\Core\\qqUploadedFileForm' => $baseDir . '/lib/FileUpload/Core/qqUploadedFileForm.php',
     'FileUpload\\Core\\qqUploadedFileXhr' => $baseDir . '/lib/FileUpload/Core/qqUploadedFileXhr.php',

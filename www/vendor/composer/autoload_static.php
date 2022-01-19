@@ -114,6 +114,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Output\\Image' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Image.php',
         'CoreLibs\\Output\\ProgressBar' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Progressbar.php',
         'CoreLibs\\Template\\SmartyExtend' => __DIR__ . '/../..' . '/lib/CoreLibs/Template/SmartyExtend.php',
+        'CoreLibs\\Template\\SmartyExtend4' => __DIR__ . '/../..' . '/lib/CoreLibs/Template/SmartyExtend4.php',
         'FileUpload\\Core\\qqUploadedFile' => __DIR__ . '/../..' . '/lib/FileUpload/Core/qqUploadedFile.php',
         'FileUpload\\Core\\qqUploadedFileForm' => __DIR__ . '/../..' . '/lib/FileUpload/Core/qqUploadedFileForm.php',
         'FileUpload\\Core\\qqUploadedFileXhr' => __DIR__ . '/../..' . '/lib/FileUpload/Core/qqUploadedFileXhr.php',
