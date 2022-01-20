@@ -1,0 +1,7 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Parameter \\#1 \\$result of function pg_result_error expects resource, object\\|resource\\|true given\\.$#"
+			count: 1
+			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
+

@@ -1,5 +1,6 @@
 # PHP Stan Config
-
+includes:
+	- phpstan-conditional.php
 parameters:
 	tmpDir: /tmp/phpstan-corelibs
 	level: 8 # max is now 9
@@ -48,6 +49,9 @@ parameters:
 		- www/admin/class_test.smarty4.php
 	# ignore errores with
 	ignoreErrors:
+		- # this error is ignore because of the PHP 8.0 to 8.1 change for pg_*
+			message: "#^Parameter \\#1 \\$(result|connection) of function pg_\\w+ expects resource(\\|null)?, object\\|resource(\\|bool)? given\\.$#"
+			path: %currentWorkingDirectory%/www/lib/CoreLibs/DB/SQL/PgSQL.php
 		# this is ignored for now
 		# - '#Expression in empty\(\) is always falsy.#'
 		# -

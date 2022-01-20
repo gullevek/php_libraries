@@ -47,6 +47,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\DB\SQL;
 
+// below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
+// as main system. Currently all @var sets are written as object
 /** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
 
 class PgSQL
@@ -85,7 +87,7 @@ class PgSQL
 	public function __dbQuery(string $query)
 	{
 		$this->last_error_query = '';
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return false;
 		}
 		// read out the query status and save the query if needed
@@ -103,7 +105,7 @@ class PgSQL
 	 */
 	public function __dbSendQuery(string $query): bool
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return false;
 		}
 		$result = pg_send_query($this->dbh, $query);
@@ -117,7 +119,7 @@ class PgSQL
 	public function __dbGetResult()
 	{
 		$this->last_error_query = '';
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return false;
 		}
 		$result = pg_get_result($this->dbh);
@@ -136,7 +138,7 @@ class PgSQL
 	 */
 	public function __dbClose(): void
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return;
 		}
 		if (pg_connection_status($this->dbh) === PGSQL_CONNECTION_OK) {
@@ -153,7 +155,7 @@ class PgSQL
 	 */
 	public function __dbPrepare(string $name, string $query)
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return false;
 		}
 		$result = pg_prepare($this->dbh, $name, $query);
@@ -171,7 +173,7 @@ class PgSQL
 	 */
 	public function __dbExecute(string $name, array $data)
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return false;
 		}
 		$result = pg_execute($this->dbh, $name, $data);
@@ -188,7 +190,7 @@ class PgSQL
 	 */
 	public function __dbNumRows($cursor): int
 	{
-		if (!$cursor) {
+		if ($cursor === false || is_bool($cursor)) {
 			return -1;
 		}
 		return pg_num_rows($cursor);
@@ -201,7 +203,7 @@ class PgSQL
 	 */
 	public function __dbNumFields($cursor): int
 	{
-		if (!$cursor) {
+		if ($cursor === false || is_bool($cursor)) {
 			return -1;
 		}
 		return pg_num_fields($cursor);
@@ -215,7 +217,7 @@ class PgSQL
 	 */
 	public function __dbFieldName($cursor, $i)
 	{
-		if (!$cursor) {
+		if ($cursor === false || is_bool($cursor)) {
 			return false;
 		}
 		return pg_field_name($cursor, $i);
@@ -230,7 +232,7 @@ class PgSQL
 	 */
 	public function __dbFetchArray($cursor, int $result_type = PGSQL_BOTH)
 	{
-		if (!$cursor) {
+		if ($cursor === false || is_bool($cursor)) {
 			return false;
 		}
 		// result type is passed on as is [should be checked]
@@ -258,7 +260,7 @@ class PgSQL
 	 */
 	public function __dbFetchAll($cursor)
 	{
-		if (!$cursor) {
+		if ($cursor === false || is_bool($cursor)) {
 			return false;
 		}
 		return pg_fetch_all($cursor);
@@ -271,7 +273,7 @@ class PgSQL
 	 */
 	public function __dbAffectedRows($cursor): int
 	{
-		if (!$cursor) {
+		if ($cursor === false || is_bool($cursor)) {
 			return -1;
 		}
 		return pg_affected_rows($cursor);
@@ -426,17 +428,18 @@ class PgSQL
 	 */
 	public function __dbPrintError($cursor = false): string
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
 		}
 		// run the query again for the error result here
-		if (!$cursor && $this->last_error_query) {
+		if (($cursor === false || is_bool($cursor)) && $this->last_error_query) {
 			pg_send_query($this->dbh, $this->last_error_query);
 			$this->last_error_query = '';
 			$cursor = pg_get_result($this->dbh);
 		}
-		if ($cursor && pg_result_error($cursor)) {
-			return "<span style=\"color: red;\"><b>-PostgreSQL-Error-></b> " . pg_result_error($cursor) . "</span><br>";
+		if ($cursor && !is_bool($cursor) && $error_str = pg_result_error($cursor)) {
+			return "<span style=\"color: red;\"><b>-PostgreSQL-Error-></b> "
+				. $error_str . "</span><br>";
 		} else {
 			return '';
 		}
@@ -450,7 +453,7 @@ class PgSQL
 	 */
 	public function __dbMetaData(string $table, $extended = false)
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return false;
 		}
 		// needs to prefixed with @ or it throws a warning on not existing table
@@ -464,7 +467,7 @@ class PgSQL
 	 */
 	public function __dbEscapeString($string): string
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
 		}
 		return pg_escape_string($this->dbh, (string)$string);
@@ -479,7 +482,7 @@ class PgSQL
 	 */
 	public function __dbEscapeLiteral($string): string
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
 		}
 		return pg_escape_string($this->dbh, (string)$string);
@@ -492,7 +495,7 @@ class PgSQL
 	 */
 	public function __dbEscapeBytea($bytea): string
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
 		}
 		return pg_escape_bytea($this->dbh, $bytea);
@@ -504,7 +507,7 @@ class PgSQL
 	 */
 	public function __dbConnectionBusy(): bool
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return false;
 		}
 		return pg_connection_busy($this->dbh);
@@ -518,7 +521,7 @@ class PgSQL
 	 */
 	public function __dbVersion(): string
 	{
-		if ($this->dbh === false) {
+		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
 		}
 		// array has client, protocol, server
@@ -547,7 +550,9 @@ class PgSQL
 				if ('{' != $text[$offset]) {
 					preg_match("/(\\{?\"([^\"\\\\]|\\\\.)*\"|[^,{}]+)+([,}]+)/", $text, $match, 0, $offset);
 					$offset += strlen($match[0]);
-					$output[] = ('"' != $match[1][0] ? $match[1] : stripcslashes(substr($match[1], 1, -1)));
+					$output[] = '"' != $match[1][0] ?
+						$match[1] :
+						stripcslashes(substr($match[1], 1, -1));
 					if ('},' == $match[3]) {
 						return $offset;
 					}

@@ -252,7 +252,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\DB;
 
-// this is for running in php 8.0 phan
+// below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
+// as main system. Currently all @var sets are written as object
 /** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
 
 class IO
