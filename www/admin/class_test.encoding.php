@@ -103,7 +103,7 @@ print "CONV ENCODING: $_string: ".$basic->convertEncoding($_string, 'ISO-2022-JP
 print "D/__MBMIMEENCODE: ".$basic->__mbMimeEncode('Some Text', 'UTF-8')."<br>"; */
 
 // error message
-print $basic->printErrorMsg();
+print $log->printErrorMsg();
 
 print "</body></html>";
 

@@ -52,9 +52,9 @@ $log = new CoreLibs\Debug\Logging([
 	'file_id' => LOG_FILE_ID,
 	'print_file_date' => true,
 	'per_class' => true,
-	'debug_all' => $DEBUG_ALL,
-	'echo_all' => $ECHO_ALL,
-	'print_all' => $PRINT_ALL,
+	'debug_all' => $DEBUG_ALL ?? false,
+	'echo_all' => $ECHO_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? false,
 ]);
 // automatic hide for DEBUG messages on live server
 // can be overridden when setting DEBUG_ALL_OVERRIDE on top of the script

@@ -252,6 +252,9 @@ declare(strict_types=1);
 
 namespace CoreLibs\DB;
 
+// this is for running in php 8.0 phan
+/** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
+
 class IO
 {
 	// 0: normal read, store in cache
@@ -276,7 +279,7 @@ class IO
 	public $query; // the query string at the moment
 	// only inside
 	// basic vars
-	/** @var PgSql\Connection|resource|bool|int|null */
+	/** @var object|resource|bool|int|null */ // replace object with PgSql\Connection|
 	private $dbh; // the dbh handler, if disconnected by command is null, bool:false/int:-1 on error,
 	/** @var bool */
 	public $db_debug = false; // DB_DEBUG ... (if set prints out debug msgs)
@@ -303,7 +306,7 @@ class IO
 	/** @var array<mixed,mixed> */
 	public $cursor_ext; // hash of hashes
 	// per query vars
-	/** @var PgSql\Result|resource */
+	/** @var object|resource|bool */ // replace object with PgSql\Result
 	public $cursor; // actual cursor (DBH)
 	/** @var int */
 	public $num_rows; // how many rows have been found
@@ -418,6 +421,7 @@ class IO
 		$this->error_string['31'] = 'Could not fetch PK after query insert';
 		$this->error_string['32'] = 'Multiple PK return as array';
 		$this->error_string['33'] = 'Returning PK was not found';
+		$this->error_string['34'] = 'Cursor invalid for fetch PK after query insert';
 		$this->error_string['40'] = 'Query async call failed.';
 		$this->error_string['41'] = 'Connection is busy with a different query. Cannot execute.';
 		$this->error_string['42'] = 'Cannot check for async query, none has been started yet.';
@@ -624,10 +628,11 @@ class IO
 	 * if error_id set, writes long error string into error_msg
 	 * NOTE:
 	 * needed to make public so it can be called from DB.Array.IO too
-	 * @param  PgSql\Result|resource|bool $cursor current cursor for pg_result_error, mysql uses dbh,
-	 *                               pg_last_error too, but pg_result_error is more accurate
-	 * @param  string         $msg   optional message
-	 * @return void                  has no return
+	 * @param  object|resource|bool $cursor current cursor for pg_result_error,
+	 *                              pg_last_error too, but pg_result_error
+	 *                              is more accurate (PgSql\Result)
+	 * @param  string         $msg  optional message
+	 * @return void                 has no return
 	 */
 	public function __dbError($cursor = false, string $msg = ''): void
 	{
@@ -904,11 +909,11 @@ class IO
 	 * insert_id_ext [DEPRECATED, all in insert_id_arr]
 	 * - holds all returning as array
 	 * TODO: Only use insert_id_arr and use functions to get ok array or single
-	 * @param boolean     $returning_id
-	 * @param string      $query
-	 * @param string|null $pk_name
-	 * @param PgSql\Result|resource    $cursor
-	 * @param string|null $stm_name     If not null, is dbExecutre run
+	 * @param boolean         $returning_id
+	 * @param string          $query
+	 * @param string|null     $pk_name
+	 * @param object|resource|bool $cursor       (PgSql\Result)
+	 * @param string|null     $stm_name     If not null, is dbExecutre run
 	 * @return void
 	 */
 	private function __dbSetInsertId(
@@ -926,6 +931,22 @@ class IO
 		$this->insert_id_arr = [];
 		// set the primary key name
 		$this->insert_id_pk_name = $pk_name ?? '';
+		// abort if cursor is empty
+		if ($cursor === false) {
+			// failed to get insert id
+			$this->warning_id = 34;
+			if ($stm_name === null) {
+				$this->__dbError($cursor, '[dbExec]');
+			} else {
+				$this->__dbError();
+				$this->__dbDebug(
+					'db',
+					$stm_name . ': CURSOR is null',
+					'DB_WARNING'
+				);
+			}
+			return;
+		}
 		// set insert_id
 		// if we do not have a returning
 		// we try to get it via the primary key and another select
@@ -1518,7 +1539,7 @@ class IO
 	 *                                 if pk name is table name and _id, pk_name
 	 *                                 is not needed to be set
 	 *                                 if NULL is given here, no RETURNING will be auto added
-	 * @return PgSql\Result|resource|false          cursor for this query or false on error
+	 * @return object|resource|bool   cursor for this query or false on error (PgSql\Result)
 	 */
 	public function dbExec(string $query = '', string $pk_name = '')
 	{
@@ -1576,8 +1597,9 @@ class IO
 	/**
 	 * checks a previous async query and returns data if finished
 	 * NEEDS : dbExecAsync
-	 * @return bool|PgSql\Result|resource cursor resource if the query is still running,
-	 *                       false if an error occured or cursor of that query
+	 * @return bool|object|resource cursor resource if the query is still running,
+	 *                              false if an error occured or cursor of that query
+	 *                              (PgSql\Result)
 	 */
 	public function dbCheckAsync()
 	{
@@ -1606,7 +1628,7 @@ class IO
 			$this->__dbDebug(
 				'db',
 				'<span style="color: red;"><b>DB-Error</b> No async query '
-					. 'has been started yet.</span>',
+					. 'has beedbFetchArrayn started yet.</span>',
 				'DB_ERROR'
 			);
 			return false;
@@ -1615,12 +1637,15 @@ class IO
 
 	/**
 	 * executes a cursor and returns the data, if no more data 0 will be returned
-	 * @param  PgSql\Result|resource|false   $cursor      the cursor from db_exec or
-	 *                                       pg_query/pg_exec/mysql_query
-	 *                                       if not set will use internal cursor,
-	 *                                       if not found, stops with 0 (error)
-	 * @param  bool              $assoc_only false is default, if true only assoc rows
-	 * @return array<mixed>|bool             row array or false on error
+	 * @param  object|resource|bool   $cursor the cursor from db_exec or
+	 *                                         pg_query/pg_exec/mysql_query
+	 *                                         if not set will use internal cursor,
+	 *                                         if not found, stops with 0 (error)
+	 *                                         (PgSql\Result)
+	 * @param  bool              $assoc_only   false is default,
+	 *                                         if true only named rows,
+	 *                                         not numbered index rows
+	 * @return array<mixed>|bool               row array or false on error
 	 */
 	public function dbFetchArray($cursor = false, bool $assoc_only = false)
 	{
@@ -1752,7 +1777,8 @@ class IO
 	 * @param  string        $stm_name statement name
 	 * @param  string        $query    queryt string to run
 	 * @param  string        $pk_name  optional primary key
-	 * @return bool|PgSql\Result|resource           false on error, true on warning or result on full ok
+	 * @return bool|object|resource    false on error, true on warning or
+	 *                                 result on full ok (PgSql\Result)
 	 */
 	public function dbPrepare(string $stm_name, string $query, string $pk_name = '')
 	{

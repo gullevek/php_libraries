@@ -111,6 +111,9 @@ return [
 		// symlink ignore
 		'www/lib/smarty-3.1.30/SmartyBC.class.php',
 		'www/lib/htmlMimeMail-2.5.1/HtmlMimeMailCreate.php',
+		// current not checking smarty4 test file
+		'www/lib/CoreLibs/Template/SmartyExtend4.php',
+		'www/admin/class_test.smarty4.php',
 	],
 
 	// what not to show as problem

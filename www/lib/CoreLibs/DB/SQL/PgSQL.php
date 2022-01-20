@@ -47,12 +47,14 @@ declare(strict_types=1);
 
 namespace CoreLibs\DB\SQL;
 
+/** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
+
 class PgSQL
 {
 	/** @var string */
 	private $last_error_query;
 	// NOTE for PHP 8.1 this is no longer a resource
-	/** @var PgSql\Connection|resource|bool */
+	/** @var object|resource|bool */ // replace object with PgSql\Connection
 	private $dbh;
 
 	/**
@@ -78,7 +80,7 @@ class PgSQL
 	/**
 	 * wrapper for gp_query, catches error and stores it in class var
 	 * @param  string      $query query string
-	 * @return PgSql\Result|resource|bool      query result
+	 * @return object|resource|bool query result (PgSql\Result)
 	 */
 	public function __dbQuery(string $query)
 	{
@@ -110,7 +112,7 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_get_result
-	 * @return PgSql\Result|resource|bool resource handler or false for error
+	 * @return object|resource|bool resource handler or false for error (PgSql\Result)
 	 */
 	public function __dbGetResult()
 	{
@@ -147,7 +149,7 @@ class PgSQL
 	 * wrapper for pg_prepare
 	 * @param  string $name  statement name
 	 * @param  string $query query string
-	 * @return PgSql\Result|resource|bool prepare statement handler or false for error
+	 * @return object|resource|bool prepare statement handler or false for error (PgSql\Result)
 	 */
 	public function __dbPrepare(string $name, string $query)
 	{
@@ -165,7 +167,7 @@ class PgSQL
 	 * wrapper for pg_execute for running a prepared statement
 	 * @param  string        $name statement name
 	 * @param  array<mixed>  $data data array
-	 * @return PgSql\Result|resource|bool returns status or false for error
+	 * @return object|resource|bool returns status or false for error (PgSql\Result)
 	 */
 	public function __dbExecute(string $name, array $data)
 	{
@@ -181,44 +183,56 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_num_rows
-	 * @param  PgSql\Result|resource $cursor cursor PgSql\Result (former resource)
+	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
 	 * @return int              number of rows, -1 on error
 	 */
 	public function __dbNumRows($cursor): int
 	{
+		if (!$cursor) {
+			return -1;
+		}
 		return pg_num_rows($cursor);
 	}
 
 	/**
 	 * wrapper for pg_num_fields
-	 * @param  PgSql\Result|resource $cursor cursor PgSql\Result (former resource)
+	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
 	 * @return int              number for fields in result, -1 on error
 	 */
 	public function __dbNumFields($cursor): int
 	{
+		if (!$cursor) {
+			return -1;
+		}
 		return pg_num_fields($cursor);
 	}
 
 	/**
 	 * wrapper for pg_field_name
-	 * @param  PgSql\Result|resource    $cursor cursor PgSql\Result (former resource)
+	 * @param  object|resource|bool    $cursor cursor PgSql\Result (former resource)
 	 * @param  int         $i      field position
 	 * @return string|bool         name or false on error
 	 */
 	public function __dbFieldName($cursor, $i)
 	{
+		if (!$cursor) {
+			return false;
+		}
 		return pg_field_name($cursor, $i);
 	}
 
 	/**
 	 * wrapper for pg_fetch_array
 	 * if through/true false, use __dbResultType(true)
-	 * @param  PgSql\Result|resource $cursor      cursor PgSql\Result (former resource)
+	 * @param  object|resource|bool $cursor      cursor PgSql\Result (former resource)
 	 * @param  int      $result_type result type as int number
 	 * @return array<mixed>|bool     array result data or false on end/error
 	 */
 	public function __dbFetchArray($cursor, int $result_type = PGSQL_BOTH)
 	{
+		if (!$cursor) {
+			return false;
+		}
 		// result type is passed on as is [should be checked]
 		return pg_fetch_array($cursor, null, $result_type);
 	}
@@ -239,21 +253,27 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_fetch_all
-	 * @param  PgSql\Result|resource   $cursor cursor PgSql\Result (former resource)
+	 * @param  object|resource|bool   $cursor cursor PgSql\Result (former resource)
 	 * @return array<mixed>|bool  data array or false for end/error
 	 */
 	public function __dbFetchAll($cursor)
 	{
+		if (!$cursor) {
+			return false;
+		}
 		return pg_fetch_all($cursor);
 	}
 
 	/**
 	 * wrapper for pg_affected_rows
-	 * @param  PgSql\Result|resource $cursor cursor PgSql\Result (former resource)
-	 * @return int              affected rows, 0 for none
+	 * @param object|resource|bool $cursor cursor PgSql\Result (former resource)
+	 * @return int              affected rows, 0 for none, -1 for error
 	 */
 	public function __dbAffectedRows($cursor): int
 	{
+		if (!$cursor) {
+			return -1;
+		}
 		return pg_affected_rows($cursor);
 	}
 
@@ -292,10 +312,6 @@ class PgSQL
 			$q = "SELECT CURRVAL('$seq') AS insert_id";
 			// I have to do manually or I overwrite the original insert internal vars ...
 			if ($q = $this->__dbQuery($q)) {
-				// abort if this is not an resource
-				if ($q === false) {
-					return false;
-				}
 				if (is_array($res = $this->__dbFetchArray($q))) {
 					list($id) = $res;
 				} else {
@@ -379,7 +395,7 @@ class PgSQL
 	 * @param  string        $db_name databse name
 	 * @param  integer       $db_port port (int, 5432 is default)
 	 * @param  string        $db_ssl  SSL (allow is default)
-	 * @return PgSql\Connection|resource|bool db handler PgSql\Connection  or false on error
+	 * @return object|resource|bool db handler PgSql\Connection  or false on error
 	 */
 	public function __dbConnect(
 		string $db_host,
@@ -404,10 +420,11 @@ class PgSQL
 	/**
 	 * reads the last error for this cursor and returns
 	 * html formatted string with error name
-	 * @param  null|PgSql\Result|resource $cursor cursor PgSql\Result (former resource) or null
+	 * @param  bool|object|resource $cursor cursor PgSql\Result (former resource)
+	 *                              or null
 	 * @return string            error string
 	 */
-	public function __dbPrintError($cursor = null): string
+	public function __dbPrintError($cursor = false): string
 	{
 		if ($this->dbh === false) {
 			return '';
