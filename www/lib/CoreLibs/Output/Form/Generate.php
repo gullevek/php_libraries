@@ -2272,7 +2272,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					'AS ARRAY'/*.$this->log->prAr($_POST[$el_name])*/ :
 					'NOT SET/OR NOT ARRAY')
 				. ((isset($_POST[$el_name]) && !is_array($_POST[$el_name])) ? $_POST[$el_name] : ''));
-			// if error, check new line addition so we don't loose it
+			// if error, check new line addition so we don't lose it
 			if ($this->error) {
 				if (isset($_POST[$el_name]) && is_array($_POST[$el_name])) {
 					// this is for the new line
