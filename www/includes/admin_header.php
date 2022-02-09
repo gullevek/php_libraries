@@ -59,7 +59,11 @@ $log = new CoreLibs\Debug\Logging([
 // automatic hide for DEBUG messages on live server
 // can be overridden when setting DEBUG_ALL_OVERRIDE on top of the script
 // (for emergency debugging of one page only)
-if ((TARGET == 'live' || TARGET == 'remote') && !empty($DEBUG_ALL_OVERRIDE)) {
+if (
+	(TARGET == 'live' || TARGET == 'remote') &&
+	DEBUG === true &&
+	!empty($DEBUG_ALL_OVERRIDE)
+) {
 	foreach (['debug', 'echo', 'print'] as $target) {
 		$log->setLogLevelAll($target, false);
 	}

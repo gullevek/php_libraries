@@ -301,6 +301,22 @@ function randomIdF() // eslint-disable-line no-unused-vars
 }
 
 /**
+ * generate a number between min/max
+ * with min/max inclusive.
+ * eg: 1,5 will create a number ranging from 1 o 5
+ * @param  {Number} min minimum int number inclusive
+ * @param  {Number} max maximumg int number inclusive
+ * @return {Number}     Random number
+ */
+function getRandomIntInclusive(min, max) // eslint-disable-line no-unused-vars
+{
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	// The maximum is inclusive and the minimum is inclusive
+	return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+/**
  * check if name is a function
  * @param  {string}  name Name of function to check if exists
  * @return {Boolean}      true/false

@@ -1044,7 +1044,7 @@ class IO
 	}
 
 	/**
-	 * set max query calls, set to --1 to disable loop
+	 * set max query calls, set to -1 to disable loop
 	 * protection. this will generate a warning
 	 * empty call (null) will reset to default
 	 * @param  int|null $max_calls Set the max loops allowed
@@ -1052,7 +1052,6 @@ class IO
 	 */
 	public function dbSetMaxQueryCall(?int $max_calls = null): bool
 	{
-		$success = false;
 		// if null then reset to default
 		if ($max_calls === null) {
 			$max_calls = self::DEFAULT_MAX_QUERY_CALL;
@@ -1071,14 +1070,8 @@ class IO
 			return false;
 		}
 		// ok entry, set
-		if (
-			$max_calls == -1 ||
-			$max_calls > 0
-		) {
-			$this->MAX_QUERY_CALL = $max_calls;
-			$success = true;
-		}
-		return $success;
+		$this->MAX_QUERY_CALL = $max_calls;
+		return true;
 	}
 
 	/**
@@ -2408,6 +2401,7 @@ class IO
 			} else {
 				// find in all inside the array
 				$__arr = array_column($this->insert_id_arr, $key);
+				/** @phpstan-ignore-next-line [Why is this always true?] */
 				if (count($__arr)) {
 					return $__arr;
 				} else {
