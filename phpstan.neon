@@ -4,6 +4,7 @@ includes:
 parameters:
 	tmpDir: /tmp/phpstan-corelibs
 	level: 8 # max is now 9
+	checkMissingCallableSignature: true
 	paths:
 		- %currentWorkingDirectory%/www
 	bootstrapFiles:

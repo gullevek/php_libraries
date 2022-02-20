@@ -50,11 +50,13 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 $key_length = 10;
 $key_length_b = 5;
+$key_lenght_long = 64;
 print "S::RANDOMKEYGEN(auto): " . RandomKey::randomKeyGen() . "<br>";
 print "S::SETRANDOMKEYLENGTH($key_length): " . RandomKey::setRandomKeyLength($key_length) . "<br>";
 print "S::RANDOMKEYGEN($key_length): " . RandomKey::randomKeyGen() . "<br>";
 print "S::RANDOMKEYGEN($key_length_b): " . RandomKey::randomKeyGen($key_length_b) . "<br>";
 print "S::RANDOMKEYGEN($key_length): " . RandomKey::randomKeyGen() . "<br>";
+print "S::RANDOMKEYGEN($key_lenght_long): " . RandomKey::randomKeyGen($key_lenght_long) . "<br>";
 $_array = new CoreLibs\Create\RandomKey();
 print "C->RANDOMKEYGEN(auto): " . $_array->randomKeyGen() . "<br>";
 // DEPRECATED

@@ -10,6 +10,9 @@
  * hsl to rgb
 */
 
+// TODO: use oklab as base for converting colors
+// https://bottosson.github.io/posts/oklab/
+
 declare(strict_types=1);
 
 namespace CoreLibs\Convert;

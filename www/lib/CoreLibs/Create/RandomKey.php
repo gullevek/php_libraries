@@ -11,8 +11,8 @@ namespace CoreLibs\Create;
 class RandomKey
 {
 	// key generation
-	/** @var array<mixed> */
-	private static $key_range = [];
+	/** @var string */
+	private static $key_range = '';
 	/** @var int */
 	private static $one_key_length;
 	/** @var int */
@@ -33,9 +33,13 @@ class RandomKey
 	 */
 	private static function initRandomKeyData()
 	{
-		// random key generation
-		self::$key_range = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
-		self::$one_key_length = count(self::$key_range);
+		// random key generation base string
+		self::$key_range = join('', array_merge(
+			range('A', 'Z'),
+			range('a', 'z'),
+			range('0', '9')
+		));
+		self::$one_key_length = strlen(self::$key_range);
 	}
 
 	/**
@@ -103,11 +107,11 @@ class RandomKey
 		} else {
 			$use_key_length = self::$key_length;
 		}
-
-		$pieces = [];
+		// create random string
+		$random_string = '';
 		for ($i = 1; $i <= $use_key_length; $i++) {
-			$pieces[] = self::$key_range[random_int(0, self::$one_key_length - 1)];
+			$random_string .= self::$key_range[random_int(0, self::$one_key_length - 1)];
 		}
-		return join('', $pieces);
+		return $random_string;
 	}
 }
