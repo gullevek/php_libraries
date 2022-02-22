@@ -361,9 +361,6 @@ class ArrayIO extends \CoreLibs\DB\IO
 					$this->table_array[$column]['value'] = '';
 				} else {
 					if ($this->table_array[$column]['tmp'] != 'none' && $this->table_array[$column]['tmp']) {
-						// Dateiname zusammenbasteln: org-name + _pkid liste + .ext
-						list($name, $ext) = explode('.', $this->table_array[$column]['dn']);
-
 						// mozilla, patch
 						$fn_name = explode('/', $this->table_array[$column]['dn']);
 						$this->table_array[$column]['dn'] = $fn_name[count($fn_name) - 1];

@@ -87,6 +87,8 @@ $new_log = new CoreLibs\Debug\Logging([
 ]);
 $new_log->debug('OPTIONS TYPE', 'New Type error');
 print "OPTIONS LOGGER:<br>" . $new_log->printErrorMsg();
+$new_log->setLogLevel('debug', 'on', ['A', 'B', 'C' => false]);
+print "LOG LEVEL: " .  DebugSupport::printAr($new_log->getLogLevel('debug', 'on')) . "<br>";
 
 echo "<b>CLASS DEBUG CALL</b><br>";
 

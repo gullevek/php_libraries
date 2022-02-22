@@ -173,7 +173,7 @@ class Basic
 	public function basicSetLogId(string $string): string
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->basicSetLogId() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
-		return $this->log->basicSetLogId($string);
+		return $this->log->setLogId($string);
 	}
 
 	// ****** DEBUG/ERROR FUNCTIONS ******
@@ -263,7 +263,7 @@ class Basic
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->debugFor() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
 		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal, PhanParamTooFew @phpstan-ignore-next-line */
-		$this->log->debugFor(...[func_get_args()]);
+		$this->log->setLogLevel(...[func_get_args()]);
 	}
 
 	/**

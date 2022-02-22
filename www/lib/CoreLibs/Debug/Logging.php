@@ -173,16 +173,17 @@ class Logging
 
 		// can be overridden with basicSetLogFileId later
 		if (!empty($this->options['file_id'])) {
-			$this->basicSetLogId($this->options['file_id'] ?? '');
+			$this->setLogId($this->options['file_id'] ?? '');
 		} elseif (!empty($GLOBALS['LOG_FILE_ID'])) {
 			// legacy flow, should be removed and only set via options
-			$this->basicSetLogId($GLOBALS['LOG_FILE_ID']);
+			$this->setLogId($GLOBALS['LOG_FILE_ID']);
 		} elseif (defined('LOG_FILE_ID')) {
-			$this->basicSetLogId(LOG_FILE_ID);
+			// legacy flow, should be removed and only set via options
+			$this->setLogId(LOG_FILE_ID);
 		}
 
 		// init the log levels
-		$this->setLogLevels();
+		$this->initLogLevels();
 	}
 
 	// *** PRIVATE ***
@@ -192,80 +193,84 @@ class Logging
 	 *
 	 * @return void
 	 */
-	private function setLogLevels(): void
+	private function initLogLevels(): void
 	{
 		// if given via parameters, only for all
 		// globals overrule given settings, for one (array), eg $ECHO['db'] = 1;
-		if (isset($this->options['debug']) && is_array($this->options['debug'])) {
-			$this->debug_output = $this->options['debug'];
-		} elseif (isset($GLOBALS['DEBUG']) && is_array($GLOBALS['DEBUG'])) {
-			$this->debug_output = $GLOBALS['DEBUG'];
-		}
-		if (isset($this->options['echo']) && is_array($this->options['echo'])) {
-			$this->debug_output = $this->options['echo'];
-		} elseif (isset($GLOBALS['ECHO']) && is_array($GLOBALS['ECHO'])) {
-			$this->echo_output = $GLOBALS['ECHO'];
-		}
-		if (isset($this->options['print']) && is_array($this->options['print'])) {
-			$this->debug_output = $this->options['print'];
-		} elseif (isset($GLOBALS['PRINT']) && is_array($GLOBALS['PRINT'])) {
-			$this->print_output = $GLOBALS['PRINT'];
-		}
-
-		// exclude these ones from output
-		if (isset($this->options['debug_not']) && is_array($this->options['debug_not'])) {
-			$this->debug_output = $this->options['debug_not'];
-		} elseif (isset($GLOBALS['DEBUG_NOT']) && is_array($GLOBALS['DEBUG_NOT'])) {
-			$this->debug_output_not = $GLOBALS['DEBUG_NOT'];
-		}
-		if (isset($this->options['echo_not']) && is_array($this->options['echo_not'])) {
-			$this->debug_output = $this->options['echo_not'];
-		} elseif (isset($GLOBALS['ECHO_NOT']) && is_array($GLOBALS['ECHO_NOT'])) {
-			$this->echo_output_not = $GLOBALS['ECHO_NOT'];
-		}
-		if (isset($this->options['print_not']) && is_array($this->options['print_not'])) {
-			$this->debug_output = $this->options['print_not'];
-		} elseif (isset($GLOBALS['PRINT_NOT']) && is_array($GLOBALS['PRINT_NOT'])) {
-			$this->print_output_not = $GLOBALS['PRINT_NOT'];
+		foreach (['debug', 'echo', 'print'] as $type) {
+			// include or exclude (off) from output
+			foreach (['on', 'off'] as $flag) {
+				$in_type = $type;
+				if ($flag == 'off') {
+					$in_type .= '_not';
+				}
+				$up_type = strtoupper($in_type);
+				if (
+					isset($this->options[$in_type]) &&
+					is_array($this->options[$in_type])
+				) {
+					$this->setLogLevel($type, $flag, $this->options[$in_type]);
+				} elseif (
+					isset($GLOBALS[$up_type]) &&
+					is_array($GLOBALS[$up_type])
+				) {
+					$this->setLogLevel($type, $flag, $GLOBALS[$up_type]);
+				}
+			}
 		}
 
 		// all overrule
-		$this->debug_output_all =
+		$this->setLogLevelAll(
+			'debug',
 			$this->options['debug_all'] ??
-			$GLOBALS['DEBUG_ALL'] ??
-			false;
-		$this->echo_output_all =
+				$GLOBALS['DEBUG_ALL'] ??
+				false
+		);
+		$this->setLogLevelAll(
+			'echo',
 			$this->options['echo_all'] ??
-			$GLOBALS['ECHO_ALL'] ??
-			false;
-		$this->print_output_all =
+				$GLOBALS['ECHO_ALL'] ??
+				false
+		);
+		$this->setLogLevelAll(
+			'print',
 			$this->options['print_all'] ??
-			$GLOBALS['PRINT_ALL'] ??
-			false;
+				$GLOBALS['PRINT_ALL'] ??
+				false
+		);
 
 		// GLOBAL rules for log writing
-		$this->log_print_file_date =
+		$this->setGetLogPrintFileDate(
 			$this->options['print_file_date'] ??
-			$GLOBALS['LOG_PRINT_FILE_DATE'] ??
-			true;
-		$this->log_per_level =
+				$GLOBALS['LOG_PRINT_FILE_DATE'] ??
+				true
+		);
+		$this->setLogPer(
+			'level',
 			$this->options['per_level'] ??
-			$GLOBALS['LOG_PER_LEVEL'] ??
-			false;
-		$this->log_per_class =
+				$GLOBALS['LOG_PER_LEVEL'] ??
+				false
+		);
+		$this->setLogPer(
+			'class',
 			$this->options['per_class'] ??
-			$GLOBALS['LOG_PER_CLASS'] ??
-			false;
-		$this->log_per_page =
+				$GLOBALS['LOG_PER_CLASS'] ??
+				false
+		);
+		$this->setLogPer(
+			'page',
 			$this->options['per_page'] ??
-			$GLOBALS['LOG_PER_PAGE'] ??
-			false;
-		$this->log_per_run =
+				$GLOBALS['LOG_PER_PAGE'] ??
+				false
+		);
+		$this->setLogPer(
+			'run',
 			$this->options['per_run'] ??
-			$GLOBALS['LOG_PER_RUN'] ??
-			false;
+				$GLOBALS['LOG_PER_RUN'] ??
+				false
+		);
 		// set log per date
-		if ($this->log_print_file_date) {
+		if ($this->setGetLogPrintFileDate()) {
 			$this->log_file_date = date('Y-m-d');
 		}
 		// set per run ID
@@ -295,46 +300,14 @@ class Logging
 	{
 		$access = false;
 		// check if we do debug, echo or print
-		switch ($target) {
-			case 'debug':
-				if (
-					(
-						(isset($this->debug_output[$level]) && $this->debug_output[$level]) ||
-						$this->debug_output_all
-					) &&
-					(!isset($this->debug_output_not[$level]) ||
-						(isset($this->debug_output_not[$level]) && !$this->debug_output_not[$level])
-					)
-				) {
-					$access = true;
-				}
-				break;
-			case 'echo':
-				if (
-					(
-						(isset($this->echo_output[$level]) && $this->echo_output[$level]) ||
-						$this->echo_output_all
-					) &&
-					(!isset($this->echo_output_not[$level]) ||
-						(isset($this->echo_output_not[$level]) && !$this->echo_output_not[$level])
-					)
-				) {
-					$access = true;
-				}
-				break;
-			case 'print':
-				if (
-					(
-						(isset($this->print_output[$level]) && $this->print_output[$level]) ||
-						$this->print_output_all
-					) &&
-					(!isset($this->print_output_not[$level]) ||
-						(isset($this->print_output_not[$level]) && !$this->print_output_not[$level])
-					)
-				) {
-					$access = true;
-				}
-				break;
+		if (
+			(
+				$this->getLogLevel($target, 'on', $level) ||
+				$this->getLogLevelAll($target)
+			) &&
+			!$this->getLogLevel($target, 'off', $level)
+		) {
+			$access = true;
 		}
 		return $access;
 	}
@@ -355,8 +328,6 @@ class Logging
 			return false;
 		}
 
-		// init output variable
-		$output = $error_string; // output formated error string to output file
 		// init base file path
 		$fn = $this->log_folder . $this->log_print_file . '.' . $this->log_file_name_ext;
 		// log ID prefix settings, if not valid, replace with empty
@@ -369,8 +340,10 @@ class Logging
 
 		if ($this->log_per_run) {
 			$rpl_string = '_' . $this->log_file_unique_id; // add 8 char unique string
-		} elseif ($this->log_print_file_date) {
+		} elseif ($this->setGetLogPrintFileDate()) {
 			$rpl_string = '_' . $this->log_file_date; // add date to file
+		} else {
+			$rpl_string = '';
 		}
 		$fn = str_replace('##DATE##', $rpl_string, $fn); // create output filename
 
@@ -397,12 +370,13 @@ class Logging
 		$this->log_file_name = $fn;
 		$fp = fopen($this->log_file_name, 'a');
 		if ($fp !== false) {
-			fwrite($fp, $output);
+			fwrite($fp, $error_string);
 			fclose($fp);
+			return true;
 		} else {
 			echo "<!-- could not open file: " . $this->log_file_name . " //-->";
+			return false;
 		}
-		return true;
 	}
 
 	// *** PUBLIC ***
@@ -424,8 +398,21 @@ class Logging
 	 * if non valid string is given it returns the previous set one only
 	 * @param  string $string log file id string value
 	 * @return string        returns the set log file id string
+	 * @deprecated Use $log->setLogId()
 	 */
 	public function basicSetLogId(string $string): string
+	{
+		return $this->setLogId($string);
+	}
+
+	/**
+	 * sets the internal log file prefix id
+	 * string must be a alphanumeric string
+	 * if non valid string is given it returns the previous set one only
+	 * @param  string $string log file id string value
+	 * @return string        returns the set log file id string
+	 */
+	public function setLogId(string $string): string
 	{
 		if (preg_match("/^[\w\-]+$/", $string)) {
 			$this->log_file_id = $string;
@@ -448,6 +435,7 @@ class Logging
 	 * @param  string $flag  on/off
 	 *         array  $array of levels to turn on/off debug
 	 * @return bool          Return false if type or flag is invalid
+	 * @deprecated Use setLogLevel
 	 */
 	public function debugFor(string $type, string $flag): bool
 	{
@@ -489,13 +477,15 @@ class Logging
 	/**
 	 * passes list of level names, to turn on debug
 	 * eg $foo->debugFor('print', 'on', ['LOG', 'DEBUG', 'INFO']);
-	 * TODO: currently we can only turn ON
-	 * @param  string $type  debug, echo, print
-	 * @param  string $flag  on/off
-	 *         array  $array of levels to turn on/off debug
-	 * @return bool          Return false if type or falg invalid
+	 * @param  string        $type     debug, echo, print
+	 * @param  string        $flag     on/off
+	 * @param  array<mixed>  $debug_on Array of levels to turn on/off debug
+	 *                                 To turn off a level set 'Level' => false,
+	 *                                 If not set, switches to on
+	 * @return bool          Return false if type or flag invalid
+	 *                       also false if debug array is empty
 	 */
-	public function setLogLevel(string $type, string $flag): bool
+	public function setLogLevel(string $type, string $flag, array $debug_on): bool
 	{
 		// abort if not valid type
 		if (!in_array($type, ['debug', 'echo', 'print'])) {
@@ -505,14 +495,17 @@ class Logging
 		if (!in_array($flag, ['on', 'off'])) {
 			return false;
 		}
-		$debug_on = func_get_args();
-		array_shift($debug_on); // kick out type
-		array_shift($debug_on); // kick out flag (on/off)
 		if (count($debug_on) >= 1) {
-			foreach ($debug_on as $level) {
+			foreach ($debug_on as $level => $set) {
 				$switch = $type . '_output' . ($flag == 'off' ? '_not' : '');
-				$this->{$switch}[$level] = true;
+				if (!is_bool($set)) {
+					$level = $set;
+					$set = true;
+				}
+				$this->{$switch}[$level] = $set;
 			}
+		} else {
+			return false;
 		}
 		return true;
 	}
@@ -536,8 +529,8 @@ class Logging
 			return false;
 		}
 		$switch = $type . '_output' . ($flag == 'off' ? '_not' : '');
-		// bool
-		if ($level !== null) {
+		// log level direct check must be not null or not empty string
+		if (!empty($level)) {
 			return $this->{$switch}[$level] ?? false;
 		}
 		// array
@@ -577,6 +570,30 @@ class Logging
 	}
 
 	/**
+	 * Set or get the log file date extension flag
+	 * if null or empty parameter gets current flag
+	 * @param boolean|null $set Set the date suffix for log files
+	 *                          If set to null return current set
+	 * @return boolean          Current set flag
+	 */
+	public function setGetLogPrintFileDate(?bool $set = null): bool
+	{
+		if ($set !== null) {
+			$this->log_print_file_date = $set;
+		}
+		return $this->log_print_file_date;
+	}
+
+	/**
+	 * Return current set log file name
+	 * @return string Filename set set after the last time debug was called
+	 */
+	public function getLogFileName(): string
+	{
+		return $this->log_file_name;
+	}
+
+	/**
 	 * A replacement for the \CoreLibs\Debug\Support::printAr
 	 * But this does not wrap it in <pre></pre>
 	 * It uses some special code sets so we can convert that to pre flags
@@ -602,10 +619,23 @@ class Logging
 	 *                        if strip is false, recommended to add that to $string
 	 * @return bool           True if logged, false if not logged
 	 */
-	public function debug(string $level, string $string, bool $strip = false, string $prefix = ''): bool
-	{
-		if (!$this->doDebugTrigger('debug', $level)) {
-			return false;
+	public function debug(
+		string $level,
+		string $string,
+		bool $strip = false,
+		string $prefix = ''
+	): bool {
+		$status = false;
+		// must be debug on and either echo or print on
+		if (
+			!$this->doDebugTrigger('debug', $level) ||
+			(
+				// if debug is on, either print or echo must be set to on
+				!$this->doDebugTrigger('print', $level) &&
+				!$this->doDebugTrigger('echo', $level)
+			)
+		) {
+			return $status;
 		}
 		// get the last class entry and wrie that
 		$class = Support::getCallerClass();
@@ -613,7 +643,7 @@ class Logging
 		$timestamp = Support::printTime();
 		// same string put for print (no html data inside)
 		// write to file if set
-		$this->writeErrorMsg(
+		$status = $this->writeErrorMsg(
 			$level,
 			'[' . $timestamp . '] '
 			. '[' . $this->host_name . '] '
@@ -662,66 +692,62 @@ class Logging
 					Html::htmlent($string)
 				)
 				. "</div><!--#BR#-->";
+			$status = true;
 		}
-		return true;
+		return $status;
 	}
 
 	/**
-	 * merges the given error array with the one from this class
-	 * only merges visible ones
-	 * @param  array<mixed> $error_msg error array
-	 * @return void                    has no return
+	 * for ECHO ON only
+	 * returns error data as string so it can be echoed out
+	 * @param  string $header_prefix prefix string for header
+	 * @return string                error msg for all levels
 	 */
-	public function mergeErrors(array $error_msg = []): void
-	{
-		if (!is_array($error_msg)) {
-			$error_msg = [];
-		}
-		array_push($this->error_msg, ...$error_msg);
-	}
-
-	/**
-	 * prints out the error string
-	 * @param  string $string prefix string for header
-	 * @return string         error msg for all levels
-	 */
-	public function printErrorMsg(string $string = ''): string
+	public function printErrorMsg(string $header_prefix = ''): string
 	{
 		$string_output = '';
-		if ($this->debug_output_all) {
-			if ($this->error_msg_prefix) {
-				$string = $this->error_msg_prefix;
-			}
-			$script_end = microtime(true) - $this->script_starttime;
-			foreach ($this->error_msg as $level => $temp_debug_output) {
-				if ($this->doDebugTrigger('debug', $level)) {
-					if ($this->doDebugTrigger('echo', $level)) {
-						$string_output .= '<div style="font-size: 12px;">'
-							. '[<span style="font-style: italic; color: #c56c00;">' . $level . '</span>] '
-							. ($string ? "<b>**** " . Html::htmlent($string) . " ****</br>\n" : "")
-							. '</div>'
-							. join('', $temp_debug_output);
-					} // echo it out
-				} // do printout
-			} // for each level
-			// create the output wrapper around, so we have a nice formated output per class
-			if ($string_output) {
-				$string_prefix = '<div style="text-align: left; padding: 5px; font-size: 10px; '
-					. 'font-family: sans-serif; border-top: 1px solid black; '
-					. 'border-bottom: 1px solid black; margin: 10px 0 10px 0; '
-					. 'background-color: white; color: black;">'
-					. '<div style="font-size: 12px;">{<span style="font-style: italic; color: #928100;">'
-					. Support::getCallerClass() . '</span>}</div>';
-				$string_output = $string_prefix . $string_output
-					. '<div><span style="font-style: italic; color: #108db3;">Script Run Time:</span> '
-					. $script_end . '</div>'
-					. '</div>';
-			}
+		// if not debug && echo on, do not return anything
+		if (
+			!$this->getLogLevelAll('debug') ||
+			!$this->getLogLevelAll('echo')
+		) {
+			return $string_output;
 		}
+		if ($this->error_msg_prefix) {
+			$header_prefix = $this->error_msg_prefix;
+		}
+		$script_end = microtime(true) - $this->script_starttime;
+		foreach ($this->error_msg as $level => $temp_debug_output) {
+			if ($this->doDebugTrigger('debug', $level)) {
+				if ($this->doDebugTrigger('echo', $level)) {
+					$string_output .= '<div style="font-size: 12px;">'
+						. '[<span style="font-style: italic; color: #c56c00;">' . $level . '</span>] '
+						. ($header_prefix ? "<b>**** " . Html::htmlent($header_prefix) . " ****</br>\n" : '')
+						. '</div>'
+						. join('', $temp_debug_output);
+				} // echo it out
+			} // do printout
+		} // for each level
+		// create the output wrapper around
+		// so we have a nice formated output per class
+		if ($string_output) {
+			$string_prefix = '<div style="text-align: left; padding: 5px; font-size: 10px; '
+				. 'font-family: sans-serif; border-top: 1px solid black; '
+				. 'border-bottom: 1px solid black; margin: 10px 0 10px 0; '
+				. 'background-color: white; color: black;">'
+				. '<div style="font-size: 12px;">{<span style="font-style: italic; color: #928100;">'
+				. Support::getCallerClass() . '</span>}</div>';
+			$string_output = $string_prefix . $string_output
+				. '<div><span style="font-style: italic; color: #108db3;">Script Run Time:</span> '
+				. $script_end . '</div>'
+				. '</div>';
+		}
+		// }
 		return $string_output;
 	}
 
 	/**
+	 * for ECHO ON only
 	 * unsests the error message array
 	 * can be used if writing is primary to file
 	 * if no level given resets all
@@ -738,13 +764,25 @@ class Logging
 	}
 
 	/**
+	 * for ECHO ON only
 	 * Get current error message array
-	 *
 	 * @return array<mixed> error messages collected
 	 */
 	public function getErrorMsg(): array
 	{
 		return $this->error_msg;
+	}
+
+	/**
+	 * for ECHO ON only
+	 * merges the given error array with the one from this class
+	 * only merges visible ones
+	 * @param  array<mixed> $error_msg error array
+	 * @return void                    has no return
+	 */
+	public function mergeErrors(array $error_msg = []): void
+	{
+		array_push($this->error_msg, ...$error_msg);
 	}
 }
 

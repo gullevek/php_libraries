@@ -26,6 +26,8 @@
 use Phan\Config;
 
 return [
+	// turn color on (-C)
+	"color_issue_messages_if_supported" => true,
 	// If true, missing properties will be created when
 	// they are first seen. If false, we'll report an
 	// error message.
@@ -36,7 +38,7 @@ return [
 	"null_casts_as_any_type" => false,
 
 	// Backwards Compatibility Checking
-	'backward_compatibility_checks' => true,
+	'backward_compatibility_checks' => false,
 
 	// Run a quick version of checks that takes less
 	// time
@@ -45,6 +47,12 @@ return [
 	// Only emit critical issues to start with
 	// (0 is low severity, 5 is normal severity, 10 is critical)
 	"minimum_severity" => 0,
+
+	// enable for dead code check
+	// this will spill out errors for all methods never called
+	// use after all is OK to try to find unused code blocks
+	// ignore recommended: PhanUnreferencedPublicMethod
+	// "dead_code_detection" => true,
 
 	// default false for include path check
 	"enable_include_path_checks" => true,
@@ -120,6 +128,13 @@ return [
 	'suppress_issue_types' => [
 		// 'PhanUndeclaredMethod',
 		'PhanEmptyFile',
+		// ignore unreferences public methods, etc here (for dead code check)
+		'PhanUnreferencedPublicMethod',
+		'PhanUnreferencedClass',
+		'PhanWriteOnlyPublicProperty',
+		'PhanUnreferencedConstant',
+		'PhanWriteOnlyPublicProperty',
+		'PhanReadOnlyPublicProperty'
 	],
 
 	// Override to hardcode existence and types of (non-builtin) globals in the global scope.
