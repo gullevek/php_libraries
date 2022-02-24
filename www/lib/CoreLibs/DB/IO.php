@@ -283,7 +283,7 @@ class IO
 	/** @var object|resource|bool|int|null */ // replace object with PgSql\Connection|
 	private $dbh; // the dbh handler, if disconnected by command is null, bool:false/int:-1 on error,
 	/** @var bool */
-	public $db_debug = false; // DB_DEBUG ... (if set prints out debug msgs)
+	private $db_debug = false; // DB_DEBUG ... (if set prints out debug msgs)
 	/** @var string */
 	private $db_name; // the DB connected to
 	/** @var string */
@@ -371,10 +371,12 @@ class IO
 	 * main DB concstructor with auto connection to DB and failure set on failed connection
 	 * @param array<mixed> $db_config DB configuration array
 	 * @param \CoreLibs\Debug\Logging|null $log Logging class
+	 * @param bool|null $db_debug_override Overrides debug settings in db_config
 	 */
 	public function __construct(
 		array $db_config,
-		?\CoreLibs\Debug\Logging $log = null
+		?\CoreLibs\Debug\Logging $log = null,
+		?bool $db_debug_override = null,
 	) {
 		// attach logger
 		$this->log = $log ?? new \CoreLibs\Debug\Logging();
@@ -391,6 +393,9 @@ class IO
 		$this->db_ssl = !empty($db_config['db_ssl']) ? $db_config['db_ssl'] : 'allow';
 		// set debug, either via global var, or from config, else set to false
 		$this->dbSetDebug(
+			// override
+			$db_debug_override ??
+			// from db config setting
 			$db_config['db_debug'] ??
 			// should be handled from outside
 			$_SESSION['DB_DEBUG'] ??
@@ -1012,113 +1017,14 @@ class IO
 	// PUBLIC METHODS
 	// *************************************************************
 
-	/**
-	 * switches the debug flag on or off
-	 * if none given, then the debug flag auto switches from
-	 * the previous setting to either then on or off
-	 * else override with boolean true/false
-	 * @param  bool|null $debug true/false or null for no set
-	 * @return bool              debug flag in int
-	 */
-	public function dbSetDebug($debug = null): bool
-	{
-		if ($debug === true) {
-			$this->db_debug = true;
-		} elseif ($debug === false) {
-			$this->db_debug = false;
-		} elseif ($this->db_debug === null) {
-			$this->db_debug = false;
-		}
-		return $this->db_debug;
-	}
-
-	/**
-	 * Switches db debug flag on or off
-	 * OR
-	 * with the optional parameter fix sets debug
-	 * returns current set stats
-	 * @param  bool|null $debug Flag to turn debug on off
-	 * @return bool             True for debug is on, False for off
-	 */
-	public function dbToggleDebug(?bool $debug = null): bool
-	{
-		if ($debug !== null) {
-			$this->db_debug = $debug;
-		} else {
-			$this->db_debug = $this->db_debug ? false : true;
-		}
-		return $this->db_debug;
-	}
-
-	/**
-	 * set max query calls, set to -1 to disable loop
-	 * protection. this will generate a warning
-	 * empty call (null) will reset to default
-	 * @param  int|null $max_calls Set the max loops allowed
-	 * @return bool                True for succesfull set
-	 */
-	public function dbSetMaxQueryCall(?int $max_calls = null): bool
-	{
-		// if null then reset to default
-		if ($max_calls === null) {
-			$max_calls = self::DEFAULT_MAX_QUERY_CALL;
-		}
-		// if -1 then disable loop check
-		// DANGEROUS, WARN USER
-		if ($max_calls == -1) {
-			$this->warning_id = 50;
-			$this->__dbError();
-		}
-		// negative or 0
-		if ($max_calls < -1 || $max_calls == 0) {
-			$this->error_id = 51;
-			$this->__dbError();
-			// early abort
-			return false;
-		}
-		// ok entry, set
-		$this->MAX_QUERY_CALL = $max_calls;
-		return true;
-	}
-
-	/**
-	 * returns current set max query calls for loop avoidance
-	 * @return int Integer number, if -1 the loop check is disabled
-	 */
-	public function dbGetMaxQueryCall(): int
-	{
-		return $this->MAX_QUERY_CALL;
-	}
-
-	/**
-	 * resets the call times for the max query called to 0
-	 * USE CAREFULLY: rather make the query prepare -> execute
-	 * @param  string $query query string
-	 * @return void          has no return
-	 */
-	public function dbResetQueryCalled(string $query): void
-	{
-		$this->query_called[md5($query)] = 0;
-	}
-
-	/**
-	 * gets how often a query was called already
-	 * @param  string $query query string
-	 * @return int           count of times the query was executed
-	 */
-	public function dbGetQueryCalled(string $query): int
-	{
-		$md5 = md5($query);
-		if ($this->query_called[$md5]) {
-			return $this->query_called[$md5];
-		} else {
-			return 0;
-		}
-	}
+	// ***************************
+	// CLOSE, STATUS, SETTINGS VARIABLE READ
+	// ***************************
 
 	/**
 	 * closes the db_connection
-	 * normally this is not used, as the class deconstructor closes the connection down
+	 * normally this is not used, as the class deconstructor closes
+	 * the connection down
 	 * @return void has no return
 	 */
 	public function dbClose(): void
@@ -1138,63 +1044,6 @@ class IO
 	public function getConnectionStatus(): bool
 	{
 		return $this->db_init_error;
-	}
-
-	/**
-	 * sets new db schema
-	 * @param  string $db_schema schema name, if not given tries internal default db schema
-	 * @return bool              false on failure to find schema values, true of db exec schema set
-	 */
-	public function dbSetSchema(string $db_schema = '')
-	{
-		if (!$db_schema && $this->db_schema) {
-			$db_schema = $this->db_schema;
-		}
-		if (!$db_schema) {
-			return false;
-		}
-		$q = "SET search_path TO '" . $this->dbEscapeString($db_schema) . "'";
-		return $this->dbExec($q) ? true : false;
-	}
-
-	/**
-	 * returns the current set db schema
-	 * @return string db schema name
-	 */
-	public function dbGetSchema(): string
-	{
-		return $this->db_schema;
-	}
-
-	/**
-	 * sets the client encoding in the postgres database
-	 * @param  string $db_encoding valid encoding name,
-	 *                             so the the data gets converted to this encoding
-	 * @return bool                false, or true of db exec encoding set
-	 */
-	public function dbSetEncoding(string $db_encoding = ''): bool
-	{
-		if (!$db_encoding && $this->db_encoding) {
-			$db_encoding = $this->db_encoding;
-		}
-		if (!$db_encoding) {
-			return false;
-		}
-		$q = "SET client_encoding TO '" . $this->dbEscapeString($db_encoding) . "'";
-		return $this->dbExec($q) ? true : false;
-	}
-
-	/**
-	 * returns the current set client encoding from the connected DB
-	 * @return string current client encoding
-	 */
-	public function dbGetEncoding(): string
-	{
-		$client_encoding = $this->dbReturnRow('SHOW client_encoding');
-		if (!is_array($client_encoding)) {
-			return '';
-		}
-		return $client_encoding['client_encoding'] ?? '';
 	}
 
 	/**
@@ -1226,6 +1075,9 @@ class IO
 				break;
 			case 'ssl':
 				$setting = $this->db_ssl;
+				break;
+			case 'debug':
+				$setting = $this->db_debug;
 				break;
 			// we return *** and never the actual password
 			case 'password':
@@ -1264,10 +1116,238 @@ class IO
 		return str_replace(['{b}', '{/b}', '{br}'], ['<b>', '</b>', '<br>'], $string);
 	}
 
+/**
+	 * return current database version
+	 * @return string database version as string
+	 */
+	public function dbVersion(): string
+	{
+		return $this->db_functions->__dbVersion();
+	}
+
+	/**
+	 * returns boolean true or false if the string matches the database version
+	 * @param  string $compare string to match in type =X.Y, >X.Y, <X.Y, <=X.Y, >=X.Y
+	 * @return bool            true for ok, false on not ok
+	 */
+	public function dbCompareVersion(string $compare): bool
+	{
+		$matches = [];
+		// compare has =, >, < prefix, and gets stripped, if the rest is not X.Y format then error
+		preg_match("/^([<>=]{1,})(\d{1,})\.(\d{1,})/", $compare, $matches);
+		$compare = $matches[1];
+		$to_master = $matches[2];
+		$to_minor = $matches[3];
+		if (!$compare || !$to_master || !$to_minor) {
+			return false;
+		} else {
+			$to_version = $to_master . ($to_minor < 10 ? '0' : '') . $to_minor;
+		}
+		// db_version can return X.Y.Z
+		// we only compare the first two
+		preg_match("/^(\d{1,})\.(\d{1,})\.?(\d{1,})?/", $this->dbVersion(), $matches);
+		$master = $matches[1];
+		$minor = $matches[2];
+		$version = $master . ($minor < 10 ? '0' : '') . $minor;
+		$return = false;
+		// compare
+		switch ($compare) {
+			case '=':
+				if ($to_version == $version) {
+					$return = true;
+				}
+				break;
+			case '<':
+				if ($version < $to_version) {
+					$return = true;
+				}
+				break;
+			case '<=':
+				if ($version <= $to_version) {
+					$return = true;
+				}
+				break;
+			case '>':
+				if ($version > $to_version) {
+					$return = true;
+				}
+				break;
+			case '>=':
+				if ($version >= $to_version) {
+					$return = true;
+				}
+				break;
+			default:
+				$return = false;
+		}
+		return $return;
+	}
+
+	/**
+	 * only for postgres. pretty formats an age or datetime difference string
+	 * @param  string  $age        age or datetime difference
+	 * @param  bool    $show_micro micro on off (default false)
+	 * @return string              Y/M/D/h/m/s formatted string (like TimeStringFormat)
+	 */
+	public function dbTimeFormat(string $age, bool $show_micro = false): string
+	{
+		$matches = [];
+		// in string (datetime diff): 1786 days 22:11:52.87418
+		// or (age): 4 years 10 mons 21 days 12:31:11.87418
+		// also -09:43:54.781021 or without - prefix
+		preg_match("/(.*)?(\d{2}):(\d{2}):(\d{2})(\.(\d+))/", $age, $matches);
+
+		$prefix = $matches[1] != '-' ? $matches[1] : '';
+		$hour = $matches[2] != '00' ? preg_replace('/^0/', '', $matches[2]) : '';
+		$minutes = $matches[3] != '00' ? preg_replace('/^0/', '', $matches[3]) : '';
+		$seconds = $matches[4] != '00' ? preg_replace('/^0/', '', $matches[4]) : '';
+		$milliseconds = $matches[6];
+
+		return $prefix
+			. (!empty($hour) && is_string($hour) ? $hour . 'h ' : '')
+			. (!empty($minutes) && is_string($minutes) ? $minutes . 'm ' : '')
+			. (!empty($seconds) && is_string($seconds) ? $seconds . 's' : '')
+			. ($show_micro && !empty($milliseconds) ? ' ' . $milliseconds . 'ms' : '');
+	}
+
+	/**
+	 * clear up any data for valid DB insert
+	 * @param  int|float|string $value to escape data
+	 * @param  string           $kbn   escape trigger type
+	 * @return string                  escaped value
+	 */
+	public function dbSqlEscape($value, string $kbn = '')
+	{
+		switch ($kbn) {
+			case 'i':
+				$value = $value === '' ? "NULL" : intval($value);
+				break;
+			case 'f':
+				$value = $value === '' ? "NULL" : floatval($value);
+				break;
+			case 't':
+				$value = $value === '' ? "NULL" : "'" . $this->dbEscapeString($value) . "'";
+				break;
+			case 'd':
+				$value = $value === '' ? "NULL" : "'" . $this->dbEscapeString($value) . "'";
+				break;
+			case 'i2':
+				$value = $value === '' ? 0 : intval($value);
+				break;
+		}
+		return (string)$value;
+	}
+
+	/**
+	 * this is only needed for Postgresql. Converts postgresql arrays to PHP
+	 * @param  string $text input text to parse to an array
+	 * @return array<mixed> PHP array of the parsed data
+	 */
+	public function dbArrayParse(string $text): array
+	{
+		$output = [];
+		$__db_array_parse = $this->db_functions->__dbArrayParse($text, $output);
+		return is_array($__db_array_parse) ? $__db_array_parse : [];
+	}
+
+	// ***************************
+	// DATA WRITE CONVERSION
+	// ***************************
+
+	/**
+	 * neutral function to escape a string for DB writing
+	 * @param  string|int|float|bool $string string to escape
+	 * @return string                        escaped string
+	 */
+	public function dbEscapeString($string): string
+	{
+		return $this->db_functions->__dbEscapeString($string);
+	}
+
+	/**
+	 * neutral function to escape a string for DB writing
+	 * this one adds '' quotes around the string
+	 * @param  string|int|float|bool $string string to escape
+	 * @return string                        escaped string
+	 */
+	public function dbEscapeLiteral($string): string
+	{
+		return $this->db_functions->__dbEscapeLiteral($string);
+	}
+
+	/**
+	 * neutral function to escape a bytea for DB writing
+	 * @param  string $bytea bytea to escape
+	 * @return string        escaped bytea
+	 */
+	public function dbEscapeBytea($bytea)
+	{
+		return $this->db_functions->__dbEscapeBytea($bytea);
+	}
+
+	/**
+	 * if the input is a single char 't' or 'f
+	 * it will return the boolean value instead
+	 * also converts smallint 1/0 to true false
+	 * @param  string|bool|int $string 't' / 'f' or any string, or bool true/false
+	 * @param  boolean         $rev    do reverse (bool to string)
+	 * @return bool|string             correct php boolean true/false
+	 *                                 or postgresql 't'/'f'
+	 */
+	public function dbBoolean($string, $rev = false)
+	{
+		if (!$rev) {
+			if ($string == 't' || $string == 'true') {
+				return true;
+			}
+			if ($string == 'f' || $string == 'false') {
+				return false;
+			}
+			// fallback in case top is not t/f, default on set unset
+			if ($string) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			if ($string) {
+				return 't';
+			} else {
+				return 'f';
+			}
+		}
+	}
+
+	// ***************************
+	// TABLE META DATA READ
+	// ***************************
+
+	/**
+	 * returns an array of the table with columns and values. FALSE on no table found
+	 * @param  string     $table  table name
+	 * @param  string     $schema optional schema name
+	 * @return array<mixed>|bool         array of table data, false on error (table not found)
+	 */
+	public function dbShowTableMetaData(string $table, string $schema = '')
+	{
+		$table = ($schema ? $schema . '.' : '') . $table;
+
+		$array = $this->db_functions->__dbMetaData($table);
+		if (!is_array($array)) {
+			$array = false;
+		}
+		return $array;
+	}
+
+	// ***************************
+	// QUERY EXECUSION AND DATA READ
+	// ***************************
+
 	/**
 	 * dumps ALL data for this query, OR if no query given all in cursor_ext array
-	 * @param  string $query query, if given, only from this quey (if found), else current cursor
-	 * @return string        formated string with all the data in the array
+	 * @param  string $query Query, if given, only from this quey (if found)
+	 *                       else current cursor
+	 * @return string        Formated string with all the data in the array
 	 */
 	public function dbDumpData($query = ''): string
 	{
@@ -1510,24 +1590,6 @@ class IO
 	}
 
 	/**
-	 * resets all data stored to this query
-	 * @param  string $query The Query whose cache should be cleaned
-	 * @return bool          false if query not found, true if success
-	 */
-	public function dbCacheReset(string $query): bool
-	{
-		$md5 = md5($query);
-		// clears cache for this query
-		if (!$this->cursor_ext[$md5]['query']) {
-			$this->error_id = 18;
-			$this->__dbError();
-			return false;
-		}
-		unset($this->cursor_ext[$md5]);
-		return true;
-	}
-
-	/**
 	 * executes the query and returns & sets the internal cursor
 	 * furthermore this functions also sets varios other vars
 	 * like num_rows, num_fields, etc depending on query
@@ -1540,7 +1602,7 @@ class IO
 	 *                                 if pk name is table name and _id, pk_name
 	 *                                 is not needed to be set
 	 *                                 if NULL is given here, no RETURNING will be auto added
-	 * @return object|resource|bool   cursor for this query or false on error (PgSql\Result)
+	 * @return object|resource|bool    cursor for this query or false on error (PgSql\Result)
 	 */
 	public function dbExec(string $query = '', string $pk_name = '')
 	{
@@ -1561,78 +1623,6 @@ class IO
 			return false;
 		} else {
 			return $this->cursor;
-		}
-	}
-
-	/**
-	 * executres the query async so other methods can be run during this
-	 * for INSERT INTO queries it is highly recommended to set the pk_name
-	 * to avoid an additional
-	 * read from the database for the PK NAME
-	 * NEEDS : dbCheckAsync
-	 * @param  string $query   query to run
-	 * @param  string $pk_name optional primary key name, only used with
-	 *                         insert for returning call
-	 * @return bool            true if async query was sent ok, false if error happened
-	 */
-	public function dbExecAsync(string $query, string $pk_name = ''): bool
-	{
-		// prepare and check if we can actually run the query
-		if (($md5 = $this->__dbPrepareExec($query, $pk_name)) === false) {
-			// bail if no md5 set
-			return false;
-		}
-		// run the async query
-		if (!$this->db_functions->__dbSendQuery($this->query)) {
-			// if failed, process here
-			$this->error_id = 40;
-			$this->__dbError();
-			return false;
-		} else {
-			$this->async_running = (string)$md5;
-			// all ok, we return true (as would be from the original send query function)
-			return true;
-		}
-	}
-
-	/**
-	 * checks a previous async query and returns data if finished
-	 * NEEDS : dbExecAsync
-	 * @return bool|object|resource cursor resource if the query is still running,
-	 *                              false if an error occured or cursor of that query
-	 *                              (PgSql\Result)
-	 */
-	public function dbCheckAsync()
-	{
-		// if there is actually a async query there
-		if ($this->async_running) {
-			if ($this->db_functions->__dbConnectionBusy()) {
-				return true;
-			} else {
-				$cursor = $this->db_functions->__dbGetResult();
-				if ($cursor === false) {
-					return false;
-				}
-				// get the result/or error
-				$this->cursor = $cursor;
-				$this->async_running = '';
-				// run the post exec processing
-				if (!$this->__dbPostExec()) {
-					return false;
-				} else {
-					return $this->cursor;
-				}
-			}
-		} else {
-			// if no async running print error
-			$this->error_id = 42;
-			$this->__dbDebug(
-				'db',
-				'<span style="color: red;"><b>DB-Error</b> No async query '
-					. 'has beedbFetchArrayn started yet.</span>',
-				'DB_ERROR'
-			);
-			return false;
 		}
 	}
 
@@ -1722,6 +1712,32 @@ class IO
 		return $rows;
 	}
 
+	// ***************************
+	// CURSOR CACHE RESET
+	// ***************************
+
+	/**
+	 * resets all data stored to this query
+	 * @param  string $query The Query whose cache should be cleaned
+	 * @return bool          false if query not found, true if success
+	 */
+	public function dbCacheReset(string $query): bool
+	{
+		$md5 = md5($query);
+		// clears cache for this query
+		if (!$this->cursor_ext[$md5]['query']) {
+			$this->error_id = 18;
+			$this->__dbError();
+			return false;
+		}
+		unset($this->cursor_ext[$md5]);
+		return true;
+	}
+
+	// ***************************
+	// CURSOR POSITON CHECK
+	// ***************************
+
 	/**
 	 * returns the current position the read out
 	 * @param  string   $query query to find in cursor_ext
@@ -1754,22 +1770,39 @@ class IO
 		return (int)$this->cursor_ext[$md5]['num_rows'];
 	}
 
-	/**
-	 * returns an array of the table with columns and values. FALSE on no table found
-	 * @param  string     $table  table name
-	 * @param  string     $schema optional schema name
-	 * @return array<mixed>|bool         array of table data, false on error (table not found)
-	 */
-	public function dbShowTableMetaData(string $table, string $schema = '')
-	{
-		$table = ($schema ? $schema . '.' : '') . $table;
+	// ***************************
+	// MAXIMUM QUERY EXECUTION CHECK HELPERS
+	// ***************************
 
-		$array = $this->db_functions->__dbMetaData($table);
-		if (!is_array($array)) {
-			$array = false;
-		}
-		return $array;
+	/**
+	 * resets the call times for the max query called to 0
+	 * USE CAREFULLY: rather make the query prepare -> execute
+	 * @param  string $query query string
+	 * @return void          has no return
+	 */
+	public function dbResetQueryCalled(string $query): void
+	{
+		$this->query_called[md5($query)] = 0;
 	}
+
+	/**
+	 * gets how often a query was called already
+	 * @param  string $query query string
+	 * @return int           count of times the query was executed
+	 */
+	public function dbGetQueryCalled(string $query): int
+	{
+		$md5 = md5($query);
+		if ($this->query_called[$md5]) {
+			return $this->query_called[$md5];
+		} else {
+			return 0;
+		}
+	}
+
+	// ***************************
+	// PREPARED QUERY WORK
+	// ***************************
 
 	/**
 	 * prepares a query
@@ -1948,136 +1981,85 @@ class IO
 		return $result;
 	}
 
-	/**
-	 * neutral function to escape a string for DB writing
-	 * @param  string|int|float|bool $string string to escape
-	 * @return string                        escaped string
-	 */
-	public function dbEscapeString($string): string
-	{
-		return $this->db_functions->__dbEscapeString($string);
-	}
+	// ***************************
+	// ASYNCHRONUS EXECUTION/CHECK
+	// ***************************
 
 	/**
-	 * neutral function to escape a string for DB writing
-	 * this one adds '' quotes around the string
-	 * @param  string|int|float|bool $string string to escape
-	 * @return string                        escaped string
+	 * executres the query async so other methods can be run during this
+	 * for INSERT INTO queries it is highly recommended to set the pk_name
+	 * to avoid an additional
+	 * read from the database for the PK NAME
+	 * NEEDS : dbCheckAsync
+	 * @param  string $query   query to run
+	 * @param  string $pk_name optional primary key name, only used with
+	 *                         insert for returning call
+	 * @return bool            true if async query was sent ok, false if error happened
 	 */
-	public function dbEscapeLiteral($string): string
+	public function dbExecAsync(string $query, string $pk_name = ''): bool
 	{
-		return $this->db_functions->__dbEscapeLiteral($string);
-	}
-
-	/**
-	 * neutral function to escape a bytea for DB writing
-	 * @param  string $bytea bytea to escape
-	 * @return string        escaped bytea
-	 */
-	public function dbEscapeBytea($bytea)
-	{
-		return $this->db_functions->__dbEscapeBytea($bytea);
-	}
-
-	/**
-	 * return current database version
-	 * @return string database version as string
-	 */
-	public function dbVersion(): string
-	{
-		return $this->db_functions->__dbVersion();
-	}
-
-	/**
-	 * returns boolean true or false if the string matches the database version
-	 * @param  string $compare string to match in type =X.Y, >X.Y, <X.Y, <=X.Y, >=X.Y
-	 * @return bool            true for ok, false on not ok
-	 */
-	public function dbCompareVersion(string $compare): bool
-	{
-		$matches = [];
-		// compare has =, >, < prefix, and gets stripped, if the rest is not X.Y format then error
-		preg_match("/^([<>=]{1,})(\d{1,})\.(\d{1,})/", $compare, $matches);
-		$compare = $matches[1];
-		$to_master = $matches[2];
-		$to_minor = $matches[3];
-		if (!$compare || !$to_master || !$to_minor) {
+		// prepare and check if we can actually run the query
+		if (($md5 = $this->__dbPrepareExec($query, $pk_name)) === false) {
+			// bail if no md5 set
+			return false;
+		}
+		// run the async query
+		if (!$this->db_functions->__dbSendQuery($this->query)) {
+			// if failed, process here
+			$this->error_id = 40;
+			$this->__dbError();
 			return false;
 		} else {
-			$to_version = $to_master . ($to_minor < 10 ? '0' : '') . $to_minor;
+			$this->async_running = (string)$md5;
+			// all ok, we return true (as would be from the original send query function)
+			return true;
 		}
-		// db_version can return X.Y.Z
-		// we only compare the first two
-		preg_match("/^(\d{1,})\.(\d{1,})\.?(\d{1,})?/", $this->dbVersion(), $matches);
-		$master = $matches[1];
-		$minor = $matches[2];
-		$version = $master . ($minor < 10 ? '0' : '') . $minor;
-		$return = false;
-		// compare
-		switch ($compare) {
-			case '=':
-				if ($to_version == $version) {
-					$return = true;
-				}
-				break;
-			case '<':
-				if ($version < $to_version) {
-					$return = true;
-				}
-				break;
-			case '<=':
-				if ($version <= $to_version) {
-					$return = true;
-				}
-				break;
-			case '>':
-				if ($version > $to_version) {
-					$return = true;
-				}
-				break;
-			case '>=':
-				if ($version >= $to_version) {
-					$return = true;
-				}
-				break;
-			default:
-				$return = false;
-		}
-		return $return;
 	}
 
 	/**
-	 * if the input is a single char 't' or 'f
-	 * it will return the boolean value instead
-	 * also converts smallint 1/0 to true false
-	 * @param  string|bool|int $string 't' / 'f' or any string, or bool true/false
-	 * @param  boolean         $rev    do reverse (bool to string)
-	 * @return bool|string             correct php boolean true/false
-	 *                                 or postgresql 't'/'f'
+	 * checks a previous async query and returns data if finished
+	 * NEEDS : dbExecAsync
+	 * @return bool|object|resource cursor resource if the query is still running,
+	 *                              false if an error occured or cursor of that query
+	 *                              (PgSql\Result)
 	 */
-	public function dbBoolean($string, $rev = false)
+	public function dbCheckAsync()
 	{
-		if (!$rev) {
-			if ($string == 't' || $string == 'true') {
-				return true;
-			}
-			if ($string == 'f' || $string == 'false') {
-				return false;
-			}
-			// fallback in case top is not t/f, default on set unset
-			if ($string) {
+		// if there is actually a async query there
+		if ($this->async_running) {
+			if ($this->db_functions->__dbConnectionBusy()) {
 				return true;
 			} else {
-				return false;
+				$cursor = $this->db_functions->__dbGetResult();
+				if ($cursor === false) {
+					return false;
+				}
+				// get the result/or error
+				$this->cursor = $cursor;
+				$this->async_running = '';
+				// run the post exec processing
+				if (!$this->__dbPostExec()) {
+					return false;
+				} else {
+					return $this->cursor;
+				}
 			}
 		} else {
-			if ($string) {
-				return 't';
-			} else {
-				return 'f';
-			}
+			// if no async running print error
+			$this->error_id = 42;
+			$this->__dbDebug(
+				'db',
+				'<span style="color: red;"><b>DB-Error</b> No async query '
+					. 'has beedbFetchArrayn started yet.</span>',
+				'DB_ERROR'
+			);
+			return false;
 		}
 	}
+
+	// ***************************
+	// COMPLEX WRITE WITH CONFIG ARRAYS
+	// ***************************
 
 	// ** REMARK **
 	// db_write_data is the old without separate update no write list
@@ -2257,75 +2239,151 @@ class IO
 		return $primary_key['value'] ?? false;
 	}
 
-	/**
-	 * only for postgres. pretty formats an age or datetime difference string
-	 * @param  string  $age        age or datetime difference
-	 * @param  bool    $show_micro micro on off (default false)
-	 * @return string              Y/M/D/h/m/s formatted string (like TimeStringFormat)
-	 */
-	public function dbTimeFormat(string $age, bool $show_micro = false): string
-	{
-		$matches = [];
-		// in string (datetime diff): 1786 days 22:11:52.87418
-		// or (age): 4 years 10 mons 21 days 12:31:11.87418
-		// also -09:43:54.781021 or without - prefix
-		preg_match("/(.*)?(\d{2}):(\d{2}):(\d{2})(\.(\d+))/", $age, $matches);
-
-		$prefix = $matches[1] != '-' ? $matches[1] : '';
-		$hour = $matches[2] != '00' ? preg_replace('/^0/', '', $matches[2]) : '';
-		$minutes = $matches[3] != '00' ? preg_replace('/^0/', '', $matches[3]) : '';
-		$seconds = $matches[4] != '00' ? preg_replace('/^0/', '', $matches[4]) : '';
-		$milliseconds = $matches[6];
-
-		return $prefix
-			. (!empty($hour) && is_string($hour) ? $hour . 'h ' : '')
-			. (!empty($minutes) && is_string($minutes) ? $minutes . 'm ' : '')
-			. (!empty($seconds) && is_string($seconds) ? $seconds . 's' : '')
-			. ($show_micro && !empty($milliseconds) ? ' ' . $milliseconds . 'ms' : '');
-	}
+	// ***************************
+	// INTERNAL SETTINGS READ/CHANGE
+	// ***************************
 
 	/**
-	 * this is only needed for Postgresql. Converts postgresql arrays to PHP
-	 * @param  string $text input text to parse to an array
-	 * @return array<mixed> PHP array of the parsed data
+	 * switches the debug flag on or off
+	 * if none given, then return current set only
+	 * @param  bool|null $debug true/false or null for just getting current set
+	 * @return bool             Current debug flag as set
 	 */
-	public function dbArrayParse(string $text): array
+	public function dbSetDebug($debug = null): bool
 	{
-		$output = [];
-		$__db_array_parse = $this->db_functions->__dbArrayParse($text, $output);
-		return is_array($__db_array_parse) ? $__db_array_parse : [];
-	}
-
-	/**
-	 * clear up any data for valid DB insert
-	 * @param  int|float|string $value to escape data
-	 * @param  string           $kbn   escape trigger type
-	 * @return string                  escaped value
-	 */
-	public function dbSqlEscape($value, string $kbn = '')
-	{
-		switch ($kbn) {
-			case 'i':
-				$value = $value === '' ? "NULL" : intval($value);
-				break;
-			case 'f':
-				$value = $value === '' ? "NULL" : floatval($value);
-				break;
-			case 't':
-				$value = $value === '' ? "NULL" : "'" . $this->dbEscapeString($value) . "'";
-				break;
-			case 'd':
-				$value = $value === '' ? "NULL" : "'" . $this->dbEscapeString($value) . "'";
-				break;
-			case 'i2':
-				$value = $value === '' ? 0 : intval($value);
-				break;
+		if ($debug !== null) {
+			$this->db_debug = $debug;
 		}
-		return (string)$value;
+		return $this->db_debug;
+	}
+
+	/**
+	 * Switches db debug flag on or off
+	 * OR
+	 * with the optional parameter fix sets debug
+	 * returns current set stats
+	 * @param  bool|null $debug Flag to turn debug on off or null for toggle
+	 * @return bool             Current debug status
+	 *                          True for debug is on, False for off
+	 */
+	public function dbToggleDebug(?bool $debug = null): bool
+	{
+		if ($debug !== null) {
+			$this->db_debug = $debug;
+		} else {
+			$this->db_debug = $this->db_debug ? false : true;
+		}
+		return $this->db_debug;
+	}
+
+	/**
+	 * Return current set db debug flag status
+	 * @return bool Current debug status
+	 */
+	public function dbGetDebug(): bool
+	{
+		return $this->db_debug;
+	}
+
+	/**
+	 * set max query calls, set to -1 to disable loop
+	 * protection. this will generate a warning
+	 * empty call (null) will reset to default
+	 * @param  int|null $max_calls Set the max loops allowed
+	 * @return bool                True for succesfull set
+	 */
+	public function dbSetMaxQueryCall(?int $max_calls = null): bool
+	{
+		// if null then reset to default
+		if ($max_calls === null) {
+			$max_calls = self::DEFAULT_MAX_QUERY_CALL;
+		}
+		// if -1 then disable loop check
+		// DANGEROUS, WARN USER
+		if ($max_calls == -1) {
+			$this->warning_id = 50;
+			$this->__dbError();
+		}
+		// negative or 0
+		if ($max_calls < -1 || $max_calls == 0) {
+			$this->error_id = 51;
+			$this->__dbError();
+			// early abort
+			return false;
+		}
+		// ok entry, set
+		$this->MAX_QUERY_CALL = $max_calls;
+		return true;
+	}
+
+	/**
+	 * returns current set max query calls for loop avoidance
+	 * @return int Integer number, if -1 the loop check is disabled
+	 */
+	public function dbGetMaxQueryCall(): int
+	{
+		return $this->MAX_QUERY_CALL;
+	}
+
+	/**
+	 * sets new db schema
+	 * @param  string $db_schema schema name, if not given tries internal default db schema
+	 * @return bool              false on failure to find schema values, true of db exec schema set
+	 */
+	public function dbSetSchema(string $db_schema = '')
+	{
+		if (!$db_schema && $this->db_schema) {
+			$db_schema = $this->db_schema;
+		}
+		if (!$db_schema) {
+			return false;
+		}
+		$q = "SET search_path TO '" . $this->dbEscapeString($db_schema) . "'";
+		return $this->dbExec($q) ? true : false;
+	}
+
+	/**
+	 * returns the current set db schema
+	 * @return string db schema name
+	 */
+	public function dbGetSchema(): string
+	{
+		return $this->db_schema;
+	}
+
+	/**
+	 * sets the client encoding in the postgres database
+	 * @param  string $db_encoding valid encoding name,
+	 *                             so the the data gets converted to this encoding
+	 * @return bool                false, or true of db exec encoding set
+	 */
+	public function dbSetEncoding(string $db_encoding = ''): bool
+	{
+		if (!$db_encoding && $this->db_encoding) {
+			$db_encoding = $this->db_encoding;
+		}
+		if (!$db_encoding) {
+			return false;
+		}
+		$q = "SET client_encoding TO '" . $this->dbEscapeString($db_encoding) . "'";
+		return $this->dbExec($q) ? true : false;
+	}
+
+	/**
+	 * returns the current set client encoding from the connected DB
+	 * @return string current client encoding
+	 */
+	public function dbGetEncoding(): string
+	{
+		$client_encoding = $this->dbReturnRow('SHOW client_encoding');
+		if (!is_array($client_encoding)) {
+			return '';
+		}
+		return $client_encoding['client_encoding'] ?? '';
 	}
 
 	// ***************************
-	// INTERNAL VARIABLES READ
+	// INTERNAL VARIABLES READ POST QUERY RUN
 	// ***************************
 
 	/**
@@ -2490,7 +2548,9 @@ class IO
 		return $this->had_warning;
 	}
 
+	/******************************** */
 	// DEPEREACTED CALLS
+	/******************************** */
 
 	/**
 	 * old call for getInserReturnExt

@@ -6,14 +6,8 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = true;
-$PRINT_ALL = true;
-$DB_DEBUG = true;
-
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+// turn on all error reporting
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -23,10 +17,6 @@ define('USE_DATABASE', true);
 require 'config.php';
 // override ECHO ALL FALSE
 $ECHO_ALL = true;
-// set session name
-if (!defined('SET_SESSION_NAME')) {
-	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-}
 // define log file id
 $LOG_FILE_ID = 'classTest-db';
 ob_end_flush();
@@ -45,16 +35,12 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
+// $basic = new CoreLibs\Basic($log, EDIT_SESSION_NAME);
+//start session
+\CoreLibs\Create\Session::startSession(EDIT_SESSION_NAME);
+// db connection and attach logger
 $db = new CoreLibs\Admin\Backend(DB_CONFIG, $log);
 $db->log->debug('START', '=============================>');
-
-// NEXT STEP
-// $basic = new CoreLibs\Basic();
-// change __construct
-// add object $logger
-// add $this->log = $logger;
-// $db = new CoreLibs\DB\IO(DB_CONFIG, $basic->log);
 
 print "<html><head><title>TEST CLASS: DB</title><head>";
 print "<body>";
