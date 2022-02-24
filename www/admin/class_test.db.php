@@ -92,7 +92,7 @@ print "DIRECT INSERT PREVIOUS INSERTED: "
 
 // PREPARED INSERT
 $db->dbPrepare("ins_test_foo", "INSERT INTO test_foo (test) VALUES ($1) RETURNING test");
-$status = $db->dbExecute("ins_test_foo", array('BAR TEST ' . time()));
+$status = $db->dbExecute("ins_test_foo", ['BAR TEST ' . time()]);
 print "PREPARE INSERT[ins_test_foo] STATUS: " . Support::printToString($status) . " | "
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
@@ -245,11 +245,24 @@ $query = "SELECT type, sdate, integer FROM foobar";
 $data = $db->dbReturnArray($query, true);
 print "Full foobar list: <br><pre>" . print_r($data, true) . "</pre><br>";
 
+// trigger a warning
+print "<b>WARNING NEXT</b><br>";
+// trigger an error
+print "<b>ERROR NEXT</b><br>";
+$query = "INSERT invalid FROM invalid";
+$data = $db->dbReturnArray($query);
+print "ERROR (INS ON dbExec): <pre>" . print_r($db->dbGetErrorHistory(true), true) . "</pre><br>";
+$query = "SELECT invalid FROM invalid";
+$data = $db->dbReturnArray($query);
+print "ERROR (HARD ERROR): <pre>" . print_r($db->dbGetErrorHistory(true), true) . "</pre><br>";
+
+// how to handle HARD errors
+
 # async test queries
 /*
 $db->dbExecAsync("SELECT test FROM test_foo, (SELECT pg_sleep(10)) as sub WHERE test_foo_id IN (27, 50, 67, 44, 10)");
 echo "WAITING FOR ASYNC: ";
-$chars = array('|', '/', '-', '\\');
+$chars = ['|', '/', '-', '\\'];
 while (($ret = $db->dbCheckAsync()) === true)
 {
 	if ((list($_, $char) = each($chars)) === FALSE)

@@ -67,6 +67,7 @@ print '<div><a href="class_test.array.php">Class Test: ARRAY HANDLER</a></div>';
 print '<div><a href="class_test.file.php">Class Test: FILE</a></div>';
 print '<div><a href="class_test.randomkey.php">Class Test: RANDOM KEY</a></div>';
 print '<div><a href="class_test.system.php">Class Test: SYSTEM</a></div>';
+print '<div><a href="class_test.readenvfile.php">Class Test: READ ENV FILE</a></div>';
 print '<div><a href="class_test.runningtime.php">Class Test: RUNNING TIME</a></div>';
 print '<div><a href="class_test.debug.php">Class Test: DEBUG</a></div>';
 print '<div><a href="class_test.output.form.php">Class Test: OUTPUT FORM</a></div>';

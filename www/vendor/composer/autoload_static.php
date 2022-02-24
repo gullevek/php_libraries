@@ -100,6 +100,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Debug\\Logging' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/Logging.php',
         'CoreLibs\\Debug\\RunningTime' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/RunningTime.php',
         'CoreLibs\\Debug\\Support' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/Support.php',
+        'CoreLibs\\Get\\ReadEnvFile' => __DIR__ . '/../..' . '/lib/CoreLibs/Get/ReadEnvFile.php',
         'CoreLibs\\Get\\System' => __DIR__ . '/../..' . '/lib/CoreLibs/Get/System.php',
         'CoreLibs\\Language\\Core\\CachedFileReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/CachedFileReader.php',
         'CoreLibs\\Language\\Core\\FileReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/FileReader.php',

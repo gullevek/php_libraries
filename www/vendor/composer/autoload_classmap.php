@@ -35,6 +35,7 @@ return array(
     'CoreLibs\\Debug\\Logging' => $baseDir . '/lib/CoreLibs/Debug/Logging.php',
     'CoreLibs\\Debug\\RunningTime' => $baseDir . '/lib/CoreLibs/Debug/RunningTime.php',
     'CoreLibs\\Debug\\Support' => $baseDir . '/lib/CoreLibs/Debug/Support.php',
+    'CoreLibs\\Get\\ReadEnvFile' => $baseDir . '/lib/CoreLibs/Get/ReadEnvFile.php',
     'CoreLibs\\Get\\System' => $baseDir . '/lib/CoreLibs/Get/System.php',
     'CoreLibs\\Language\\Core\\CachedFileReader' => $baseDir . '/lib/CoreLibs/Language/Core/CachedFileReader.php',
     'CoreLibs\\Language\\Core\\FileReader' => $baseDir . '/lib/CoreLibs/Language/Core/FileReader.php',

@@ -1,5 +1,10 @@
 <?php
 
+// config.php reads auto loader and uses CoreLibs version of this
+// DEPRECATED for here
+
+declare(strict_types=1);
+
 /**
  * parses .env file
  *

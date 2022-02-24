@@ -156,8 +156,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// if not set ... produce error
 		if (!$this->table_array[$this->pk_name]['value']) {
 			// if no PK found, error ...
-			$this->error_id = 91;
-			$this->__dbError();
+			$this->dbError(91);
 			return false;
 		} else {
 			return true;
@@ -235,8 +234,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// if 0, error
 		$this->pk_id = null;
 		if (!$this->dbExec($q)) {
-			$this->error_id = 92;
-			$this->__dbError();
+			$this->dbError(92);
 		}
 		return $this->table_array;
 	}
@@ -310,8 +308,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			// possible dbFetchArray errors ...
 			$this->pk_id = $this->table_array[$this->pk_name]['value'];
 		} else {
-			$this->error_id = 92;
-			$this->__dbError();
+			$this->dbError(92);
 		}
 		return $this->table_array;
 	}
@@ -535,8 +532,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// return success or not
 		if (!$this->dbExec($q)) {
-			$this->error_id = 92;
-			$this->__dbError();
+			$this->dbError(92);
 		}
 		// set primary key
 		if ($insert) {

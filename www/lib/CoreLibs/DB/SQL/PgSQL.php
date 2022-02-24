@@ -80,8 +80,8 @@ class PgSQL
 	}
 
 	/**
-	 * wrapper for gp_query, catches error and stores it in class var
-	 * @param  string      $query query string
+	 * wrapper for pg_query, catches error and stores it in class var
+	 * @param  string $query Query string
 	 * @return object|resource|bool query result (PgSql\Result)
 	 */
 	public function __dbQuery(string $query)
@@ -92,6 +92,30 @@ class PgSQL
 		}
 		// read out the query status and save the query if needed
 		$result = pg_query($this->dbh, $query);
+		if ($result === false) {
+			$this->last_error_query = $query;
+		}
+		return $result;
+	}
+
+	/**
+	 * Proposed
+	 * wrapperf or pg_query_params for queries in the style of
+	 * SELECT foo FROM bar WHERE foobar = $1
+	 * @param string $query  Query string with placeholders $1, ..
+	 * @param array  $params matching parameters for each placerhold
+	 * @return object|resource|bool query result (PgSql\Result)
+	 */
+	public function __dbQueryParams(string $query, array $params)
+	{
+		$this->last_error_query = '';
+		if ($this->dbh === false || is_bool($this->dbh)) {
+			return false;
+		}
+		// parse query and get all $n entries
+		// TODO count of $n must match params
+		// read out the query status and save the query if needed
+		$result = pg_query_params($this->dbh, $query, $params);
 		if ($result === false) {
 			$this->last_error_query = $query;
 		}
@@ -397,22 +421,43 @@ class PgSQL
 	 * @param  string        $db_name databse name
 	 * @param  integer       $db_port port (int, 5432 is default)
 	 * @param  string        $db_ssl  SSL (allow is default)
-	 * @return object|resource|bool db handler PgSql\Connection  or false on error
+	 * @return object|resource|bool db handler PgSql\Connection or false on error
 	 */
 	public function __dbConnect(
 		string $db_host,
 		string $db_user,
 		string $db_pass,
 		string $db_name,
-		int $db_port = 5432,
+		int $db_port,
 		string $db_ssl = 'allow'
 	) {
-		// to avoid empty db_port
-		if (!$db_port) {
-			$db_port = 5432;
+		if (empty($db_name)) {
+			return false;
 		}
-		$this->dbh = pg_connect("host=" . $db_host . " port=" . $db_port . " user="
-			. $db_user . " password=" . $db_pass . " dbname=" . $db_name . " sslmode=" . $db_ssl);
+		// if there is no host, leave it empty, this will try default unix path
+		// same for port (defaults to 5432 if not set)
+		// must set is db name
+		// if no user name, db name is used
+		$connection_string = [];
+		if (!empty($db_host)) {
+			$connection_string[] = 'host=' . $db_host;
+		}
+		if (!empty($db_port)) {
+			$connection_string[] = 'port=' . $db_port;
+		}
+		if (!empty($db_user)) {
+			$connection_string[] = 'user=' . $db_user;
+		}
+		if (!empty($db_pass)) {
+			$connection_string[] = 'password=' . $db_pass;
+		}
+		// we must have at least db name set
+		$connection_string[] = 'dbname=' . $db_name;
+		if (!empty($db_ssl)) {
+			$connection_string[] = 'sslmode=' . $db_ssl;
+		}
+		// connect
+		$this->dbh = pg_connect(join(' ', $connection_string));
 		// if (!$this->dbh) {
 		// 	die("<!-- Can't connect to database //-->");
 		// }
@@ -438,8 +483,8 @@ class PgSQL
 			$cursor = pg_get_result($this->dbh);
 		}
 		if ($cursor && !is_bool($cursor) && $error_str = pg_result_error($cursor)) {
-			return "<span style=\"color: red;\"><b>-PostgreSQL-Error-></b> "
-				. $error_str . "</span><br>";
+			return '-PostgreSQL-Error- '
+				. $error_str;
 		} else {
 			return '';
 		}
