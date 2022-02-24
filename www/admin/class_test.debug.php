@@ -24,9 +24,7 @@ define('USE_DATABASE', false);
 // sample config
 require 'config.php';
 // set session name
-if (!defined('SET_SESSION_NAME')) {
-	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-}
+$GLOBALS['SET_SESSION_NAME'] = EDIT_SESSION_NAME;
 // define log file id
 $LOG_FILE_ID = 'classTest-debug';
 ob_end_flush();
@@ -37,7 +35,13 @@ use CoreLibs\Debug\Support as DebugSupport;
 use CoreLibs\Debug\FileWriter;
 
 $basic = new CoreLibs\Basic();
-$debug = new CoreLibs\Debug\Logging();
+$debug = new CoreLibs\Debug\Logging([
+	'log_folder' => BASE . LOG,
+	'file_id' => $LOG_FILE_ID,
+	'debug_all' => $DEBUG_ALL,
+	'print_all' => $PRINT_ALL,
+	'echo_all' => $ECHO_ALL,
+]);
 $debug_support_class = 'CoreLibs\Debug\Support';
 $debug_logging_class = 'CoreLibs\Debug\Logging';
 

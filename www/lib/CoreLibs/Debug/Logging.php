@@ -177,9 +177,19 @@ class Logging
 		} elseif (!empty($GLOBALS['LOG_FILE_ID'])) {
 			// legacy flow, should be removed and only set via options
 			$this->setLogId($GLOBALS['LOG_FILE_ID']);
+			// TODO trigger deprecation error
+			// trigger_error(
+			// 	'Debug\Logging: Do not use globals LOG_FILE_ID to set log id for Logging',
+			// 	E_USER_DEPRECATED
+			// );
 		} elseif (defined('LOG_FILE_ID')) {
 			// legacy flow, should be removed and only set via options
 			$this->setLogId(LOG_FILE_ID);
+			// trigger deprecation error
+			// trigger_error(
+			// 	'Debug\Logging: Do not use constant LOG_FILE_ID to set log id for Logging',
+			// 	E_USER_DEPRECATED
+			// );
 		}
 
 		// init the log levels
@@ -214,16 +224,28 @@ class Logging
 					isset($GLOBALS[$up_type]) &&
 					is_array($GLOBALS[$up_type])
 				) {
+					// TODO trigger deprecation error
 					$this->setLogLevel($type, $flag, $GLOBALS[$up_type]);
 				}
 			}
 		}
 
+		// TODO remove all $GLOBALS call and only use options
 		// all overrule
 		$this->setLogLevelAll(
 			'debug',
 			$this->options['debug_all'] ??
+				// for user login, should be handled outside like globals
+				$_SESSION['DEBUG_ALL'] ??
 				$GLOBALS['DEBUG_ALL'] ??
+				false
+		);
+		$this->setLogLevelAll(
+			'print',
+			$this->options['print_all'] ??
+				// for user login, should be handled outside like globals
+				$_SESSION['DEBUG_ALL'] ??
+				$GLOBALS['PRINT_ALL'] ??
 				false
 		);
 		$this->setLogLevelAll(
@@ -232,19 +254,15 @@ class Logging
 				$GLOBALS['ECHO_ALL'] ??
 				false
 		);
-		$this->setLogLevelAll(
-			'print',
-			$this->options['print_all'] ??
-				$GLOBALS['PRINT_ALL'] ??
-				false
-		);
 
 		// GLOBAL rules for log writing
+		// add file date is default on
 		$this->setGetLogPrintFileDate(
 			$this->options['print_file_date'] ??
 				$GLOBALS['LOG_PRINT_FILE_DATE'] ??
 				true
 		);
+		// all other logging file name flags are off
 		$this->setLogPer(
 			'level',
 			$this->options['per_level'] ??

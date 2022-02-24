@@ -390,7 +390,14 @@ class IO
 		$this->db_type = $db_config['db_type'] ?? '';
 		$this->db_ssl = !empty($db_config['db_ssl']) ? $db_config['db_ssl'] : 'allow';
 		// set debug, either via global var, or from config, else set to false
-		$this->dbSetDebug($GLOBALS['DB_DEBUG'] ?? $db_config['db_debug'] ?? false);
+		$this->dbSetDebug(
+			$db_config['db_debug'] ??
+			// should be handled from outside
+			$_SESSION['DB_DEBUG'] ??
+			// globals should be deprecated
+			$GLOBALS['DB_DEBUG'] ??
+			false
+		);
 
 		// set the target encoding to the DEFAULT_ENCODING if it is one of them: EUC, Shift_JIS, UTF-8
 		// @ the moment set only from outside
@@ -2040,10 +2047,13 @@ class IO
 	}
 
 	/**
-	 * if the input is a single char 't' or 'f' it will return the boolean value instead
-	 * @param  string|bool  $string 't' / 'f' or any string, or bool true/false
-	 * @param  boolean      $rev    do reverse (bool to string)
-	 * @return bool|string          correct php boolean true/false or postgresql 't'/'f'
+	 * if the input is a single char 't' or 'f
+	 * it will return the boolean value instead
+	 * also converts smallint 1/0 to true false
+	 * @param  string|bool|int $string 't' / 'f' or any string, or bool true/false
+	 * @param  boolean         $rev    do reverse (bool to string)
+	 * @return bool|string             correct php boolean true/false
+	 *                                 or postgresql 't'/'f'
 	 */
 	public function dbBoolean($string, $rev = false)
 	{

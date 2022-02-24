@@ -252,7 +252,10 @@ class Backend extends \CoreLibs\DB\IO
 			. "'" . $this->dbEscapeString($_SERVER['HTTP_ACCEPT'] ?? '') . "', "
 			. "'" . $this->dbEscapeString($_SERVER['HTTP_ACCEPT_CHARSET'] ?? '') . "', "
 			. "'" . $this->dbEscapeString($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '') . "', "
-			. "'" . session_id() . "', "
+			. (\CoreLibs\Create\Session::getSessionId() === false ?
+				"NULL" :
+				"'" . \CoreLibs\Create\Session::getSessionId() . "'")
+			. ", "
 			. "'" . $this->dbEscapeString($this->action) . "', "
 			. "'" . $this->dbEscapeString($this->action_id) . "', "
 			. "'" . $this->dbEscapeString($this->action_yes) . "', "

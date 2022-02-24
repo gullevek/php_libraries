@@ -69,6 +69,7 @@ declare(strict_types=1);
 namespace CoreLibs\ACL;
 
 use CoreLibs\Check\Password;
+use CoreLibs\Create\Session;
 
 class Login extends \CoreLibs\DB\IO
 {
@@ -184,12 +185,13 @@ class Login extends \CoreLibs\DB\IO
 		}
 
 		// initial the session if there is no session running already
-		// TODO: move that to outside
-		\CoreLibs\Create\Session::startSession();
-		// check if session exists
-		if (!session_id()) {
-			echo '<b>Session not started!</b><br>Use \'session_start();\'.<br>';
-			echo 'For less problems with other session, you can set a session name with \'session_name("name");\'.<br>';
+		// check if session exists and could be created
+		// TODO: move session creation and check to outside?
+		if (Session::startSession() === false) {
+			echo '<b>Session not started or could not be started!</b><br>'
+				. 'Use \'\CoreLibs\Create\Session::startSession();\'.<br>'
+				. 'For less problems with other session, you can set a '
+				. 'session name with \'\CoreLibs\Create\Session::startSession(\'name\');\'.<br>';
 			exit;
 		}
 
@@ -209,7 +211,7 @@ class Login extends \CoreLibs\DB\IO
 		$this->login_is_ajax_page = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
 		// set the default lang
 		$lang = 'en_utf8';
-		if (session_id() !== false && !empty($_SESSION['DEFAULT_LANG'])) {
+		if (Session::getSessionId() !== false && !empty($_SESSION['DEFAULT_LANG'])) {
 			$lang = $_SESSION['DEFAULT_LANG'];
 		} else {
 			$lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
@@ -408,11 +410,12 @@ class Login extends \CoreLibs\DB\IO
 				$this->login_error = 102;
 			} else {
 				// we have to get the themes in here too
-				$q = "SELECT eu.edit_user_id, username, password, eu.edit_group_id, "
+				$q = "SELECT eu.edit_user_id, eu.username, eu.password, "
+					. "eu.edit_group_id, "
 					. "eg.name AS edit_group_name, admin, "
 					. "eu.login_error_count, eu.login_error_date_last, "
 					. "eu.login_error_date_first, eu.strict, eu.locked, "
-					. "debug, db_debug, "
+					. "eu.debug, eu.db_debug, "
 					. "eareu.level AS user_level, eareu.type AS user_type, "
 					. "eareg.level AS group_level, eareg.type AS group_type, "
 					. "eu.enabled, el.short_name AS lang_short, el.iso_name AS lang_iso, "
@@ -477,8 +480,9 @@ class Login extends \CoreLibs\DB\IO
 						$this->loginCheckPermissions();
 						if ($this->login_error == 0) {
 							// now set all session vars and read page permissions
-							$GLOBALS['DEBUG_ALL'] = $_SESSION['DEBUG_ALL'] = $res['debug'];
-							$GLOBALS['DB_DEBUG'] = $_SESSION['DB_DEBUG'] = $res['db_debug'];
+							$_SESSION['DEBUG_ALL'] = $this->dbBoolean($res['debug']);
+							$_SESSION['DB_DEBUG'] = $this->dbBoolean($res['db_debug']);
+							// general info for user logged in
 							$_SESSION['USER_NAME'] = $res['username'];
 							$_SESSION['ADMIN'] = $res['admin'];
 							$_SESSION['GROUP_NAME'] = $res['edit_group_name'];
@@ -687,14 +691,6 @@ class Login extends \CoreLibs\DB\IO
 				$this->permission_okay = false;
 				return $this->permission_okay;
 			}
-			// unset mem limit if debug is set to 1
-			// if (
-			// 	($GLOBALS["DEBUG_ALL"] || $GLOBALS["DB_DEBUG"] ||
-			// 	$_SESSION["DEBUG_ALL"] || $_SESSION["DB_DEBUG"]) &&
-			// 	ini_get('memory_limit') != -1
-			// ) {
-			// 	ini_set('memory_limit', '-1');
-			// }
 			if (isset($res['filename']) && $res['filename'] == $this->page_name) {
 				$this->permission_okay = true;
 			} else {
@@ -714,21 +710,39 @@ class Login extends \CoreLibs\DB\IO
 	{
 		if ($this->logout || $this->login_error) {
 			// unregister and destroy session vars
-			unset($_SESSION['EUID']);
-			unset($_SESSION['GROUP_ACL_LEVEL']);
-			unset($_SESSION['USER_ACL_LEVEL']);
-			unset($_SESSION['PAGES']);
-			unset($_SESSION['USER_NAME']);
-			unset($_SESSION['UNIT']);
-			unset($_SESSION['DEBUG_ALL']);
-			unset($_SESSION['DB_DEBUG']);
-			unset($GLOBALS['DEBUG_ALL']);
-			unset($GLOBALS['DB_DEBUG']);
-			unset($_SESSION['LANG']);
-			unset($_SESSION['DEFAULT_CHARSET']);
-			unset($_SESSION['DEFAULT_LANG']);
-			unset($_SESSION['GROUP_NAME']);
-			unset($_SESSION['HEADER_COLOR']);
+			foreach (
+				// TODO move this into some global array for easier update
+				[
+					'ADMIN',
+					'BASE_ACL_LEVEL',
+					'DB_DEBUG',
+					'DEBUG_ALL',
+					'DEFAULT_ACL_LIST',
+					'DEFAULT_CHARSET',
+					'DEFAULT_LANG',
+					'EAID',
+					'EUID',
+					'GROUP_ACL_LEVEL',
+					'GROUP_ACL_TYPE',
+					'GROUP_NAME',
+					'HEADER_COLOR',
+					'LANG',
+					'PAGES_ACL_LEVEL',
+					'PAGES',
+					'TEMPLATE',
+					'UNIT_ACL_LEVEL',
+					'UNIT_DEFAULT',
+					'UNIT',
+					'USER_ACL_LEVEL',
+					'USER_ACL_TYPE',
+					'USER_NAME',
+				] as $session_var
+			) {
+				unset($_SESSION[$session_var]);
+			}
+			// final unset all
+			session_unset();
+			// final destroy session
 			session_destroy();
 			// then prints the login screen again
 			$this->permission_okay = false;
@@ -1384,7 +1398,7 @@ EOM;
 				$q .= "NULL, ";
 			}
 		}
-		$q .= "'" . session_id() . "', ";
+		$q .= "'" . Session::getSessionId() . "', ";
 		$q .= "'" . $this->dbEscapeString($this->action) . "', ";
 		$q .= "'" . $this->dbEscapeString($this->username) . "', ";
 		$q .= "NULL, ";
