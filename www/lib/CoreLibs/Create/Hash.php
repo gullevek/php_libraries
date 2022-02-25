@@ -10,6 +10,9 @@ namespace CoreLibs\Create;
 
 class Hash
 {
+	public const STANDARD_HASH_LONG = 'ripemd160';
+	public const STANDARD_HASH_SHORT = 'adler32';
+
 	/**
 	 * checks php version and if >=5.2.7 it will flip the string
 	 * can return empty string if none of string sets work
@@ -59,8 +62,10 @@ class Hash
 	 * @param  string $hash_type hash type (default adler32)
 	 * @return string            hash of the string
 	 */
-	public static function __hash(string $string, string $hash_type = 'adler32'): string
-	{
+	public static function __hash(
+		string $string,
+		string $hash_type = self::STANDARD_HASH_SHORT
+	): string {
 		if (
 			!in_array(
 				$hash_type,
@@ -73,6 +78,16 @@ class Hash
 	}
 
 	/**
+	 * Wrapper function for standard long hashd
+	 * @param string $string String to be hashed
+	 * @return string        Hashed string
+	 */
+	public static function __hashLong(string $string): string
+	{
+		return hash(self::STANDARD_HASH_LONG, $string);
+	}
+
+	/**
 	 * create a unique id with the standard hash type defined in __hash
 	 *
 	 * @return string Unique ID with fixed length of 8 characters
@@ -80,6 +95,17 @@ class Hash
 	public static function __uniqId(): string
 	{
 		return self::__hash(uniqid((string)rand(), true));
+	}
+
+	/**
+	 * create a unique id with the standard long hash type
+	 * defined in __hashLong
+	 *
+	 * @return string Unique ID with length of current default long hash
+	 */
+	public static function __uniqIdLong(): string
+	{
+		return self::__hashLong(uniqid((string)rand(), true));
 	}
 }
 

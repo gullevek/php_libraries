@@ -31,7 +31,6 @@ for ($dir_pos = 0, $dir_max = count(explode(DIRECTORY_SEPARATOR, __DIR__)); $dir
 		// 	]
 		// },
 		// NOTE: MUST RUN composer dump-autoload if file/class names are changed or added
-		// NOTE BASE: __DIR__ . DIRECTORY_SEPARATOR . '..' DIRECTORY_SEPARATOR;
 		// load auto loader
 		if (is_file($CONFIG_PATH_PREFIX . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php')) {
 			require $CONFIG_PATH_PREFIX . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';

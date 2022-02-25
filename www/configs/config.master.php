@@ -304,20 +304,5 @@ if (defined('DEBUG') && DEBUG == false) {
 
 /************* AUTO LOADER *******************/
 // **DEPRECATED** MOVED TO config.php
-// read auto loader for lib only
-// if (is_file(BASE . LIB . 'autoloader.php')) {
-// 	require BASE . LIB . 'autoloader.php';
-// }
-// composer auto loader, IF composer.json file includes classmap for lib/:
-// "autoload": {
-// 	"classmap": [
-// 		"lib/"
-// 	]
-// },
-// NOTE: MUST RUN composer dump-autoload if file/class names are changed or added
-// NOTE BASE: __DIR__ . DIRECTORY_SEPARATOR . '..' DIRECTORY_SEPARATOR;
-// if (is_file(BASE . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php')) {
-// 	require BASE . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
-// }
 
 // __END__

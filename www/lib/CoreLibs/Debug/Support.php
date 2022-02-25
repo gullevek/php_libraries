@@ -75,7 +75,7 @@ class Support
 	 * if there is a need to find out which parent method called a child method,
 	 * eg for debugging, this function does this
 	 * call this method in the child method and you get the parent function that called
-	 * @param  int    $level debug level, default 2
+	 * @param  int    $level debug level, default 1
 	 * @return ?string       null or the function that called the function where this method is called
 	 */
 	public static function getCallerMethod(int $level = 1): ?string

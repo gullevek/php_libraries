@@ -256,6 +256,20 @@ $query = "SELECT invalid FROM invalid";
 $data = $db->dbReturnArray($query);
 print "ERROR (HARD ERROR): <pre>" . print_r($db->dbGetErrorHistory(true), true) . "</pre><br>";
 
+/*
+set error id in
+dbPrepare
+dbExecute
+dbExecAsync
+dbWriteDataExt
+dbReturnArray
+dbReturnRow
+dbFetchArray (?)
+dbExec (if not set before)
+dbReturn
+dbShowTableMetaData
+*/
+
 // how to handle HARD errors
 
 # async test queries

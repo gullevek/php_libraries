@@ -55,12 +55,21 @@ $to_crc = 'Some text block';
 print "S::__CRC32B: $to_crc: " . $hash_class::__crc32b($to_crc) . "<br>";
 print "S::__SHA1SHORT(off): $to_crc: " . $hash_class::__sha1short($to_crc) . "<br>";
 print "S::__SHA1SHORT(on): $to_crc: " . $hash_class::__sha1short($to_crc, true) . "<br>";
-print "S::__hash(d): $to_crc: " . $hash_class::__hash($to_crc) . "<br>";
+print "S::__hash(d): " . $to_crc . "/"
+	. Hash::STANDARD_HASH_SHORT . ": " . $hash_class::__hash($to_crc) . "<br>";
 foreach (['adler32', 'fnv132', 'fnv1a32', 'joaat'] as $__hash_c) {
 	print "S::__hash($__hash_c): $to_crc: " . $hash_class::__hash($to_crc, $__hash_c) . "<br>";
 }
 // static use
 print "U-S::__CRC32B: $to_crc: " . Hash::__crc32b($to_crc) . "<br>";
+
+print "<br>CURRENT STANDARD_HASH_SHORT: " . Hash::STANDARD_HASH_SHORT . "<br>";
+print "<br>CURRENT STANDARD_HASH_LONG: " . Hash::STANDARD_HASH_LONG . "<br>";
+print "HASH SHORT: " . $to_crc . ": " . Hash::__hash($to_crc) . "<br>";
+print "HASH LONG: " . $to_crc . ": " . Hash::__hashLong($to_crc) . "<br>";
+
+print "UNIQU ID SHORT : " . Hash::__uniqId() . "<br>";
+print "UNIQU ID LONG : " . Hash::__uniqIdLong() . "<br>";
 
 // DEPRECATED
 /* print "D/__CRC32B: $to_crc: ".$basic->__crc32b($to_crc)."<br>";

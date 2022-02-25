@@ -102,9 +102,9 @@ class PgSQL
 	 * Proposed
 	 * wrapperf or pg_query_params for queries in the style of
 	 * SELECT foo FROM bar WHERE foobar = $1
-	 * @param string $query  Query string with placeholders $1, ..
-	 * @param array  $params matching parameters for each placerhold
-	 * @return object|resource|bool query result (PgSql\Result)
+	 * @param  string       $query  Query string with placeholders $1, ..
+	 * @param  array<mixed> $params Matching parameters for each placerhold
+	 * @return object|resource|bool Query result (PgSql\Result)
 	 */
 	public function __dbQueryParams(string $query, array $params)
 	{
