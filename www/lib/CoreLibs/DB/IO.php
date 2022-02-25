@@ -339,7 +339,7 @@ class IO
 	private $warning_history = [];
 	// error thrown on class init if we cannot connect to db
 	/** @var bool */
-	protected $db_init_error = false;
+	protected $db_connection_closed = false;
 	// sub include with the database functions
 	/** @var \CoreLibs\DB\SQL\PgSQL */
 	private $db_functions;
@@ -463,17 +463,17 @@ class IO
 		} else {
 			// abort error
 			$this->__dbError(10);
-			$this->db_init_error = true;
+			$this->db_connection_closed = true;
 		}
 		if (!is_object($this->db_functions)) {
 			$this->__dbError(100);
-			$this->db_init_error = true;
+			$this->db_connection_closed = true;
 		}
 
 		// connect to DB
 		if (!$this->__connectToDB()) {
 			$this->__dbError(16);
-			$this->db_init_error = true;
+			$this->db_connection_closed = true;
 		}
 	}
 
@@ -1071,18 +1071,19 @@ class IO
 		if ($this->dbh) {
 			$this->db_functions->__dbClose();
 			$this->dbh = null;
+			$this->db_connection_closed = true;
 		}
 	}
 
 	/**
 	 * returns the db init error
-	 * if failed to connect it is set to true
-	 * else false
-	 * @return bool connection failure status
+	 * if failed to connect it is set to false
+	 * else true
+	 * @return bool Connection status
 	 */
-	public function getConnectionStatus(): bool
+	public function dbGetConnectionStatus(): bool
 	{
-		return $this->db_init_error;
+		return $this->db_connection_closed ? false : true;
 	}
 
 	/**
@@ -1131,12 +1132,16 @@ class IO
 
 	/**
 	 * prints out status info from the connected DB (might be usefull for debug stuff)
-	 * @param  bool|boolean $show show db connection info, default true
-	 *                            if set to false won't write to error_msg var
-	 * @return string             db connection information string
+	 * @param  bool   $log   Show db connection info, default true
+	 *                       if set to false won't write to error_msg var
+	 * @param  bool   $strip Strip all HTML
+	 * @return string        db connection information string
 	 */
-	public function dbInfo(bool $show = true): string
+	public function dbInfo(bool $log = true, bool $strip = false): string
 	{
+		$html_tags = ['{b}', '{/b}', '{br}'];
+		$replace_html = ['<b>', '</b>', '<br>'];
+		$replace_text = ['', '', ' **** '];
 		$string = '';
 		$string .= '{b}-DB-info->{/b} Connected to db {b}\'' . $this->db_name . '\'{/b} ';
 		$string .= 'with schema {b}\'' . $this->db_schema . '\'{/b} ';
@@ -1145,14 +1150,22 @@ class IO
 		$string .= 'on port {b}\'' . $this->db_port . '\'{/b} ';
 		$string .= 'with ssl mode {b}\'' . $this->db_ssl . '\'{/b}{br}';
 		$string .= '{b}-DB-info->{/b} DB IO Class debug output: {b}' . ($this->db_debug ? 'Yes' : 'No') . '{/b}';
-		if ($show === true) {
+		if ($log === true) {
 			// if debug, remove / change b
-			$this->__dbDebug('db', str_replace(['{b}', '{/b}', '{br}'], ['', '', ' **** '], $string), 'dbInfo');
+			$this->__dbDebug('db', str_replace(
+				$html_tags,
+				$replace_text,
+				$string
+			), 'dbInfo');
 		} else {
 			$string = $string . '{br}';
 		}
-		// for direct print, change to html
-		return str_replace(['{b}', '{/b}', '{br}'], ['<b>', '</b>', '<br>'], $string);
+		// for direct print, change to html or strip if flagged
+		return str_replace(
+			$html_tags,
+			$strip === false ? $replace_html : $replace_text,
+			$string
+		);
 	}
 
 	/**
@@ -1177,7 +1190,7 @@ class IO
 		$compare = $matches[1];
 		$to_master = $matches[2];
 		$to_minor = $matches[3];
-		if (!$compare || !$to_master || !$to_minor) {
+		if (!$compare || !strlen($to_master) || !strlen($to_minor)) {
 			return false;
 		} else {
 			$to_version = $to_master . ($to_minor < 10 ? '0' : '') . $to_minor;
@@ -1290,6 +1303,33 @@ class IO
 	}
 
 	// ***************************
+	// DEBUG DATA DUMP
+	// ***************************
+
+	/**
+	 * dumps ALL data for this query, OR if no query given all in cursor_ext array
+	 * @param  string $query Query, if given, only from this quey (if found)
+	 *                       else current cursor
+	 * @return string        Formated string with all the data in the array
+	 */
+	public function dbDumpData($query = ''): string
+	{
+		// set start array
+		if ($query) {
+			$array = $this->cursor_ext[Hash::__hashLong($query)] ?? [];
+		} else {
+			$array = $this->cursor_ext;
+		}
+		$string = '';
+		if (is_array($array)) {
+			$this->nbsp = '';
+			$string .= $this->__printArray($array);
+			$this->__dbDebug('db', $string, 'dbDumpData');
+		}
+		return $string;
+	}
+
+	// ***************************
 	// DATA WRITE CONVERSION
 	// ***************************
 
@@ -1382,29 +1422,6 @@ class IO
 	// ***************************
 	// QUERY EXECUSION AND DATA READ
 	// ***************************
-
-	/**
-	 * dumps ALL data for this query, OR if no query given all in cursor_ext array
-	 * @param  string $query Query, if given, only from this quey (if found)
-	 *                       else current cursor
-	 * @return string        Formated string with all the data in the array
-	 */
-	public function dbDumpData($query = ''): string
-	{
-		// set start array
-		if ($query) {
-			$array = $this->cursor_ext[Hash::__hashLong($query)] ?? [];
-		} else {
-			$array = $this->cursor_ext;
-		}
-		$string = '';
-		if (is_array($array)) {
-			$this->nbsp = '';
-			$string .= $this->__printArray($array);
-			$this->__dbDebug('db', $string, 'dbDumpData');
-		}
-		return $string;
-	}
 
 	/**
 	 * single running function, if called creates hash from
@@ -2632,6 +2649,21 @@ class IO
 	/******************************** */
 	// DEPEREACTED CALLS
 	/******************************** */
+
+	/**
+	 * returns the db init error
+	 * if failed to connect it is set to true
+	 * else false
+	 * @return bool connection failure status
+	 * @deprecated Use dbGetConnectionStatus() and True means correct connection
+	 */
+	public function getConnectionStatus(): bool
+	{
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, '
+			. 'use dbGetConnectionStatus() with True for successful connection', E_USER_DEPRECATED);
+		// reverse because before it was reverse
+		return $this->dbGetConnectionStatus() ? false : true;
+	}
 
 	/**
 	 * Sets error number that was last

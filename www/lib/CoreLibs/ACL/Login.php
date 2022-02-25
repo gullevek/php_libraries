@@ -178,7 +178,7 @@ class Login extends \CoreLibs\DB\IO
 		// set internal page name
 		$this->page_name = \CoreLibs\Get\System::getPageName();
 		// set db special errors
-		if ($this->db_init_error === true) {
+		if (!$this->dbGetConnectionStatus()) {
 			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
 			exit;
