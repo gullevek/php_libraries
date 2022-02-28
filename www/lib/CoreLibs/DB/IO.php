@@ -341,13 +341,13 @@ class IO
 	/** @var bool */
 	protected $db_connection_closed = false;
 	// sub include with the database functions
-	/** @var \CoreLibs\DB\SQL\PgSQL */
+	/** @var \CoreLibs\DB\SQL\PgSQL if we have other DB types we need to add them here */
 	private $db_functions;
 	// endless loop protection
 	/** @var int */
 	private $MAX_QUERY_CALL;
 	/** @var int */
-	private const DEFAULT_MAX_QUERY_CALL = 20; // default
+	public const DEFAULT_MAX_QUERY_CALL = 20; // default
 	/** @var array<mixed> */
 	private $query_called = [];
 	// error string
@@ -449,26 +449,16 @@ class IO
 			'50' => 'Setting max query call to -1 will disable loop protection '
 				. 'for all subsequent runs',
 			'51' => 'Max query call needs to be set to at least 1',
-			'60' => 'table not found for reading meta data',
-			'100' => 'No database sql layer object could be loaded'
+			'60' => 'table not found for reading meta data'
 		];
 
-		// based on $this->db_type
-		// here we need to load the db pgsql include one
-		// How can we do this dynamic? eg for non PgSQL
-		// OTOH this whole class is so PgSQL specific
-		// that non PgSQL doesn't make much sense anymore
-		if ($this->db_type == 'pgsql') {
-			$this->db_functions = new \CoreLibs\DB\SQL\PgSQL();
-		} else {
-			// abort error
-			$this->__dbError(10);
-			$this->db_connection_closed = true;
+		// load the core DB functions wrapper class
+		if (($db_functions = $this->__loadDBFunctions()) === null) {
+			// abort
+			die('<!-- Cannot load db functions calss for: ' . $this->db_type . ' -->');
 		}
-		if (!is_object($this->db_functions)) {
-			$this->__dbError(100);
-			$this->db_connection_closed = true;
-		}
+		// write to internal one, once OK
+		$this->db_functions = $db_functions;
 
 		// connect to DB
 		if (!$this->__connectToDB()) {
@@ -488,6 +478,33 @@ class IO
 	// *************************************************************
 	// PRIVATE METHODS
 	// *************************************************************
+
+	/**
+	 * based on $this->db_type
+	 * here we need to load the db pgsql include one
+	 * How can we do this dynamic? eg for non PgSQL
+	 * OTOH this whole class is so PgSQL specific
+	 * that non PgSQL doesn't make much sense anymore
+	 *
+	 * @return \CoreLibs\DB\SQL\PgSQL|null DB functions object or false on error
+	 */
+	private function __loadDBFunctions()
+	{
+		$db_functions = null;
+		switch ($this->db_type) {
+			// list of valid DB function objects
+			case 'pgsql':
+				$db_functions = new \CoreLibs\DB\SQL\PgSQL();
+				break;
+			// if non set or none matching abort
+			default:
+				// abort error
+				$this->__dbError(10);
+				$this->db_connection_closed = true;
+				break;
+		}
+		return $db_functions;
+	}
 
 	/**
 	 * internal connection function. Used to connect to the DB if there is no connection done yet.
@@ -1235,73 +1252,6 @@ class IO
 		return $return;
 	}
 
-	/**
-	 * only for postgres. pretty formats an age or datetime difference string
-	 * @param  string  $age        age or datetime difference
-	 * @param  bool    $show_micro micro on off (default false)
-	 * @return string              Y/M/D/h/m/s formatted string (like TimeStringFormat)
-	 */
-	public function dbTimeFormat(string $age, bool $show_micro = false): string
-	{
-		$matches = [];
-		// in string (datetime diff): 1786 days 22:11:52.87418
-		// or (age): 4 years 10 mons 21 days 12:31:11.87418
-		// also -09:43:54.781021 or without - prefix
-		preg_match("/(.*)?(\d{2}):(\d{2}):(\d{2})(\.(\d+))/", $age, $matches);
-
-		$prefix = $matches[1] != '-' ? $matches[1] : '';
-		$hour = $matches[2] != '00' ? preg_replace('/^0/', '', $matches[2]) : '';
-		$minutes = $matches[3] != '00' ? preg_replace('/^0/', '', $matches[3]) : '';
-		$seconds = $matches[4] != '00' ? preg_replace('/^0/', '', $matches[4]) : '';
-		$milliseconds = $matches[6];
-
-		return $prefix
-			. (!empty($hour) && is_string($hour) ? $hour . 'h ' : '')
-			. (!empty($minutes) && is_string($minutes) ? $minutes . 'm ' : '')
-			. (!empty($seconds) && is_string($seconds) ? $seconds . 's' : '')
-			. ($show_micro && !empty($milliseconds) ? ' ' . $milliseconds . 'ms' : '');
-	}
-
-	/**
-	 * clear up any data for valid DB insert
-	 * @param  int|float|string $value to escape data
-	 * @param  string           $kbn   escape trigger type
-	 * @return string                  escaped value
-	 */
-	public function dbSqlEscape($value, string $kbn = '')
-	{
-		switch ($kbn) {
-			case 'i':
-				$value = $value === '' ? 'NULL' : intval($value);
-				break;
-			case 'f':
-				$value = $value === '' ? 'NULL' : floatval($value);
-				break;
-			case 't':
-				$value = $value === '' ? 'NULL' : "'" . $this->dbEscapeString($value) . "'";
-				break;
-			case 'd':
-				$value = $value === '' ? 'NULL' : "'" . $this->dbEscapeString($value) . "'";
-				break;
-			case 'i2':
-				$value = $value === '' ? 0 : intval($value);
-				break;
-		}
-		return (string)$value;
-	}
-
-	/**
-	 * this is only needed for Postgresql. Converts postgresql arrays to PHP
-	 * @param  string $text input text to parse to an array
-	 * @return array<mixed> PHP array of the parsed data
-	 */
-	public function dbArrayParse(string $text): array
-	{
-		$output = [];
-		$__db_array_parse = $this->db_functions->__dbArrayParse($text, $output);
-		return is_array($__db_array_parse) ? $__db_array_parse : [];
-	}
-
 	// ***************************
 	// DEBUG DATA DUMP
 	// ***************************
@@ -1355,6 +1305,16 @@ class IO
 	}
 
 	/**
+	 * string escape for column and table names
+	 * @param  string $string string to escape
+	 * @return string         escaped string
+	 */
+	public function dbEscapeIdentifier($string): string
+	{
+		return $this->db_functions->__dbEscapeIdentifier($string);
+	}
+
+	/**
 	 * neutral function to escape a bytea for DB writing
 	 * @param  string $bytea bytea to escape
 	 * @return string        escaped bytea
@@ -1363,6 +1323,45 @@ class IO
 	{
 		return $this->db_functions->__dbEscapeBytea($bytea);
 	}
+
+	/**
+	 * clear up any data for valid DB insert
+	 * @param  int|float|string $value to escape data
+	 * @param  string           $kbn   escape trigger type
+	 * @return string                  escaped value
+	 */
+	public function dbSqlEscape($value, string $kbn = '')
+	{
+		switch ($kbn) {
+			case 'i':
+				$value = $value === '' ? 'NULL' : intval($value);
+				break;
+			case 'f':
+				$value = $value === '' ? 'NULL' : floatval($value);
+				break;
+			case 't':
+				$value = $value === '' ? 'NULL' : "'" . $this->dbEscapeString($value) . "'";
+				break;
+			case 'tl':
+				$value = $value === '' ? 'NULL' : $this->dbEscapeLiteral($value);
+				break;
+			// what is d?
+			case 'd':
+				$value = $value === '' ? 'NULL' : "'" . $this->dbEscapeString($value) . "'";
+				break;
+			case 'b':
+				$value = $value === '' ? 'NULL' : "'" . $this->dbBoolean($value, true) . "'";
+				break;
+			case 'i2':
+				$value = $value === '' ? 0 : intval($value);
+				break;
+		}
+		return (string)$value;
+	}
+
+	// ***************************
+	// DATA READ/WRITE CONVERSION
+	// ***************************
 
 	/**
 	 * if the input is a single char 't' or 'f
@@ -1395,6 +1394,73 @@ class IO
 				return 'f';
 			}
 		}
+	}
+
+	// ***************************
+	// DATA READ CONVERSION
+	// ***************************
+
+	/**
+	 * only for postgres. pretty formats an age or datetime difference string
+	 * @param  string  $interval   Age or interval/datetime difference
+	 * @param  bool    $show_micro micro on off (default false)
+	 * @return string              Y/M/D/h/m/s formatted string (like timeStringFormat)
+	 */
+	public function dbTimeFormat(string $interval, bool $show_micro = false): string
+	{
+		$matches = [];
+		// in string (datetime diff): 1786 days 22:11:52.87418
+		// or (age): 4 years 10 mons 21 days 12:31:11.87418
+		// also -09:43:54.781021 or without - prefix
+		// can have missing parts, but day/time must be fully set
+		preg_match(
+			"/^(-)?((\d+) year[s]? ?)?((\d+) mon[s]? ?)?((\d+) day[s]? ?)?"
+				. "((\d{1,2}):(\d{1,2}):(\d{1,2}))?(\.(\d+))?$/",
+			$interval,
+			$matches
+		);
+
+		// prefix (-)
+		$prefix = $matches[1] ?? '';
+		// date, years (2, 3), month (4, 5), days (6, 7)
+		$years = $matches[2] ?? '';
+		$months = $matches[4] ?? '';
+		$days = $matches[6] ?? '';
+		// time (8), hour (9), min (10), sec (11)
+		$hour = $matches[9] ?? '';
+		$minutes = $matches[10] ?? '';
+		$seconds = $matches[11] ?? '';
+		// micro second block (12), ms (13)
+		$milliseconds = $matches[13] ?? '';
+
+		// clean up, hide entries that have 00 in the time group
+		$hour = $hour != '00' ? preg_replace('/^0/', '', $hour) : '';
+		$minutes = $minutes != '00' ? preg_replace('/^0/', '', $minutes) : '';
+		$seconds = $seconds != '00' ? preg_replace('/^0/', '', $seconds) : '';
+
+		// strip any leading or trailing spaces
+		$time_string = trim(
+			$prefix . $years . $months . $days
+			. (!empty($hour) && is_string($hour) ? $hour . 'h ' : '')
+			. (!empty($minutes) && is_string($minutes) ? $minutes . 'm ' : '')
+			. (!empty($seconds) && is_string($seconds) ? $seconds . 's ' : '')
+			. ($show_micro && !empty($milliseconds) ? $milliseconds . 'ms' : '')
+		);
+		// if the return string is empty, return 0s instead
+		return empty($time_string) ? '0s' : $time_string;
+	}
+
+	/**
+	 * this is only needed for Postgresql. Converts postgresql arrays to PHP
+	 * Recommended to rather user 'array_to_json' instead and convet JSON in PHP
+	 * @param  string $text input text to parse to an array
+	 * @return array<mixed> PHP array of the parsed data
+	 * @deprecated Recommended to use 'array_to_json' in PostgreSQL instead
+	 */
+	public function dbArrayParse(string $text): array
+	{
+		$__db_array_parse = $this->db_functions->__dbArrayParse($text);
+		return is_array($__db_array_parse) ? $__db_array_parse : [];
 	}
 
 	// ***************************

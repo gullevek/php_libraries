@@ -530,7 +530,21 @@ class PgSQL
 		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
 		}
-		return pg_escape_string($this->dbh, (string)$string);
+		return pg_escape_literal($this->dbh, (string)$string);
+	}
+
+	/**
+	 * wrapper for pg_escape_identifier
+	 * Only used for table names, column names
+	 * @param  string $string any string
+	 * @return string         escaped string
+	 */
+	public function __dbEscapeIdentifier(string $string): string
+	{
+		if ($this->dbh === false || is_bool($this->dbh)) {
+			return '';
+		}
+		return pg_escape_identifier($this->dbh, (string)$string);
 	}
 
 	/**
@@ -576,37 +590,64 @@ class PgSQL
 	}
 
 	/**
+	 * NOTE: it is recommended to convert arrays to json and parse the json in
+	 * PHP itself, array_to_json(array)
+	 * This is a fallback for old PostgreSQL versions
 	 * postgresql array to php array
-	 * @param  string           $text   array text from PostgreSQL
-	 * @param  array<mixed>     $output (internal) recursive pass on for nested arrays
-	 * @param  bool|int         $limit  (internal) max limit to not overshoot
-	 *                                  the end, start with false
-	 * @param  integer          $offset (internal) shift offset for {}
-	 * @return array<mixed>|int         converted PHP array, interal recusrive int position
+	 * https://stackoverflow.com/a/27964420
+	 * @param  string       $array_text Array text from PostgreSQL
+	 * @param  int          $start      Start string position
+	 * @param  int|null     $end        End string position from recursive call
+	 * @return null|array<mixed>        PHP type array
 	 */
-	public function __dbArrayParse($text, &$output, $limit = false, $offset = 1)
-	{
-		if (false === $limit) {
-			$limit = strlen($text) - 1;
-			$output = [];
+	public function __dbArrayParse(
+		string $array_text,
+		int $start = 0,
+		?int &$end = null
+	): ?array {
+		if (empty($array_text) || $array_text[0] != '{') {
+			return null;
 		}
-		if ('{}' != $text) {
-			do {
-				if ('{' != $text[$offset]) {
-					preg_match("/(\\{?\"([^\"\\\\]|\\\\.)*\"|[^,{}]+)+([,}]+)/", $text, $match, 0, $offset);
-					$offset += strlen($match[0]);
-					$output[] = '"' != $match[1][0] ?
-						$match[1] :
-						stripcslashes(substr($match[1], 1, -1));
-					if ('},' == $match[3]) {
-						return $offset;
-					}
-				} else {
-					$offset = $this->__dbArrayParse($text, $output, $limit, $offset + 1);
+		$return = [];
+		$string = false;
+		$quote = '';
+		$len = strlen($array_text);
+		$v = '';
+		// start from offset
+		for ($array_pos = $start + 1; $array_pos < $len; $array_pos += 1) {
+			$ch = $array_text[$array_pos];
+			// check wher ein the string are we
+			// end, one down
+			if (!$string && $ch == '}') {
+				if ($v !== '' || !empty($return)) {
+					$return[] = $v;
 				}
-			} while ($limit > $offset);
+				$end = $array_pos;
+				break;
+			// open new array, jump recusrive up
+			} elseif (!$string && $ch == '{') {
+				// full string + poff set and end
+				$v = $this->__dbArrayParse($array_text, $array_pos, $array_pos);
+			// next array element
+			} elseif (!$string && $ch == ',') {
+				$return[] = $v;
+				$v = '';
+			// flag that this is a string
+			} elseif (!$string && ($ch == '"' || $ch == "'")) {
+				$string = true;
+				$quote = $ch;
+			// quoted string
+			} elseif ($string && $ch == $quote && $array_text[$array_pos - 1] == "\\") {
+				$v = substr($v, 0, -1) . $ch;
+			} elseif ($string && $ch == $quote && $array_text[$array_pos - 1] != "\\") {
+				$string = false;
+			} else {
+				// build string
+				$v .= $ch;
+			}
 		}
-		return $output;
+
+		return $return;
 	}
 }
 
