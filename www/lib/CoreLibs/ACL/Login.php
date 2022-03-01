@@ -439,8 +439,9 @@ class Login extends \CoreLibs\DB\IO
 				if (!is_array($res)) {
 					$this->login_error = 1009;
 					$this->permission_okay = false;
-				} elseif (!$this->cursor_ext[md5($q)]['num_rows']) {
-					// username is wrong, but we throw for wrong username and wrong password the same error
+				} elseif (empty($this->dbGetCursorExt($q, 'num_rows'))) {
+					// username is wrong, but we throw for wrong username
+					// and wrong password the same error
 					$this->login_error = 1010;
 				} else {
 					// if login errors is half of max errors and the last login error

@@ -72,7 +72,7 @@
 *   $num_rows
 *     - the number of rows returned by a SELECT or alterd bei UPDATE/INSERT
 *   $num_fields
-*     - the number of fields from the SELECT, is usefull if u do a SELECT *
+*     - the number of fields from the SELECT, is usefull if you do a SELECT *
 *   $field_names
 *     - array of field names (in the order of the return)
 *   $insert_id
@@ -253,6 +253,8 @@ declare(strict_types=1);
 namespace CoreLibs\DB;
 
 use CoreLibs\Create\Hash;
+use CoreLibs\Debug\Support;
+use CoreLibs\Create\Uids;
 
 // below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
 // as main system. Currently all @var sets are written as object
@@ -272,14 +274,16 @@ class IO
 	public const READ_NEW = 2;
 	/** @var int */
 	public const NO_CACHE = 3;
+	/** @var string */
+	public const ERROR_HASH_TYPE = 'adler32';
 
 	// recommend to set private/protected and only allow setting via method
 	// can bet set from outside
 	// encoding to
 	/** @var string */
-	public $to_encoding = '';
+	private $to_encoding = '';
 	/** @var string */
-	public $query; // the query string at the moment
+	private $query; // the query string at the moment
 	// only inside
 	// basic vars
 	/** @var object|resource|bool|int|null */ // replace object with PgSql\Connection|
@@ -307,16 +311,16 @@ class IO
 	// FOR BELOW: (This should be private and only readable through some method)
 	// cursor array for cached readings
 	/** @var array<mixed,mixed> */
-	public $cursor_ext; // hash of hashes
+	private $cursor_ext; // hash of hashes
 	// per query vars
 	/** @var object|resource|bool */ // replace object with PgSql\Result
-	public $cursor; // actual cursor (DBH)
+	private $cursor; // actual cursor (DBH)
 	/** @var int */
-	public $num_rows; // how many rows have been found
+	private $num_rows; // how many rows have been found
 	/** @var int */
-	public $num_fields; // how many fields has the query
+	private $num_fields; // how many fields has the query
 	/** @var array<mixed> */
-	public $field_names = []; // array with the field names of the current query
+	private $field_names = []; // array with the field names of the current query
 	/** @var array<mixed> */
 	private $insert_id_arr = []; // always return as array, even if only one
 	/** @var string */
@@ -325,18 +329,14 @@ class IO
 	/** @var string */
 	private $nbsp = ''; // used by print_array recursion function
 	// error & warning id
-	/** @var int */
+	/** @var string */
 	private $error_id;
-	/** @var int */
-	// private $had_error = 0;
-	/** @var array<int> */
-	private $error_history = [];
-	/** @var int */
+	/** @var string */
 	private $warning_id;
-	/** @var int */
-	// private $had_warning = 0;
-	/** @var array<int> */
-	private $warning_history = [];
+	/** @var string */
+	private $error_history_id;
+	/** @var array<mixed> Stores warning and errors combinded with detail info */
+	private $error_history_long = [];
 	// error thrown on class init if we cannot connect to db
 	/** @var bool */
 	protected $db_connection_closed = false;
@@ -355,11 +355,11 @@ class IO
 	protected $error_string = [];
 	// prepared list
 	/** @var array<mixed> */
-	public $prepare_cursor = [];
+	private $prepare_cursor = [];
 	// primary key per table list
 	// format is 'table' => 'pk_name'
 	/** @var array<mixed> */
-	public $pk_name_table = [];
+	private $pk_name_table = [];
 	// internal primary key name, for cross calls in async
 	/** @var string */
 	private $pk_name;
@@ -455,7 +455,7 @@ class IO
 		// load the core DB functions wrapper class
 		if (($db_functions = $this->__loadDBFunctions()) === null) {
 			// abort
-			die('<!-- Cannot load db functions calss for: ' . $this->db_type . ' -->');
+			die('<!-- Cannot load db functions class for: ' . $this->db_type . ' -->');
 		}
 		// write to internal one, once OK
 		$this->db_functions = $db_functions;
@@ -677,17 +677,42 @@ class IO
 	}
 
 	/**
+	 * Reset warnings and errors before run
+	 * Is called on base queries to reset error before each run
+	 * Recent error history can be checked with
+	 * dbGetErrorHistory or dbGetWarningHistory
+	 * @return void
+	 */
+	private function __dbErrorReset(): void
+	{
+		$this->error_id = '';
+		$this->warning_id = '';
+		$this->error_history_id = Uids::uniqId(self::ERROR_HASH_TYPE);
+	}
+
+	/**
 	 * Check if there is a cursor and write this cursors error info
 	 * @param object|resource|bool $cursor current cursor for pg_result_error,
 	 *                             pg_last_error too, but pg_result_error
 	 *                             is more accurate (PgSql\Result)
-	 * @return string         If we could get the method where it was called
+	 * @return array Pos 0: if we could get the method where it was called
+	 *                      if not found [Uknown Method]
+	 *               Pos 1: if we have the pg_error_string from last error
+	 *                      if nothing then empty string
 	 */
-	private function __dbErrorPreprocessor($cursor = false): string
+	private function __dbErrorPreprocessor($cursor = false): array
 	{
 		$pg_error_string = '';
-		// 1 = self, 2 = __dbError, __dbWarning, 3 == actual source
-		$where_called = \CoreLibs\Debug\Support::getCallerMethod(3);
+		// 1 = self/__dbErrorPreprocessor, 2 = __dbError, __dbWarning,
+		// 3+ == actual source
+		// loop until we get a null, build where called chain
+		// left to right for last called rightmost
+		$level = 3;
+		$where_called = null;
+		foreach (Support::getCallerMethodList($level) as $method) {
+			$where_called .= (!empty($where_called) ? '::' : '')
+				. $method;
+		}
 		if ($where_called === null) {
 			$where_called = '[Unknown Method]';
 		}
@@ -700,7 +725,41 @@ class IO
 		if ($pg_error_string) {
 			$this->__dbDebug('db', $pg_error_string, 'DB_ERROR', $where_called);
 		}
-		return $where_called;
+		return [$where_called, $pg_error_string];
+	}
+
+	/**
+	 * Build combined error history
+	 * contains timestamp, error/warning id and message
+	 * error level, source as :: separated string
+	 * additional pg error message if exists and optional msg given on error call
+	 * all error messages are grouped by error_history_id set when errors are reset
+	 * @param string $level
+	 * @param string $error_id
+	 * @param string $where_called
+	 * @param string $pg_error_string
+	 * @param string $msg
+	 * @return void
+	 */
+	private function __dbErrorHistory(
+		string $level,
+		string $error_id,
+		string $where_called,
+		string $pg_error_string,
+		string $msg
+	): void {
+		if (empty($this->error_history_id)) {
+			$this->error_history_id = Uids::uniqId(self::ERROR_HASH_TYPE);
+		}
+		$this->error_history_long[$this->error_history_id][] = [
+			'timestamp' => \CoreLibs\Combined\DateTime::dateStringFormat(microtime(true), true, true),
+			'level' => $level,
+			'id' => $error_id,
+			'error' => $this->error_string[$error_id] ?? '[UNKNOWN ERROR]',
+			'source' => $where_called,
+			'pg_error' => $pg_error_string,
+			'msg' => $msg,
+		];
 	}
 
 	/**
@@ -712,18 +771,19 @@ class IO
 	 */
 	protected function __dbError(int $error_id, $cursor = false, string $msg = ''): void
 	{
-		$where_called = $this->__dbErrorPreprocessor($cursor);
+		$error_id = (string)$error_id;
+		[$where_called, $pg_error_string] = $this->__dbErrorPreprocessor($cursor);
 		// write error msg ...
 		$this->__dbDebug(
 			'db',
-			$error_id . ': ' . $this->error_string[$error_id]
+			$error_id . ': ' . ($this->error_string[$error_id] ?? '[UNKNOWN ERROR]')
 				. ($msg ? ', ' . $msg : ''),
 			'DB_ERROR',
 			$where_called
 		);
 		$this->error_id = $error_id;
 		// keep warning history
-		$this->error_history[] = $error_id;
+		$this->__dbErrorHistory('error', $error_id, $where_called, $pg_error_string, $msg);
 	}
 
 	/**
@@ -735,23 +795,25 @@ class IO
 	 */
 	protected function __dbWarning(int $warning_id, $cursor = false, string $msg = ''): void
 	{
-		$where_called = $this->__dbErrorPreprocessor($cursor);
+		$warning_id = (string)$warning_id;
+		[$where_called, $pg_error_string] = $this->__dbErrorPreprocessor($cursor);
 		$this->__dbDebug(
 			'db',
-			$warning_id . ': ' . $this->error_string[$warning_id]
+			$warning_id . ': ' . ($this->error_string[$warning_id] ?? '[UNKNOWN WARNING')
 				. ($msg ? ', ' . $msg : ''),
 			'DB_WARNING',
 			$where_called
 		);
 		$this->warning_id = $warning_id;
 		// keep warning history
-		$this->warning_history[] = $warning_id;
+		$this->__dbErrorHistory('warning', $warning_id, $where_called, $pg_error_string, $msg);
 	}
 
 	/**
-	 * if there is the 'to_encoding' var set, and the field is in the wrong encoding converts it to the target
-	 * @param  array<mixed>|bool|null $row array from fetch_row
-	 * @return array<mixed>|bool           convert fetch_row array, or false
+	 * if there is the 'to_encoding' var set,
+	 * and the field is in the wrong encoding converts it to the target
+	 * @param  array<mixed>|bool|null $row Array from fetch_row
+	 * @return array<mixed>|bool           Convert fetch_row array, or false
 	 */
 	private function __dbConvertEncoding($row)
 	{
@@ -760,7 +822,8 @@ class IO
 		}
 		// only do if array, else pass through row (can be false)
 		if (
-			!is_array($row) || empty($this->to_encoding) || empty($this->db_encoding)
+			!is_array($row) ||
+			empty($this->to_encoding) || empty($this->db_encoding)
 		) {
 			return $row;
 		}
@@ -814,6 +877,23 @@ class IO
 	}
 
 	/**
+	 * check if there is another query running, or do we hang after a
+	 * PHP error
+	 * @param  integer $timeout_seconds For complex timeout waits, default 3 seconds
+	 * @return boolean                  True for connection OK, else false
+	 */
+	private function __dbCheckConnectionOk(int $timeout_seconds = 3): bool
+	{
+		// check that no other query is running right now
+		// FIXME: do this in a loop? __dbConnectionBusySocketWait? max check timeout
+		if ($this->db_functions->__dbConnectionBusy()) {
+			$this->__dbError(41);
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * sub function for dbExec and dbExecAsync
 	 * - checks query is set
 	 * - checks there is a database handler
@@ -827,15 +907,17 @@ class IO
 	 */
 	private function __dbPrepareExec(string $query, string $pk_name)
 	{
+		// reset current cursor before exec
+		$this->cursor = null;
+		// clear matches for regex lookups
 		$matches = [];
-		// to either use the returning method or the guess method for getting primary keys
+		// to either use the returning method
+		// or the guess method for getting primary keys
 		$this->returning_id = false;
 		// set the query
-		if ($query) {
-			$this->query = $query;
-		}
+		$this->query = $query;
 		// no query set
-		if (!$this->query) {
+		if (empty($this->query)) {
 			$this->__dbError(11);
 			return false;
 		}
@@ -848,8 +930,7 @@ class IO
 			}
 		}
 		// check that no other query is running right now
-		if ($this->db_functions->__dbConnectionBusy()) {
-			$this->__dbError(41);
+		if (!$this->__dbCheckConnectionOk()) {
 			return false;
 		}
 		// if we do have an insert, check if there is no RETURNING pk_id,
@@ -865,7 +946,10 @@ class IO
 					}
 					$this->pk_name = $this->pk_name_table[$table] ? $this->pk_name_table[$table] : 'NULL';
 				}
-				if (!preg_match("/ returning /i", $this->query) && $this->pk_name && $this->pk_name != 'NULL') {
+				if (
+					!preg_match("/ returning /i", $this->query) &&
+					$this->pk_name && $this->pk_name != 'NULL'
+				) {
 					// check if this query has a ; at the end and remove it
 					$__query = preg_replace("/(;\s*)$/", '', $this->query);
 					// must be query, if preg replace failed, use query as before
@@ -911,7 +995,7 @@ class IO
 			$this->MAX_QUERY_CALL != -1 &&
 			$this->query_called[$query_hash] > $this->MAX_QUERY_CALL
 		) {
-				$this->__dbError(30);
+				$this->__dbError(30, false, $this->query);
 				$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
 				return false;
 		}
@@ -926,6 +1010,8 @@ class IO
 	 */
 	private function __dbPostExec(): bool
 	{
+		// always reset insert array after exec
+		$this->insert_id_arr = [];
 		// if FALSE returned, set error stuff
 		// if either the cursor is false
 		if ($this->cursor === false || $this->db_functions->__dbLastErrorQuery()) {
@@ -1009,12 +1095,7 @@ class IO
 			if ($stm_name === null) {
 				$this->__dbWarning(34, $cursor, '[dbExec]');
 			} else {
-				$this->__dbWarning(34);
-				$this->__dbDebug(
-					'db',
-					$stm_name . ': CURSOR is null',
-					'DB_WARNING'
-				);
+				$this->__dbWarning(34, false, $stm_name . ': CURSOR is null');
 			}
 			return;
 		}
@@ -1045,9 +1126,9 @@ class IO
 				if ($stm_name === null) {
 					$this->__dbWarning(33, $cursor, '[dbExec]');
 				} else {
-					$this->__dbWarning(33);
-					$this->__dbDebug(
-						'db',
+					$this->__dbWarning(
+						33,
+						false,
 						$stm_name . ': RETURNING returned no data',
 						'DB_WARNING'
 					);
@@ -1058,11 +1139,10 @@ class IO
 				if ($stm_name === null) {
 					$this->__dbWarning(32, $cursor, '[dbExec]');
 				} else {
-					$this->__dbWarning(32);
-					$this->__dbDebug(
-						'db',
-						$stm_name . ': RETURNING returned an array (possible multiple insert)',
-						'DB_WARNING'
+					$this->__dbWarning(
+						32,
+						false,
+						$stm_name . ': RETURNING returned an array (possible multiple insert)'
 					);
 				}
 			}
@@ -1315,7 +1395,7 @@ class IO
 	}
 
 	/**
-	 * neutral function to escape a bytea for DB writing
+	 * escape data for writing to bytea type column field
 	 * @param  string $bytea bytea to escape
 	 * @return string        escaped bytea
 	 */
@@ -1326,7 +1406,7 @@ class IO
 
 	/**
 	 * clear up any data for valid DB insert
-	 * @param  int|float|string $value to escape data
+	 * @param  int|float|string|null $value to escape data
 	 * @param  string           $kbn   escape trigger type
 	 * @return string                  escaped value
 	 */
@@ -1334,26 +1414,36 @@ class IO
 	{
 		switch ($kbn) {
 			case 'i':
-				$value = $value === '' ? 'NULL' : intval($value);
+				$value = empty($value) ? 'NULL' : intval($value);
 				break;
 			case 'f':
-				$value = $value === '' ? 'NULL' : floatval($value);
+				$value = empty($value) ? 'NULL' : floatval($value);
 				break;
 			case 't':
-				$value = $value === '' ? 'NULL' : "'" . $this->dbEscapeString($value) . "'";
+				$value = $value === null ?
+					'NULL' :
+					"'" . $this->dbEscapeString($value) . "'";
 				break;
 			case 'tl':
-				$value = $value === '' ? 'NULL' : $this->dbEscapeLiteral($value);
+				$value = $value === null ?
+					'NULL' :
+					$this->dbEscapeLiteral($value);
 				break;
 			// what is d?
 			case 'd':
-				$value = $value === '' ? 'NULL' : "'" . $this->dbEscapeString($value) . "'";
+				$value = empty($value) ? 'NULL' : "'" . $this->dbEscapeString($value) . "'";
+				break;
+			// bytea data
+			case 'by':
+				$value = empty($value) ? 'NULL' : $this->dbEscapeBytea($value);
 				break;
 			case 'b':
-				$value = $value === '' ? 'NULL' : "'" . $this->dbBoolean($value, true) . "'";
+				$value = $value === '' || $value === null ?
+					'NULL' :
+					"'" . $this->dbBoolean($value, true) . "'";
 				break;
 			case 'i2':
-				$value = $value === '' ? 0 : intval($value);
+				$value = empty($value) ? 0 : intval($value);
 				break;
 		}
 		return (string)$value;
@@ -1475,8 +1565,8 @@ class IO
 	 */
 	public function dbShowTableMetaData(string $table, string $schema = '')
 	{
-		$table = ($schema ? $schema . '.' : '') . $table;
-
+		$this->__dbErrorReset();
+		$table = (!empty($schema) ? $schema . '.' : '') . $table;
 		$array = $this->db_functions->__dbMetaData($table);
 		if (!is_array($array)) {
 			$this->__dbError(60);
@@ -1515,6 +1605,7 @@ class IO
 	 */
 	public function dbReturn(string $query, int $reset = self::USE_CACHE, bool $assoc_only = false)
 	{
+		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
@@ -1568,8 +1659,7 @@ class IO
 				}
 			}
 			// check that no other query is running right now
-			if ($this->db_functions->__dbConnectionBusy()) {
-				$this->__dbError(41);
+			if (!$this->__dbCheckConnectionOk()) {
 				return false;
 			}
 			$this->cursor_ext[$query_hash]['cursor'] =
@@ -1734,6 +1824,7 @@ class IO
 	 */
 	public function dbExec(string $query = '', string $pk_name = '')
 	{
+		$this->__dbErrorReset();
 		// prepare and check if we can actually run it
 		if ($this->__dbPrepareExec($query, $pk_name) === false) {
 			// bail if no query hash set
@@ -1744,6 +1835,7 @@ class IO
 		// if we faield, just set the master cursors to false too
 		$this->cursor = $cursor;
 		if ($cursor === false) {
+			$this->__dbError(13);
 			return false;
 		}
 		// if FALSE returned, set error stuff
@@ -1754,6 +1846,8 @@ class IO
 			return $this->cursor;
 		}
 	}
+
+	// add adbExecParams(string $query = '', array $params = [], string $pk_name = ')
 
 	/**
 	 * executes a cursor and returns the data, if no more data 0 will be returned
@@ -1769,7 +1863,8 @@ class IO
 	 */
 	public function dbFetchArray($cursor = false, bool $assoc_only = false)
 	{
-		// return false if no query or cursor set ...
+		$this->__dbErrorReset();
+		// set last available cursor if none set or false
 		if ($cursor === false) {
 			$cursor = $this->cursor;
 		}
@@ -1793,6 +1888,7 @@ class IO
 	 */
 	public function dbReturnRow(string $query, bool $assoc_only = false)
 	{
+		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
@@ -1805,7 +1901,7 @@ class IO
 		}
 		$cursor = $this->dbExec($query);
 		if ($cursor === false) {
-			$this->__dbError(13);
+			return false;
 		}
 		$result = $this->dbFetchArray($cursor, $assoc_only);
 		return $result;
@@ -1819,6 +1915,7 @@ class IO
 	 */
 	public function dbReturnArray(string $query, bool $assoc_only = false)
 	{
+		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
@@ -1830,7 +1927,6 @@ class IO
 		}
 		$cursor = $this->dbExec($query);
 		if ($cursor === false) {
-			$this->__dbError(13);
 			return false;
 		}
 		$rows = [];
@@ -1855,6 +1951,7 @@ class IO
 	 */
 	public function dbCacheReset(string $query): bool
 	{
+		$this->__dbErrorReset();
 		$query_hash = Hash::__hashLong($query);
 		// clears cache for this query
 		if (!$this->cursor_ext[$query_hash]['query']) {
@@ -1876,6 +1973,7 @@ class IO
 	 */
 	public function dbCursorPos(string $query)
 	{
+		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
@@ -1891,6 +1989,7 @@ class IO
 	 */
 	public function dbCursorNumRows(string $query)
 	{
+		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
@@ -1945,6 +2044,7 @@ class IO
 	 */
 	public function dbPrepare(string $stm_name, string $query, string $pk_name = '')
 	{
+		$this->__dbErrorReset();
 		$matches = [];
 		if (!$query) {
 			$this->__dbError(11);
@@ -1959,12 +2059,14 @@ class IO
 			}
 		}
 		// check that no other query is running right now
-		if ($this->db_functions->__dbConnectionBusy()) {
-			$this->__dbError(41);
+		if (!$this->__dbCheckConnectionOk()) {
 			return false;
 		}
 		// check if this was already prepared
-		if (!array_key_exists($stm_name, $this->prepare_cursor) || !is_array($this->prepare_cursor[$stm_name])) {
+		if (
+			!array_key_exists($stm_name, $this->prepare_cursor) ||
+			!is_array($this->prepare_cursor[$stm_name])
+		) {
 			// if this is an insert query, check if we can add a return
 			if ($this->__checkQueryForInsert($query, true)) {
 				if ($pk_name != 'NULL') {
@@ -2033,6 +2135,7 @@ class IO
 	 */
 	public function dbExecute(string $stm_name, array $data = [])
 	{
+		$this->__dbErrorReset();
 		// if we do not have no prepare cursor array entry
 		// for this statement name, abort
 		if (!is_array($this->prepare_cursor[$stm_name])) {
@@ -2115,6 +2218,7 @@ class IO
 	 */
 	public function dbExecAsync(string $query, string $pk_name = ''): bool
 	{
+		$this->__dbErrorReset();
 		// prepare and check if we can actually run the query
 		if (($query_hash = $this->__dbPrepareExec($query, $pk_name)) === false) {
 			// bail if no hash set
@@ -2141,8 +2245,10 @@ class IO
 	 */
 	public function dbCheckAsync()
 	{
+		$this->__dbErrorReset();
 		// if there is actually a async query there
 		if ($this->async_running) {
+			// alternative try __dbConnectionBusySocketWait
 			if ($this->db_functions->__dbConnectionBusy()) {
 				return true;
 			} else {
@@ -2495,6 +2601,28 @@ class IO
 		return $client_encoding['client_encoding'] ?? '';
 	}
 
+	/**
+	 * Set the to_encoding var that will trigger on return of selected data
+	 * on the fly PHP encoding conversion
+	 * Alternative use dbSetEcnoding to trigger encoding change on the DB side
+	 * @param  string $encoding PHP Valid encoding to set
+	 * @return string           Current set encoding
+	 */
+	public function dbSetToEncoding(string $encoding): string
+	{
+		$this->to_encoding = $encoding;
+		return $this->to_encoding;
+	}
+
+	/**
+	 * Returns current set to encoding
+	 * @return string Current set encoding
+	 */
+	public function dbGetToEncoding(): string
+	{
+		return $this->to_encoding;
+	}
+
 	// ***************************
 	// INTERNAL VARIABLES READ POST QUERY RUN
 	// ***************************
@@ -2609,10 +2737,13 @@ class IO
 	 * @param  string|null $q    Query string, if not null convert to hash
 	 *                           and return set cursor ext for only this
 	 *                           if not found or null return null
-	 * @return array<mixed>|null Cursor Extended array
+	 * @return array<mixed>|string|int|resource|object|null
+	 *                           Cursor Extended array full if no parameter
 	 *                           Key is hash string from query run
+	 *                           Or cursor data entry if query field is set
+	 *                           If nothing found return null
 	 */
-	public function dbGetCursorExt($q = null)
+	public function dbGetCursorExt($q = null, string $query_field = '')
 	{
 		if ($q !== null) {
 			$query_hash = Hash::__hashLong($q);
@@ -2620,7 +2751,11 @@ class IO
 				is_array($this->cursor_ext) &&
 				isset($this->cursor_ext[$query_hash])
 			) {
-				return $this->cursor_ext[$query_hash];
+				if (empty($query_field)) {
+					return $this->cursor_ext[$query_hash];
+				} else {
+					return $this->cursor_ext[$query_hash][$query_field];
+				}
 			} else {
 				return null;
 			}
@@ -2632,11 +2767,56 @@ class IO
 	 * returns current number of rows that where
 	 * affected by UPDATE/SELECT, etc
 	 * null on empty
-	 * @return int|null Number of rows
+	 * @return int|null Number of rows or null if not set
 	 */
 	public function dbGetNumRows(): ?int
 	{
 		return $this->num_rows;
+	}
+
+	/**
+	 * Number of fields in select query
+	 * @return integer|null Number of fields in select or null if not set
+	 */
+	public function dbGetNumFields(): ?int
+	{
+		return $this->num_fields;
+	}
+
+	/**
+	 * Return field names from query
+	 * @return array Field names as array
+	 */
+	public function dbGetFieldNames(): array
+	{
+		return $this->field_names;
+	}
+
+	/**
+	 * Return current database handler
+	 * @return object|resource|bool|int|null
+	 */
+	public function dbGetDbh()
+	{
+		return $this->dbh;
+	}
+
+	/**
+	 * Get current set query
+	 * @return string Current set query string
+	 */
+	public function dbGetQuery(): string
+	{
+		return $this->query;
+	}
+
+	/**
+	 * Clear current query
+	 * @return void
+	 */
+	public function dbResetQuery(): void
+	{
+		$this->query = '';
 	}
 
 	/**
@@ -2648,31 +2828,16 @@ class IO
 	 */
 	public function dbGetLastError(bool $transform = false): string
 	{
+		// if no error, return empty
+		if (empty($this->error_id)) {
+			return '';
+		}
+		// either error number or error detail string
 		if (!$transform) {
-			return (string)$this->error_id;
+			return $this->error_id;
 		} else {
 			return $this->error_id . ': '
 				. ($this->error_string[$this->error_id] ?? '[NO ERROR MESSAGE]');
-		}
-	}
-
-	/**
-	 * Return the error history as is or map it to the error messages
-	 * @param  boolean $transform Set to true to transform into id + error message
-	 * @return array<mixed>       Either as is, or id + error message array
-	 */
-	public function dbGetErrorHistory(bool $transform = false): array
-	{
-		if (!$transform) {
-			return $this->error_history;
-		} else {
-			return array_map(
-				function ($id) {
-					return $id . ': '
-						. ($this->error_string[$id] ?? '[NO ERROR MESSAGE]');
-				},
-				$this->error_history
-			);
 		}
 	}
 
@@ -2684,8 +2849,13 @@ class IO
 	 */
 	public function dbGetLastWarning(bool $transform = false)
 	{
+		// if no warning, return empty
+		if (empty($this->warning_id)) {
+			return '';
+		}
+		// either warning number or warning detail string
 		if (!$transform) {
-			return (string)$this->warning_id;
+			return $this->warning_id;
 		} else {
 			return $this->warning_id . ': '
 				. ($this->error_string[$this->warning_id] ?? '[NO WARNING MESSAGE]');
@@ -2693,23 +2863,12 @@ class IO
 	}
 
 	/**
-	 * Return the warning history as is or map it to the error messages
-	 * @param  boolean $transform Set to true to transform into id + warning message
-	 * @return array<mixed>       Either as is, or id + warning message array
+	 * Return the combined warning and error history
+	 * @return array
 	 */
-	public function dbGetWarningHistory(bool $transform = false): array
+	public function dbGetCombinedErrorHistory(): array
 	{
-		if (!$transform) {
-			return $this->warning_history;
-		} else {
-			return array_map(
-				function ($id) {
-					return $id . ': '
-						. ($this->error_string[$id] ?? '[NO WARNING MESSAGE]');
-				},
-				$this->warning_history
-			);
-		}
+		return $this->error_history_long;
 	}
 
 	/******************************** */

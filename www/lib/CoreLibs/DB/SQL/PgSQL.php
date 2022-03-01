@@ -493,10 +493,10 @@ class PgSQL
 	/**
 	 * wrapper for pg_meta_data
 	 * @param  string $table     table name
-	 * @param  bool   $extended  show extended info (default false)
+	 * @param  bool   $extended  show extended info (default true)
 	 * @return array<mixed>|bool array data for the table info or false on error
 	 */
-	public function __dbMetaData(string $table, $extended = false)
+	public function __dbMetaData(string $table, $extended = true)
 	{
 		if ($this->dbh === false || is_bool($this->dbh)) {
 			return false;
@@ -570,6 +570,25 @@ class PgSQL
 			return false;
 		}
 		return pg_connection_busy($this->dbh);
+	}
+
+	/**
+	 * Experimental wrapper with scoket timetout
+	 * @param integer $timeout_seconds Wait how many seconds on timeout
+	 * @return boolean
+	 */
+	public function __dbConnectionBusySocketWait(int $timeout_seconds = 3): bool
+	{
+		if ($this->dbh === false || is_bool($this->dbh)) {
+			return false;
+		}
+		$busy = pg_connection_busy($this->dbh);
+		$socket = [pg_socket($this->dbh)];
+		while ($busy) {
+			// Will wait on that socket until that happens or the timeout is reached
+			stream_select($socket, null, null, $timeout_seconds);
+			$busy = pg_connection_busy($this->dbh);
+		}
 	}
 
 	/**
