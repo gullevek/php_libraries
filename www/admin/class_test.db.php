@@ -57,7 +57,7 @@ print "DB Client encoding: " . $db->dbGetEncoding() . "<br>";
 while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::USE_CACHE, true))) {
 	print "TIME: " . $res['time'] . "<br>";
 }
-print "CACHED DATA: <pre>" . print_r($db->cursor_ext, true) . "</pre><br>";
+print "CACHED DATA: <pre>" . print_r($db->dbGetCursorExt(), true) . "</pre><br>";
 while (is_array($res = $db->dbReturn("SELECT * FROM max_test"))) {
 	print "[CACHED] TIME: " . $res['time'] . "<br>";
 }
@@ -68,6 +68,8 @@ while (is_array($res = $db->dbReturn("SELECT * FROM max_test"))) {
 
 print "<pre>";
 
+print "SOCKET: " . pg_socket($db->dbGetDbh()) . "<br>";
+
 // truncate test_foo table before testing
 print "<b>TRUNCATE test_foo</b><br>";
 $query = "TRUNCATE test_foo";
@@ -77,7 +79,8 @@ $query = "TRUNCATE test_foobar";
 $db->dbExec($query);
 
 $status = $db->dbExec("INSERT INTO test_foo (test) VALUES ('FOO TEST " . time() . "') RETURNING test");
-print "DIRECT INSERT STATUS: " . Support::printToString($status) . "| "
+print "DIRECT INSERT STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "DB OBJECT: <pre>" . print_r($status, true) . "</pre>| "
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
@@ -93,7 +96,8 @@ print "DIRECT INSERT PREVIOUS INSERTED: "
 // PREPARED INSERT
 $db->dbPrepare("ins_test_foo", "INSERT INTO test_foo (test) VALUES ($1) RETURNING test");
 $status = $db->dbExecute("ins_test_foo", ['BAR TEST ' . time()]);
-print "PREPARE INSERT[ins_test_foo] STATUS: " . Support::printToString($status) . " | "
+print "PREPARE INSERT[ins_test_foo] STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -116,15 +120,17 @@ $status = $db->dbExec(
 	. "('BAR 3 " . time() . "') "
 	. "RETURNING test_foo_id, test"
 );
-print "DIRECT MULTIPLE INSERT WITH RETURN STATUS: " . Support::printToString($status) . " | "
+print "DIRECT MULTIPLE INSERT WITH RETURN STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "PRIMARY KEYS: " . print_r($db->dbGetInsertPK(), true) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING EXT[test]: " . print_r($db->dbGetReturningExt('test'), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 // no returning, but not needed ;
-$status = $db->dbExec("INSERT INTO test_foo (test) VALUES ('FOO; TEST " . time() . "');");
-print "DIRECT INSERT NO RETURN STATUS: " . Support::printToString($status) . " | "
+$status = $db->dbExec("INSERT INTO test_foo (test) VALUES ('FOO; TEST " . time() . "')");
+print "DIRECT INSERT NO RETURN STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -140,20 +146,23 @@ if (is_array($s_res = $db->dbReturnRow($q)) && !empty($s_res['test'])) {
 $status = $db->dbExec("UPDATE test_foo SET test = 'SOMETHING DIFFERENT' "
 	. "WHERE test_foo_id = " . $last_insert_pk . " RETURNING test");
 print "UPDATE WITH PK " . $last_insert_pk
-	. " RETURN STATUS: " . Support::printToString($status) . " | "
+	. " RETURN STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 
 // INSERT WITH NO RETURNING
-$status = $db->dbExec("INSERT INTO test_foobar (type, integer) VALUES ('WITH DATA', 123)");
-print "INSERT WITH NO PRIMARY KEY NO RETURNING STATUS: " . Support::printToString($status) . " | "
+$status = $db->dbExec("INSERT INTO test_foobar (type, integer) VALUES ('WITHOUT DATA', 456)");
+print "INSERT WITH NO PRIMARY KEY NO RETURNING STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 $status = $db->dbExec("INSERT INTO test_foobar (type, integer) VALUES ('WITH DATA', 123) RETURNING type, integer");
-print "INSERT WITH NO PRIMARY KEY WITH RETURNING STATUS: " . Support::printToString($status) . " | "
+print "INSERT WITH NO PRIMARY KEY WITH RETURNING STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -251,10 +260,21 @@ print "<b>WARNING NEXT</b><br>";
 print "<b>ERROR NEXT</b><br>";
 $query = "INSERT invalid FROM invalid";
 $data = $db->dbReturnArray($query);
-print "ERROR (INS ON dbExec): <pre>" . print_r($db->dbGetErrorHistory(true), true) . "</pre><br>";
+print "ERROR (INS ON dbExec): "
+	. $db->dbGetLastError() . "/" . $db->dbGetLastWarning() . "/"
+	. "<pre>" . print_r($db->dbGetCombinedErrorHistory(), true) . "</pre><br>";
 $query = "SELECT invalid FROM invalid";
 $data = $db->dbReturnArray($query);
-print "ERROR (HARD ERROR): <pre>" . print_r($db->dbGetErrorHistory(true), true) . "</pre><br>";
+print "ERROR (HARD ERROR): "
+	. $db->dbGetLastError() . "/" . $db->dbGetLastWarning() . "/"
+	. "<pre>" . print_r($db->dbGetCombinedErrorHistory(), true) . "</pre><br>";
+// Now a good query will fail
+$query = "SELECT type, sdate, integer FROM foobar";
+$data = $db->dbReturnRow($query, true);
+print "GOOD SELECT AFTER ERROR: "
+	. $db->dbGetLastError() . "/" . $db->dbGetLastWarning() . "/"
+	. "<pre>" . print_r($db->dbGetCombinedErrorHistory(), true) . "</pre><br>";
+print "GOOD SELECT AFTER ERROR: <br><pre>" . print_r($data, true) . "</pre><br>";
 
 /*
 set error id in

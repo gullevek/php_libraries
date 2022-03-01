@@ -1,14 +1,18 @@
 <?php // phpcs:disable Generic.Files.LineLength
 
 /*
+*** IMPORTANT ***
 This test needs a working database with certain tables setup
+DB Host: localhost
 DB Name: corelibs_db_io_test
 DB User: corelibs_db_io_test
 DB Password: corelibs_db_io_test
-DB Encoding: UTF8
+DB Encoding: UTF8 (MUST!)
 User must be able to drop/create tables
+In case of changes the valid_* $db_config entries must be changed
+*** IMPORTANT ***
 
-Below tables will be auto created
+Below tables will be automatically created
 Table with Primary Key: table_with_primary_key
 Table without Primary Key: table_without_primary_key
 
@@ -101,7 +105,8 @@ final class CoreLibsDBIOTest extends TestCase
 	/**
 	 * Test if pgsql module loaded
 	 * Check if valid DB connection works
-	 * Check if tables exist
+	 * Check if tables exist and remove them
+	 * Create test tables
 	 *
 	 * @return void
 	 */
@@ -134,10 +139,13 @@ final class CoreLibsDBIOTest extends TestCase
 		if ($db->dbShowTableMetaData('table_with_primary_key') !== false) {
 			$db->dbExec("DROP TABLE table_with_primary_key");
 			$db->dbExec("DROP TABLE table_without_primary_key");
+			$db->dbExec("DROP TABLE test_meta");
 		}
-		$base_table = "row_int INT, "
+		$base_table = "uid VARCHAR, " // uid is for internal reference tests
+			. "row_int INT, "
 			. "row_numeric NUMERIC, "
 			. "row_varchar VARCHAR, "
+			. "row_varchar_literal VARCHAR, "
 			. "row_json JSON, "
 			. "row_jsonb JSONB, "
 			. "row_bytea BYTEA, "
@@ -150,12 +158,20 @@ final class CoreLibsDBIOTest extends TestCase
 		// create the tables
 		$db->dbExec(
 			"CREATE TABLE table_with_primary_key ("
-			. "row_primary_key SERIAL PRIMARY KEY, "
+			// primary key name is table + '_id'
+			. "table_with_primary_key_id SERIAL PRIMARY KEY, "
 			. $base_table
 		);
 		$db->dbExec(
 			"CREATE TABLE table_without_primary_key ("
 			. $base_table
+		);
+		// create simple table for meta test
+		$db->dbExec(
+			"CREATE TABLE test_meta ("
+			. "row_1 VARCHAR, "
+			. "row_2 INT"
+			. ") WITHOUT OIDS"
 		);
 		// end connection
 		$db->dbClose();
@@ -175,7 +191,7 @@ final class CoreLibsDBIOTest extends TestCase
 	//   dbVerions, dbCompareVersion
 
 	/**
-	 * Undocumented function
+	 * Returns test list for dbCompareVersion check
 	 *
 	 * @return array
 	 */
@@ -220,7 +236,7 @@ final class CoreLibsDBIOTest extends TestCase
 
 		// print "DB VERSION: " . $db->dbVersion()  . "\n";
 
-		// TODO: Mock \CoreLibs\DB\SQL\PgSQL somehow
+		// TODO: Mock \CoreLibs\DB\SQL\PgSQL somehow or Mock \CoreLibsDB\IO::dbVersion
 		// Create a stub for the SomeClass class.
 		// $stub = $this->createMock(\CoreLibs\DB\IO::class);
 		// $stub->method('dbVersion')
@@ -245,7 +261,7 @@ final class CoreLibsDBIOTest extends TestCase
 	// - disconnect: dbClose
 
 	/**
-	 * connection DB strings
+	 * connection DB strings list with info blocks for connection testing
 	 *
 	 * @return array
 	 */
@@ -276,7 +292,7 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
-	 * Connection tests
+	 * Connection tests and confirmation with info blocks
 	 *
 	 * @covers ::__connectToDB
 	 * @dataProvider connectionProvider
@@ -313,7 +329,7 @@ final class CoreLibsDBIOTest extends TestCase
 		} else {
 			// TODO: error checks
 			// print "LAST ERROR: " . $db->dbGetLastError(true) . "\n";
-			// print "ERRORS: " . print_r($db->dbGetErrorHistory(true), true) . "\n";
+			// print "ERRORS: " . print_r($db->dbGetCombinedErrorHistory(), true) . "\n";
 		}
 	}
 
@@ -321,7 +337,7 @@ final class CoreLibsDBIOTest extends TestCase
 	//   dbGetDebug,  dbSetDebug, dbToggleDebug
 
 	/**
-	 * Undocumented function
+	 * test set for setDebug
 	 *
 	 * @return array
 	 */
@@ -350,7 +366,7 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
-	 * Undocumented function
+	 * test set for toggleDEbug
 	 *
 	 * @return array
 	 */
@@ -459,8 +475,18 @@ final class CoreLibsDBIOTest extends TestCase
 	// - set max query call sets
 	//   dbSetMaxQueryCall, dbGetMaxQueryCall
 
+	/**
+	 * test list for max query run settings
+	 *
+	 * @return array
+	 */
 	public function maxQueryCallProvider(): array
 	{
+		// 0: max call number
+		// 1: expected flag from set call
+		// 2: expected number from get call
+		// 3: expected last warning id
+		// 4: expected last error id
 		return [
 			'set default' => [
 				null,
@@ -504,7 +530,7 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
-	 * Undocumented function
+	 * Test max query call set and get flow with warging/errors
 	 *
 	 * @covers ::dbSetMaxQueryCall
 	 * @covers ::dbGetMaxQueryCall
@@ -552,9 +578,16 @@ final class CoreLibsDBIOTest extends TestCase
 	// - set and get schema
 	//   dbGetSchema, dbSetSchema,
 
+	// TODO: schema set/get test
+
 	// - encoding settings (exclude encoding test, just set)
 	//   dbGetEncoding, dbSetEncoding
 
+	/**
+	 * test encoding change list for dbSetEncoding
+	 *
+	 * @return array
+	 */
 	public function encodingProvider(): array
 	{
 		// 0: connection
@@ -586,7 +619,8 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
-	 * Undocumented function
+	 * change DB encoding, only function set test, not test of encoding change
+	 * TODO: add encoding changed test with DB insert
 	 *
 	 * @covers ::dbSetEncoding
 	 * @covers ::dbGetEncoding
@@ -623,27 +657,26 @@ final class CoreLibsDBIOTest extends TestCase
 	// - all general data from connection array
 	//   dbGetSetting (name, user, ecnoding, schema, host, port, ssl, debug, password)
 
-		/**
-	 * returns ALL connections sets
+	/**
+	 * returns ALL connections sets as a group with
+	 * conneciton name on pos 0 and the connection settings on pos 1
 	 *
 	 * @return array
 	 */
 	public function connectionCompleteProvider(): array
 	{
 		$connections = [];
-		// return self::$db_config;
 		foreach (self::$db_config as $connection => $settings) {
 			$connections['DB Connection: ' . $connection] = [
 				$connection,
 				$settings,
 			];
 		}
-
 		return $connections;
 	}
 
 	/**
-	 * Undocumented function
+	 * Test connection array settings return call
 	 *
 	 * @covers ::dbGetSetting
 	 * @dataProvider connectionCompleteProvider
@@ -687,12 +720,15 @@ final class CoreLibsDBIOTest extends TestCase
 	//   dbBoolean
 
 	/**
-	 * Undocumented function
+	 * test list for dbBoolean
 	 *
 	 * @return array
 	 */
 	public function booleanProvider(): array
 	{
+		// 0: set
+		// 1: reverse flag
+		// 2: expected
 		return [
 			'source "t" to true' => [
 				't',
@@ -767,12 +803,15 @@ final class CoreLibsDBIOTest extends TestCase
 	//   dbTimeFormat
 
 	/**
-	 * Undocumented function
+	 * test list for timestamp parsers
 	 *
 	 * @return array
 	 */
 	public function timeFormatProvider(): array
 	{
+		// 0: set
+		// 1: micro seconds flag
+		// 2: expected
 		return [
 			'interval a' => [
 				'41 years 9 mons 18 days',
@@ -833,7 +872,7 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
-	 * Undocumented function
+	 * Test parsing of interval strings into human readable format
 	 *
 	 * @covers ::dbTimeFormat
 	 * @dataProvider timeFormatProvider
@@ -860,8 +899,15 @@ final class CoreLibsDBIOTest extends TestCase
 	// - convert PostreSQL arrays into PHP
 	//   dbArrayParse
 
+	/**
+	 * test list for array convert
+	 *
+	 * @return array
+	 */
 	public function arrayProvider(): array
 	{
+		// 0: postgresql array string
+		// 1: php array
 		return [
 			'array 1' => [
 				'{1,2,3,"4 this is shit"}',
@@ -883,7 +929,7 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
-	 * Undocumented function
+	 * test convert PostgreSQL array to PHP array
 	 *
 	 * @covers ::dbArrayParse
 	 * @dataProvider arrayProvider
@@ -909,8 +955,17 @@ final class CoreLibsDBIOTest extends TestCase
 	// - string escape tests
 	//   dbEscapeString, dbEscapeLiteral, dbEscapeIdentifier,
 
+	/**
+	 * test list for string encodig
+	 *
+	 * @return array
+	 */
 	public function stringProvider(): array
 	{
+		// 0: input
+		// 1: expected string
+		// 2: expected literal
+		// 3: expected identifier
 		return [
 			'string normal' => [
 				'Foo Bar',
@@ -937,7 +992,10 @@ final class CoreLibsDBIOTest extends TestCase
 	 * Check all string escape functions
 	 * NOTE:
 	 * This depends on the SETTINGS of the DB
-	 * The function should current escape settings to do proper checks
+	 * The expected setting is the default encoding setting in PostgreSQL
+	 * #backslash_quote = safe_encoding
+	 * #escape_string_warning = on
+	 * TODO: Load current settings from DB and ajust comapre string
 	 *
 	 * @covers ::dbEscapeString
 	 * @covers ::dbEscapeLiteral
@@ -984,12 +1042,14 @@ final class CoreLibsDBIOTest extends TestCase
 	//   dbEscapeBytea
 
 	/**
-	 * Undocumented function
+	 * test bytea encoding list
 	 *
 	 * @return array
 	 */
 	public function byteaProvider(): array
 	{
+		// 0: string in
+		// 1: bytea expected
 		return [
 			'standard empty string' => [
 				'',
@@ -998,6 +1058,10 @@ final class CoreLibsDBIOTest extends TestCase
 			'random values' => [
 				'""9f8a!1012938123712378a../%(\'%)"!"#0"#$%\'"#$00"#$0"#0$0"#$',
 				'\x2222396638612131303132393338313233373132333738612e2e2f2528272529222122233022232425272223243030222324302223302430222324'
+			],
+			'random text' => [
+				'string d',
+				'\x737472696e672064'
 			]
 		];
 	}
@@ -1005,8 +1069,8 @@ final class CoreLibsDBIOTest extends TestCase
 	/**
 	 * Test bytea escape
 	 * NOTE:
-	 * This depends on bytea encoding settings on the server,
-	 * Currently skip as true
+	 * This depends on bytea encoding settings on the server
+	 * #bytea_output = 'hex'
 	 *
 	 * @covers ::dbEscapeBytea
 	 * @dataProvider byteaProvider
@@ -1035,49 +1099,63 @@ final class CoreLibsDBIOTest extends TestCase
 	//   dbSqlEscape
 
 	/**
-	 * Undocumented function
+	 * test list for sql escape function
 	 *
 	 * @return array
 	 */
 	public function sqlEscapeProvider(): array
 	{
+		// 0: data in
+		// 1: flag
+		// 2: expected output
 		return [
-			// int
+			// int (standard)
 			'integer value' => [1, 'i', 1,],
 			'bad integer value' => ['za', 'i', 0,],
 			'empty integer value' => ['', 'i', 'NULL',],
-			// float
+			'null integer value' => [null, 'i', 'NULL',],
+			// float (standard)
 			'float value' => [1.1, 'f', 1.1,],
 			'bad float value' => ['za', 'f', 0,],
 			'empty float value' => ['', 'f', 'NULL',],
-			// text
+			'null float value' => [null, 'f', 'NULL',],
+			// text (varchar)
 			'string value' => ['string value', 't', '\'string value\'',],
-			'empty string value' => ['', 't', 'NULL',],
-			// text literal
+			'empty string value' => ['', 't', '\'\'',],
+			'null string value' => [null, 't', 'NULL',],
+			// text literal (don't worry about ' around string)
 			'string value literal' => ['string literal', 'tl', '\'string literal\'',],
-			'empty string value literal' => ['', 'tl', 'NULL',],
-			// ?d
+			'empty string value literal' => ['', 'tl', '\'\'',],
+			'null string value literal' => [null, 'tl', 'NULL',],
+			// ?d (I have no idea what that does, is like string)
 			'string value d' => ['string d', 'd', '\'string d\'',],
 			'empty string value d' => ['', 'd', 'NULL',],
+			'null string value d' => [null, 'd', 'NULL',],
+			// by bytea
+			'string value d' => ['string d', 'by', '\x737472696e672064',],
+			'empty string value d' => ['', 'by', 'NULL',],
+			'null string value d' => [null, 'by', 'NULL',],
 			// b (bool)
 			'bool true value' => [true, 'b', '\'t\'',],
 			'bool false value' => [false, 'b', '\'f\'',],
 			'empty bool value' => ['', 'b', 'NULL',],
-			// i2
+			'null bool value' => [null, 'b', 'NULL',],
+			// i2 (integer but with 0 instead of NULL for empty)
 			'integer2 value' => [1, 'i2', 1,],
 			'bad integer2 value' => ['za', 'i2', 0,],
 			'empty integer2 value' => ['', 'i2', 0,],
+			'null integer2 value' => [null, 'i2', 0,],
 		];
 	}
 
 	/**
-	 * Undocumented function
+	 * Test for the sql escape/null wrapper function
 	 *
 	 * @covers ::dbSqlEscape
 	 * @dataProvider sqlEscapeProvider
 	 * @testdox Input value $input as $flag to $expected [$_dataName]
 	 *
-	 * @param int|float|string $input
+	 * @param int|float|string|null $input
 	 * @param string $flag
 	 * @param int|float|string $expected
 	 * @return void
@@ -1097,13 +1175,320 @@ final class CoreLibsDBIOTest extends TestCase
 		$db->dbClose();
 	}
 
+	// - show table data
+	//   dbShowTableMetaData
+
+	/**
+	 * table meta data return test
+	 *
+	 * @return array
+	 */
+	public function tableProvider(): array
+	{
+		// 0: table
+		// 1: schema
+		// 2: expected array
+		return [
+			// disable the default tables, they might change
+			/* 'table with primary key' => [
+				'table_with_primary_key',
+				'',
+				[]
+			],
+			'table without primary key' => [
+				'table_without_primary_key',
+				'public',
+				[]
+			], */
+			'simple table' => [
+				'test_meta',
+				'',
+				[
+					'row_1' => [
+						'num' => 1,
+						'type' => 'varchar',
+						'len' => -1,
+						'not null' => false,
+						'has default' => false,
+						'array dims' => 0,
+						'is enum' => false,
+						'is base' => 1,
+						'is composite' => false,
+						'is pesudo' => false,
+						'description' => '',
+					],
+					'row_2' => [
+						'num' => 2,
+						'type' => 'int4',
+						'len' => 4,
+						'not null' => false,
+						'has default' => false,
+						'array dims' => 0,
+						'is enum' => false,
+						'is base' => 1,
+						'is composite' => false,
+						'is pesudo' => false,
+						'description' => '',
+					]
+				]
+			],
+			'table does not exist' => [
+				'non_existing',
+				'public',
+				false
+			],
+		];
+	}
+
+	/**
+	 * test the table meta data return flow
+	 *
+	 * @covers ::dbShowTableMetaData
+	 * @dataProvider tableProvider
+	 * @testdox Check table $table in schema $schema with $expected [$_dataName]
+	 *
+	 * @param string $table
+	 * @param string $schema
+	 * @param array<mixed>|bool $expected
+	 * @return void
+	 */
+	public function testDbShowTableMetaData(string $table, string $schema, $expected): void
+	{
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		// print "TABLE\n" . print_r($db->dbShowTableMetaData($table, $schema), true) . "\n";
+
+		$this->assertEquals(
+			$expected,
+			$db->dbShowTableMetaData($table, $schema)
+		);
+
+		$db->dbClose();
+	}
+
+	// - db exec test for insert/update/select/etc
+	//   dbExec
+
+	/**
+	 * provide queries with return results
+	 *
+	 * @return array
+	 */
+	public function queryDbExecProvider(): array
+	{
+		// 0: query
+		// 1: optional primary key name
+		// 2: expectes result (bool, object (>=8.1)/resource (<8.1))
+		// 3: warning
+		// 4: error
+		// 5: run times, not set is once, true is max + 1
+		return [
+			// insert
+			'table with pk insert' => [
+				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW())',
+				'',
+				'resource/object',
+				'',
+				'',
+			],
+			// insert to table with no pk (31?)
+			'table with no pk insert' => [
+				'INSERT INTO table_without_primary_key (row_date) VALUES (NOW())',
+				'',
+				'resource/object',
+				'',
+				'',
+			],
+			// INSERT: returning array possible multi insert (32)
+			'table with pk insert multile' => [
+				'INSERT INTO table_with_primary_key (row_date) VALUES'
+					. '(NOW()), '
+					. '(NOW()), '
+					. '(NOW()), '
+					. '(NOW())',
+				'',
+				'resource/object',
+				'32',
+				'',
+			],
+			// Skip PK READING
+			'table with pk insert and NULL pk name' => [
+				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW())',
+				'NULL',
+				'resource/object',
+				'',
+				'',
+			],
+			// insert with pk set
+			'table with pk insert and pk name' => [
+				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW())',
+				'table_with_primary_key_id',
+				'resource/object',
+				'',
+				'',
+			],
+			// update
+			'table with pk update' => [
+				'UPDATE table_with_primary_key SET row_date = NOW()',
+				'',
+				'resource/object',
+				'',
+				'',
+			],
+			'table with pk select' => [
+				'SELECT * FROM table_with_primary_key',
+				'',
+				'resource/object',
+				'',
+				'',
+			],
+			// no query set, error 11
+			'no query set' => [
+				'',
+				'',
+				false,
+				'',
+				'11',
+			],
+			// no db connection setable (16) [needs Mocking]
+			// connection busy [async] (41)
+			// same query run too many times (30)
+			'same query run too many times' => [
+				'SELECT row_date FROM table_with_primary_key',
+				'',
+				'resource/object',
+				'',
+				'30',
+				true,
+			],
+			// execution failed (13)
+			'invalid query' => [
+				'INVALID',
+				'',
+				false,
+				'',
+				'13'
+			],
+			// INSERT: cursor invalid for fetch PK (34) [unreachable code]
+			// INSERT: returning has no data (33)
+			// invalid RETURNING columns
+			// NOTE: After an error was encountered, queries after this
+			//       will return a true connection busy although it was error
+			//       https://bugs.php.net/bug.php?id=36469
+			'invalid returning' => [
+				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW()) RETURNING invalid',
+				'',
+				false,
+				'',
+				'13'
+			],
+		];
+	}
+
+	/**
+	 * pure dbExec checker
+	 * does not check __dbPostExec run, this will be done in the dbGet* functions
+	 * tests (internal read data post exec group)
+	 *
+	 * @covers ::dbExec
+	 * @dataProvider queryDbExecProvider
+	 * @testdox dbExec $query and pk $pk_name with $expected_return (Warning: $warning/Error: $error) [$_dataName]
+	 *
+	 * @param string $query
+	 * @param string $pk_name
+	 * @param [type] $expected_return
+	 * @return void
+	 */
+	public function testDbExec(
+		string $query,
+		string $pk_name,
+		$expected_return,
+		string $warning,
+		string $error,
+		bool $run_many_times = false
+	): void {
+		self::$log->setLogLevelAll('debug', true);
+		self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		// clear any current query
+		// $db->dbResetQuery();
+
+		// if expected result is not a bool
+		// for PHP 8.1 or higher it has to be an object
+		// for anything before PHP 8.1 this has to be a resource
+
+		if (is_bool($expected_return)) {
+			$this->assertEquals(
+				$expected_return,
+				// supress ANY errors here
+				@$db->dbExec($query, $pk_name)
+			);
+		} else {
+			// if PHP or newer, must be Object PgSql\Result
+			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
+				$this->assertIsObject(
+					$db->dbExec($query, $pk_name)
+				);
+				// also check that this is correct instance type
+				$this->assertInstanceOf(
+					'PgSql\Result',
+					$db->dbExec($query, $pk_name)
+				);
+			} else {
+				$this->assertIsResource(
+					$db->dbExec($query, $pk_name)
+				);
+			}
+		}
+		// if we have more than one run time
+		// re-run same query and then catch error
+		if ($run_many_times) {
+			for ($i = 1; $i <= $db->dbGetMaxQueryCall() + 1; $i++) {
+				$db->dbExec($query, $pk_name);
+			}
+			// will fail now
+			$this->assertFalse(
+				$db->dbExec($query, $pk_name)
+			);
+		}
+		// if string for warning or error is not empty check
+		$this->assertEquals(
+			$warning,
+			$db->dbGetLastWarning()
+		);
+		$this->assertEquals(
+			$error,
+			$db->dbGetLastError()
+		);
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+
+		$db->dbClose();
+	}
+
 	// - db execution tests
-	//   dbReturn, dbDumpData, dbCacheReset, dbExec, dbExecAsync, dbCheckAsync
-	//   dbFetchArray, dbReturnRow, dbReturnArray, dbCursorPos, dbCursorNumRows,
-	//   dbShowTableMetaData, dbPrepare, dbExecute
+	//   dbReturn, dbCacheReset,
+	//   dbFetchArray, dbReturnRow, dbReturnArray,
+	//   dbCursorPos, dbCursorNumRows,
+	//   dbPrepare, dbExecute
+	//   dbExecAsync, dbCheckAsync
+	// - encoding conversion on read
+	//   dbSetToEncoding, dbGetToEncoding
+	// - data debug
+	//   dbDumpData
 	// - internal read data (post exec)
 	//   dbGetReturning, dbGetInsertPKName, dbGetInsertPK, dbGetReturningExt,
-	//   dbGetReturningArray, dbGetCursorExt, dbGetNumRows,
+	//   dbGetReturningArray, dbGetCursorExt, dbGetNumRows, dbGetNumFields,
+	//   dbGetFieldNames, dbGetQuery
 	//   getHadError, getHadWarning,
 	//   dbResetQueryCalled, dbGetQueryCalled
 	// - complex write sets
@@ -1111,6 +1496,8 @@ final class CoreLibsDBIOTest extends TestCase
 	// - deprecated tests [no need to test perhaps]
 	//   getInsertReturn, getReturning, getInsertPK, getReturningExt,
 	//   getCursorExt, getNumRows
+	// - error handling
+	//   dbGetCombinedErrorHistory, dbGetLastError, dbGetLastWarning
 
 	/**
 	 * grouped DB IO test
