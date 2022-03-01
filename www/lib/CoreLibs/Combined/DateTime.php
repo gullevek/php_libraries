@@ -15,18 +15,26 @@ class DateTime
 	/**
 	 * a simple wrapper for the date format
 	 * if an invalid timestamp is give zero timestamp unix time is used
-	 * @param  int|float $timestamp  unix timestamp
-	 * @param  bool      $show_micro show the micro time (default false)
-	 * @return string                formated date+time in Y-M-D h:m:s ms
+	 * @param  int|float $timestamp      unix timestamp
+	 * @param  bool      $show_micro     show the micro time (default false)
+	 * @param  bool      $micro_as_float Add the micro time with . instead of ms (default false)
+	 * @return string                    formated date+time in Y-M-D h:m:s ms
 	 */
-	public static function dateStringFormat($timestamp, bool $show_micro = false): string
-	{
+	public static function dateStringFormat(
+		$timestamp,
+		bool $show_micro = false,
+		bool $micro_as_float = false
+	): string {
 		// split up the timestamp, assume . in timestamp
 		// array pad $ms if no microtime
 		list ($timestamp, $ms) = array_pad(explode('.', (string)round($timestamp, 4)), 2, null);
 		$string = date("Y-m-d H:i:s", (int)$timestamp);
 		if ($show_micro && $ms) {
-			$string .= ' ' . $ms . 'ms';
+			if ($micro_as_float == false) {
+				$string .= ' ' . $ms . 'ms';
+			} else {
+				$string .= '.' . $ms;
+			}
 		}
 		return $string;
 	}

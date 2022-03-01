@@ -25,25 +25,42 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 			'valid timestamp no microtime' => [
 				1641515890,
 				false,
+				false,
 				'2022-01-07 09:38:10',
 			],
 			'valid timestamp with microtime' => [
 				1641515890,
+				true,
+				false,
+				'2022-01-07 09:38:10',
+			],
+			'valid timestamp with microtime float' => [
+				1641515890,
+				true,
 				true,
 				'2022-01-07 09:38:10',
 			],
 			'valid micro timestamp with microtime' => [
 				1641515890.123456,
 				true,
+				false,
 				'2022-01-07 09:38:10 1235ms',
+			],
+			'valid micro timestamp with microtime float' => [
+				1641515890.123456,
+				true,
+				true,
+				'2022-01-07 09:38:10.1235',
 			],
 			'valid micro timestamp no microtime' => [
 				1641515890.123456,
+				false,
 				false,
 				'2022-01-07 09:38:10',
 			],
 			'invalid timestamp' => [
 				-123123,
+				false,
 				false,
 				'1969-12-30 22:47:57',
 			],
@@ -454,11 +471,19 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	 * @param string    $expected
 	 * @return void
 	 */
-	public function testDateStringFormat($input, bool $flag, string $expected): void
-	{
+	public function testDateStringFormat(
+		$input,
+		bool $flag_show_micro,
+		bool $flag_micro_as_float,
+		string $expected
+	): void {
 		$this->assertEquals(
 			$expected,
-			\CoreLibs\Combined\DateTime::dateStringFormat($input, $flag)
+			\CoreLibs\Combined\DateTime::dateStringFormat(
+				$input,
+				$flag_show_micro,
+				$flag_micro_as_float
+			)
 		);
 	}
 

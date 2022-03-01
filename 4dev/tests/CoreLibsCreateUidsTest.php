@@ -24,7 +24,15 @@ final class CoreLibsCreateUidsTest extends TestCase
 				0 => 'sha256',
 				1 => 64
 			],
-			'default hash DEFAULT_HASH not set' => [
+			'ripemd160 hash' => [
+				0 => 'ripemd160',
+				1 => 40
+			],
+			'adler32 hash' => [
+				0 => 'adler32',
+				1 => 8
+			],
+			'default hash not set' => [
 				0 => null,
 				1 => 64,
 			],

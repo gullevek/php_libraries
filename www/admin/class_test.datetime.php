@@ -74,8 +74,9 @@ $timestamps = [
 	-1622788315.456789
 ];
 foreach ($timestamps as $timestamp) {
-	print "DATESTRINGFORMAT(sm:0): $timestamp: " . DateTime::dateStringFormat($timestamp) . "<br>";
-	print "DATESTRINGFORMAT(sm:1): $timestamp: " . DateTime::dateStringFormat($timestamp, true) . "<br>";
+	print "DATESTRINGFORMAT(sm:0:0): $timestamp: " . DateTime::dateStringFormat($timestamp) . "<br>";
+	print "DATESTRINGFORMAT(sm:1:0): $timestamp: " . DateTime::dateStringFormat($timestamp, true) . "<br>";
+	print "DATESTRINGFORMAT(sm:1:1): $timestamp: " . DateTime::dateStringFormat($timestamp, true, true) . "<br>";
 }
 $intervals = [
 	788315.123456,

@@ -62,6 +62,11 @@ final class CoreLibsDebugSupportTest extends TestCase
 		];
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function printToStringProvider(): array
 	{
 		return [
@@ -243,6 +248,24 @@ final class CoreLibsDebugSupportTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Debug\Support::getCallerMethod()
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::getCallerMethodList
+	 * @testWith [["main", "run", "run", "run", "run", "run", "run", "runBare", "runTest", "testGetCallerMethodList"]]
+	 * @testdox getCallerMethodList check if it returns $expected [$_dataName]
+	 *
+	 * @param array $expected
+	 * @return void
+	 */
+	public function testGetCallerMethodList(array $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Debug\Support::getCallerMethodList()
 		);
 	}
 

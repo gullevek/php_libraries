@@ -91,6 +91,29 @@ class Support
 	}
 
 	/**
+	 * Returns array with all methods in the call stack in the order so that last
+	 * called is last in order
+	 * Will start with start_level to skip unwanted from stack
+	 * Defaults to skip level 0 wich is this methid
+	 * @param  integer $start_level From what level on, as defaul starts with 1
+	 *                              to exclude self
+	 * @return array                All method names in list where max is last called
+	 */
+	public static function getCallerMethodList(int $start_level = 1): array
+	{
+		$traces = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+		$methods = [];
+		foreach ($traces as $level => $data) {
+			if ($level >= $start_level) {
+				if (!empty($data['function'])) {
+					array_unshift($methods, $data['function']);
+				}
+			}
+		}
+		return $methods;
+	}
+
+	/**
 	 * Get the current class where this function is called
 	 * Is mostly used in debug log statements to get the class where the debug
 	 * was called

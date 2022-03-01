@@ -54,8 +54,14 @@ function test()
 	return DebugSupport::getCallerMethod(1);
 }
 
+function test2()
+{
+	return DebugSupport::getCallerMethodList(1);
+}
+
 print "S::GETCALLERMETHOD: " . DebugSupport::getCallerMethod(0) . "<br>";
 print "S::GETCALLERMETHOD: " . test() . "<br>";
+print "S::GETCALLERMETHODLIST: <pre>" . print_r(test2(), true) . "</pre><br>";
 print "S::PRINTAR: " . DebugSupport::printAr(['Foo', 'Bar']) . "<br>";
 print "V-S::PRINTAR: " . $debug_support_class::printAr(['Foo', 'Bar']) . "<br>";
 print "S::DEBUSTRING(s): " . DebugSupport::debugString('SET') . "<br>";

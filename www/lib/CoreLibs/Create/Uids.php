@@ -7,7 +7,7 @@ namespace CoreLibs\Create;
 class Uids
 {
 	// what to use as a default hash if non ise set and no DEFAULT_HASH is defined
-	private const FALLBACK_HASH = 'sha256';
+	public const FALLBACK_HASH = 'sha256';
 
 	/**
 	 * creates psuedo random uuid v4
@@ -56,15 +56,15 @@ class Uids
 			case 'sha256':
 				$uniq_id = hash('sha256', uniqid((string)rand(), true));
 				break;
+			case 'ripemd160':
+				$uniq_id = hash('ripemd160', uniqid((string)rand(), true));
+				break;
+			case 'adler32':
+				$uniq_id = hash('adler32', uniqid((string)rand(), true));
+				break;
 			default:
 				// fallback to this hash type
 				$hash = self::FALLBACK_HASH;
-				if (
-					defined('DEFAULT_HASH') &&
-					in_array(DEFAULT_HASH, hash_algos())
-				) {
-					$hash = DEFAULT_HASH;
-				}
 				$uniq_id = hash($hash, uniqid((string)rand(), true));
 				break;
 		}
