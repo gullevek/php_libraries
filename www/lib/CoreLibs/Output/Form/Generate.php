@@ -2249,14 +2249,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				while (is_array($res = $this->dbReturn($data_array['query']))) {
 					/** @phan-suppress-next-line PhanTypeInvalidDimOffset */
 					$this->log->debug('edit', 'Q[' . $this->dbGetQueryHash($data_array['query']) . '] pos: '
-						. $this->dbGetCursorExt($data_array['query'], 'pos')
+						. $this->dbGetCursorPos($data_array['query'])
 						. ' | want: ' . ($data_array['preset'] ?? '-')
 						. ' | set: ' . ($data['preset'][$el_name] ?? '-'));
 					// first is default for this element
 					if (
 						isset($data_array['preset']) &&
 						(!isset($data['preset'][$el_name]) || empty($data['preset'][$el_name])) &&
-						($this->dbGetCursorExt($data_array['query'], 'pos') == $data_array['preset'])
+						($this->dbGetCursorPos($data_array['query']) == $data_array['preset'])
 					) {
 						$data['preset'][$el_name] = $res[0];
 					}

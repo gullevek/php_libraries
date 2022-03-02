@@ -436,7 +436,6 @@ class IO
 			'22' => 'Query Execute failed',
 			'23' => 'Query Execute failed, data array does not match placeholders',
 			'24' => 'Missing prepared query entry for execute.',
-			'25' => 'Prepare query data is not in array format.',
 			'30' => 'Query call in a possible endless loop. '
 				. 'Was called more than ' . $this->MAX_QUERY_CALL . ' times',
 			'31' => 'Could not fetch PK after query insert',
@@ -885,12 +884,59 @@ class IO
 	private function __dbCheckConnectionOk(int $timeout_seconds = 3): bool
 	{
 		// check that no other query is running right now
-		// FIXME: do this in a loop? __dbConnectionBusySocketWait? max check timeout
-		if ($this->db_functions->__dbConnectionBusy()) {
+		// below does return false after error too
+		// if ($this->db_functions->__dbConnectionBusy()) {
+		if ($this->db_functions->__dbConnectionBusySocketWait($timeout_seconds)) {
 			$this->__dbError(41);
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * dbReturn
+	 * Read data from previous written data cache
+	 * @param  string  $query_hash The hash for the current query
+	 * @param  boolean $assoc_only Only return assoc value (key named)
+	 * @return array               Current position query data from cache
+	 */
+	private function __dbReturnCacheRead(string $query_hash, bool $assoc_only): array
+	{
+		// unset return value ...
+		$return = [];
+		// current cursor hash element
+		$cursor_hash = $this->cursor_ext[$query_hash];
+		// position in reading for current cursor hash
+		$cursor_pos = $cursor_hash['pos'];
+		// max fields in current cursor hash
+		$max_fields = $cursor_hash['num_fields'] ?? 0;
+		// read voer each field
+		for ($pos = 0; $pos < $max_fields; $pos++) {
+			// numbered pos element data (only exists in full read)
+			$cursor_data_pos = $cursor_hash['data'][$cursor_pos][$pos] ?? null;
+			// field name position from field names
+			$field_name_pos = $cursor_hash['field_names'][$pos] ?? null;
+			// field name data
+			$cursor_data_name = $cursor_hash['data'][$cursor_pos][$field_name_pos] ?? null;
+			// create mixed return array
+			if (
+				$assoc_only === false &&
+				$cursor_data_pos !== null
+			) {
+				$return[$pos] = $cursor_data_pos;
+			}
+			// named part (is alreays read)
+			if (!empty($field_name_pos)) {
+				// read pos first, fallback to name if not set
+				if ($cursor_data_pos !== null) {
+					$return[$field_name_pos] = $cursor_data_pos;
+				} else {
+					$return[$field_name_pos] = $cursor_data_name;
+				}
+			}
+		}
+		$this->cursor_ext[$query_hash]['pos'] ++;
+		return $return;
 	}
 
 	/**
@@ -908,7 +954,7 @@ class IO
 	private function __dbPrepareExec(string $query, string $pk_name)
 	{
 		// reset current cursor before exec
-		$this->cursor = null;
+		$this->cursor = false;
 		// clear matches for regex lookups
 		$matches = [];
 		// to either use the returning method
@@ -980,7 +1026,7 @@ class IO
 			$this->__dbDebug('db', $this->query, '__dbPrepareExec', 'Q');
 		}
 		// import protection, hash needed
-		$query_hash = Hash::__hashLong($this->query);
+		$query_hash = $this->dbGetQueryHash($this->query);
 		// if the array index does not exists set it 0
 		if (!array_key_exists($query_hash, $this->query_called)) {
 			$this->query_called[$query_hash] = 0;
@@ -1129,13 +1175,11 @@ class IO
 					$this->__dbWarning(
 						33,
 						false,
-						$stm_name . ': RETURNING returned no data',
-						'DB_WARNING'
+						$stm_name . ': RETURNING returned no data'
 					);
 				}
 			} elseif (count($this->insert_id_arr) > 1) {
 				// this error handling is only for INSERT (), (), ... sets
-				$this->warning_id = 32;
 				if ($stm_name === null) {
 					$this->__dbWarning(32, $cursor, '[dbExec]');
 				} else {
@@ -1346,7 +1390,7 @@ class IO
 	{
 		// set start array
 		if ($query) {
-			$array = $this->cursor_ext[Hash::__hashLong($query)] ?? [];
+			$array = $this->cursor_ext[$this->dbGetQueryHash($query)] ?? [];
 		} else {
 			$array = $this->cursor_ext;
 		}
@@ -1585,7 +1629,8 @@ class IO
 	 * caches data, so next time called with IDENTICAL (!!!!)
 	 * [this means 1:1 bit to bit identical query] returns cached
 	 * data, or with reset flag set calls data from DB again
-	 * NOTE on $reset param:
+	 * NOTE on $cache param:
+	 * - if set to 0, if same query run again, will read from cache
 	 * - if set to 1, at the end of the query (last row returned),
 	 *   the stored array will be deleted ...
 	 * - if set to 2, the data will be read new and cached
@@ -1593,25 +1638,28 @@ class IO
 	 * - if set to 3, after EACH row, the data will be reset,
 	 *   no caching is done except for basic (count, etc)
 	 * @param  string $query      Query string
-	 * @param  int    $reset      reset status:
+	 * @param  int    $cache      reset status: default: USE_CACHE
 	 *                            USE_CACHE/0: normal read from cache on second run
 	 *                            CLEAR_CACHE/1: read cache, clean at the end
 	 *                            READ_NEW/2: read new, clean at end
-	 *                            NO_CACHE/3: never cache
+	 *                            NO_CACHE/3: never cache [default]
 	 * @param  bool   $assoc_only True to only returned the named and not
 	 *                            index position ones
 	 * @return array<mixed>|bool  return array data or false on error/end
 	 * @#suppress PhanTypeMismatchDimFetch
 	 */
-	public function dbReturn(string $query, int $reset = self::USE_CACHE, bool $assoc_only = false)
-	{
+	public function dbReturn(
+		string $query,
+		int $cache = self::USE_CACHE,
+		bool $assoc_only = false
+	) {
 		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
 		}
 		// create hash from query ...
-		$query_hash = Hash::__hashLong($query);
+		$query_hash = $this->dbGetQueryHash($query);
 		// pre declare array
 		if (!isset($this->cursor_ext[$query_hash])) {
 			$this->cursor_ext[$query_hash] = [
@@ -1635,9 +1683,10 @@ class IO
 		}
 		// init return als false
 		$return = false;
-		// if it is a call with reset in it we reset the cursor, so we get an uncached return
+		// if it is a call with reset in it we reset the cursor,
+		// so we get an uncached return
 		// but only for the FIRST call (pos == 0)
-		if ($reset && !$this->cursor_ext[$query_hash]['pos']) {
+		if ($cache > self::USE_CACHE && !$this->cursor_ext[$query_hash]['pos']) {
 			$this->cursor_ext[$query_hash]['cursor'] = null;
 		}
 		// $this->debug('MENU', 'Reset: '.$reset.', Cursor: '
@@ -1687,6 +1736,7 @@ class IO
 				$this->cursor_ext[$query_hash]['num_fields'] =
 					$this->db_functions->__dbNumFields($this->cursor_ext[$query_hash]['cursor']);
 				// set field names
+				$this->cursor_ext[$query_hash]['field_names'] = [];
 				for ($i = 0; $i < $this->cursor_ext[$query_hash]['num_fields']; $i++) {
 					$this->cursor_ext[$query_hash]['field_names'][] =
 						$this->db_functions->__dbFieldName(
@@ -1702,7 +1752,10 @@ class IO
 				$this->cursor_ext[$query_hash]['read_rows'] = 0;
 			}
 			// read data for further work ... but only if necessarry
-			if ($this->cursor_ext[$query_hash]['read_rows'] == $this->cursor_ext[$query_hash]['num_rows']) {
+			if (
+				$this->cursor_ext[$query_hash]['read_rows'] ==
+					$this->cursor_ext[$query_hash]['num_rows']
+			) {
 				$return = false;
 			} else {
 				$return = $this->__dbConvertEncoding(
@@ -1717,7 +1770,7 @@ class IO
 				}
 			}
 			// check if cached call or reset call ...
-			if (!$return && !$reset) {
+			if (!$return && $cache == self::USE_CACHE) {
 				// check if end of output ...
 				if ($this->cursor_ext[$query_hash]['pos'] >= $this->cursor_ext[$query_hash]['num_rows']) {
 					$this->cursor_ext[$query_hash]['pos'] = 0;
@@ -1727,62 +1780,25 @@ class IO
 					$this->cursor_ext[$query_hash]['cursor'] = 1;
 					$return = false;
 				} else {
-					// unset return value ...
-					$return = [];
-					for ($i = 0; $i < $this->cursor_ext[$query_hash]['num_fields']; $i++) {
-						// FIXME: find out why phan throws all those array errors
-						// create mixed return array
-						if (
-							$assoc_only === false &&
-							isset($this->cursor_ext[$query_hash]['data'][$this->cursor_ext[$query_hash]['pos']][$i])
-						) {
-							$return[$i] =
-							/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
-								$this->cursor_ext[$query_hash]['data']
-									[$this->cursor_ext[$query_hash]['pos']][$i];
-						}
-						// named part
-						if (!empty($this->cursor_ext[$query_hash]['field_names'][$i])) {
-							if (
-								isset(
-									$this->cursor_ext[$query_hash]['data']
-										[$this->cursor_ext[$query_hash]['pos']][$i]
-								)
-							) {
-								/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
-								$return[$this->cursor_ext[$query_hash]['field_names'][$i]] =
-									/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
-									$this->cursor_ext[$query_hash]['data']
-										[$this->cursor_ext[$query_hash]['pos']][$i];
-							} else {
-								// throws PhanTypeMismatchDimFetch error, but in this
-								// case we know we will access only named array parts
-								/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
-								$return[$this->cursor_ext[$query_hash]['field_names'][$i]] =
-									/** @phan-suppress-next-line PhanTypeMismatchDimFetch,PhanTypeArraySuspiciousNullable */
-									$this->cursor_ext[$query_hash]['data'][$this->cursor_ext[$query_hash]
-										/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
-										['pos']][$this->cursor_ext[$query_hash]['field_names'][$i]];
-							}
-						}
-					}
-					$this->cursor_ext[$query_hash]['pos'] ++;
+					// cached data read
+					$return = $this->__dbReturnCacheRead($query_hash, $assoc_only);
 				}
 			} else {
 				// return row, if last && reset, then unset the hole hash array
 				if (
 					!$return &&
-					($reset == self::CLEAR_CACHE || $reset == self::NO_CACHE) &&
+					($cache == self::CLEAR_CACHE || $cache == self::NO_CACHE) &&
 					$this->cursor_ext[$query_hash]['pos']
 				) {
-					// unset only the field names here of course
-					$this->cursor_ext[$query_hash]['field_names'] = null;
+					// unset data block only
+					$this->cursor_ext[$query_hash]['data'] = [];
 					$this->cursor_ext[$query_hash]['pos'] = 0;
 				} elseif (
-					!$return && $reset == self::READ_NEW &&
+					!$return && $cache == self::READ_NEW &&
 					$this->cursor_ext[$query_hash]['pos']
 				) {
-					// at end of read reset pos & set cursor to 1 (so it does not get lost in session transfer)
+					// at end of read reset pos & set cursor to 1
+					// (so it does not get lost in session transfer)
 					$this->cursor_ext[$query_hash]['pos'] = 0;
 					$this->cursor_ext[$query_hash]['cursor'] = 1;
 					$return = false;
@@ -1792,13 +1808,14 @@ class IO
 					// internal position counter
 					$this->cursor_ext[$query_hash]['pos'] ++;
 					$this->cursor_ext[$query_hash]['read_rows'] ++;
-					// if reset is <3 caching is done, else no
-					if ($reset < self::NO_CACHE) {
-						$temp = [];
-						foreach ($return as $field_name => $data) {
-							$temp[$field_name] = $data;
-						}
-						$this->cursor_ext[$query_hash]['data'][] = $temp;
+					// if reset is < NO_CACHE level caching is done, else no
+					if ($cache < self::NO_CACHE) {
+						// why was this here?
+						// $temp = [];
+						// foreach ($return as $field_name => $data) {
+						// 	$temp[$field_name] = $data;
+						// }
+						$this->cursor_ext[$query_hash]['data'][] = $return;
 					}
 				} // cached data if
 			} // cached or not if
@@ -1913,7 +1930,7 @@ class IO
 	 * @param  bool   $assoc_only if true, only name ref are returned
 	 * @return array<mixed>|bool  array of hashes (row -> fields), false on error
 	 */
-	public function dbReturnArray(string $query, bool $assoc_only = false)
+	public function dbReturnArray(string $query, bool $assoc_only = true)
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
@@ -1931,17 +1948,18 @@ class IO
 		}
 		$rows = [];
 		while (is_array($res = $this->dbFetchArray($cursor, $assoc_only))) {
-			$data = [];
-			for ($i = 0; $i < $this->num_fields; $i++) {
-				$data[$this->field_names[$i]] = $res[$this->field_names[$i]] ?? null;
-			}
-			$rows[] = $data;
+			// $data = [];
+			// for ($i = 0; $i < $this->num_fields; $i++) {
+			// 	$data[$this->field_names[$i]] = $res[$this->field_names[$i]] ?? null;
+			// }
+			// $rows[] = $data;
+			$rows[] = $res;
 		}
 		return $rows;
 	}
 
 	// ***************************
-	// CURSOR CACHE RESET
+	// CURSOR EXT CACHE RESET
 	// ***************************
 
 	/**
@@ -1952,9 +1970,9 @@ class IO
 	public function dbCacheReset(string $query): bool
 	{
 		$this->__dbErrorReset();
-		$query_hash = Hash::__hashLong($query);
+		$query_hash = $this->dbGetQueryHash($query);
 		// clears cache for this query
-		if (!$this->cursor_ext[$query_hash]['query']) {
+		if (empty($this->cursor_ext[$query_hash]['query'])) {
 			$this->__dbError(18);
 			return false;
 		}
@@ -1963,22 +1981,55 @@ class IO
 	}
 
 	// ***************************
-	// CURSOR POSITON CHECK
+	// CURSOR EXT DATA CHECK
 	// ***************************
+
+	/**
+	 * returns the full array for cursor ext
+	 * or cursor for one query
+	 * or detail data fonr one query cursor data
+	 * @param  string|null $query Query string, if not null convert to hash
+	 *                            and return set cursor ext for only this
+	 *                            if not found or null return null
+	 * @return array<mixed>|string|int|resource|object|null
+	 *                            Cursor Extended array full if no parameter
+	 *                            Key is hash string from query run
+	 *                            Or cursor data entry if query field is set
+	 *                            If nothing found return null
+	 */
+	public function dbGetCursorExt($query = null, string $query_field = '')
+	{
+		if ($query !== null) {
+			$query_hash = $this->dbGetQueryHash($query);
+			if (
+				is_array($this->cursor_ext) &&
+				isset($this->cursor_ext[$query_hash])
+			) {
+				if (empty($query_field)) {
+					return $this->cursor_ext[$query_hash];
+				} else {
+					return $this->cursor_ext[$query_hash][$query_field] ?? null;
+				}
+			} else {
+				return null;
+			}
+		}
+		return $this->cursor_ext;
+	}
 
 	/**
 	 * returns the current position the read out
 	 * @param  string   $query query to find in cursor_ext
 	 * @return int|bool        query position (row pos), false on error
 	 */
-	public function dbCursorPos(string $query)
+	public function dbGetCursorPos(string $query)
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
 		}
-		$query_hash = Hash::__hashLong($query);
+		$query_hash = $this->dbGetQueryHash($query);
 		return (int)$this->cursor_ext[$query_hash]['pos'];
 	}
 
@@ -1987,14 +2038,14 @@ class IO
 	 * @param  string   $query query to find in cursor_ext
 	 * @return int|bool        query position (row pos), false on error
 	 */
-	public function dbCursorNumRows(string $query)
+	public function dbGetCursorNumRows(string $query)
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
 		}
-		$query_hash = Hash::__hashLong($query);
+		$query_hash = $this->dbGetQueryHash($query);
 		return (int)$this->cursor_ext[$query_hash]['num_rows'];
 	}
 
@@ -2010,7 +2061,7 @@ class IO
 	 */
 	public function dbResetQueryCalled(string $query): void
 	{
-		$this->query_called[Hash::__hashLong($query)] = 0;
+		$this->query_called[$this->dbGetQueryHash($query)] = 0;
 	}
 
 	/**
@@ -2020,7 +2071,7 @@ class IO
 	 */
 	public function dbGetQueryCalled(string $query): int
 	{
-		$query_hash = Hash::__hashLong($query);
+		$query_hash = $this->dbGetQueryHash($query);
 		if ($this->query_called[$query_hash]) {
 			return $this->query_called[$query_hash];
 		} else {
@@ -2122,7 +2173,7 @@ class IO
 			}
 		} else {
 			// thrown warning
-			$this->warning_id = 20;
+			$this->__dbWarning(20, false, $stm_name);
 			return true;
 		}
 	}
@@ -2146,14 +2197,7 @@ class IO
 			);
 			return false;
 		}
-		if (!is_array($data)) {
-			$this->__dbError(
-				25,
-				false,
-				$stm_name . ': Prepared query Data has to be given in array form.'
-			);
-			return false;
-		}
+		// if the count does not match
 		if ($this->prepare_cursor[$stm_name]['count'] != count($data)) {
 			$this->__dbError(
 				23,
@@ -2624,6 +2668,48 @@ class IO
 	}
 
 	// ***************************
+	// QUERY DATA AND DB HANDLER
+	// ***************************
+
+	/**
+	 * Return current database handler
+	 * @return object|resource|bool|int|null
+	 */
+	public function dbGetDbh()
+	{
+		return $this->dbh;
+	}
+
+	/**
+	 * Returns hash for query
+	 * Hash is used in all internal storage systems for return data
+	 * @param  string $query The query to create the hash from
+	 * @return string        Hash, as set by hash lpng
+	 */
+	public function dbGetQueryHash(string $query): string
+	{
+		return Hash::__hashLong($query);
+	}
+
+	/**
+	 * Get current set query
+	 * @return string Current set query string
+	 */
+	public function dbGetQuery(): string
+	{
+		return $this->query;
+	}
+
+	/**
+	 * Clear current query
+	 * @return void
+	 */
+	public function dbResetQuery(): void
+	{
+		$this->query = '';
+	}
+
+	// ***************************
 	// INTERNAL VARIABLES READ POST QUERY RUN
 	// ***************************
 
@@ -2733,37 +2819,6 @@ class IO
 	}
 
 	/**
-	 * returns the full array for cursor ext
-	 * @param  string|null $q    Query string, if not null convert to hash
-	 *                           and return set cursor ext for only this
-	 *                           if not found or null return null
-	 * @return array<mixed>|string|int|resource|object|null
-	 *                           Cursor Extended array full if no parameter
-	 *                           Key is hash string from query run
-	 *                           Or cursor data entry if query field is set
-	 *                           If nothing found return null
-	 */
-	public function dbGetCursorExt($q = null, string $query_field = '')
-	{
-		if ($q !== null) {
-			$query_hash = Hash::__hashLong($q);
-			if (
-				is_array($this->cursor_ext) &&
-				isset($this->cursor_ext[$query_hash])
-			) {
-				if (empty($query_field)) {
-					return $this->cursor_ext[$query_hash];
-				} else {
-					return $this->cursor_ext[$query_hash][$query_field];
-				}
-			} else {
-				return null;
-			}
-		}
-		return $this->cursor_ext;
-	}
-
-	/**
 	 * returns current number of rows that where
 	 * affected by UPDATE/SELECT, etc
 	 * null on empty
@@ -2792,32 +2847,9 @@ class IO
 		return $this->field_names;
 	}
 
-	/**
-	 * Return current database handler
-	 * @return object|resource|bool|int|null
-	 */
-	public function dbGetDbh()
-	{
-		return $this->dbh;
-	}
-
-	/**
-	 * Get current set query
-	 * @return string Current set query string
-	 */
-	public function dbGetQuery(): string
-	{
-		return $this->query;
-	}
-
-	/**
-	 * Clear current query
-	 * @return void
-	 */
-	public function dbResetQuery(): void
-	{
-		$this->query = '';
-	}
+	// ***************************
+	// ERROR AND WARNING DATA
+	// ***************************
 
 	/**
 	 * Sets error number that was last
@@ -2871,9 +2903,10 @@ class IO
 		return $this->error_history_long;
 	}
 
-	/******************************** */
+	// ***************************
 	// DEPEREACTED CALLS
-	/******************************** */
+	// all call below are no longer in use and throw deprecated errors
+	// ***************************
 
 	/**
 	 * returns the db init error

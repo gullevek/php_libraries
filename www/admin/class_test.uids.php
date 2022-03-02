@@ -41,6 +41,7 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $basic = new CoreLibs\Basic($log);
 $_uids = new CoreLibs\Create\Uids();
+use CoreLibs\Create\Uids;
 $uids_class = 'CoreLibs\Create\Uids';
 
 print "<html><head><title>TEST CLASS: UIDS</title><head>";
@@ -57,6 +58,10 @@ print "S::UUIDV4: " . $uids_class::uuidv4() . "<br>";
 print "S::UNIQID (d): " . $uids_class::uniqId() . "<br>";
 print "S::UNIQID (md5): " . $uids_class::uniqId('md5') . "<br>";
 print "S::UNIQID (sha256): " . $uids_class::uniqId('sha256') . "<br>";
+// uniq ids
+print "UNIQU ID SHORT : " . Uids::uniqIdShort() . "<br>";
+print "UNIQU ID LONG : " . Uids::uniqIdLong() . "<br>";
+
 // DEPRECATED
 /* print "D/UUIDV4: ".$basic->uuidv4()."<br>";
 print "/DUNIQID (d): ".$basic->uniqId()."<br>"; */

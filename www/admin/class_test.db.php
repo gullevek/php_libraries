@@ -55,15 +55,25 @@ echo "DB_CONFIG_SET constant: <pre>" . print_r(DB_CONFIG, true) . "</pre><br>";
 print "DB Client encoding: " . $db->dbGetEncoding() . "<br>";
 
 while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::USE_CACHE, true))) {
-	print "TIME: " . $res['time'] . "<br>";
+	print "UUD/TIME: " . $res['uid'] . "/" . $res['time'] . "<br>";
 }
 print "CACHED DATA: <pre>" . print_r($db->dbGetCursorExt(), true) . "</pre><br>";
-while (is_array($res = $db->dbReturn("SELECT * FROM max_test"))) {
-	print "[CACHED] TIME: " . $res['time'] . "<br>";
+while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::USE_CACHE))) {
+	print "[CACHED] UID/TIME: " . $res['uid'] . "/" . $res['time'] . "<br>";
+	// print "****RES: <pre>" . print_r($res, true) . "</pre><br>";
 }
+// print "CACHED REREAD DATA: <pre>" . print_r($db->dbGetCursorExt(), true) . "</pre><br>";
+while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::NO_CACHE))) {
+	print "[NO CACHE] UID.TIME: " . $res['uid'] . "/" . $res['time'] . "<br>";
+	// print "****RES: <pre>" . print_r($res, true) . "</pre><br>";
+}
+print "NO CACHED DATA: <pre>" . print_r($db->dbGetCursorExt(), true) . "</pre><br>";
 // alternate check for valid data
 // while (($res = $db->dbReturn("SELECT * FROM max_test")) !== false) {
 // 	print "[CACHED] TIME: " . $res['time'] . "<br>";
+// }
+// while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::USE_CACHE))) {
+// 	print "UUD/TIME: " . $res['uid'] . "/" . $res['time'] . "<br>";
 // }
 
 print "<pre>";

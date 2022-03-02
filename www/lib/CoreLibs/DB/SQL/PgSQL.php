@@ -586,9 +586,10 @@ class PgSQL
 		$socket = [pg_socket($this->dbh)];
 		while ($busy) {
 			// Will wait on that socket until that happens or the timeout is reached
-			stream_select($socket, null, null, $timeout_seconds);
+			stream_select($socket, $null, $null, $timeout_seconds);
 			$busy = pg_connection_busy($this->dbh);
 		}
+		return $busy;
 	}
 
 	/**

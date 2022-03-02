@@ -270,6 +270,7 @@ final class CoreLibsDBIOTest extends TestCase
 		// 0: connection array
 		// 1: status after connection
 		// 2: info string
+		// 3: ???
 		return [
 			'invalid connection' => [
 				self::$db_config['invalid'],
@@ -413,18 +414,12 @@ final class CoreLibsDBIOTest extends TestCase
 			self::$db_config[$connection],
 			self::$log
 		);
-		if ($set === null) {
-			// equals to do nothing
-			$this->assertEquals(
-				$expected,
-				$db->dbSetDebug()
-			);
-		} else {
-			$this->assertEquals(
-				$expected,
+		$this->assertEquals(
+			$expected,
+			$set === null ?
+				$db->dbSetDebug() :
 				$db->dbSetDebug($set)
-			);
-		}
+		);
 		// must always match
 		$this->assertEquals(
 			$expected,
@@ -452,18 +447,12 @@ final class CoreLibsDBIOTest extends TestCase
 			self::$db_config[$connection],
 			self::$log
 		);
-		if ($toggle === null) {
-			// equals to do nothing
-			$this->assertEquals(
-				$expected,
-				$db->dbToggleDebug()
-			);
-		} else {
-			$this->assertEquals(
-				$expected,
+		$this->assertEquals(
+			$expected,
+			$toggle === null ?
+				$db->dbToggleDebug() :
 				$db->dbToggleDebug($toggle)
-			);
-		}
+		);
 		// must always match
 		$this->assertEquals(
 			$expected,
@@ -557,7 +546,10 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 		$this->assertEquals(
 			$expected_flag,
-			$db->dbSetMaxQueryCall($max_calls)
+			// TODO special test with null call too
+			$max_calls === null ?
+				$db->dbSetMaxQueryCall() :
+				$db->dbSetMaxQueryCall($max_calls)
 		);
 		$this->assertEquals(
 			$expected_max_calls,
@@ -615,6 +607,7 @@ final class CoreLibsDBIOTest extends TestCase
 			// 	'UTF8'
 			// ],
 			// other tests includ perhaps mocking for error?
+			// TODO actual data check
 		];
 	}
 
@@ -732,28 +725,33 @@ final class CoreLibsDBIOTest extends TestCase
 		return [
 			'source "t" to true' => [
 				't',
+				false,
 				true,
-				false
+			],
+			'source "t" to true null flag' => [
+				't',
+				null,
+				true,
 			],
 			'source "true" to true' => [
 				'true',
+				false,
 				true,
-				false
 			],
 			'source "f" to false' => [
 				'f',
 				false,
-				false
+				false,
 			],
 			'source "false" to false' => [
 				'false',
 				false,
-				false
+				false,
 			],
 			'source anything to true' => [
 				'something',
-				true,
 				false,
+				true,
 			],
 			'source empty to false' => [
 				'',
@@ -762,13 +760,13 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'source bool true to "t"' => [
 				true,
-				't',
 				true,
+				't',
 			],
 			'source bool false to "f"' => [
 				false,
-				'f',
 				true,
+				'f',
 			],
 		];
 	}
@@ -781,11 +779,11 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @testdox Have $source and convert ($reverse) to $expected [$_dataName]
 	 *
 	 * @param string|bool $source
+	 * @param bool|null $reverse
 	 * @param string|bool $expected
-	 * @param bool $reverse
 	 * @return void
 	 */
-	public function testDbBoolean($source, $expected, bool $reverse): void
+	public function testDbBoolean($source, ?bool $reverse, $expected): void
 	{
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
@@ -793,7 +791,9 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 		$this->assertEquals(
 			$expected,
-			$db->dbBoolean($source, $reverse)
+			$reverse === null ?
+				$db->dbBoolean($source) :
+				$db->dbBoolean($source, $reverse)
 		);
 		$db->dbClose();
 	}
@@ -816,6 +816,11 @@ final class CoreLibsDBIOTest extends TestCase
 			'interval a' => [
 				'41 years 9 mons 18 days',
 				false,
+				'41 years 9 mons 18 days'
+			],
+			'interval a null micro time' => [
+				'41 years 9 mons 18 days',
+				null,
 				'41 years 9 mons 18 days'
 			],
 			'interval a-1' => [
@@ -879,11 +884,11 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @testdox Have $source and convert ($show_micro) to $expected [$_dataName]
 	 *
 	 * @param string $source
-	 * @param bool $show_micro
+	 * @param bool|null $show_micro
 	 * @param string $expected
 	 * @return void
 	 */
-	public function testDbTimeFormat(string $source, bool $show_micro, string $expected): void
+	public function testDbTimeFormat(string $source, ?bool $show_micro, string $expected): void
 	{
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
@@ -891,7 +896,9 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 		$this->assertEquals(
 			$expected,
-			$db->dbTimeFormat($source, $show_micro)
+			$show_micro === null ?
+				$db->dbTimeFormat($source) :
+				$db->dbTimeFormat($source, $show_micro)
 		);
 		$db->dbClose();
 	}
@@ -1232,6 +1239,38 @@ final class CoreLibsDBIOTest extends TestCase
 					]
 				]
 			],
+			'simple table null schema' => [
+				'test_meta',
+				null,
+				[
+					'row_1' => [
+						'num' => 1,
+						'type' => 'varchar',
+						'len' => -1,
+						'not null' => false,
+						'has default' => false,
+						'array dims' => 0,
+						'is enum' => false,
+						'is base' => 1,
+						'is composite' => false,
+						'is pesudo' => false,
+						'description' => '',
+					],
+					'row_2' => [
+						'num' => 2,
+						'type' => 'int4',
+						'len' => 4,
+						'not null' => false,
+						'has default' => false,
+						'array dims' => 0,
+						'is enum' => false,
+						'is base' => 1,
+						'is composite' => false,
+						'is pesudo' => false,
+						'description' => '',
+					]
+				]
+			],
 			'table does not exist' => [
 				'non_existing',
 				'public',
@@ -1248,11 +1287,11 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @testdox Check table $table in schema $schema with $expected [$_dataName]
 	 *
 	 * @param string $table
-	 * @param string $schema
+	 * @param string|null $schema
 	 * @param array<mixed>|bool $expected
 	 * @return void
 	 */
-	public function testDbShowTableMetaData(string $table, string $schema, $expected): void
+	public function testDbShowTableMetaData(string $table, ?string $schema, $expected): void
 	{
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
@@ -1263,14 +1302,16 @@ final class CoreLibsDBIOTest extends TestCase
 
 		$this->assertEquals(
 			$expected,
-			$db->dbShowTableMetaData($table, $schema)
+			$schema === null ?
+				$db->dbShowTableMetaData($table) :
+				$db->dbShowTableMetaData($table, $schema)
 		);
 
 		$db->dbClose();
 	}
 
 	// - db exec test for insert/update/select/etc
-	//   dbExec
+	//   dbExec, dbResetQueryCalled, dbGetQueryCalled
 
 	/**
 	 * provide queries with return results
@@ -1280,7 +1321,7 @@ final class CoreLibsDBIOTest extends TestCase
 	public function queryDbExecProvider(): array
 	{
 		// 0: query
-		// 1: optional primary key name
+		// 1: optional primary key name, null for empty test
 		// 2: expectes result (bool, object (>=8.1)/resource (<8.1))
 		// 3: warning
 		// 4: error
@@ -1290,6 +1331,14 @@ final class CoreLibsDBIOTest extends TestCase
 			'table with pk insert' => [
 				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW())',
 				'',
+				'resource/object',
+				'',
+				'',
+			],
+			// insert but null primary key
+			'table with pk insert null' => [
+				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW())',
+				null,
 				'resource/object',
 				'',
 				'',
@@ -1378,6 +1427,7 @@ final class CoreLibsDBIOTest extends TestCase
 			// NOTE: After an error was encountered, queries after this
 			//       will return a true connection busy although it was error
 			//       https://bugs.php.net/bug.php?id=36469
+			// TODO: fix wron error 42 after error insert
 			'invalid returning' => [
 				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW()) RETURNING invalid',
 				'',
@@ -1394,24 +1444,29 @@ final class CoreLibsDBIOTest extends TestCase
 	 * tests (internal read data post exec group)
 	 *
 	 * @covers ::dbExec
+	 * @covers ::dbGetQueryCalled
+	 * @covers ::dbResetQueryCalled
 	 * @dataProvider queryDbExecProvider
 	 * @testdox dbExec $query and pk $pk_name with $expected_return (Warning: $warning/Error: $error) [$_dataName]
 	 *
 	 * @param string $query
-	 * @param string $pk_name
-	 * @param [type] $expected_return
+	 * @param string|null $pk_name
+	 * @param object|resource|bool $expected_return
+	 * @param string $warning
+	 * @param string $error
+	 * @param bool $run_many_times
 	 * @return void
 	 */
 	public function testDbExec(
 		string $query,
-		string $pk_name,
+		?string $pk_name,
 		$expected_return,
 		string $warning,
 		string $error,
 		bool $run_many_times = false
 	): void {
-		self::$log->setLogLevelAll('debug', true);
-		self::$log->setLogLevelAll('print', true);
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -1428,58 +1483,621 @@ final class CoreLibsDBIOTest extends TestCase
 			$this->assertEquals(
 				$expected_return,
 				// supress ANY errors here
-				@$db->dbExec($query, $pk_name)
+				$pk_name === null ?
+					@$db->dbExec($query) :
+					@$db->dbExec($query, $pk_name)
 			);
+			$last_warning = $db->dbGetLastWarning();
+			$last_error = $db->dbGetLastError();
 		} else {
 			// if PHP or newer, must be Object PgSql\Result
 			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
+				$result = $pk_name === null ?
+					$db->dbExec($query) :
+					$db->dbExec($query, $pk_name);
+				$last_warning = $db->dbGetLastWarning();
+				$last_error = $db->dbGetLastError();
 				$this->assertIsObject(
-					$db->dbExec($query, $pk_name)
+					$result
 				);
 				// also check that this is correct instance type
 				$this->assertInstanceOf(
 					'PgSql\Result',
-					$db->dbExec($query, $pk_name)
+					$result
 				);
 			} else {
 				$this->assertIsResource(
-					$db->dbExec($query, $pk_name)
+					$pk_name === null ?
+						$db->dbExec($query) :
+						$db->dbExec($query, $pk_name)
 				);
+				$last_warning = $db->dbGetLastWarning();
+				$last_error = $db->dbGetLastError();
 			}
 		}
 		// if we have more than one run time
 		// re-run same query and then catch error
 		if ($run_many_times) {
 			for ($i = 1; $i <= $db->dbGetMaxQueryCall() + 1; $i++) {
-				$db->dbExec($query, $pk_name);
+				$pk_name === null ?
+					$db->dbExec($query) :
+					$db->dbExec($query, $pk_name);
 			}
 			// will fail now
 			$this->assertFalse(
-				$db->dbExec($query, $pk_name)
+				$pk_name === null ?
+					$db->dbExec($query) :
+					$db->dbExec($query, $pk_name)
+			);
+			$last_warning = $db->dbGetLastWarning();
+			$last_error = $db->dbGetLastError();
+			// check query called matching
+			$current_count = $db->dbGetQueryCalled($query);
+			$this->assertEquals(
+				$db->dbGetMaxQueryCall() + 1,
+				$current_count
+			);
+			// reset query called and check again
+			$this->assertEquals(
+				0,
+				$db->dbResetQueryCalled($query)
 			);
 		}
+
 		// if string for warning or error is not empty check
 		$this->assertEquals(
 			$warning,
-			$db->dbGetLastWarning()
+			$last_warning
 		);
 		$this->assertEquals(
 			$error,
-			$db->dbGetLastError()
+			$last_error
 		);
 
 		// reset all data
 		$db->dbExec("TRUNCATE table_with_primary_key");
 		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
+		$db->dbClose();
+	}
 
+	// - return one database row
+	//   dbReturnRow
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function returnRowProvider(): array
+	{
+		$insert_query = "INSERT INTO table_with_primary_key (row_int, uid) VALUES (1, 'A')";
+		$read_query = "SELECT row_int, uid FROM table_with_primary_key WHERE uid = 'A'";
+		// 0: query
+		// 1: flag (assoc)
+		// 2: result
+		// 3: warning
+		// 4: error
+		// 5: insert query
+		return [
+			'valid select' => [
+				$read_query,
+				null,
+				[
+					'row_int' => 1,
+					0 => 1,
+					'uid' => 'A',
+					1 => 'A'
+				],
+				'',
+				'',
+				$insert_query,
+			],
+			'valid select, assoc only false' => [
+				$read_query,
+				false,
+				[
+					'row_int' => 1,
+					0 => 1,
+					'uid' => 'A',
+					1 => 'A'
+				],
+				'',
+				'',
+				$insert_query,
+			],
+			'valid select, assoc only true' => [
+				$read_query,
+				true,
+				[
+					'row_int' => 1,
+					'uid' => 'A',
+				],
+				'',
+				'',
+				$insert_query,
+			],
+			'empty select' => [
+				'',
+				null,
+				false,
+				'',
+				'11',
+				$insert_query,
+			],
+			'insert query' => [
+				$insert_query,
+				null,
+				false,
+				'',
+				'17',
+				$insert_query
+			],
+			// invalid QUERY
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbReturnRow
+	 * @dataProvider returnRowProvider
+	 * @testdox dbReturnRow $query and assoc $flag_assoc with $expected (Warning: $warning/Error: $error) [$_dataName]
+	 *
+	 * @param string $query
+	 * @param bool|null $flag_assoc
+	 * @param array<mixed>|bool $expected
+	 * @param string $warning
+	 * @param string $error
+	 * @param string $insert_data
+	 * @return void
+	 */
+	public function testDbReturnRow(
+		string $query,
+		?bool $flag_assoc,
+		$expected,
+		string $warning,
+		string $error,
+		string $insert_data,
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		// insert data before we can test, from expected array
+		$db->dbExec($insert_data);
+		// compare
+		$this->assertEquals(
+			$expected,
+			$flag_assoc === null ?
+				$db->dbReturnRow($query) :
+				$db->dbReturnRow($query, $flag_assoc)
+		);
+		// get last error/warnings
+		$last_warning = $db->dbGetLastWarning();
+		$last_error = $db->dbGetLastError();
+		// print "ER: " . $last_error . "/" . $last_warning . "\n";
+		// if string for warning or error is not empty check
+		$this->assertEquals(
+			$warning,
+			$last_warning
+		);
+		$this->assertEquals(
+			$error,
+			$last_error
+		);
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
+		$db->dbClose();
+	}
+
+	// - return all database rows
+	//   dbReturnArray
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function returnArrayProvider(): array
+	{
+		$insert_query = "INSERT INTO table_with_primary_key (row_int, uid) VALUES "
+			. "(1, 'A'), (2, 'B')";
+		$read_query = "SELECT row_int, uid FROM table_with_primary_key";
+		// 0: query
+		// 1: flag (assoc)
+		// 2: result
+		// 3: warning
+		// 4: error
+		// 5: insert query
+		return [
+			'valid select' => [
+				$read_query,
+				null,
+				[
+					[
+						'row_int' => 1,
+						'uid' => 'A',
+					],
+					[
+						'row_int' => 2,
+						'uid' => 'B',
+					],
+				],
+				'',
+				'',
+				$insert_query,
+			],
+			'valid select, assoc ' => [
+				$read_query,
+				false,
+				[
+					[
+						'row_int' => 1,
+						0 => 1,
+						'uid' => 'A',
+						1 => 'A'
+					],
+					[
+						'row_int' => 2,
+						0 => 2,
+						'uid' => 'B',
+						1 => 'B'
+					],
+				],
+				'',
+				'',
+				$insert_query,
+			],
+			'empty select' => [
+				'',
+				null,
+				false,
+				'',
+				'11',
+				$insert_query,
+			],
+			'insert query' => [
+				$insert_query,
+				null,
+				false,
+				'',
+				'17',
+				$insert_query
+			],
+			// invalid QUERY
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbReturnArray
+	 * @dataProvider returnArrayProvider
+	 * @testdox dbReturnArray $query and assoc $flag_assoc with $expected (Warning: $warning/Error: $error) [$_dataName]
+	 *
+	 * @param string $query
+	 * @param boolean|null $flag_assoc
+	 * @param array<mixed>|bool $expected
+	 * @param string $warning
+	 * @param string $error
+	 * @param string $insert_data
+	 * @return void
+	 */
+	public function testDbReturnArrray(
+		string $query,
+		?bool $flag_assoc,
+		$expected,
+		string $warning,
+		string $error,
+		string $insert_data,
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		// insert data before we can test, from expected array
+		$db->dbExec($insert_data);
+		// compare
+		$this->assertEquals(
+			$expected,
+			$flag_assoc === null ?
+				$db->dbReturnArray($query) :
+				$db->dbReturnArray($query, $flag_assoc)
+		);
+		// get last error/warnings
+		$last_warning = $db->dbGetLastWarning();
+		$last_error = $db->dbGetLastError();
+		// if string for warning or error is not empty check
+		$this->assertEquals(
+			$warning,
+			$last_warning
+		);
+		$this->assertEquals(
+			$error,
+			$last_error
+		);
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
+		$db->dbClose();
+	}
+
+	// - loop data return flow
+	//   dbReturn, dbCacheReset, dbCursorPos, dbCursorNumRows, dbGetCursorExt
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function dbReturnProvider(): array
+	{
+		$insert_query = "INSERT INTO table_with_primary_key (row_int, uid) VALUES "
+			. "(1, 'A'), (2, 'B')";
+		$read_query = "SELECT row_int, uid FROM table_with_primary_key";
+		// 0: read query
+		// 1: reset flag, null for default
+		// 2: assoc flag, null for default
+		// 3: expected return
+		// 4: read first, read all flag
+		// 5: read all check array
+		// 6: warning
+		// 7: error
+		// 8: insert data
+		return [
+			'valid select' => [
+				$read_query,
+				null,
+				null,
+				[
+					'row_int' => 1,
+					0 => 1,
+					'uid' => 'A',
+					1 => 'A'
+				],
+				true,
+				[],
+				'',
+				'',
+				$insert_query
+			],
+			'valid select, default cache, assoc only' => [
+				$read_query,
+				\CoreLibs\DB\IO::USE_CACHE,
+				true,
+				[
+					'row_int' => 1,
+					'uid' => 'A',
+				],
+				true,
+				[],
+				'',
+				'',
+				$insert_query
+			],
+			'empty select' => [
+				'',
+				null,
+				null,
+				false,
+				true,
+				[],
+				'',
+				'11',
+				$insert_query,
+			],
+			'insert query' => [
+				$insert_query,
+				null,
+				null,
+				false,
+				true,
+				[],
+				'',
+				'17',
+				$insert_query
+			],
+			// from here on a complex read all full tests
+			'valid select, full read' => [
+				$read_query,
+				null,
+				null,
+				[
+					'row_int' => 1,
+					0 => 1,
+					'uid' => 'A',
+					1 => 'A'
+				],
+				false,
+				[],
+				'',
+				'',
+				$insert_query
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbReturn
+	 * @covers ::dbCacheReset
+	 * @covers ::dbGetCursorExt
+	 * @covers ::dbCursorPos
+	 * @covers ::dbCursorNumRows
+	 * @dataProvider dbReturnProvider
+	 * @testdox dbReturn $query and cache $flag_cache and assoc $flag_assoc with $expected (Warning: $warning/Error: $error) [$_dataName]
+	 *
+	 * @param string $query
+	 * @param integer|null $flag_cache
+	 * @param boolean|null $flag_assoc
+	 * @param array<mixed>|bool $expected
+	 * @param bool $read_first_only
+	 * @param array $cursor_ext_checks
+	 * @param string $warning
+	 * @param string $error
+	 * @param string $insert_data
+	 * @return void
+	 */
+	public function testDbReturn(
+		string $query,
+		?int $flag_cache,
+		?bool $flag_assoc,
+		$expected,
+		bool $read_first_only,
+		array $cursor_ext_checks,
+		string $warning,
+		string $error,
+		string $insert_data,
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		// insert data before we can test, from expected array
+		$db->dbExec($insert_data);
+
+		// all checks below
+		if ($read_first_only === true) {
+			// simple assert first read, then discard result
+			// compare
+			$this->assertEquals(
+				$expected,
+				$flag_cache === null && $flag_assoc === null ?
+					$db->dbReturn($query) :
+					($flag_assoc === null ?
+						$db->dbReturn($query, $flag_cache) :
+						$db->dbReturn($query, $flag_cache, $flag_assoc)
+					)
+			);
+			// get last error/warnings
+			$last_warning = $db->dbGetLastWarning();
+			$last_error = $db->dbGetLastError();
+			// if string for warning or error is not empty check
+			$this->assertEquals(
+				$warning,
+				$last_warning
+			);
+			$this->assertEquals(
+				$error,
+				$last_error
+			);
+		} else {
+			// all tests here have valid returns already, error checks not needed
+			// read all, and then do result compare
+			// cursor ext data checks (field names, rows, pos, data)
+			// do cache reset test
+			$data = [];
+			$pos = 0;
+			while (
+				is_array(
+					$res = $flag_cache === null && $flag_assoc === null ?
+						$db->dbReturn($query) :
+						($flag_assoc === null ?
+							$db->dbReturn($query, $flag_cache) :
+							$db->dbReturn($query, $flag_cache, $flag_assoc)
+						)
+				)
+			) {
+				$data[] = $res;
+				$pos++;
+				// check cursor pos
+				$this->assertEquals(
+					$pos,
+					$db->dbGetCursorPos($query)
+				);
+			}
+			// does count match for returned data and the cursor num rows
+			$this->assertEquals(
+				count($data),
+				$db->dbGetCursorNumRows($query)
+			);
+			// does data match
+			// try get cursor data for non existing, must be null
+			$this->assertNull(
+				$db->dbGetCursorExt($query, 'nonexistingfield')
+			);
+			// does reset data work, query cursor must be null
+			$db->dbCacheReset($query);
+			$this->assertNull(
+				$db->dbGetCursorExt($query)
+			);
+		}
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
+		$db->dbClose();
+	}
+
+	// - prepared query execute
+	//   dbPrepare, dbExecute, dbFetchArray
+
+	public function preparedProvider(): array
+	{
+		// 0: statement name
+		// 1: query to prepare
+		// 2: primary key name: null for default run
+		// 3: arguments for query (double array 0: for select, 0..n for insert/update)
+		// 4: expected prepare return
+		// 5: prepare warning
+		// 6: prepare error
+		// 7: expected execute return
+		// 8: execute warning
+		// 9: execute error
+		// 10: execute data to check (array)
+		// 11: insert data
+		return [
+
+		];
+	}
+
+	// bool|object|resource
+
+	public function testDbPrepared(
+		string $stm_name,
+		string $query,
+		?string $pk_name,
+		array $query_data,
+		$expected_prepare,
+		string $warning_prepare,
+		string $error_prepare,
+		$expected_execute,
+		string $warning_execute,
+		string $error_execute,
+		array $excute_data,
+		string $insert_data,
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		// insert data before we can test, from expected array
+		$db->dbExec($insert_data);
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
 		$db->dbClose();
 	}
 
 	// - db execution tests
-	//   dbReturn, dbCacheReset,
-	//   dbFetchArray, dbReturnRow, dbReturnArray,
-	//   dbCursorPos, dbCursorNumRows,
-	//   dbPrepare, dbExecute
 	//   dbExecAsync, dbCheckAsync
 	// - encoding conversion on read
 	//   dbSetToEncoding, dbGetToEncoding
@@ -1487,10 +2105,8 @@ final class CoreLibsDBIOTest extends TestCase
 	//   dbDumpData
 	// - internal read data (post exec)
 	//   dbGetReturning, dbGetInsertPKName, dbGetInsertPK, dbGetReturningExt,
-	//   dbGetReturningArray, dbGetCursorExt, dbGetNumRows, dbGetNumFields,
-	//   dbGetFieldNames, dbGetQuery
-	//   getHadError, getHadWarning,
-	//   dbResetQueryCalled, dbGetQueryCalled
+	//   dbGetReturningArray, dbGetNumRows, dbGetNumFields,
+	//   dbGetFieldNames, dbGetQuery, dbGetQueryHash, dbGetDbh
 	// - complex write sets
 	//   dbWriteData, dbWriteDataExt
 	// - deprecated tests [no need to test perhaps]
@@ -1498,21 +2114,6 @@ final class CoreLibsDBIOTest extends TestCase
 	//   getCursorExt, getNumRows
 	// - error handling
 	//   dbGetCombinedErrorHistory, dbGetLastError, dbGetLastWarning
-
-	/**
-	 * grouped DB IO test
-	 *
-	 * @testdox DB\IO Class tests
-	 *
-	 * @return void
-	 */
-	public function testDBIO()
-	{
-		$this->assertTrue(true, 'DB IO Tests not implemented');
-		$this->markTestIncomplete(
-			'DB\IO Tests have not yet been implemented'
-		);
-	}
 }
 
 // __END__
