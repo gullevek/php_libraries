@@ -91,10 +91,13 @@ class Hash
 	 * create a unique id with the standard hash type defined in __hash
 	 *
 	 * @return string Unique ID with fixed length of 8 characters
+	 * @deprecated Use \CoreLibs\Create\Uids::uniqIdShort() instead
 	 */
 	public static function __uniqId(): string
 	{
-		return self::__hash(uniqid((string)rand(), true));
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, '
+			. '\CoreLibs\Create\Uids::uniqIdShort() class', E_USER_DEPRECATED);
+		return \CoreLibs\Create\Uids::uniqIdShort();
 	}
 
 	/**
@@ -102,10 +105,13 @@ class Hash
 	 * defined in __hashLong
 	 *
 	 * @return string Unique ID with length of current default long hash
+	 * @deprecated Use \CoreLibs\Create\Uids::uniqIdLong() instead
 	 */
 	public static function __uniqIdLong(): string
 	{
-		return self::__hashLong(uniqid((string)rand(), true));
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, '
+			. '\CoreLibs\Create\Uids::uniqIdLong() class', E_USER_DEPRECATED);
+		return \CoreLibs\Create\Uids::uniqIdLong();
 	}
 }
 

@@ -68,8 +68,8 @@ print "<br>CURRENT STANDARD_HASH_LONG: " . Hash::STANDARD_HASH_LONG . "<br>";
 print "HASH SHORT: " . $to_crc . ": " . Hash::__hash($to_crc) . "<br>";
 print "HASH LONG: " . $to_crc . ": " . Hash::__hashLong($to_crc) . "<br>";
 
-print "UNIQU ID SHORT : " . Hash::__uniqId() . "<br>";
-print "UNIQU ID LONG : " . Hash::__uniqIdLong() . "<br>";
+// print "UNIQU ID SHORT : " . Hash::__uniqId() . "<br>";
+// print "UNIQU ID LONG : " . Hash::__uniqIdLong() . "<br>";
 
 // DEPRECATED
 /* print "D/__CRC32B: $to_crc: ".$basic->__crc32b($to_crc)."<br>";

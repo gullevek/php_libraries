@@ -13,6 +13,11 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsCreateUidsTest extends TestCase
 {
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function uniqIdProvider(): array
 	{
 		return [
@@ -32,6 +37,10 @@ final class CoreLibsCreateUidsTest extends TestCase
 				0 => 'adler32',
 				1 => 8
 			],
+			'not in list hash but valid' => [
+				0 => 'sha3-512',
+				1 => strlen(hash('sha3-512', 'A'))
+			],
 			'default hash not set' => [
 				0 => null,
 				1 => 64,
@@ -39,9 +48,36 @@ final class CoreLibsCreateUidsTest extends TestCase
 			'invalid name' => [
 				0 => 'iamnotavalidhash',
 				1 => 64,
-			]
+			],
+			'auto: ' . \CoreLibs\Create\Uids::DEFAULT_HASH => [
+				0 => \CoreLibs\Create\Uids::DEFAULT_HASH,
+				1 => strlen(hash(\CoreLibs\Create\Uids::DEFAULT_HASH, 'A'))
+			],
+			'auto: ' . \CoreLibs\Create\Uids::STANDARD_HASH_LONG => [
+				0 => \CoreLibs\Create\Uids::STANDARD_HASH_LONG,
+				1 => strlen(hash(\CoreLibs\Create\Uids::STANDARD_HASH_LONG, 'A'))
+			],
+			'auto: ' . \CoreLibs\Create\Uids::STANDARD_HASH_SHORT => [
+				0 => \CoreLibs\Create\Uids::STANDARD_HASH_SHORT,
+				1 => strlen(hash(\CoreLibs\Create\Uids::STANDARD_HASH_SHORT, 'A'))
+			],
 		];
 	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function uniqIdLongProvider(): array
+	{
+		return [
+			'uniq id long: ' . \CoreLibs\Create\Uids::STANDARD_HASH_LONG => [
+				strlen(hash(\CoreLibs\Create\Uids::STANDARD_HASH_LONG, 'A'))
+			],
+		];
+	}
+
 
 	/**
 	 * must match 7e78fe0d-59b8-4637-af7f-e88d221a7d1e
@@ -107,6 +143,42 @@ final class CoreLibsCreateUidsTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			strlen(\CoreLibs\Create\Uids::uniqId())
+		);
+	}
+
+	/**
+	 * Short id, always 8 in length
+	 *
+	 * @covers ::uniqIdShort
+	 * @testWith [8]
+	 * @testdox uniqIdShort will be length $expected [$_dataName]
+	 *
+	 * @param integer $expected
+	 * @return void
+	 */
+	public function testUniqIdShort(int $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			strlen(\CoreLibs\Create\Uids::uniqIdShort())
+		);
+	}
+
+	/**
+	 * Long Id, length can change
+	 *
+	 * @covers ::uniqIdLong
+	 * @dataProvider uniqIdLongProvider
+	 * @testdox uniqIdLong will be length $expected [$_dataName]
+	 *
+	 * @param integer $expected
+	 * @return void
+	 */
+	public function testUniqIdLong(int $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			strlen(\CoreLibs\Create\Uids::uniqIdLong())
 		);
 	}
 }

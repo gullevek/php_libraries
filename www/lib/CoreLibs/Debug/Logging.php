@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace CoreLibs\Debug;
 
 use CoreLibs\Debug\Support;
-use CoreLibs\Create\Hash;
+use CoreLibs\Create\Uids;
 use CoreLibs\Get\System;
 use CoreLibs\Convert\Html;
 
@@ -161,7 +161,7 @@ class Logging
 		// running time start for script
 		$this->script_starttime = microtime(true);
 		// set per run UID for logging
-		$this->running_uid = Hash::__uniqId();
+		$this->running_uid = Uids::uniqIdShort();
 		// set the page name
 		$this->page_name = System::getPageName();
 		// set host name

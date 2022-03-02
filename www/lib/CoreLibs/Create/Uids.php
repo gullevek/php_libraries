@@ -7,7 +7,9 @@ namespace CoreLibs\Create;
 class Uids
 {
 	// what to use as a default hash if non ise set and no DEFAULT_HASH is defined
-	public const FALLBACK_HASH = 'sha256';
+	public const DEFAULT_HASH = 'sha256';
+	public const STANDARD_HASH_LONG = 'ripemd160';
+	public const STANDARD_HASH_SHORT = 'adler32';
 
 	/**
 	 * creates psuedo random uuid v4
@@ -53,22 +55,51 @@ class Uids
 			case 'md5':
 				$uniq_id = md5(uniqid((string)rand(), true));
 				break;
-			case 'sha256':
-				$uniq_id = hash('sha256', uniqid((string)rand(), true));
+			case self::DEFAULT_HASH:
+				$uniq_id = hash(self::DEFAULT_HASH, uniqid((string)rand(), true));
 				break;
-			case 'ripemd160':
-				$uniq_id = hash('ripemd160', uniqid((string)rand(), true));
+			case self::STANDARD_HASH_LONG:
+				$uniq_id = hash(self::STANDARD_HASH_LONG, uniqid((string)rand(), true));
 				break;
-			case 'adler32':
-				$uniq_id = hash('adler32', uniqid((string)rand(), true));
+			case self::STANDARD_HASH_SHORT:
+				$uniq_id = hash(self::STANDARD_HASH_SHORT, uniqid((string)rand(), true));
 				break;
 			default:
-				// fallback to this hash type
-				$hash = self::FALLBACK_HASH;
+				// if not empty, check if in valid list
+				if (
+					!empty($type) &&
+					in_array($type, hash_algos())
+				) {
+					$hash = $type;
+				} else {
+					// fallback to default hash type if none set or invalid
+					$hash = self::DEFAULT_HASH;
+				}
 				$uniq_id = hash($hash, uniqid((string)rand(), true));
 				break;
 		}
 		return $uniq_id;
+	}
+
+		/**
+	 * create a unique id with the standard hash type defined in __hash
+	 *
+	 * @return string Unique ID with fixed length of 8 characters
+	 */
+	public static function uniqIdShort(): string
+	{
+		return self::uniqId(self::STANDARD_HASH_SHORT);
+	}
+
+	/**
+	 * create a unique id with the standard long hash type
+	 * defined in __hashLong
+	 *
+	 * @return string Unique ID with length of current default long hash
+	 */
+	public static function uniqIdLong(): string
+	{
+		return self::uniqId(self::STANDARD_HASH_LONG);
 	}
 }
 

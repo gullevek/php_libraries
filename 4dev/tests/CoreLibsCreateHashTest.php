@@ -110,15 +110,6 @@ final class CoreLibsCreateHashTest extends TestCase
 		];
 	}
 
-	public function uniqIdLongProvider(): array
-	{
-		return [
-			'uniq id long: ' . \CoreLibs\Create\Hash::STANDARD_HASH_LONG => [
-				strlen(hash(\CoreLibs\Create\Hash::STANDARD_HASH_LONG, 'A'))
-			],
-		];
-	}
-
 	/**
 	 * Undocumented function
 	 *
@@ -197,24 +188,6 @@ final class CoreLibsCreateHashTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::__uniqueId
-	 * @testWith [8]
-	 * @testdox __uniqId will be length $expected [$_dataName]
-	 *
-	 * @param integer $expected
-	 * @return void
-	 */
-	public function testUniqId(int $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			strlen(\CoreLibs\Create\Hash::__uniqId())
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
 	 * @covers ::__hashLong
 	 * @dataProvider hashLongProvider
 	 * @testdox __hashLong $input will be $expected [$_dataName]
@@ -228,24 +201,6 @@ final class CoreLibsCreateHashTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Create\Hash::__hashLong($input)
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @covers ::__uniqueIdLong
-	 * @dataProvider uniqIdLongProvider
-	 * @testdox __uniqIdLong will be length $expected [$_dataName]
-	 *
-	 * @param integer $expected
-	 * @return void
-	 */
-	public function testUniqIdLong(int $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			strlen(\CoreLibs\Create\Hash::__uniqIdLong())
 		);
 	}
 }
