@@ -694,10 +694,10 @@ class IO
 	 * @param object|resource|bool $cursor current cursor for pg_result_error,
 	 *                             pg_last_error too, but pg_result_error
 	 *                             is more accurate (PgSql\Result)
-	 * @return array Pos 0: if we could get the method where it was called
-	 *                      if not found [Uknown Method]
-	 *               Pos 1: if we have the pg_error_string from last error
-	 *                      if nothing then empty string
+	 * @return array<mixed> Pos 0: if we could get the method where it was called
+	 *                             if not found [Uknown Method]
+	 *                      Pos 1: if we have the pg_error_string from last error
+	 *                             if nothing then empty string
 	 */
 	private function __dbErrorPreprocessor($cursor = false): array
 	{
@@ -898,7 +898,7 @@ class IO
 	 * Read data from previous written data cache
 	 * @param  string  $query_hash The hash for the current query
 	 * @param  boolean $assoc_only Only return assoc value (key named)
-	 * @return array               Current position query data from cache
+	 * @return array<mixed>        Current position query data from cache
 	 */
 	private function __dbReturnCacheRead(string $query_hash, bool $assoc_only): array
 	{
@@ -1479,9 +1479,12 @@ class IO
 				break;
 			// bytea data
 			case 'by':
-				$value = empty($value) ? 'NULL' : $this->dbEscapeBytea($value);
+				$value = empty($value) ? 'NULL' : $this->dbEscapeBytea((string)$value);
 				break;
 			case 'b':
+				if (is_float($value)) {
+					$value = (int)$value;
+				}
 				$value = $value === '' || $value === null ?
 					'NULL' :
 					"'" . $this->dbBoolean($value, true) . "'";
@@ -2840,7 +2843,7 @@ class IO
 
 	/**
 	 * Return field names from query
-	 * @return array Field names as array
+	 * @return array<mixed> Field names as array
 	 */
 	public function dbGetFieldNames(): array
 	{
@@ -2896,7 +2899,8 @@ class IO
 
 	/**
 	 * Return the combined warning and error history
-	 * @return array
+	 * TODO: add options to return only needed (Eg error, time based)
+	 * @return array<mixed> Complete long error history string
 	 */
 	public function dbGetCombinedErrorHistory(): array
 	{
@@ -2996,7 +3000,7 @@ class IO
 	/**
 	 * DEPRECATED: getCursorExt
 	 * @param  string|null $q [DEPRECATED]
-	 * @return array<mixed>|null [DEPRECATED]
+	 * @return array<mixed>|string|int|resource|object|null [DEPRECATED]
 	 * @deprecated use dbGetCursorExt($q = null) instead
 	 */
 	public function getCursorExt($q = null)

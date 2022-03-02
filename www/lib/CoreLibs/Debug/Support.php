@@ -97,7 +97,7 @@ class Support
 	 * Defaults to skip level 0 wich is this methid
 	 * @param  integer $start_level From what level on, as defaul starts with 1
 	 *                              to exclude self
-	 * @return array                All method names in list where max is last called
+	 * @return array<mixed>         All method names in list where max is last called
 	 */
 	public static function getCallerMethodList(int $start_level = 1): array
 	{

@@ -528,9 +528,10 @@ class PgSQL
 	public function __dbEscapeLiteral($string): string
 	{
 		if ($this->dbh === false || is_bool($this->dbh)) {
-			return '';
+			return (string)'';
 		}
-		return pg_escape_literal($this->dbh, (string)$string);
+		// for phpstan, thinks this is string|false?
+		return (string)pg_escape_literal($this->dbh, (string)$string);
 	}
 
 	/**
@@ -544,7 +545,8 @@ class PgSQL
 		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
 		}
-		return pg_escape_identifier($this->dbh, (string)$string);
+		// for phpstan, thinks this is string|false?
+		return (string)pg_escape_identifier($this->dbh, (string)$string);
 	}
 
 	/**
@@ -583,7 +585,9 @@ class PgSQL
 			return false;
 		}
 		$busy = pg_connection_busy($this->dbh);
+		/** @var array<resource>|null */
 		$socket = [pg_socket($this->dbh)];
+		$null = null;
 		while ($busy) {
 			// Will wait on that socket until that happens or the timeout is reached
 			stream_select($socket, $null, $null, $timeout_seconds);
