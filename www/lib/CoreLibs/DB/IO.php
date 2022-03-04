@@ -436,6 +436,7 @@ class IO
 			'22' => 'Query Execute failed',
 			'23' => 'Query Execute failed, data array does not match placeholders',
 			'24' => 'Missing prepared query entry for execute.',
+			'25' => 'Missing Statement name',
 			'30' => 'Query call in a possible endless loop. '
 				. 'Was called more than ' . $this->MAX_QUERY_CALL . ' times',
 			'31' => 'Could not fetch PK after query insert',
@@ -445,10 +446,15 @@ class IO
 			'40' => 'Query async call failed.',
 			'41' => 'Connection is busy with a different query. Cannot execute.',
 			'42' => 'Cannot check for async query, none has been started yet.',
+			'43' => 'No Async query result',
 			'50' => 'Setting max query call to -1 will disable loop protection '
 				. 'for all subsequent runs',
 			'51' => 'Max query call needs to be set to at least 1',
-			'60' => 'table not found for reading meta data'
+			'60' => 'table not found for reading meta data',
+			'70' => 'Trying to set an empty search path/schema',
+			'71' => 'Failed to set search path/schema',
+			'80' => 'Trying to set an empty encoding',
+			'81' => 'Failed to set client encoding',
 		];
 
 		// load the core DB functions wrapper class
@@ -538,12 +544,12 @@ class IO
 		// 	return false;
 		// }
 		// set search path if needed
-		if ($this->db_schema) {
-			$this->dbSetSchema();
+		if (!empty($this->db_schema)) {
+			$this->dbSetSchema($this->db_schema);
 		}
 		// set client encoding
-		if ($this->db_encoding) {
-			$this->dbSetEncoding();
+		if (!empty($this->db_encoding)) {
+			$this->dbSetEncoding($this->db_encoding);
 		}
 		// all okay
 		return true;
@@ -1903,7 +1909,7 @@ class IO
 	/**
 	 * returns the FIRST row of the given query
 	 * @param  string $query      the query to be executed
-	 * @param  bool   $assoc_only if true, only return assoc entry, else both (pgsql)
+	 * @param  bool   $assoc_only if true, only return assoc entry (default false)
 	 * @return array<mixed>|bool  row array or false on error
 	 */
 	public function dbReturnRow(string $query, bool $assoc_only = false)
@@ -1930,7 +1936,7 @@ class IO
 	/**
 	 * createds an array of hashes of the query (all data)
 	 * @param  string $query      the query to be executed
-	 * @param  bool   $assoc_only if true, only name ref are returned
+	 * @param  bool   $assoc_only if true, only name ref are returned (default true)
 	 * @return array<mixed>|bool  array of hashes (row -> fields), false on error
 	 */
 	public function dbReturnArray(string $query, bool $assoc_only = true)
@@ -2116,11 +2122,24 @@ class IO
 		if (!$this->__dbCheckConnectionOk()) {
 			return false;
 		}
+		// no statement name
+		if (empty($stm_name)) {
+			$this->__dbError(25);
+			return false;
+		}
 		// check if this was already prepared
 		if (
 			!array_key_exists($stm_name, $this->prepare_cursor) ||
 			!is_array($this->prepare_cursor[$stm_name])
 		) {
+			// init cursor
+			$this->prepare_cursor[$stm_name] = [
+				'pk_name' => '',
+				'count' => 0,
+				'query' => '',
+				'result' =>  null,
+				'returning_id' => false
+			];
 			// if this is an insert query, check if we can add a return
 			if ($this->__checkQueryForInsert($query, true)) {
 				if ($pk_name != 'NULL') {
@@ -2190,9 +2209,29 @@ class IO
 	public function dbExecute(string $stm_name, array $data = [])
 	{
 		$this->__dbErrorReset();
+		// if no DB Handler drop out
+		if (!$this->dbh) {
+			// if reconnect fails drop out
+			if (!$this->__connectToDB()) {
+				$this->__dbError(16);
+				return false;
+			}
+		}
+		// check that no other query is running right now
+		if (!$this->__dbCheckConnectionOk()) {
+			return false;
+		}
+		// no statement name
+		if (empty($stm_name)) {
+			$this->__dbError(25);
+			return false;
+		}
 		// if we do not have no prepare cursor array entry
 		// for this statement name, abort
-		if (!is_array($this->prepare_cursor[$stm_name])) {
+		if (
+			empty($this->prepare_cursor[$stm_name]) ||
+			!is_array($this->prepare_cursor[$stm_name])
+		) {
 			$this->__dbError(
 				24,
 				false,
@@ -2254,8 +2293,7 @@ class IO
 	/**
 	 * executres the query async so other methods can be run during this
 	 * for INSERT INTO queries it is highly recommended to set the pk_name
-	 * to avoid an additional
-	 * read from the database for the PK NAME
+	 * to avoid an additional read from the database for the PK NAME
 	 * NEEDS : dbCheckAsync
 	 * @param  string $query   query to run
 	 * @param  string $pk_name optional primary key name, only used with
@@ -2271,14 +2309,16 @@ class IO
 			// bail if no hash set
 			return false;
 		}
-		// run the async query
+		// run the async query, this just returns true or false
+		// the actually result is in dbCheckAsync
 		if (!$this->db_functions->__dbSendQuery($this->query)) {
 			// if failed, process here
 			$this->__dbError(40);
 			return false;
 		} else {
 			$this->async_running = (string)$query_hash;
-			// all ok, we return true (as would be from the original send query function)
+			// all ok, we return true
+			// (as would be from the original send query function)
 			return true;
 		}
 	}
@@ -2294,13 +2334,14 @@ class IO
 	{
 		$this->__dbErrorReset();
 		// if there is actually a async query there
-		if ($this->async_running) {
+		if (!empty($this->async_running)) {
 			// alternative try __dbConnectionBusySocketWait
 			if ($this->db_functions->__dbConnectionBusy()) {
 				return true;
 			} else {
 				$cursor = $this->db_functions->__dbGetResult();
 				if ($cursor === false) {
+					$this->__dbError(43);
 					return false;
 				}
 				// get the result/or error
@@ -2593,54 +2634,99 @@ class IO
 
 	/**
 	 * sets new db schema
-	 * @param  string $db_schema schema name, if not given tries internal default db schema
-	 * @return bool              false on failure to find schema values, true of db exec schema set
+	 * @param  string $db_schema Schema name
+	 * @return bool              False on failure to find schema value or set schema,
+	 *                           True on successful set
 	 */
-	public function dbSetSchema(string $db_schema = '')
+	public function dbSetSchema(string $db_schema)
 	{
-		if (!$db_schema && $this->db_schema) {
-			$db_schema = $this->db_schema;
-		}
-		if (!$db_schema) {
+		if (empty($db_schema)) {
+			$this->__dbError(70);
 			return false;
 		}
+		// check if schema exists
+		$q = "SELECT EXISTS("
+			. "SELECT 1 FROM information_schema.schemata "
+			. "WHERE schema_name = " . $this->dbEscapeLiteral($db_schema)
+			. ")";
+		$row = $this->dbReturnRow($q);
+		if (!$this->dbBoolean($row['exists'])) {
+			$this->__dbError(71);
+			return false;
+		}
+		// set new schema
 		$q = "SET search_path TO '" . $this->dbEscapeString($db_schema) . "'";
-		return $this->dbExec($q) ? true : false;
+		$this->dbExec($q);
+		$this->db_schema = $db_schema;
+		return true;
 	}
 
 	/**
 	 * returns the current set db schema
-	 * @return string db schema name
+	 * @param  bool $class_var If set to true, will return class var and
+	 *                         not DB setting
+	 * @return string          DB schema name or schema string
 	 */
-	public function dbGetSchema(): string
+	public function dbGetSchema(bool $class_var = false): string
 	{
-		return $this->db_schema;
+		// return $this->db_schema;
+		if ($class_var === true) {
+			return $this->db_schema;
+		}
+		$search_path = $this->dbReturnRow('SHOW search_path');
+		if (!is_array($search_path)) {
+			return '';
+		}
+		return $search_path['search_path'] ?? '';
 	}
 
 	/**
 	 * sets the client encoding in the postgres database
-	 * @param  string $db_encoding valid encoding name,
+	 * @param  string $db_encoding Valid encoding name,
 	 *                             so the the data gets converted to this encoding
 	 * @return bool                false, or true of db exec encoding set
 	 */
-	public function dbSetEncoding(string $db_encoding = ''): bool
+	public function dbSetEncoding(string $db_encoding): bool
 	{
-		if (!$db_encoding && $this->db_encoding) {
-			$db_encoding = $this->db_encoding;
-		}
-		if (!$db_encoding) {
+		if (empty($db_encoding)) {
+			$this->__dbError(80);
 			return false;
 		}
+		// check if ecnoding is valid first
+		// does not take into account aliases
+		// TODO lookup with alisaes so eg ShiftJIS does not get a false
+		// $q = "SELECT EXISTS("
+		// 	. "SELECT pg_catalog.pg_encoding_to_char(conforencoding) "
+		// 	. "FROM pg_catalog.pg_conversion "
+		// 	. "WHERE pg_catalog.pg_encoding_to_char(conforencoding) = "
+		// 	. $this->dbEscapeLiteral($db_encoding)
+		// 	. ")";
+		// $row = $this->dbReturnRow($q);
+		// if (!$this->dbBoolean($row['exists'])) {
+		// 	$this->__dbError(81);
+		// 	return false;
+		// }
 		$q = "SET client_encoding TO '" . $this->dbEscapeString($db_encoding) . "'";
-		return $this->dbExec($q) ? true : false;
+		// abort on error
+		if ($this->dbExec($q) === false) {
+			$this->__dbError(81);
+			return false;
+		}
+		$this->db_encoding = $db_encoding;
+		return true;
 	}
 
 	/**
 	 * returns the current set client encoding from the connected DB
-	 * @return string current client encoding
+	 * @param  bool $class_var If set to true, will return class var and
+	 *                         not DB setting
+	 * @return string          current client encoding
 	 */
-	public function dbGetEncoding(): string
+	public function dbGetEncoding(bool $class_var = false): string
 	{
+		if ($class_var === true) {
+			return $this->db_encoding;
+		}
 		$client_encoding = $this->dbReturnRow('SHOW client_encoding');
 		if (!is_array($client_encoding)) {
 			return '';
