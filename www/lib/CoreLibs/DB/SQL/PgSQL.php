@@ -51,7 +51,7 @@ namespace CoreLibs\DB\SQL;
 // as main system. Currently all @var sets are written as object
 /** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
 
-class PgSQL
+class PgSQL implements Interface\SqlFunctions
 {
 	/** @var string */
 	private $last_error_query;
@@ -62,15 +62,15 @@ class PgSQL
 	/**
 	 * class constructor, empty does nothing
 	 */
-	public function __construct()
-	{
-	}
+	// public function __construct()
+	// {
+	// }
 
 	/**
 	 * queries last error query and returns true or false if error was set
 	 * @return bool true/false if last error is set
 	 */
-	public function __dbLastErrorQuery()
+	public function __dbLastErrorQuery(): bool
 	{
 		if ($this->last_error_query) {
 			return true;
@@ -210,7 +210,7 @@ class PgSQL
 	/**
 	 * wrapper for pg_num_rows
 	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
-	 * @return int              number of rows, -1 on error
+	 * @return int                  number of rows, -1 on error
 	 */
 	public function __dbNumRows($cursor): int
 	{
@@ -223,7 +223,7 @@ class PgSQL
 	/**
 	 * wrapper for pg_num_fields
 	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
-	 * @return int              number for fields in result, -1 on error
+	 * @return int                  number for fields in result, -1 on error
 	 */
 	public function __dbNumFields($cursor): int
 	{
@@ -235,11 +235,11 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_field_name
-	 * @param  object|resource|bool    $cursor cursor PgSql\Result (former resource)
-	 * @param  int         $i      field position
-	 * @return string|bool         name or false on error
+	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
+	 * @param  int                  $i      field position
+	 * @return string|bool          name or false on error
 	 */
-	public function __dbFieldName($cursor, $i)
+	public function __dbFieldName($cursor, int $i)
 	{
 		if ($cursor === false || is_bool($cursor)) {
 			return false;
@@ -251,8 +251,8 @@ class PgSQL
 	 * wrapper for pg_fetch_array
 	 * if through/true false, use __dbResultType(true)
 	 * @param  object|resource|bool $cursor      cursor PgSql\Result (former resource)
-	 * @param  int      $result_type result type as int number
-	 * @return array<mixed>|bool     array result data or false on end/error
+	 * @param  int                  $result_type result type as int number
+	 * @return array<mixed>|bool    array result data or false on end/error
 	 */
 	public function __dbFetchArray($cursor, int $result_type = PGSQL_BOTH)
 	{
@@ -279,8 +279,8 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_fetch_all
-	 * @param  object|resource|bool   $cursor cursor PgSql\Result (former resource)
-	 * @return array<mixed>|bool  data array or false for end/error
+	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
+	 * @return array<mixed>|bool    data array or false for end/error
 	 */
 	public function __dbFetchAll($cursor)
 	{
@@ -293,7 +293,7 @@ class PgSQL
 	/**
 	 * wrapper for pg_affected_rows
 	 * @param object|resource|bool $cursor cursor PgSql\Result (former resource)
-	 * @return int              affected rows, 0 for none, -1 for error
+	 * @return int                 affected rows, 0 for none, -1 for error
 	 */
 	public function __dbAffectedRows($cursor): int
 	{
@@ -362,19 +362,11 @@ class PgSQL
 	public function __dbPrimaryKey(string $table, string $schema = '')
 	{
 		if ($table) {
-			// check if schema set is different from schema given, only needed if schema is not empty
+			// check if schema set is different from schema given,
+			// only needed if schema is not empty
 			$table_prefix = '';
 			if ($schema) {
-				$q = "SHOW search_path";
-				$cursor = $this->__dbQuery($q);
-				if ($cursor === false) {
-					return false;
-				}
-				$__db_fetch_array = $this->__dbFetchArray($cursor);
-				if (!is_array($__db_fetch_array)) {
-					return false;
-				}
-				$search_path = $__db_fetch_array['search_path'] ?? '';
+				$search_path = $this->__dbGetSchema();
 				if ($search_path != $schema) {
 					$table_prefix = $schema . '.';
 				}
@@ -415,12 +407,12 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_connect, writes out failure to screen if error occurs (hidden var)
-	 * @param  string        $db_host host name
-	 * @param  string        $db_user user name
-	 * @param  string        $db_pass password
-	 * @param  string        $db_name databse name
-	 * @param  integer       $db_port port (int, 5432 is default)
-	 * @param  string        $db_ssl  SSL (allow is default)
+	 * @param  string  $db_host host name
+	 * @param  string  $db_user user name
+	 * @param  string  $db_pass password
+	 * @param  string  $db_name databse name
+	 * @param  integer $db_port port (int, 5432 is default)
+	 * @param  string  $db_ssl  SSL (allow is default)
 	 * @return object|resource|bool db handler PgSql\Connection or false on error
 	 */
 	public function __dbConnect(
@@ -458,9 +450,6 @@ class PgSQL
 		}
 		// connect
 		$this->dbh = pg_connect(join(' ', $connection_string));
-		// if (!$this->dbh) {
-		// 	die("<!-- Can't connect to database //-->");
-		// }
 		return $this->dbh;
 	}
 
@@ -469,7 +458,7 @@ class PgSQL
 	 * html formatted string with error name
 	 * @param  bool|object|resource $cursor cursor PgSql\Result (former resource)
 	 *                              or null
-	 * @return string            error string
+	 * @return string               error string
 	 */
 	public function __dbPrintError($cursor = false): string
 	{
@@ -508,7 +497,7 @@ class PgSQL
 	/**
 	 * wrapper for pg_escape_string
 	 * @param  string|int|float|bool $string any string/int/float/bool
-	 * @return string                        excaped string
+	 * @return string                excaped string
 	 */
 	public function __dbEscapeString($string): string
 	{
@@ -523,7 +512,7 @@ class PgSQL
 	 * difference to escape string is that this one adds quotes ('') around
 	 * the string too
 	 * @param  string|int|float|bool $string any string/int/float/bool
-	 * @return string                        excaped string including quites
+	 * @return string                excaped string including quites
 	 */
 	public function __dbEscapeLiteral($string): string
 	{
@@ -554,7 +543,7 @@ class PgSQL
 	 * @param  string $bytea bytea data stream
 	 * @return string        escaped bytea string
 	 */
-	public function __dbEscapeBytea($bytea): string
+	public function __dbEscapeBytea(string $bytea): string
 	{
 		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
@@ -564,7 +553,7 @@ class PgSQL
 
 	/**
 	 * wrapper for pg_connection_busy
-	 * @return bool true/false for busy connection
+	 * @return bool True if connection is busy, False if not or no db connection at all
 	 */
 	public function __dbConnectionBusy(): bool
 	{
@@ -577,7 +566,8 @@ class PgSQL
 	/**
 	 * Experimental wrapper with scoket timetout
 	 * @param integer $timeout_seconds Wait how many seconds on timeout
-	 * @return boolean
+	 * @return boolean                 True if connection is busy, or false on
+	 *                                 not busy or no db connection at all
 	 */
 	public function __dbConnectionBusySocketWait(int $timeout_seconds = 3): bool
 	{
@@ -619,10 +609,10 @@ class PgSQL
 	 * This is a fallback for old PostgreSQL versions
 	 * postgresql array to php array
 	 * https://stackoverflow.com/a/27964420
-	 * @param  string       $array_text Array text from PostgreSQL
-	 * @param  int          $start      Start string position
-	 * @param  int|null     $end        End string position from recursive call
-	 * @return null|array<mixed>        PHP type array
+	 * @param  string   $array_text Array text from PostgreSQL
+	 * @param  int      $start      Start string position
+	 * @param  int|null $end        End string position from recursive call
+	 * @return array<mixed>|null    PHP type array
 	 */
 	public function __dbArrayParse(
 		string $array_text,
@@ -672,6 +662,110 @@ class PgSQL
 		}
 
 		return $return;
+	}
+
+	/**
+	 * wrapper for any SHOW data blocks
+	 * eg search_path or client_encoding
+	 * @param  string $show_string Part to show, if invalid will return empty string
+	 * @return string              Found part as is
+	 */
+	public function __dbShow(string $show_string): string
+	{
+		// get search path
+		$cursor = $this->__dbQuery("SHOW " . $this->__dbEscapeIdentifier($show_string));
+		// abort on failure and return empty
+		if ($cursor === false) {
+			return '';
+		}
+		// get result
+		$db_schema = $this->__dbFetchArray($cursor, PGSQL_ASSOC);
+		/** @phpstan-ignore-next-line Cannot access offset string on array|bool */
+		return $db_schema[$show_string] ?? '';
+	}
+
+	/**
+	 * Sets a new database schema/search_path
+	 * Checks if schema exits and if not aborts with error code 2
+	 * @param  string $db_schema Schema to set
+	 * @return int               Returns 0 if no error
+	 *                           1 for check query failed
+	 *                           2 for schema not found in database
+	 */
+	public function __dbSetSchema(string $db_schema): int
+	{
+		// check if schema actually exists
+		$query = "SELECT EXISTS("
+			. "SELECT 1 FROM information_schema.schemata "
+			. "WHERE schema_name = " . $this->__dbEscapeLiteral($db_schema)
+			. ")";
+		$cursor = $this->__dbQuery($query);
+		// abort if execution fails
+		if ($cursor === false) {
+			return 1;
+		}
+		// check if schema does not exists
+		$row = $this->__dbFetchArray($cursor, PGSQL_ASSOC);
+		/** @phpstan-ignore-next-line */
+		if (empty($row['exists']) || $row['exists'] == 'f') {
+			return 2;
+		}
+		$query = "SET search_path TO " . $this->__dbEscapeLiteral($db_schema);
+		$this->__dbQuery($query);
+		return 0;
+	}
+
+	/**
+	 * Returns current set schema/search_path
+	 * @return string Search Path as currently set in DB
+	 */
+	public function __dbGetSchema(): string
+	{
+		return $this->__dbShow('search_path');
+	}
+
+	/**
+	 * set the client encoding
+	 * Returns 0 on set ok, or 3 if the client encoding could not be set
+	 * @param  string $db_encoding
+	 * @return int    Returns 0 for no error
+	 *                [not used] 1 for check query failed
+	 *                [not used] 2 for invalid client encoding
+	 *                3 client encoding could not be set
+	 */
+	public function __dbSetEncoding(string $db_encoding): int
+	{
+		// check if ecnoding is valid first
+		// does not take into account aliases
+		// TODO lookup with alisaes so eg ShiftJIS does not get a false
+		// $query = "SELECT EXISTS("
+		// 	. "SELECT pg_catalog.pg_encoding_to_char(conforencoding) "
+		// 	. "FROM pg_catalog.pg_conversion "
+		// 	. "WHERE pg_catalog.pg_encoding_to_char(conforencoding) = "
+		// 	. $this->dbEscapeLiteral($db_encoding)
+		// 	. ")";
+		// $cursor = $this->__dbQuery($query);
+		// if ($cursor === false) {
+		// 	return 1;
+		// }
+		// $row = $this->__dbFetchArray($cursor, PGSQL_ASSOC);
+		// if ($row['exists'] == 'f') {
+		// 	return 2;
+		// }
+		$query = "SET client_encoding TO " . $this->__dbEscapeLiteral($db_encoding);
+		if ($this->__dbQuery($query) === false) {
+			return 3;
+		}
+		return 0;
+	}
+
+	/**
+	 * Returns current set client encoding
+	 * @return string Client encoding string, empty if not set
+	 */
+	public function __dbGetEncoding(): string
+	{
+		return $this->__dbShow('client_encoding');
 	}
 }
 

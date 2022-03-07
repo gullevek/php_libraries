@@ -52,7 +52,8 @@ print "DBINFO: " . $db->dbInfo() . "<br>";
 echo "DB_CONFIG_SET constant: <pre>" . print_r(DB_CONFIG, true) . "</pre><br>";
 
 // DB client encoding
-print "DB Client encoding: " . $db->dbGetEncoding() . "<br>";
+print "DB client encoding: " . $db->dbGetEncoding() . "<br>";
+print "DB search path: " . $db->dbGetSchema() . "<br>";
 
 while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::USE_CACHE, true))) {
 	print "UUD/TIME: " . $res['uid'] . "/" . $res['time'] . "<br>";
@@ -304,13 +305,14 @@ dbShowTableMetaData
 
 # async test queries
 /*
-$db->dbExecAsync("SELECT test FROM test_foo, (SELECT pg_sleep(10)) as sub WHERE test_foo_id IN (27, 50, 67, 44, 10)");
+$db->dbExecAsync(
+	"SELECT test FROM test_foo, (SELECT pg_sleep(10)) as sub "
+		. "WHERE test_foo_id IN (27, 50, 67, 44, 10)"
+);
 echo "WAITING FOR ASYNC: ";
 $chars = ['|', '/', '-', '\\'];
-while (($ret = $db->dbCheckAsync()) === true)
-{
-	if ((list($_, $char) = each($chars)) === FALSE)
-	{
+while (($ret = $db->dbCheckAsync()) === true) {
+	if ((list($_, $char) = each($chars)) === FALSE) {
 		reset($chars);
 		list($_, $char) = each($chars);
 	}
@@ -320,15 +322,13 @@ while (($ret = $db->dbCheckAsync()) === true)
 }
 print "<br>END STATUS: " . $ret . "<br>";
 //	while ($res = $db->dbFetchArray($ret))
-while ($res = $db->dbFetchArray())
-{
+while ($res = $db->dbFetchArray()) {
 	echo "RES: " . $res['test'] . "<br>";
 }
 # test async insert
 $db->dbExecAsync("INSERT INTO test_foo (Test) VALUES ('ASYNC TEST " . time() . "')");
 echo "WAITING FOR ASYNC INSERT: ";
-while (($ret = $db->dbCheckAsync()) === true)
-{
+while (($ret = $db->dbCheckAsync()) === true) {
 	print " . ";
 	sleep(1);
 	flush();

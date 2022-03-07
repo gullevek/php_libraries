@@ -86,6 +86,19 @@ final class CoreLibsDBIOTest extends TestCase
 			'db_ssl' => 'allow', // allow, disable, require, prefer
 			'db_debug' => true,
 		],
+		// valid with no schema set
+		'valid_no_schema' => [
+			'db_name' => 'corelibs_db_io_test',
+			'db_user' => 'corelibs_db_io_test',
+			'db_pass' => 'corelibs_db_io_test',
+			'db_host' => 'localhost',
+			'db_port' => 5432,
+			'db_schema' => '',
+			'db_type' => 'pgsql',
+			'db_encoding' => '',
+			'db_ssl' => 'allow', // allow, disable, require, prefer
+			'db_debug' => true,
+		],
 		// invalid (missing db name)
 		'invalid' => [
 			'db_name' => '',
@@ -563,86 +576,6 @@ final class CoreLibsDBIOTest extends TestCase
 		$this->assertEquals(
 			$error,
 			$db->dbGetLastError()
-		);
-		$db->dbClose();
-	}
-
-	// - set and get schema
-	//   dbGetSchema, dbSetSchema,
-
-	// TODO: schema set/get test
-
-	// - encoding settings (exclude encoding test, just set)
-	//   dbGetEncoding, dbSetEncoding
-
-	/**
-	 * test encoding change list for dbSetEncoding
-	 *
-	 * @return array
-	 */
-	public function encodingProvider(): array
-	{
-		// 0: connection
-		// 1: set encoding
-		// 2: expected return from set
-		// 2: expected to get
-		return [
-			'default set no encoding' => [
-				'valid',
-				'',
-				false,
-				// I expect that the default DB is set to UTF8
-				'UTF8'
-			],
-			'set to Shift JIS' => [
-				'valid',
-				'ShiftJIS',
-				true,
-				'SJIS'
-			],
-			// 'set to Invalid' => [
-			// 	'valid',
-			// 	'Invalid',
-			// 	false,
-			// 	'UTF8'
-			// ],
-			// other tests includ perhaps mocking for error?
-			// TODO actual data check
-		];
-	}
-
-	/**
-	 * change DB encoding, only function set test, not test of encoding change
-	 * TODO: add encoding changed test with DB insert
-	 *
-	 * @covers ::dbSetEncoding
-	 * @covers ::dbGetEncoding
-	 * @dataProvider encodingProvider
-	 * @testdox Set encoding on $connection to $set_encoding expect $expected_set_flag and $expected_get_encoding [$_dataName]
-	 *
-	 * @param string $connection
-	 * @param string $set_encoding
-	 * @param boolean $expected_set_flag
-	 * @param string $expected_get_encoding
-	 * @return void
-	 */
-	public function testEncoding(
-		string $connection,
-		string $set_encoding,
-		bool $expected_set_flag,
-		string $expected_get_encoding
-	): void {
-		$db = new \CoreLibs\DB\IO(
-			self::$db_config[$connection],
-			self::$log
-		);
-		$this->assertEquals(
-			$expected_set_flag,
-			$db->dbSetEncoding($set_encoding)
-		);
-		$this->assertEquals(
-			$expected_get_encoding,
-			$db->dbGetEncoding()
 		);
 		$db->dbClose();
 	}
@@ -1403,7 +1336,9 @@ final class CoreLibsDBIOTest extends TestCase
 				'11',
 			],
 			// no db connection setable (16) [needs Mocking]
+			// TODO failed db connection
 			// connection busy [async] (41)
+			// TODO connection busy
 			// same query run too many times (30)
 			'same query run too many times' => [
 				'SELECT row_date FROM table_with_primary_key',
@@ -1427,7 +1362,7 @@ final class CoreLibsDBIOTest extends TestCase
 			// NOTE: After an error was encountered, queries after this
 			//       will return a true connection busy although it was error
 			//       https://bugs.php.net/bug.php?id=36469
-			// TODO: fix wron error 42 after error insert
+			//       FIX with socket check type
 			'invalid returning' => [
 				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW()) RETURNING invalid',
 				'',
@@ -1490,13 +1425,13 @@ final class CoreLibsDBIOTest extends TestCase
 			$last_warning = $db->dbGetLastWarning();
 			$last_error = $db->dbGetLastError();
 		} else {
+			$result = $pk_name === null ?
+				$db->dbExec($query) :
+				$db->dbExec($query, $pk_name);
+			$last_warning = $db->dbGetLastWarning();
+			$last_error = $db->dbGetLastError();
 			// if PHP or newer, must be Object PgSql\Result
 			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
-				$result = $pk_name === null ?
-					$db->dbExec($query) :
-					$db->dbExec($query, $pk_name);
-				$last_warning = $db->dbGetLastWarning();
-				$last_error = $db->dbGetLastError();
 				$this->assertIsObject(
 					$result
 				);
@@ -1507,12 +1442,8 @@ final class CoreLibsDBIOTest extends TestCase
 				);
 			} else {
 				$this->assertIsResource(
-					$pk_name === null ?
-						$db->dbExec($query) :
-						$db->dbExec($query, $pk_name)
+					$result
 				);
-				$last_warning = $db->dbGetLastWarning();
-				$last_error = $db->dbGetLastError();
 			}
 		}
 		// if we have more than one run time
@@ -2046,39 +1977,240 @@ final class CoreLibsDBIOTest extends TestCase
 	// - prepared query execute
 	//   dbPrepare, dbExecute, dbFetchArray
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function preparedProvider(): array
 	{
+		$insert_query = "INSERT INTO table_with_primary_key (row_int, uid) VALUES "
+			. "(1, 'A'), (2, 'B')";
+		$read_query = "SELECT row_int, uid FROM table_with_primary_key";
 		// 0: statement name
 		// 1: query to prepare
 		// 2: primary key name: null for default run
-		// 3: arguments for query (double array 0: for select, 0..n for insert/update)
+		// 3: arguments for query (single array for all)
 		// 4: expected prepare return
 		// 5: prepare warning
 		// 6: prepare error
 		// 7: expected execute return
 		// 8: execute warning
 		// 9: execute error
-		// 10: execute data to check (array)
-		// 11: insert data
+		// 11: read query (if insert/update)
+		// 11: execute data to check (array)
+		// 12: insert data
 		return [
-
+			// insert
+			'prepare query insert' => [
+				// base statements 0-3
+				'insert',
+				"INSERT INTO table_with_primary_key (row_int, uid) VALUES "
+					. "($1, $2)",
+				null,
+				[990, 'TEST A'],
+				// prepare (4-6)
+				'result', '', '',
+				// execute
+				'result', '', '',
+				// check query and compare data (for insert/update)
+				$read_query,
+				[
+					[
+						'row_int' => 990,
+						'uid' => 'TEST A',
+					],
+				],
+				// insert data (for select)
+				'',
+			],
+			// update
+			'prepare query update' => [
+				'update',
+				"UPDATE table_with_primary_key SET "
+					. "row_int = $1, "
+					. "row_varchar = $2 "
+					. "WHERE uid = $3",
+				null,
+				[550, 'I AM NEW TEXT', 'TEST A'],
+				//
+				'result', '', '',
+				//
+				'result', '', '',
+				//
+				"SELECT row_int, row_varchar FROM table_with_primary_key "
+					. "WHERE uid = 'TEST A'",
+				[
+					[
+						'row_int' => 550,
+						'row_varchar' => 'I AM NEW TEXT',
+					],
+				],
+				//
+				"INSERT INTO table_with_primary_key (row_int, uid) VALUES "
+					. "(111, 'TEST A')",
+			],
+			// select
+			'prepare select query' => [
+				'select',
+				$read_query
+					. " WHERE uid = $1",
+				null,
+				['A'],
+				//
+				'result', '', '',
+				// execute here needs to read too
+				'result', '', '',
+				//
+				'',
+				[
+					[
+						'row_int' => 1,
+						'uid' => 'A',
+					],
+				],
+				//
+				$insert_query
+			],
+			// any query but with no parameters
+			'prepare select query no parameter' => [
+				'select_noparam',
+				$read_query,
+				null,
+				null,
+				//
+				'result', '', '',
+				// execute here needs to read too
+				'result', '', '',
+				//
+				'',
+				[
+					[
+						'row_int' => 1,
+						'uid' => 'A',
+					],
+					[
+						'row_int' => 2,
+						'uid' => 'B',
+					],
+				],
+				//
+				$insert_query
+			],
+			// no statement name (25)
+			'empty statement' => [
+				'',
+				'SELECT',
+				null,
+				[],
+				//
+				false, '', '25',
+				//
+				false, '', '25',
+				//
+				'',
+				[],
+				//
+				'',
+			],
+			// no query (prepare 11)
+			// no prepared cursor found with statement name (execute 24)
+			'empty query' => [
+				'Empty Query',
+				'',
+				null,
+				[],
+				//
+				false, '', '11',
+				//
+				false, '', '24',
+				//
+				'',
+				[],
+				//
+				'',
+			],
+			// no db connection (prepare/execute 16)
+			// TODO no db connection test
+			// connection busy (prepare/execute 41)
+			// TODO connection busy test
+			// query could not be prepare (prepare 21)
+			// TODO query could not be prepared test
+			// some query with same statement name exists (prepare W20)
+			'prepare query with same statement name' => [
+				'double',
+				$read_query,
+				null,
+				null,
+				//
+				true, '20', '',
+				//
+				'result', '', '',
+				// no query but data for data only compare
+				'',
+				[],
+				//,
+				$insert_query
+			],
+			// insert wrong data count compared to needed (execute 23)
+			'wrong parmeter count' => [
+				'wrong_param_count',
+				"INSERT INTO table_with_primary_key (row_int, uid) VALUES "
+					. "($1, $2)",
+				null,
+				[],
+				//
+				'result', '', '',
+				//
+				false, '', '23',
+				//
+				'',
+				[],
+				//
+				''
+			],
+			// execute does not return a result (22)
+			// TODO execute does not return a result
 		];
 	}
 
-	// bool|object|resource
-
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbPrepare
+	 * @covers ::dbExecute
+	 * @covers ::dbFetchArray
+	 * @dataProvider preparedProvider
+	 * @testdox prepared query $stm_name with $expected_prepare (warning $warning_prepare/error $error_prepare) and $expected_execute (warning $warning_execute/error $error_execute) [$_dataName]
+	 *
+	 * @param string $stm_name
+	 * @param string $query
+	 * @param string|null $pk_name
+	 * @param array|null $query_data
+	 * @param bool|string $expected_prepare
+	 * @param string $warning_prepare
+	 * @param string $error_prepare
+	 * @param bool|string $expected_execute
+	 * @param string $warning_execute
+	 * @param string $error_execute
+	 * @param string $expected_data_query
+	 * @param array $expected_data
+	 * @param string $insert_data
+	 * @return void
+	 */
 	public function testDbPrepared(
 		string $stm_name,
 		string $query,
 		?string $pk_name,
-		array $query_data,
+		?array $query_data,
 		$expected_prepare,
 		string $warning_prepare,
 		string $error_prepare,
 		$expected_execute,
 		string $warning_execute,
 		string $error_execute,
-		array $excute_data,
+		string $expected_data_query,
+		array $expected_data,
 		string $insert_data,
 	): void {
 		// self::$log->setLogLevelAll('debug', true);
@@ -2088,7 +2220,124 @@ final class CoreLibsDBIOTest extends TestCase
 			self::$log
 		);
 		// insert data before we can test, from expected array
-		$db->dbExec($insert_data);
+		if (!empty($insert_data)) {
+			$db->dbExec($insert_data);
+		}
+
+		// test prepare
+		$prepare_result = $pk_name === null ?
+			$db->dbPrepare($stm_name, $query) :
+			$db->dbPrepare($stm_name, $query, $pk_name);
+		// if warning is 20, call prepare again
+		if ($warning_prepare == '20') {
+			$prepare_result = $pk_name === null ?
+				$db->dbPrepare($stm_name, $query) :
+				$db->dbPrepare($stm_name, $query, $pk_name);
+		}
+		$last_warning = $db->dbGetLastWarning();
+		$last_error = $db->dbGetLastError();
+		// if result type, or if forced bool
+		if (is_string($expected_prepare) && $expected_prepare == 'result') {
+			// if PHP or newer, must be Object PgSql\Result
+			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
+				$this->assertIsObject(
+					$prepare_result
+				);
+				// also check that this is correct instance type
+				$this->assertInstanceOf(
+					'PgSql\Result',
+					$prepare_result
+				);
+			} else {
+				$this->assertIsResource(
+					$prepare_result
+				);
+			}
+		} else {
+			$this->assertEquals(
+				$expected_prepare,
+				$prepare_result
+			);
+		}
+		// error/warning check
+		$this->assertEquals(
+			$warning_prepare,
+			$last_warning,
+		);
+		$this->assertEquals(
+			$error_prepare,
+			$last_error,
+		);
+
+		// for non fail prepare test exec
+		// check test result
+		$execute_result = $query_data === null ?
+			$db->dbExecute($stm_name) :
+			$db->dbExecute($stm_name, $query_data);
+		$last_warning = $db->dbGetLastWarning();
+		$last_error = $db->dbGetLastError();
+		if ($expected_execute == 'result') {
+			// if PHP or newer, must be Object PgSql\Result
+			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
+				$this->assertIsObject(
+					$execute_result
+				);
+				// also check that this is correct instance type
+				$this->assertInstanceOf(
+					'PgSql\Result',
+					$execute_result
+				);
+				// if this is an select use dbFetchArray to get data and test
+			} else {
+				$this->assertIsResource(
+					$execute_result
+				);
+			}
+		} else {
+			$this->assertEquals(
+				$expected_execute,
+				$execute_result
+			);
+		}
+		// error/warning check
+		$this->assertEquals(
+			$warning_execute,
+			$last_warning,
+		);
+		$this->assertEquals(
+			$error_execute,
+			$last_error,
+		);
+		// now check test result if expected return is result
+		if (
+			$expected_execute == 'result' &&
+			!empty($expected_data_query)
+		) {
+			// $expected_data_query
+			// $expected_data
+			$rows = $db->dbReturnArray($expected_data_query);
+			$this->assertEquals(
+				$expected_data,
+				$rows
+			);
+		}
+		if (
+			$expected_execute == 'result' &&
+			$execute_result !== false &&
+			empty($expected_data_query) &&
+			count($expected_data)
+		) {
+			// compare previously read data to compare data
+			$compare_data = [];
+			// read in the query data
+			while (is_array($row = $db->dbFetchArray($execute_result, true))) {
+				$compare_data[] = $row;
+			}
+			$this->assertEquals(
+				$expected_data,
+				$compare_data
+			);
+		}
 
 		// reset all data
 		$db->dbExec("TRUNCATE table_with_primary_key");
@@ -2097,10 +2346,441 @@ final class CoreLibsDBIOTest extends TestCase
 		$db->dbClose();
 	}
 
-	// - db execution tests
-	//   dbExecAsync, dbCheckAsync
-	// - encoding conversion on read
+	// - schema set/get tests
+	//   dbGetSchema, dbSetSchema
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function schemaProvider(): array
+	{
+		// 0: db connection
+		// 1: schema to set
+		// 2: set result
+		// 3: set error
+		// 4: get result flagged
+		// 5: get result DB
+		return [
+			'schema get check only' => [
+				'valid',
+				null,
+				true,
+				'',
+				'public',
+				'public',
+			],
+			'new schema set' => [
+				'valid',
+				'public',
+				true,
+				'',
+				'public',
+				'public',
+			],
+			'no schema set, set new schema' => [
+				'valid_no_schema',
+				'public',
+				true,
+				'',
+				'public',
+				'public',
+			],
+			'try to set empty schema' => [
+				'valid',
+				'',
+				false,
+				'70',
+				'public',
+				'public'
+			],
+			// invalid schema (does not throw error)
+			'try to set empty schema' => [
+				'valid',
+				'invalid',
+				false,
+				'71',
+				'public',
+				'public'
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbSetSchema
+	 * @covers ::dbGetSchema
+	 * @dataProvider schemaProvider
+	 * @testdox set schema $schema on $connection with $expected_set (error $error_set) and get $expected_get_var/$expected_get_db [$_dataName]
+	 *
+	 * @param string $connection
+	 * @param string|null $schema
+	 * @param boolean $expected_set
+	 * @param string $error_set
+	 * @param string $expected_get_var
+	 * @param string $expected_get_db
+	 * @return void
+	 */
+	public function testDbSchema(
+		string $connection,
+		?string $schema,
+		bool $expected_set,
+		string $error_set,
+		string $expected_get_var,
+		string $expected_get_db
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config[$connection],
+			self::$log
+		);
+
+		// schema is not null, we do set testing
+		if ($schema !== null) {
+			$result_set = $db->dbSetSchema($schema);
+			$last_error = $db->dbGetLastError();
+			$this->assertEquals(
+				$expected_set,
+				$result_set
+			);
+			// error/warning check
+			$this->assertEquals(
+				$error_set,
+				$last_error,
+			);
+		}
+
+		// get current set from db
+		$result_get_var = $db->dbGetSchema(true);
+		$this->assertEquals(
+			$expected_get_var,
+			$result_get_var
+		);
+		$result_get_db = $db->dbGetSchema();
+		$this->assertEquals(
+			$expected_get_db,
+			$result_get_db
+		);
+
+		// close connection
+		$db->dbClose();
+	}
+
+	// - check error and warning handling
+	//   dbGetCombinedErrorHistory, dbGetLastError, dbGetLastWarning
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function errorHandlingProvider(): array
+	{
+		// 0: some error call
+		// 1: type (error/warning)
+		// 2: error/warning code
+		// 3: return array matcher (excluding time)
+		return [
+			'trigger error' => [
+				0,
+				'error',
+				'51',
+				[
+					'timestamp' => "/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,}/",
+					'level' => 'error',
+					'id' => '51',
+					'error' => 'Max query call needs to be set to at least 1',
+					'source' => 'main::run::run::run::run::run::run::runBare::runTest::testDbErrorHandling::dbSetMaxQueryCall',
+					'pg_error' => '',
+					'msg' => '',
+				]
+			],
+			'trigger warning' => [
+				-1,
+				'warning',
+				'50',
+				[]
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbGetLastError
+	 * @covers ::dbGetLastWarning
+	 * @covers ::dbGetCombinedErrorHistory
+	 * @dataProvider errorHandlingProvider
+	 * @testdox error $call_value for type $type with $error_id [$_dataName]
+	 *
+	 * @param integer $call_value
+	 * @param string $type
+	 * @param string $error_id
+	 * @param array $error_history
+	 * @return void
+	 */
+	public function testDbErrorHandling(
+		int $call_value,
+		string $type,
+		string $error_id,
+		array $expected_history
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		// trigger the error call
+		$db->dbSetMaxQueryCall($call_value);
+		if ($type == 'error') {
+			$last_error = $db->dbGetLastError();
+		} else {
+			$last_error = $db->dbGetLastWarning();
+		}
+		$this->assertEquals(
+			$error_id,
+			$last_error
+		);
+
+		$error_history = $db->dbGetCombinedErrorHistory();
+		// pop first error off
+		$first_error_element = array_shift($error_history);
+		// get first row element
+		// comarep all, except timestamp that is a regex
+		foreach ($expected_history as $key => $value) {
+			// check if starts with / because this is regex (timestamp)
+			if (strpos($value, "/") === 0) {
+				// this is regex
+				$this->assertMatchesRegularExpression(
+					$value,
+					$first_error_element[0][$key]
+				);
+			} else {
+				// assert equal
+				$this->assertEquals(
+					$value,
+					$first_error_element[0][$key],
+				);
+			}
+		}
+
+		// close connection
+		$db->dbClose();
+	}
+
+	// - encoding settings (exclude encoding test, just set)
+	//   dbGetEncoding, dbSetEncoding
+
+	/**
+	 * test encoding change list for dbSetEncoding
+	 *
+	 * @return array
+	 */
+	public function encodingProvider(): array
+	{
+		// 0: connection
+		// 1: set encoding
+		// 2: expected return from set
+		// 2: expected to get
+		// 3: error id
+		return [
+			'default set no encoding' => [
+				'valid',
+				'',
+				false,
+				// I expect that the default DB is set to UTF8
+				'UTF8',
+				'',
+			],
+			'set to Shift JIS' => [
+				'valid',
+				'ShiftJIS',
+				true,
+				'SJIS',
+				'',
+			],
+			'set to Invalid' => [
+				'valid',
+				'Invalid',
+				false,
+				'UTF8',
+				'81',
+			],
+			'set to empty' => [
+				'valid',
+				'',
+				false,
+				'UTF8',
+				'80',
+			]
+		];
+	}
+
+	/**
+	 * change DB encoding, only function set test, not test of encoding change
+	 * TODO: add encoding changed test with DB insert
+	 *
+	 * @covers ::dbSetEncoding
+	 * @covers ::dbGetEncoding
+	 * @dataProvider encodingProvider
+	 * @testdox Set encoding on $connection to $set_encoding expect $expected_set_flag and $expected_get_encoding [$_dataName]
+	 *
+	 * @param string $connection
+	 * @param string $set_encoding
+	 * @param boolean $expected_set_flag
+	 * @param string $expected_get_encoding
+	 * @return void
+	 */
+	public function testEncoding(
+		string $connection,
+		string $set_encoding,
+		bool $expected_set_flag,
+		string $expected_get_encoding
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config[$connection],
+			self::$log
+		);
+		$this->assertEquals(
+			$expected_set_flag,
+			// avoid bubbling up error
+			@$db->dbSetEncoding($set_encoding)
+		);
+		$this->assertEquals(
+			$expected_get_encoding,
+			$db->dbGetEncoding()
+		);
+		$db->dbClose();
+	}
+
+	// - encoding conversion on read and test encoding conversion on db connection
 	//   dbSetToEncoding, dbGetToEncoding
+	//   [and test encoding transfer with both types]
+	//   dbSetEncoding, dbGetEncoding
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function encodingConversionProvider(): array
+	{
+		// 0: connection
+		// 1: target encoding (or alias)
+		// 2: optional name for php for proper alias matching
+		// 3: text to check
+		return [
+			'convert from UTF8 to SJIS' => [
+				'valid',
+				'SJIS',
+				null,
+				'日本語カタカナひらがな'
+			],
+			// SHIFT_JIS_2004/SJIS-win
+			// EUC_JP/EUC-JP
+			//
+		];
+	}
+
+	/**
+	 * tests actually text conversion and not only just setting
+	 * NOTE: database is always stored as UTF8 in our case so all
+	 * tests check conversion FROM utf8 to a target.
+	 * Also because only SJIS is of interest, only this one is tested
+	 * https://www.postgresql.org/docs/current/multibyte.html#MULTIBYTE-CHARSET-SUPPORTED
+	 * SHIFT_JIS_2004
+	 * SJIS (Mskanji, ShiftJIS, WIN932, Windows932)
+	 * EUC_JP
+	 * EUC_JIS_2004
+	 *
+	 * @covers ::dbSetToEncoding
+	 * @covers ::dbGetToEncoding
+	 * @covers ::dbSetEncoding
+	 * @covers ::dbGetEncoding
+	 * @dataProvider encodingConversionProvider
+	 * @testdox Check encoding on $connection with $encoding [$_dataName]
+	 *
+	 * @param string $connection
+	 * @param string $encoding
+	 * @param string|null $encoding_php
+	 * @param string $text
+	 * @return void
+	 */
+	public function testEncodingConversion(
+		string $connection,
+		string $encoding,
+		?string $encoding_php,
+		string $text
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config[$connection],
+			self::$log
+		);
+
+		// convert in php unless encoding is the smae
+		if (strtolower($encoding) != 'utf8') {
+			$encoded = mb_convert_encoding($text, $encoding_php ?? $encoding, 'UTF-8');
+		} else {
+			$encoded = $text;
+		}
+
+		// insert data
+		$insert_query = "INSERT INTO table_with_primary_key (row_varchar, uid) VALUES "
+			. "(" . $db->dbEscapeLiteral($text) . ", 'A')";
+		$db->dbExec($insert_query);
+		// for check read
+		$read_query = "SELECT row_varchar, uid FROM table_with_primary_key WHERE uid = 'A'";
+
+		// TEST 1 in class
+		// test to encoding (conversion with mb_convert_encoding)
+		$db->dbSetToEncoding($encoding);
+		$this->assertEquals(
+			$encoding,
+			$db->dbGetToEncoding()
+		);
+		// read query, check that row_varchar matches
+		$row = $db->dbReturnRow($read_query, true);
+		$this->assertEquals(
+			$encoded,
+			$row['row_varchar']
+		);
+		// reset to encoding to empty
+		$db->dbSetToEncoding('');
+		// and check
+		$this->assertEquals(
+			'',
+			$db->dbGetToEncoding()
+		);
+
+		// TEST 2 DB side
+		// same test with setting database encoding
+		// if connection encoding differts
+		if (strtolower($db->dbGetSetting('encoding')) != strtolower($encoding)) {
+			$db->dbSetEncoding($encoding);
+		}
+		// read from DB and check encoding
+		$row = $db->dbReturnRow($read_query, true);
+		$this->assertEquals(
+			$encoded,
+			$row['row_varchar']
+		);
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
+		$db->dbClose();
+	}
+
 	// - data debug
 	//   dbDumpData
 	// - internal read data (post exec)
@@ -2112,8 +2792,172 @@ final class CoreLibsDBIOTest extends TestCase
 	// - deprecated tests [no need to test perhaps]
 	//   getInsertReturn, getReturning, getInsertPK, getReturningExt,
 	//   getCursorExt, getNumRows
-	// - error handling
-	//   dbGetCombinedErrorHistory, dbGetLastError, dbGetLastWarning
+
+	// ASYNC at the end because it has 3s timeout
+	// - asynchronous executions
+	//   dbExecAsync, dbCheckAsync
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function asyncProvider(): array
+	{
+		// 0: query
+		// 1: primary key
+		// 2: exepected exec return
+		// 3: warning
+		// 4: error
+		// 5: exepcted check return 1st
+		// 6: final result
+		// 7: warning
+		// 8: error
+		return [
+			'run simple async query' => [
+				"SELECT pg_sleep(1)",
+				null,
+				// exec result
+				true,
+				'',
+				'',
+				// check first
+				true,
+				// check final
+				'result',
+				'',
+				''
+			],
+			// send query failed (E40)
+			// result failed (E43)
+			// no query running (E42)
+			'no async query running' => [
+				'',
+				null,
+				//
+				false,
+				'',
+				'11',
+				//
+				false,
+				//
+				false,
+				'',
+				'42'
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbExecAsync
+	 * @covers ::dbCheckAsync
+	 * @dataProvider asyncProvider
+	 * @testdox async query $query with $expected_exec (warning $warning_exec/error $error_exec) and $expected_check/$expected_final (warning $warning_final/error $error_final) [$_dataName]
+	 *
+	 * @param string $query
+	 * @param string|null $pk_name
+	 * @param boolean $expected_exec
+	 * @param string $warning_exec
+	 * @param string $error_exec
+	 * @param bool $expected_check
+	 * @param bool|object|resource $expected_final
+	 * @param string $warning_final
+	 * @param string $error_final
+	 * @return void
+	 */
+	public function testDbExecAsync(
+		string $query,
+		?string $pk_name,
+		bool $expected_exec,
+		string $warning_exec,
+		string $error_exec,
+		bool $expected_check,
+		$expected_final,
+		string $warning_final,
+		string $error_final
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		// exec the query
+		$result_exec = $pk_name === null ?
+			$db->dbExecAsync($query) :
+			$db->dbExecAsync($query, $pk_name);
+		$last_warning = $db->dbGetLastWarning();
+		$last_error = $db->dbGetLastError();
+		$this->assertEquals(
+			$expected_exec,
+			$result_exec
+		);
+		// error/warning check
+		$this->assertEquals(
+			$warning_exec,
+			$last_warning,
+		);
+		$this->assertEquals(
+			$error_exec,
+			$last_error,
+		);
+
+		$run = 1;
+		// first loop check
+		while (($result_check = $db->dbCheckAsync()) === true) {
+			if ($run == 1) {
+				$this->assertEquals(
+					$expected_check,
+					$result_check
+				);
+			}
+			$run++;
+		}
+		$last_warning = $db->dbGetLastWarning();
+		$last_error = $db->dbGetLastError();
+		// check after final
+		if ($expected_final == 'result') {
+			// post end check
+			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
+				$this->assertIsObject(
+					$result_check
+				);
+				// also check that this is correct instance type
+				$this->assertInstanceOf(
+					'PgSql\Result',
+					$result_check
+				);
+			} else {
+				$this->assertIsResource(
+					$result_check
+				);
+			}
+		} else {
+			// else compar check
+			$this->assertEquals(
+				$expected_final,
+				$result_check
+			);
+		}
+		// error/warning check
+		$this->assertEquals(
+			$warning_final,
+			$last_warning,
+		);
+		$this->assertEquals(
+			$error_final,
+			$last_error,
+		);
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
+		$db->dbClose();
+	}
 }
 
 // __END__

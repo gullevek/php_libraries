@@ -828,7 +828,7 @@ class IO
 		// only do if array, else pass through row (can be false)
 		if (
 			!is_array($row) ||
-			empty($this->to_encoding) || empty($this->db_encoding)
+			empty($this->to_encoding)// || empty($this->db_encoding)
 		) {
 			return $row;
 		}
@@ -841,7 +841,11 @@ class IO
 				$from_encoding != $this->to_encoding &&
 				$from_encoding != 'ASCII'
 			) {
-				$row[$key] = mb_convert_encoding($value, $this->to_encoding, $from_encoding);
+				$row[$key] = mb_convert_encoding(
+					$value,
+					$this->to_encoding,
+					$from_encoding
+				);
 			}
 		}
 		return $row;
@@ -1216,6 +1220,9 @@ class IO
 	public function dbClose(): void
 	{
 		if ($this->dbh) {
+			// reset any client encodings set
+			$this->dbResetEncoding();
+			// calls db close
 			$this->db_functions->__dbClose();
 			$this->dbh = null;
 			$this->db_connection_closed = true;
@@ -2365,6 +2372,15 @@ class IO
 		}
 	}
 
+	/**
+	 * Returns the current async running query hash
+	 * @return string Current async running query hash
+	 */
+	public function dbGetAsyncRunning(): string
+	{
+		return $this->async_running;
+	}
+
 	// ***************************
 	// COMPLEX WRITE WITH CONFIG ARRAYS
 	// ***************************
@@ -2603,6 +2619,7 @@ class IO
 	 */
 	public function dbSetMaxQueryCall(?int $max_calls = null): bool
 	{
+		$this->__dbErrorReset();
 		// if null then reset to default
 		if ($max_calls === null) {
 			$max_calls = self::DEFAULT_MAX_QUERY_CALL;
@@ -2640,25 +2657,29 @@ class IO
 	 */
 	public function dbSetSchema(string $db_schema)
 	{
+		$this->__dbErrorReset();
 		if (empty($db_schema)) {
 			$this->__dbError(70);
 			return false;
 		}
-		// check if schema exists
-		$q = "SELECT EXISTS("
-			. "SELECT 1 FROM information_schema.schemata "
-			. "WHERE schema_name = " . $this->dbEscapeLiteral($db_schema)
-			. ")";
-		$row = $this->dbReturnRow($q);
-		if (!$this->dbBoolean($row['exists'])) {
-			$this->__dbError(71);
-			return false;
+		$status = false;
+		$set_value = $this->db_functions->__dbSetSchema($db_schema);
+		switch ($set_value) {
+			// no problem
+			case 0:
+				$this->db_schema = $db_schema;
+				$status = true;
+				break;
+			// cursor failed (1) or schema does not exists (2)
+			case 1:
+			case 2:
+			// setting schema failed (3)
+			case 3:
+				$this->__dbError(71);
+				$status = false;
+				break;
 		}
-		// set new schema
-		$q = "SET search_path TO '" . $this->dbEscapeString($db_schema) . "'";
-		$this->dbExec($q);
-		$this->db_schema = $db_schema;
-		return true;
+		return $status;
 	}
 
 	/**
@@ -2673,11 +2694,7 @@ class IO
 		if ($class_var === true) {
 			return $this->db_schema;
 		}
-		$search_path = $this->dbReturnRow('SHOW search_path');
-		if (!is_array($search_path)) {
-			return '';
-		}
-		return $search_path['search_path'] ?? '';
+		return $this->db_functions->__dbGetSchema();
 	}
 
 	/**
@@ -2688,32 +2705,31 @@ class IO
 	 */
 	public function dbSetEncoding(string $db_encoding): bool
 	{
+		$this->__dbErrorReset();
+		// no encding, abort
 		if (empty($db_encoding)) {
 			$this->__dbError(80);
 			return false;
 		}
-		// check if ecnoding is valid first
-		// does not take into account aliases
-		// TODO lookup with alisaes so eg ShiftJIS does not get a false
-		// $q = "SELECT EXISTS("
-		// 	. "SELECT pg_catalog.pg_encoding_to_char(conforencoding) "
-		// 	. "FROM pg_catalog.pg_conversion "
-		// 	. "WHERE pg_catalog.pg_encoding_to_char(conforencoding) = "
-		// 	. $this->dbEscapeLiteral($db_encoding)
-		// 	. ")";
-		// $row = $this->dbReturnRow($q);
-		// if (!$this->dbBoolean($row['exists'])) {
-		// 	$this->__dbError(81);
-		// 	return false;
-		// }
-		$q = "SET client_encoding TO '" . $this->dbEscapeString($db_encoding) . "'";
-		// abort on error
-		if ($this->dbExec($q) === false) {
-			$this->__dbError(81);
-			return false;
+		// set client encoding on database side
+		$status = false;
+		$set_value = $this->db_functions->__dbSetEncoding($db_encoding);
+		switch ($set_value) {
+			// no problem
+			case 0:
+				$this->db_encoding = $db_encoding;
+				$status = true;
+				break;
+			// 1 & 2 are for encoding not found
+			case 1:
+			case 2:
+			// 3 is set failed
+			case 3:
+				$this->__dbError(81);
+				$status = false;
+				break;
 		}
-		$this->db_encoding = $db_encoding;
-		return true;
+		return $status;
 	}
 
 	/**
@@ -2727,17 +2743,23 @@ class IO
 		if ($class_var === true) {
 			return $this->db_encoding;
 		}
-		$client_encoding = $this->dbReturnRow('SHOW client_encoding');
-		if (!is_array($client_encoding)) {
-			return '';
-		}
-		return $client_encoding['client_encoding'] ?? '';
+		return $this->db_functions->__dbGetEncoding();
+	}
+
+	/**
+	 * Resets client encodig back to databse encoding
+	 * @return void
+	 */
+	public function dbResetEncoding(): void
+	{
+		$this->dbExec('RESET client_encoding');
 	}
 
 	/**
 	 * Set the to_encoding var that will trigger on return of selected data
 	 * on the fly PHP encoding conversion
 	 * Alternative use dbSetEcnoding to trigger encoding change on the DB side
+	 * Set to empty string to turn off
 	 * @param  string $encoding PHP Valid encoding to set
 	 * @return string           Current set encoding
 	 */
