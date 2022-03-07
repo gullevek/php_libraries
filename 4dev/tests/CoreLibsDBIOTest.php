@@ -211,16 +211,16 @@ final class CoreLibsDBIOTest extends TestCase
 	public function versionProvider(): array
 	{
 		return [
-			'compare = ok' => [ '=13.5.0', true ],
+			'compare = ok' => [ '=13.6.0', true ],
 			'compare = bad' => [ '=9.2.0', false ],
 			'compare < ok' => [ '<20.0.0', true ],
 			'compare < bad' => [ '<9.2.0', false ],
 			'compare <= ok a' => [ '<=20.0.0', true ],
-			'compare <= ok b' => [ '<=13.5.0', true ],
+			'compare <= ok b' => [ '<=13.6.0', true ],
 			'compare <= false' => [ '<=9.2.0', false ],
 			'compare > ok' => [ '>9.2.0', true ],
 			'compare > bad' => [ '>20.2.0', false ],
-			'compare >= ok a' => [ '>=13.5.0', true ],
+			'compare >= ok a' => [ '>=13.6.0', true ],
 			'compare >= ok b' => [ '>=9.2.0', true ],
 			'compare >= bad' => [ '>=20.0.0', false ],
 		];
@@ -229,7 +229,7 @@ final class CoreLibsDBIOTest extends TestCase
 	/**
 	 * NOTE
 	 * Version tests will fail if versions change
-	 * Current base as Version 13.5 for equal check
+	 * Current base as Version 13.6 for equal check
 	 * I can't mock a function on the same class when it is called in a method
 	 * NOTE
 	 *
@@ -256,7 +256,7 @@ final class CoreLibsDBIOTest extends TestCase
 		// 	->willReturn('13.1.0');
 		// print "DB: " . $stub->dbVersion() . "\n";
 		// print "TEST: " . ($stub->dbCompareVersion('=13.1.0') ? 'YES' : 'NO') . "\n";
-		// print "TEST: " . ($stub->dbCompareVersion('=13.5.0') ? 'YES' : 'NO') . "\n";
+		// print "TEST: " . ($stub->dbCompareVersion('=13.6.0') ? 'YES' : 'NO') . "\n";
 		// $mock = $this->getMockBuilder(CoreLibs\DB\IO::class)
 		// 	->addMethods(['dbVersion'])
 		// 	->ge‌​tMock();
@@ -2781,14 +2781,164 @@ final class CoreLibsDBIOTest extends TestCase
 		$db->dbClose();
 	}
 
-	// - data debug
-	//   dbDumpData
+	// - get primary key
+	//   dbGetReturning, dbGetInsertPK, dbGetInsertPKName
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function primaryKeyProvider(): array
+	{
+		// 0: insert query add (returning, etc)
+		// 1: pk_name, null for default
+		// 2: table name
+		// 3: primary key or empty if none
+		return [
+			'normal all auto' => [
+				'',
+				null,
+				'table_with_primary_key',
+				'table_with_primary_key_id',
+			],
+			'table without primary key' => [
+				'',
+				null,
+				'table_without_primary_key',
+				''
+			],
+			// valid primary key name
+			'normal, with pk_name' => [
+				'',
+				'table_with_primary_key_id',
+				'table_with_primary_key',
+				'table_with_primary_key_id',
+			],
+			// returning name no pk name
+			'normal, with returning' => [
+				'RETURNING table_with_primary_key_id',
+				null,
+				'table_with_primary_key',
+				'table_with_primary_key_id',
+			],
+			// both pk name and returning
+			'normal, with returning' => [
+				'RETURNING table_with_primary_key_id',
+				'table_with_primary_key_id',
+				'table_with_primary_key',
+				'table_with_primary_key_id',
+			],
+			// TODO other tests
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbGetInsertPK
+	 * @covers ::dbGetInsertPKName
+	 * @dataProvider primaryKeyProvider
+	 * @testdox Check returning pk $insert with $pk_name [$_dataName]
+	 *
+	 * @param string $insert
+	 * @param string|null $pk_name
+	 * @return void
+	 */
+	public function testGetPrimaryKey(
+		string $insert,
+		?string $pk_name,
+		string $table,
+		string $primary_key,
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		// basic query
+		$insert_query = "INSERT INTO " . $db->dbEscapeIdentifier($table)
+			. " (uid) "
+			. "VALUES ('A') " . $insert;
+		$result = $pk_name === null ?
+			$db->dbExec($insert_query) :
+			$db->dbExec($insert_query, $pk_name);
+		// $db_get_returning = $db->dbGetReturning();
+		$db_get_insert_pk_name = $db->dbGetInsertPKName();
+		$db_get_insert_pk = $db->dbGetInsertPK();
+
+		$read_query = "SELECT "
+			. (!empty($primary_key) ?
+				$db->dbEscapeIdentifier($primary_key) . ", " : ""
+			)
+			. "uid "
+			. "FROM " . $db->dbEscapeIdentifier($table)
+			. " WHERE uid = 'A'";
+		$row = $db->dbReturnRow($read_query, true);
+		$this->assertEquals(
+			$row[$primary_key] ?? null,
+			$db_get_insert_pk
+		);
+		$this->assertEquals(
+			$primary_key,
+			$db_get_insert_pk_name
+		);
+		$this->assertTrue(true);
+
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
+		$db->dbClose();
+	}
+
+	// - complex returning data checks
+	//   dbGetReturningExt, dbGetReturningArray
+
+	public function returingProvider(): array
+	{
+		// NOTE that query can have multiple inserts
+		// 0: query + returning
+		// 1: key name/value or null
+		// 2: pos or null
+		// 3: matching return value
+		// 4: full returning array value
+		return [
+			'single insert (PK)' => [
+				"INSERT INTO table_with_primary_key "
+					. "(row_varchar, row_varchar_literalm row_int, row_date) "
+					. "VALUES "
+					. "() "
+			]
+		];
+	}
+
+	public function testDbReturning(): void
+	{
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
+		$db->dbClose();
+	}
+
 	// - internal read data (post exec)
-	//   dbGetReturning, dbGetInsertPKName, dbGetInsertPK, dbGetReturningExt,
-	//   dbGetReturningArray, dbGetNumRows, dbGetNumFields,
-	//   dbGetFieldNames, dbGetQuery, dbGetQueryHash, dbGetDbh
+	//   dbGetNumRows, dbGetNumFields, dbGetFieldNames,
+	//   dbGetQuery, dbGetQueryHash, dbGetDbh
 	// - complex write sets
 	//   dbWriteData, dbWriteDataExt
+	// - data debug
+	//   dbDumpData
 	// - deprecated tests [no need to test perhaps]
 	//   getInsertReturn, getReturning, getInsertPK, getReturningExt,
 	//   getCursorExt, getNumRows

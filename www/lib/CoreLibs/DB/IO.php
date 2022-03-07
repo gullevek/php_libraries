@@ -878,11 +878,11 @@ class IO
 	{
 		$matches = [];
 		if (preg_match("/^SELECT /i", $query)) {
-			preg_match("/ (FROM) (([\w_]+)\.)?([\w_]+) /i", $query, $matches);
+			preg_match("/ (FROM) \"?(([\w_]+)\.)?([\w_]+)\"? /i", $query, $matches);
 		} else {
-			preg_match("/(INSERT INTO|DELETE FROM|UPDATE) (([\w_]+)\.)?([\w_]+) /i", $query, $matches);
+			preg_match("/(INSERT INTO|DELETE FROM|UPDATE) \"?(([\w_]+)\.)?([\w_]+)\"? /i", $query, $matches);
 		}
-		return [$matches[3], $matches[4]];
+		return [$matches[3] ?? '', $matches[4] ?? ''];
 	}
 
 	/**
@@ -1000,7 +1000,9 @@ class IO
 					if (!array_key_exists($table, $this->pk_name_table) || !$this->pk_name_table[$table]) {
 						$this->pk_name_table[$table] = $this->db_functions->__dbPrimaryKey($table, $schema);
 					}
-					$this->pk_name = $this->pk_name_table[$table] ? $this->pk_name_table[$table] : 'NULL';
+					$this->pk_name =
+						$this->pk_name_table[$table] ?
+							$this->pk_name_table[$table] : 'NULL';
 				}
 				if (
 					!preg_match("/ returning /i", $this->query) &&
@@ -2825,19 +2827,6 @@ class IO
 	// ***************************
 
 	/**
-	 * return current set insert_id as is
-	 * @return array<mixed>|string|int|bool|null Primary key value, most likely int
-	 *                                           Array for multiple return set
-	 *                                           Empty string for unset
-	 *                                           Null for error
-	 * @deprecated Use ->dbGetInsertPK();
-	 */
-	public function dbGetReturning()
-	{
-		return $this->dbGetInsertPK();
-	}
-
-	/**
 	 * returns current set primary key name for last run query
 	 * Is empty string if not setable
 	 *
@@ -2845,7 +2834,7 @@ class IO
 	 */
 	public function dbGetInsertPKName(): string
 	{
-		return $this->insert_id_pk_name;
+		return $this->insert_id_pk_name ?? '';
 	}
 
 	/**
@@ -2857,6 +2846,9 @@ class IO
 	 */
 	public function dbGetInsertPK()
 	{
+		if (empty($this->insert_id_pk_name)) {
+			return null;
+		}
 		return $this->dbGetReturningExt($this->insert_id_pk_name);
 	}
 
@@ -3019,6 +3011,19 @@ class IO
 	// DEPEREACTED CALLS
 	// all call below are no longer in use and throw deprecated errors
 	// ***************************
+
+	/**
+	 * return current set insert_id as is
+	 * @return array<mixed>|string|int|bool|null Primary key value, most likely int
+	 *                                           Array for multiple return set
+	 *                                           Empty string for unset
+	 *                                           Null for error
+	 * @deprecated Use ->dbGetInsertPK();
+	 */
+	public function dbGetReturning()
+	{
+		return $this->dbGetInsertPK();
+	}
 
 	/**
 	 * returns the db init error
