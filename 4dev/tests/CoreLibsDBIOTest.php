@@ -186,6 +186,8 @@ final class CoreLibsDBIOTest extends TestCase
 			. "row_2 INT"
 			. ") WITHOUT OIDS"
 		);
+		// set some test schema
+		$db->dbExec("CREATE SCHEMA IF NOT EXISTS testschema");
 		// end connection
 		$db->dbClose();
 	}
@@ -2393,7 +2395,7 @@ final class CoreLibsDBIOTest extends TestCase
 				false,
 				'70',
 				'public',
-				'public'
+				'public',
 			],
 			// invalid schema (does not throw error)
 			'try to set empty schema' => [
@@ -2402,8 +2404,17 @@ final class CoreLibsDBIOTest extends TestCase
 				false,
 				'71',
 				'public',
-				'public'
+				'public',
 			],
+			// valid different schema
+			'try to set new valid schema' => [
+				'valid',
+				'testschema',
+				true,
+				'',
+				'testschema',
+				'testschema',
+			]
 		];
 	}
 
@@ -2489,7 +2500,7 @@ final class CoreLibsDBIOTest extends TestCase
 				'error',
 				'51',
 				[
-					'timestamp' => "/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,}/",
+					'timestamp' => "/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,}$/",
 					'level' => 'error',
 					'id' => '51',
 					'error' => 'Max query call needs to be set to at least 1',
@@ -2862,7 +2873,7 @@ final class CoreLibsDBIOTest extends TestCase
 		$insert_query = "INSERT INTO " . $db->dbEscapeIdentifier($table)
 			. " (uid) "
 			. "VALUES ('A') " . $insert;
-		$result = $pk_name === null ?
+		$pk_name === null ?
 			$db->dbExec($insert_query) :
 			$db->dbExec($insert_query, $pk_name);
 		// $db_get_returning = $db->dbGetReturning();
@@ -2898,32 +2909,175 @@ final class CoreLibsDBIOTest extends TestCase
 	// - complex returning data checks
 	//   dbGetReturningExt, dbGetReturningArray
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function returingProvider(): array
 	{
 		// NOTE that query can have multiple inserts
+		// NOTE if there are different INSERTS before the primary keys will not match anymore
+		$table_with_primary_key_id = 43;
 		// 0: query + returning
-		// 1: key name/value or null
-		// 2: pos or null
-		// 3: matching return value
-		// 4: full returning array value
+		// 1: pk name for db exec
+		// 2: key name/value or null (dbGetReturningExt)
+		// 3: pos or null (dbGetReturningExt)
+		// 4: matching return value (dbGetReturningExt)
+		// 5: full returning array value (dbGetReturningArray)
 		return [
 			'single insert (PK)' => [
 				"INSERT INTO table_with_primary_key "
-					. "(row_varchar, row_varchar_literalm row_int, row_date) "
+					. "(row_varchar, row_varchar_literal, row_int, row_date) "
 					. "VALUES "
-					. "() "
+					. "('Text', 'Other', 123, '2022-03-01') "
+					. "RETURNING row_varchar, row_varchar_literal, row_int, row_date",
+				null,
+				null,
+				null,
+				[
+					'row_varchar' => 'Text',
+					'row_varchar_literal' => 'Other',
+					'row_int' => 123,
+					'row_date' => '2022-03-01',
+					// 'table_with_primary_key_id' => "/^\d+$/",
+					'table_with_primary_key_id' => $table_with_primary_key_id + 1,
+				],
+				[
+					0 => [
+						'row_varchar' => 'Text',
+						'row_varchar_literal' => 'Other',
+						'row_int' => 123,
+						'row_date' => '2022-03-01',
+						// 'table_with_primary_key_id' => "/^\d+$/",
+						'table_with_primary_key_id' => $table_with_primary_key_id + 1,
+					]
+				]
+			],
+			// double insert (PK)
+			'dobule insert (PK)' => [
+				"INSERT INTO table_with_primary_key "
+					. "(row_varchar, row_varchar_literal, row_int, row_date) "
+					. "VALUES "
+					. "('Text', 'Other', 123, '2022-03-01'), "
+					. "('Foxtrott', 'Tango', 789, '1982-10-15') "
+					. "RETURNING row_varchar, row_varchar_literal, row_int, row_date",
+				null,
+				null,
+				null,
+				[
+					0 => [
+						'row_varchar' => 'Text',
+						'row_varchar_literal' => 'Other',
+						'row_int' => 123,
+						'row_date' => '2022-03-01',
+						'table_with_primary_key_id' => $table_with_primary_key_id + 2,
+					],
+					1 => [
+						'row_varchar' => 'Foxtrott',
+						'row_varchar_literal' => 'Tango',
+						'row_int' => 789,
+						'row_date' => '1982-10-15',
+						'table_with_primary_key_id' => $table_with_primary_key_id + 3,
+					],
+				],
+				[
+					0 => [
+						'row_varchar' => 'Text',
+						'row_varchar_literal' => 'Other',
+						'row_int' => 123,
+						'row_date' => '2022-03-01',
+						'table_with_primary_key_id' => $table_with_primary_key_id + 2,
+					],
+					1 => [
+						'row_varchar' => 'Foxtrott',
+						'row_varchar_literal' => 'Tango',
+						'row_int' => 789,
+						'row_date' => '1982-10-15',
+						'table_with_primary_key_id' => $table_with_primary_key_id + 3,
+					],
+				]
+			],
+			// insert into table with no primary key
+			'single insert (No PK)' => [
+				"INSERT INTO table_without_primary_key "
+					. "(row_varchar, row_varchar_literal, row_int, row_date) "
+					. "VALUES "
+					. "('Text', 'Other', 123, '2022-03-01') "
+					. "RETURNING row_varchar, row_varchar_literal, row_int, row_date",
+				null,
+				null,
+				null,
+				[
+					'row_varchar' => 'Text',
+					'row_varchar_literal' => 'Other',
+					'row_int' => 123,
+					'row_date' => '2022-03-01',
+				],
+				[
+					0 => [
+						'row_varchar' => 'Text',
+						'row_varchar_literal' => 'Other',
+						'row_int' => 123,
+						'row_date' => '2022-03-01',
+					]
+				]
 			]
 		];
 	}
 
-	public function testDbReturning(): void
-	{
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbGetReturningExt
+	 * @covers ::dbGetReturningArray
+	 * @dataProvider returingProvider
+	 * @testdox Check returning cursor using $pk_name with $key and $pos [$_dataName]
+	 *
+	 * @param string $query
+	 * @param string|null $pk_name
+	 * @param string|null $key
+	 * @param integer|null $pos
+	 * @param array<mixed>|string|int|null $expected_ret_ext
+	 * @param array $expected_ret_arr
+	 * @return void
+	 */
+	public function testDbReturning(
+		string $query,
+		?string $pk_name,
+		?string $key,
+		?int $pos,
+		$expected_ret_ext,
+		array $expected_ret_arr
+	): void {
 		// self::$log->setLogLevelAll('debug', true);
 		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
 		);
+
+		// insert data
+		$pk_name === null ?
+			$db->dbExec($query) :
+			$db->dbExec($query, $pk_name);
+
+		// get the last value for PK and match that somehow
+
+		$returning_ext = $db->dbGetReturningExt($key, $pos);
+		$returning_arr = $db->dbGetReturningArray();
+
+		$this->assertEquals(
+			$expected_ret_ext,
+			$returning_ext
+		);
+		$this->assertEquals(
+			$expected_ret_arr,
+			$returning_arr
+		);
+
+		// print "EXT: " . print_r($returning_ext, true) . "\n";
+		// print "ARR: " . print_r($returning_arr, true) . "\n";
 
 		// reset all data
 		$db->dbExec("TRUNCATE table_with_primary_key");
@@ -2935,6 +3089,161 @@ final class CoreLibsDBIOTest extends TestCase
 	// - internal read data (post exec)
 	//   dbGetNumRows, dbGetNumFields, dbGetFieldNames,
 	//   dbGetQuery, dbGetQueryHash, dbGetDbh
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function getMethodsProvider(): array
+	{
+		// 0: run query
+		// 1: optional insert query (if select or needed)
+		// 2: optional compare query, if not set 0 is used
+		// 3: num rows
+		// 4: column count
+		// 5: column names
+		return [
+			'select data' => [
+				"SELECT row_varchar, row_varchar_literal, row_int, row_date "
+					. "FROM table_with_primary_key",
+				"INSERT INTO table_with_primary_key "
+					. "(row_varchar, row_varchar_literal, row_int, row_date) "
+					. "VALUES "
+					. "('Text', 'Other', 123, '2022-03-01'), "
+					. "('Foxtrott', 'Tango', 789, '1982-10-15') ",
+				null,
+				//
+				2,
+				4,
+				['row_varchar', 'row_varchar_literal', 'row_int', 'row_date'],
+			],
+			// insert
+			'insert data' => [
+				"INSERT INTO table_with_primary_key "
+					. "(row_varchar, row_varchar_literal, row_int, row_numeric, row_date) "
+					. "VALUES "
+					. "('Text', 'Other', 123, 1.0, '2022-03-01'), "
+					. "('Foxtrott', 'Tango', 789, 2.2, '1982-10-15'), "
+					. "('Schlamm', 'Beizinger', 100, 3.14, '1990-1-1') ",
+				null,
+				"INSERT INTO table_with_primary_key "
+					. "(row_varchar, row_varchar_literal, row_int, row_numeric, row_date) "
+					. "VALUES "
+					. "('Text', 'Other', 123, 1.0, '2022-03-01'), "
+					. "('Foxtrott', 'Tango', 789, 2.2, '1982-10-15'), "
+					. "('Schlamm', 'Beizinger', 100, 3.14, '1990-1-1') "
+					. " RETURNING table_with_primary_key_id",
+				//
+				3,
+				0,
+				[],
+			],
+			// update
+			'update data' => [
+				"UPDATE table_with_primary_key SET "
+					. "row_varchar = 'CHANGE A', row_int = 999 "
+					. "WHERE uid = 'A'",
+				"INSERT INTO table_with_primary_key "
+					. "(uid, row_varchar, row_varchar_literal, row_int, row_date) "
+					. "VALUES "
+					. "('A', 'Text', 'Other', 123, '2022-03-01'), "
+					. "('B', 'Foxtrott', 'Tango', 789, '1982-10-15') ",
+				null,
+				//
+				1,
+				0,
+				[],
+			]
+			// something other (schema change?)
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbGetNumRows
+	 * @covers ::dbGetNumFields
+	 * @covers ::dbGetFieldNames
+	 * @covers ::dbGetQuery
+	 * @covers ::dbGetQueryHash
+	 * @covers ::dbGetDbh
+	 * @dataProvider getMethodsProvider
+	 * @testdox Check check rows: $expected_rows and cols: $expected_cols [$_dataName]
+	 *
+	 * @param string $query
+	 * @param string|null $insert_query
+	 * @param string|null $compare_query
+	 * @param integer $expected_rows
+	 * @param integer $expected_cols
+	 * @param array $expected_col_names
+	 * @return void
+	 */
+	public function testDbGetMethods(
+		string $query,
+		?string $insert_query,
+		?string $compare_query,
+		int $expected_rows,
+		int $expected_cols,
+		array $expected_col_names
+	): void {
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		if (!empty($insert_query)) {
+			$db->dbExec($insert_query);
+		}
+
+		$db->dbExec($query);
+
+		$this->assertEquals(
+			$compare_query ?? $query,
+			$db->dbGetQuery()
+		);
+		$this->assertEquals(
+			// perhaps move that somewhere else?
+			\CoreLibs\Create\Hash::__hashLong($query),
+			$db->dbGetQueryHash($query)
+		);
+		$this->assertEquals(
+			$expected_rows,
+			$db->dbGetNumRows()
+		);
+		$this->assertEquals(
+			$expected_cols,
+			$db->dbGetNumFields()
+		);
+		$this->assertEquals(
+			$expected_col_names,
+			$db->dbGetFieldNames()
+		);
+		$dbh = $db->dbGetDbh();
+		if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
+			$this->assertIsObject(
+				$dbh
+			);
+			// also check that this is correct instance type
+			$this->assertInstanceOf(
+				'PgSql\Connection',
+				$dbh
+			);
+		} else {
+			$this->assertIsResource(
+				$dbh
+			);
+		}
+
+		// reset all data
+		$db->dbExec("TRUNCATE table_with_primary_key");
+		$db->dbExec("TRUNCATE table_without_primary_key");
+		// close connection
+		$db->dbClose();
+	}
+
 	// - complex write sets
 	//   dbWriteData, dbWriteDataExt
 	// - data debug
