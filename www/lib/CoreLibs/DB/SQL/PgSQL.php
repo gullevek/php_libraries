@@ -587,6 +587,47 @@ class PgSQL implements Interface\SqlFunctions
 	}
 
 	/**
+	 * extended wrapper for pg_version
+	 * can return any setting in this array block
+	 * If no connection, return empty string,
+	 * if not in array return empty string
+	 * On default 'version' will be stripped of any space attached info
+	 * eg 13.5 (other info) will return only 13.5
+	 * @param  string  $parameter Parameter string to extract from array
+	 * @param  boolean $strip     If parameter is server strip out on default
+	 *                            Set to false to get original string AS is
+	 * @return string             The parameter value
+	 */
+	public function __dbVersionInfo(string $parameter, bool $strip = true): string
+	{
+		if ($this->dbh === false || is_bool($this->dbh)) {
+			return '';
+		}
+		// extract element
+		$return_string = pg_version($this->dbh)[$parameter] ?? '';
+		// for version, strip if requested
+		if (
+			in_array($parameter, ['server']) &&
+			$strip === true
+		) {
+			$return_string = explode(' ', $return_string, 2)[0] ?? '';
+		}
+		return $return_string;
+	}
+
+	/**
+	 * Returns all parameters that are possible from the db_version
+	 * @return array Parameter key names from pg_version
+	 */
+	public function __dbVersionInfoParameterList(): array
+	{
+		if ($this->dbh === false || is_bool($this->dbh)) {
+			return [];
+		}
+		return array_keys(pg_version($this->dbh));
+	}
+
+	/**
 	 * wrapper for pg_version
 	 * Note: this only returns server version
 	 * not connection version OR client version
@@ -597,10 +638,22 @@ class PgSQL implements Interface\SqlFunctions
 		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
 		}
-		// array has client, protocol, server
-		// we just need the server
-		$v = pg_version($this->dbh);
-		return $v['server'];
+		// array has client, protocol, server, we just return server stripped
+		return $this->__dbVersionInfo('server', true);
+	}
+
+	/**
+	 * Returns a numeric version eg 90506 or 130006, etc
+	 * Note that this calls a show command on the server
+	 * Note:
+	 * Old version is 9.5.6 where 9.5 is the major version
+	 * Newer Postgresql (10 on) have only one major version so eg 13.5
+	 * is returned as 130005
+	 * @return integer Server version
+	 */
+	public function __dbVersionNumeric(): int
+	{
+		return (int)$this->__dbShow('server_version_num');
 	}
 
 	/**
@@ -662,6 +715,23 @@ class PgSQL implements Interface\SqlFunctions
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Returns any server setting, if no connection or empty parameter returns
+	 * empty string
+	 * @param string $parameter Parameter to query
+	 * @return string           Settings value as string
+	 */
+	public function __dbParameter(string $parameter): string
+	{
+		if ($this->dbh === false || is_bool($this->dbh)) {
+			return '';
+		}
+		if (empty($parameter)) {
+			return '';
+		}
+		return pg_parameter_status($this->dbh, $parameter);
 	}
 
 	/**

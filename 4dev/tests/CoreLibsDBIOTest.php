@@ -203,7 +203,147 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	// - connected version test
-	//   dbVerions, dbCompareVersion
+	//   dbVerions, dbVersionNum, dbVersionInfo, dbVersionInfoParameters,
+	//   dbCompareVersion
+
+	/**
+	 * Just checks that the return value of dbVersion matches basic regex
+	 *
+	 * @covers ::dbVersion
+	 * @testdox test db version string return matching retex
+	 *
+	 * @return void
+	 */
+	public function testDbVersion(): void
+	{
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		$this->assertMatchesRegularExpression(
+			"/^\d+\.\d+(\.\d+)?$/",
+			$db->dbVersion()
+		);
+
+		$db->dbClose();
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbVersionNumeric
+	 * @testdox test db version numeric return matching retex
+	 *
+	 * @return void
+	 */
+	public function testDbVersionNumeric(): void
+	{
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		$version = $db->dbVersionNumeric();
+		// must be int
+		$this->assertIsInt($version);
+		// assume 90606 or 130006
+		// should this change, the regex below must change
+		$this->assertMatchesRegularExpression(
+			"/^\d{5,6}?$/",
+			(string)$version
+		);
+
+		$db->dbClose();
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbVersionInfoParameters
+	 * @testdox test db version parameters are returned as array
+	 *
+	 * @return void
+	 */
+	public function testDbVersionInfoParameters(): void
+	{
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		$parameters = $db->dbVersionInfoParameters();
+
+		$this->assertIsArray($parameters);
+		$this->assertGreaterThan(
+			1,
+			count($parameters)
+		);
+		// must have at least this
+		$this->assertContains(
+			'server',
+			$parameters
+		);
+
+		$db->dbClose();
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function versionInfoProvider(): array
+	{
+		return [
+			'client' => [
+				'client',
+				"/^\d+\.\d+/"
+			],
+			'session authorization' => [
+				'session_authorization',
+				"/^\w+$/"
+			],
+			'test non existing' => [
+				'non_existing',
+				'/^$/'
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbVersionInfo
+	 * @dataProvider versionInfoProvider
+	 * @testdox Version Info $parameter matches as $expected [$_dataName]
+	 *
+	 * @param string $parameter
+	 * @param string $expected
+	 * @return void
+	 */
+	public function testDbVersionInfo(string $parameter, string $expected): void
+	{
+		// self::$log->setLogLevelAll('debug', true);
+		// self::$log->setLogLevelAll('print', true);
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+
+		$this->assertMatchesRegularExpression(
+			$expected,
+			$db->dbVersionInfo($parameter)
+		);
+
+		$db->dbClose();
+	}
 
 	/**
 	 * Returns test list for dbCompareVersion check
@@ -212,6 +352,8 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function versionProvider(): array
 	{
+		// 1: vesion to compare to
+		// 2: expected outcome
 		return [
 			'compare = ok' => [ '=13.6.0', true ],
 			'compare = bad' => [ '=9.2.0', false ],
@@ -2664,9 +2806,15 @@ final class CoreLibsDBIOTest extends TestCase
 			// avoid bubbling up error
 			@$db->dbSetEncoding($set_encoding)
 		);
+		// show query
 		$this->assertEquals(
 			$expected_get_encoding,
 			$db->dbGetEncoding()
+		);
+		// pg_version
+		$this->assertEquals(
+			$expected_get_encoding,
+			$db->dbVersionInfo('client_encoding')
 		);
 		$db->dbClose();
 	}
@@ -2840,7 +2988,6 @@ final class CoreLibsDBIOTest extends TestCase
 				'table_with_primary_key',
 				'table_with_primary_key_id',
 			],
-			// TODO other tests
 		];
 	}
 
@@ -3244,15 +3391,13 @@ final class CoreLibsDBIOTest extends TestCase
 		$db->dbClose();
 	}
 
+	// TODO implement below checks
 	// - complex write sets
 	//   dbWriteData, dbWriteDataExt
 	// - data debug
 	//   dbDumpData
-	// - deprecated tests [no need to test perhaps]
-	//   getInsertReturn, getReturning, getInsertPK, getReturningExt,
-	//   getCursorExt, getNumRows
 
-	// ASYNC at the end because it has 3s timeout
+	// ASYNC at the end because it has 1s timeout
 	// - asynchronous executions
 	//   dbExecAsync, dbCheckAsync
 

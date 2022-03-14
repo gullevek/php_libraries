@@ -1325,12 +1325,43 @@ class IO
 	}
 
 	/**
-	 * return current database version
+	 * Server version as integer value
+	 * @return integer Version as integer
+	 */
+	public function dbVersionNumeric(): int
+	{
+		return $this->db_functions->__dbVersionNumeric();
+	}
+
+	/**
+	 * return current database version (server side) as string
 	 * @return string database version as string
 	 */
 	public function dbVersion(): string
 	{
 		return $this->db_functions->__dbVersion();
+	}
+
+	/**
+	 * extended version info, can access all additional information data
+	 * @param  string  $parameter Array parameter name, if not valid returns
+	 *                            empty string
+	 * @param  boolean $strip     Strip extended server info string, default true
+	 *                            eg nn.n (other info) will only return nn.n
+	 * @return string             Parameter value
+	 */
+	public function dbVersionInfo(string $parameter, bool $strip = true): string
+	{
+		return $this->db_functions->__dbVersionInfo($parameter, $strip);
+	}
+
+	/**
+	 * All possible parameter names for dbVersionInfo
+	 * @return array List of all parameter names
+	 */
+	public function dbVersionInfoParameters(): array
+	{
+		return $this->db_functions->__dbVersionInfoParameterList();
 	}
 
 	/**
@@ -1346,6 +1377,7 @@ class IO
 		$compare = $matches[1];
 		$to_master = $matches[2];
 		$to_minor = $matches[3];
+		$to_version = '';
 		if (!$compare || !strlen($to_master) || !strlen($to_minor)) {
 			return false;
 		} else {
@@ -1353,7 +1385,11 @@ class IO
 		}
 		// db_version can return X.Y.Z
 		// we only compare the first two
-		preg_match("/^(\d{1,})\.(\d{1,})\.?(\d{1,})?/", $this->dbVersion(), $matches);
+		preg_match(
+			"/^(\d{1,})\.(\d{1,})\.?(\d{1,})?/",
+			$this->db_functions->__dbVersion(),
+			$matches
+		);
 		$master = $matches[1];
 		$minor = $matches[2];
 		$version = $master . ($minor < 10 ? '0' : '') . $minor;

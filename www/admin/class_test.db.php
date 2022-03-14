@@ -55,6 +55,23 @@ echo "DB_CONFIG_SET constant: <pre>" . print_r(DB_CONFIG, true) . "</pre><br>";
 print "DB client encoding: " . $db->dbGetEncoding() . "<br>";
 print "DB search path: " . $db->dbGetSchema() . "<br>";
 
+$to_db_version = '13.6';
+print "VERSION DB: " . $db->dbVersion() . "<br>";
+print "VERSION LONG DB: " . $db->dbVersionInfo('server', false) . "<br>";
+print "VERSION NUMERIC DB: " . $db->dbVersionNumeric() . "<br>";
+print "SERVER ENCODING: " . $db->dbVersionInfo('server_encoding') . "<br>";
+print "ALL PG VERSION PARAMETERS: <pre>" . print_r($db->dbVersionInfoParameters(), true) . "</pre><br>";
+print "ALL OUTPUT [TEST]: <pre>" . print_r(pg_version($db->dbGetDbh()), true) . "</pre><br>";
+print "DB Version smaller $to_db_version: " . $db->dbCompareVersion('<' . $to_db_version) . "<br>";
+print "DB Version smaller than $to_db_version: " . $db->dbCompareVersion('<=' . $to_db_version) . "<br>";
+print "DB Version equal $to_db_version: " . $db->dbCompareVersion('=' . $to_db_version) . "<br>";
+print "DB Version bigger than $to_db_version: " . $db->dbCompareVersion('>=' . $to_db_version) . "<br>";
+print "DB Version bigger $to_db_version: " . $db->dbCompareVersion('>' . $to_db_version) . "<br>";
+
+$db->dbSetEncoding('SJIS');
+print "ENCODING TEST: " . $db->dbVersionInfo('client_encoding') . "/" . $db->dbGetEncoding() . "<br>";
+$db->dbResetEncoding();
+
 while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::USE_CACHE, true))) {
 	print "UUD/TIME: " . $res['uid'] . "/" . $res['time'] . "<br>";
 }
@@ -341,14 +358,6 @@ print "ASYNC PREVIOUS INSERTED: "
 		true
 	) . "<br>";
 */
-
-$to_db_version = '9.1.9';
-print "VERSION DB: " . $db->dbVersion() . "<br>";
-print "DB Version smaller $to_db_version: " . $db->dbCompareVersion('<' . $to_db_version) . "<br>";
-print "DB Version smaller than $to_db_version: " . $db->dbCompareVersion('<=' . $to_db_version) . "<br>";
-print "DB Version equal $to_db_version: " . $db->dbCompareVersion('=' . $to_db_version) . "<br>";
-print "DB Version bigger than $to_db_version: " . $db->dbCompareVersion('>=' . $to_db_version) . "<br>";
-print "DB Version bigger $to_db_version: " . $db->dbCompareVersion('>' . $to_db_version) . "<br>";
 
 /*
 $q = "Select * from test_foo";
