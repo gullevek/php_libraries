@@ -367,8 +367,14 @@ class Login extends \CoreLibs\DB\IO
 		}
 		// first, errors on missing encryption
 		if (
+			// below is all deprecated. all the ones below will always be true
+			// all the crypt standards are always set
+			// FIXME: remove this error code
+			/** @phpstan-ignore-next-line Why? */
 			(preg_match("/^\\$2(a|y)\\$/", $hash) && CRYPT_BLOWFISH != 1) ||
+			/** @phpstan-ignore-next-line Why? */
 			(preg_match("/^\\$1\\$/", $hash) && CRYPT_MD5 != 1) ||
+			/** @phpstan-ignore-next-line Why? */
 			(preg_match("/^\\$[0-9A-Za-z.]{12}$/", $hash) && CRYPT_STD_DES != 1)
 		) {
 			// this means password cannot be decrypted because of missing crypt methods

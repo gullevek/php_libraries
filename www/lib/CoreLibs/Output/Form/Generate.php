@@ -867,7 +867,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					$save = $this->l->__('Update');
 				}
 				// print the old_school hidden if requestet
-				if ($old_school_hidden == 1) {
+				if ($old_school_hidden == 1) { /** @phpstan-ignore-line Unclear logic */
 					$pk_name = $this->int_pk_name;
 					$pk_value = $this->table_array[$this->int_pk_name]['value'];
 				}
@@ -2488,7 +2488,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 
 		// push in an empty line of this type, but only if we have a delete key that is also filled
-		if (isset($data['delete_name']) && !empty($data['delete_name'])) {
+		if (!empty($data['delete_name'])) {
 			$data['content'][] = $proto;
 			// we also need the pos add or we through an error in smarty
 			$data['pos'][] = [

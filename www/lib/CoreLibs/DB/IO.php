@@ -1357,7 +1357,7 @@ class IO
 
 	/**
 	 * All possible parameter names for dbVersionInfo
-	 * @return array List of all parameter names
+	 * @return array<mixed> List of all parameter names
 	 */
 	public function dbVersionInfoParameters(): array
 	{
@@ -2870,7 +2870,7 @@ class IO
 	 */
 	public function dbGetInsertPKName(): string
 	{
-		return $this->insert_id_pk_name ?? '';
+		return $this->insert_id_pk_name;
 	}
 
 	/**

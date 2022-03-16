@@ -128,7 +128,8 @@ class DateTime
 				$timestamp .= '.' . $matches[10];
 			}
 			if ($negative) {
-				$timestamp *= -1;
+				// cast to flaot so we can do a negative multiplication
+				$timestamp = (float)$timestamp * -1;
 			}
 			return $timestamp;
 		} else {

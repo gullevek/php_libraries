@@ -226,7 +226,7 @@ if (
 		((is_array($DB_CONFIG) && !count($DB_CONFIG)) ||
 		!is_array($DB_CONFIG) ||
 		// has DB CONFIG but no match
-		(is_array($DB_CONFIG) && count($DB_CONFIG) && !isset($DB_CONFIG[$SITE_CONFIG[HOST_NAME]['db_host']])))
+		empty($DB_CONFIG[$SITE_CONFIG[HOST_NAME]['db_host']]))
 	)
 ) {
 	echo 'No matching DB config found for: "' . HOST_NAME . '" . Contact Administrator';

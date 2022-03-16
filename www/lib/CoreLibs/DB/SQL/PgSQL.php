@@ -617,7 +617,7 @@ class PgSQL implements Interface\SqlFunctions
 
 	/**
 	 * Returns all parameters that are possible from the db_version
-	 * @return array Parameter key names from pg_version
+	 * @return array<mixed> Parameter key names from pg_version
 	 */
 	public function __dbVersionInfoParameterList(): array
 	{
@@ -718,18 +718,19 @@ class PgSQL implements Interface\SqlFunctions
 	}
 
 	/**
-	 * Returns any server setting, if no connection or empty parameter returns
-	 * empty string
-	 * @param string $parameter Parameter to query
-	 * @return string           Settings value as string
+	 * Returns any server setting
+	 * if no connection or empty parameter or other error returns false
+	 * else returns a string
+	 * @param  string      $parameter Parameter to query
+	 * @return string|bool            Settings value as string
 	 */
-	public function __dbParameter(string $parameter): string
+	public function __dbParameter(string $parameter)
 	{
 		if ($this->dbh === false || is_bool($this->dbh)) {
-			return '';
+			return false;
 		}
 		if (empty($parameter)) {
-			return '';
+			return false;
 		}
 		return pg_parameter_status($this->dbh, $parameter);
 	}
