@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\Admin;
 
-class Backend extends \CoreLibs\DB\IO
+class Backend
 {
 	// page name
 	/** @var array<mixed> */
@@ -93,8 +93,11 @@ class Backend extends \CoreLibs\DB\IO
 	public $lang_short;
 	/** @var string */
 	public $encoding;
-	// language
-	/** @var \CoreLibs\Language\L10n */
+	/** @var \CoreLibs\Debug\Logging logger */
+	public $log;
+	/** @var \CoreLibs\DB\IO database */
+	public $db;
+	/** @var \CoreLibs\Language\L10n language */
 	public $l;
 	// smarty publics [end processing in smarty class]
 	/** @var array<mixed> */
@@ -109,23 +112,26 @@ class Backend extends \CoreLibs\DB\IO
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**
 	 * main class constructor
-	 * @param array<mixed> $db_config db config array
-	 * @param \CoreLibs\Debug\Logging|null $log Logging class, default set if not set
+	 * @param \CoreLibs\DB\IO              $db  Database connection class
+	 * @param \CoreLibs\Debug\Logging      $log Logging class, default set if not set
+	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class
+	 *                                           if null, auto set
 	 */
 	public function __construct(
-		array $db_config,
-		?\CoreLibs\Debug\Logging $log = null
+		\CoreLibs\DB\IO $db,
+		\CoreLibs\Debug\Logging $log,
+		?\CoreLibs\Language\L10n $l10n = null
 	) {
 		// set to log not per class
-		if ($log !== null) {
-			$log->setLogPer('class', false);
-		}
+		$log->setLogPer('class', false);
+		// attach logger
+		$this->log = $log;
+		// attach db class
+		$this->db = $db;
+		// TODO lang create outside of class
 		$this->setLangEncoding();
 		// get the language sub class & init it
-		$this->l = new \CoreLibs\Language\L10n($this->lang);
-
-		// init the database class
-		parent::__construct($db_config, $log ?? new \CoreLibs\Debug\Logging());
+		$this->l = $l10n ?? new \CoreLibs\Language\L10n($this->lang);
 
 		// set the page name
 		$this->page_name = \CoreLibs\Get\System::getPageName();
@@ -148,7 +154,7 @@ class Backend extends \CoreLibs\DB\IO
 	 */
 	public function __destruct()
 	{
-		parent::__destruct();
+		// NO OP
 	}
 
 	// INTERNAL METHODS |===============================================>
@@ -206,16 +212,19 @@ class Backend extends \CoreLibs\DB\IO
 	 * @param  string              $write_type write type can bei STRING or BINARY
 	 * @return void
 	 */
-	public function adbEditLog(string $event = '', $data = '', string $write_type = 'STRING'): void
-	{
+	public function adbEditLog(
+		string $event = '',
+		$data = '',
+		string $write_type = 'STRING'
+	): void {
 		$data_binary = '';
 		if ($write_type == 'BINARY') {
-			$data_binary = $this->dbEscapeBytea((string)bzcompress(serialize($data)));
+			$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($data)));
 			$data = 'see bzip compressed data_binary field';
 		}
 		if ($write_type == 'STRING') {
 			$data_binary = '';
-			$data = $this->dbEscapeString(serialize($data));
+			$data = $this->db->dbEscapeString(serialize($data));
 		}
 
 		// check schema
@@ -223,8 +232,8 @@ class Backend extends \CoreLibs\DB\IO
 		/** @phpstan-ignore-next-line */
 		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
 			$SCHEMA = LOGIN_DB_SCHEMA;
-		} elseif ($this->dbGetSchema()) {
-			$SCHEMA = $this->dbGetSchema();
+		} elseif ($this->db->dbGetSchema()) {
+			$SCHEMA = $this->db->dbGetSchema();
 		} elseif (defined('PUBLIC_SCHEMA')) {
 			$SCHEMA = PUBLIC_SCHEMA;
 		}
@@ -235,36 +244,36 @@ class Backend extends \CoreLibs\DB\IO
 			. "http_accept, http_accept_charset, http_accept_encoding, session_id, "
 			. "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) "
 			. "VALUES "
-			. "(" . $this->dbEscapeString(isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
+			. "(" . $this->db->dbEscapeString(isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
 				$_SESSION['EUID'] :
 				'NULL')
 			. ", "
 			. "NOW(), "
-			. "'" . $this->dbEscapeString((string)$event) . "', '" . $data . "', "
-			. "'" . $data_binary . "', '" . $this->dbEscapeString((string)$this->page_name) . "', "
+			. "'" . $this->db->dbEscapeString((string)$event) . "', '" . $data . "', "
+			. "'" . $data_binary . "', '" . $this->db->dbEscapeString((string)$this->page_name) . "', "
 			. "'" . @$_SERVER["REMOTE_ADDR"] . "', "
-			. "'" . $this->dbEscapeString(@$_SERVER['HTTP_USER_AGENT']) . "', "
-			. "'" . $this->dbEscapeString($_SERVER['HTTP_REFERER'] ?? '') . "', "
-			. "'" . $this->dbEscapeString($_SERVER['SCRIPT_FILENAME'] ?? '') . "', "
-			. "'" . $this->dbEscapeString($_SERVER['QUERY_STRING'] ?? '') . "', "
-			. "'" . $this->dbEscapeString($_SERVER['SERVER_NAME'] ?? '') . "', "
-			. "'" . $this->dbEscapeString($_SERVER['HTTP_HOST'] ?? '') . "', "
-			. "'" . $this->dbEscapeString($_SERVER['HTTP_ACCEPT'] ?? '') . "', "
-			. "'" . $this->dbEscapeString($_SERVER['HTTP_ACCEPT_CHARSET'] ?? '') . "', "
-			. "'" . $this->dbEscapeString($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '') . "', "
+			. "'" . $this->db->dbEscapeString(@$_SERVER['HTTP_USER_AGENT']) . "', "
+			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_REFERER'] ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($_SERVER['SCRIPT_FILENAME'] ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($_SERVER['QUERY_STRING'] ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($_SERVER['SERVER_NAME'] ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_HOST'] ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT'] ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT_CHARSET'] ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '') . "', "
 			. (\CoreLibs\Create\Session::getSessionId() === false ?
 				"NULL" :
 				"'" . \CoreLibs\Create\Session::getSessionId() . "'")
 			. ", "
-			. "'" . $this->dbEscapeString($this->action) . "', "
-			. "'" . $this->dbEscapeString($this->action_id) . "', "
-			. "'" . $this->dbEscapeString($this->action_yes) . "', "
-			. "'" . $this->dbEscapeString($this->action_flag) . "', "
-			. "'" . $this->dbEscapeString($this->action_menu) . "', "
-			. "'" . $this->dbEscapeString($this->action_loaded) . "', "
-			. "'" . $this->dbEscapeString($this->action_value) . "', "
-			. "'" . $this->dbEscapeString($this->action_error) . "')";
-		$this->dbExec($q, 'NULL');
+			. "'" . $this->db->dbEscapeString($this->action) . "', "
+			. "'" . $this->db->dbEscapeString($this->action_id) . "', "
+			. "'" . $this->db->dbEscapeString($this->action_yes) . "', "
+			. "'" . $this->db->dbEscapeString($this->action_flag) . "', "
+			. "'" . $this->db->dbEscapeString($this->action_menu) . "', "
+			. "'" . $this->db->dbEscapeString($this->action_loaded) . "', "
+			. "'" . $this->db->dbEscapeString($this->action_value) . "', "
+			. "'" . $this->db->dbEscapeString($this->action_error) . "')";
+		$this->db->dbExec($q, 'NULL');
 	}
 
 	/**
@@ -530,8 +539,8 @@ class Backend extends \CoreLibs\DB\IO
 		/** @phpstan-ignore-next-line */
 		if (defined('GLOBAL_DB_SCHEMA') && !empty(GLOBAL_DB_SCHEMA)) {
 			$SCHEMA = GLOBAL_DB_SCHEMA;
-		} elseif ($this->dbGetSchema()) {
-			$SCHEMA = $this->dbGetSchema();
+		} elseif ($this->db->dbGetSchema()) {
+			$SCHEMA = $this->db->dbGetSchema();
 		} elseif (defined('PUBLIC_SCHEMA')) {
 			$SCHEMA = PUBLIC_SCHEMA;
 		} else {
@@ -540,13 +549,13 @@ class Backend extends \CoreLibs\DB\IO
 		$q = "INSERT INTO " . $SCHEMA . ".live_queue ("
 			. "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file"
 			. ") VALUES ("
-			. "'" . $this->dbEscapeString($queue_key) . "', '" . $this->dbEscapeString($key_value) . "', "
-			. "'" . $this->dbEscapeString($key_name) . "', '" . $this->dbEscapeString($type) . "', "
-			. "'" . $this->dbEscapeString($target) . "', '" . $this->dbEscapeString($data) . "', "
+			. "'" . $this->db->dbEscapeString($queue_key) . "', '" . $this->db->dbEscapeString($key_value) . "', "
+			. "'" . $this->db->dbEscapeString($key_name) . "', '" . $this->db->dbEscapeString($type) . "', "
+			. "'" . $this->db->dbEscapeString($target) . "', '" . $this->db->dbEscapeString($data) . "', "
 			. "'" . $this->queue_key . "', '" . $this->action . "', "
-			. "'" . $this->dbEscapeString((string)$associate) . "', "
-			. "'" . $this->dbEscapeString((string)$file) . "')";
-		$this->dbExec($q);
+			. "'" . $this->db->dbEscapeString((string)$associate) . "', "
+			. "'" . $this->db->dbEscapeString((string)$file) . "')";
+		$this->db->dbExec($q);
 	}
 
 	/**

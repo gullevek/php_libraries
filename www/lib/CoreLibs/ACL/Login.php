@@ -71,7 +71,7 @@ namespace CoreLibs\ACL;
 use CoreLibs\Check\Password;
 use CoreLibs\Create\Session;
 
-class Login extends \CoreLibs\DB\IO
+class Login
 {
 	/** @var string */
 	private $euid; // the user id var
@@ -156,29 +156,35 @@ class Login extends \CoreLibs\DB\IO
 	/** @var bool */
 	private $login_is_ajax_page = false;
 
-	// language
-	/** @var \CoreLibs\Language\L10n */
+	/** @var \CoreLibs\Debug\Logging logger */
+	public $log;
+	/** @var \CoreLibs\DB\IO database */
+	public $db;
+	/** @var \CoreLibs\Language\L10n language */
 	public $l;
 
 	/**
 	 * constructor, does ALL, opens db, works through connection checks, closes itself
-	 * @param array<mixed> $db_config db config array
-	 * @param \CoreLibs\Debug\Logging|null $log Logging class, if null, auto set
-	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class, if null, auto set
+	 * @param \CoreLibs\DB\IO              $db   Database connection class
+	 * @param \CoreLibs\Debug\Logging      $log  Logging class
+	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class
+	 *                                     if null, auto set
 	 */
 	public function __construct(
-		array $db_config,
-		?\CoreLibs\Debug\Logging $log = null,
+		\CoreLibs\DB\IO $db,
+		\CoreLibs\Debug\Logging $log,
 		?\CoreLibs\Language\L10n $l10n = null
 	) {
-		// create db connection and init base class
-		parent::__construct($db_config, $log ?? new \CoreLibs\Debug\Logging());
 		// log login data for this class only
-		$this->log->setLogPer('class', true);
+		$log->setLogPer('class', true);
+		// attach logger
+		$this->log = $log;
+		// attach db class
+		$this->db = $db;
 		// set internal page name
 		$this->page_name = \CoreLibs\Get\System::getPageName();
 		// set db special errors
-		if (!$this->dbGetConnectionStatus()) {
+		if (!$this->db->dbGetConnectionStatus()) {
 			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
 			exit;
@@ -225,8 +231,8 @@ class Login extends \CoreLibs\DB\IO
 		/** @phpstan-ignore-next-line */
 		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
 			$SCHEMA = LOGIN_DB_SCHEMA;
-		} elseif (isset($db_config['db_schema']) && $db_config['db_schema']) {
-			$SCHEMA = $db_config['db_schema'];
+		} elseif (!empty($this->db->dbGetSchema(true))) {
+			$SCHEMA = $this->db->dbGetSchema(true);
 		} elseif (defined('PUBLIC_SCHEMA')) {
 			$SCHEMA = PUBLIC_SCHEMA;
 		} else {
@@ -234,8 +240,8 @@ class Login extends \CoreLibs\DB\IO
 		}
 		// echo "<h1>*****SCHEMA******</h1>: $SCHEMA<br>";
 		// set schema if schema differs to schema set in db conneciton
-		if ($this->dbGetSchema() && $this->dbGetSchema() != $SCHEMA) {
-			$this->dbExec("SET search_path TO " . $SCHEMA);
+		if ($this->db->dbGetSchema() != $SCHEMA) {
+			$this->db->dbExec("SET search_path TO " . $SCHEMA);
 		}
 		// if there is none, there is none, saves me POST/GET check
 		$this->euid = array_key_exists('EUID', $_SESSION) ? $_SESSION['EUID'] : 0;
@@ -273,7 +279,7 @@ class Login extends \CoreLibs\DB\IO
 		$_SESSION['DEFAULT_ACL_LIST'] = [];
 		// read the current edit_access_right list into an array
 		$q = "SELECT level, type, name FROM edit_access_right WHERE level >= 0 ORDER BY level";
-		while (is_array($res = $this->dbReturn($q))) {
+		while (is_array($res = $this->db->dbReturn($q))) {
 			// level to description format (numeric)
 			$this->default_acl_list[$res['level']] = [
 				'type' => $res['type'],
@@ -344,7 +350,7 @@ class Login extends \CoreLibs\DB\IO
 	 */
 	public function __destruct()
 	{
-		parent::__destruct();
+		// NO OP
 	}
 
 	/**
@@ -440,12 +446,12 @@ class Login extends \CoreLibs\DB\IO
 					. "eu.edit_access_right_id = eareu.edit_access_right_id AND "
 					. "eg.edit_access_right_id = eareg.edit_access_right_id AND "
 					// password match is done in script, against old plain or new blowfish encypted
-					. "(LOWER(username) = '" . $this->dbEscapeString(strtolower($this->username)) . "') ";
-				$res = $this->dbReturn($q);
+					. "(LOWER(username) = '" . $this->db->dbEscapeString(strtolower($this->username)) . "') ";
+				$res = $this->db->dbReturn($q);
 				if (!is_array($res)) {
 					$this->login_error = 1009;
 					$this->permission_okay = false;
-				} elseif (empty($this->dbGetCursorNumRows($q))) {
+				} elseif (empty($this->db->dbGetCursorNumRows($q))) {
 					// username is wrong, but we throw for wrong username
 					// and wrong password the same error
 					$this->login_error = 1010;
@@ -476,9 +482,9 @@ class Login extends \CoreLibs\DB\IO
 						if (Password::passwordRehashCheck($res['password'])) {
 							// update password hash to new one now
 							$q = "UPDATE edit_user "
-								. "SET password = '" . $this->dbEscapeString(Password::passwordSet($this->password))
+								. "SET password = '" . $this->db->dbEscapeString(Password::passwordSet($this->password))
 								. "' WHERE edit_user_id = " . $res['edit_user_id'];
-							$this->dbExec($q);
+							$this->db->dbExec($q);
 						}
 						// normal user processing
 						// set class var and session var
@@ -487,8 +493,8 @@ class Login extends \CoreLibs\DB\IO
 						$this->loginCheckPermissions();
 						if ($this->login_error == 0) {
 							// now set all session vars and read page permissions
-							$_SESSION['DEBUG_ALL'] = $this->dbBoolean($res['debug']);
-							$_SESSION['DB_DEBUG'] = $this->dbBoolean($res['db_debug']);
+							$_SESSION['DEBUG_ALL'] = $this->db->dbBoolean($res['debug']);
+							$_SESSION['DB_DEBUG'] = $this->db->dbBoolean($res['db_debug']);
 							// general info for user logged in
 							$_SESSION['USER_NAME'] = $res['username'];
 							$_SESSION['ADMIN'] = $res['admin'];
@@ -512,7 +518,7 @@ class Login extends \CoreLibs\DB\IO
 									. "SET login_error_count = 0, login_error_date_last = NULL, "
 									. "login_error_date_first = NULL "
 									. "WHERE edit_user_id = " . $res['edit_user_id'];
-								$this->dbExec($q);
+								$this->db->dbExec($q);
 							}
 							$edit_page_ids = [];
 							$pages = [];
@@ -529,7 +535,7 @@ class Login extends \CoreLibs\DB\IO
 								. "AND ear.edit_access_right_id = epa.edit_access_right_id "
 								. "AND epa.enabled = 1 AND epa.edit_group_id = " . $res["edit_group_id"] . " "
 								. "ORDER BY ep.order_number";
-							while ($res = $this->dbReturn($q)) {
+							while ($res = $this->db->dbReturn($q)) {
 								if (!is_array($res)) {
 									break;
 								}
@@ -564,7 +570,7 @@ class Login extends \CoreLibs\DB\IO
 								. "WHERE evp.edit_visible_group_id = epvg.edit_visible_group_id "
 								. "AND epvg.edit_page_id IN (" . join(', ', array_keys($edit_page_ids)) . ") "
 								. "ORDER BY epvg.edit_page_id";
-							while (is_array($res = $this->dbReturn($q))) {
+							while (is_array($res = $this->db->dbReturn($q))) {
 								$pages[$edit_page_ids[$res['edit_page_id']]]['visible'][$res['name']] = $res['flag'];
 							}
 							// get the same for the query strings
@@ -572,7 +578,7 @@ class Login extends \CoreLibs\DB\IO
 								. "WHERE enabled = 1 AND edit_page_id "
 								. "IN (" . join(', ', array_keys($edit_page_ids)) . ") "
 								. "ORDER BY eqs.edit_page_id";
-							while (is_array($res = $this->dbReturn($q))) {
+							while (is_array($res = $this->db->dbReturn($q))) {
 								$pages[$edit_page_ids[$res['edit_page_id']]]['query'][] = [
 									'name' => $res['name'],
 									'value' => $res['value'],
@@ -586,7 +592,7 @@ class Login extends \CoreLibs\DB\IO
 								. "WHERE epc.edit_access_right_id = ear.edit_access_right_id AND "
 								. "epc.edit_page_id IN (" . join(', ', array_keys($edit_page_ids)) . ") "
 								. "ORDER BY epc.order_number";
-							while (is_array($res = $this->dbReturn($q))) {
+							while (is_array($res = $this->db->dbReturn($q))) {
 								$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = [
 									'name' => $res['name'],
 									'uid' => $res['uid'],
@@ -610,13 +616,13 @@ class Login extends \CoreLibs\DB\IO
 							$unit_access = [];
 							$eauid = [];
 							$unit_acl = [];
-							while (is_array($res = $this->dbReturn($q))) {
+							while (is_array($res = $this->db->dbReturn($q))) {
 								// read edit access data fields and drop them into the unit access array
 								$q_sub = "SELECT name, value "
 									. "FROM edit_access_data "
 									. "WHERE enabled = 1 AND edit_access_id = " . $res['edit_access_id'];
 								$ea_data = [];
-								while (is_array($res_sub = $this->dbReturn($q_sub))) {
+								while (is_array($res_sub = $this->db->dbReturn($q_sub))) {
 									$ea_data[$res_sub['name']] = $res_sub['value'];
 								}
 								// build master unit array
@@ -653,7 +659,7 @@ class Login extends \CoreLibs\DB\IO
 							. "SET login_error_count = login_error_count + 1, "
 							. "login_error_date_last = NOW() " . $login_error_date_first . " "
 							. "WHERE edit_user_id = " . $res['edit_user_id'];
-						$this->dbExec($q);
+						$this->db->dbExec($q);
 						// totally lock the user if error max is reached
 						if (
 							$this->max_login_error_count != -1 &&
@@ -692,7 +698,7 @@ class Login extends \CoreLibs\DB\IO
 				. "AND eu.edit_user_id = " . $this->euid . " "
 				. "AND filename = '" . $this->page_name . "' "
 				. "AND eg.enabled = 1 AND epa.enabled = 1";
-			$res = $this->dbReturnRow($q);
+			$res = $this->db->dbReturnRow($q);
 			if (!is_array($res)) {
 				$this->login_error = 109;
 				$this->permission_okay = false;
@@ -957,8 +963,8 @@ class Login extends \CoreLibs\DB\IO
 					$q = "SELECT edit_user_id "
 						. "FROM edit_user "
 						. "WHERE enabled = 1 "
-						. "AND username = '" . $this->dbEscapeString($this->pw_username) . "'";
-					$res = $this->dbReturnRow($q);
+						. "AND username = '" . $this->db->dbEscapeString($this->pw_username) . "'";
+					$res = $this->db->dbReturnRow($q);
 					if (
 						!is_array($res) ||
 						(is_array($res) && empty($res['edit_user_id']))
@@ -973,9 +979,9 @@ class Login extends \CoreLibs\DB\IO
 					$q = "SELECT edit_user_id, password "
 						. "FROM edit_user "
 						. "WHERE enabled = 1 "
-						. "AND username = '" . $this->dbEscapeString($this->pw_username) . "'";
+						. "AND username = '" . $this->db->dbEscapeString($this->pw_username) . "'";
 					$edit_user_id = '';
-					$res = $this->dbReturnRow($q);
+					$res = $this->db->dbReturnRow($q);
 					if (is_array($res)) {
 						$edit_user_id = $res['edit_user_id'];
 					}
@@ -1016,9 +1022,9 @@ class Login extends \CoreLibs\DB\IO
 					// update the user (edit_user_id) with the new password
 					$q = "UPDATE edit_user "
 						. "SET password = "
-						. "'" . $this->dbEscapeString(Password::passwordSet($this->pw_new_password)) . "' "
+						. "'" . $this->db->dbEscapeString(Password::passwordSet($this->pw_new_password)) . "' "
 						. "WHERE edit_user_id = " . $edit_user_id;
-					$this->dbExec($q);
+					$this->db->dbExec($q);
 					$data = 'Password change for user "' . $this->pw_username . '"';
 					$this->password_change_ok = true;
 				}
@@ -1158,7 +1164,7 @@ class Login extends \CoreLibs\DB\IO
 				// get user from user table
 				$q = "SELECT username FROM edit_user WHERE edit_user_id = " . $this->euid;
 				$username = '';
-				if (is_array($res = $this->dbReturnRow($q))) {
+				if (is_array($res = $this->db->dbReturnRow($q))) {
 					$username = $res['username'];
 				}
 			} // if euid is set, get username (or try)
@@ -1378,7 +1384,7 @@ EOM;
 				'_FILES' => $_FILES,
 				'error' => $this->login_error
 		];
-		$data_binary = $this->dbEscapeBytea((string)bzcompress(serialize($_data_binary)));
+		$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($_data_binary)));
 		// SQL querie for log entry
 		$q = "INSERT INTO edit_log "
 			. "(username, password, euid, event_date, event, error, data, data_binary, page, "
@@ -1386,11 +1392,11 @@ EOM;
 			. "http_accept, http_accept_charset, http_accept_encoding, session_id, "
 			. "action, action_id, action_yes, action_flag, action_menu, action_loaded, "
 			. "action_value, action_error) "
-			. "VALUES ('" . $this->dbEscapeString($username) . "', 'PASSWORD', "
+			. "VALUES ('" . $this->db->dbEscapeString($username) . "', 'PASSWORD', "
 			. ($this->euid ? $this->euid : 'NULL') . ", "
-			. "NOW(), '" . $this->dbEscapeString($event) . "', "
-			. "'" . $this->dbEscapeString((string)$error) . "', "
-			. "'" . $this->dbEscapeString($data) . "', '" . $data_binary . "', "
+			. "NOW(), '" . $this->db->dbEscapeString($event) . "', "
+			. "'" . $this->db->dbEscapeString((string)$error) . "', "
+			. "'" . $this->db->dbEscapeString($data) . "', '" . $data_binary . "', "
 			. "'" . $this->page_name . "', ";
 		foreach (
 			[
@@ -1400,20 +1406,20 @@ EOM;
 			] as $server_code
 		) {
 			if (array_key_exists($server_code, $_SERVER)) {
-				$q .= "'" . $this->dbEscapeString($_SERVER[$server_code]) . "', ";
+				$q .= "'" . $this->db->dbEscapeString($_SERVER[$server_code]) . "', ";
 			} else {
 				$q .= "NULL, ";
 			}
 		}
 		$q .= "'" . Session::getSessionId() . "', ";
-		$q .= "'" . $this->dbEscapeString($this->action) . "', ";
-		$q .= "'" . $this->dbEscapeString($this->username) . "', ";
+		$q .= "'" . $this->db->dbEscapeString($this->action) . "', ";
+		$q .= "'" . $this->db->dbEscapeString($this->username) . "', ";
 		$q .= "NULL, ";
-		$q .= "'" . $this->dbEscapeString((string)$this->login_error) . "', ";
+		$q .= "'" . $this->db->dbEscapeString((string)$this->login_error) . "', ";
 		$q .= "NULL, NULL, ";
-		$q .= "'" . $this->dbEscapeString((string)$this->permission_okay) . "', ";
+		$q .= "'" . $this->db->dbEscapeString((string)$this->permission_okay) . "', ";
 		$q .= "NULL)";
-		$this->dbExec($q, 'NULL');
+		$this->db->dbExec($q, 'NULL');
 	}
 
 	/**

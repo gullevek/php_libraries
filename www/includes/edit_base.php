@@ -57,8 +57,10 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL,
 	'print_all' => $PRINT_ALL,
 ]);
+// db connection
+$db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 // login page
-$login = new CoreLibs\ACL\Login(DB_CONFIG, $log);
+$login = new CoreLibs\ACL\Login($db, $log);
 // flush and start
 ob_end_flush();
 // turn off set log per class

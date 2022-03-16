@@ -43,6 +43,8 @@ if (isset($_POST['action']) && $_POST['action'] != 'download_csv' && !$AJAX_PAGE
 if ($AJAX_PAGE && !$ZIP_STREAM) {
 	header("Content-Type: application/json; charset=UTF-8");
 }
+// start session
+CoreLibs\Create\Session::startSession();
 //------------------------------ basic variable settings start
 
 //------------------------------ class init start
@@ -51,7 +53,6 @@ $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
 	'file_id' => LOG_FILE_ID,
 	'print_file_date' => true,
-	'per_class' => true,
 	'debug_all' => $DEBUG_ALL ?? false,
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
@@ -68,22 +69,21 @@ if (
 		$log->setLogLevelAll($target, false);
 	}
 }
-// start session
-CoreLibs\Create\Session::startSession();
+// db config with logger
+$db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 // login & page access check
-$login = new CoreLibs\ACL\Login(DB_CONFIG, $log);
+$login = new CoreLibs\ACL\Login($db, $log);
 // create smarty object
 $smarty = new CoreLibs\Template\SmartyExtend();
-// create new DB class
-$log->setLogPer('class', false);
-$cms = new CoreLibs\Admin\Backend(DB_CONFIG, $log);
+// create new Backend class with db and loger attached
+$cms = new CoreLibs\Admin\Backend($db, $log);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
-// db nfo
-$cms->dbInfo();
+// db info
+$cms->db->dbInfo();
 // set acl
 $cms->setACL($login->acl);
-// flush
+// flush (can we move that to header block above)
 ob_end_flush();
 //------------------------------ class init end
 

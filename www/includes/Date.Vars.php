@@ -10,6 +10,19 @@
 
 declare(strict_types=1);
 
+/******
+All moved to CoreLibs\Combined\DateTime
+DAY_SHORT
+DAY_LONG
+MONTH_LONG
+MONTH_SHORT
+*******/
+trigger_error(
+	'Date.VArs.php is deprecated. '
+		. 'Use CoreLibs\Combined\DateTime:: with upper case old variable name',
+	E_USER_DEPRECATED
+);
+
 $day_short = [
 	1 => 'Mon',
 	2 => 'Tue',
