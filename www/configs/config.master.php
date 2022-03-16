@@ -212,7 +212,7 @@ list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 define('HOST_NAME', $HOST_NAME);
 // BAIL ON MISSING MASTER SITE CONFIG
 if (!isset($SITE_CONFIG[HOST_NAME]['location'])) {
-	echo 'Missing SITE_CONFIG entry for: "' . HOST_NAME . '" . Contact Administrator';
+	echo 'Missing SITE_CONFIG entry for: "' . HOST_NAME . '". Contact Administrator';
 	exit;
 }
 // BAIL ON MISSING DB CONFIG:
@@ -229,7 +229,7 @@ if (
 		empty($DB_CONFIG[$SITE_CONFIG[HOST_NAME]['db_host']]))
 	)
 ) {
-	echo 'No matching DB config found for: "' . HOST_NAME . '" . Contact Administrator';
+	echo 'No matching DB config found for: "' . HOST_NAME . '". Contact Administrator';
 	exit;
 }
 // set SSL on
@@ -245,7 +245,7 @@ if (
 }
 // define the db config set name, the db config and the db schema
 define('DB_CONFIG_NAME', $SITE_CONFIG[HOST_NAME]['db_host']);
-define('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ? $DB_CONFIG[DB_CONFIG_NAME] : []);
+define('DB_CONFIG', isset($DB_CONFIG[DB_CONFIG_NAME]) ?? []);
 // because we can't change constant, but we want to for db debug flag
 $GLOBALS['DB_CONIFG'] = DB_CONFIG;
 // define('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
@@ -301,8 +301,5 @@ if (defined('DEBUG') && DEBUG == false) {
 	$ENABLE_ERROR_HANDLING = false;
 	$DEBUG_ALL_OVERRIDE = false;
 }
-
-/************* AUTO LOADER *******************/
-// **DEPRECATED** MOVED TO config.php
 
 // __END__
