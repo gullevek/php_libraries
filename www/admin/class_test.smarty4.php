@@ -45,8 +45,6 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $basic = new CoreLibs\Basic($log);
 $smarty = new CoreLibs\Template\SmartyExtend4();
-// for testing with or without CMS
-// $cms = new CoreLibs\Admin\Backend(DB_CONFIG);
 $l = new CoreLibs\Language\L10n($lang);
 
 print "<html><head><title>TEST CLASS: SMARTY</title><head>";

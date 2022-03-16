@@ -34,7 +34,6 @@ $ECHO_ALL = true;
 use CoreLibs\Debug\Support as DebugSupport;
 use CoreLibs\Debug\FileWriter;
 
-$basic = new CoreLibs\Basic();
 $debug = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
 	'file_id' => $LOG_FILE_ID,
@@ -161,28 +160,8 @@ class AttachOutside
 		return get_class($this);
 	}
 }
-$ao = new AttachOutside($basic->log);
+$ao = new AttachOutside($debug);
 print "AO-CLASS: DEBUG: " . $ao->test() . "<br>";
-
-// @codingStandardsIgnoreLine
-class AttachFull
-{
-	public $main;
-	public function __construct(object $class)
-	{
-		$this->main = $class;
-	}
-	public function test()
-	{
-		// should trigger deprecated
-		return $this->main->rgb2hex(2, 3, 4);
-	}
-}
-
-$af = new AttachFull($basic);
-// should trigger deprecated
-print "DEPREACTEDTEST: " . $af->test() . "<br>";
-
 
 print "GETCALLERCLASS(NON CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
 
@@ -192,9 +171,9 @@ print "S::FDEBUG: " . FileWriter::fdebug('CLASS TEST DEBUG FILE: ' . date('Y-m-d
 
 // error message
 // future DEPRECATED
-// $basic->debug('BASIC CLASS', 'Debug test');
-$basic->log->debug('BASIC CLASS', 'Debug test');
-print "BASIC PRINTERRORMSG:<br>" . $basic->log->printErrorMsg();
+// $debug->debug('BASIC CLASS', 'Debug test');
+$debug->debug('BASIC CLASS', 'Debug test');
+print "BASIC PRINTERRORMSG:<br>" . $debug->printErrorMsg();
 
 print "</body></html>";
 

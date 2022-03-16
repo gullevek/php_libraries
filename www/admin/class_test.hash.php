@@ -41,7 +41,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $hash_class = 'CoreLibs\Create\Hash';
 
 // define a list of from to color sets for conversion test
@@ -70,11 +69,6 @@ print "HASH LONG: " . $to_crc . ": " . Hash::__hashLong($to_crc) . "<br>";
 
 // print "UNIQU ID SHORT : " . Hash::__uniqId() . "<br>";
 // print "UNIQU ID LONG : " . Hash::__uniqIdLong() . "<br>";
-
-// DEPRECATED
-/* print "D/__CRC32B: $to_crc: ".$basic->__crc32b($to_crc)."<br>";
-print "D/__SHA1SHORT(off): $to_crc: ".$basic->__sha1short($to_crc)."<br>";
-print "D/__hash(d): $to_crc: ".$basic->__hash($to_crc)."<br>"; */
 
 // error message
 print $log->printErrorMsg();

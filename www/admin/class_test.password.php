@@ -41,7 +41,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $_password = new CoreLibs\Check\Password();
 $password_class = 'CoreLibs\Check\Password';
 
@@ -64,13 +63,6 @@ print "S-PASSWORD VERIFY: " . (string)$password_class::passwordVerify($password,
 print "PASSWORD REHASH: " . (string)$password_class::passwordRehashCheck($enc_password) . "<br>";
 // direct static
 print "S::PASSWORD VERFIY: " . (string)PwdChk::passwordVerify($password, $enc_password) . "<br>";
-
-// DEPRECATED
-/* $password = 'deprecated4567';
-$enc_password = $basic->passwordSet($password);
-print "PASSWORD: $password: ".$enc_password."<br>";
-print "PASSWORD VERIFY: ".(string)$basic->passwordVerify($password, $enc_password)."<br>";
-print "PASSWORD REHASH: ".(string)$basic->passwordRehashCheck($enc_password)."<br>"; */
 
 // error message
 print $log->printErrorMsg();

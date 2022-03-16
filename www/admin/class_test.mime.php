@@ -39,7 +39,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $_mime = new CoreLibs\Convert\MimeAppName();
 
 print "<html><head><title>TEST CLASS: MIME</title><head>";
@@ -63,13 +62,6 @@ $mime = 'application/x-indesign';
 print "S::App for mime $mime: " . \CoreLibs\Convert\MimeAppName::mimeGetAppName($mime) . "<br>";
 $mime = 'application/vnd.ms-excel';
 print "S::App for mime $mime: " . \CoreLibs\Convert\MimeAppName::mimeGetAppName($mime) . "<br>";
-
-// DEPRECATED
-/* $mime = 'application/illustrator';
-print "MIME $mime: ".$basic->mimeGetAppName($mime)."<br>";
-$mime = 'fake/mime';
-$basic->mimeSetAppName($mime, 'This is a fake mime');
-print "MIME $mime: ".$basic->mimeGetAppName($mime)."<br>"; */
 
 print $log->printErrorMsg();
 

@@ -41,7 +41,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $array_class = 'CoreLibs\Create\RandomKey';
 
 print "<html><head><title>TEST CLASS: RANDOM KEY</title><head>";
@@ -59,8 +58,6 @@ print "S::RANDOMKEYGEN($key_length): " . RandomKey::randomKeyGen() . "<br>";
 print "S::RANDOMKEYGEN($key_lenght_long): " . RandomKey::randomKeyGen($key_lenght_long) . "<br>";
 $_array = new CoreLibs\Create\RandomKey();
 print "C->RANDOMKEYGEN(auto): " . $_array->randomKeyGen() . "<br>";
-// DEPRECATED
-// print "D\RANDOMKEYGEN(auto): ".$basic->randomKeyGen()."<br>";
 
 // error message
 print $log->printErrorMsg();

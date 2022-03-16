@@ -42,7 +42,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $_html = new CoreLibs\Convert\Html();
 $_elements = new CoreLibs\Output\Form\Elements();
 $html_class = 'CoreLibs\Convert\Html';
@@ -97,17 +96,6 @@ $magic_links = [
 foreach ($magic_links as $magic_link) {
 	print "MAGICLINK: " . Html::htmlent($magic_link) . ": " . Html::htmlent(Elements::magicLinks($magic_link)) . "<br>";
 }
-
-// DEPREACTED
-/* $string = "Deprecated Something < = > Other <br> Deprecated Next line";
-print "D/HTMLENT: $string: ".$basic->htmlent($string)."<br>";
-print "D/REMOVELB: $string: ".$basic->removeLB($string)."<br>";
-$date_str = [2021, 5, 1, 11, 10];
-print "D/PRINTDATETIME: "
-	. $basic->printDateTime($date_str[0], $date_str[1], $date_str[2], $date_str[3], $date_str[4])."<br>";
-$magic_link = 'http://www.somelink.com/?with=1234|Some Title|';
-print "D/MAGICLINK: ".Html::htmlent($basic->magicLinks($magic_link))."<Br>";
-*/
 
 $text = 'I am some text
 with some

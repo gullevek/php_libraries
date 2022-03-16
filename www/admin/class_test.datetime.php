@@ -42,7 +42,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $datetime_class = 'CoreLibs\Combined\DateTime';
 
 print "<html><head><title>TEST CLASS: DATE/TIME</title><head>";
@@ -140,27 +139,6 @@ foreach ($compare_dates as $compare_date) {
 	print "CALCDAYSINTERVAL(named): $compare_date[0] = $compare_date[1]: "
 		. DgS::printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1], true)) . "<br>";
 }
-
-// DEPRECATED
-/* $timestamp = 1622788315.123456;
-print "C->DATESTRINGFORMAT(sm:0): $timestamp: ".$basic->dateStringFormat($timestamp)."<br>";
-$interval = 788315.123456;
-$reverse_interval = $basic->timeStringFormat($interval);
-print "TIMESTRINGFORMAT(sm:1): $interval: ".$reverse_interval."<br>";
-print "STRINGTOTIME: $reverse_interval: ".$basic->stringToTime($reverse_interval)."<br>";
-$check_date = '2021-05-01';
-print "CHECKDATE: $check_date: ".(string)$basic->checkDate($check_date)."<br>";
-$check_datetime = '2021-05-01 12:13:14';
-print "CHECKDATETIME: $check_datetime: ".(string)$basic->checkDateTime($check_datetime)."<br>";
-$compare_date = ['2021-05-01', '2021-05-02'];
-print "COMPAREDATE: $compare_date[0] = $compare_date[1]: "
-	. (string)$basic->compareDate($compare_date[0], $compare_date[1])."<br>";
-$compare_datetime = ['2021-05-01 10:00:00', '2021-05-01 11:00:00'];
-print "COMPAREDATE: $compare_datetime[0] = $compare_datetime[1]: "
-	. (string)$basic->compareDateTime($compare_datetime[0], $compare_datetime[1])."<br>";
-$compare_date = ['2021-05-01', '2021-05-10'];
-print "CALCDAYSINTERVAL(named): $compare_date[0] = $compare_date[1]: "
-	. DgS::printAr($basic->calcDaysInterval($compare_date[0], $compare_date[1], true))."<br>"; */
 
 // error message
 print $log->printErrorMsg();

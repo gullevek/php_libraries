@@ -42,7 +42,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $json_class = 'CoreLibs\Convert\Json';
 
 // define a list of from to color sets for conversion test
@@ -71,12 +70,6 @@ $json = '["f: {b"""ar}]';
 $output = $json_class::jsonConvertToArray($json);
 print "J/S::E-JSON: $json: " . DgS::printAr($output) . "<br>";
 print "J/S::E-JSON ERROR: " . $json_class::jsonGetLastError() . ": " . $json_class::jsonGetLastError(true) . "<br>";
-
-// DEPRECATE TEST
-/* $json = '["f: {b"""ar}]';
-$output = $basic->jsonConvertToArray($json);
-print "E-JSON: $json: ".DgS::printAr($output)."<br>";
-print "E-JSON ERROR: ".$basic->jsonGetLastError().": ".$basic->jsonGetLastError(true)."<br>"; */
 
 // $json = '{"foo": "bar"}';
 // $output = Jason::jsonConvertToArray($json);

@@ -41,7 +41,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $_phpv = new CoreLibs\Check\PhpVersion();
 $phpv_class = 'CoreLibs\Check\PhpVersion';
 
@@ -72,9 +71,6 @@ print "S::MIN/SS: $min_version_ss: " . (string)$phpv_class::checkPHPVersion($min
 print "S::MAX $max_version_ss: " . (string)$phpv_class::checkPHPVersion(null, $max_version_ss) . "<br>";
 // use stats
 print "U-S::MIN: $min_version: " . (string)PhpVersion::checkPHPVersion($min_version) . "<br>";
-
-// DEPRECATED
-// print "MIN: $min_version: ".(string)$basic->checkPHPVersion($min_version)."<br>";
 
 // error message
 print $log->printErrorMsg();

@@ -39,7 +39,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $_math = new CoreLibs\Convert\Math();
 $math_class = 'CoreLibs\Convert\Math';
 
@@ -60,11 +59,6 @@ print "S-INITNUMERIC: " . $math_class::initNumeric(123) . "<br>";
 print "S-INITNUMERIC: " . $math_class::initNumeric(123.456) . "<br>";
 print "S-INITNUMERIC: " . $math_class::initNumeric('123') . "<br>";
 print "S-INITNUMERIC: " . $math_class::initNumeric('123.456') . "<br>";
-
-// DEPRECATED
-/* print "FCEIL: ".$basic->fceil(5.1234567890, 5)."<br>";
-print "FLOORP: ".$basic->floorp(5123456, -3)."<br>";
-print "INITNUMERIC: ".$basic->initNumeric('123')."<br>"; */
 
 // error message
 print $log->printErrorMsg();

@@ -41,7 +41,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $_image = new CoreLibs\Output\Image();
 $image_class = 'CoreLibs\Output\Image';
 
@@ -111,15 +110,6 @@ foreach ($images as $image) {
 		. Image::createThumbnailSimple($image, $thumb_width, $thumb_height, null, true, false) . "></div>";
 	echo "<hr>";
 }
-
-// DEPRECATED
-// static
-/* $image = BASE.LAYOUT.CONTENT_PATH.IMAGES.'no_picture.jpg';
-// rotate image first
-$basic->correctImageOrientation($image);
-// thumbnail tests
-echo "<div>S::CREATETHUMBNAILSIMPLE: ".basename($image).": WIDTH: $thumb_width<br><img src="
-	. $basic->createThumbnailSimple($image, $thumb_width)."></div>"; */
 
 // error message
 print $log->printErrorMsg();

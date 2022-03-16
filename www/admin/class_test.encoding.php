@@ -41,7 +41,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $_encoding = new CoreLibs\Language\Encoding();
 $encoding_class = 'CoreLibs\Language\Encoding';
 
@@ -49,7 +48,7 @@ print "<html><head><title>TEST CLASS: ENCODING</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
-// print "Valid encoding: ".$basic->printAr(mb_list_encodings())."<br>";
+// print "Valid encoding: ".$log->printAr(mb_list_encodings())."<br>";
 
 $mime_encodes = [
 	['Simple string UTF8', 'UTF-8'],
@@ -95,12 +94,6 @@ print "S::ERROR CHAR: " . $encoding_class::getErrorChar() . "<br>";
 $_string = $enc_strings[1];
 $string = Encoding::checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
 print "S::ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
-
-// DEPRECATED
-/* $string = $basic->checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
-print "ENC CHECK: $_string: ".($string === false ? '-OK-' : $string)."<br>";
-print "CONV ENCODING: $_string: ".$basic->convertEncoding($_string, 'ISO-2022-JP')."<br>";
-print "D/__MBMIMEENCODE: ".$basic->__mbMimeEncode('Some Text', 'UTF-8')."<br>"; */
 
 // error message
 print $log->printErrorMsg();

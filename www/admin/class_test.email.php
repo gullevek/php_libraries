@@ -42,7 +42,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 
 print "<html><head><title>TEST CLASS: HTML/ELEMENTS</title><head>";
 print "<body>";
@@ -81,11 +80,6 @@ foreach ($email as $s_email) {
 	print "S::CHECKEMAILFULL: " . $s_email . ": " . Dgs::printAr(Email::checkEmailFull($s_email)) . "<br>";
 	print "S::CHECKEMAILFULL(true): " . $s_email . ": " . Dgs::printAr(Email::checkEmailFull($s_email, true)) . "<br>";
 }
-// DEPRECATED
-/* foreach ($email as $s_email) {
-	print "D/S-EMAIL: $s_email: ".$basic->getEmailType($s_email)."<br>";
-	print "D/S-EMAIL SHORT: $s_email: ".$basic->getEmailType($s_email, true)."<br>";
-} */
 
 // error message
 print $log->printErrorMsg();

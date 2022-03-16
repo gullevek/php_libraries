@@ -39,7 +39,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $_uids = new CoreLibs\Create\Uids();
 use CoreLibs\Create\Uids;
 $uids_class = 'CoreLibs\Create\Uids';

@@ -42,7 +42,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $color_class = 'CoreLibs\Convert\Colors';
 
 print "<html><head><title>TEST CLASS: COLORS</title><head>";

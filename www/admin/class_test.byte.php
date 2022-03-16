@@ -41,7 +41,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $byte_class = 'CoreLibs\Convert\Byte';
 
 print "<html><head><title>TEST CLASS: BYTE CONVERT</title><head>";
@@ -106,12 +105,6 @@ foreach ($bytes as $byte) {
 	//
 	print "</div>";
 }
-
-// DEPRECATED
-/* $byte = 254779258;
-$string = '242.98 MB';
-print "BYTE TO: $byte: ".$basic->humanReadableByteFormat($byte)."<br>";
-print "BYTE FROM: $string: ".$basic->stringByteFormat($string)."<br>"; */
 
 // error message
 print $log->printErrorMsg();

@@ -67,9 +67,7 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $form = new CoreLibs\Output\Form\Generate(DB_CONFIG, $log);
-// $db = new CoreLibs\DB\IO(DB_CONFIG, $basic->log);
 
 print "<html><head><title>TEST CLASS: FORM GENERATE</title><head>";
 print "<body>";

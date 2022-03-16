@@ -42,7 +42,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 // $_array = new CoreLibs\Combined\ArrayHandler();
 // $array_class = 'CoreLibs\Combination\ArrayHandler';
 
@@ -112,9 +111,6 @@ print "FLATTENARRAY: " . DgS::printAr(ArrayHandler::flattenArray($test_array)) .
 print "FLATTENARRAYKEY: " . DgS::printAr(ArrayHandler::flattenArrayKey($test_array)) . "<br>";
 // flatten for key set
 print "ARRAYFLATFORKEY: " . DgS::printAr(ArrayHandler::arrayFlatForKey($test_array, 'type')) . "<br>";
-
-// DEPRECATED
-// print "ARRAYMERGERECURSIVE: ".DgS::printAr($basic->arrayMergeRecursive($array_1, $array_2, $array_3))."<br>";
 
 /**
  * attach key/value to an array so it becomes nested

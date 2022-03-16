@@ -39,7 +39,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 $_token = new CoreLibs\Output\Form\Token();
 $token_class = 'CoreLibs\Output\Form\Token';
 

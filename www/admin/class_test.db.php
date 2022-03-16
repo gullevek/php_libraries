@@ -35,11 +35,8 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-// $basic = new CoreLibs\Basic($log, EDIT_SESSION_NAME);
-//start session
-\CoreLibs\Create\Session::startSession(EDIT_SESSION_NAME);
 // db connection and attach logger
-$db = new CoreLibs\Admin\Backend(DB_CONFIG, $log);
+$db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 $db->log->debug('START', '=============================>');
 
 print "<html><head><title>TEST CLASS: DB</title><head>";

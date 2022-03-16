@@ -41,8 +41,9 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
-$backend = new CoreLibs\Admin\Backend(DB_CONFIG, $log);
+// db config with logger
+$db = new CoreLibs\DB\IO(DB_CONFIG, $log);
+$backend = new CoreLibs\Admin\Backend($db, $log);
 
 print "<html><head><title>TEST CLASS: ADMIN BACKEND</title><head>";
 print "<body>";

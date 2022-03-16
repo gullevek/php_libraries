@@ -39,9 +39,10 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$login = new CoreLibs\ACL\Login(DB_CONFIG, $log);
-$basic = new CoreLibs\Admin\Backend(DB_CONFIG, $log);
-$basic->dbInfo(true);
+$db = new CoreLibs\DB\IO(DB_CONFIG, $log);
+$login = new CoreLibs\ACL\Login($db, $log);
+$backend = new CoreLibs\Admin\Backend($db, $log);
+$backend->db->dbInfo(true);
 ob_end_flush();
 
 print "<html><head><title>TEST CLASS</title><head>";
@@ -86,15 +87,15 @@ if (is_object($login) && isset($login->acl['unit'])) {
 	print "ACL UNIT: " . print_r(array_keys($login->acl['unit']), true) . "<br>";
 	print "ACCESS CHECK: " . (string)$login->loginCheckEditAccess($edit_access_id) . "<br>";
 	if ($login->loginCheckEditAccess($edit_access_id)) {
-		$basic->edit_access_id = $edit_access_id;
+		$backend->edit_access_id = $edit_access_id;
 	} else {
-		$basic->edit_access_id = $login->acl['unit_id'];
+		$backend->edit_access_id = $login->acl['unit_id'];
 	}
 } else {
 	print "Something went wrong with the login<br>";
 }
 
-//	$basic->log->debug('SESSION', \CoreLibs\Debug\Support::printAr($_SESSION));
+//	$backend->log->debug('SESSION', \CoreLibs\Debug\Support::printAr($_SESSION));
 
 print '<form method="post" name="loginlogout">';
 print '<a href="javascript:document.loginlogout.login_logout.value=\'Logou\';'
@@ -107,22 +108,22 @@ foreach (['on', 'off'] as $flag) {
 	foreach (['debug', 'echo', 'print'] as $type) {
 		$prefix = $flag == 'off' ? 'NOT ' : '';
 		print $prefix . strtoupper($type) . ' OUT: '
-			. \CoreLibs\Debug\Support::printAr($basic->log->getLogLevel($type, $flag)) . '<br>';
+			. \CoreLibs\Debug\Support::printAr($backend->log->getLogLevel($type, $flag)) . '<br>';
 	}
 }
 foreach (['debug', 'echo', 'print'] as $type) {
-	print strtoupper($type) . ' OUT ALL: ' . $basic->log->getLogLevelAll($type) . '<br>';
+	print strtoupper($type) . ' OUT ALL: ' . $backend->log->getLogLevelAll($type) . '<br>';
 }
 
 $log->debug('SOME MARK', 'Some error output');
 
 // INTERNAL SET
-print "EDIT ACCESS ID: " . $basic->edit_access_id . "<br>";
+print "EDIT ACCESS ID: " . $backend->edit_access_id . "<br>";
 if (is_object($login)) {
-	//	print "ACL: <br>".$basic->print_ar($login->acl)."<br>";
+	//	print "ACL: <br>".$backend->print_ar($login->acl)."<br>";
 	$log->debug('ACL', "ACL: " . \CoreLibs\Debug\Support::printAr($login->acl));
-	//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
-	//	print "DEFAULT ACL: <br>".$basic->print_ar($login->default_acl_list)."<br>";
+	//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
+	//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
 	// $result = array_flip(
 	// 	array_filter(
 	// 		array_flip($login->default_acl_list),
@@ -133,9 +134,9 @@ if (is_object($login)) {
 	// 		}
 	// 	)
 	// );
-	//	print "DEFAULT ACL: <br>".$basic->print_ar($result)."<br>";
+	//	print "DEFAULT ACL: <br>".$backend->print_ar($result)."<br>";
 	// DEPRICATED CALL
-	//	$basic->adbSetACL($login->acl);
+	//	$backend->adbSetACL($login->acl);
 }
 
 print "THIS HOST: " . HOST_NAME . ", with PROTOCOL: " . HOST_PROTOCOL . " is running SSL: " . HOST_SSL . "<br>";

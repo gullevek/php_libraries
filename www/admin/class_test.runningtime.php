@@ -41,7 +41,6 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$basic = new CoreLibs\Basic($log);
 
 print "<html><head><title>TEST CLASS: RUNNING IMTE</title><head>";
 print "<body>";
@@ -56,17 +55,6 @@ echo "TIMED [string]: " . RunningTime::runningTimeString() . "<br>";
 RunningTime::hrRunningTime();
 echo "RANDOM KEY [default]: " . \CoreLibs\Create\RandomKey::randomKeyGen() . "<br>";
 echo "TIMED [hr]: " . RunningTime::hrRunningTime() . "<br>";
-
-// DEPRECATED
-/* $basic->hrRunningTime();
-$basic->runningTime();
-echo "RANDOM KEY [50]: ".$basic->randomKeyGen(50)."<br>";
-echo "TIMED [hr]: ".$basic->hrRunningTime()."<br>";
-echo "TIMED [def]: ".$basic->runningTime()."<br>";
-echo "TIMED [string]: ".$basic->runningtime_string."<br>";
-$basic->hrRunningTime();
-echo "RANDOM KEY [default]: ".$basic->randomKeyGen()."<br>";
-echo "TIMED [hr]: ".$basic->hrRunningTime()."<br>"; */
 
 // error message
 print $log->printErrorMsg();
