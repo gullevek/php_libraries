@@ -13,10 +13,10 @@ declare(strict_types=1);
 // please be VERY carefull only to change the right side
 $DB_CONFIG = [
 	'test' => [
-		'db_name' => $_ENV['DB_NAME_TEST'] ?? '',
-		'db_user' => $_ENV['DB_USER_TEST'] ?? '',
-		'db_pass' => $_ENV['DB_PASS_TEST'] ?? '',
-		'db_host' => $_ENV['DB_HOST_TEST'] ?? '',
+		'db_name' => $_ENV['DB_NAME.TEST'] ?? '',
+		'db_user' => $_ENV['DB_USER.TEST'] ?? '',
+		'db_pass' => $_ENV['DB_PASS.TEST'] ?? '',
+		'db_host' => $_ENV['DB_HOST.TEST'] ?? '',
 		'db_port' => 5432,
 		'db_schema' => 'public',
 		'db_type' => 'pgsql',
