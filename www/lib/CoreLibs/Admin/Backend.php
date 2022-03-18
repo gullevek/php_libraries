@@ -112,8 +112,8 @@ class Backend
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**
 	 * main class constructor
-	 * @param \CoreLibs\DB\IO              $db  Database connection class
-	 * @param \CoreLibs\Debug\Logging      $log Logging class, default set if not set
+	 * @param \CoreLibs\DB\IO              $db   Database connection class
+	 * @param \CoreLibs\Debug\Logging      $log  Logging class
 	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class
 	 *                                           if null, auto set
 	 */
@@ -274,6 +274,27 @@ class Backend
 			. "'" . $this->db->dbEscapeString($this->action_value) . "', "
 			. "'" . $this->db->dbEscapeString($this->action_error) . "')";
 		$this->db->dbExec($q, 'NULL');
+	}
+
+	/**
+	 * Set the menu show flag
+	 * @param string|int $menu_show_flag
+	 * @return string|int
+	 */
+	public function adbSetMenuShowFlag($menu_show_flag)
+	{
+		// must be string or int
+		$this->menu_show_flag = $menu_show_flag;
+		return $this->menu_show_flag;
+	}
+
+	/**
+	 * Return the menu show flag
+	 * @return string|int
+	 */
+	public function adbGetMenuShowFlag()
+	{
+		return $this->menu_show_flag;
 	}
 
 	/**

@@ -54,7 +54,7 @@ class ReadEnvFile
 				$var = $matches[1];
 				$value = $matches[2];
 				$quotes = $matches[3];
-				// wirte only if env is not set yet, and write only the first time
+				// write only if env is not set yet, and write only the first time
 				if (empty($_ENV[$var])) {
 					if (!empty($quotes)) {
 						// match greedy for first to last so we move any " if there are
