@@ -3386,6 +3386,7 @@ final class CoreLibsDBIOTest extends TestCase
 
 		// if this is a select query, db dbReturn, dbReturnRow, dbReturnArray too
 		if (preg_match("/^(select|show|with) /i", $query)) {
+			// TODO also tst dbReturnRow and dbReturnArray
 			$res = $db->dbReturn($query);
 			$this->assertEquals(
 				$expected_rows,
