@@ -274,8 +274,8 @@ define('G_TITLE', $_ENV['G_TITLE'] ?? '');
 /************ STYLE SHEETS / JS **********/
 define('ADMIN_STYLESHEET', 'edit.css');
 define('ADMIN_JAVASCRIPT', 'edit.js');
-define('STYLESHEET', 'frontend.css');
-define('JAVASCRIPT', 'frontend.js');
+define('STYLESHEET', $_ENV['STYLESHEET'] ?? 'frontend.css');
+define('JAVASCRIPT', $_ENV['JAVASCRIPT'] ?? 'frontend.js');
 
 // anything optional
 /************* INTERNAL ******************/

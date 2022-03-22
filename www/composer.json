@@ -1,6 +1,7 @@
 {
-    "name": "gullevek/corelibs",
-    "description": "CoreLibs",
+    "name": "gullevek/corelibs-dev",
+    "version": "dev-master",
+    "description": "CoreLibs: Development package",
     "type": "library",
     "authors": [
         {

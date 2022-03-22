@@ -1786,9 +1786,12 @@ class IO
 				// count the rows returned (if select)
 				$this->cursor_ext[$query_hash]['num_rows'] =
 					$this->db_functions->__dbNumRows($this->cursor_ext[$query_hash]['cursor']);
+				// also set last return
+				$this->num_rows = $this->cursor_ext[$query_hash]['num_rows'];
 				// count the fields
 				$this->cursor_ext[$query_hash]['num_fields'] =
 					$this->db_functions->__dbNumFields($this->cursor_ext[$query_hash]['cursor']);
+				$this->num_fields = $this->cursor_ext[$query_hash]['num_fields'];
 				// set field names
 				$this->cursor_ext[$query_hash]['field_names'] = [];
 				for ($i = 0; $i < $this->cursor_ext[$query_hash]['num_fields']; $i++) {
@@ -1798,6 +1801,7 @@ class IO
 							$i
 						);
 				}
+				$this->field_names = $this->cursor_ext[$query_hash]['field_names'];
 				// reset first call vars
 				$this->cursor_ext[$query_hash]['firstcall'] = 0;
 				// reset the internal pos counter

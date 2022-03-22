@@ -69,6 +69,9 @@ $db->dbSetEncoding('SJIS');
 print "ENCODING TEST: " . $db->dbVersionInfo('client_encoding') . "/" . $db->dbGetEncoding() . "<br>";
 $db->dbResetEncoding();
 
+$res = $db->dbReturn("SELECT * FROM max_test");
+print "DB RETURN ROWS: " . $db->dbGetNumRows() . "<br>";
+
 while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::USE_CACHE, true))) {
 	print "UUD/TIME: " . $res['uid'] . "/" . $res['time'] . "<br>";
 }
@@ -277,7 +280,7 @@ print "Wrote to DB tabel $table with data " . print_r($data, true) . " and got p
 // return Array Test
 $query = "SELECT type, sdate, integer FROM foobar";
 $data = $db->dbReturnArray($query, true);
-print "Full foobar list: <br><pre>" . print_r($data, true) . "</pre><br>";
+print "Rows: " . $db->dbGetNumRows() . ", Full foobar list: <br><pre>" . print_r($data, true) . "</pre><br>";
 
 // trigger a warning
 print "<b>WARNING NEXT</b><br>";

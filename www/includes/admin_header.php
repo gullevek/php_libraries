@@ -4,7 +4,6 @@
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2008/08/01
 * SHORT DESCRIPTION:
-* URL redirect header
 * HISTORY:
 *********************************************************************/
 
