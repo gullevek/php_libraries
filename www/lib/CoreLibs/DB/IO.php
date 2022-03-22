@@ -2874,7 +2874,7 @@ class IO
 	 */
 	public function dbGetInsertPKName(): string
 	{
-		return $this->insert_id_pk_name;
+		return (string)$this->insert_id_pk_name;
 	}
 
 	/**

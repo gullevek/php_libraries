@@ -3384,6 +3384,23 @@ final class CoreLibsDBIOTest extends TestCase
 			);
 		}
 
+		// if this is a select query, db dbReturn, dbReturnRow, dbReturnArray too
+		if (preg_match("/^(select|show|with) /i", $query)) {
+			$res = $db->dbReturn($query);
+			$this->assertEquals(
+				$expected_rows,
+				$db->dbGetNumRows()
+			);
+			$this->assertEquals(
+				$expected_cols,
+				$db->dbGetNumFields()
+			);
+			$this->assertEquals(
+				$expected_col_names,
+				$db->dbGetFieldNames()
+			);
+		}
+
 		// reset all data
 		$db->dbExec("TRUNCATE table_with_primary_key");
 		$db->dbExec("TRUNCATE table_without_primary_key");
