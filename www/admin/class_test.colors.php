@@ -79,6 +79,15 @@ $hsb = [0, 0, 5];
 print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
 	. DgS::printAr(Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])) . "<br>";
 
+// Random text
+$h = rand(0, 359);
+$s = rand(15, 70);
+$b = 100;
+$l = 50;
+print "RANDOM IN: H: " . $h . ", S: " . $s . ", B/L: " . $b . "/" . $l . "<br>";
+print "RANDOM hsb->rgb: <pre>" . DgS::printAr(Colors::hsb2rgb($h, $s, $b)) . "</pre><br>";
+print "RANDOM hsl->rgb: <pre>" . DgS::printAr(Colors::hsl2rgb($h, $s, $l)) . "</pre><br>";
+
 // TODO: run compare check input must match output
 
 // error message

@@ -66,7 +66,8 @@ class Colors
 		}
 		$rgbArray = [];
 		if (strlen($hexStr) == 6) {
-			// If a proper hex code, convert using bitwise operation. No overhead... faster
+			// If a proper hex code, convert using bitwise operation.
+			// No overhead... faster
 			$colorVal = hexdec($hexStr);
 			$rgbArray['r'] = 0xFF & ($colorVal >> 0x10);
 			$rgbArray['g'] = 0xFF & ($colorVal >> 0x8);
@@ -289,7 +290,8 @@ class Colors
 		if ($lum < 0 || $lum > 100) {
 			return false;
 		}
-		$hue = (1 / 360) * $hue; // calc to internal convert value for hue
+		// calc to internal convert value for hue
+		$hue = (1 / 360) * $hue;
 		// convert to internal 0-1 format
 		$sat /= 100;
 		$lum /= 100;
