@@ -256,10 +256,11 @@ $GLOBALS['DB_CONFIG'] = DB_CONFIG;
 // where global tables are that are used by all schemas (eg queue tables for online, etc)
 // define('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA);
 // debug settings, site lang, etc
-define('TARGET', $SITE_CONFIG[HOST_NAME]['location']);
-define('DEBUG', $SITE_CONFIG[HOST_NAME]['debug_flag']);
-define('SITE_LANG', $SITE_CONFIG[HOST_NAME]['site_lang']);
-define('LOGIN_ENABLED', $SITE_CONFIG[HOST_NAME]['login_enabled']);
+define('TARGET', $SITE_CONFIG[HOST_NAME]['location'] ?? 'test');
+define('DEBUG', $SITE_CONFIG[HOST_NAME]['debug_flag'] ?? false);
+define('SITE_LANG', $SITE_CONFIG[HOST_NAME]['site_lang'] ?? 'en_utf8');
+define('LOGIN_ENABLED', $SITE_CONFIG[HOST_NAME]['login_enabled'] ?? false);
+define('AUTH', $SITE_CONFIG[HOST_NAME]['auth'] ?? false);
 // paths
 // define('CSV_PATH', $PATHS[TARGET]['csv_path']);
 // define('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);

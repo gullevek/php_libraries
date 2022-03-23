@@ -135,13 +135,13 @@ class Colors
 	 * hsb2rgb does not clean convert back to hsb in a round trip
 	 * converts HSB/V to RGB values RGB is full INT
 	 * if HSB/V value is invalid, sets this value to 0
-	 * @param  int $H          hue 0-360 (int)
-	 * @param  int $S          saturation 0-100 (int)
-	 * @param  int $V          brightness/value 0-100 (int)
+	 * @param  float $H          hue 0-360 (int)
+	 * @param  float $S          saturation 0-100 (int)
+	 * @param  float $V          brightness/value 0-100 (int)
 	 * @return array<int>|bool 0 red/1 green/2 blue array as 0-255
 	 *                         false for input value error
 	 */
-	public static function hsb2rgb(int $H, int $S, int $V)
+	public static function hsb2rgb(float $H, float $S, float $V)
 	{
 		// check that H is 0 to 359, 360 = 0
 		// and S and V are 0 to 1
@@ -270,12 +270,12 @@ class Colors
 	/**
 	 * converts an HSL to RGB
 	 * if HSL value is invalid, set this value to 0
-	 * @param  int|float   $hue                hue: 0-360 (degrees)
+	 * @param  float $hue                hue: 0-360 (degrees)
 	 * @param  float $sat                saturation: 0-100
 	 * @param  float $lum                luminance: 0-100
 	 * @return array<int,float|int>|bool red/blue/green 0-255 each
 	 */
-	public static function hsl2rgb($hue, float $sat, float $lum)
+	public static function hsl2rgb(float $hue, float $sat, float $lum)
 	{
 		if (!is_numeric($hue)) {
 			return false;

@@ -57,6 +57,7 @@ print "\$C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: " . $color_class::r
 $rgb = [10, 20, 30];
 $hex = '#0a141e';
 $hsb = [210, 67, 12];
+$hsb_f = [210.5, 67.5, 12.5];
 $hsl = [210, 50, 7.8];
 print "S::COLOR rgb->hex: $rgb[0], $rgb[1], $rgb[2]: " . Colors::rgb2hex($rgb[0], $rgb[1], $rgb[2]) . "<br>";
 print "S::COLOR hex->rgb: $hex: " . DgS::printAr(Colors::hex2rgb($hex)) . "<br>";
@@ -69,6 +70,8 @@ print "S::COLOR rgb->hsl: $rgb[0], $rgb[1], $rgb[2]: "
 // D(from hsb/hsl) Note that param 2 + 3 is always 0-100 divided
 print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
 	. DgS::printAr(Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])) . "<br>";
+	print "S::COLOR hsb_f->rgb: $hsb_f[0], $hsb_f[1], $hsb_f[2]: "
+	. DgS::printAr(Colors::hsb2rgb($hsb_f[0], $hsb_f[1], $hsb_f[2])) . "<br>";
 print "S::COLOR hsl->rgb: $hsl[0], $hsl[1], $hsl[2]: "
 	. DgS::printAr(Colors::hsl2rgb($hsl[0], $hsl[1], $hsl[2])) . "<br>";
 

@@ -132,7 +132,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 			],
 			'valid color' => [
 				'rgb' => [10, 100, 200],
-				'hsb' => [212, 95, 78],
+				'hsb' => [212, 95, 78.0],
 				'hsb_rgb' => [10, 98, 199], // should be rgb, but rounding error
 				'hsl' => [211.6, 90.5, 41.2],
 				'valid' => true,
@@ -327,13 +327,13 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * @dataProvider hsb2rgbColorProvider
 	 * @testdox hsb2rgb $input_h,$input_s,$input_b will be $expected [$_dataName]
 	 *
-	 * @param integer $input_h
-	 * @param integer $input_s
-	 * @param integer $input_b
+	 * @param float $input_h
+	 * @param float $input_s
+	 * @param float $input_b
 	 * @param array|bool $expected
 	 * @return void
 	 */
-	public function testHsb2rgb(int $input_h, int $input_s, int $input_b, $expected): void
+	public function testHsb2rgb(float $input_h, float $input_s, float $input_b, $expected): void
 	{
 		$this->assertEquals(
 			$expected,
