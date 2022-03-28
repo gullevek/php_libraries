@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  * @coversDefaultClass \CoreLibs\Convert\Json
  * @testdox \CoreLibs\Convert\Json method tests
  */
-final class CoreLibsCheckJsonTest extends TestCase
+final class CoreLibsConvertJsonTest extends TestCase
 {
 
 	/**

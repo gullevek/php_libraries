@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable Generic.Files.LineLength
 
 declare(strict_types=1);
 
@@ -255,18 +255,27 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @cover ::getCallerMethodList
-	 * @testWith [["main", "run", "run", "run", "run", "run", "run", "runBare", "runTest", "testGetCallerMethodList"]]
+	 * @testWith [["main", "run", "run", "run", "run", "run", "run", "runBare", "runTest", "testGetCallerMethodList"],["main", "run", "run", "run", "run", "run", "run", "run", "runBare", "runTest", "testGetCallerMethodList"]]
 	 * @testdox getCallerMethodList check if it returns $expected [$_dataName]
 	 *
 	 * @param array $expected
 	 * @return void
 	 */
-	public function testGetCallerMethodList(array $expected): void
+	public function testGetCallerMethodList(array $expected, array $expected_group): void
 	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Debug\Support::getCallerMethodList()
-		);
+		$compare = \CoreLibs\Debug\Support::getCallerMethodList();
+		// if we direct call we have 10, if we call as folder we get 11
+		if (count($compare) == 10) {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Debug\Support::getCallerMethodList()
+			);
+		} else {
+			$this->assertEquals(
+				$expected_group,
+				\CoreLibs\Debug\Support::getCallerMethodList()
+			);
+		}
 	}
 
 	/**

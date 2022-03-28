@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  * @coversDefaultClass \CoreLibs\Check\PHPVersion
  * @testdox \CoreLibs\Check\PHPVersion method tests
  */
-final class CoreLibsCheckPHPVersionTest extends TestCase
+final class CoreLibsCheckPhpVersionTest extends TestCase
 {
 	/**
 	 * NOTE: The checks must be adapted to the PHP version or they will fail
