@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <psalm
-    totallyTyped="false"
     resolveFromConfigFile="true"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
@@ -8,6 +7,9 @@
     autoloader="lib/autoloader.php"
     errorLevel="8"
 >
+    <extraFiles>
+        <file name="configs/config.master.php" />
+    </extraFiles>
     <projectFiles>
 		<file name="admin/class_test.php" />
         <file name="admin/config.php" />
@@ -24,10 +26,12 @@
             <directory name="log" />
             <directory name="media" />
 			<directory name="lib/FileUpload" />
-            <directory name="lib/pChart" />
-			<directory name="lib/pChart2.1.4" />
 			<directory name="lib/Smarty" />
 			<directory name="lib/smarty-3.1.30" />
+			<file name="lib/smarty-3.1.30/SmartyBC.class.php" />
+			<file name="lib/Smarty/SmartyBC.class.php" />
+			<file name="lib/CoreLibs/Template/SmartyExtend.php" />
+			<file name="lib/CoreLibs/Template/SmartyExtend4.php" />
         </ignoreFiles>
     </projectFiles>
 
