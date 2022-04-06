@@ -45,9 +45,6 @@ parameters:
 		- www/lib/smarty-*/
 		# ignore composer
 		- www/vendor
-		# temp ignore smarty 4
-		- www/lib/CoreLibs/Template/SmartyExtend4.php
-		- www/admin/class_test.smarty4.php
 	# ignore errores with
 	ignoreErrors:
 		- # this error is ignore because of the PHP 8.0 to 8.1 change for pg_*

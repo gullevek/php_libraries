@@ -95,7 +95,7 @@ return [
 		'www/vendor',
 		'www/tests',
 		'www/lib/Smarty',
-		'www/lib/smarty-3.1.30',
+		'www/lib/smarty-4.1.0',
 		'www/templates_c',
 		'www/log',
 		'www/tmp',
@@ -117,11 +117,7 @@ return [
 		'www/admin/qq_file_upload_front.php',
 		'www/admin/qq_file_upload_ajax.php',
 		// symlink ignore
-		'www/lib/smarty-3.1.30/SmartyBC.class.php',
-		'www/lib/htmlMimeMail-2.5.1/HtmlMimeMailCreate.php',
-		// current not checking smarty4 test file
-		'www/lib/CoreLibs/Template/SmartyExtend4.php',
-		'www/admin/class_test.smarty4.php',
+		'www/lib/smarty-4.1.0/libs/Smarty.class.php'
 	],
 
 	// what not to show as problem

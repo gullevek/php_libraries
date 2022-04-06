@@ -27,11 +27,10 @@
             <directory name="media" />
 			<directory name="lib/FileUpload" />
 			<directory name="lib/Smarty" />
-			<directory name="lib/smarty-3.1.30" />
-			<file name="lib/smarty-3.1.30/SmartyBC.class.php" />
-			<file name="lib/Smarty/SmartyBC.class.php" />
+			<directory name="lib/smarty-4.1.0" />
+			<file name="lib/smarty-4.1.0/SmartyBC.class.php" />
+			<file name="lib/Smarty/Smarty.class.php" />
 			<file name="lib/CoreLibs/Template/SmartyExtend.php" />
-			<file name="lib/CoreLibs/Template/SmartyExtend4.php" />
         </ignoreFiles>
     </projectFiles>
 

@@ -19,21 +19,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\Template;
 
-// I need to manually load Smarty BC here (it is not namespaced)
-// require_once(BASE . LIB . SMARTY . 'SmartyBC.class.php');
-// we set this hard coded so it works with all checkers
-// HARD CODED path:
-// __DIR__: lib/CoreLibs/Template/
-// smarty located in lib/Smarty/
-// require_once(__DIR__ . '/../../Smarty/Smarty.class.php');
-require_once(__DIR__ . '/../../Smarty/SmartyBC.class.php');
-// So it doesn't start looking around in the wrong naemspace as smarty doesn't have one
-// use Smarty;
-use SmartyBC;
-
-// technically this can be Smarty
-// class SmartyExtend extends Smarty
-class SmartyExtend extends SmartyBC
+// leading slash if this is in lib\Smarty
+class SmartyExtend extends \Smarty
 {
 	// internal translation engine
 	/** @var \CoreLibs\Language\L10n */
@@ -169,13 +156,15 @@ class SmartyExtend extends SmartyBC
 	public function __construct()
 	{
 		// call basic smarty
+		// or Smarty::__construct();
 		parent::__construct();
 		// set lang vars
 		$this->setLangEncoding();
 		// iinit lang
 		$this->l10n = new \CoreLibs\Language\L10n($this->lang);
-		/** @phpstan-ignore-next-line */
-		$this->registerPlugin('modifier', 'getvar', [&$this, 'get_template_vars']);
+		// Smarty 3.x
+		// $this->registerPlugin('modifier', 'getvar', [&$this, 'get_template_vars']);
+		$this->registerPlugin('modifier', 'getvar', [&$this, 'getTemplateVars']);
 
 		$this->page_name = pathinfo($_SERVER["PHP_SELF"])['basename'];
 
@@ -211,8 +200,9 @@ class SmartyExtend extends SmartyBC
 			$this->lang = $_SESSION['DEFAULT_LANG'];
 		} else {
 			// mostly default SITE LANG or DEFAULT LANG
-			$this->lang = defined('SITE_LANG') && !empty('SITE_LANG') ?
-				SITE_LANG : DEFAULT_LANG;
+			$this->lang = defined('SITE_LANG') && !empty(SITE_LANG) ?
+				SITE_LANG :
+				DEFAULT_LANG;
 		}
 		// create the char lang encoding
 		$this->lang_short = substr($this->lang, 0, 2);
