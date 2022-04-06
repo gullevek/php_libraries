@@ -330,13 +330,13 @@ class SmartyExtend extends SmartyBC
 		// check if template names exist
 		if (!$this->MASTER_TEMPLATE_NAME) {
 			exit('MASTER TEMPLATE is not set');
-		} elseif (!file_exists($this->getTemplateDir()[0] . DS . $this->MASTER_TEMPLATE_NAME)) {
+		} elseif (!file_exists($this->getTemplateDir()[0] . DIRECTORY_SEPARATOR . $this->MASTER_TEMPLATE_NAME)) {
 			// abort if master template could not be found
 			exit('MASTER TEMPLATE: ' . $this->MASTER_TEMPLATE_NAME . ' could not be found');
 		}
 		if (
 			$this->TEMPLATE_NAME &&
-			!file_exists($this->getTemplateDir()[0] . DS . $this->TEMPLATE_NAME)
+			!file_exists($this->getTemplateDir()[0] . DIRECTORY_SEPARATOR . $this->TEMPLATE_NAME)
 		) {
 			exit('INCLUDE TEMPLATE: ' . $this->TEMPLATE_NAME . ' could not be found');
 		}
@@ -355,7 +355,7 @@ class SmartyExtend extends SmartyBC
 			}
 		}
 		// if we can't find it, dump it
-		if (!file_exists($this->getTemplateDir()[0] . DS . $this->TEMPLATE_TRANSLATE)) {
+		if (!file_exists($this->getTemplateDir()[0] . DIRECTORY_SEPARATOR . $this->TEMPLATE_TRANSLATE)) {
 			$this->TEMPLATE_TRANSLATE = null;
 		}
 	}

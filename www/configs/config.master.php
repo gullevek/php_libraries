@@ -11,72 +11,72 @@
 declare(strict_types=1);
 
 /************* PATHS *********************/
-// directory seperator
+// [DEPRECATED] directory seperator
 define('DS', DIRECTORY_SEPARATOR);
 // ** NEW/BETTER DIR DECLARATIONS **
 // path to original file (if symlink)
-define('DIR', __DIR__ . DS);
+define('DIR', __DIR__ . DIRECTORY_SEPARATOR);
 // base dir root folder level
-define('BASE', str_replace('/configs', '', __DIR__) . DS);
+define('BASE', str_replace('/configs', '', __DIR__) . DIRECTORY_SEPARATOR);
 
 // ** OLD DIR DECLARATIONS **
 // path to document root of file called
-define('ROOT', getcwd() . DS);
+define('ROOT', getcwd() . DIRECTORY_SEPARATOR);
 // libs path
-define('LIB', 'lib' . DS);
-define('LIBS', 'lib' . DS);
+define('LIB', 'lib' . DIRECTORY_SEPARATOR);
+define('LIBS', 'lib' . DIRECTORY_SEPARATOR);
 // configs folder
-define('CONFIGS', 'configs' . DS);
+define('CONFIGS', 'configs' . DIRECTORY_SEPARATOR);
 // includes (strings, arrays for static, etc)
-define('INCLUDES', 'includes' . DS);
+define('INCLUDES', 'includes' . DIRECTORY_SEPARATOR);
 // data folder (mostly in includes, or root for internal data)
-define('DATA', 'data' . DS);
+define('DATA', 'data' . DIRECTORY_SEPARATOR);
 // layout base path
-define('LAYOUT', 'layout' . DS);
+define('LAYOUT', 'layout' . DIRECTORY_SEPARATOR);
 // pic-root (compatible to CMS)
-define('PICTURES', 'images' . DS);
+define('PICTURES', 'images' . DIRECTORY_SEPARATOR);
 // images
-define('IMAGES', 'images' . DS);
+define('IMAGES', 'images' . DIRECTORY_SEPARATOR);
 // icons (below the images/ folder)
-define('ICONS', 'icons' . DS);
+define('ICONS', 'icons' . DIRECTORY_SEPARATOR);
 // media (accessable from outside)
-define('MEDIA', 'media' . DS);
+define('MEDIA', 'media' . DIRECTORY_SEPARATOR);
 // uploads (anything to keep or data)
-define('UPLOADS', 'uploads' . DS);
+define('UPLOADS', 'uploads' . DIRECTORY_SEPARATOR);
 // files (binaries) (below media or data)
-define('BINARIES', 'binaries' . DS);
+define('BINARIES', 'binaries' . DIRECTORY_SEPARATOR);
 // files (videos) (below media or data)
-define('VIDEOS', 'videos' . DS);
+define('VIDEOS', 'videos' . DIRECTORY_SEPARATOR);
 // files (documents) (below media or data)
-define('DOCUMENTS', 'documents' . DS);
+define('DOCUMENTS', 'documents' . DIRECTORY_SEPARATOR);
 // files (pdfs) (below media or data)
-define('PDFS', 'documents' . DS);
+define('PDFS', 'documents' . DIRECTORY_SEPARATOR);
 // files (general) (below media or data)
-define('FILES', 'files' . DS);
+define('FILES', 'files' . DIRECTORY_SEPARATOR);
 // CSV
-define('CSV', 'csv' . DS);
+define('CSV', 'csv' . DIRECTORY_SEPARATOR);
 // css
-define('CSS', 'css' . DS);
+define('CSS', 'css' . DIRECTORY_SEPARATOR);
 // font (web)
-define('FONT', 'font' . DS);
+define('FONT', 'font' . DIRECTORY_SEPARATOR);
 // js
-define('JS', 'javascript' . DS);
+define('JS', 'javascript' . DIRECTORY_SEPARATOR);
 // table arrays
-define('TABLE_ARRAYS', 'table_arrays' . DS);
+define('TABLE_ARRAYS', 'table_arrays' . DIRECTORY_SEPARATOR);
 // smarty libs path
-define('SMARTY', 'Smarty' . DS);
+define('SMARTY', 'Smarty' . DIRECTORY_SEPARATOR);
 // po langs
-define('LANG', 'lang' . DS);
+define('LANG', 'lang' . DIRECTORY_SEPARATOR);
 // cache path
-define('CACHE', 'cache' . DS);
+define('CACHE', 'cache' . DIRECTORY_SEPARATOR);
 // temp path
-define('TMP', 'tmp' . DS);
+define('TMP', 'tmp' . DIRECTORY_SEPARATOR);
 // log files
-define('LOG', 'log' . DS);
+define('LOG', 'log' . DIRECTORY_SEPARATOR);
 // compiled template folder
-define('TEMPLATES_C', 'templates_c' . DS);
+define('TEMPLATES_C', 'templates_c' . DIRECTORY_SEPARATOR);
 // template base
-define('TEMPLATES', 'templates' . DS);
+define('TEMPLATES', 'templates' . DIRECTORY_SEPARATOR);
 
 /************* HASH / ACL DEFAULT / ERROR SETTINGS / SMARTY *************/
 // default hash type

@@ -46,8 +46,8 @@ for ($dir_pos = 0, $dir_max = count(explode(DIRECTORY_SEPARATOR, __DIR__)); $dir
 		break;
 	}
 }
-// fail if no base DS is not set
-if (!defined('DS')) {
+// fail if no base DIR is not set
+if (!defined('DIR')) {
 	exit('Base config unloadable');
 }
 // find trigger name "admin/" or "frontend/" in the getcwd() folder

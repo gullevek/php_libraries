@@ -145,9 +145,7 @@ print "BASE: " . BASE . "<br>";
 print "ROOT: " . ROOT . "<br>";
 print "HOST: " . HOST_NAME . " => DB HOST: " . DB_CONFIG_NAME . " => " . print_r(DB_CONFIG, true) . "<br>";
 
-$ds = defined('DS') ? DS : DIRECTORY_SEPARATOR;
-$du = DS ?? DIRECTORY_SEPARATOR;
-print "DS is: " . $ds . "<br>";
+print "DS is: " . DIRECTORY_SEPARATOR . "<br>";
 print "SERVER HOST: " . $_SERVER['HTTP_HOST'] . "<br>";
 
 // print error messages

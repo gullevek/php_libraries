@@ -21,9 +21,9 @@ $paths = [
 ];
 // find convert
 foreach ($paths as $path) {
-	if (file_exists($path . DS . 'convert') && is_file($path . DS . 'convert')) {
+	if (file_exists($path . DIRECTORY_SEPARATOR . 'convert') && is_file($path . DIRECTORY_SEPARATOR . 'convert')) {
 		// image magick convert location
-		define('CONVERT', $path . DS . 'convert');
+		define('CONVERT', $path . DIRECTORY_SEPARATOR . 'convert');
 		break;
 	}
 }
