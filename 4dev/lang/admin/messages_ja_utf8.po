@@ -75,3 +75,5 @@ msgstr "「スマーティー」これは正しいです"
 msgid "Are we translated?"
 msgstr "「クラス」これは翻訳です？"
 
+msgid "Original with string: %1"
+msgstr "%1と翻訳した"

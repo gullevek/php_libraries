@@ -65,16 +65,26 @@ if ($smarty->USE_PROTOTYPE) {
 	$smarty->JS_SPECIAL_TEMPLATE_NAME = 'jquery.test.js';
 }
 $smarty->PAGE_WIDTH = '100%';
-// require BASE.INCLUDES.'admin_set_paths.php';
 $smarty->setSmartyPaths();
 
 // smarty test
 $smarty->DATA['SMARTY_TEST'] = 'Test Data';
 $smarty->DATA['TRANSLATE_TEST'] = $l->__('Are we translated?');
 $smarty->DATA['TRANSLATE_TEST_SMARTY'] = $smarty->l10n->__('Are we translated?');
-
+$smarty->DATA['replace'] = 'Replaced';
+// variable variables
+$smarty->DATA['test'] = 'foo';
+$smarty->DATA['foo'] = 'bar';
+// loop
+$smarty->DATA['loop_start'] = 5;
 // drop down test with optgroups
-$options = [
+$smarty->DATA['drop_down_test'] = [
+	'foo' => 'Foo',
+	'bar' => 'Bar',
+	'foobar' => 'Foo Bar',
+];
+$smarty->DATA['drop_down_test_selected'] = 'bar';
+$smarty->DATA['drop_down_test_nested']  = [
 	'' => '選択してください',
 	'4/25(木)' => [
 		'4/25(木) 11:00-11:50' => '4/25(木) 11:00-11:50',
@@ -89,11 +99,26 @@ $options = [
 		'4/27(土) 12:20-13:00' => '4/27(土) 12:20-13:00'
 	],
 ];
+$smarty->DATA['drop_down_test_nested_selected'] = '';
+$smarty->DATA['radio_test'] = [
+	'0' => 'On',
+	'1' => 'Off',
+	'-1' => 'Undefined'
+];
+$smarty->DATA['radio_test_selected'] = -1;
+$smarty->DATA['checkbox_test'] = [
+	'0' => 'On',
+	'1' => 'Off',
+	'-1' => 'Undefined'
+];
+$smarty->DATA['checkbox_test_pos'] = [
+	'0' => 'A',
+	'1' => 'B'
+];
+$smarty->DATA['checkbox_test_selected'] = ['1', '-1'];
+$smarty->DATA['checkbox_test_pos_selected'] = ['0', '-1'];
 
-$smarty->DATA['drop_down_test'] = $options;
-$smarty->DATA['drop_down_test_selected'] = '';
-$smarty->DATA['loop_start'] = 2;
-// require BASE.INCLUDES.'admin_smarty.php';
+
 $smarty->setSmartyVarsAdmin();
 
 // error message

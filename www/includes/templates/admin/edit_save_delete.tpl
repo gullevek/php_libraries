@@ -26,7 +26,7 @@
 			<input type="submit" name="delete" value="{t}Delete{/t}">
 	{else}
 		<td class="edit_fgcolor_alt" class="normal">
-             &nbsp;
+            &nbsp;
 	{/if}
 		</td>
 	</tr>

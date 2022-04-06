@@ -33,3 +33,6 @@ msgstr "I should be translated: I WAS TRANSLATED"
 
 msgid "Are we translated?"
 msgstr "Are we translated? Yes, we are!"
+
+msgid "Original with string: %1"
+msgstr "Translated with: %1"

@@ -198,20 +198,21 @@ class SmartyExtend extends SmartyBC
 	{
 		// just emergency fallback for language
 		// set encoding
-		if (isset($_SESSION['DEFAULT_CHARSET'])) {
+		if (!empty($_SESSION['DEFAULT_CHARSET'])) {
 			$this->encoding = $_SESSION['DEFAULT_CHARSET'];
 		} else {
 			$this->encoding = DEFAULT_ENCODING;
 		}
 		// gobal override
-		if (isset($GLOBALS['OVERRIDE_LANG'])) {
+		if (!empty($GLOBALS['OVERRIDE_LANG'])) {
 			$this->lang = $GLOBALS['OVERRIDE_LANG'];
-		} elseif (isset($_SESSION['DEFAULT_LANG'])) {
+		} elseif (!empty($_SESSION['DEFAULT_LANG'])) {
 			// session (login)
 			$this->lang = $_SESSION['DEFAULT_LANG'];
 		} else {
 			// mostly default SITE LANG or DEFAULT LANG
-			$this->lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
+			$this->lang = defined('SITE_LANG') && !empty('SITE_LANG') ?
+				SITE_LANG : DEFAULT_LANG;
 		}
 		// create the char lang encoding
 		$this->lang_short = substr($this->lang, 0, 2);

@@ -33,26 +33,26 @@ function pop(theURL, winName, features) {
 <!-- ERROR MSG END //-->
 <!-- TOP MENU START //-->
 <tr>
-  <td width="{$table_width}" class="menu_bgcolor" valign="top">
-	 <table width="100%" border="0" cellpadding="2" cellspacing="1">
-	 <form method="post">
-	 <tr>
+	<td width="{$table_width}" class="menu_bgcolor" valign="top">
+		<table width="100%" border="0" cellpadding="2" cellspacing="1">
+		<form method="post">
+		<tr>
 		<td bgcolor="{$HEADER_COLOR}" class="normal">
 			Hello <b>{$USER_NAME|upper}</b> [{$EUID}] from the group <b>{$GROUP_NAME}</b> with Access Level <b>{$GROUP_LEVEL}</b>
 		</td>
 		<td bgcolor="{$HEADER_COLOR}" class="normal" align="right">
 			<input type="submit" name="login_logout" value="Logout">
 		</td>
-	 </tr>
-	 </form>
-	 </table>
-	 <table width="100%" border="0" cellpadding="2" cellspacing="1">
-	 <tr>
+		</tr>
+		</form>
+		</table>
+		<table width="100%" border="0" cellpadding="2" cellspacing="1">
+		<tr>
 	{* foreach menu *}
 	{foreach from=$menu_data item=menu_element}
 	{* if split factor is reached *}
 		{if $menu_element.splitfactor_in}
-	 	<td class="menu_fgcolor" class="small" valign="top">
+			<td class="menu_fgcolor" class="small" valign="top">
 		{/if}
 		{if $menu_element.position}
 			<b><a href="{$menu_element.filename}">{$menu_element.pagename}</a></b><br>
@@ -67,22 +67,22 @@ function pop(theURL, winName, features) {
 		</td>
 		{/if}
 	{/foreach}
-	 </tr>
-	 </table>
-	 <table width="100%" border="0" cellpadding="10" cellspacing="1">
-	 <tr>
-		<td class="edit_fgcolor_alt" class="headline" align="center">
-			{$page_name}
-		</td>
-	 </tr>
-	 </table>
-  </td>
-</tr>
+		</tr>
+		</table>
+		<table width="100%" border="0" cellpadding="10" cellspacing="1">
+		<tr>
+			<td class="edit_fgcolor_alt" class="headline" align="center">
+				{$page_name}
+			</td>
+		</tr>
+		</table>
+	</td>
+	</tr>
 <!-- TOP MENU END //-->
-<tr>
-  <td width="{$table_width}" class="edit_bgcolor">
-	 <form method="post" name="edit_form" style="margin-block-end: 0em;">
-	 <table width="100%" border="0" cellpadding="2" cellspacing="1">
+	<tr>
+	<td width="{$table_width}" class="edit_bgcolor">
+		<form method="post" name="edit_form" style="margin-block-end: 0em;">
+		<table width="100%" border="0" cellpadding="2" cellspacing="1">
 	 <!-- LOAD START //-->
 	{include file="edit_load.tpl"}
 	 <!-- LOAD END //-->
@@ -93,23 +93,23 @@ function pop(theURL, winName, features) {
 	{if $form_yes}
 		{include file="edit_save_delete.tpl"}
 		{if $form_my_page_name == "edit_pages" && $filename_exist}
-	 <tr>
-		<td class="edit_fgcolor" class="normal">
-			Filename:
-		</td>
-		<td class="edit_fgcolor" class="normal">
-			{$filename}
-			<input type="hidden" name="filename" value="{$filename}">
-		</td>
-	 </tr>
+		<tr>
+			<td class="edit_fgcolor" class="normal">
+				Filename:
+			</td>
+			<td class="edit_fgcolor" class="normal">
+				{$filename}
+				<input type="hidden" name="filename" value="{$filename}">
+			</td>
+		</tr>
 		{/if}
 		{include file="edit_elements.tpl"}
 		{include file="edit_hidden.tpl"}
 		{include file="edit_save_delete.tpl"}
 	{/if}
-	 </table>
-	 </form>
-  </td>
+		</table>
+		</form>
+	</td>
 </tr>
 </table>
 </body>

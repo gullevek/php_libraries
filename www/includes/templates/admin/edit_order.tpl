@@ -25,7 +25,7 @@
 <!-- ERROR MSG END //-->
 <!-- BODY START //-->
 <tr>
-  <td class="edit_bgcolor">
+	<td class="edit_bgcolor">
 	<table width="100%" border="0" cellpadding="2" cellspacing="1">
 	<!-- ANFANG Neu //-->
 	<form method="post" enctype="multipart/form-data">
@@ -68,7 +68,7 @@
 	</form>
 <!-- ENDE FOOTER //-->
 	</table>
-  </td>
+	</td>
 </tr>
 <!-- BODY END //-->
 </table>

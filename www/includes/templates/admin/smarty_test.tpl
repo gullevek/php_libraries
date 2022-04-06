@@ -1,16 +1,27 @@
 <div>
-	{$SMARTY_TEST}
+	SMARTY_TEST: {$SMARTY_TEST}
+</div>
+<div {popup width="250" caption="Info" text="Text block<br>Control"} style="border: 1px solid black; margin: 5px 0 5px 0; padding: 5px;">
+	POPUP HERE (hover mouse)
 </div>
 <div>
-	TRANSLATION CLASS (OUT): {$TRANSLATE_TEST}
-</div>
-<div>
+	<b>Outside translation test</b><br>
+	TRANSLATION CLASS (OUT): {$TRANSLATE_TEST}<br>
 	TRANSLATION CLASS (SMARTY): {$TRANSLATE_TEST_SMARTY}
 </div>
 <div>
-	<select id="drop_down_test" name="drop_down_test">
-		{html_options options=$drop_down_test selected=$drop_down_test_selected}
-	</select>
+	<b>Translate Test with replace:</b><br>
+	ORIGINAL: Original with string: %1 ({$replace})<br>
+	TRANSLATED: {t 1=$replace}Original with string: %1{/t}<br>
+	TRANSLATED (escape): {t escape=on 1=$replace}Original with string: %1{/t}
+</div>
+<div>
+	<b>Variable variables:</b><br>
+	Test: {$test}<br>
+	Foo: {$foo}<br>
+	{assign var="bar" value="test"}
+	vFoo ($test = $foo = bar): {$test|getvar}<br>
+	vFoo ($bar = $test = foo): {$bar|getvar}
 </div>
 <div class="jq-container">
 	<div id="jq-test" class="jp-test">
@@ -23,10 +34,29 @@
 	</div>
 </div>
 <div class="loop-test">
-	<div>LOOP TEST</div>
+	<div><b>LOOP TEST</b></div>
 {section name=page_list start=1 loop=$loop_start+1}
 	<div>LOOP OUTPUT: {$smarty.section.page_list.index}</div>
 {/section}
+</div>
+<div>
+	<select id="drop_down_test" name="drop_down_test">
+		{html_options options=$drop_down_test selected=$drop_down_test_selected}
+	</select>
+</div>
+<div>
+	<select id="drop_down_test_nested" name="drop_down_test_nested">
+		{html_options options=$drop_down_test_nested selected=$drop_down_test_nested_selected}
+	</select>
+</div>
+<div>
+	{html_radios name="radio_test" options=$radio_test selected=$radio_test_selected}
+</div>
+<div>
+	{html_checkboxes name="checkbox_test" options=$checkbox_test selected=$checkbox_test_selected}
+</div>
+<div>
+	{html_checkboxes name="checkbox_test_pos" options=$checkbox_test selected=$checkbox_test_pos_selected pos=$checkbox_test_pos}
 </div>
 {* progresss indicator *}
 <div id="indicator"></div>
