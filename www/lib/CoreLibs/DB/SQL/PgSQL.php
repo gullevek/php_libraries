@@ -51,7 +51,7 @@ namespace CoreLibs\DB\SQL;
 // as main system. Currently all @var sets are written as object
 /** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
 
-class PgSQL implements Interface\SqlFunctions
+class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 {
 	/** @var string */
 	private $last_error_query;

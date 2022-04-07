@@ -168,7 +168,7 @@ class Login
 	 * @param \CoreLibs\DB\IO              $db   Database connection class
 	 * @param \CoreLibs\Debug\Logging      $log  Logging class
 	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class
-	 *                                     if null, auto set
+	 *                                                if null, auto set
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace CoreLibs\DB\SQL\Interface;
+namespace CoreLibs\DB\SQL\SqlInterface;
 
 interface SqlFunctions
 {

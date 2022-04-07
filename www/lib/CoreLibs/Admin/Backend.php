@@ -92,6 +92,8 @@ class Backend
 	/** @var string */
 	public $lang_short;
 	/** @var string */
+	public $domain;
+	/** @var string */
 	public $encoding;
 	/** @var \CoreLibs\Debug\Logging logger */
 	public $log;
@@ -171,27 +173,13 @@ class Backend
 	 */
 	private function setLangEncoding(): void
 	{
-		// just emergency fallback for language
-		// set encoding
-		if (isset($_SESSION['DEFAULT_CHARSET'])) {
-			$this->encoding = $_SESSION['DEFAULT_CHARSET'];
-		} else {
-			$this->encoding = DEFAULT_ENCODING;
-		}
-		// gobal override
-		if (isset($GLOBALS['OVERRIDE_LANG'])) {
-			$this->lang = $GLOBALS['OVERRIDE_LANG'];
-		} elseif (isset($_SESSION['DEFAULT_LANG'])) {
-			// session (login)
-			$this->lang = $_SESSION['DEFAULT_LANG'];
-		} else {
-			// mostly default SITE LANG or DEFAULT LANG
-			$this->lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
-		}
-		// create the char lang encoding
-		$this->lang_short = substr($this->lang, 0, 2);
-		// set the language folder
-		$this->lang_dir = BASE . INCLUDES . LANG . CONTENT_PATH;
+		list (
+			$this->encoding,
+			$this->lang,
+			$this->lang_short,
+			$this->domain,
+			$this->lang_dir
+		) = \CoreLibs\Language\GetSettings::setLangEncoding();
 	}
 
 	// PUBLIC METHODS |=================================================>

@@ -54,7 +54,7 @@ print "SETACL[]: " . $backend->setACL([]) . "<br>";
 print "ADBEDITLOG: " . $backend->adbEditLog('CLASSTEST-ADMIN', 'Some info stirng') . "<br>";
 print "ADBTOPMENU(0): " . \CoreLibs\Debug\Support::printAr($backend->adbTopMenu()) . "<br>";
 print "ADBMSG: " . $backend->adbMsg('info', 'Message: %1$d', [1]) . "<br>";
-print "Messaes: " . \CoreLibs\Debug\Support::printAr($this->messages) . "<br>";
+print "Messaes: " . \CoreLibs\Debug\Support::printAr($backend->messages) . "<br>";
 print "ADBPRINTDATETIME:<br>" . $backend->adbPrintDateTime(2021, 6, 21, 6, 38, '_test') . "<br>";
 
 // error message

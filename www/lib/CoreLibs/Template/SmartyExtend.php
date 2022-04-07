@@ -34,6 +34,8 @@ class SmartyExtend extends \Smarty
 	/** @var string */
 	public $lang_short;
 	/** @var string */
+	public $domain;
+	/** @var string */
 	public $encoding;
 	// page name
 	/** @var string */
@@ -152,8 +154,10 @@ class SmartyExtend extends \Smarty
 	 * constructor class, just sets the language stuff
 	 * calls L10 for pass on internaly in smarty
 	 * also registers the getvar caller plugin
+	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class
+	 *                                           if null, auto set
 	 */
-	public function __construct()
+	public function __construct(?\CoreLibs\Language\L10n $l10n = null)
 	{
 		// call basic smarty
 		// or Smarty::__construct();
@@ -161,7 +165,7 @@ class SmartyExtend extends \Smarty
 		// set lang vars
 		$this->setLangEncoding();
 		// iinit lang
-		$this->l10n = new \CoreLibs\Language\L10n($this->lang);
+		$this->l10n = $l10n ?? new \CoreLibs\Language\L10n($this->lang);
 		// Smarty 3.x
 		// $this->registerPlugin('modifier', 'getvar', [&$this, 'get_template_vars']);
 		$this->registerPlugin('modifier', 'getvar', [&$this, 'getTemplateVars']);
@@ -185,29 +189,13 @@ class SmartyExtend extends \Smarty
 	 */
 	private function setLangEncoding(): void
 	{
-		// just emergency fallback for language
-		// set encoding
-		if (!empty($_SESSION['DEFAULT_CHARSET'])) {
-			$this->encoding = $_SESSION['DEFAULT_CHARSET'];
-		} else {
-			$this->encoding = DEFAULT_ENCODING;
-		}
-		// gobal override
-		if (!empty($GLOBALS['OVERRIDE_LANG'])) {
-			$this->lang = $GLOBALS['OVERRIDE_LANG'];
-		} elseif (!empty($_SESSION['DEFAULT_LANG'])) {
-			// session (login)
-			$this->lang = $_SESSION['DEFAULT_LANG'];
-		} else {
-			// mostly default SITE LANG or DEFAULT LANG
-			$this->lang = defined('SITE_LANG') && !empty(SITE_LANG) ?
-				SITE_LANG :
-				DEFAULT_LANG;
-		}
-		// create the char lang encoding
-		$this->lang_short = substr($this->lang, 0, 2);
-		// set the language folder
-		$this->lang_dir = BASE . INCLUDES . LANG . CONTENT_PATH;
+		list (
+			$this->encoding,
+			$this->lang,
+			$this->lang_short,
+			$this->domain,
+			$this->lang_dir
+		) = \CoreLibs\Language\GetSettings::setLangEncoding();
 	}
 
 	/**

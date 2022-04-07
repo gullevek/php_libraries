@@ -382,7 +382,7 @@ class IO
 	public function __construct(
 		array $db_config,
 		?\CoreLibs\Debug\Logging $log = null,
-		?bool $db_debug_override = null,
+		?bool $db_debug_override = null
 	) {
 		// attach logger
 		$this->log = $log ?? new \CoreLibs\Debug\Logging();

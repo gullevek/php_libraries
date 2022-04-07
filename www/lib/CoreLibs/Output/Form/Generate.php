@@ -286,6 +286,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	/** @var string */
 	public $lang_short;
 	/** @var string */
+	public $domain;
+	/** @var string */
 	public $encoding;
 	// language
 	/** @var \CoreLibs\Language\L10n */
@@ -299,10 +301,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * construct form generator
 	 * @param array<mixed> $db_config   db config array
 	 * @param \CoreLibs\Debug\Logging|null $log Logging class
+	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class
+	 *                                                if null, auto set
 	 */
 	public function __construct(
 		array $db_config,
-		\CoreLibs\Debug\Logging $log = null
+		\CoreLibs\Debug\Logging $log = null,
+		?\CoreLibs\Language\L10n $l10n = null
 	) {
 		global $table_arrays;
 		// replace any non valid variable names
@@ -310,7 +315,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->my_page_name = str_replace(['.'], '_', System::getPageName(System::NO_EXTENSION));
 		$this->setLangEncoding();
 		// init the language class
-		$this->l = new \CoreLibs\Language\L10n($this->lang);
+		$this->l = $l10n ?? new \CoreLibs\Language\L10n($this->lang);
 		// load config array
 		// get table array definitions for current page name
 
@@ -452,27 +457,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	private function setLangEncoding(): void
 	{
-		// just emergency fallback for language
-		// set encoding
-		if (isset($_SESSION['DEFAULT_CHARSET'])) {
-			$this->encoding = $_SESSION['DEFAULT_CHARSET'];
-		} else {
-			$this->encoding = DEFAULT_ENCODING;
-		}
-		// gobal override
-		if (isset($GLOBALS['OVERRIDE_LANG'])) {
-			$this->lang = $GLOBALS['OVERRIDE_LANG'];
-		} elseif (isset($_SESSION['DEFAULT_LANG'])) {
-			// session (login)
-			$this->lang = $_SESSION['DEFAULT_LANG'];
-		} else {
-			// mostly default SITE LANG or DEFAULT LANG
-			$this->lang = defined('SITE_LANG') ? SITE_LANG : DEFAULT_LANG;
-		}
-		// create the char lang encoding
-		$this->lang_short = substr($this->lang, 0, 2);
-		// set the language folder
-		$this->lang_dir = BASE . INCLUDES . LANG . CONTENT_PATH;
+		list (
+			$this->encoding,
+			$this->lang,
+			$this->lang_short,
+			$this->domain,
+			$this->lang_dir
+		) = \CoreLibs\Language\GetSettings::setLangEncoding();
 	}
 
 	// PUBLIC METHODS |=================================================>
