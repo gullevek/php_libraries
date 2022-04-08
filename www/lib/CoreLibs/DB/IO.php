@@ -410,9 +410,6 @@ class IO
 			false
 		);
 
-		// set the target encoding to the DEFAULT_ENCODING if it is one of them: EUC, Shift_JIS, UTF-8
-		// @ the moment set only from outside
-
 		// set loop protection max count
 		$this->MAX_QUERY_CALL = self::DEFAULT_MAX_QUERY_CALL;
 
