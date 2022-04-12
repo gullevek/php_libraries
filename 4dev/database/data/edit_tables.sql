@@ -68,9 +68,10 @@ INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('Visitor', 'B0C4B3
 INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('User', '1E789E', 1);
 
 -- edit language
+-- iso_name = encoding
 DELETE FROM edit_language;
-INSERT INTO edit_language (short_name, long_name, iso_name, order_number, enabled, lang_default) VALUES ('en', 'English', 'UTF-8', 1, 1, 1);
-INSERT INTO edit_language (short_name, long_name, iso_name, order_number, enabled, lang_default) VALUES ('ja', 'Japanese', 'UTF-8', 2, 1, 0);
+INSERT INTO edit_language (long_name, short_name, iso_name, order_number, enabled, lang_default) VALUES ('English', 'en_US', 'UTF-8', 1, 1, 1);
+INSERT INTO edit_language (long_name, short_name, long_name, iso_name, order_number, enabled, lang_default) VALUES ('Japanese', 'ja_JP', 'UTF-8', 2, 1, 0);
 
 -- edit group
 DELETE FROM edit_group;
