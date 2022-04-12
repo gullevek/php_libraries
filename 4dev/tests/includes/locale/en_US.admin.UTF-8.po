@@ -1,0 +1,2 @@
+msgid "Original"
+msgstr "Translated admin en_US"

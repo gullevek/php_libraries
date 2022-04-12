@@ -1,0 +1,2 @@
+msgid "Original"
+msgstr "Translated frontend en_US"

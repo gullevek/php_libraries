@@ -1,0 +1,1 @@
+../../locale/ja_JP/LC_MESSAGES/admin.mo
