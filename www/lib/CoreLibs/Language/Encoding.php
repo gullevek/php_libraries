@@ -10,23 +10,32 @@ namespace CoreLibs\Language;
 
 class Encoding
 {
-	/** @var string */
+	/** @var int<min, -1>|int<1, max>|string */
 	private static $mb_error_char = '';
 
 	/**
-	 * wrapper function for mb mime convert, for correct conversion with long strings
-	 * @param  string $string   string to encode
-	 * @param  string $encoding target encoding
-	 * @return string           encoded string
+	 * wrapper function for mb mime convert
+	 * for correct conversion with long strings
+	 *
+	 * @param  string $string     string to encode
+	 * @param  string $encoding   target encoding
+	 * @param  string $line_break default line break is \r\n
+	 * @return string             encoded string
 	 */
-	public static function __mbMimeEncode(string $string, string $encoding): string
-	{
+	public static function __mbMimeEncode(
+		string $string,
+		string $encoding,
+		string $line_break = "\r\n"
+	): string {
 		// set internal encoding, so the mimeheader encode works correctly
 		mb_internal_encoding($encoding);
 		// if a subject, make a work around for the broken mb_mimencode
 		$pos = 0;
-		$split = 36; // after 36 single bytes characters, if then comes MB, it is broken
-					 // has to 2 x 36 < 74 so the mb_encode_mimeheader 74 hardcoded split does not get triggered
+		// after 36 single bytes characters,
+		// if then comes MB, it is broken
+		// has to 2 x 36 < 74 so the mb_encode_mimeheader
+		// 74 hardcoded split does not get triggered
+		$split = 36;
 		$_string = '';
 		while ($pos < mb_strlen($string, $encoding)) {
 			$output = mb_strimwidth($string, $pos, $split, "", $encoding);
@@ -39,38 +48,68 @@ class Encoding
 			// only make linebreaks if we have mime encoded code inside
 			// the space only belongs in the second line
 			if ($_string && preg_match("/^=\?/", $_string_encoded)) {
-				$_string .= "\n ";
+				$_string .= $line_break . " ";
+			} elseif (
+				// hack for plain text with space at the end
+				mb_strlen($output, $encoding) == $split &&
+				mb_substr($output, -1, 1, $encoding) == " "
+			) {
+				// if output ends with space, add one more
+				$_string_encoded .= " ";
 			}
 			$_string .= $_string_encoded;
 		}
 		// strip out any spaces BEFORE a line break
-		$string = str_replace(" \n", "\n", $_string);
+		$string = str_replace(" " . $line_break, $line_break, $_string);
 		return $string;
 	}
 
 	/**
 	 * set error char
 	 *
-	 * @param  string $string The character to use to represent error chars
+	 * @param  string|int|null $string The character to use to represent
+	 *                                 error chars
+	 *                                 "long" for long, "none" for none
+	 *                                 or a valid code point in int
+	 *                                 like 0x2234 (8756, ∴)
+	 *                                 default character is ? (63)
+	 *                                 if null is set then "none"
 	 * @return void
 	 */
-	public static function setErrorChar(string $string): void
+	public static function setErrorChar($string): void
 	{
-		self::$mb_error_char = $string;
+		if (empty($string)) {
+			$string = 'none';
+		}
+		if (!in_array($string, ['none', 'long', 'entity'])) {
+			self::$mb_error_char = \IntlChar::chr($string);
+		} else {
+			self::$mb_error_char = $string;
+		}
+		mb_substitute_character($string);
 	}
 
 	/**
 	 * get the current set error character
 	 *
-	 * @return string Set error character
+	 * @param  bool $return_substitute_func if set to true return the set
+	 *                                      character from the php function
+	 *                                      directly
+	 * @return string|int Set error character
 	 */
-	public static function getErrorChar(): string
+	public static function getErrorChar(bool $return_substitute_func = false)
 	{
-		return self::$mb_error_char;
+		// return mb_substitute_character();
+		if ($return_substitute_func === true) {
+			return mb_substitute_character();
+		} else {
+			return self::$mb_error_char;
+		}
 	}
 
 	/**
-	 * test if a string can be safely convert between encodings. mostly utf8 to shift jis
+	 * test if a string can be safely convert between encodings.
+	 * mostly utf8 to shift jis
 	 * the default compare has a possibility of failure, especially with windows
 	 * it is recommended to the following in the script which uses this method:
 	 * mb_substitute_character(0x2234);
@@ -80,13 +119,17 @@ class Encoding
 	 * if check to ISO-2022-JP-MS
 	 * set three dots (∴) as wrong character for correct convert error detect
 	 * (this char is used, because it is one of the least used ones)
+	 *
 	 * @param  string     $string        string to test
 	 * @param  string     $from_encoding encoding of string to test
 	 * @param  string     $to_encoding   target encoding
 	 * @return bool|array<string>        false if no error or array with failed characters
 	 */
-	public static function checkConvertEncoding(string $string, string $from_encoding, string $to_encoding)
-	{
+	public static function checkConvertEncoding(
+		string $string,
+		string $from_encoding,
+		string $to_encoding
+	) {
 		// convert to target encoding and convert back
 		$temp = mb_convert_encoding($string, $to_encoding, $from_encoding);
 		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);
@@ -97,9 +140,11 @@ class Encoding
 			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i++) {
 				$char = mb_substr($string, $i, 1, $from_encoding);
 				$r_char = mb_substr($compare, $i, 1, $from_encoding);
-				// the ord 194 is a hack to fix the IE7/IE8 bug with line break and illegal character
+				// the ord 194 is a hack to fix the IE7/IE8
+				// bug with line break and illegal character
 				if (
-					(($char != $r_char && !self::$mb_error_char) ||
+					(($char != $r_char && (!self::$mb_error_char ||
+					in_array(self::$mb_error_char, ['none', 'long', 'entity']))) ||
 					($char != $r_char && $r_char == self::$mb_error_char && self::$mb_error_char)) &&
 					ord($char) != 194
 				) {
@@ -118,6 +163,7 @@ class Encoding
 	 * if source encoding is set and auto check is true (default) a second
 	 * check is done so that the source string encoding actually matches
 	 * will be skipped if source encoding detection is ascii
+	 *
 	 * @param  string $string          string to convert
 	 * @param  string $to_encoding     target encoding
 	 * @param  string $source_encoding optional source encoding, will try to auto detect
@@ -144,7 +190,8 @@ class Encoding
 			$_source_encoding == $source_encoding
 		) {
 			// trigger check if we have override source encoding.
-			// if different (_source is all but not ascii) then trigger skip if matching
+			// if different (_source is all but not ascii) then trigger
+			// skip if matching
 		}
 		if ($source_encoding != $to_encoding) {
 			if ($source_encoding) {
