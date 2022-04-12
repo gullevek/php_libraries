@@ -65,8 +65,10 @@ define('JS', 'javascript' . DIRECTORY_SEPARATOR);
 define('TABLE_ARRAYS', 'table_arrays' . DIRECTORY_SEPARATOR);
 // smarty libs path
 define('SMARTY', 'Smarty' . DIRECTORY_SEPARATOR);
-// po langs
+// po langs [DEPRECAED: use LOCALE]
 define('LANG', 'lang' . DIRECTORY_SEPARATOR);
+// po locale file
+define('LOCALE', 'locale' . DIRECTORY_SEPARATOR);
 // cache path
 define('CACHE', 'cache' . DIRECTORY_SEPARATOR);
 // temp path
@@ -158,9 +160,11 @@ define('CACHE_ID', 'CACHE_' . BASE_NAME . '_' . SERVER_NAME_HASH);
 define('COMPILE_ID', 'COMPILE_' . BASE_NAME . '_' . SERVER_NAME_HASH);
 
 /************* LANGUAGE / ENCODING *******/
-define('DEFAULT_LANG', 'en_utf8');
+define('DEFAULT_LANG', 'en_US');
 // default web page encoding setting
 define('DEFAULT_ENCODING', 'UTF-8');
+// default lang + encoding
+define('DEFAULT_LOCALE', 'en_US.UTF-8');
 
 /************* LOGGING *******************/
 // below two can be defined here, but they should be
@@ -258,7 +262,9 @@ $GLOBALS['DB_CONFIG'] = DB_CONFIG;
 // debug settings, site lang, etc
 define('TARGET', $SITE_CONFIG[HOST_NAME]['location'] ?? 'test');
 define('DEBUG', $SITE_CONFIG[HOST_NAME]['debug_flag'] ?? false);
-define('SITE_LANG', $SITE_CONFIG[HOST_NAME]['site_lang'] ?? 'en_utf8');
+define('SITE_LANG', $SITE_CONFIG[HOST_NAME]['site_lang'] ?? DEFAULT_LANG);
+define('SITE_ENCODING', $SITE_CONFIG[HOST_NAME]['site_encoding'] ?? DEFAULT_ENCODING);
+define('SITE_LOCALE', $SITE_CONFIG[HOST_NAME]['site_locale'] ?? DEFAULT_LOCALE);
 define('LOGIN_ENABLED', $SITE_CONFIG[HOST_NAME]['login_enabled'] ?? false);
 define('AUTH', $SITE_CONFIG[HOST_NAME]['auth'] ?? false);
 // paths

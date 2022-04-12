@@ -27,7 +27,9 @@ $__LOCAL_CONFIG = [
 	'db_host' => 'test',
 	'location' => 'test',
 	'debug_flag' => true,
-	'site_lang' => 'en_utf8',
+	'site_lang' => 'en_US',
+	'site_encoding' => 'UTF-8',
+	'site_locale' => 'en_US.UTF-8',
 	'login_enabled' => true
 ];
 
@@ -45,7 +47,10 @@ $SITE_CONFIG = [
 		// show DEBUG override
 		'debug_flag' => true,
 		// site language
-		'site_lang' => 'en_utf8',
+		'site_lang' => 'en_US',
+		'site_encoding' => 'UTF-8',
+		// lang + encoding
+		'site_locale' => 'en_US.UTF-8',
 		// enable/disable login override
 		'login_enabled' => true
 	],
