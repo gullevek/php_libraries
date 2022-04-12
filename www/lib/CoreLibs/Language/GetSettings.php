@@ -13,38 +13,55 @@ class GetSettings
 	/**
 	 * Sets encoding and language
 	 * Can be overridden with language + path to mo file
-	 * If language is set it must be in the format of:
+	 * If locale is set it must be in the format of:
 	 * <lang>.<encoding>
 	 * <lang>_<country>.<encoding>
-	 * <lang>_<country>@<subset>.<encoding>
+	 * <lang>_<country>.<encoding>@<subset>
+	 * If no encoding is set in the is, UTF-8 is assumed
 	 *
-	 * @param  string|null $language
-	 * @param  string|null $path
-	 * @return array
+	 * Returned is an array with array indes and dictionary index
+	 * 0~4 array are
+	 * encoding: 0
+	 * lang: 1
+	 * lang_short: 2
+	 * domain: 3
+	 * path: 4
+	 *
+	 * @param  string|null $locale A valid locale name
+	 * @param  string|null $path   A valid path where the mo files will be based
+	 * @return array<int|string,string> Settings as array/dictionary
 	 */
 	public static function setLangEncoding(
-		?string $language = null,
+		?string $locale = null,
 		?string $domain = null,
 		?string $path = null
 	): array {
 		$lang = '';
 		$lang_short = '';
 		$encoding = '';
-		// if language is set, extract
-		if (!empty($language)) {
+		// if is is set, extract
+		if (!empty($locale)) {
 			preg_match(
-				"/^(([a-z]{2,})(_[A-Z]{2,})?(@[a-z]{1,})?)(\.([\w-])+)?$/",
-				$language,
+				// language code
+				'/^(?P<lang>[a-z]{2,3})'
+				// _ country code
+				. '(?:_(?P<country>[A-Z]{2}))?'
+				// . charset
+				. '(?:\\.(?P<charset>[-A-Za-z0-9_]+))?'
+				// @ modifier
+				. '(?:@(?P<modifier>[-A-Za-z0-9_]+))?$/',
+				$locale,
 				$matches
 			);
-			// 1: lang (always)
-			$lang = $matches[1] ?? '';
-			// 2: lang short part
-			$lang_short = $matches[2] ?? '';
-			// 3: [ignore] sub part, if set, combined with lang
-			// 4: [ignore] possible sub part, combined with lang in 1
-			// 6: encoding if set
-			$encoding = $matches[5] ?? '';
+			// lang short part
+			$lang_short = $matches['lang'] ?? '';
+			$lang = $lang_short;
+			// lang + country if country is set
+			if (!empty($matches['country'])) {
+				$lang = sprintf('%s_%s', $lang_short, $matches['country']);
+			}
+			// encoding if set
+			$encoding = strtoupper($matches['charset'] ?? 'UTF-8');
 		}
 		// if domain is set, must be alphanumeric, if not unset
 		if (
