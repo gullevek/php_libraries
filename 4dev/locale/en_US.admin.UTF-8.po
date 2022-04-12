@@ -1,9 +1,9 @@
 # ********************************************************************
 # AUTHOR: Clemens Schwaighofer
-# CREATED: 2018/03/28
+# CREATED: 2005/08/09
 # SHORT DESCRIPTION:
-# Backend Japanese Messages file for gettext
-# to craete: msgfmt -o ja.mo messages_ja.po
+# Backned English Messages file for gettext
+# to craete: msgfmt -o ja.mo messages_en.po
 # HISTORY:
 # ********************************************************************/
 
@@ -19,61 +19,20 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Yes"
-msgstr "はい"
-
-msgid "No"
-msgstr "いいえ"
-
-# Basic date info
 msgid "Year"
-msgstr "年"
+msgstr "Year"
 
 msgid "Month"
-msgstr "月"
-
-msgid "Day"
-msgstr "日"
-
-msgid "Hour"
-msgstr "時"
-
-msgid "Minute"
-msgstr "分"
-
-msgid "Mon"
-msgstr "月"
-
-msgid "Tue"
-msgstr "火"
-
-msgid "Wed"
-msgstr "水"
-
-msgid "Thu"
-msgstr "木"
-
-msgid "Fri"
-msgstr "金"
-
-msgid "Sat"
-msgstr "土"
-
-msgid "Sun"
-msgstr "日"
+msgstr "Month"
 
 msgid "INPUT TEST"
-msgstr "OUTPUT TEST JA"
-
-# login string
-msgid "Hello %s"
-msgstr "こにちは %s"
+msgstr "OUTPUT TEST ADMIN EN"
 
 msgid "I should be translated"
-msgstr "「スマーティー」これは正しいです"
+msgstr "I should be translated: I WAS TRANSLATED"
 
 msgid "Are we translated?"
-msgstr "「クラス」これは翻訳です？"
+msgstr "Are we translated? Yes, we are!"
 
 msgid "Original with string: %1"
-msgstr "%1と翻訳した"
+msgstr "Translated with: %1"

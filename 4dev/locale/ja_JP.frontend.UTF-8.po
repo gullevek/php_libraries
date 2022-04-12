@@ -1,0 +1,2 @@
+msgid "INPUT TEST"
+msgstr "OUTPUT TEST FRONTEND JA"
