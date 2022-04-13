@@ -41,7 +41,7 @@ class StreamReader
 	 * @param  int $bytes bytes to read
 	 * @return bool       dummy false
 	 */
-	public function read($bytes)
+	public function read(int $bytes): bool
 	{
 		return false;
 	}
@@ -51,7 +51,7 @@ class StreamReader
 	 * @param  int $position seek to position
 	 * @return bool          dummy false
 	 */
-	public function seekto($position)
+	public function seekto(int $position): bool
 	{
 		return false;
 	}
@@ -60,7 +60,7 @@ class StreamReader
 	 * returns current position
 	 * @return bool dummy false
 	 */
-	public function currentpos()
+	public function currentpos(): bool
 	{
 		return false;
 	}
@@ -69,7 +69,7 @@ class StreamReader
 	 * returns length of entire stream (limit for seekto()s)
 	 * @return bool dummy false
 	 */
-	public function length()
+	public function length(): bool
 	{
 		return false;
 	}

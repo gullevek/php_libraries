@@ -67,9 +67,7 @@ class GetTextReader
 	/** @var array<mixed> */
 	private $cache_translations = [];  // original -> translation mapping
 
-
 	/* Methods */
-
 
 	/**
 	* Reads a 32bit Integer from the Stream
@@ -77,7 +75,7 @@ class GetTextReader
 	* @access private
 	* @return int Integer from the Stream
 	*/
-	private function readint()
+	private function readint(): int
 	{
 		if ($this->BYTEORDER == 0) {
 			// low endian
@@ -91,10 +89,11 @@ class GetTextReader
 
 	/**
 	 * read bytes
+	 *
 	 * @param  int    $bytes byte length to read
 	 * @return string        return data, possible string
 	 */
-	public function read($bytes)
+	public function read(int $bytes): string
 	{
 		return $this->STREAM->read($bytes);
 	}
@@ -105,7 +104,7 @@ class GetTextReader
 	* @param  int   $count How many elements should be read
 	* @return array<mixed> Array of Integers
 	*/
-	public function readintarray($count)
+	public function readintarray(int $count): array
 	{
 		if ($this->BYTEORDER == 0) {
 			// low endian
@@ -120,9 +119,10 @@ class GetTextReader
 	* Constructor
 	*
 	* @param FileReader|bool $Reader       the StreamReader object
-	* @param bool            $enable_cache Enable or disable caching of strings (default on)
+	* @param bool            $enable_cache Enable or disable caching
+	*                                      of strings (default on)
 	*/
-	public function __construct($Reader, $enable_cache = true)
+	public function __construct($Reader, bool $enable_cache = true)
 	{
 		// If there isn't a StreamReader, turn on short circuit mode.
 		if ((!is_object($Reader) && !$Reader) || (is_object($Reader) && $Reader->error)) {
@@ -157,6 +157,26 @@ class GetTextReader
 		$this->total = $this->readint();
 		$this->originals = $this->readint();
 		$this->translations = $this->readint();
+	}
+
+	/**
+	 * Get current short circuit, equals to no translator running
+	 *
+	 * @return bool
+	 */
+	public function getShortCircuit(): bool
+	{
+		return $this->short_circuit;
+	}
+
+	/**
+	 * get the current cache enabled status
+	 *
+	 * @return bool
+	 */
+	public function getEnableCache(): bool
+	{
+		return $this->enable_cache;
 	}
 
 	/**
@@ -207,7 +227,7 @@ class GetTextReader
 	* @param  int    $num Offset number of original string
 	* @return string      Requested string if found, otherwise ''
 	*/
-	private function getOriginalString($num)
+	private function getOriginalString(int $num): string
 	{
 		$length = $this->table_originals[$num * 2 + 1] ?? 0;
 		$offset = $this->table_originals[$num * 2 + 2] ?? 0;
@@ -226,7 +246,7 @@ class GetTextReader
 	* @param  int    $num Offset number of original string
 	* @return string      Requested string if found, otherwise ''
 	*/
-	private function getTranslationString($num)
+	private function getTranslationString(int $num): string
 	{
 		$length = $this->table_translations[$num * 2 + 1] ?? 0;
 		$offset = $this->table_translations[$num * 2 + 2] ?? 0;
@@ -242,12 +262,12 @@ class GetTextReader
 	* Binary search for string
 	*
 	* @access private
-	* @param  string           $string string to find
-	* @param  int              $start  (internally used in recursive function)
-	* @param  int              $end    (internally used in recursive function)
-	* @return int                      (offset in originals table)
+	* @param  string $string string to find
+	* @param  int    $start  (internally used in recursive function)
+	* @param  int    $end    (internally used in recursive function)
+	* @return int            (offset in originals table)
 	*/
-	private function findString($string, $start = -1, $end = -1)
+	private function findString(string $string, int $start = -1, int $end = -1): int
 	{
 		if (($start == -1) or ($end == -1)) {
 			// findString is called with only one parameter, set start end end
@@ -289,7 +309,7 @@ class GetTextReader
 	* @param  string $string to be translated
 	* @return string         translated string (or original, if not found)
 	*/
-	public function translate($string)
+	public function translate(string $string): string
 	{
 		if ($this->short_circuit) {
 			return $string;
@@ -298,7 +318,10 @@ class GetTextReader
 
 		if ($this->enable_cache) {
 			// Caching enabled, get translated string from cache
-			if (is_array($this->cache_translations) && array_key_exists($string, $this->cache_translations)) {
+			if (
+				is_array($this->cache_translations) &&
+				array_key_exists($string, $this->cache_translations)
+			) {
 				return $this->cache_translations[$string];
 			} else {
 				return $string;
@@ -321,7 +344,7 @@ class GetTextReader
 	* @param  string $expr an expression to match
 	* @return string       sanitized plural form expression
 	*/
-	private function sanitizePluralExpression($expr)
+	private function sanitizePluralExpression(string $expr): string
 	{
 		// Get rid of disallowed characters.
 		$expr = preg_replace('@[^a-zA-Z0-9_:;\(\)\?\|\&=!<>+*/\%-]@', '', $expr);
@@ -358,7 +381,7 @@ class GetTextReader
 	* @param  string $header header search in plurals
 	* @return string         verbatim plural form header field
 	*/
-	private function extractPluralFormsHeaderFromPoHeader($header)
+	private function extractPluralFormsHeaderFromPoHeader(string $header): string
 	{
 		if (preg_match("/(^|\n)plural-forms: ([^\n]*)\n/i", $header, $regs)) {
 			$expr = $regs[2];
@@ -374,14 +397,14 @@ class GetTextReader
 	* @access private
 	* @return string plural form header
 	*/
-	private function getPluralForms()
+	private function getPluralForms(): string
 	{
 		// lets assume message number 0 is header
 		// this is true, right?
 		$this->loadTables();
 
 		// cache header field for plural forms
-		if (! is_string($this->pluralheader)) {
+		if (empty($this->pluralheader) || !is_string($this->pluralheader)) {
 			if ($this->enable_cache) {
 				$header = $this->cache_translations[''];
 			} else {
@@ -397,25 +420,37 @@ class GetTextReader
 	* Detects which plural form to take
 	*
 	* @access private
-	* @param  string $n count
-	* @return int       array index of the right plural form
+	* @param  int $n count
+	* @return int    array index of the right plural form
 	*/
-	private function selectString($n)
+	private function selectString(int $n): int
 	{
 		$string = $this->getPluralForms();
 		$string = str_replace('nplurals', "\$total", $string);
-		$string = str_replace("n", $n, $string);
+		$string = str_replace("n", (string)$n, $string);
 		$string = str_replace('plural', "\$plural", $string);
 
 		$total = 0;
 		$plural = 0;
 
 		eval("$string");
-		/** @phpstan-ignore-next-line */
+		/** @phpstan-ignore-next-line 0 >= 0 is always true*/
 		if ($plural >= $total) {
 			$plural = $total - 1;
 		}
-		return $plural;
+		return (int)$plural;
+	}
+
+	/**
+	 * wrapper for translate() method
+	 *
+	 * @access public
+	 * @param  string $string
+	 * @return string
+	 */
+	public function gettext(string $string): string
+	{
+		return $this->translate($string);
 	}
 
 	/**
@@ -424,10 +459,10 @@ class GetTextReader
 	* @access public
 	* @param  string $single
 	* @param  string $plural
-	* @param  string $number
+	* @param  int    $number
 	* @return string plural form
 	*/
-	public function ngettext($single, $plural, $number)
+	public function ngettext(string $single, string $plural, int $number): string
 	{
 		if ($this->short_circuit) {
 			if ($number != 1) {
@@ -465,11 +500,12 @@ class GetTextReader
 
 	/**
 	 * p get text
+	 *
 	 * @param  string $context [description]
 	 * @param  string $msgid   [description]
 	 * @return string          [description]
 	 */
-	public function pgettext($context, $msgid)
+	public function pgettext(string $context, string $msgid): string
 	{
 		$key = $context . chr(4) . $msgid;
 		$ret = $this->translate($key);
@@ -482,14 +518,19 @@ class GetTextReader
 
 	/**
 	 * np get text
+	 *
 	 * @param  string $context  [description]
 	 * @param  string $singular [description]
 	 * @param  string $plural   [description]
-	 * @param  string $number   [description]
+	 * @param  int    $number   [description]
 	 * @return string           [description]
 	 */
-	public function npgettext($context, $singular, $plural, $number)
-	{
+	public function npgettext(
+		string $context,
+		string $singular,
+		string $plural,
+		int $number
+	): string {
 		$key = $context . chr(4) . $singular;
 		$ret = $this->ngettext($key, $plural, $number);
 		if (strpos($ret, "\004") !== false) {

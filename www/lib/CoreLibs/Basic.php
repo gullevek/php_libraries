@@ -715,20 +715,20 @@ class Basic
 
 	// *** ARRAY HANDLING END
 	// [!!! DEPRECATED !!!]
-	// Moved to \CoreLibs\Language\Encoding
+	// Moved to \CoreLibs\Convert\MimeEncode
 
 	/**
 	 * wrapper function for mb mime convert, for correct conversion with long strings
 	 * @param  string $string   string to encode
 	 * @param  string $encoding target encoding
 	 * @return string           encoded string
-	 * @deprecated Use \CoreLibs\Language\Encoding::__mbMimeEncode() instead
+	 * @deprecated Use \CoreLibs\Convert\MimeEncode::__mbMimeEncode() instead
 	 */
 	public static function __mbMimeEncode(string $string, string $encoding): string
 	{
 
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Language\Encoding::__mbMimeEncode()', E_USER_DEPRECATED);
-		return \CoreLibs\Language\Encoding::__mbMimeEncode($string, $encoding);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\MimeEncode::__mbMimeEncode()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\MimeEncode::__mbMimeEncode($string, $encoding);
 	}
 
 	// *** HUMAND BYTE READABLE CONVERT
@@ -1009,7 +1009,7 @@ class Basic
 
 	// *** ENCODING FUNCTIONS
 	// [!!! DEPRECATED !!!]
-	// Moved to \CoreLibs\Language\Encoding
+	// Moved to \CoreLibs\Check\Encoding and \CoreLibs\Convert\Encoding
 
 	/**
 	 * test if a string can be safely convert between encodings. mostly utf8 to shift jis
@@ -1026,12 +1026,12 @@ class Basic
 	 * @param  string     $from_encoding encoding of string to test
 	 * @param  string     $to_encoding   target encoding
 	 * @return bool|array<mixed>         false if no error or array with failed characters
-	 * @deprecated use \CoreLibs\Language\Encoding::checkConvertEncoding() instead
+	 * @deprecated use \CoreLibs\Check\Encoding::checkConvertEncoding() instead
 	 */
 	public function checkConvertEncoding(string $string, string $from_encoding, string $to_encoding)
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Language\Encoding::checkConvertEncoding()', E_USER_DEPRECATED);
-		return \CoreLibs\Language\Encoding::checkConvertEncoding($string, $from_encoding, $to_encoding);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Encoding::checkConvertEncoding()', E_USER_DEPRECATED);
+		return \CoreLibs\Check\Encoding::checkConvertEncoding($string, $from_encoding, $to_encoding);
 	}
 
 	/**
@@ -1047,12 +1047,12 @@ class Basic
 	 *                                 check that the source is actually matching
 	 *                                 to what we sav the source is
 	 * @return string                  encoding converted string
-	 * @deprecated use \CoreLibs\Language\Encoding::convertEncoding() instead
+	 * @deprecated use \CoreLibs\Convert\Encoding::convertEncoding() instead
 	 */
 	public static function convertEncoding(string $string, string $to_encoding, string $source_encoding = '', bool $auto_check = true): string
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Language\Encoding::convertEncoding()', E_USER_DEPRECATED);
-		return \CoreLibs\Language\Encoding::convertEncoding($string, $to_encoding, $source_encoding, $auto_check);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Encoding::convertEncoding()', E_USER_DEPRECATED);
+		return \CoreLibs\Convert\Encoding::convertEncoding($string, $to_encoding, $source_encoding, $auto_check);
 	}
 
 	// *** ENCODING FUNCTIONS END

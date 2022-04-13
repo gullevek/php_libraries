@@ -1,2 +1,8 @@
+# to craete: msgfmt -o <output.po> <input.mo>
+
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
 msgid "INPUT TEST"
 msgstr "OUTPUT TEST FRONTEND JA"

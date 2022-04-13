@@ -39,7 +39,7 @@ class FileReader
 	 * file read constructor
 	 * @param string $filename file name to load
 	 */
-	public function __construct($filename)
+	public function __construct(string $filename)
 	{
 		if (file_exists($filename)) {
 			$this->fr_length = filesize($filename) ?: 0;
@@ -58,7 +58,7 @@ class FileReader
 	 * @param  int $bytes how many bytes to read
 	 * @return string     read data as string
 	 */
-	public function read($bytes)
+	public function read(int $bytes): string
 	{
 		if (!$bytes || !is_resource($this->fr_fd)) {
 			return '';
@@ -86,7 +86,7 @@ class FileReader
 	 * @param  int $pos position where to go to
 	 * @return int      file position after seek done
 	 */
-	public function seekto($pos)
+	public function seekto(int $pos): int
 	{
 		if (!is_resource($this->fr_fd)) {
 			return 0;
@@ -100,7 +100,7 @@ class FileReader
 	 * get current position in file
 	 * @return int current position in bytes
 	 */
-	public function currentpos()
+	public function currentpos(): int
 	{
 		return $this->fr_pos;
 	}
@@ -109,7 +109,7 @@ class FileReader
 	 * file length/size
 	 * @return int file size in bytes
 	 */
-	public function length()
+	public function length(): int
 	{
 		return $this->fr_length;
 	}
