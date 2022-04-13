@@ -45,6 +45,7 @@ $log = new CoreLibs\Debug\Logging([
 // $_array = new CoreLibs\Combined\ArrayHandler();
 // $array_class = 'CoreLibs\Combination\ArrayHandler';
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: ARRAY HANDLER</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

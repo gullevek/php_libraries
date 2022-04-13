@@ -46,6 +46,7 @@ $image_class = 'CoreLibs\Output\Image';
 
 // define a list of from to color sets for conversion test
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: IMAGE</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

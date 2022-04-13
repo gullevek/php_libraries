@@ -44,6 +44,7 @@ $math_class = 'CoreLibs\Convert\Math';
 
 // define a list of from to color sets for conversion test
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: MATH</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

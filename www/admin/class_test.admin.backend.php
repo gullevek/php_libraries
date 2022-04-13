@@ -45,6 +45,7 @@ $log = new CoreLibs\Debug\Logging([
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 $backend = new CoreLibs\Admin\Backend($db, $log);
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: ADMIN BACKEND</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

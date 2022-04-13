@@ -45,6 +45,7 @@ $hash_class = 'CoreLibs\Create\Hash';
 
 // define a list of from to color sets for conversion test
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: HASH</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

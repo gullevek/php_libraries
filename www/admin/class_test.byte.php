@@ -43,6 +43,7 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $byte_class = 'CoreLibs\Convert\Byte';
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: BYTE CONVERT</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

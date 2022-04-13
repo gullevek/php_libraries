@@ -44,6 +44,7 @@ $debug = new CoreLibs\Debug\Logging([
 $debug_support_class = 'CoreLibs\Debug\Support';
 $debug_logging_class = 'CoreLibs\Debug\Logging';
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: DEBUG</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

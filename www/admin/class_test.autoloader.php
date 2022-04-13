@@ -32,6 +32,7 @@ ob_end_flush();
 
 use CoreLibs\Convert\Byte;
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: AUTOLOADER</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

@@ -347,6 +347,7 @@ final class CoreLibsDBIOTest extends TestCase
 
 	/**
 	 * Returns test list for dbCompareVersion check
+	 * NOTE: unless we fully mock the =version check needs to be updated
 	 *
 	 * @return array
 	 */
@@ -357,16 +358,16 @@ final class CoreLibsDBIOTest extends TestCase
 		return [
 			'compare = ok' => [ '=13.6.0', true ],
 			'compare = bad' => [ '=9.2.0', false ],
-			'compare < ok' => [ '<20.0.0', true ],
+			'compare < ok' => [ '<99.0.0', true ],
 			'compare < bad' => [ '<9.2.0', false ],
-			'compare <= ok a' => [ '<=20.0.0', true ],
+			'compare <= ok a' => [ '<=99.0.0', true ],
 			'compare <= ok b' => [ '<=13.6.0', true ],
 			'compare <= false' => [ '<=9.2.0', false ],
 			'compare > ok' => [ '>9.2.0', true ],
-			'compare > bad' => [ '>20.2.0', false ],
+			'compare > bad' => [ '>99.2.0', false ],
 			'compare >= ok a' => [ '>=13.6.0', true ],
 			'compare >= ok b' => [ '>=9.2.0', true ],
-			'compare >= bad' => [ '>=20.0.0', false ],
+			'compare >= bad' => [ '>=99.0.0', false ],
 		];
 	}
 

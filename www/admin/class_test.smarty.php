@@ -46,6 +46,7 @@ $log = new CoreLibs\Debug\Logging([
 $smarty = new CoreLibs\Template\SmartyExtend();
 $l = new CoreLibs\Language\L10n($lang);
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: SMARTY</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

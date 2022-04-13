@@ -69,6 +69,7 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $form = new CoreLibs\Output\Form\Generate(DB_CONFIG, $log);
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: FORM GENERATE</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

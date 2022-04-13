@@ -46,6 +46,7 @@ $json_class = 'CoreLibs\Convert\Json';
 
 // define a list of from to color sets for conversion test
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: JSON</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

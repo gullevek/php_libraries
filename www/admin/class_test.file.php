@@ -42,6 +42,7 @@ $log = new CoreLibs\Debug\Logging([
 	'print_all' => $PRINT_ALL ?? false,
 ]);
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: FILE</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

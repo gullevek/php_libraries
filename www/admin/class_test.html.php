@@ -49,6 +49,7 @@ $elements_class = 'CoreLibs\Output\Form\Elements';
 
 // define a list of from to color sets for conversion test
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: HTML/ELEMENTS</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

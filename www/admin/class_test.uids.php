@@ -43,6 +43,7 @@ $_uids = new CoreLibs\Create\Uids();
 use CoreLibs\Create\Uids;
 $uids_class = 'CoreLibs\Create\Uids';
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: UIDS</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

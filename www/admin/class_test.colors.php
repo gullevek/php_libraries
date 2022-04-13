@@ -44,6 +44,7 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $color_class = 'CoreLibs\Convert\Colors';
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: COLORS</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

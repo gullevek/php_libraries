@@ -34,6 +34,7 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $ref_class = 'CoreLibs\Get\ReadEnvFile';
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: READ ENV FILE</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

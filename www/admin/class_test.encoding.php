@@ -48,6 +48,7 @@ $_chk_enc = new CoreLibs\Check\Encoding();
 $_con_enc = new CoreLibs\Convert\Encoding();
 $chk_enc = 'CoreLibs\Check\Encoding';
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: ENCODING (CHECK/CONVERT/MIME)</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
@@ -64,10 +65,13 @@ $mime_encodes = [
 foreach ($mime_encodes as $mime_encode) {
 	print "__MBMIMEENCODE: $mime_encode[0]: " . MimeEncode::__mbMimeEncode($mime_encode[0], $mime_encode[1]) . "<br>";
 }
+echo "<br>";
 
 $enc_strings = [
 	'Normal Text',
 	'日本語',
+	// bad
+	'❶',
 	// unworkable
 	''
 ];
@@ -77,19 +81,20 @@ $_chk_enc->setErrorChar('∴');
 print "ERROR CHAR: " . $_chk_enc->getErrorChar() . "<br>";
 foreach ($enc_strings as $_string) {
 	$string = $_chk_enc->checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
-	print "ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
+	print "ENC CHECK: $_string: " . ($string === false ? '<b>-OK-</b>' : print_r($string, true)) . "<br>";
 	print "CONV ENCODING: $_string: " . $_con_enc->convertEncoding($_string, 'ISO-2022-JP') . "<br>";
 	print "CONV ENCODING (s): $_string: " . $_con_enc->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8') . "<br>";
 	print "CONV ENCODING (s,a-false): $_string: "
 		. $_con_enc->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8', false) . "<br>";
 }
+echo "<br>";
 // static
 // ChkEnc::setErrorChar('∴');
 ChkEnc::setErrorChar(0x2234);
 print "S::ERROR CHAR: " . ChkEnc::getErrorChar() . "<br>";
 foreach ($enc_strings as $_string) {
 	$string = ChkEnc::checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
-	print "S::ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
+	print "S::ENC CHECK: $_string: " . ($string === false ? '<b>-OK-</b>' : print_r($string, true)) . "<br>";
 	print "S::CONV ENCODING: $_string: " . ConEnc::convertEncoding($_string, 'ISO-2022-JP') . "<br>";
 	print "S::CONV ENCODING (s): $_string: "
 		. ConEnc::convertEncoding($_string, 'ISO-2022-JP', 'UTF-8') . "<br>";

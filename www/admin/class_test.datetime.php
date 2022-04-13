@@ -44,6 +44,7 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $datetime_class = 'CoreLibs\Combined\DateTime';
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: DATE/TIME</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

@@ -44,6 +44,7 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $basic = new CoreLibs\Basic($log);
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: SYSTEM</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';

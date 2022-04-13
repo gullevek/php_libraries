@@ -39,6 +39,7 @@ $log = new CoreLibs\Debug\Logging([
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 $db->log->debug('START', '=============================>');
 
+print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: DB</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
