@@ -1,7 +1,12 @@
 <?php
 
 /*
- * hash wrapper functions for old problem fixes
+ * deprecated function calls
+ * Language\Encoding::__mbMimeEncode -> Convert\MimeEncode::__mbMimeEncode
+ * Langauge\Encoding::checkConvertEncoding -> Check\Encoding::checkConvertEncoding
+ * Langauge\Encoding::setErrorChar -> Check\Encoding::setErrorChar
+ * Langauge\Encoding::getErrorChar -> Encoding::getErrorChar
+ * Langauge\Encoding::convertEncoding -> Convert\Encoding::convertEncoding
  */
 
 declare(strict_types=1);
@@ -10,9 +15,6 @@ namespace CoreLibs\Language;
 
 class Encoding
 {
-	/** @var int<min, -1>|int<1, max>|string */
-	private static $mb_error_char = '';
-
 	/**
 	 * wrapper function for mb mime convert
 	 * for correct conversion with long strings
@@ -21,47 +23,14 @@ class Encoding
 	 * @param  string $encoding   target encoding
 	 * @param  string $line_break default line break is \r\n
 	 * @return string             encoded string
+	 * @deprecated Use \CoreLibs\Convert\MimeEncode::__mbMimeEncode();
 	 */
 	public static function __mbMimeEncode(
 		string $string,
 		string $encoding,
 		string $line_break = "\r\n"
 	): string {
-		// set internal encoding, so the mimeheader encode works correctly
-		mb_internal_encoding($encoding);
-		// if a subject, make a work around for the broken mb_mimencode
-		$pos = 0;
-		// after 36 single bytes characters,
-		// if then comes MB, it is broken
-		// has to 2 x 36 < 74 so the mb_encode_mimeheader
-		// 74 hardcoded split does not get triggered
-		$split = 36;
-		$_string = '';
-		while ($pos < mb_strlen($string, $encoding)) {
-			$output = mb_strimwidth($string, $pos, $split, "", $encoding);
-			$pos += mb_strlen($output, $encoding);
-			// if the strinlen is 0 here, get out of the loop
-			if (!mb_strlen($output, $encoding)) {
-				$pos += mb_strlen($string, $encoding);
-			}
-			$_string_encoded = mb_encode_mimeheader($output, $encoding);
-			// only make linebreaks if we have mime encoded code inside
-			// the space only belongs in the second line
-			if ($_string && preg_match("/^=\?/", $_string_encoded)) {
-				$_string .= $line_break . " ";
-			} elseif (
-				// hack for plain text with space at the end
-				mb_strlen($output, $encoding) == $split &&
-				mb_substr($output, -1, 1, $encoding) == " "
-			) {
-				// if output ends with space, add one more
-				$_string_encoded .= " ";
-			}
-			$_string .= $_string_encoded;
-		}
-		// strip out any spaces BEFORE a line break
-		$string = str_replace(" " . $line_break, $line_break, $_string);
-		return $string;
+		return \CoreLibs\Convert\MimeEncode::__mbMimeEncode($string, $encoding, $line_break);
 	}
 
 	/**
@@ -75,18 +44,11 @@ class Encoding
 	 *                                 default character is ? (63)
 	 *                                 if null is set then "none"
 	 * @return void
+	 * @deprecated Use \CoreLibs\Check\Encoding::setErrorChar();
 	 */
 	public static function setErrorChar($string): void
 	{
-		if (empty($string)) {
-			$string = 'none';
-		}
-		if (!in_array($string, ['none', 'long', 'entity'])) {
-			self::$mb_error_char = \IntlChar::chr($string);
-		} else {
-			self::$mb_error_char = $string;
-		}
-		mb_substitute_character($string);
+		\CoreLibs\Check\Encoding::setErrorChar($string);
 	}
 
 	/**
@@ -96,15 +58,11 @@ class Encoding
 	 *                                      character from the php function
 	 *                                      directly
 	 * @return string|int Set error character
+	 * @deprecated Use \CoreLibs\Check\Encoding::getErrorChar();
 	 */
 	public static function getErrorChar(bool $return_substitute_func = false)
 	{
-		// return mb_substitute_character();
-		if ($return_substitute_func === true) {
-			return mb_substitute_character();
-		} else {
-			return self::$mb_error_char;
-		}
+		return \CoreLibs\Check\Encoding::getErrorChar($return_substitute_func);
 	}
 
 	/**
@@ -123,38 +81,16 @@ class Encoding
 	 * @param  string     $string        string to test
 	 * @param  string     $from_encoding encoding of string to test
 	 * @param  string     $to_encoding   target encoding
-	 * @return bool|array<string>        false if no error or array with failed characters
+	 * @return bool|array<string>        false if no error or
+	 *                                   array with failed characters
+	 * @deprecated Use \CoreLibs\Check\Encoding::checkConvertEncoding();
 	 */
 	public static function checkConvertEncoding(
 		string $string,
 		string $from_encoding,
 		string $to_encoding
 	) {
-		// convert to target encoding and convert back
-		$temp = mb_convert_encoding($string, $to_encoding, $from_encoding);
-		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);
-		// if string does not match anymore we have a convert problem
-		if ($string != $compare) {
-			$failed = [];
-			// go through each character and find the ones that do not match
-			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i++) {
-				$char = mb_substr($string, $i, 1, $from_encoding);
-				$r_char = mb_substr($compare, $i, 1, $from_encoding);
-				// the ord 194 is a hack to fix the IE7/IE8
-				// bug with line break and illegal character
-				if (
-					(($char != $r_char && (!self::$mb_error_char ||
-					in_array(self::$mb_error_char, ['none', 'long', 'entity']))) ||
-					($char != $r_char && $r_char == self::$mb_error_char && self::$mb_error_char)) &&
-					ord($char) != 194
-				) {
-					$failed[] = $char;
-				}
-			}
-			return $failed;
-		} else {
-			return false;
-		}
+		return \CoreLibs\Check\Encoding::checkConvertEncoding($string, $from_encoding, $to_encoding);
 	}
 
 	/**
@@ -171,6 +107,7 @@ class Encoding
 	 *                                 check that the source is actually matching
 	 *                                 to what we sav the source is
 	 * @return string                  encoding converted string
+	 * @deprecated Use \CoreLibs\Convert\Encoding::convertEncoding();
 	 */
 	public static function convertEncoding(
 		string $string,
@@ -178,29 +115,12 @@ class Encoding
 		string $source_encoding = '',
 		bool $auto_check = true
 	): string {
-		// set if not given
-		if (!$source_encoding) {
-			$source_encoding = mb_detect_encoding($string);
-		} else {
-			$_source_encoding = mb_detect_encoding($string);
-		}
-		if (
-			$auto_check === true &&
-			isset($_source_encoding) &&
-			$_source_encoding == $source_encoding
-		) {
-			// trigger check if we have override source encoding.
-			// if different (_source is all but not ascii) then trigger
-			// skip if matching
-		}
-		if ($source_encoding != $to_encoding) {
-			if ($source_encoding) {
-				$string = mb_convert_encoding($string, $to_encoding, $source_encoding);
-			} else {
-				$string = mb_convert_encoding($string, $to_encoding);
-			}
-		}
-		return $string;
+		return \CoreLibs\Convert\Encoding::convertEncoding(
+			$string,
+			$to_encoding,
+			$source_encoding,
+			$auto_check
+		);
 	}
 }
 

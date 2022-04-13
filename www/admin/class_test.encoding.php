@@ -29,7 +29,9 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-encoding';
 ob_end_flush();
 
-use CoreLibs\Language\Encoding;
+use CoreLibs\Convert\Encoding as ConEnc;
+use CoreLibs\Check\Encoding as ChkEnc;
+use CoreLibs\Convert\MimeEncode;
 
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
@@ -41,10 +43,12 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$_encoding = new CoreLibs\Language\Encoding();
-$encoding_class = 'CoreLibs\Language\Encoding';
+// class type
+$_chk_enc = new CoreLibs\Check\Encoding();
+$_con_enc = new CoreLibs\Convert\Encoding();
+$chk_enc = 'CoreLibs\Check\Encoding';
 
-print "<html><head><title>TEST CLASS: ENCODING</title><head>";
+print "<html><head><title>TEST CLASS: ENCODING (CHECK/CONVERT/MIME)</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
@@ -58,7 +62,7 @@ $mime_encodes = [
 	['日本語ながい日本語ながい日本語ながい日本語ながい日本語ながい日本語ながい日本語ながい', 'ISO-2022-JP-MS'],
 ];
 foreach ($mime_encodes as $mime_encode) {
-	print "__MBMIMEENCODE: $mime_encode[0]: " . Encoding::__mbMimeEncode($mime_encode[0], $mime_encode[1]) . "<br>";
+	print "__MBMIMEENCODE: $mime_encode[0]: " . MimeEncode::__mbMimeEncode($mime_encode[0], $mime_encode[1]) . "<br>";
 }
 
 $enc_strings = [
@@ -68,31 +72,33 @@ $enc_strings = [
 	''
 ];
 // class
-$_encoding->setErrorChar('∴');
+$_chk_enc->setErrorChar(0x2234);
+$_chk_enc->setErrorChar('∴');
+print "ERROR CHAR: " . $_chk_enc->getErrorChar() . "<br>";
 foreach ($enc_strings as $_string) {
-	$string = $_encoding->checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
+	$string = $_chk_enc->checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
 	print "ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
-	print "CONV ENCODING: $_string: " . $_encoding->convertEncoding($_string, 'ISO-2022-JP') . "<br>";
-	print "CONV ENCODING (s): $_string: " . $_encoding->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8') . "<br>";
+	print "CONV ENCODING: $_string: " . $_con_enc->convertEncoding($_string, 'ISO-2022-JP') . "<br>";
+	print "CONV ENCODING (s): $_string: " . $_con_enc->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8') . "<br>";
 	print "CONV ENCODING (s,a-false): $_string: "
-		. $_encoding->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8', false) . "<br>";
+		. $_con_enc->convertEncoding($_string, 'ISO-2022-JP', 'UTF-8', false) . "<br>";
 }
-print "ERROR CHAR: " . $_encoding->getErrorChar() . "<br>";
 // static
-$encoding_class::setErrorChar('∴');
+// ChkEnc::setErrorChar('∴');
+ChkEnc::setErrorChar(0x2234);
+print "S::ERROR CHAR: " . ChkEnc::getErrorChar() . "<br>";
 foreach ($enc_strings as $_string) {
-	$string = $encoding_class::checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
+	$string = ChkEnc::checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
 	print "S::ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
-	print "S::CONV ENCODING: $_string: " . $encoding_class::convertEncoding($_string, 'ISO-2022-JP') . "<br>";
+	print "S::CONV ENCODING: $_string: " . ConEnc::convertEncoding($_string, 'ISO-2022-JP') . "<br>";
 	print "S::CONV ENCODING (s): $_string: "
-		. $encoding_class::convertEncoding($_string, 'ISO-2022-JP', 'UTF-8') . "<br>";
+		. ConEnc::convertEncoding($_string, 'ISO-2022-JP', 'UTF-8') . "<br>";
 	print "S::CONV ENCODING (s,a-false): $_string: "
-		. $encoding_class::convertEncoding($_string, 'ISO-2022-JP', 'UTF-8', false) . "<br>";
+		. ConEnc::convertEncoding($_string, 'ISO-2022-JP', 'UTF-8', false) . "<br>";
 }
-print "S::ERROR CHAR: " . $encoding_class::getErrorChar() . "<br>";
 // static use
 $_string = $enc_strings[1];
-$string = Encoding::checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
+$string = $chk_enc::checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
 print "S::ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
 
 // error message
