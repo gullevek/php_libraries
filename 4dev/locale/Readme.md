@@ -13,6 +13,7 @@ en_US@latin -> en_US -> en
 
 * en
 * en_US
+* en_US.UTF-8
 * en_US@latin
 
 ### Domain
@@ -32,7 +33,9 @@ if not set UTF-8 is assumed. Any other utf8 encoding is changed to UTF-8
 
 ## File name example source
 
-`ja_US.admin.UTF-8.po`
+`ja-admin.po`
+
+First part is LOCALE, second part is domain. Separator is `-`
 
 ## Folder layout
 
@@ -49,4 +52,4 @@ frontend: dmain (CONTENT_PATH)
 
 ## command
 
-`msgfmt -o www/includes/locale/ja_JP/LC_MESSAGES/frontend.UTF-8.mo 4dev/lang/ja_US.admin.UTF-8.po`
+`msgfmt -o www/includes/locale/ja/LC_MESSAGES/frontend.mo 4dev/lang/ja.admin.po`

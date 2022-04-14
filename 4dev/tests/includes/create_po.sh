@@ -7,7 +7,10 @@ if [ ! -f "locale/en_US/LC_MESSAGES/admin.mo" ]; then
 	exit;
 fi;
 
-msgfmt -o locale/en_US/LC_MESSAGES/admin.mo locale/en_US.admin.UTF-8.po
-msgfmt -o locale/en_US/LC_MESSAGES/frontend.mo locale/en_US.frontend.UTF-8.po
-msgfmt -o locale/ja_JP/LC_MESSAGES/admin.mo locale/ja_JP.admin.UTF-8.po
-msgfmt -o locale/ja_JP/LC_MESSAGES/frontend.mo locale/ja_JP.frontend.UTF-8.po
+for file in $(ls -1 locale/*.po); do
+	echo $file;
+	file=$(basename $file .po);
+	locale=$(echo "${file}" | cut -d "-" -f 1);
+	domain=$(echo "${file}" | cut -d "-" -f 2);
+	msgfmt -o locale/${locale}/LC_MESSAGES/${domain}.mo locale/${locale}-${domain}.po;
+done;
