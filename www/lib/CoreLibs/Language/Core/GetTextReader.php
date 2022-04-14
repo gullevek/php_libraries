@@ -353,7 +353,8 @@ class GetTextReader
 		$expr .= ';';
 		$res = '';
 		$p = 0;
-		for ($i = 0; $i < strlen($expr); $i++) {
+		$expr_len = strlen($expr);
+		for ($i = 0; $i < $expr_len; $i++) {
 			$ch = $expr[$i];
 			switch ($ch) {
 				case '?':
@@ -433,6 +434,7 @@ class GetTextReader
 		$total = 0;
 		$plural = 0;
 
+		// FIXME use  Symfony\Component\ExpressionLanguage\ExpressionLanguage or similar
 		eval("$string");
 		/** @phpstan-ignore-next-line 0 >= 0 is always true*/
 		if ($plural >= $total) {
