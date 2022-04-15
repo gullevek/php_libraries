@@ -112,6 +112,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Language\\Core\\StreamReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/StreamReader.php',
         'CoreLibs\\Language\\Core\\StringReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/StringReader.php',
         'CoreLibs\\Language\\Encoding' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Encoding.php',
+        'CoreLibs\\Language\\GetLocale' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/GetLocale.php',
         'CoreLibs\\Language\\GetSettings' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/GetSettings.php',
         'CoreLibs\\Language\\L10n' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/L10n.php',
         'CoreLibs\\Output\\Form\\Elements' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/Elements.php',

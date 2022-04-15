@@ -30,6 +30,7 @@ class GetSettings
 	 * @param  string|null $locale A valid locale name
 	 * @param  string|null $path   A valid path where the mo files will be based
 	 * @return array<int|string,string> Settings as array/dictionary
+	 * @deprecated Use CoreLibs\Language\GetLocale::setLocale()
 	 */
 	public static function setLangEncoding(
 		?string $locale = null,

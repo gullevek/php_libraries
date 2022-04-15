@@ -87,44 +87,20 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	{
 		return [
 			// 0: locale
-			// 1: path
-			// 2: domain
-			// 3: legacy load (Default true)
+			// 1: domain
+			// 2: encoding
+			// 3: path
 			// 4: locale expected
 			// 5: domain exepcted
 			// 6: context (null for none)
 			// 7: test string in
 			// 8: test translated
-			'legacy load en' => [
-				'en_utf8',
-				null,
-				null,
-				null,
-				//
-				'en_utf8',
-				'',
-				//
-				null,
-				'Original',
-				'Translated frontend en_US',
-			],
-			'legacy load ja' => [
-				'ja_utf8',
-				null,
-				null,
-				null,
-				'ja_utf8',
-				'',
-				null,
-				'Original',
-				'Translated frontend ja_JP',
-			],
 			// new style load
 			'gettext load en' => [
 				'en_US.UTF-8',
-				__DIR__ . 'includes/locale/',
 				'frontend',
-				false,
+				__DIR__ . 'includes/locale/',
+				//
 				'en_US.UTF-8',
 				'frontend',
 				null,
@@ -133,9 +109,9 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			],
 			'gettext load en' => [
 				'en_US.UTF-8',
-				__DIR__ . 'includes/locale/',
 				'frontend',
-				false,
+				__DIR__ . 'includes/locale/',
+				//
 				'en_US.UTF-8',
 				'frontend',
 				'context',
@@ -144,32 +120,33 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			],
 			'gettext load ja' => [
 				'ja_JP.UTF-8',
-				__DIR__ . 'includes/locale/',
 				'admin',
-				false,
+				__DIR__ . 'includes/locale/',
+				//
 				'ja_JP.UTF-8',
 				'admin',
 				null,
 				'Original',
 				'Translated admin ja_JP',
 			],
-			// null set locale legacy
-			'empty load legacy' => [
-				null,
-				null,
-				null,
-				null,
-				'',
-				'',
-				null,
+			// mixed path and domain
+			'mixed path and domain' => [
+				'en_US.UTF-8',
+				__DIR__ . 'includes/locale/',
+				'frontend',
+				//
+				'en_US.UTF-8',
+				'frontend',
+				'context',
 				'Original',
-				'Original',
+				'Original context frontend en_US',
 			],
+			// null set
 			'empty load new ' => [
 				'',
 				'',
 				'',
-				false,
+				//
 				'',
 				'',
 				null,
@@ -187,9 +164,8 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * @testdox check l10n init with Locale $locale, Path $path, Domain $domain, Legacy: $legacy with $context [$_dataName]
 	 *
 	 * @param  string|null $locale
-	 * @param  string|null $path
 	 * @param  string|null $domain
-	 * @param  bool|null   $legacy
+	 * @param  string|null $path
 	 * @param  string      $locale_expected
 	 * @param  string      $domain_expected
 	 * @param  ?string     $context
@@ -199,9 +175,8 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 */
 	public function testL10nObject(
 		?string $locale,
-		?string $path,
 		?string $domain,
-		?bool $legacy,
+		?string $path,
 		string $locale_expected,
 		string $domain_expected,
 		?string $context,
@@ -210,14 +185,12 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	): void {
 		if ($locale === null) {
 			$l10n = new \CoreLibs\Language\L10n();
-		} elseif ($path === null) {
-			$l10n = new \CoreLibs\Language\L10n($locale);
 		} elseif ($domain === null) {
-			$l10n = new \CoreLibs\Language\L10n($locale, $path);
-		} elseif ($legacy === null) {
-			$l10n = new \CoreLibs\Language\L10n($locale, $path, $domain);
+			$l10n = new \CoreLibs\Language\L10n($locale);
+		} elseif ($path === null) {
+			$l10n = new \CoreLibs\Language\L10n($locale, $domain);
 		} else {
-			$l10n = new \CoreLibs\Language\L10n($locale, $path, $domain, $legacy);
+			$l10n = new \CoreLibs\Language\L10n($locale, $domain, $path);
 		}
 		// print "LOC: " . $locale . ", " . $l10n->getLocale() . ", " . $locale_expected . "\n";
 		// print "MO: " . $l10n->getMoFile() . "\n";
@@ -259,94 +232,64 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	{
 		return [
 			// 0: locale
-			// 1: path
-			// 2: domain
-			// 3: legacy flag
+			// 1: domain
+			// 2: path
+			// 3: load error
 			// 4: input string to translated
 			// 5: expected locale
 			// 6: expected domain
 			// 7: expected translation
 			// 8: change locale
-			// 9: change path
-			// 10: change domain
-			// 11: legacy flag
+			// 9: change domain
+			// 10: change path
+			// 11: change load error
 			// 12: expected locale
 			// 13: expected domain
 			// 14: expected translation
-			'legacy load and change (en->ja)' => [
-				// set 0-3
-				'en_utf8',
-				null,
-				null,
-				null,
-				// status 4
-				false,
-				// to translate 5
-				'Original',
-				// check setter 6-8
-				'en_utf8',
-				'',
-				'Translated frontend en_US',
-				// set new 9-12
-				'ja_utf8',
-				null,
-				null,
-				null,
-				// status new 13
-				false,
-				// check new setter 14-16
-				'ja_utf8',
-				'',
-				'Translated frontend ja_JP',
-			],
 			'load and change (en->ja)' => [
-				// set 0-3
+				// set 0-2
 				'en_US.UTF-8',
-				__DIR__ . 'includes/locale/',
 				'frontend',
+				__DIR__ . 'includes/locale/',
+				// status 3
 				false,
-				// status 4
-				false,
-				// to translate 5
+				// to translate 4
 				'Original',
-				// check setter 6-8
+				// check setter 5-7
 				'en_US.UTF-8',
 				'frontend',
 				'Translated frontend en_US',
-				// set new 9-12
+				// set new 8-10
 				'ja_JP.UTF-8',
-				__DIR__ . 'includes/locale/',
 				'frontend',
+				__DIR__ . 'includes/locale/',
+				// status new 11
 				false,
-				// status new 13
-				false,
-				// check new setter 14-16
+				// check new setter 12-14
 				'ja_JP.UTF-8',
 				'frontend',
 				'Translated frontend ja_JP',
 			],
 			'empty load and change to en' => [
-				// set 0-3
+				// set 0-2
 				'',
 				'',
 				'',
+				// status 3
 				false,
-				// status 4
-				false,
-				// to translate 5
+				// to translate 4
 				'Original',
-				// check setter 6-8
+				// check setter 5-7
 				'',
 				'',
 				'Original',
-				// set new 9-12
+				// set new 8-10
 				'en_US.UTF-8',
-				__DIR__ . 'includes/locale/',
 				'frontend',
+				__DIR__ . 'includes/locale/',
+				// status new 11
 				false,
-				// status new 13
-				false,
-				// check new setter 14-16
+				// check new setter 12-14
 				'en_US.UTF-8',
 				'frontend',
 				'Translated frontend en_US',
@@ -363,18 +306,16 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * @testdox change locale from $locale and domain $domain to locale $locale_new and domain $domain_new [$_dataName]
 	 *
 	 * @param  string|null $locale
-	 * @param  string|null $path
 	 * @param  string|null $domain
-	 * @param  bool|null   $legacy
+	 * @param  string|null $path
 	 * @param  bool        $load_error
 	 * @param  string      $original
 	 * @param  string      $locale_expected_a
 	 * @param  string      $domain_expected_a
 	 * @param  string      $translated_a
 	 * @param  string|null $locale_new
-	 * @param  string|null $path_new
 	 * @param  string|null $domain_new
-	 * @param  bool|null   $legacy_new
+	 * @param  string|null $path_new
 	 * @param  bool        $load_error_new
 	 * @param  string      $locale_expected_b
 	 * @param  string      $domain_expected_b
@@ -382,41 +323,37 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * @return void
 	 */
 	public function testGetTranslator(
-		// 0-3
+		// 0-2
 		?string $locale,
-		?string $path,
 		?string $domain,
-		?bool $legacy,
-		// 4
+		?string $path,
+		// 3
 		bool $load_error,
-		// 5
+		// 4
 		string $original,
-		// 6-8
+		// 5-7
 		string $locale_expected_a,
 		string $domain_expected_a,
 		string $translated_a,
-		// 9-12
+		// 8-10
 		?string $locale_new,
-		?string $path_new,
 		?string $domain_new,
-		?bool $legacy_new,
-		// 13
+		?string $path_new,
+		// 11
 		bool $load_error_new,
-		// 14-16
+		// 12-14
 		string $locale_expected_b,
 		string $domain_expected_b,
 		string $translated_b,
 	): void {
 		if ($locale === null) {
 			$l10n = new \CoreLibs\Language\L10n();
-		} elseif ($path === null) {
-			$l10n = new \CoreLibs\Language\L10n($locale);
 		} elseif ($domain === null) {
-			$l10n = new \CoreLibs\Language\L10n($locale, $path);
-		} elseif ($legacy === null) {
-			$l10n = new \CoreLibs\Language\L10n($locale, $path, $domain);
+			$l10n = new \CoreLibs\Language\L10n($locale);
+		} elseif ($path === null) {
+			$l10n = new \CoreLibs\Language\L10n($locale, $domain);
 		} else {
-			$l10n = new \CoreLibs\Language\L10n($locale, $path, $domain, $legacy);
+			$l10n = new \CoreLibs\Language\L10n($locale, $domain, $path);
 		}
 		// print "LOC: " . $locale . ", " . $l10n->getLocale() . ", " . $locale_expected . "\n";
 		// status check
@@ -441,67 +378,39 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			'Translated string init assert failed'
 		);
 
-		// do reload with legacy l10nReloadMOfile IF legacy is null or true
-		// use getTranslator if legacy is false
-		if ($legacy === null || $legacy === true) {
-			// there is no null/empty locale allowed directly
-			// if empty will set previous one
-			if ($path_new === null) {
-				$ret_status = $l10n->l10nReloadMOfile($locale_new);
-			} elseif ($domain_new === null) {
-				$ret_status = $l10n->l10nReloadMOfile($locale_new, $path_new);
-			} elseif ($legacy_new === null) {
-				$ret_status = $l10n->l10nReloadMOfile($locale_new, $path_new, $domain_new);
-			} else {
-				$ret_status = $l10n->l10nReloadMOfile($locale_new, $path_new, $domain_new, $legacy_new);
-			}
-			// status check
-			$this->assertEquals(
-				$load_error_new,
-				$l10n->getLoadError(),
-				'Legacy method load error change check'
-			);
-			// retun status check is inverted to load error check
-			$this->assertEquals(
-				$load_error_new ? false : true,
-				$ret_status,
-				'Legacy return load error change check'
-			);
+		// switch
+		if ($locale_new === null) {
+			$translator = $l10n->getTranslator();
+		} elseif ($domain_new === null) {
+			$translator = $l10n->getTranslator($locale_new);
+		} elseif ($path_new === null) {
+			$translator = $l10n->getTranslator($locale_new, $domain_new);
 		} else {
-			if ($locale_new === null) {
-				$translator = $l10n->getTranslator();
-			} elseif ($path_new === null) {
-				$translator = $l10n->getTranslator($locale_new);
-			} elseif ($domain_new === null) {
-				$translator = $l10n->getTranslator($locale_new, $path_new);
-			} elseif ($legacy_new === null) {
-				$translator = $l10n->getTranslator($locale_new, $path_new, $domain_new);
-			} else {
-				$translator = $l10n->getTranslator($locale_new, $path_new, $domain_new, $legacy_new);
-			}
-			// status check
-			$this->assertEquals(
-				$load_error_new,
-				$l10n->getLoadError(),
-				'Translate method load error change check'
-			);
-			// check that returned is class GetTextReader and object
-			$this->assertIsObject(
-				$translator,
-				'translater class is object assert failed'
-			);
-			$this->assertInstanceOf(
-				'\CoreLibs\Language\Core\GetTextReader',
-				$translator,
-				'translator class is correct instance assert failed'
-			);
-			// translator class
-			$this->assertEquals(
-				$translated_b,
-				$translator->gettext($original),
-				'Translated string change assert failed from returned class'
-			);
+			$translator = $l10n->getTranslator($locale_new, $domain_new, $path_new);
 		}
+		// status check
+		$this->assertEquals(
+			$load_error_new,
+			$l10n->getLoadError(),
+			'Translate method load error change check'
+		);
+		// check that returned is class GetTextReader and object
+		$this->assertIsObject(
+			$translator,
+			'translater class is object assert failed'
+		);
+		$this->assertInstanceOf(
+			'\CoreLibs\Language\Core\GetTextReader',
+			$translator,
+			'translator class is correct instance assert failed'
+		);
+
+		// translator class
+		$this->assertEquals(
+			$translated_b,
+			$translator->gettext($original),
+			'Translated string change assert failed from returned class'
+		);
 		// new set check
 		$this->assertEquals(
 			$locale_expected_b,
@@ -520,16 +429,14 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		);
 	}
 
-	// TODO: test all translation types
-	// __/gettext
-	// __n/ngettext
+	// TODO: domain based
 	// ->dgettext
 	// ->dngettext
 	// ->dpgettext
 	// ->dpngettext
 
 	/**
-	 * Undocumented function
+	 * for plural and plural context
 	 *
 	 * @return array
 	 */
@@ -579,9 +486,10 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	}
 
 	/**
-	 * Undocumented function
+	 * plural and plural context
 	 *
 	 * @covers ::__n
+	 * @covers ::__pn
 	 * @dataProvider ngettextProvider
 	 * @testdox plural string test for locale $locale and domain $domain with $context [$_dataName]
 	 *
@@ -640,21 +548,39 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				'en',
 				[
 					'en',
-				]
+				],
+				[
+					'lang' => 'en',
+					'country' => null,
+					'charset' => null,
+					'modifier' => null,
+				],
 			],
 			'en.UTF-8' => [
 				'en.UTF-8',
 				[
 					'en.UTF-8',
 					'en',
-				]
+				],
+				[
+					'lang' => 'en',
+					'country' => null,
+					'charset' => 'UTF-8',
+					'modifier' => null,
+				],
 			],
 			'en_US' => [
 				'en_US',
 				[
 					'en_US',
 					'en',
-				]
+				],
+				[
+					'lang' => 'en',
+					'country' => 'US',
+					'charset' => null,
+					'modifier' => null,
+				],
 			],
 			'en_US.UTF-8' => [
 				'en_US.UTF-8',
@@ -662,7 +588,13 @@ final class CoreLibsLanguageL10nTest extends TestCase
 					'en_US.UTF-8',
 					'en_US',
 					'en',
-				]
+				],
+				[
+					'lang' => 'en',
+					'country' => 'US',
+					'charset' => 'UTF-8',
+					'modifier' => null,
+				],
 			],
 			'en_US@subtext' => [
 				'en_US@subtext',
@@ -671,7 +603,13 @@ final class CoreLibsLanguageL10nTest extends TestCase
 					'en@subtext',
 					'en_US',
 					'en',
-				]
+				],
+				[
+					'lang' => 'en',
+					'country' => 'US',
+					'charset' => null,
+					'modifier' => 'subtext',
+				],
 			],
 			'en_US.UTF-8@subtext' => [
 				'en_US.UTF-8@subtext',
@@ -682,7 +620,13 @@ final class CoreLibsLanguageL10nTest extends TestCase
 					'en_US.UTF-8',
 					'en_US',
 					'en',
-				]
+				],
+				[
+					'lang' => 'en',
+					'country' => 'US',
+					'charset' => 'UTF-8',
+					'modifier' => 'subtext',
+				],
 			]
 		];
 	}
@@ -695,16 +639,24 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * @testdox check $locale [$_dataName]
 	 *
 	 * @param string $locale
-	 * @param array $expected
+	 * @param array $expected_list
+	 * @param array $expected_detail
 	 * @return void
 	 */
-	public function testListLocales(string $locale, array $expected): void
+	public function testListLocales(string $locale, array $expected_list, array $expected_detail): void
 	{
+		$locale_detail = \CoreLibs\Language\L10n::parseLocale($locale);
+		$this->assertEquals(
+			$expected_detail,
+			$locale_detail,
+			'Parse local assert failed'
+		);
 		$locale_list = \CoreLibs\Language\L10n::listLocales($locale);
 		// print "LOCALES: " . print_r($locale_list, true) . "\n";
 		$this->assertEquals(
-			$expected,
-			$locale_list
+			$expected_list,
+			$locale_list,
+			'List locale assert failed'
 		);
 	}
 
@@ -971,23 +923,23 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	{
 		return [
 			// 0: lang/locale
-			// 1: path
-			// 2: domain
+			// 1: domain
+			// 2: path
 			// 3: encoding
 			// 4: string
 			// 5: translated string
 			'standard en' => [
 				'en_US.UTF-8',
-				__DIR__ . 'includes/locale/',
 				'frontend',
+				__DIR__ . 'includes/locale/',
 				'UTF-8',
 				'Original',
 				'Translated frontend en_US',
 			],
 			'standard ja' => [
 				'ja_JP.UTF-8',
-				__DIR__ . 'includes/locale/',
 				'admin',
+				__DIR__ . 'includes/locale/',
 				'UTF-8',
 				'Original',
 				'Translated admin ja_JP',
@@ -1008,8 +960,8 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * @dataProvider functionsProvider
 	 * @testdox check functions with locale $locale and domain $domain [$_dataName]
 	 * @param  string $locale
-	 * @param  string $path
 	 * @param  string $domain
+	 * @param  string $path
 	 * @param  string $encoding
 	 * @param  string $original
 	 * @param  string $translated
@@ -1017,8 +969,8 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 */
 	public function testFunctions(
 		string $locale,
-		string $path,
 		string $domain,
+		string $path,
 		string $encoding,
 		string $original,
 		string $translated

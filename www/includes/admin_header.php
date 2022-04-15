@@ -72,10 +72,19 @@ if (
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 // login & page access check
 $login = new CoreLibs\ACL\Login($db, $log);
+// lang, path, domain
+// pre auto detect language after login
+$locale = \CoreLibs\Language\GetLocale::setLocale();
+// set lang and pass to smarty/backend
+$l10n = new \CoreLibs\Language\L10n(
+	$locale['locale'],
+	$locale['domain'],
+	$locale['path'],
+);
 // create smarty object
-$smarty = new CoreLibs\Template\SmartyExtend();
+$smarty = new CoreLibs\Template\SmartyExtend($l10n, $locale);
 // create new Backend class with db and loger attached
-$cms = new CoreLibs\Admin\Backend($db, $log);
+$cms = new CoreLibs\Admin\Backend($db, $log, $l10n, $locale);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db info

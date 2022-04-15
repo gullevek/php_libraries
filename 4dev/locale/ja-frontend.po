@@ -2,7 +2,23 @@
 
 msgid ""
 msgstr ""
+"Project-Id-Version: ja.UTF-8 LC_MESSAGES frontend\n"
+"Report-Msgid-Bugs-To: clemens.schwaighofer@egplusww.com\n"
+"POT-Creation-Date: 2018-03-28 10:40+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: clemens.schwaighofer@egplusww.com\n"
+"Language-Team: E-GRAPHICS COMMUNICATIONS Japan <info.jp@egplusww.com>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 msgid "INPUT TEST"
 msgstr "OUTPUT TEST FRONTEND JA"
+
+msgid "single"
+msgid_plural "multi"
+msgstr[0] "Multi frontend ja 0"
+msgstr[1] "Multi frontend ja 1"
+msgstr[2] "Multi frontend ja 2"

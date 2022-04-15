@@ -3,33 +3,25 @@
 /*********************************************************************
 * AUTHOR: Clemens Schwaighofer
 * CREATED: 2004/11/18
-* VERSION: 1.0.0
+* VERSION: 3.0.0
 * RELEASED LICENSE: GNU GPL 3
 * SHORT DESCRIPTION:
-* 	init class for gettext. Original was just a function & var setting include for wordpress.
+* 	init class for gettext. Original was just a function &
+*   var setting include for wordpress.
 *	I changed that to a class to be more portable with my style of coding
-*
-* PUBLIC VARIABLES
-*
-* PRIVATE VARIABLES
-*
+*   VERSION 3.0 (2022/4) removes all old folder layout and uses standard gettext
 * PUBLIC METHODS
-*	__:	returns string (translated or original if not found)
-*	__e: echos out string (translated or original if not found)
-*	__n:	should return plural. never tested this.
-*
-*   PRIVATE METHODS
+*	__  : returns string (translated or original if not found)
+*	__n : plural string
+*   __p : string with context
+*   __pb: string with context and plural
 *
 * HISTORY:
+* 2022/4/15  (cs) drop all old folder layout support, new folder base
+*                 in locale with standard gettext layout of
+*                 locale/LC_MESSAGES/domain.mo
 * 2005/10/17 (cs) made an on the fly switch method (reload of lang)
 *********************************************************************/
-
-// TODO: default path change to <base>/lang/LC_MESSAGES/domain.encoding.mo
-// for example: lang: ja_JP.UTF-8, domain: admin
-// <base>/ja_JP/LC_MESSAGES/admin.UTF-8.mo
-// OLD: includes/lang/admin/ja_utf8.mo
-// NEW: includes/lang/ja_JP/LC_MESSAGES/admin.UTF-8.mo
-// or fallback: includes/lang/ja/LC_MESSAGES/admin.UTF-8.mo
 
 declare(strict_types=1);
 
@@ -48,15 +40,20 @@ class L10n
 	private $domains = [];
 	/** @var array<string,string> bound paths for domains */
 	private $paths = ['' => './'];
+
+	// files
 	/** @var string the full path to the mo file to loaded */
 	private $mofile = '';
 	/** @var string base path to search level */
 	private $base_locale_path = '';
 	/** @var string dynamic set path to where the mo file is actually */
 	private $base_content_path = '';
+
+	// errors
 	/** @var bool if load of mo file was unsuccessful */
 	private $load_failure = false;
 
+	// object holders
 	/** @var FileReader|bool reader class for file reading, false for short circuit */
 	private $input = false;
 	/** @var GetTextReader reader class for MO data */
@@ -74,20 +71,24 @@ class L10n
 	 *
 	 * @param string $locale language name, default empty string
 	 *                       will return self instance
-	 * @param string $path   path, if empty fallback on default internal path
 	 * @param string $domain override CONTENT_PATH . $encoding name for mo file
-	 * @param bool   $legacy default true, if set to true, will look in the old
-	 *                       folder format lang/ CONTENT_PATH / $lang . mo
+	 * @param string $path   path, if empty fallback on default internal path
 	 */
 	public function __construct(
 		string $locale = '',
-		string $path = '',
 		string $domain = '',
-		bool $legacy = true
+		string $path = '',
 	) {
-		// load the mo file if locale is not empty
-		if (!empty($locale)) {
-			$this->getTranslator($locale, $path, $domain, $legacy);
+		// auto load language only if at least locale and domain is set
+		if (!empty($locale) && !empty($domain)) {
+			// check hack if domain and path is switched
+			// Note this can be removed in future versions
+			if (strstr($domain, DIRECTORY_SEPARATOR) !== false) {
+				$_domain = $path;
+				$path = $domain;
+				$domain = $_domain;
+			}
+			$this->getTranslator($locale, $domain, $path);
 		}
 	}
 
@@ -117,42 +118,17 @@ class L10n
 	}
 
 	/**
-	 * legacy loader name for getTranslator
-	 * instead of returning the GetTextReader object it returns
-	 * true or false for successful load.
-	 * NOTE: some time down the road this will be deprecated
-	 *
-	 * @param string $locale
-	 * @param string $path
-	 * @param string $domain
-	 * @param bool   $legacy
-	 * @return bool          Returns true for successfull load, false for error
-	 */
-	public function l10nReloadMOfile(
-		string $locale,
-		string $path = '',
-		string $domain = '',
-		bool $legacy = true
-	): bool {
-		$this->getTranslator($locale, $path, $domain, $legacy);
-		return $this->load_failure ? false : true;
-	}
-
-	/**
 	 * loads the mo file base on path, locale and domain set
 	 *
 	 * @param string $locale language name (optional), fallback is en
-	 * @param string $path   path, if empty fallback on default internal path
 	 * @param string $domain override CONTENT_PATH . $encoding name for mo file
-	 * @param bool   $legacy default true, if set to true, will look in the old
-	 *                       folder format lang/ CONTENT_PATH / $lang . mo
+	 * @param string $path   path, if empty fallback on default internal path
 	 * @return GetTextReader the main gettext reader object
 	 */
 	public function getTranslator(
 		string $locale = '',
-		string $path = '',
 		string $domain = '',
-		bool $legacy = false
+		string $path = ''
 	): GetTextReader {
 		// set local if not from parameter
 		if (empty($locale)) {
@@ -169,48 +145,34 @@ class L10n
 		$old_base_locale_path = $this->base_locale_path;
 		$old_base_content_path = $this->base_content_path;
 
-		// legacy or new type
-		// legacy will use the old lang/content/file.mo type as default
-		// if path is not set, also locale is the file name
-		// for new type it follows the gettext spec and path is just the
-		// base folder where the mo files will be searched
-		if ($legacy === true) {
-			if (!is_dir($path)) {
-				$this->base_locale_path = BASE . INCLUDES . LANG;
-				$this->base_content_path = CONTENT_PATH;
-				$path = $this->base_locale_path . $this->base_content_path;
-			}
-			$this->mofile = $path . $locale . ".mo";
+		// if path is a dir
+		// 1) from a previous set domain
+		// 2) from method option as is
+		// 3) fallback if BASE/INCLUDES/LOCALE set
+		// 4) current dir
+		if (!empty($this->paths[$domain]) && is_dir($this->paths[$domain])) {
+			$this->base_locale_path = $this->paths[$domain];
+		} elseif (is_dir($path)) {
+			$this->base_locale_path = $path;
+		} elseif (
+			defined('BASE') && defined('INCLUDES') && defined('LOCALE')
+		) {
+			// set fallback base path if constant set
+			$this->base_locale_path = BASE . INCLUDES . LOCALE;
 		} else {
-			// if new path is a dir
-			// 1) from a previous set domain
-			// 2) from method option as is
-			// 3) fallback if BASE/INCLUDES/LOCALE set
-			// 4) current dir
-			if (!empty($this->paths[$domain]) && is_dir($this->paths[$domain])) {
-				$this->base_locale_path = $this->paths[$domain];
-			} elseif (is_dir($path)) {
-				$this->base_locale_path = $path;
-			} elseif (
-				defined('BASE') && defined('INCLUDES') && defined('LOCALE')
-			) {
-				// set fallback base path if constant set
-				$this->base_locale_path = BASE . INCLUDES . LOCALE;
-			} else {
-				$this->base_locale_path = './';
-			}
-			// now we loop over lang compositions to get the base path
-			// then we check
-			$locales = $this->listLocales($locale);
-			foreach ($locales as $_locale) {
-				$this->base_content_path = $_locale . DIRECTORY_SEPARATOR
-					. 'LC_MESSAGES' . DIRECTORY_SEPARATOR;
-				$this->mofile = $this->base_locale_path
-					. $this->base_content_path
-					. $domain . '.mo';
-				if (file_exists($this->mofile)) {
-					break;
-				}
+			$this->base_locale_path = './';
+		}
+		// now we loop over lang compositions to get the base path
+		// then we check
+		$locales = $this->listLocales($locale);
+		foreach ($locales as $_locale) {
+			$this->base_content_path = $_locale . DIRECTORY_SEPARATOR
+				. 'LC_MESSAGES' . DIRECTORY_SEPARATOR;
+			$this->mofile = $this->base_locale_path
+				. $this->base_content_path
+				. $domain . '.mo';
+			if (file_exists($this->mofile)) {
+				break;
 			}
 		}
 
@@ -274,6 +236,34 @@ class L10n
 	}
 
 	/**
+	 * parse the locale string for further processing
+	 *
+	 * @param  string $locale Locale to parse
+	 * @return array<string,string|null> array with lang, country, charset, modifier
+	 */
+	public static function parseLocale(string $locale = ''): array
+	{
+		preg_match(
+			// language code
+			'/^(?P<lang>[a-z]{2,3})'
+			// country code
+			. '(?:_(?P<country>[A-Z]{2}))?'
+			// charset
+			. '(?:\\.(?P<charset>[-A-Za-z0-9_]+))?'
+			// @ modifier
+			. '(?:@(?P<modifier>[-A-Za-z0-9_]+))?$/',
+			$locale,
+			$matches
+		);
+		return [
+			'lang' => $matches['lang'] ?? null,
+			'country' => $matches['country'] ?? null,
+			'charset' => $matches['charset'] ?? null,
+			'modifier' => $matches['modifier'] ?? null,
+		];
+	}
+
+	/**
 	 * original:
 	 * vendor/phpmyadmin/motranslator/src/Loader.php
 	 *
@@ -294,28 +284,16 @@ class L10n
 			return $locale_list;
 		}
 		// is matching regex
-		if (
-			!preg_match(
-				// language code
-				'/^(?P<lang>[a-z]{2,3})'
-				// country code
-				. '(?:_(?P<country>[A-Z]{2}))?'
-				// charset
-				. '(?:\\.(?P<charset>[-A-Za-z0-9_]+))?'
-				// @ modifier
-				. '(?:@(?P<modifier>[-A-Za-z0-9_]+))?$/',
-				$locale,
-				$matches
-			)
-		) {
-			// not matching, return as is
+		$locale_detail = L10n::parseLocale($locale);
+		// all null = nothing mached, return locale as is
+		if ($locale_detail === array_filter($locale_detail, 'is_null')) {
 			return [$locale];
 		}
-		// do matching run
-		$lang = $matches['lang'] ?? null;
-		$country = $matches['country'] ?? null;
-		$charset = $matches['charset'] ?? null;
-		$modifier = $matches['modifier'] ?? null;
+		// write to innteral vars
+		$lang = $locale_detail['lang'];
+		$country = $locale_detail['country'];
+		$charset = $locale_detail['charset'];
+		$modifier = $locale_detail['modifier'];
 		// we need to add all possible cominations from not null set
 		// entries to the list, from longest to shortest
 		// %s_%s.%s@%s　(lang _ country . encoding @ suffix)

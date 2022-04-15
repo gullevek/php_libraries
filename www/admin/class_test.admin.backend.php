@@ -43,7 +43,13 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 // db config with logger
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
-$backend = new CoreLibs\Admin\Backend($db, $log);
+$locale = \CoreLibs\Language\GetLocale::setLocale();
+$l10n = new \CoreLibs\Language\L10n(
+	$locale['locale'],
+	$locale['domain'],
+	$locale['path'],
+);
+$backend = new CoreLibs\Admin\Backend($db, $log, $l10n, $locale);
 
 print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: ADMIN BACKEND</title><head>";
@@ -51,7 +57,7 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 // set acl, from eg login acl
-print "SETACL[]: " . $backend->setACL([]) . "<br>";
+print "SETACL[]: " . $backend->setACL(['EMPTY' => 'EMPTY']) . "<br>";
 print "ADBEDITLOG: " . $backend->adbEditLog('CLASSTEST-ADMIN', 'Some info stirng') . "<br>";
 print "ADBTOPMENU(0): " . \CoreLibs\Debug\Support::printAr($backend->adbTopMenu()) . "<br>";
 print "ADBMSG: " . $backend->adbMsg('info', 'Message: %1$d', [1]) . "<br>";

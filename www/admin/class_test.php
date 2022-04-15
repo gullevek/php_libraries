@@ -41,7 +41,13 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 $login = new CoreLibs\ACL\Login($db, $log);
-$backend = new CoreLibs\Admin\Backend($db, $log);
+$locale = \CoreLibs\Language\GetLocale::setLocale();
+$l10n = new \CoreLibs\Language\L10n(
+	$locale['locale'],
+	$locale['domain'],
+	$locale['path'],
+);
+$backend = new CoreLibs\Admin\Backend($db, $log, $l10n, $locale);
 $backend->db->dbInfo(true);
 ob_end_flush();
 
@@ -79,9 +85,10 @@ print '<div><a href="class_test.smarty.php">Class Test: SMARTY</a></div>';
 print '<div><a href="class_test.autoloader.php">Class Test: AUTOLOADER</a></div>';
 
 print "<hr>";
+print "L: " . CoreLibs\Debug\Support::printAr($locale) . "<br>";
 // print all _ENV vars set
 print "<div>READ _ENV ARRAY:</div>";
-print "<pre>" . print_r(array_map('htmlentities', $_ENV), true) . "</pre>";
+print CoreLibs\Debug\Support::printAr(array_map('htmlentities', $_ENV));
 // set + check edit access id
 $edit_access_id = 3;
 if (is_object($login) && isset($login->acl['unit'])) {

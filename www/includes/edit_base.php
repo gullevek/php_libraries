@@ -61,18 +61,27 @@ $log = new CoreLibs\Debug\Logging([
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 // login page
 $login = new CoreLibs\ACL\Login($db, $log);
+// lang, path, domain
+// pre auto detect language after login
+$locale = \CoreLibs\Language\GetLocale::setLocale();
+// set lang and pass to smarty/backend
+$l10n = new \CoreLibs\Language\L10n(
+	$locale['locale'],
+	$locale['domain'],
+	$locale['path'],
+);
 // flush and start
 ob_end_flush();
 // turn off set log per class
 $log->setLogPer('class', false);
 // create form class
-$form = new CoreLibs\Output\Form\Generate(DB_CONFIG, $log);
+$form = new CoreLibs\Output\Form\Generate(DB_CONFIG, $log, $l10n, $locale);
 if ($form->mobile_phone) {
 	echo "I am sorry, but this page cannot be viewed by a mobile phone";
 	exit;
 }
 // smarty template engine (extended Translation version)
-$smarty = new CoreLibs\Template\SmartyExtend();
+$smarty = new CoreLibs\Template\SmartyExtend($l10n, $locale);
 
 // $form->log->debug('POST', $form->log->prAr($_POST));
 

@@ -114,15 +114,16 @@ class Backend
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**
 	 * main class constructor
-	 * @param \CoreLibs\DB\IO              $db   Database connection class
-	 * @param \CoreLibs\Debug\Logging      $log  Logging class
-	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class
-	 *                                           if null, auto set
+	 * @param \CoreLibs\DB\IO         $db     Database connection class
+	 * @param \CoreLibs\Debug\Logging $log    Logging class
+	 * @param \CoreLibs\Language\L10n $l10n   l10n language class
+	 * @param array<string,string>    $locale locale data read from setLocale
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
 		\CoreLibs\Debug\Logging $log,
-		?\CoreLibs\Language\L10n $l10n = null
+		\CoreLibs\Language\L10n $l10n,
+		array $locale
 	) {
 		// set to log not per class
 		$log->setLogPer('class', false);
@@ -130,10 +131,15 @@ class Backend
 		$this->log = $log;
 		// attach db class
 		$this->db = $db;
-		// TODO lang create outside of class
-		$this->setLangEncoding();
 		// get the language sub class & init it
-		$this->l = $l10n ?? new \CoreLibs\Language\L10n($this->lang);
+		$this->l = $l10n;
+		// parse and read, legacy stuff
+		$this->encoding = $locale['encoding'];
+		$this->lang = $locale['lang'];
+		// get first part from lang
+		$this->lang_short = explode('_', $locale['lang'])[0];
+		$this->domain = $this->l->getDomain();
+		$this->lang_dir = $this->l->getBaseLocalePath();
 
 		// set the page name
 		$this->page_name = \CoreLibs\Get\System::getPageName();
@@ -157,29 +163,6 @@ class Backend
 	public function __destruct()
 	{
 		// NO OP
-	}
-
-	// INTERNAL METHODS |===============================================>
-
-	/**
-	 * set the language encoding and language settings
-	 * use $OVERRIDE_LANG to override all language settings
-	 * the default charset from _SESSION login or from
-	 * config DEFAULT ENCODING
-	 * the lang full name for mo loading from _SESSION login
-	 * or SITE LANG or DEFAULT LANG from config
-	 * creates short lang (only first two chars) from the lang
-	 * @return void
-	 */
-	private function setLangEncoding(): void
-	{
-		list (
-			$this->encoding,
-			$this->lang,
-			$this->lang_short,
-			$this->domain,
-			$this->lang_dir
-		) = \CoreLibs\Language\GetSettings::setLangEncoding();
 	}
 
 	// PUBLIC METHODS |=================================================>

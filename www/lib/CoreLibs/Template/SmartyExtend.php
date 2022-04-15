@@ -154,48 +154,34 @@ class SmartyExtend extends \Smarty
 	 * constructor class, just sets the language stuff
 	 * calls L10 for pass on internaly in smarty
 	 * also registers the getvar caller plugin
-	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class
-	 *                                           if null, auto set
+	 * @param \CoreLibs\Language\L10n $l10n l10n language class
+	 * @param array<string,string>    $locale locale data read from setLocale
 	 */
-	public function __construct(?\CoreLibs\Language\L10n $l10n = null)
+	public function __construct(\CoreLibs\Language\L10n $l10n, array $locale)
 	{
 		// call basic smarty
 		// or Smarty::__construct();
 		parent::__construct();
-		// set lang vars
-		$this->setLangEncoding();
 		// iinit lang
-		$this->l10n = $l10n ?? new \CoreLibs\Language\L10n($this->lang);
-		// Smarty 3.x
-		// $this->registerPlugin('modifier', 'getvar', [&$this, 'get_template_vars']);
+		$this->l10n = $l10n;
+		// opt load functions so we can use legacy init for smarty run perhaps
+		$this->l10n->loadFunctions();
+		// parse and read, legacy stuff
+		$this->encoding = $locale['encoding'];
+		$this->lang = $locale['lang'];
+		// get first part from lang
+		$this->lang_short = explode('_', $locale['lang'])[0];
+		$this->domain = $this->l10n->getDomain();
+		$this->lang_dir = $this->l10n->getBaseLocalePath();
+
+		// register smarty variable
 		$this->registerPlugin('modifier', 'getvar', [&$this, 'getTemplateVars']);
 
-		$this->page_name = pathinfo($_SERVER["PHP_SELF"])['basename'];
+		$this->page_name = \CoreLibs\Get\System::getPageName();
 
 		// set internal settings
 		$this->CACHE_ID = defined('CACHE_ID') ? CACHE_ID : '';
 		$this->COMPILE_ID = defined('COMPILE_ID') ? COMPILE_ID : '';
-	}
-
-	/**
-	 * ORIGINAL in \CoreLibs\Admin\Backend
-	 * set the language encoding and language settings
-	 * the default charset from _SESSION login or from
-	 * config DEFAULT ENCODING
-	 * the lang full name for mo loading from _SESSION login
-	 * or SITE LANG or DEFAULT LANG from config
-	 * creates short lang (only first two chars) from the lang
-	 * @return void
-	 */
-	private function setLangEncoding(): void
-	{
-		list (
-			$this->encoding,
-			$this->lang,
-			$this->lang_short,
-			$this->domain,
-			$this->lang_dir
-		) = \CoreLibs\Language\GetSettings::setLangEncoding();
 	}
 
 	/**

@@ -19,8 +19,6 @@ ob_start();
 
 // basic class test file
 define('USE_DATABASE', true);
-// set language
-$lang = 'en_utf8';
 // sample config
 require 'config.php';
 // override ECHO ALL FALSE
@@ -43,8 +41,13 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL ?? false,
 ]);
-$smarty = new CoreLibs\Template\SmartyExtend();
-$l = new CoreLibs\Language\L10n($lang);
+$locale = \CoreLibs\Language\GetLocale::setLocale();
+$l10n = new \CoreLibs\Language\L10n(
+	$locale['locale'],
+	$locale['domain'],
+	$locale['path'],
+);
+$smarty = new CoreLibs\Template\SmartyExtend($l10n, $locale);
 
 print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS: SMARTY</title><head>";
@@ -70,7 +73,7 @@ $smarty->setSmartyPaths();
 
 // smarty test
 $smarty->DATA['SMARTY_TEST'] = 'Test Data';
-$smarty->DATA['TRANSLATE_TEST'] = $l->__('Are we translated?');
+$smarty->DATA['TRANSLATE_TEST'] = $l10n->__('Are we translated?');
 $smarty->DATA['TRANSLATE_TEST_SMARTY'] = $smarty->l10n->__('Are we translated?');
 $smarty->DATA['replace'] = 'Replaced';
 // variable variables

@@ -167,13 +167,10 @@ class Login
 	 * constructor, does ALL, opens db, works through connection checks, closes itself
 	 * @param \CoreLibs\DB\IO              $db   Database connection class
 	 * @param \CoreLibs\Debug\Logging      $log  Logging class
-	 * @param \CoreLibs\Language\L10n|null $l10n l10n language class
-	 *                                                if null, auto set
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
-		\CoreLibs\Debug\Logging $log,
-		?\CoreLibs\Language\L10n $l10n = null
+		\CoreLibs\Debug\Logging $log
 	) {
 		// log login data for this class only
 		$log->setLogPer('class', true);
@@ -215,19 +212,6 @@ class Login
 		// or need to pass it back
 		// to the continue AJAX class for output back to the user
 		$this->login_is_ajax_page = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
-		// set the default lang
-		$locale = 'en_US.UTF-8';
-		$lang = 'en_utf8';
-		if (Session::getSessionId() !== false && !empty($_SESSION['DEFAULT_LANG'])) {
-			$lang = $_SESSION['DEFAULT_LANG'];
-			$locale = $_SESSION['DEFAULT_LOCALE'];
-		} else {
-			$lang = defined('SITE_LANG') && !empty(SITE_LANG) ?
-				SITE_LANG : DEFAULT_LANG;
-			$locale = defined('SITE_LOCALE') && !empty(SITE_LOCALE) ?
-				SITE_LOCALE : DEFAULT_LOCALE;
-		}
-		$this->l = $l10n ?? new \CoreLibs\Language\L10n($lang);
 
 		// if we have a search path we need to set it, to use the correct DB to login
 		// check what schema to use. if there is a login schema use this, else check
@@ -300,6 +284,24 @@ class Login
 		$this->loginCheckPermissions();
 		// logsout user
 		$this->loginLogoutUser();
+		// ** LANGUAGE SET AFTER LOGIN **
+		// set the locale
+		if (Session::getSessionId() !== false && !empty($_SESSION['DEFAULT_LANG'])) {
+			$locale = $_SESSION['DEFAULT_LOCALE'] ?? '';
+		} else {
+			$locale = defined('SITE_LOCALE') && !empty(SITE_LOCALE) ?
+				SITE_LOCALE :
+				/** @phpstan-ignore-next-line DEFAULT_LOCALE could be empty */
+				(defined('DEFAULT_LOCALE') && !empty(DEFAULT_LOCALE) ?
+					DEFAULT_LOCALE : 'en.UTF-8');
+		}
+		// set domain
+		if (defined('CONTENT_PATH') && !empty(CONTENT_PATH)) {
+			$domain = str_replace('/', '', CONTENT_PATH);
+		} else {
+			$domain = 'admin';
+		}
+		$this->l = new \CoreLibs\Language\L10n($locale, $domain);
 		// if the password change flag is okay, run the password change method
 		if ($this->password_change) {
 			$this->loginPasswordChange();

@@ -19,8 +19,6 @@ ob_start();
 
 // basic class test file
 define('USE_DATABASE', false);
-// init language
-$lang = 'en_utf8';
 // sample config
 require 'config.php';
 // set session name
@@ -37,69 +35,43 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 
 use CoreLibs\Language\L10n;
-
-$string = 'INPUT TEST';
-
-echo "<br><b>LEGACY TEST</b><br>";
-
-$lang = 'en_utf8';
-$l = new CoreLibs\Language\L10n($lang);
-echo "*<br>";
-echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
-echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
-echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
-echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
-$single_string = 'single';
-$multi_string = 'multi';
-for ($n = 0; $n <= 3; $n++) {
-	echo "MULTI TEST $n: " . $single_string . "/" . $multi_string . " => "
-		. $l->__n($single_string, $multi_string, $n) . "<br>";
-}
-$context = "month name";
-$context_string = "May";
-echo "CONTEXT TRANSLATION: " . $context_string . " => " . $l->__p($context, $context_string) . "<br>";
-$single_string = 'single';
-$multi_string = 'multi';
-for ($n = 0; $n <= 3; $n++) {
-	echo "CONTEXT MULTI TEST $n: " . $single_string . "/" . $multi_string . " => "
-		. $l->__pn($context, $single_string, $multi_string, $n) . "<br>";
-}
-
-// switch to other language
-$lang = 'ja_utf8';
-$l->l10nReloadMOfile($lang);
-echo "*<br>";
-echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
-echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
-echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
-echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
-// switch to non existing language
-$lang = 'tr_utf8';
-$l->l10nReloadMOfile($lang);
-echo "*<br>";
-echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
-echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
-echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
-echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
+use CoreLibs\Debug\Support;
 
 echo "<br><b>LIST LOCALES</b><br>";
 
 $locale = 'en_US.UTF-8';
 $locales = CoreLibs\Language\L10n::listLocales($locale);
-print "[" . $locale . "] LOCALES: " . CoreLibs\Debug\Support::printAr($locales) . "<br>";
+print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
 $locale = 'en.UTF-8';
 $locales = CoreLibs\Language\L10n::listLocales($locale);
-print "[" . $locale . "] LOCALES: " . CoreLibs\Debug\Support::printAr($locales) . "<br>";
+print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
+
+echo "<br><b>LOCALE INFO</b><br>";
+$locale = 'en_US.UTF-8';
+$locale_info = CoreLibs\Language\L10n::parseLocale($locale);
+print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
+$locale = 'en.UTF-8';
+$locale_info = CoreLibs\Language\L10n::parseLocale($locale);
+print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
+
+echo "<br><b>AUTO DETECT</b><br>";
+
+$get_locale = \CoreLibs\Language\GetLocale::setLocale();
+print "[AUTO]: " . Support::printAr($get_locale) . "<br>";
+$get_locale = \CoreLibs\Language\GetLocale::setLocale('en', 'foo', 'ISO-8895');
+print "[OVERRIDE]: " . Support::printAr($get_locale) . "<br>";
 
 // try to load non existing
 echo "<br><b>NEW TYPE</b><br>";
+// translate string
+$string = 'INPUT TEST';
 // new path test
 $lang = 'ja';
 $domain = 'admin';
 $encoding = 'UTF-8';
 $path = BASE . INCLUDES . LOCALE;
-$l = new CoreLibs\Language\L10n($lang, $path, $domain, false);
-
+// load direct
+$l = new CoreLibs\Language\L10n($lang, $domain, $path);
 echo "*<br>";
 echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
 echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";
@@ -116,9 +88,45 @@ for ($n = 0; $n <= 3; $n++) {
 	echo "MULTI TEST $n: " . $single_string . "/" . $multi_string . " => "
 		. $l->__n($single_string, $multi_string, $n) . "<br>";
 }
-
+$context = "month name";
+$context_string = "May";
+echo "CONTEXT TRANSLATION: " . $context_string . " => " . $l->__p($context, $context_string) . "<br>";
+$single_string = 'single';
+$multi_string = 'multi';
+for ($n = 0; $n <= 3; $n++) {
+	echo "CONTEXT MULTI TEST $n: " . $single_string . "/" . $multi_string . " => "
+		. $l->__pn($context, $single_string, $multi_string, $n) . "<br>";
+}
+// change domain
 $domain = 'frontend';
-$l->getTranslator('', $path, $domain);
+$l->getTranslator('', $domain, $path);
+echo "*<br>";
+echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
+echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";
+echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
+echo "CONTENT PATH: " . $l->getBaseContentPath() . "<br>";
+echo "DOMAIN PATH: " . $l->getTextDomain($domain) . "<br>";
+echo "BASE PATH: " . $l->getBaseLocalePath() . "<br>";
+echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
+echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
+echo "TROUGH LOAD: " . $l->getTranslatorClass()->gettext($string) . "<br>";
+// change language short type
+$lang = 'en';
+$domain = 'admin';
+$l->getTranslator($lang, $domain, $path);
+echo "*<br>";
+echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
+echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";
+echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
+echo "CONTENT PATH: " . $l->getBaseContentPath() . "<br>";
+echo "DOMAIN PATH: " . $l->getTextDomain($domain) . "<br>";
+echo "BASE PATH: " . $l->getBaseLocalePath() . "<br>";
+echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
+echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
+echo "TROUGH LOAD: " . $l->getTranslatorClass()->gettext($string) . "<br>";
+// chang to wrong language
+$lang = 'tr';
+$l->getTranslator($lang, $domain, $path);
 echo "*<br>";
 echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
 echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";

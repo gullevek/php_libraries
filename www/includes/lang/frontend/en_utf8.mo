@@ -1,1 +1,0 @@
-../../locale/en_US/LC_MESSAGES/frontend.mo
