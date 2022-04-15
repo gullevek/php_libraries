@@ -54,14 +54,16 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			'no options set, constant set' => [
 				null,
 				[
-					'log_folder' => '/tmp/',
+					'log_folder' => str_replace('/configs', '', __DIR__)
+					. DIRECTORY_SEPARATOR . 'log/',
 					'debug_all' => false,
 					'print_all' => false,
 				],
 				[
 					'constant' => [
-						'BASE' => '/tmp',
-						'LOG' => '/'
+						'BASE' => str_replace('/configs', '', __DIR__)
+							. DIRECTORY_SEPARATOR,
+						'LOG' => 'log/'
 					]
 				]
 			],

@@ -218,7 +218,8 @@ class ArrayHandler
 				continue;
 			}
 			foreach ($array as $key => $value) {
-				// if string or if key is assumed to be string do key match else add new entry
+				// if string or if key is assumed to be string do key match
+				// else add new entry
 				if (is_string($key) || $key_is_string === false) {
 					if (is_array($value) && array_key_exists($key, $merged) && is_array($merged[$key])) {
 						// $merged[$key] = call_user_func(__METHOD__, $merged[$key], $value, $key_is_string);

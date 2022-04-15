@@ -68,6 +68,7 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 */
 	public function testStartSession(string $input, string $type, $expected_n, $expected_i): void
 	{
+		// NEEDS MOCKING
 		/* $session_id = '';
 		switch ($type) {
 			case 'p':
@@ -97,7 +98,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 		if ($type == 'g') {
 			unset($GLOBALS['SET_SESSION_NAME']);
 		} */
-		$this->markTestSkipped('No implementation for Create\Session. Cannot run session_start in CLI');
+		$this->markTestSkipped('[CoreLibsCreateSessionTest] No implementation '
+			. 'for Create\Session. Cannot run session_start in CLI');
 	}
 }
 

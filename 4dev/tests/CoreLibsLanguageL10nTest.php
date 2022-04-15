@@ -22,19 +22,37 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 */
 	public static function setUpBeforeClass(): void
 	{
-		define('DEFAULT_LANG', 'en_US');
 		// default web page encoding setting
-		define('DEFAULT_ENCODING', 'UTF-8');
-		// default lang + encoding
-		define('DEFAULT_LOCALE', 'en_US.UTF-8');
+		if (!defined('DEFAULT_ENCODING')) {
+			define('DEFAULT_ENCODING', 'UTF-8');
+		}
+		if (!defined('DEFAULT_LOCALE')) {
+			// default lang + encoding
+			define('DEFAULT_LOCALE', 'en_US.UTF-8');
+		}
 		// site
-		define('SITE_LANG', DEFAULT_LANG);
+		if (!defined('SITE_ENCODING')) {
+			define('SITE_ENCODING', DEFAULT_ENCODING);
+		}
+		if (!defined('SITE_LOCALE')) {
+			define('SITE_LOCALE', DEFAULT_LOCALE);
+		}
 		// just set
-		define('BASE', str_replace('/configs', '', __DIR__) . DIRECTORY_SEPARATOR);
-		define('INCLUDES', 'includes' . DIRECTORY_SEPARATOR);
-		define('LANG', 'lang' . DIRECTORY_SEPARATOR);
-		define('LOCALE', 'locale' . DIRECTORY_SEPARATOR);
-		define('CONTENT_PATH', 'frontend' . DIRECTORY_SEPARATOR);
+		if (!defined('BASE')) {
+			define('BASE', str_replace('/configs', '', __DIR__) . DIRECTORY_SEPARATOR);
+		}
+		if (!defined('INCLUDES')) {
+			define('INCLUDES', 'includes' . DIRECTORY_SEPARATOR);
+		}
+		if (!defined('LANG')) {
+			define('LANG', 'lang' . DIRECTORY_SEPARATOR);
+		}
+		if (!defined('LOCALE')) {
+			define('LOCALE', 'locale' . DIRECTORY_SEPARATOR);
+		}
+		if (!defined('CONTENT_PATH')) {
+			define('CONTENT_PATH', 'frontend' . DIRECTORY_SEPARATOR);
+		}
 	}
 
 	/**

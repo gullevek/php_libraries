@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace tests;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -274,7 +275,6 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	}
 
 	/**
-	 * TODO: create provider for n array merge
 	 * provides array listing for the merge test
 	 *
 	 * @return array
@@ -282,6 +282,61 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	public function arrayMergeRecursiveProvider(): array
 	{
 		return [
+			// 0: expected
+			// 1..n: to merge arrays
+			// n+1: trigger for handle keys as string
+			'two arrays' => [
+				['a' => 1, 'b' => 2, 'c' => 3],
+				['a' => 1, 'b' => 2],
+				['b' => 2, 'c' => 3],
+			],
+			'two arrays, string flag' => [
+				['a' => 1, 'b' => 2, 'c' => 3],
+				['a' => 1, 'b' => 2],
+				['b' => 2, 'c' => 3],
+				true,
+			],
+			// non hash arrays
+			'non hash array merge, no string flag' => [
+				[3, 4, 5],
+				[1, 2, 3],
+				[3, 4, 5],
+			],
+			'non hash array merge, string flag' => [
+				[1, 2, 3, 3, 4, 5],
+				[1, 2, 3],
+				[3, 4, 5],
+				true
+			],
+		];
+	}
+
+	/**
+	 * for warning checks
+	 *
+	 * @return array
+	 */
+	public function arrayMergeRecursiveProviderWarning(): array
+	{
+		return [
+			// error <2 arguments
+			'too view arguments' => [
+				'arrayMergeRecursive needs two or more array arguments',
+				[1]
+			],
+			// error <2 arrays
+			'only one array' => [
+				'arrayMergeRecursive needs two or more array arguments',
+				[1],
+				true,
+			],
+			// error element is not array
+			'non array between array' => [
+				'arrayMergeRecursive encountered a non array argument',
+				[1],
+				'string',
+				[2]
+			],
 		];
 	}
 
@@ -626,21 +681,43 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::arrayMergeRecursive
-	 * @#dataProvider arrayMergeRecursiveProvider
-	 * @testdox arrayMergeRecursive ... will be $expected [$_dataName]
+	 * @dataProvider arrayMergeRecursiveProvider
+	 * @testdox arrayMergeRecursive ... [$_dataName]
 	 *
-	 * @param array $input nested array set as each parameter
-	 * @param bool $flag
-	 * @param bool|array $expected
 	 * @return void
-	 * array $input, bool $flag, $expected
+	 *
 	 */
 	public function testArrayMergeRecursive(): void
 	{
-		$this->assertTrue(true, 'Implement proper test run');
-		$this->markTestIncomplete(
-			'testArrayMergeRecursive has not been implemented yet.'
+		$arrays = func_get_args();
+		// first is expected array, always
+		$expected = array_shift($arrays);
+		$output = \CoreLibs\Combined\ArrayHandler::arrayMergeRecursive(
+			...$arrays
 		);
+		$this->assertEquals(
+			$expected,
+			$output
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::arrayMergeRecursive
+	 * @dataProvider arrayMergeRecursiveProviderWarning
+	 * @testdox arrayMergeRecursive with E_USER_WARNING [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testArrayMergeRecursiveWarningA(): void
+	{
+		$arrays = func_get_args();
+		// first is expected warning
+		$warning = array_shift($arrays);
+		$this->expectWarning();
+		$this->expectWarningMessage($warning);
+		\CoreLibs\Combined\ArrayHandler::arrayMergeRecursive(...$arrays);
 	}
 
 	/**
