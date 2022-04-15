@@ -48,7 +48,6 @@ return array(
     'CoreLibs\\Language\\Core\\StringReader' => $baseDir . '/lib/CoreLibs/Language/Core/StringReader.php',
     'CoreLibs\\Language\\Encoding' => $baseDir . '/lib/CoreLibs/Language/Encoding.php',
     'CoreLibs\\Language\\GetLocale' => $baseDir . '/lib/CoreLibs/Language/GetLocale.php',
-    'CoreLibs\\Language\\GetSettings' => $baseDir . '/lib/CoreLibs/Language/GetSettings.php',
     'CoreLibs\\Language\\L10n' => $baseDir . '/lib/CoreLibs/Language/L10n.php',
     'CoreLibs\\Output\\Form\\Elements' => $baseDir . '/lib/CoreLibs/Output/Form/Elements.php',
     'CoreLibs\\Output\\Form\\Generate' => $baseDir . '/lib/CoreLibs/Output/Form/Generate.php',
