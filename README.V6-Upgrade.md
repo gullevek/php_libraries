@@ -44,9 +44,24 @@ $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 // login & page access check
 $login = new CoreLibs\ACL\Login($db, $log);
 ```
+* update language class
+```php
+// pre auto detect language after login
+$locale = \CoreLibs\Language\GetLocale::setLocale();
+// set lang and pass to smarty/backend
+$l10n = new \CoreLibs\Language\L10n(
+	$locale['locale'],
+	$locale['domain'],
+	$locale['path'],
+);
+```
+* smarty needs language
+```php
+$smarty = new CoreLibs\Template\SmartyExtend($l10n, $locale);
+```
 * admin backend also needs logger
 ```php
-$cms = new CoreLibs\Admin\Backend($db, $log);
+$cms = new CoreLibs\Admin\Backend($db, $log, $l10n, $locale);
 ```
 * update and `$cms` or similar calls so db is in `$cms->db->...` and log are in `$cms->log->...`
 * update all `config.*.php` files where needed
@@ -59,6 +74,12 @@ $cms = new CoreLibs\Admin\Backend($db, $log);
 require BASE . LIB . 'autoloader.php';
 ```
 **UPDATE:**
+```php
+// po langs [DEPRECAED: use LOCALE]
+define('LANG', 'lang' . DIRECTORY_SEPARATOR);
+// po locale file
+define('LOCALE', 'locale' . DIRECTORY_SEPARATOR);
+```
 ```php
 // SSL host name
 // define('SSL_HOST', $_ENV['SSL_HOST'] ?? '');
@@ -85,6 +106,13 @@ define('CONTENT_WIDTH', '100%');
 define('BASE_NAME', preg_replace('/[^A-Za-z0-9]/', '', $_ENV['BASE_NAME'] ?? ''));
 ```
 ```php
+/************* LANGUAGE / ENCODING *******/
+// default lang + encoding
+define('DEFAULT_LOCALE', 'en_US.UTF-8');
+// default web page encoding setting
+define('DEFAULT_ENCODING', 'UTF-8');
+```
+```php
 // BAIL ON MISSING DB CONFIG:
 // we have either no db selction for this host but have db config entries
 // or we have a db selection but no db config as array or empty
@@ -104,6 +132,10 @@ if (
 }
 ```
 ```php
+// remove SITE_LANG
+define('SITE_LOCALE', $SITE_CONFIG[HOST_NAME]['site_locale'] ?? DEFAULT_LOCALE);
+define('SITE_ENCODING', $SITE_CONFIG[HOST_NAME]['site_encoding'] ?? DEFAULT_ENCODING);
+```
 ```php
 /************* GENERAL PAGE TITLE ********/
 define('G_TITLE', $_ENV['G_TITLE'] ?? '');
@@ -117,6 +149,15 @@ DB_NAME.TEST=some_database
 In the config then
 ```php
 'db_name' => $_ENV['DB_NAME.TEST'] ?? '',
+```
+* config.host.php update
+must add site_locale (site_lang + site_encoding)
+remove site_lang
+```php
+	// lang + encoding
+	'site_locale' => 'en_US.UTF-8',
+	// site language
+	'site_encoding' => 'UTF-8',
 ```
 * copy `layout/admin/javascript/edit.jq.js`
 * check other javacsript files if needed (`edit.jq.js`)
