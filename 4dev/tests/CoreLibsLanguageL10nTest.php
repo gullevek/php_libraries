@@ -545,7 +545,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			} else {
 				$this->assertEquals(
 					$expected,
-					$l10n->__pn($context, $original_single, $original_plural, $n),
+					$l10n->__np($context, $original_single, $original_plural, $n),
 					'assert failed for plural: ' . $n . ' in context: ' . $context
 				);
 			}
@@ -967,7 +967,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 
 	/**
 	 * fuctions check
-	 * TODO: others d/dn/dp/dpn gettext functions
+	 * TODO: others d/dn/dp/dnp gettext functions
 	 *
 	 * @covers __setlocale
 	 * @covers __bindtextdomain

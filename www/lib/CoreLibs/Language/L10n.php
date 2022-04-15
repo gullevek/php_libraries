@@ -601,7 +601,7 @@ class L10n
 	 * @param  int    $number  number value
 	 * @return string
 	 */
-	public function __pn(string $context, string $single, string $plural, int $number): string
+	public function __np(string $context, string $single, string $plural, int $number): string
 	{
 		if ($this->l10n === null) {
 			return $number > 1 ? $plural : $single;

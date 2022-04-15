@@ -95,7 +95,7 @@ $single_string = 'single';
 $multi_string = 'multi';
 for ($n = 0; $n <= 3; $n++) {
 	echo "CONTEXT MULTI TEST $n: " . $single_string . "/" . $multi_string . " => "
-		. $l->__pn($context, $single_string, $multi_string, $n) . "<br>";
+		. $l->__np($context, $single_string, $multi_string, $n) . "<br>";
 }
 // change domain
 $domain = 'frontend';

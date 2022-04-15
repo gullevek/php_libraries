@@ -101,11 +101,76 @@ function smarty_block_t($params, $text, $template, &$repeat)
 		}
 	}
 
+	// get domain param
+	if (isset($params['domain'])) {
+		$domain = $params['domain'];
+		unset($params['domain']);
+	} else {
+		$domain = null;
+	}
+
+	// get context param
+	if (isset($params['context'])) {
+		$context = $params['context'];
+		unset($params['context']);
+	} else {
+		$context = null;
+	}
+
 	// use plural if required parameters are set
 	if (isset($count) && isset($plural)) {
-		$text = $template->l10n->__ngettext($text, $plural, $count);
+		if (isset($domain) && isset($context)) {
+			if (is_callable('__dnpgettext')) {
+				$text = __dnpgettext($domain, $context, $text, $plural, $count);
+			}
+		} elseif (isset($domain)) {
+			if (is_callable('__dngettext')) {
+				$text = __dngettext($domain, $text, $plural, $count);
+			}
+		} elseif (isset($context)) {
+			if (is_callable('__npgettext')) {
+				$text == __npgettext($context, $text, $plural, $count);
+			} elseif (
+				$template->l10n instanceof \CoreLibs\Language\L10n &&
+				method_exists($template->l10n, '__pn')
+			) {
+				$text = $template->l10n->__pn($text, $plural, $count);
+			}
+		} elseif (
+			$template->l10n instanceof \CoreLibs\Language\L10n &&
+			method_exists($template->l10n, '__n')
+		) {
+			$text = $template->l10n->__n($text, $plural, $count);
+			// $text == __ngettext($text, $plural, $count);
+		}
 	} else { // use normal
-		$text = $template->l10n->__($text);
+		if (isset($domain) && isset($context)) {
+			if (is_callable('__dpgettext')) {
+				$text = __dpgettext($domain, $context, $text);
+			}
+		} elseif (isset($domain)) {
+			if (is_callable('__dgettext')) {
+				$text = __dgettext($domain, $text);
+			}
+		} elseif (isset($context)) {
+			if (is_callable('__pgettext')) {
+				$text = __pgettext($context, $text);
+			} elseif (
+				$template->l10n instanceof \CoreLibs\Language\L10n &&
+				method_exists($template->l10n, '__p')
+			) {
+				$text = $template->l10n->__p($context, $text);
+			}
+		} else {
+			if (is_callable('__gettext')) {
+				$text = __gettext($text);
+			} elseif (
+				$template->l10n instanceof \CoreLibs\Language\L10n &&
+				method_exists($template->l10n, '__')
+			) {
+				$text = $template->l10n->__($text);
+			}
+		}
 	}
 
 	// run strarg if there are parameters

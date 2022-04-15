@@ -7,7 +7,8 @@
 <div>
 	<b>Outside translation test</b><br>
 	TRANSLATION CLASS (OUT): {$TRANSLATE_TEST}<br>
-	TRANSLATION CLASS (SMARTY): {$TRANSLATE_TEST_SMARTY}
+	TRANSLATION CLASS (OUT FUNCTION): {$TRANSLATE_TEST_FUNCTION}<br>
+	TRANSLATION CLASS (SMARTY): {$TRANSLATE_TEST_SMARTY}<br>
 </div>
 <div>
 	<b>Translate Test with replace:</b><br>
