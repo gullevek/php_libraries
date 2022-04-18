@@ -5,7 +5,7 @@
  * Language\Encoding::__mbMimeEncode -> Convert\MimeEncode::__mbMimeEncode
  * Langauge\Encoding::checkConvertEncoding -> Check\Encoding::checkConvertEncoding
  * Langauge\Encoding::setErrorChar -> Check\Encoding::setErrorChar
- * Langauge\Encoding::getErrorChar -> Encoding::getErrorChar
+ * Langauge\Encoding::getErrorChar -> Check\Encoding::getErrorChar
  * Langauge\Encoding::convertEncoding -> Convert\Encoding::convertEncoding
  */
 
