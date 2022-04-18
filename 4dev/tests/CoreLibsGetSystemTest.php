@@ -90,11 +90,16 @@ final class CoreLibsGetSystemTest extends TestCase
 	public function getPageNameProvider(): array
 	{
 		return [
+			// 0: input
+			// 1: expected default/WITH_EXTENSION
+			// 2: expected NO_EXTENSION
+			// 3: expected FULL_PATH, if first and last character are / use regex
 			'original set' => [
-				0 => null, // input
+				0 => null,
 				1 => 'phpunit',
 				2 => 'phpunit',
-				3 => 'www/vendor/bin/phpunit', // NOTE: this can change
+				// NOTE: this can change, so it is a regex check
+				3 => "/^(\/?.*\/?)?www\/vendor\/bin\/phpunit$/",
 			],
 			'some path with extension' => [
 				0 => '/some/path/to/file.txt',
@@ -147,11 +152,13 @@ final class CoreLibsGetSystemTest extends TestCase
 		list ($host, $port) = \CoreLibs\Get\System::getHostName();
 		$this->assertEquals(
 			$expected_host,
-			$host
+			$host,
+			'failed expected host assert'
 		);
 		$this->assertEquals(
 			$expected_port,
-			$port
+			$port,
+			'faile expected port assert'
 		);
 	}
 
@@ -176,20 +183,38 @@ final class CoreLibsGetSystemTest extends TestCase
 		// default 0,
 		$this->assertEquals(
 			$expected_0,
-			\CoreLibs\Get\System::getPageName()
+			\CoreLibs\Get\System::getPageName(),
+			'failed default assert'
 		);
 		$this->assertEquals(
 			$expected_0,
-			\CoreLibs\Get\System::getPageName(\CoreLibs\Get\System::WITH_EXTENSION)
+			\CoreLibs\Get\System::getPageName(\CoreLibs\Get\System::WITH_EXTENSION),
+			'failed WITH_EXTESION assert'
 		);
 		$this->assertEquals(
 			$expected_1,
-			\CoreLibs\Get\System::getPageName(\CoreLibs\Get\System::NO_EXTENSION)
+			\CoreLibs\Get\System::getPageName(\CoreLibs\Get\System::NO_EXTENSION),
+			'failed NO_EXTENSION assert'
 		);
-		$this->assertEquals(
-			$expected_2,
-			\CoreLibs\Get\System::getPageName(\CoreLibs\Get\System::FULL_PATH)
-		);
+		// FULL PATH check can be equals or regex
+		$page_name_full_path = \CoreLibs\Get\System::getPageName(\CoreLibs\Get\System::FULL_PATH);
+		if (
+			substr($expected_2, 0, 1) == '/' &&
+			substr($expected_2, -1, 1) == '/'
+		) {
+			// this is regex
+			$this->assertMatchesRegularExpression(
+				$expected_2,
+				$page_name_full_path,
+				'failed FULL_PATH assert regex'
+			);
+		} else {
+			$this->assertEquals(
+				$expected_2,
+				$page_name_full_path,
+				'failed FULL_PATH assert equals'
+			);
+		}
 	}
 }
 

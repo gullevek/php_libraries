@@ -994,10 +994,10 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		string $translated
 	): void {
 		\CoreLibs\Language\L10n::loadFunctions();
-		__setlocale(LC_MESSAGES, $locale);
-		__textdomain($domain);
-		__bindtextdomain($domain, $path);
-		__bind_textdomain_codeset($domain, $encoding);
+		_setlocale(LC_MESSAGES, $locale);
+		_textdomain($domain);
+		_bindtextdomain($domain, $path);
+		_bind_textdomain_codeset($domain, $encoding);
 		$this->assertEquals(
 			$translated,
 			__($original),
@@ -1005,7 +1005,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		);
 		$this->assertEquals(
 			$translated,
-			__gettext($original),
+			_gettext($original),
 			'function gettext assert failed'
 		);
 	}

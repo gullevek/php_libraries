@@ -173,11 +173,11 @@ class SmartyExtend extends \Smarty
 		$this->lang_dir = $this->l10n->getBaseLocalePath();
 
 		// opt load functions so we can use legacy init for smarty run perhaps
-		$this->l10n->loadFunctions();
-		__setlocale(LC_MESSAGES, $locale['locale']);
-		__textdomain($this->domain);
-		__bindtextdomain($this->domain, $this->lang_dir);
-		__bind_textdomain_codeset($this->domain, $this->encoding);
+		\CoreLibs\Language\L10n::loadFunctions();
+		_setlocale(LC_MESSAGES, $locale['locale']);
+		_textdomain($this->domain);
+		_bindtextdomain($this->domain, $this->lang_dir);
+		_bind_textdomain_codeset($this->domain, $this->encoding);
 
 		// register smarty variable
 		$this->registerPlugin('modifier', 'getvar', [&$this, 'getTemplateVars']);

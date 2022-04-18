@@ -138,6 +138,7 @@ echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
 echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
 echo "TROUGH LOAD: " . $l->getTranslatorClass()->gettext($string) . "<br>";
 
+$lang = 'en';
 $domain = 'admin';
 echo "<br><b>STATIC TYPE TEST</b><br>";
 // static tests from l10n_load
@@ -154,17 +155,17 @@ echo "<br><b>FUNCTIONS</b><br>";
 // real statisc test
 L10n::loadFunctions();
 $locale = 'ja';
-__setlocale(LC_MESSAGES, $locale);
-__textdomain($domain);
-__bindtextdomain($domain, $path);
-__bind_textdomain_codeset($domain, $encoding);
+_setlocale(LC_MESSAGES, $locale);
+_textdomain($domain);
+_bindtextdomain($domain, $path);
+_bind_textdomain_codeset($domain, $encoding);
 echo "INPUT TEST $locale: " . $string . " => " . __($string) . "<br>";
 
 $locale = 'en_US.UTF-8';
-__setlocale(LC_MESSAGES, $locale);
-__textdomain($domain);
-__bindtextdomain($domain, $path);
-__bind_textdomain_codeset($domain, $encoding);
+_setlocale(LC_MESSAGES, $locale);
+_textdomain($domain);
+_bindtextdomain($domain, $path);
+_bind_textdomain_codeset($domain, $encoding);
 echo "INPUT TEST $locale: " . $string . " => " . __($string) . "<br>";
 
 print "</body></html>";

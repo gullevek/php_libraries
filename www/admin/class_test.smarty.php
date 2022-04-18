@@ -74,7 +74,7 @@ $smarty->setSmartyPaths();
 // smarty test
 $smarty->DATA['SMARTY_TEST'] = 'Test Data';
 $smarty->DATA['TRANSLATE_TEST'] = $l10n->__('Are we translated?');
-$smarty->DATA['TRANSLATE_TEST_FUNCTION'] = __gettext('Are we translated?');
+$smarty->DATA['TRANSLATE_TEST_FUNCTION'] = _gettext('Are we translated?');
 $smarty->DATA['TRANSLATE_TEST_SMARTY'] = $smarty->l10n->__('Are we translated?');
 $smarty->DATA['replace'] = 'Replaced';
 // variable variables

@@ -2709,7 +2709,8 @@ final class CoreLibsDBIOTest extends TestCase
 		// comarep all, except timestamp that is a regex
 		foreach ($expected_history as $key => $value) {
 			// check if starts with / because this is regex (timestamp)
-			if (strpos($value, "/") === 0) {
+			// if (substr($expected_2, 0, 1) == '/) {
+			if (strpos($value, '/') === 0) {
 				// this is regex
 				$this->assertMatchesRegularExpression(
 					$value,

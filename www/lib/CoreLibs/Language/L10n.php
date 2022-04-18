@@ -14,7 +14,7 @@
 *	__  : returns string (translated or original if not found)
 *	__n : plural string
 *   __p : string with context
-*   __pb: string with context and plural
+*   __np: string with context and plural
 *
 * HISTORY:
 * 2022/4/15  (cs) drop all old folder layout support, new folder base

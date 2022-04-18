@@ -3,30 +3,19 @@
 /**
  * smarty-gettext.php - Gettext support for smarty
  *
- * ------------------------------------------------------------------------- *
- * This library is free software; you can redistribute it and/or             *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * This library is distributed in the hope that it will be useful,           *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with this library; if not, write to the Free Software       *
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA *
- * ------------------------------------------------------------------------- *
- *
  * To register as a smarty block function named 't', use:
  *   $smarty->register_block('t', 'smarty_translate');
+ *
+ * NOTE: native php support for conext sensitive does not exist
+ * Those jumps are disabled
  *
  * @package	smarty-gettext
  * @version	$Id: block.t.php 4738 2022-05-06 01:28:48Z clemens $
  * @link	http://smarty-gettext.sf.net/
  * @author	Sagi Bashari <sagi@boom.org.il>
  * @copyright 2004 Sagi Bashari
+ * @copyright Elan Ruusamäe
+ * @copyright Clemens Schwaighofer
  */
 
 /**
@@ -39,7 +28,7 @@
  */
 function smarty_gettext_strarg($str/*, $varargs... */)
 {
-	$tr = array();
+	$tr = [];
 	$p = 0;
 
 	$nargs = func_num_args();
@@ -120,55 +109,54 @@ function smarty_block_t($params, $text, $template, &$repeat)
 	// use plural if required parameters are set
 	if (isset($count) && isset($plural)) {
 		if (isset($domain) && isset($context)) {
-			if (is_callable('__dnpgettext')) {
-				$text = __dnpgettext($domain, $context, $text, $plural, $count);
-			}
+			if (is_callable('_dnpgettext')) {
+				$text = _dnpgettext($domain, $context, $text, $plural, $count);
+			}/*  elseif (is_callable('dnpgettext')) {
+				$text = dnpgettext($domain, $context, $text, $plural, $count);
+			} */
 		} elseif (isset($domain)) {
-			if (is_callable('__dngettext')) {
-				$text = __dngettext($domain, $text, $plural, $count);
+			if (is_callable('_dngettext')) {
+				$text = _dngettext($domain, $text, $plural, $count);
+			} elseif (is_callable('dngettext')) {
+				$text = dngettext($domain, $text, $plural, $count);
 			}
 		} elseif (isset($context)) {
-			if (is_callable('__npgettext')) {
-				$text == __npgettext($context, $text, $plural, $count);
-			} elseif (
-				$template->l10n instanceof \CoreLibs\Language\L10n &&
-				method_exists($template->l10n, '__pn')
-			) {
-				$text = $template->l10n->__pn($text, $plural, $count);
+			if (is_callable('_npgettext')) {
+				$text == _npgettext($context, $text, $plural, $count);
+			}/*  elseif (is_callable('npgettext')) {
+				$text = npgettext($context, $text, $plural, $count);
+			} */
+		} else {
+			if (is_callable('_ngettext')) {
+				$text == _ngettext($text, $plural, $count);
+			} elseif (is_callable('ngettext')) {
+				$text == ngettext($text, $plural, $count);
 			}
-		} elseif (
-			$template->l10n instanceof \CoreLibs\Language\L10n &&
-			method_exists($template->l10n, '__n')
-		) {
-			$text = $template->l10n->__n($text, $plural, $count);
-			// $text == __ngettext($text, $plural, $count);
 		}
 	} else { // use normal
 		if (isset($domain) && isset($context)) {
-			if (is_callable('__dpgettext')) {
-				$text = __dpgettext($domain, $context, $text);
-			}
+			if (is_callable('_dpgettext')) {
+				$text = _dpgettext($domain, $context, $text);
+			}/*  elseif (is_callable('dpgettext')) {
+				$text = dpgettext($domain, $context, $text);
+			} */
 		} elseif (isset($domain)) {
-			if (is_callable('__dgettext')) {
-				$text = __dgettext($domain, $text);
+			if (is_callable('_dgettext')) {
+				$text = _dgettext($domain, $text);
+			} elseif (is_callable('dpgettext')) {
+				$text = dgettext($domain, $text);
 			}
 		} elseif (isset($context)) {
-			if (is_callable('__pgettext')) {
-				$text = __pgettext($context, $text);
-			} elseif (
-				$template->l10n instanceof \CoreLibs\Language\L10n &&
-				method_exists($template->l10n, '__p')
-			) {
-				$text = $template->l10n->__p($context, $text);
-			}
+			if (is_callable('_pgettext')) {
+				$text = _pgettext($context, $text);
+			}/*  elseif (is_callable('pgettext')) {
+				$text = pgettext($context, $text);
+			} */
 		} else {
-			if (is_callable('__gettext')) {
-				$text = __gettext($text);
-			} elseif (
-				$template->l10n instanceof \CoreLibs\Language\L10n &&
-				method_exists($template->l10n, '__')
-			) {
-				$text = $template->l10n->__($text);
+			if (is_callable('_gettext')) {
+				$text = _gettext($text);
+			} elseif (is_callable('gettext')) {
+				$text = gettext($text);
 			}
 		}
 	}
@@ -180,6 +168,7 @@ function smarty_block_t($params, $text, $template, &$repeat)
 
 	switch ($escape) {
 		case 'html':
+			// default
 			$text = nl2br(htmlspecialchars($text));
 			break;
 		case 'javascript':
@@ -187,12 +176,28 @@ function smarty_block_t($params, $text, $template, &$repeat)
 			// javascript escape
 			$text = strtr(
 				$text,
-				array('\\' => '\\\\', "'" => "\\'", '"' => '\\"', "\r" => '\\r', "\n" => '\\n', '</' => '<\/')
+				[
+					'\\' => '\\\\',
+					"'" => "\\'",
+					'"' => '\\"',
+					"\r" => '\\r',
+					"\n" => '\\n',
+					'</' => '<\/'
+				]
 			);
 			break;
 		case 'url':
 			// url escape
 			$text = urlencode($text);
+			break;
+		// below is a list for explicit OFF
+		case 'no':
+		case 'off':
+		case 'false':
+		case '0':
+		case 0:
+			// explicit OFF
+		default:
 			break;
 	}
 
