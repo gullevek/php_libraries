@@ -160,6 +160,12 @@ _textdomain($domain);
 _bindtextdomain($domain, $path);
 _bind_textdomain_codeset($domain, $encoding);
 echo "INPUT TEST $locale: " . $string . " => " . __($string) . "<br>";
+$single_string = 'single';
+$multi_string = 'multi';
+for ($n = 0; $n <= 3; $n++) {
+	echo "MULTI TEST $n: " . $single_string . "/" . $multi_string . " => "
+		. _ngettext($single_string, $multi_string, $n) . "<br>";
+}
 
 $locale = 'en_US.UTF-8';
 _setlocale(LC_MESSAGES, $locale);
@@ -167,6 +173,12 @@ _textdomain($domain);
 _bindtextdomain($domain, $path);
 _bind_textdomain_codeset($domain, $encoding);
 echo "INPUT TEST $locale: " . $string . " => " . __($string) . "<br>";
+$single_string = 'single';
+$multi_string = 'multi';
+for ($n = 0; $n <= 3; $n++) {
+	echo "MULTI TEST $n: " . $single_string . "/" . $multi_string . " => "
+		. _ngettext($single_string, $multi_string, $n) . "<br>";
+}
 
 print "</body></html>";
 

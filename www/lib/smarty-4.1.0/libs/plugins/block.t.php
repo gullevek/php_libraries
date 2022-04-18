@@ -57,14 +57,18 @@ function smarty_gettext_strarg($str/*, $varargs... */)
  *   - escape - sets escape mode:
  *       - 'html' for HTML escaping, this is the default.
  *       - 'js' for javascript escaping.
+ *       - 'url' for url escaping.
  *       - 'no'/'off'/0 - turns off escaping
  *   - plural - The plural version of the text (2nd parameter of ngettext())
  *   - count - The item count for plural mode (3rd parameter of ngettext())
+ *   - domain - Textdomain to be used, default if skipped (dgettext() instead of gettext())
+ *   - context - gettext context. reserved for future use.
+ *
  */
 
 // cs modified: __ calls instead of direct gettext calls
 
-function smarty_block_t($params, $text, $template, &$repeat)
+function smarty_block_t($params, $text)
 {
 	if (!isset($text)) {
 		return $text;
@@ -122,15 +126,15 @@ function smarty_block_t($params, $text, $template, &$repeat)
 			}
 		} elseif (isset($context)) {
 			if (is_callable('_npgettext')) {
-				$text == _npgettext($context, $text, $plural, $count);
+				$text = _npgettext($context, $text, $plural, $count);
 			}/*  elseif (is_callable('npgettext')) {
 				$text = npgettext($context, $text, $plural, $count);
 			} */
 		} else {
 			if (is_callable('_ngettext')) {
-				$text == _ngettext($text, $plural, $count);
+				$text = _ngettext($text, $plural, $count);
 			} elseif (is_callable('ngettext')) {
-				$text == ngettext($text, $plural, $count);
+				$text = ngettext($text, $plural, $count);
 			}
 		}
 	} else { // use normal

@@ -14,7 +14,12 @@
 	<b>Translate Test with replace:</b><br>
 	ORIGINAL: Original with string: %1 ({$replace})<br>
 	TRANSLATED: {t 1=$replace}Original with string: %1{/t}<br>
-	TRANSLATED (escape): {t escape=on 1=$replace}Original with string: %1{/t}
+	TRANSLATED (escape): {t escape=on 1=$replace}Original with string: %1{/t}<br>
+	{capture assign="extra_title"}{t}INPUT TEST{/t}{/capture}
+	Capture test: {$extra_title}<br>
+	{section name=plural_test start=0 loop=3}
+	Plural test {$smarty.section.plural_test.index}: {t count=$smarty.section.plural_test.index plural="multi"}single{/t}<br>
+	{/section}
 </div>
 <div>
 	<b>Variable variables:</b><br>
