@@ -885,13 +885,13 @@ class Login
 			$this->acl['show_ea_extra'] = false;
 		}
 		// set the default edit access
-		$this->acl['default_edit_access'] = $_SESSION['UNIT_DEFAULT'];
+		$this->acl['default_edit_access'] = $_SESSION['UNIT_DEFAULT'] ?? null;
 		// integrate the type acl list, but only for the keyword -> level
 		foreach ($this->default_acl_list as $level => $data) {
 			$this->acl['min'][$data['type']] = $level;
 		}
 		// set the full acl list too
-		$this->acl['acl_list'] = $_SESSION['DEFAULT_ACL_LIST'];
+		$this->acl['acl_list'] = $_SESSION['DEFAULT_ACL_LIST'] ?? [];
 		// debug
 		// $this->debug('ACL', $this->print_ar($this->acl));
 	}
@@ -1453,7 +1453,8 @@ EOM;
 	 * checks that the given edit access id is valid for this user
 	 * @param  int|null $edit_access_id edit access id to check
 	 * @return int|null                 same edit access id if ok
-	 *                                  or the default edit access id if given one is not valid
+	 *                                  or the default edit access id
+	 *                                  if given one is not valid
 	 */
 	public function loginCheckEditAccessId(?int $edit_access_id): ?int
 	{
@@ -1463,7 +1464,7 @@ EOM;
 			is_array($_SESSION['UNIT']) &&
 			!array_key_exists($edit_access_id, $_SESSION['UNIT'])
 		) {
-			return (int)$_SESSION['UNIT_DEFAULT'];
+			return $_SESSION['UNIT_DEFAULT'] ?? null;
 		} else {
 			return $edit_access_id;
 		}

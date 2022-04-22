@@ -503,7 +503,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			// max id, falls INSERT
 			$q = 'SELECT MAX(' . $this->pk_name . ') + 1 AS pk_id FROM ' . $this->table_name;
 			if (is_array($res = $this->dbReturnRow($q))) {
-				$pk_id = $res['pkd_id'];
+				$pk_id = $res['pk_id'];
 			} else {
 				$pk_id = 1;
 			}
