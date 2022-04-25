@@ -79,7 +79,7 @@ class L10n
 	public function __construct(
 		string $locale = '',
 		string $domain = '',
-		string $path = '',
+		string $path = ''
 	) {
 		// auto load language only if at least locale and domain is set
 		if (!empty($locale) && !empty($domain)) {

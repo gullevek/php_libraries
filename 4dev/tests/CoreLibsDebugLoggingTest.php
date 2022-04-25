@@ -730,7 +730,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		bool $expected_debug,
 		string $expected_file,
 		string $expected_string_start,
-		string $expected_string_contains,
+		string $expected_string_contains
 	): void {
 		// must run with below matrix
 		// level    | debug | print | echo | debug() | printErrorMsg() | file

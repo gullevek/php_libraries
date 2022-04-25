@@ -20,7 +20,7 @@ class DateTime
 		4 => 'Thu',
 		5 => 'Fri',
 		6 => 'Sat',
-		7 => 'Sun'
+		7 => 'Sun',
 	];
 	/** @var array<int,string> */
 	public const DAY_LONG = [
@@ -30,7 +30,7 @@ class DateTime
 		4 => 'Thursday',
 		5 => 'Friday',
 		6 => 'Saturday',
-		7 => 'Sunday'
+		7 => 'Sunday',
 	];
 	/** @var array<int,string> */
 	public const MONTH_LONG = [
@@ -45,7 +45,7 @@ class DateTime
 		9 => 'September',
 		10 => 'October',
 		11 => 'November',
-		12 => 'December'
+		12 => 'December',
 	];
 	/** @var array<int,string> */
 	public const MONTH_SHORT = [
@@ -60,7 +60,7 @@ class DateTime
 		9 => 'Sep',
 		10 => 'Oct',
 		11 => 'Nov',
-		12 => 'Dec'
+		12 => 'Dec',
 	];
 
 	/**
@@ -349,7 +349,7 @@ class DateTime
 		try {
 			$start = new \DateTime($start_date);
 			$end = new \DateTime($end_date);
-		} catch (Exception) {
+		} catch (Exception $e) {
 			if ($return_named === true) {
 				return [
 					'overall' => 0,

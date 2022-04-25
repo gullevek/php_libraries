@@ -207,7 +207,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		string $domain_expected,
 		?string $context,
 		string $original,
-		string $translated,
+		string $translated
 	): void {
 		if ($locale === null) {
 			$l10n = new \CoreLibs\Language\L10n();
@@ -385,7 +385,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		string $locale_expected_b,
 		string $locale_set_expected_b,
 		string $domain_expected_b,
-		string $translated_b,
+		string $translated_b
 	): void {
 		if ($locale === null) {
 			$l10n = new \CoreLibs\Language\L10n();
@@ -763,7 +763,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		string $type,
 		string $var,
 		string $value,
-		string $expected,
+		string $expected
 	): void {
 		switch ($type) {
 			case 'global':

@@ -566,7 +566,7 @@ final class CoreLibsDBIOTest extends TestCase
 	public function testDbSetDebug(
 		string $connection,
 		?bool $set,
-		bool $expected,
+		bool $expected
 	): void {
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config[$connection],
@@ -599,7 +599,7 @@ final class CoreLibsDBIOTest extends TestCase
 	public function testDbToggleDebug(
 		string $connection,
 		?bool $toggle,
-		bool $expected,
+		bool $expected
 	): void {
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config[$connection],
@@ -1734,7 +1734,7 @@ final class CoreLibsDBIOTest extends TestCase
 		$expected,
 		string $warning,
 		string $error,
-		string $insert_data,
+		string $insert_data
 	): void {
 		// self::$log->setLogLevelAll('debug', true);
 		// self::$log->setLogLevelAll('print', true);
@@ -1871,7 +1871,7 @@ final class CoreLibsDBIOTest extends TestCase
 		$expected,
 		string $warning,
 		string $error,
-		string $insert_data,
+		string $insert_data
 	): void {
 		// self::$log->setLogLevelAll('debug', true);
 		// self::$log->setLogLevelAll('print', true);
@@ -2034,7 +2034,7 @@ final class CoreLibsDBIOTest extends TestCase
 		array $cursor_ext_checks,
 		string $warning,
 		string $error,
-		string $insert_data,
+		string $insert_data
 	): void {
 		// self::$log->setLogLevelAll('debug', true);
 		// self::$log->setLogLevelAll('print', true);
@@ -2356,7 +2356,7 @@ final class CoreLibsDBIOTest extends TestCase
 		string $error_execute,
 		string $expected_data_query,
 		array $expected_data,
-		string $insert_data,
+		string $insert_data
 	): void {
 		// self::$log->setLogLevelAll('debug', true);
 		// self::$log->setLogLevelAll('print', true);
@@ -3010,7 +3010,7 @@ final class CoreLibsDBIOTest extends TestCase
 		string $insert,
 		?string $pk_name,
 		string $table,
-		string $primary_key,
+		string $primary_key
 	): void {
 		// self::$log->setLogLevelAll('debug', true);
 		// self::$log->setLogLevelAll('print', true);

@@ -240,7 +240,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 		?string $path,
 		?string $SESSION_DEFAULT_LOCALE,
 		?string $SESSION_DEFAULT_CHARSET,
-		array $expected,
+		array $expected
 	): void {
 		$return_lang_settings = [];
 		global $_SESSION;

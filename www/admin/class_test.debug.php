@@ -68,6 +68,9 @@ print "S::DEBUSTRING(s): " . DebugSupport::debugString('SET') . "<br>";
 print "S::DEBUSTRING(''): " . DebugSupport::debugString('') . "<br>";
 print "S::DEBUSTRING(,s): " . DebugSupport::debugString(null, '{-}') . "<br>";
 
+// get test
+print "LOG FOLDER: " . $debug->getSetting('log_folder') . "<br>";
+
 // debug
 print "C->DEBUG: " . $debug->debug('CLASS-TEST-DEBUG', 'Class Test Debug') . "<br>";
 print "C->DEBUG(html): " . $debug->debug('CLASS-TEST-DEBUG', 'HTML TAG<br><b>BOLD</b>') . "<br>";

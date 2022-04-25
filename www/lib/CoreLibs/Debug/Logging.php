@@ -401,10 +401,10 @@ class Logging
 
 	/**
 	 * Temporary method to read all class variables for testing purpose
-	 * @param string $name
-	 * @return mixed       can be anything, bool, string, int, array
+	 * @param  string $name what variable to return
+	 * @return mixed        can be anything, bool, string, int, array
 	 */
-	public function getSetting(string $name): mixed
+	public function getSetting(string $name) //:mixed DOES not work with PHP 7.4
 	{
 		// for debug purpose only
 		return $this->{$name};
