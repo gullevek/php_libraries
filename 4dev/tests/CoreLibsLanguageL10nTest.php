@@ -109,10 +109,11 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			// 2: encoding
 			// 3: path
 			// 4: locale expected
-			// 5: domain exepcted
-			// 6: context (null for none)
-			// 7: test string in
-			// 8: test translated
+			// 5: locale set expected
+			// 6: domain exepcted
+			// 7: context (null for none)
+			// 8: test string in
+			// 9: test translated
 			// new style load
 			'gettext load en' => [
 				'en_US.UTF-8',
@@ -120,6 +121,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				__DIR__ . 'includes/locale/',
 				//
 				'en_US.UTF-8',
+				'en_US',
 				'frontend',
 				null,
 				'Original',
@@ -131,6 +133,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				__DIR__ . 'includes/locale/',
 				//
 				'en_US.UTF-8',
+				'en_US',
 				'frontend',
 				'context',
 				'Original',
@@ -142,6 +145,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				__DIR__ . 'includes/locale/',
 				//
 				'ja_JP.UTF-8',
+				'ja_JP',
 				'admin',
 				null,
 				'Original',
@@ -154,6 +158,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				'frontend',
 				//
 				'en_US.UTF-8',
+				'en_US',
 				'frontend',
 				'context',
 				'Original',
@@ -165,6 +170,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				'',
 				'',
 				//
+				'',
 				'',
 				'',
 				null,
@@ -185,6 +191,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * @param  string|null $domain
 	 * @param  string|null $path
 	 * @param  string      $locale_expected
+	 * @param  string      $locale_set_expected
 	 * @param  string      $domain_expected
 	 * @param  ?string     $context
 	 * @param  string      $original
@@ -196,6 +203,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		?string $domain,
 		?string $path,
 		string $locale_expected,
+		string $locale_set_expected,
 		string $domain_expected,
 		?string $context,
 		string $original,
@@ -216,6 +224,11 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			$locale_expected,
 			$l10n->getLocale(),
 			'Locale assert failed'
+		);
+		$this->assertEquals(
+			$locale_set_expected,
+			$l10n->getLocaleSet(),
+			'Locale set assert failed'
 		);
 		$this->assertEquals(
 			$domain_expected,
@@ -255,15 +268,17 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			// 3: load error
 			// 4: input string to translated
 			// 5: expected locale
-			// 6: expected domain
-			// 7: expected translation
-			// 8: change locale
-			// 9: change domain
-			// 10: change path
-			// 11: change load error
-			// 12: expected locale
-			// 13: expected domain
-			// 14: expected translation
+			// 6: expected locale set
+			// 7: expected domain
+			// 8: expected translation
+			// 9: change locale
+			// 10: change domain
+			// 11: change path
+			// 12: change load error
+			// 13: expected locale
+			// 14: expected locale set
+			// 15: expected domain
+			// 16: expected translation
 			'load and change (en->ja)' => [
 				// set 0-2
 				'en_US.UTF-8',
@@ -275,6 +290,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				'Original',
 				// check setter 5-7
 				'en_US.UTF-8',
+				'en_US',
 				'frontend',
 				'Translated frontend en_US',
 				// set new 8-10
@@ -285,6 +301,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				false,
 				// check new setter 12-14
 				'ja_JP.UTF-8',
+				'ja_JP',
 				'frontend',
 				'Translated frontend ja_JP',
 			],
@@ -300,6 +317,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				// check setter 5-7
 				'',
 				'',
+				'',
 				'Original',
 				// set new 8-10
 				'en_US.UTF-8',
@@ -309,6 +327,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				false,
 				// check new setter 12-14
 				'en_US.UTF-8',
+				'en_US',
 				'frontend',
 				'Translated frontend en_US',
 			]
@@ -329,12 +348,14 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * @param  bool        $load_error
 	 * @param  string      $original
 	 * @param  string      $locale_expected_a
+	 * @param  string      $locale_set_expected_a
 	 * @param  string      $domain_expected_a
 	 * @param  string      $translated_a
 	 * @param  string|null $locale_new
 	 * @param  string|null $domain_new
 	 * @param  string|null $path_new
 	 * @param  bool        $load_error_new
+	 * @param  string      $locale_set_expected_b
 	 * @param  string      $locale_expected_b
 	 * @param  string      $domain_expected_b
 	 * @param  string      $translated_b
@@ -351,6 +372,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		string $original,
 		// 5-7
 		string $locale_expected_a,
+		string $locale_set_expected_a,
 		string $domain_expected_a,
 		string $translated_a,
 		// 8-10
@@ -361,6 +383,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		bool $load_error_new,
 		// 12-14
 		string $locale_expected_b,
+		string $locale_set_expected_b,
 		string $domain_expected_b,
 		string $translated_b,
 	): void {
@@ -384,6 +407,10 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			$locale_expected_a,
 			$l10n->getLocale(),
 			'Locale init assert failed'
+		);$this->assertEquals(
+			$locale_set_expected_a,
+			$l10n->getLocaleSet(),
+			'Locale Set init assert failed'
 		);
 		$this->assertEquals(
 			$domain_expected_a,
@@ -434,6 +461,11 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			$locale_expected_b,
 			$l10n->getLocale(),
 			'Locale change assert failed'
+		);
+		$this->assertEquals(
+			$locale_set_expected_b,
+			$l10n->getLocaleSet(),
+			'Locale Set change assert failed'
 		);
 		$this->assertEquals(
 			$domain_expected_b,

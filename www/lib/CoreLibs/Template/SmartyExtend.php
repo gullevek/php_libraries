@@ -32,6 +32,8 @@ class SmartyExtend extends \Smarty
 	/** @var string */
 	public $lang;
 	/** @var string */
+	public $locale_set;
+	/** @var string */
 	public $lang_short;
 	/** @var string */
 	public $domain;
@@ -170,6 +172,7 @@ class SmartyExtend extends \Smarty
 		// get first part from lang
 		$this->lang_short = explode('_', $locale['lang'])[0];
 		$this->domain = $this->l10n->getDomain();
+		$this->locale_set = $this->l10n->getLocaleSet();
 		$this->lang_dir = $this->l10n->getBaseLocalePath();
 
 		// opt load functions so we can use legacy init for smarty run perhaps
@@ -312,7 +315,9 @@ class SmartyExtend extends \Smarty
 		}
 		// javascript translate data as template for auto translate
 		if (empty($this->TEMPLATE_TRANSLATE)) {
-			$this->TEMPLATE_TRANSLATE = 'jsTranslate_' . $this->lang . '.tpl';
+			$this->TEMPLATE_TRANSLATE = 'jsTranslate_'
+				. $this->locale_set . '.' . $this->encoding
+				. '.tpl';
 		} else {
 			// we assume we have some fixed set
 			// we must add _<$this->lang>
@@ -321,12 +326,12 @@ class SmartyExtend extends \Smarty
 			if (strpos($this->TEMPLATE_TRANSLATE, '.tpl')) {
 				$this->TEMPLATE_TRANSLATE = str_replace(
 					'.tpl',
-					'-' . $this->lang . '.' . $this->encoding . '.tpl',
+					'-' . $this->locale_set . '.' . $this->encoding . '.tpl',
 					$this->TEMPLATE_TRANSLATE
 				);
 			} else {
 				$this->TEMPLATE_TRANSLATE .= '_'
-					. $this->lang . '.' . $this->encoding
+					. $this->locale_set . '.' . $this->encoding
 					. '.tpl';
 			}
 		}

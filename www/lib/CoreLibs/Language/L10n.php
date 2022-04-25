@@ -34,6 +34,8 @@ class L10n
 {
 	/** @var string the current locale */
 	private $locale = '';
+	/** @var string the SET locale as WHERE the domain file is */
+	private $locale_set = '';
 	/** @var string the default selected/active domain */
 	private $domain = '';
 	/** @var array<string,array<string,GetTextReader>> locale > domain = translator */
@@ -141,6 +143,7 @@ class L10n
 		// store old settings
 		$old_mofile = $this->mofile;
 		$old_lang = $this->locale;
+		$old_lang_set = $this->locale_set;
 		$old_domain = $this->domain;
 		$old_base_locale_path = $this->base_locale_path;
 		$old_base_content_path = $this->base_content_path;
@@ -172,6 +175,7 @@ class L10n
 				. $this->base_content_path
 				. $domain . '.mo';
 			if (file_exists($this->mofile)) {
+				$this->locale_set = $_locale;
 				break;
 			}
 		}
@@ -202,6 +206,7 @@ class L10n
 			// else fall back to the old ones
 			$this->mofile = $old_mofile;
 			$this->locale = $old_lang;
+			$this->locale_set = $old_lang_set;
 			$this->domain = $old_domain;
 			$this->base_locale_path = $old_base_locale_path;
 			$this->base_content_path = $old_base_content_path;
@@ -454,13 +459,23 @@ class L10n
 	}
 
 	/**
-	 * get current set locale
+	 * get current set locale (want locale)
 	 *
 	 * @return string
 	 */
 	public function getLocale(): string
 	{
 		return $this->locale;
+	}
+
+	/**
+	 * current set locale where mo file is located
+	 *
+	 * @return string
+	 */
+	public function getLocaleSet(): string
+	{
+		return $this->locale_set;
 	}
 
 	/**
