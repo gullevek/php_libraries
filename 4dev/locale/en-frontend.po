@@ -1,4 +1,9 @@
-# to craete: msgfmt -o <output.po> <input.mo>
+# ********************************************************************
+# AUTHOR: Clemens Schwaighofer
+# CREATED: 2005/08/09
+# SHORT DESCRIPTION:
+# Frontend English Messages file for gettext
+# ********************************************************************/
 
 msgid ""
 msgstr ""

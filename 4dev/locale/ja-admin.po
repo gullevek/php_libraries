@@ -2,8 +2,7 @@
 # AUTHOR: Clemens Schwaighofer
 # CREATED: 2018/03/28
 # SHORT DESCRIPTION:
-# Backend Japanese Messages file for gettext
-# to craete: msgfmt -o <output.po> <input.mo>
+# Backend Japanese Messages file for gettext>
 # ********************************************************************/
 
 msgid ""
