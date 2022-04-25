@@ -319,9 +319,15 @@ class SmartyExtend extends \Smarty
 			// if .tpl, put before .tpl
 			// if not .tpl, add _<$this->lang>.tpl
 			if (strpos($this->TEMPLATE_TRANSLATE, '.tpl')) {
-				$this->TEMPLATE_TRANSLATE = str_replace('.tpl', '_' . $this->lang . '.tpl', $this->TEMPLATE_TRANSLATE);
+				$this->TEMPLATE_TRANSLATE = str_replace(
+					'.tpl',
+					'-' . $this->lang . '.' . $this->encoding . '.tpl',
+					$this->TEMPLATE_TRANSLATE
+				);
 			} else {
-				$this->TEMPLATE_TRANSLATE .= '_' . $this->lang . '.tpl';
+				$this->TEMPLATE_TRANSLATE .= '_'
+					. $this->lang . '.' . $this->encoding
+					. '.tpl';
 			}
 		}
 		// if we can't find it, dump it

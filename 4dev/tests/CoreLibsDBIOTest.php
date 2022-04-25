@@ -145,7 +145,7 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 		if (!$db->dbGetConnectionStatus()) {
 			self::markTestSkipped(
-				'Cannot connect to valid Test DB.'
+				'Cannot connect to valid Test DB for DB\IO test.'
 			);
 		}
 		// check if they already exist, drop them
