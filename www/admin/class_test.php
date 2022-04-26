@@ -83,6 +83,9 @@ print '<div><a href="class_test.admin.backend.php">Class Test: BACKEND ADMIN CLA
 print '<div><a href="class_test.lang.php">Class Test: LANG/L10n</a></div>';
 print '<div><a href="class_test.smarty.php">Class Test: SMARTY</a></div>';
 print '<div><a href="class_test.autoloader.php">Class Test: AUTOLOADER</a></div>';
+print '<div><a href="class_test.config.link.php">Class Test: CONFIG LINK</a></div>';
+print '<div><a href="class_test.config.direct.php">Class Test: CONFIG DIRECT</a></div>';
+print '<div><a href="subfolder/class_test.config.direct.php">Class Test: CONFIG DIRECT SUB</a></div>';
 
 print "<hr>";
 print "L: " . CoreLibs\Debug\Support::printAr($locale) . "<br>";

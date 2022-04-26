@@ -85,11 +85,13 @@ class Basic
 	 * main Basic constructor to init and check base settings
 	 * @param \CoreLibs\Debug\Logging|null $log Logging class
 	 * @param string|null $session_name Set session name
+	 * @deprecated DO NOT USE Class\Basic anymore. Use dedicated logger and sub classes
 	 */
 	public function __construct(
 		\CoreLibs\Debug\Logging $log = null,
 		?string $session_name = null
 	) {
+		trigger_error('Class \CoreLibs\Basic is deprected', E_USER_DEPRECATED);
 		// TODO make check dynamic for entries we MUST have depending on load type
 		// before we start any work, we should check that all MUST constants are defined
 		$abort = false;

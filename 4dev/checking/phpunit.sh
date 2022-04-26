@@ -10,14 +10,16 @@ if [ "${1}" = "t" ] || [ "${2}" = "t" ]; then
 	opt_testdox="--testdox";
 fi;
 php_bin="";
-case "${1}" in
-	# "7.3") php_bin="/usr/bin/php7.3 "; ;;
-	"7.4") php_bin="/usr/bin/php7.4 "; ;;
-	"8.0") php_bin="/usr/bin/php8.0 "; ;;
-	"8.1") php_bin="/usr/bin/php8.1 "; ;;
-	*) echo "Not support PHP: ${1}"; exit; ;;
-esac;
-if [ -z "${php_bin}" ]; then
+if [ ! -z "${1}" ]; then
+	case "${1}" in
+		# "7.3") php_bin="/usr/bin/php7.3 "; ;;
+		"7.4") php_bin="/usr/bin/php7.4 "; ;;
+		"8.0") php_bin="/usr/bin/php8.0 "; ;;
+		"8.1") php_bin="/usr/bin/php8.1 "; ;;
+		*) echo "Not support PHP: ${1}"; exit; ;;
+	esac;
+fi;
+if [ ! -z "${2}" ] && [ -z "${php_bin}" ]; then
 	case "${2}" in
 		# "7.3") php_bin="/usr/bin/php7.3 "; ;;
 		"7.4") php_bin="/usr/bin/php7.4 "; ;;
