@@ -191,6 +191,7 @@ class Login
 		// check if session exists and could be created
 		// TODO: move session creation and check to outside?
 		if (Session::startSession() === false) {
+			$this->login_error = 1;
 			echo '<b>Session not started or could not be started!</b><br>'
 				. 'Use \'\CoreLibs\Create\Session::startSession();\'.<br>'
 				. 'For less problems with other session, you can set a '
@@ -837,10 +838,10 @@ class Login
 		$_SESSION['BASE_ACL_LEVEL'] = $this->acl['base'];
 
 		// set the current page acl
-		// start with default acl
+		// start with base acl
 		// set group if not -1, overrides default
 		// set page if not -1, overrides group set
-		$this->acl['page'] = DEFAULT_ACL_LEVEL;
+		$this->acl['page'] = $this->acl['base'];
 		if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
 			$this->acl['page'] = $_SESSION['GROUP_ACL_LEVEL'];
 		}

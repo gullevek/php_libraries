@@ -95,6 +95,8 @@ final class CoreLibsACLLoginTest extends TestCase
 		$this->markTestIncomplete(
 			'ACL\Login Tests have not yet been implemented'
 		);
+
+		$login = new \CoreLibs\ACL\Login(self::$db, self::$log);
 	}
 }
 
