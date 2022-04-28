@@ -818,6 +818,7 @@ class Login
 		}
 		// set the default edit access
 		$this->acl['default_edit_access'] = $_SESSION['UNIT_DEFAULT'] ?? null;
+		$this->acl['min'] = [];
 		// integrate the type acl list, but only for the keyword -> level
 		foreach ($this->default_acl_list as $level => $data) {
 			$this->acl['min'][$data['type']] = $level;
@@ -846,6 +847,8 @@ class Login
 		) {
 			return false;
 		}
+		// phan claims $this->acl['min'] can be null, but above should skip
+		/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 		if ($this->acl[$source] >= $this->acl['min'][$min_access]) {
 			return true;
 		}
@@ -1492,7 +1495,7 @@ EOM;
 	/**
 	 * Return ACL array as is
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function loginGetAcl(): array
 	{

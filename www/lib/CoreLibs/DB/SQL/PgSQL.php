@@ -604,7 +604,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 			return '';
 		}
 		// extract element
-		$return_string = pg_version($this->dbh)[$parameter] ?? '';
+		$return_string = (string)(pg_version($this->dbh)[$parameter] ?? '');
 		// for version, strip if requested
 		if (
 			in_array($parameter, ['server']) &&
