@@ -446,16 +446,15 @@ if ($form->my_page_name == 'edit_order') {
 					$t_q = '';
 					foreach ($output as $output_file) {
 						// split the ouput into folder and file
-						// eg ../admin/test.php is ../admin/ and test.php
-						preg_match("/([\.\/\w]+\/)+(\w+\.\w{1,})$/", $output_file, $matches);
-						// if named config.php, skip
-						if ($matches[2] != 'config.php') {
-							if ($t_q) {
-								$t_q .= ', ';
-							}
-							$t_q .= "('" . $form->dbEscapeString($matches[1]) . "', '"
-								. $form->dbEscapeString($matches[2]) . "')";
+						$pathinfo = pathinfo($output_file);
+						if (!empty($pathinfo['dirname'])) {
+							$pathinfo['dirname'] .= DIRECTORY_SEPARATOR;
 						}
+						if ($t_q) {
+							$t_q .= ', ';
+						}
+						$t_q .= "('" . $form->dbEscapeString($pathinfo['dirname']) . "', '"
+							. $form->dbEscapeString($pathinfo['basename']) . "')";
 					}
 					$form->dbExec($q . $t_q, 'NULL');
 					$elements[] = $form->formCreateElement('filename');

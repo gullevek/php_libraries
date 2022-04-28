@@ -43,7 +43,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	/** @var string */
 	public $table_name; // the table_name
 	/** @var string */
-	public $pk_name; // the primary key from this table
+	public $pk_name = ''; // the primary key from this table
 	/** @var int|string|null */
 	public $pk_id; // the PK id
 
