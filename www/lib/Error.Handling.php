@@ -32,7 +32,8 @@ function MyErrorHandler(
 	int $line,
 	array $context = []
 ): bool {
-	if (!(error_reporting() & $type) && SHOW_ALL_ERRORS == false) {
+	/** @phpstan-ignore-next-line cannot check show all errors constant */
+	if (!(error_reporting() & $type) && SHOW_ALL_ERRORS === false) {
 		// This error code is not included in error_reporting
 		return false;
 	}
