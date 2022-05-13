@@ -17,6 +17,7 @@ if ($DEBUG_ALL) {
  * @param  int    $status
  * @return string
  */
+/** @phan-suppress-next-line PhanRedefineFunction */
 function getSessionStatusString(int $status): string
 {
 	switch ($status) {
@@ -82,7 +83,7 @@ echo "Global session name: " . ($GLOBALS['SET_SESSION_NAME'] ?? '-') . "<br>";
 
 print "[UNSET] Current session id: " . Session::getSessionId() . "<br>";
 print "[UNSET] Current session name: " . Session::getSessionName() . "<br>";
-print "[UNSET] Current session active: " . Session::checkActiveSession() . "<br>";
+print "[UNSET] Current session active: " . (Session::checkActiveSession() ? 'Yes' : 'No') . "<br>";
 print "[UNSET] Current session status: " . getSessionStatusString(Session::getSessionStatus()) . "<br>";
 if (isset($_SESSION)) {
 	print "[UNSET] _SESSION is: set<br>";
@@ -92,22 +93,20 @@ if (isset($_SESSION)) {
 #
 print "[UNSET] To set session name valid: "
 	. (Session::checkValidSessionName($session_name) ? 'Valid' : 'Invalid') . "<br>";
-$session = Session::startSession($session_name);
-if ($session === false) {
+if (false === ($session = Session::startSession($session_name))) {
 	print "[FAILED] Session start failed: " . Session::getErrorStr() . "<br>";
 } else {
 	print "[SET] Current session id: " . $session . "<br>";
 }
 // set again
-$session = Session::startSession($session_name);
-if ($session === false) {
+if (false === ($session = Session::startSession($session_name))) {
 	print "[2 FAILED] Session start failed: " . Session::getErrorStr() . "<br>";
 } else {
 	print "[2 SET] Current session id: " . $session . "<br>";
 }
 print "[SET] Current session id: " . Session::getSessionId() . "<br>";
 print "[SET] Current session name: " . Session::getSessionName() . "<br>";
-print "[SET] Current session active: " . Session::checkActiveSession() . "<br>";
+print "[SET] Current session active: " . (Session::checkActiveSession() ? 'Yes' : 'No') . "<br>";
 print "[SET] Current session status: " . getSessionStatusString(Session::getSessionStatus()) . "<br>";
 if (isset($_SESSION)) {
 	print "[SET] _SESSION is: set<br>";
@@ -126,8 +125,7 @@ print "[READ] Confirm " . $var . " is " . $value . ": "
 
 // differnt session name
 $session_name = 'class-test-session-ALT';
-$session = Session::startSession($session_name);
-if ($session === false) {
+if (false === ($session = Session::startSession($session_name))) {
 	print "[3 FAILED] Session start failed: " . Session::getErrorStr() . "<br>";
 } else {
 	print "[3 SET] Current session id: " . $session . "<br>";
@@ -143,14 +141,27 @@ $_SESSION['will_never_be_written'] = 'empty';
 
 // open again
 $session_name = 'class-test-session';
-$session = Session::startSession($session_name);
-if ($session === false) {
+if (false === ($session = Session::startSession($session_name))) {
 	print "[4 FAILED] Session start failed: " . Session::getErrorStr() . "<br>";
 } else {
 	print "[4 SET] Current session id: " . $session . "<br>";
 }
 print "[START AGAIN] Current session id: " . Session::getSessionId() . "<br>";
 $_SESSION['will_be_written_again'] = 'Full';
+
+// close session
+Session::writeClose();
+// invalid
+$session_name = '123';
+if (false === ($session = Session::startSession($session_name))) {
+	print "[5 FAILED] Session start failed: " . Session::getErrorStr() . "<br>";
+} else {
+	print "[5 SET] Current session id: " . $session . "<br>";
+}
+print "[BAD NAME] Current session id: " . Session::getSessionId() . "<br>";
+print "[BAD NAME] Current session name: " . Session::getSessionName() . "<br>";
+print "[BAD NAME] Current session active: " . (Session::checkActiveSession() ? 'Yes' : 'No') . "<br>";
+print "[BAD NAME] Current session status: " . getSessionStatusString(Session::getSessionStatus()) . "<br>";
 
 // error message
 print $log->printErrorMsg();

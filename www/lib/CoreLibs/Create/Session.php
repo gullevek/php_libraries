@@ -18,11 +18,49 @@ namespace CoreLibs\Create;
 
 class Session
 {
+	/** @var string list for errors*/
+	private static $error_str = '';
+
 	/**
 	 * init a session
 	 */
 	public function __construct()
 	{
+	}
+
+	/**
+	 * Return set error string, empty if none set
+	 *
+	 * @return string Last error string
+	 */
+	public static function getErrorStr(): string
+	{
+		return self::$error_str;
+	}
+
+	/**
+	 * check if session name is valid
+	 *
+	 * As from PHP 8.1/8.0/7.4 error
+	 * INVALID CHARS: =,; \t\r\n\013\014
+	 * NOTE: using . will fail even thought valid
+	 * we allow only alphanumeric with - (dash) and 1 to 128 characters
+	 *
+	 * @param  string $session_name any string, not null
+	 * @return bool                 True for valid, False for invalid
+	 */
+	public static function checkValidSessionName(string $session_name): bool
+	{
+		// check
+		if (
+			// must only have those
+			!preg_match('/^[-a-zA-Z0-9]{1,128}$/', $session_name) ||
+			// cannot be only numbers
+			preg_match('/^[0-9]+$/', $session_name)
+		) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -35,10 +73,12 @@ class Session
 	{
 		// we can't start sessions on command line
 		if (php_sapi_name() === 'cli') {
+			self::$error_str = '[SESSION] No sessions in php cli';
 			return false;
 		}
 		// if session are OFF
 		if (self::getSessionStatus() === PHP_SESSION_DISABLED) {
+			self::$error_str = '[SESSION] Sessions are disabled';
 			return false;
 		}
 		// session_status
@@ -59,6 +99,11 @@ class Session
 			}
 			// if set, set special session name
 			if (!empty($session_name)) {
+				// invalid session name, abort
+				if (!self::checkValidSessionName($session_name)) {
+					self::$error_str = '[SESSION] Invalid session name: ' . $session_name;
+					return false;
+				}
 				session_name($session_name);
 			}
 			// start session
@@ -66,6 +111,7 @@ class Session
 		}
 		// if we still have no active session
 		if (!self::checkActiveSession()) {
+			self::$error_str = '[SESSION] Failed to activate session';
 			return false;
 		}
 		return self::getSessionId();
@@ -95,7 +141,7 @@ class Session
 	 * Checks if there is an active session.
 	 * Does not check if we can have a session
 	 *
-	 * @return boolean True if there is an active session, else false
+	 * @return bool True if there is an active session, else false
 	 */
 	public static function checkActiveSession(): bool
 	{
@@ -104,6 +150,19 @@ class Session
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * unlock the session file, so concurrent AJAX requests can be done
+	 * NOTE: after this has been called, no changes in _SESSION will be stored
+	 * NOTE: a new session with a different name can be started after this one is called
+	 * if problem, run ob_flush() and flush() too
+	 *
+	 * @return bool True und sucess, false on failure
+	 */
+	public static function writeClose(): bool
+	{
+		return session_write_close();
 	}
 
 	/**

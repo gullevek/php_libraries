@@ -17,6 +17,7 @@ if ($DEBUG_ALL) {
  * @param  int    $status
  * @return string
  */
+/** @phan-suppress-next-line PhanRedefineFunction */
 function getSessionStatusString(int $status): string
 {
 	switch ($status) {
@@ -78,27 +79,25 @@ echo "Global session name: " . ($GLOBALS['SET_SESSION_NAME'] ?? '-') . "<br>";
 
 print "[UNSET] Current session id: " . Session::getSessionId() . "<br>";
 print "[UNSET] Current session name: " . Session::getSessionName() . "<br>";
-print "[UNSET] Current session active: " . Session::checkActiveSession() . "<br>";
+print "[UNSET] Current session active: " . (Session::checkActiveSession() ? 'Yes' : 'No') . "<br>";
 print "[UNSET] Current session status: " . getSessionStatusString(Session::getSessionStatus()) . "<br>";
 
 print "[READ] " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 // start
-$session = Session::startSession($session_name);
-if ($session === false) {
+if (false === ($session = Session::startSession($session_name))) {
 	print "Session start failed: " . Session::getErrorStr() . "<br>";
 } else {
 	print "Current session id: " . $session . "<br>";
 }
 // set again
-$session = Session::startSession($session_name);
-if ($session === false) {
+if (false === ($session = Session::startSession($session_name))) {
 	print "[2] Session start failed<br>";
 } else {
 	print "[2] Current session id: " . $session . "<br>";
 }
 print "[SET] Current session id: " . Session::getSessionId() . "<br>";
 print "[SET] Current session name: " . Session::getSessionName() . "<br>";
-print "[SET] Current session active: " . Session::checkActiveSession() . "<br>";
+print "[SET] Current session active: " . (Session::checkActiveSession() ? 'Yes' : 'No') . "<br>";
 print "[SET] Current session status: " . getSessionStatusString(Session::getSessionStatus()) . "<br>";
 print "[READ] " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 print "[READ] Confirm " . $var . " is " . $value . ": "
