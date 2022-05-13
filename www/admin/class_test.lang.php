@@ -29,10 +29,12 @@ if (!defined('SET_SESSION_NAME')) {
 $LOG_FILE_ID = 'classTest-lang';
 ob_end_flush();
 
+$PAGE_NAME = 'TEST CLASS: LANG';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: LANG</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 use CoreLibs\Language\L10n;
 use CoreLibs\Debug\Support;

@@ -43,10 +43,12 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $array_class = 'CoreLibs\Create\RandomKey';
 
+$PAGE_NAME = 'TEST CLASS: RANDOM KEY';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: RANDOM KEY</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $key_length = 10;
 $key_length_b = 5;

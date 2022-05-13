@@ -32,10 +32,12 @@ ob_end_flush();
 
 use CoreLibs\Convert\Byte;
 
+$PAGE_NAME = 'TEST CLASS: AUTOLOADER';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: AUTOLOADER</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $bytes = 10242424;
 $_bytes = Byte::humanReadableByteFormat($bytes);

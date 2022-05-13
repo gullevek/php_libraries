@@ -44,10 +44,12 @@ $debug = new CoreLibs\Debug\Logging([
 $debug_support_class = 'CoreLibs\Debug\Support';
 $debug_logging_class = 'CoreLibs\Debug\Logging';
 
+$PAGE_NAME = 'TEST CLASS: DEBUG';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: DEBUG</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 function test()
 {

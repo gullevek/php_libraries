@@ -42,10 +42,12 @@ $log = new CoreLibs\Debug\Logging([
 $_token = new CoreLibs\Output\Form\Token();
 $token_class = 'CoreLibs\Output\Form\Token';
 
+$PAGE_NAME = 'TEST CLASS: FORM TOKEN';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: FORM TOKEN</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $token = 'test_form_token';
 $token_id = $_token->setFormToken($token);

@@ -49,10 +49,12 @@ $elements_class = 'CoreLibs\Output\Form\Elements';
 
 // define a list of from to color sets for conversion test
 
+$PAGE_NAME = 'TEST CLASS: HTML/ELEMENTS';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: HTML/ELEMENTS</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $string = "Something < = > Other <br> Next line";
 print "HTMLENT: " . Html::htmlent($string) . ": " . $_html->htmlent($string) . "<br>";

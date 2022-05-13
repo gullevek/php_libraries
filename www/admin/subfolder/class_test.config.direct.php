@@ -36,11 +36,12 @@ $log = new CoreLibs\Debug\Logging([
 	'print_all' => $PRINT_ALL ?? false,
 ]);
 
+$PAGE_NAME = 'TEST CLASS: CONFIG DIRECT SUB';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: CONFIG DIRECT SUB</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="../class_test.php">Class Test Master</a></div>';
-print '<div><b>CONFIG DIRECT SUB</b></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 print "DIR: " . DIR . "<br>";
 print "BASE: " . BASE . "<br>";

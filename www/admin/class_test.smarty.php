@@ -49,10 +49,12 @@ $l10n = new \CoreLibs\Language\L10n(
 );
 $smarty = new CoreLibs\Template\SmartyExtend($l10n, $locale);
 
+$PAGE_NAME = 'TEST CLASS: SMARTY';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: SMARTY</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $smarty->DATA['JS_DEBUG'] = DEBUG;
 $smarty->MASTER_TEMPLATE_NAME = 'main_body.tpl';

@@ -46,10 +46,12 @@ $phpv_class = 'CoreLibs\Check\PhpVersion';
 
 // define a list of from to color sets for conversion test
 
+$PAGE_NAME = 'TEST CLASS: PHP VERSION';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: PHP VERSION</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $min_version_s = '7';
 $min_version_ss = '7.1';

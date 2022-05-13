@@ -42,10 +42,12 @@ $log = new CoreLibs\Debug\Logging([
 	'print_all' => $PRINT_ALL ?? false,
 ]);
 
+$PAGE_NAME = 'TEST CLASS: RUNNING TIME';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: RUNNING IMTE</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 RunningTime::hrRunningTime();
 RunningTime::runningTime();

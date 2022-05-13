@@ -51,10 +51,12 @@ $l10n = new \CoreLibs\Language\L10n(
 );
 $backend = new CoreLibs\Admin\Backend($db, $log, $l10n, $locale);
 
+$PAGE_NAME = 'TEST CLASS: ADMIN BACKEND';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: ADMIN BACKEND</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 // set acl, from eg login acl
 print "SETACL[]: " . $backend->setACL(['EMPTY' => 'EMPTY']) . "<br>";

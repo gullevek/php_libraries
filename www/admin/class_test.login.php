@@ -42,10 +42,12 @@ $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 $login = new CoreLibs\ACL\Login($db, $log);
 ob_end_flush();
 
+$PAGE_NAME = 'TEST CLASS: LOGIN';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: LOGIN</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 echo "CHECK PERMISSION: " . ($login->loginCheckPermissions() ? 'OK' : 'BAD') . "<br>";
 echo "IS ADMIN: " . ($login->loginIsAdmin() ? 'OK' : 'BAD') . "<br>";

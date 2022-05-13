@@ -44,10 +44,12 @@ $math_class = 'CoreLibs\Convert\Math';
 
 // define a list of from to color sets for conversion test
 
+$PAGE_NAME = 'TEST CLASS: MATH';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: MATH</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 print "FCEIL: " . $_math->fceil(5.1234567890, 5) . "<br>";
 print "FLOORP: " . $_math->floorp(5123456, -3) . "<br>";

@@ -69,10 +69,12 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $form = new CoreLibs\Output\Form\Generate(DB_CONFIG, $log);
 
+$PAGE_NAME = 'TEST CLASS: FORM GENERATE';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: FORM GENERATE</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 print "MOBILE PHONE: " . $form->mobile_phone . "<br>";
 // sets table array to include

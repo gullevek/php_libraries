@@ -46,10 +46,12 @@ $password_class = 'CoreLibs\Check\Password';
 
 // define a list of from to color sets for conversion test
 
+$PAGE_NAME = 'TEST CLASS: PASSWORD';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: PASSWORD</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $password = 'something1234';
 $enc_password = $_password->passwordSet($password);

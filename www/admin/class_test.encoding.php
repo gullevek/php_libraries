@@ -48,10 +48,12 @@ $_chk_enc = new CoreLibs\Check\Encoding();
 $_con_enc = new CoreLibs\Convert\Encoding();
 $chk_enc = 'CoreLibs\Check\Encoding';
 
+$PAGE_NAME = 'TEST CLASS: ENCODING (CHECK/CONVERT/MIME)';
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS: ENCODING (CHECK/CONVERT/MIME)</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 // print "Valid encoding: ".$log->printAr(mb_list_encodings())."<br>";
 
