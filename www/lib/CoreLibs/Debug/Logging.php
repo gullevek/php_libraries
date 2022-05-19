@@ -365,7 +365,18 @@ class Logging
 		}
 		$fn = str_replace('##DATE##', $rpl_string, $fn); // create output filename
 
-		$rpl_string = !$this->log_per_level ? '' : '_' . $level; // if request to write to one file
+		// write per level
+		$rpl_string = !$this->log_per_level ? '' :
+			// normalize level, replace all non alphanumeric characters with -
+			'_' . (
+				// if return is only - then set error string
+				preg_match(
+					"/^-+$/",
+					$level_string = preg_replace("/[^A-Za-z0-9-_]/", '-', $level) ?? ''
+				) ?
+					'INVALID-LEVEL-STRING' :
+					$level_string
+			);
 		$fn = str_replace('##LEVEL##', $rpl_string, $fn); // create output filename
 		// set per class, but don't use get_class as we will only get self
 		$rpl_string = !$this->log_per_class ? '' : '_'

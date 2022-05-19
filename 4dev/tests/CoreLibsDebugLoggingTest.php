@@ -6,6 +6,8 @@ namespace tests;
 
 use PHPUnit\Framework\TestCase;
 
+// TODO: setLogPer test log file written matches pattern
+
 /**
  * Test class for Debug\Logging
  * @coversDefaultClass \CoreLibs\Debug\Logging

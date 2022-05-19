@@ -175,6 +175,12 @@ print "GETCALLERCLASS(NON CLASS): " . \CoreLibs\Debug\Support::getCallerClass() 
 print "S::FSETFILENAME: " . FileWriter::fsetFilename('class_test_debug_file.log') . "<br>";
 print "S::FDEBUG: " . FileWriter::fdebug('CLASS TEST DEBUG FILE: ' . date('Y-m-d H:i:s')) . "<br>";
 
+// test per level
+$debug->setLogPer('level', true);
+$debug->debug('TEST PER LEVEL', 'Per level test');
+$debug->debug('()', 'Per level test: invalid chars');
+$debug->setLogPer('level', false);
+
 // error message
 // future DEPRECATED
 // $debug->debug('BASIC CLASS', 'Debug test');
