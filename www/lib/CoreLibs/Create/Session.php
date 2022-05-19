@@ -7,9 +7,6 @@
  * name can be given via startSession parameter
  * if not set tries to read $SET_SESSION_NAME from global
  * if this is not set tries to read SET_SESSION_NAME constant
- *
- * TODO: add _SESSION write unset
- * TODO: add session close down with all _SESSION vars unset
  */
 
 declare(strict_types=1);
