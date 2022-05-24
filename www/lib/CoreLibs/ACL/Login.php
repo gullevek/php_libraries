@@ -221,7 +221,7 @@ class Login
 		// if there is a schema set in the config, or fall back to DB_SCHEMA
 		// if this exists, if this also does not exists use public schema
 		/** @phpstan-ignore-next-line */
-		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
+		if (!empty(LOGIN_DB_SCHEMA)) {
 			$SCHEMA = LOGIN_DB_SCHEMA;
 		} elseif (!empty($this->db->dbGetSchema(true))) {
 			$SCHEMA = $this->db->dbGetSchema(true);
@@ -296,14 +296,14 @@ class Login
 		) {
 			$locale = $_SESSION['DEFAULT_LOCALE'] ?? '';
 		} else {
-			$locale = defined('SITE_LOCALE') && !empty(SITE_LOCALE) ?
+			$locale = !empty(SITE_LOCALE) ?
 				SITE_LOCALE :
 				/** @phpstan-ignore-next-line DEFAULT_LOCALE could be empty */
-				(defined('DEFAULT_LOCALE') && !empty(DEFAULT_LOCALE) ?
+				(!empty(DEFAULT_LOCALE) ?
 					DEFAULT_LOCALE : 'en.UTF-8');
 		}
 		// set domain
-		if (defined('CONTENT_PATH') && !empty(CONTENT_PATH)) {
+		if (defined('CONTENT_PATH')) {
 			$domain = str_replace('/', '', CONTENT_PATH);
 		} else {
 			$domain = 'admin';
