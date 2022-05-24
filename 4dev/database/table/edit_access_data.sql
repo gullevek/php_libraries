@@ -14,3 +14,7 @@ CREATE TABLE edit_access_data (
 	name	VARCHAR,
 	value	VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;
+
+-- create a unique index for each attached data block for each edit access can
+-- only have ONE value;
+CREATE UNIQUE INDEX edit_access_data_edit_access_id_name_ukey ON edit_access_data (edit_access_id, name);

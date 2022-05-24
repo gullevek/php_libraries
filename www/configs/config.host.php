@@ -53,7 +53,10 @@ $SITE_CONFIG = [
 		'login_enabled' => true
 	],
 	// 'other.host.com' => $__LOCAL_CONFIG
-	'soba-dev.tequila.jp' => $__LOCAL_CONFIG
+	'soba-dev.tequila.jp' => $__LOCAL_CONFIG,
+	'soba.tequila.jp' => $__LOCAL_CONFIG,
+	'soba.teq.jp' => $__LOCAL_CONFIG,
+	'soba-local.tokyo.tequila.jp' => $__LOCAL_CONFIG,
 ];
 
 // __END__

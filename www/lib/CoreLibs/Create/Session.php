@@ -61,7 +61,10 @@ class Session
 	}
 
 	/**
-	 * Undocumented function
+	 * start session with given session name if set
+	 * aborts on command line or if sessions are not enabled
+	 * also aborts if session cannot be started
+	 * On sucess returns the session id
 	 *
 	 * @param string|null $session_name
 	 * @return string|bool
@@ -69,7 +72,7 @@ class Session
 	public static function startSession(?string $session_name = null)
 	{
 		// we can't start sessions on command line
-		if (php_sapi_name() === 'cli') {
+		if (\CoreLibs\Get\System::checkCLI()) {
 			self::$error_str = '[SESSION] No sessions in php cli';
 			return false;
 		}

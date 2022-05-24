@@ -94,6 +94,16 @@ class System
 	{
 		return pathinfo($_SERVER['PHP_SELF']);
 	}
+
+	/**
+	 * Check if the php sapi interface has cli inside
+	 *
+	 * @return bool True for CLI type PHP, else false
+	 */
+	public static function checkCLI(): bool
+	{
+		return substr(php_sapi_name(), 0, 3) === 'cli' ? true : false;
+	}
 }
 
 // __END__

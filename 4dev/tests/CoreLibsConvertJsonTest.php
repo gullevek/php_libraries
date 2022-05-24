@@ -13,7 +13,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsConvertJsonTest extends TestCase
 {
-
 	/**
 	 * test list for json convert tests
 	 *

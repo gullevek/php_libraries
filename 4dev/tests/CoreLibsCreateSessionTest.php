@@ -20,6 +20,10 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 */
 	public function sessionProvider(): array
 	{
+		// 0: session name as parameter
+		// 1: type p (param), g: global, c: constant
+		// 2: exepcted name (session)
+		// 3: regex check
 		return [
 			'session parameter' => [
 				'sessionNameParameter',
@@ -45,20 +49,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return void
-	 */
-	protected function setUp(): void
-	{
-		if (session_id()) {
-			session_destroy();
-		}
-	}
-
-	/**
-	 * Undocumented function
-	 *
 	 * @dataProvider sessionProvider
-	 * @testdox  startSession $input name for $type will be $expected_n with $expected_i [$_dataName]
+	 * @testdox startSession $input name for $type will be $expected_n with $expected_i [$_dataName]
 	 *
 	 * @param string $input
 	 * @param string $type
@@ -66,8 +58,12 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 * @param string|bool $expected_i
 	 * @return void
 	 */
-	public function testStartSession(string $input, string $type, $expected_n, $expected_i): void
-	{
+	public function testStartSession(
+		string $input,
+		string $type,
+		$expected_n,
+		$expected_i
+	): void {
 		// NEEDS MOCKING
 		/* $session_id = '';
 		switch ($type) {
@@ -100,6 +96,64 @@ final class CoreLibsCreateSessionTest extends TestCase
 		} */
 		$this->markTestSkipped('[CoreLibsCreateSessionTest] No implementation '
 			. 'for Create\Session. Cannot run session_start in CLI');
+	}
+
+	/**
+	 * provider for session name check
+	 *
+	 * @return array
+	 */
+	public function sessionNameProvider(): array
+	{
+		// 0: string for session
+		// 1: expected return
+		return [
+			'valid name' => [
+				'abc',
+				true
+			],
+			'valid name longer' => [
+				'something-abc-123',
+				true
+			],
+			'invalid name' => [
+				'abc#abc',
+				false
+			],
+			'only numbers' => [
+				'123',
+				false
+			],
+			'longer than 128 chars' => [
+				'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'
+					. 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'
+					. 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz',
+				false
+			],
+			'too short' => [
+				'',
+				false
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::checkValidSessionName
+	 * @dataProvider sessionNameProvider
+	 * @testdox checkValidSessionName $input seessionn name is $expected [$_dataName]
+	 *
+	 * @param  string $input
+	 * @param  bool   $expected
+	 * @return void
+	 */
+	public function testCheckValidSessionName(string $input, bool $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Create\Session::checkValidSessionName($input)
+		);
 	}
 }
 
