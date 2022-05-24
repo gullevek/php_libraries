@@ -102,7 +102,15 @@ class System
 	 */
 	public static function checkCLI(): bool
 	{
-		return substr(php_sapi_name(), 0, 3) === 'cli' ? true : false;
+		return substr(
+			// if return is false, use empty string
+			(($sapi_name = php_sapi_name()) === false ?
+				'' :
+				$sapi_name
+			),
+			0,
+			3
+		) === 'cli' ? true : false;
 	}
 }
 
