@@ -101,6 +101,8 @@ class Backend
 	public $db;
 	/** @var \CoreLibs\Language\L10n language */
 	public $l;
+	/** @var \CoreLibs\Create\Session session class */
+	public $session;
 	// smarty publics [end processing in smarty class]
 	/** @var array<mixed> */
 	public $DATA;
@@ -114,23 +116,27 @@ class Backend
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**
 	 * main class constructor
-	 * @param \CoreLibs\DB\IO         $db     Database connection class
-	 * @param \CoreLibs\Debug\Logging $log    Logging class
-	 * @param \CoreLibs\Language\L10n $l10n   l10n language class
-	 * @param array<string,string>    $locale locale data read from setLocale
+	 * @param \CoreLibs\DB\IO          $db      Database connection class
+	 * @param \CoreLibs\Debug\Logging  $log     Logging class
+	 * @param \CoreLibs\Create\Session $session Session interface class
+	 * @param \CoreLibs\Language\L10n  $l10n    l10n language class
+	 * @param array<string,string>     $locale  locale data read from setLocale
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
 		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Create\Session $session,
 		\CoreLibs\Language\L10n $l10n,
 		array $locale
 	) {
+		// attach db class
+		$this->db = $db;
 		// set to log not per class
 		$log->setLogPer('class', false);
 		// attach logger
 		$this->log = $log;
-		// attach db class
-		$this->db = $db;
+		// attach session class
+		$this->session = $session;
 		// get the language sub class & init it
 		$this->l = $l10n;
 		// parse and read, legacy stuff
@@ -232,9 +238,9 @@ class Backend
 			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT'] ?? '') . "', "
 			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT_CHARSET'] ?? '') . "', "
 			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '') . "', "
-			. (\CoreLibs\Create\Session::getSessionId() === false ?
+			. ($this->session->getSessionId() === false ?
 				"NULL" :
-				"'" . \CoreLibs\Create\Session::getSessionId() . "'")
+				"'" . $this->session->getSessionId() . "'")
 			. ", "
 			. "'" . $this->db->dbEscapeString($this->action) . "', "
 			. "'" . $this->db->dbEscapeString($this->action_id) . "', "

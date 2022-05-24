@@ -6,7 +6,7 @@
  * start a php sesseion
  * name can be given via startSession parameter
  * if not set tries to read $SET_SESSION_NAME from global
- * if this is not set tries to read SET_SESSION_NAME constant
+ * else will use default set in php.ini
  */
 
 declare(strict_types=1);
@@ -16,13 +16,29 @@ namespace CoreLibs\Create;
 class Session
 {
 	/** @var string list for errors*/
-	private static $error_str = '';
+	private $error_str = '';
 
 	/**
-	 * init a session
+	 * init a session, if array is empty or array does not have session_name set
+	 * then no auto init is run
+	 *
+	 * @param string $session_name if set and not empty, will start session
 	 */
-	public function __construct()
+	public function __construct(string $session_name = '')
 	{
+		if (!empty($session_name)) {
+			$this->startSession($session_name);
+		}
+	}
+
+	/**
+	 * check if we are in CLI, we set this, so we can mock this too
+	 *
+	 * @return bool
+	 */
+	private function checkCLI(): bool
+	{
+		return \CoreLibs\Get\System::checkCLI();
 	}
 
 	/**
@@ -30,9 +46,9 @@ class Session
 	 *
 	 * @return string Last error string
 	 */
-	public static function getErrorStr(): string
+	public function getErrorStr(): string
 	{
-		return self::$error_str;
+		return $this->error_str;
 	}
 
 	/**
@@ -69,39 +85,30 @@ class Session
 	 * @param string|null $session_name
 	 * @return string|bool
 	 */
-	public static function startSession(?string $session_name = null)
+	public function startSession(?string $session_name = null)
 	{
 		// we can't start sessions on command line
-		if (\CoreLibs\Get\System::checkCLI()) {
-			self::$error_str = '[SESSION] No sessions in php cli';
+		if ($this->checkCLI()) {
+			$this->error_str = '[SESSION] No sessions in php cli';
 			return false;
 		}
 		// if session are OFF
-		if (self::getSessionStatus() === PHP_SESSION_DISABLED) {
-			self::$error_str = '[SESSION] Sessions are disabled';
+		if ($this->getSessionStatus() === PHP_SESSION_DISABLED) {
+			$this->error_str = '[SESSION] Sessions are disabled';
 			return false;
 		}
 		// session_status
 		// initial the session if there is no session running already
-		if (!self::checkActiveSession()) {
+		if (!$this->checkActiveSession()) {
 			// if session name is emtpy, check if there is a global set
 			// this is a deprecated fallback
 			$session_name = $session_name ?? $GLOBALS['SET_SESSION_NAME'] ?? '';
-			// check if we have an external session name given, else skip this step
-			// this is a deprecated fallback
-			if (
-				empty($session_name) &&
-				defined('SET_SESSION_NAME') &&
-				!empty(SET_SESSION_NAME)
-			) {
-				// set the session name for possible later check
-				$session_name = SET_SESSION_NAME;
-			}
+			// DEPRECTED: constant SET_SESSION_NAME is no longer used
 			// if set, set special session name
 			if (!empty($session_name)) {
 				// invalid session name, abort
-				if (!self::checkValidSessionName($session_name)) {
-					self::$error_str = '[SESSION] Invalid session name: ' . $session_name;
+				if (!$this->checkValidSessionName($session_name)) {
+					$this->error_str = '[SESSION] Invalid session name: ' . $session_name;
 					return false;
 				}
 				session_name($session_name);
@@ -110,11 +117,11 @@ class Session
 			session_start();
 		}
 		// if we still have no active session
-		if (!self::checkActiveSession()) {
-			self::$error_str = '[SESSION] Failed to activate session';
+		if (!$this->checkActiveSession()) {
+			$this->error_str = '[SESSION] Failed to activate session';
 			return false;
 		}
-		return self::getSessionId();
+		return $this->getSessionId();
 	}
 
 	/**
@@ -122,7 +129,7 @@ class Session
 	 *
 	 * @return string|bool
 	 */
-	public static function getSessionId()
+	public function getSessionId()
 	{
 		return session_id();
 	}
@@ -132,7 +139,7 @@ class Session
 	 *
 	 * @return string|bool
 	 */
-	public static function getSessionName()
+	public function getSessionName()
 	{
 		return session_name();
 	}
@@ -143,9 +150,9 @@ class Session
 	 *
 	 * @return bool True if there is an active session, else false
 	 */
-	public static function checkActiveSession(): bool
+	public function checkActiveSession(): bool
 	{
-		if (self::getSessionStatus() === PHP_SESSION_ACTIVE) {
+		if ($this->getSessionStatus() === PHP_SESSION_ACTIVE) {
 			return true;
 		} else {
 			return false;
@@ -160,7 +167,7 @@ class Session
 	 *
 	 * @return bool True und sucess, false on failure
 	 */
-	public static function writeClose(): bool
+	public function writeClose(): bool
 	{
 		return session_write_close();
 	}
@@ -175,7 +182,7 @@ class Session
 	 *
 	 * @return int
 	 */
-	public static function getSessionStatus(): int
+	public function getSessionStatus(): int
 	{
 		return session_status();
 	}

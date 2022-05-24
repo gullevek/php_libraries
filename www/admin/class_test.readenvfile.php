@@ -14,10 +14,6 @@ ob_start();
 define('USE_DATABASE', false);
 // sample config
 require 'config.php';
-// set session name
-if (!defined('SET_SESSION_NAME')) {
-	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-}
 // define log file id
 $LOG_FILE_ID = 'classTest-readEnvFile';
 ob_end_flush();

@@ -21,14 +21,12 @@ ob_start();
 define('USE_DATABASE', true);
 // sample config
 require 'config.php';
-// set session name
-if (!defined('SET_SESSION_NAME')) {
-	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-}
 // define log file id
 $LOG_FILE_ID = 'classTest';
+$SET_SESSION_NAME = EDIT_SESSION_NAME;
 
 // init login & backend class
+$session = new CoreLibs\Create\Session($SET_SESSION_NAME);
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
 	'file_id' => $LOG_FILE_ID,
@@ -40,14 +38,14 @@ $log = new CoreLibs\Debug\Logging([
 	'print_all' => $PRINT_ALL ?? false,
 ]);
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
-$login = new CoreLibs\ACL\Login($db, $log);
+$login = new CoreLibs\ACL\Login($db, $log, $session);
 $locale = \CoreLibs\Language\GetLocale::setLocale();
 $l10n = new \CoreLibs\Language\L10n(
 	$locale['locale'],
 	$locale['domain'],
 	$locale['path'],
 );
-$backend = new CoreLibs\Admin\Backend($db, $log, $l10n, $locale);
+$backend = new CoreLibs\Admin\Backend($db, $log, $session, $l10n, $locale);
 $backend->db->dbInfo(true);
 ob_end_flush();
 

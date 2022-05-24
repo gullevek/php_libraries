@@ -37,10 +37,10 @@ final class CoreLibsCreateSessionTest extends TestCase
 				'sessionNameGlobals',
 				'/^\w+$/'
 			],
-			'session constant' => [
-				'sessionNameConstant',
-				'c',
-				'sessionNameConstant',
+			'session name default' => [
+				'',
+				'd',
+				'',
 				'/^\w+$/'
 			],
 		];
@@ -64,19 +64,22 @@ final class CoreLibsCreateSessionTest extends TestCase
 		$expected_n,
 		$expected_i
 	): void {
-		// NEEDS MOCKING
-		/* $session_id = '';
+		/*
+		// MOCK class for dummy call
+		$session = new \CoreLibs\Create\Session();
+		$session_id = '';
+		unset($GLOBALS['SET_SESSION_NAME']);
 		switch ($type) {
 			case 'p':
-				$session_id = \CoreLibs\Create\Session::startSession($input);
+				$session_id = $session->startSession($input);
 				break;
 			case 'g':
 				$GLOBALS['SET_SESSION_NAME'] = $input;
-				$session_id = \CoreLibs\Create\Session::startSession();
+				$session_id = $session->startSession();
 				break;
-			case 'c':
-				define('SET_SESSION_NAME', $input);
-				$session_id = \CoreLibs\Create\Session::startSession();
+			case 'd':
+				$expected_n = ini_get('session.name');
+				$session_id = \$session->startSession();
 				break;
 		}
 		$this->assertMatchesRegularExpression(
@@ -85,11 +88,11 @@ final class CoreLibsCreateSessionTest extends TestCase
 		);
 		$this->assertMatchesRegularExpression(
 			$expected_i,
-			(string)\CoreLibs\Create\Session::getSessionId()
+			(string)$session->getSessionId()
 		);
 		$this->assertEquals(
 			$expected_n,
-			\CoreLibs\Create\Session::getSessionName()
+			$session->getSessionName()
 		);
 		if ($type == 'g') {
 			unset($GLOBALS['SET_SESSION_NAME']);

@@ -33,8 +33,6 @@ extract($_POST, EXTR_SKIP);
 
 ob_start();
 require 'config.php';
-// set session name here
-// $SET_SESSION_NAME = EDIT_SESSION_NAME;
 // overrride debug flags
 if (!DEBUG)	{
 	$DEBUG_ALL = false;
@@ -45,8 +43,8 @@ if (!DEBUG)	{
 
 // should be utf8
 header("Content-type: text/html; charset=" . DEFAULT_ENCODING);
-// set session
-\CoreLibs\Create\Session::startSession(EDIT_SESSION_NAME);
+// start session
+$session = new \CoreLibs\Create\Session(EDIT_SESSION_NAME);
 // init logger
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
@@ -60,7 +58,7 @@ $log = new CoreLibs\Debug\Logging([
 // db connection
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 // login page
-$login = new CoreLibs\ACL\Login($db, $log);
+$login = new CoreLibs\ACL\Login($db, $log, $session);
 // lang, path, domain
 // pre auto detect language after login
 $locale = \CoreLibs\Language\GetLocale::setLocale();

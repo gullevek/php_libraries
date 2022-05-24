@@ -42,11 +42,11 @@ if (isset($_POST['action']) && $_POST['action'] != 'download_csv' && !$AJAX_PAGE
 if ($AJAX_PAGE && !$ZIP_STREAM) {
 	header("Content-Type: application/json; charset=UTF-8");
 }
-// start session
-CoreLibs\Create\Session::startSession();
 //------------------------------ basic variable settings start
 
 //------------------------------ class init start
+// start session
+$session = new \CoreLibs\Create\Session($SET_SESSION_NAME);
 // create logger
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
@@ -71,7 +71,7 @@ if (
 // db config with logger
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 // login & page access check
-$login = new CoreLibs\ACL\Login($db, $log);
+$login = new CoreLibs\ACL\Login($db, $log, $session);
 // lang, path, domain
 // pre auto detect language after login
 $locale = \CoreLibs\Language\GetLocale::setLocale();
@@ -84,7 +84,7 @@ $l10n = new \CoreLibs\Language\L10n(
 // create smarty object
 $smarty = new CoreLibs\Template\SmartyExtend($l10n, $locale);
 // create new Backend class with db and loger attached
-$cms = new CoreLibs\Admin\Backend($db, $log, $l10n, $locale);
+$cms = new CoreLibs\Admin\Backend($db, $log, $session, $l10n, $locale);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db info

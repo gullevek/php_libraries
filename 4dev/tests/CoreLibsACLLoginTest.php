@@ -15,6 +15,7 @@ final class CoreLibsACLLoginTest extends TestCase
 {
 	private static $db;
 	private static $log;
+	private static $session;
 
 	/**
 	 * start DB conneciton, setup DB, etc
@@ -28,6 +29,8 @@ final class CoreLibsACLLoginTest extends TestCase
 				'The PgSQL extension is not available.'
 			);
 		}
+		// init session
+		self::$session = new \CoreLibs\Create\Session('ACLLoginTest');
 		// logger is always needed
 		// define basic connection set valid and one invalid
 		self::$log = new \CoreLibs\Debug\Logging([
@@ -96,7 +99,7 @@ final class CoreLibsACLLoginTest extends TestCase
 			'ACL\Login Tests have not yet been implemented'
 		);
 
-		$login = new \CoreLibs\ACL\Login(self::$db, self::$log);
+		$login = new \CoreLibs\ACL\Login(self::$db, self::$log, self::$session);
 	}
 }
 

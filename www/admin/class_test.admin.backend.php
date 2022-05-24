@@ -23,14 +23,12 @@ define('USE_DATABASE', true);
 require 'config.php';
 // override ECHO ALL FALSE
 $ECHO_ALL = true;
-// set session name
-if (!defined('SET_SESSION_NAME')) {
-	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-}
 // define log file id
 $LOG_FILE_ID = 'classTest-admin';
+$SET_SESSION_NAME = EDIT_SESSION_NAME;
 ob_end_flush();
 
+$session = new CoreLibs\Create\Session($SET_SESSION_NAME);
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
 	'file_id' => $LOG_FILE_ID,
@@ -49,7 +47,7 @@ $l10n = new \CoreLibs\Language\L10n(
 	$locale['domain'],
 	$locale['path'],
 );
-$backend = new CoreLibs\Admin\Backend($db, $log, $l10n, $locale);
+$backend = new CoreLibs\Admin\Backend($db, $log, $session, $l10n, $locale);
 
 $PAGE_NAME = 'TEST CLASS: ADMIN BACKEND';
 print "<!DOCTYPE html>";

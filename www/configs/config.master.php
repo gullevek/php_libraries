@@ -150,8 +150,6 @@ define('SERVER_PATH_HASH', hash('crc32b', BASE));
 define('EDIT_SESSION_NAME', BASE_NAME . 'Admin' . SERVER_NAME_HASH . SERVER_PATH_HASH);
 // frontend
 define('SESSION_NAME', BASE_NAME . SERVER_NAME_HASH . SERVER_PATH_HASH);
-// SET_SESSION_NAME should be set in the header if a special session name is needed
-define('SET_SESSION_NAME', SESSION_NAME);
 
 /************* CACHE/COMPILE IDS *************/
 define('CACHE_ID', 'CACHE_' . BASE_NAME . '_' . SERVER_NAME_HASH);

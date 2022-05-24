@@ -66,6 +66,8 @@ class Basic
 	// logging interface, Debug\Logging class
 	/** @var \CoreLibs\Debug\Logging */
 	public $log;
+	/** @var\CoreLibs\Create\Session */
+	public $session;
 
 	// email valid checks
 	/** @var array<mixed> */
@@ -148,7 +150,7 @@ class Basic
 		$this->email_regex_check = \CoreLibs\Check\Email::getEmailRegexCheck();
 
 		// initial the session if there is no session running already
-		\CoreLibs\Create\Session::startSession($session_name);
+		$this->session = new \CoreLibs\Create\Session($session_name ?? '');
 	}
 
 	/**

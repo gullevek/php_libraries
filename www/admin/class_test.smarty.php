@@ -23,10 +23,6 @@ define('USE_DATABASE', true);
 require 'config.php';
 // override ECHO ALL FALSE
 $ECHO_ALL = true;
-// set session name
-if (!defined('SET_SESSION_NAME')) {
-	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-}
 // define log file id
 $LOG_FILE_ID = 'classTest-smarty';
 ob_end_flush();

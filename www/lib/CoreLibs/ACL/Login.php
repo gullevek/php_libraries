@@ -69,7 +69,6 @@ declare(strict_types=1);
 namespace CoreLibs\ACL;
 
 use CoreLibs\Check\Password;
-use CoreLibs\Create\Session;
 
 class Login
 {
@@ -162,24 +161,30 @@ class Login
 	public $db;
 	/** @var \CoreLibs\Language\L10n language */
 	public $l;
+	/** @var \CoreLibs\Create\Session session class */
+	public $session;
 
 	/**
 	 * constructor, does ALL, opens db, works through connection checks,
 	 * finishes itself
 	 *
-	 * @param \CoreLibs\DB\IO              $db   Database connection class
-	 * @param \CoreLibs\Debug\Logging      $log  Logging class
+	 * @param \CoreLibs\DB\IO          $db      Database connection class
+	 * @param \CoreLibs\Debug\Logging  $log     Logging class
+	 * @param \CoreLibs\Create\Session $session Session interface class
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
-		\CoreLibs\Debug\Logging $log
+		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Create\Session $session
 	) {
+		// attach db class
+		$this->db = $db;
 		// log login data for this class only
 		$log->setLogPer('class', true);
 		// attach logger
 		$this->log = $log;
-		// attach db class
-		$this->db = $db;
+		// attach session class
+		$this->session = $session;
 		// set internal page name
 		$this->page_name = \CoreLibs\Get\System::getPageName();
 		// set db special errors
@@ -192,12 +197,9 @@ class Login
 		// initial the session if there is no session running already
 		// check if session exists and could be created
 		// TODO: move session creation and check to outside?
-		if (Session::startSession() === false) {
+		if ($this->session->checkActiveSession() === false) {
 			$this->login_error = 1;
-			echo '<b>Session not started or could not be started!</b><br>'
-				. 'Use \'\CoreLibs\Create\Session::startSession();\'.<br>'
-				. 'For less problems with other session, you can set a '
-				. 'session name with \'\CoreLibs\Create\Session::startSession(\'name\');\'.<br>';
+			echo '<b>No active session found</b>';
 			exit;
 		}
 
@@ -289,7 +291,7 @@ class Login
 		// ** LANGUAGE SET AFTER LOGIN **
 		// set the locale
 		if (
-			Session::getSessionId() !== false &&
+			$this->session->checkActiveSession() === true &&
 			!empty($_SESSION['DEFAULT_LANG'])
 		) {
 			$locale = $_SESSION['DEFAULT_LOCALE'] ?? '';
@@ -1369,7 +1371,7 @@ EOM;
 				$q .= "NULL, ";
 			}
 		}
-		$q .= "'" . Session::getSessionId() . "', ";
+		$q .= "'" . $this->session->getSessionId() . "', ";
 		$q .= "'" . $this->db->dbEscapeString($this->action) . "', ";
 		$q .= "'" . $this->db->dbEscapeString($this->username) . "', ";
 		$q .= "NULL, ";

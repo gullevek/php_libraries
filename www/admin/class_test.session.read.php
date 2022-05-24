@@ -43,10 +43,6 @@ ob_start();
 define('USE_DATABASE', false);
 // sample config
 require 'config.php';
-// set session name
-if (!defined('SET_SESSION_NAME')) {
-	define('SET_SESSION_NAME', EDIT_SESSION_NAME);
-}
 // define log file id
 $LOG_FILE_ID = 'classTest-session.read';
 ob_end_flush();
@@ -62,6 +58,7 @@ $log = new CoreLibs\Debug\Logging([
 	'print_all' => $PRINT_ALL ?? false,
 ]);
 use CoreLibs\Create\Session;
+$session = new Session();
 
 $PAGE_NAME = 'TEST CLASS: SESSION (READ)';
 print "<!DOCTYPE html>";
@@ -77,28 +74,28 @@ $value = 'bar';
 
 echo "Global session name: " . ($GLOBALS['SET_SESSION_NAME'] ?? '-') . "<br>";
 
-print "[UNSET] Current session id: " . Session::getSessionId() . "<br>";
-print "[UNSET] Current session name: " . Session::getSessionName() . "<br>";
-print "[UNSET] Current session active: " . (Session::checkActiveSession() ? 'Yes' : 'No') . "<br>";
-print "[UNSET] Current session status: " . getSessionStatusString(Session::getSessionStatus()) . "<br>";
+print "[UNSET] Current session id: " . $session->getSessionId() . "<br>";
+print "[UNSET] Current session name: " . $session->getSessionName() . "<br>";
+print "[UNSET] Current session active: " . ($session->checkActiveSession() ? 'Yes' : 'No') . "<br>";
+print "[UNSET] Current session status: " . getSessionStatusString($session->getSessionStatus()) . "<br>";
 
 print "[READ] " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 // start
-if (false === ($session = Session::startSession($session_name))) {
-	print "Session start failed: " . Session::getErrorStr() . "<br>";
+if (false === ($session_id = $session->startSession($session_name))) {
+	print "Session start failed: " . $session->getErrorStr() . "<br>";
 } else {
-	print "Current session id: " . $session . "<br>";
+	print "Current session id: " . $session_id . "<br>";
 }
 // set again
-if (false === ($session = Session::startSession($session_name))) {
+if (false === ($session_id = $session->startSession($session_name))) {
 	print "[2] Session start failed<br>";
 } else {
-	print "[2] Current session id: " . $session . "<br>";
+	print "[2] Current session id: " . $session_id . "<br>";
 }
-print "[SET] Current session id: " . Session::getSessionId() . "<br>";
-print "[SET] Current session name: " . Session::getSessionName() . "<br>";
-print "[SET] Current session active: " . (Session::checkActiveSession() ? 'Yes' : 'No') . "<br>";
-print "[SET] Current session status: " . getSessionStatusString(Session::getSessionStatus()) . "<br>";
+print "[SET] Current session id: " . $session->getSessionId() . "<br>";
+print "[SET] Current session name: " . $session->getSessionName() . "<br>";
+print "[SET] Current session active: " . ($session->checkActiveSession() ? 'Yes' : 'No') . "<br>";
+print "[SET] Current session status: " . getSessionStatusString($session->getSessionStatus()) . "<br>";
 print "[READ] " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 print "[READ] Confirm " . $var . " is " . $value . ": "
 	. (($_SESSION[$var] ?? '') == $value ? 'Matching' : 'Not matching') . "<br>";
