@@ -50,7 +50,7 @@ $session = new \CoreLibs\Create\Session($SET_SESSION_NAME);
 // create logger
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => LOG_FILE_ID,
+	'file_id' => $LOG_FILE_ID,
 	'print_file_date' => true,
 	'debug_all' => $DEBUG_ALL ?? false,
 	'echo_all' => $ECHO_ALL ?? false,

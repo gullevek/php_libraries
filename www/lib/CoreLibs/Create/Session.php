@@ -15,8 +15,8 @@ namespace CoreLibs\Create;
 
 class Session
 {
-	/** @var string list for errors*/
-	private $error_str = '';
+	/** @var string list for errors */
+	private $session_intern_error_str = '';
 
 	/**
 	 * init a session, if array is empty or array does not have session_name set
@@ -32,23 +32,54 @@ class Session
 	}
 
 	/**
-	 * check if we are in CLI, we set this, so we can mock this too
+	 * check if we are in CLI, we set this, so we can mock this
+	 * Not this is just a wrapper for the static System::checkCLI call
 	 *
-	 * @return bool
+	 * @return bool True if we are in a CLI enviroment, or false for everything else
 	 */
-	private function checkCLI(): bool
+	public function checkCliStatus(): bool
 	{
 		return \CoreLibs\Get\System::checkCLI();
 	}
 
 	/**
+	 * Set session name call. If not valid session name, will return false
+	 *
+	 * @param  string $session_name A valid string for session name
+	 * @return bool                 True if session name is valid,
+	 *                              False if not
+	 */
+	public function setSessionName(string $session_name): bool
+	{
+		if (!$this->checkValidSessionName($session_name)) {
+			return false;
+		}
+		session_name($session_name);
+		return true;
+	}
+
+	/**
+	 * Start session
+	 * startSession should be called for complete check
+	 * If this is called without any name set before the php.ini name is
+	 * used.
+	 *
+	 * @return void
+	 */
+	public function startSessionCall(): void
+	{
+		session_start();
+	}
+
+	/**
 	 * Return set error string, empty if none set
+	 * Error strings are only set in the startSession method
 	 *
 	 * @return string Last error string
 	 */
 	public function getErrorStr(): string
 	{
-		return $this->error_str;
+		return $this->session_intern_error_str;
 	}
 
 	/**
@@ -88,13 +119,13 @@ class Session
 	public function startSession(?string $session_name = null)
 	{
 		// we can't start sessions on command line
-		if ($this->checkCLI()) {
-			$this->error_str = '[SESSION] No sessions in php cli';
+		if ($this->checkCliStatus()) {
+			$this->session_intern_error_str = '[SESSION] No sessions in php cli';
 			return false;
 		}
 		// if session are OFF
 		if ($this->getSessionStatus() === PHP_SESSION_DISABLED) {
-			$this->error_str = '[SESSION] Sessions are disabled';
+			$this->session_intern_error_str = '[SESSION] Sessions are disabled';
 			return false;
 		}
 		// session_status
@@ -108,20 +139,23 @@ class Session
 			if (!empty($session_name)) {
 				// invalid session name, abort
 				if (!$this->checkValidSessionName($session_name)) {
-					$this->error_str = '[SESSION] Invalid session name: ' . $session_name;
+					$this->session_intern_error_str = '[SESSION] Invalid session name: ' . $session_name;
 					return false;
 				}
-				session_name($session_name);
+				$this->setSessionName($session_name);
 			}
 			// start session
-			session_start();
+			$this->startSessionCall();
 		}
 		// if we still have no active session
 		if (!$this->checkActiveSession()) {
-			$this->error_str = '[SESSION] Failed to activate session';
+			$this->session_intern_error_str = '[SESSION] Failed to activate session';
 			return false;
 		}
-		return $this->getSessionId();
+		if (false === ($session_id = $this->getSessionId())) {
+			$this->session_intern_error_str = '[SESSION] getSessionId did not return a session id';
+		}
+		return $session_id;
 	}
 
 	/**
@@ -180,11 +214,124 @@ class Session
 	 *
 	 * https://www.php.net/manual/en/function.session-status.php
 	 *
-	 * @return int
+	 * @return int See possible return int values above
 	 */
 	public function getSessionStatus(): int
 	{
 		return session_status();
+	}
+
+	// _SESSION set/unset methods
+
+	/**
+	 * unset all _SESSION entries
+	 *
+	 * @return void
+	 */
+	public function unsetAllS(): void
+	{
+		foreach (array_keys($_SESSION ?? []) as $name) {
+			unset($_SESSION[$name]);
+		}
+	}
+
+	/**
+	 * set _SESSION entry 'name' with any value
+	 *
+	 * @param  string|int $name  array name in _SESSION
+	 * @param  mixed      $value value to set (can be anything)
+	 * @return void
+	 */
+	public function setS($name, $value): void
+	{
+		$_SESSION[$name] = $value;
+	}
+
+	/**
+	 * get _SESSION 'name' entry or empty string if not set
+	 *
+	 * @param  string|int $name value key to get from _SESSION
+	 * @return mixed            value stored in _SESSION
+	 */
+	public function getS($name)
+	{
+		return $_SESSION[$name] ?? '';
+	}
+
+	/**
+	 * Check if a name is set in the _SESSION array
+	 *
+	 * @param  string|int $name Name to check for
+	 * @return bool             True for set, False fornot set
+	 */
+	public function issetS($name): bool
+	{
+		return isset($_SESSION[$name]);
+	}
+
+	/**
+	 * unset one _SESSION entry 'name' if exists
+	 *
+	 * @param  string|int $name _SESSION key name to remove
+	 * @return void
+	 */
+	public function unsetS($name): void
+	{
+		if (isset($_SESSION[$name])) {
+			unset($_SESSION[$name]);
+		}
+	}
+
+	// set/get below
+	// ->var = value;
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string|int $name
+	 * @param  mixed      $value
+	 * @return void
+	 */
+	public function __set($name, $value): void
+	{
+		$_SESSION[$name] = $value;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string|int $name
+	 * @return mixed
+	 */
+	public function __get($name)
+	{
+		if (isset($_SESSION[$name])) {
+			return $_SESSION[$name];
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string|int $name
+	 * @return bool
+	 */
+	public function __isset($name): bool
+	{
+		return isset($_SESSION[$name]);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string|int $name
+	 * @return void
+	 */
+	public function __unset($name): void
+	{
+		if (isset($_SESSION[$name])) {
+			unset($_SESSION[$name]);
+		}
 	}
 }
 

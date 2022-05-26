@@ -1384,7 +1384,7 @@ class IO
 		// we only compare the first two
 		preg_match(
 			"/^(\d{1,})\.(\d{1,})\.?(\d{1,})?/",
-			$this->db_functions->__dbVersion(),
+			$this->dbVersion(),
 			$matches
 		);
 		$master = $matches[1];

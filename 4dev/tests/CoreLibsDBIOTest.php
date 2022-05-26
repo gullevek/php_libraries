@@ -36,6 +36,7 @@ declare(strict_types=1);
 namespace tests;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Test class for DB\IO + DB\SQL\PgSQL
@@ -387,28 +388,24 @@ final class CoreLibsDBIOTest extends TestCase
 	public function testDbVerson(string $input, bool $expected): void
 	{
 		// connect to valid DB
-		$db = new \CoreLibs\DB\IO(
-			self::$db_config['valid'],
-			self::$log
-		);
+		// $db = new \CoreLibs\DB\IO(
+		// 	self::$db_config['valid'],
+		// 	self::$log
+		// );
+
+		/** @var \CoreLibs\DB\IO&MockObject $db_io_mock */
+		$db_io_mock = $this->createPartialMock(\CoreLibs\DB\IO::class, ['dbVersion']);
+		$db_io_mock->method('dbVersion')->willReturn('13.6.0');
 
 		// print "DB VERSION: " . $db->dbVersion()  . "\n";
-
-		// TODO: Mock \CoreLibs\DB\SQL\PgSQL somehow or Mock \CoreLibsDB\IO::dbVersion
-		// Create a stub for the SomeClass class.
-		// $stub = $this->createMock(\CoreLibs\DB\IO::class);
-		// $stub->method('dbVersion')
-		// 	->willReturn('13.1.0');
-		// print "DB: " . $stub->dbVersion() . "\n";
+		// print "DB Mock: " . $stub->dbVersion() . "\n";
 		// print "TEST: " . ($stub->dbCompareVersion('=13.1.0') ? 'YES' : 'NO') . "\n";
 		// print "TEST: " . ($stub->dbCompareVersion('=13.6.0') ? 'YES' : 'NO') . "\n";
-		// $mock = $this->getMockBuilder(CoreLibs\DB\IO::class)
-		// 	->addMethods(['dbVersion'])
-		// 	->ge‌​tMock();
 
 		$this->assertEquals(
 			$expected,
-			$db->dbCompareVersion($input)
+			// $db->dbCompareVersion($input)
+			$db_io_mock->dbCompareVersion($input)
 		);
 
 		// print "IT HAS TO BE 13.1.0: " . $stub->dbVersion() . "\n";

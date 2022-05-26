@@ -120,6 +120,21 @@ print "[READ] B " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 print "[READ] Confirm " . $var . " is " . $value . ": "
 	. (($_SESSION[$var] ?? '') == $value ? 'Matching' : 'Not matching') . "<br>";
 
+// test set wrappers methods
+$session->setS('setwrap', 'YES, method set _SESSION var');
+print "[READ WRAP] A setwrap: " . $session->getS('setwrap') . "<br>";
+print "[READ WRAP] Isset: " . ($session->issetS('setwrap') ? 'Yes' : 'No') . "<br>";
+$session->unsetS('setwrap');
+print "[READ WRAP] unset setwrap: " . $session->getS('setwrap') . "<br>";
+print "[READ WRAP] unset Isset: " . ($session->issetS('setwrap') ? 'Yes' : 'No') . "<br>";
+// test __get/__set
+$session->setwrap = 'YES, magic set _SESSION var';
+print "[READ MAGIC] A setwrap: " . $session->setwrap . "<br>";
+print "[READ MAGIC] Isset: " . (isset($session->setwrap) ? 'Yes' : 'No') . "<br>";
+unset($session->setwrap);
+print "[READ MAGIC] unset setwrap: " . $session->setwrap . "<br>";
+print "[READ MAGIC] unset Isset: " . (isset($session->setwrap) ? 'Yes' : 'No') . "<br>";
+
 // differnt session name
 $session_name = 'class-test-session-ALT';
 if (false === ($session_id = $session->startSession($session_name))) {
