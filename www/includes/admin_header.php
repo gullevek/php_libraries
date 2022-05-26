@@ -19,15 +19,17 @@ if (!empty($DEBUG_ALL) && !empty($ENABLE_ERROR_HANDLING)) {
 //------------------------------ library include start
 // set output to quiet for load of classes & session settings
 ob_start();
-// set the session name
-$SET_SESSION_NAME = EDIT_SESSION_NAME;
-$LOG_FILE_ID = BASE_NAME . 'Admin';
 //------------------------------ library include end
 
 //------------------------------ basic variable settings start
+// set the session name
+$SET_SESSION_NAME = EDIT_SESSION_NAME;
+$LOG_FILE_ID = BASE_NAME . 'Admin';
+// ajax page flag
 if (!isset($AJAX_PAGE)) {
 	$AJAX_PAGE = false;
 }
+// zip download flag
 if (!isset($ZIP_STREAM)) {
 	$ZIP_STREAM = false;
 }
@@ -48,7 +50,7 @@ if ($AJAX_PAGE && !$ZIP_STREAM) {
 // start session
 $session = new \CoreLibs\Create\Session($SET_SESSION_NAME);
 // create logger
-$log = new CoreLibs\Debug\Logging([
+$log = new \CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
 	'file_id' => $LOG_FILE_ID,
 	'print_file_date' => true,
@@ -69,9 +71,9 @@ if (
 	}
 }
 // db config with logger
-$db = new CoreLibs\DB\IO(DB_CONFIG, $log);
+$db = new \CoreLibs\DB\IO(DB_CONFIG, $log);
 // login & page access check
-$login = new CoreLibs\ACL\Login($db, $log, $session);
+$login = new \CoreLibs\ACL\Login($db, $log, $session);
 // lang, path, domain
 // pre auto detect language after login
 $locale = \CoreLibs\Language\GetLocale::setLocale();
@@ -82,9 +84,9 @@ $l10n = new \CoreLibs\Language\L10n(
 	$locale['path'],
 );
 // create smarty object
-$smarty = new CoreLibs\Template\SmartyExtend($l10n, $locale);
+$smarty = new \CoreLibs\Template\SmartyExtend($l10n, $locale);
 // create new Backend class with db and loger attached
-$cms = new CoreLibs\Admin\Backend($db, $log, $session, $l10n, $locale);
+$cms = new \CoreLibs\Admin\Backend($db, $log, $session, $l10n, $locale);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db info

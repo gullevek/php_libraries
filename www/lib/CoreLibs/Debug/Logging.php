@@ -310,6 +310,7 @@ class Logging
 	 * Needs debug/echo/print ad target for which of the debug flag groups we check
 	 * also needs level string to check in the per level output flag check.
 	 * In case we have invalid target it will return false
+	 *
 	 * @param  string $target target group to check debug/echo/print
 	 * @param  string $level  level to check in detailed level flag
 	 * @return bool           true on access allowed or false on no access
@@ -332,6 +333,7 @@ class Logging
 
 	/**
 	 * writes error msg data to file for current level
+	 *
 	 * @param  string $level        the level to write
 	 * @param  string $error_string error string to write
 	 * @return bool                 True if message written, FAlse if not
@@ -412,6 +414,7 @@ class Logging
 
 	/**
 	 * Temporary method to read all class variables for testing purpose
+	 *
 	 * @param  string $name what variable to return
 	 * @return mixed        can be anything, bool, string, int, array
 	 */
@@ -425,6 +428,7 @@ class Logging
 	 * sets the internal log file prefix id
 	 * string must be a alphanumeric string
 	 * if non valid string is given it returns the previous set one only
+	 *
 	 * @param  string $string log file id string value
 	 * @return string        returns the set log file id string
 	 * @deprecated Use $log->setLogId()
@@ -438,6 +442,7 @@ class Logging
 	 * sets the internal log file prefix id
 	 * string must be a alphanumeric string
 	 * if non valid string is given it returns the previous set one only
+	 *
 	 * @param  string $string log file id string value
 	 * @return string        returns the set log file id string
 	 */
@@ -460,6 +465,7 @@ class Logging
 
 	/**
 	 * old name for setLogLevel
+	 *
 	 * @param  string $type  debug, echo, print
 	 * @param  string $flag  on/off
 	 *         array  $array of levels to turn on/off debug
@@ -475,6 +481,7 @@ class Logging
 	/**
 	 * set log level settings for All types
 	 * if invalid type, skip
+	 *
 	 * @param  string $type Type to get: debug, echo, print
 	 * @param  bool   $set  True or False
 	 * @return bool         Return false if type invalid
@@ -491,6 +498,7 @@ class Logging
 
 	/**
 	 * get the current log level setting for All level blocks
+	 *
 	 * @param  string $type Type to get: debug, echo, print
 	 * @return bool         False on failure, or the boolean flag from the all var
 	 */
@@ -506,6 +514,7 @@ class Logging
 	/**
 	 * passes list of level names, to turn on debug
 	 * eg $foo->debugFor('print', 'on', ['LOG', 'DEBUG', 'INFO']);
+	 *
 	 * @param  string        $type     debug, echo, print
 	 * @param  string        $flag     on/off
 	 * @param  array<mixed>  $debug_on Array of levels to turn on/off debug
@@ -541,6 +550,7 @@ class Logging
 
 	/**
 	 * return the log level for the array type normal and not (disable)
+	 *
 	 * @param  string      $type  debug, echo, print
 	 * @param  string      $flag  on/off
 	 * @param  string|null $level if not null then check if this array entry is set
@@ -572,6 +582,7 @@ class Logging
 	 * - class: split by class
 	 * - page: split per page called
 	 * - run: for each run
+	 *
 	 * @param  string $type Type to get: level, class, page, run
 	 * @param  bool   $set  True or False
 	 * @return bool         Return false if type invalid
@@ -587,6 +598,7 @@ class Logging
 
 	/**
 	 * return current set log per flag in bool
+	 *
 	 * @param  string $type Type to get: level, class, page, run
 	 * @return bool         True of false for turned on or off
 	 */
@@ -601,6 +613,7 @@ class Logging
 	/**
 	 * Set or get the log file date extension flag
 	 * if null or empty parameter gets current flag
+	 *
 	 * @param boolean|null $set Set the date suffix for log files
 	 *                          If set to null return current set
 	 * @return boolean          Current set flag
@@ -615,6 +628,7 @@ class Logging
 
 	/**
 	 * Return current set log file name
+	 *
 	 * @return string Filename set set after the last time debug was called
 	 */
 	public function getLogFileName(): string
@@ -628,6 +642,7 @@ class Logging
 	 * It uses some special code sets so we can convert that to pre flags
 	 * for echo output {##HTMLPRE##} ... {##/HTMLPRE##}
 	 * Do not use this without using it in a string in debug function
+	 *
 	 * @param  array<mixed> $a Array to format
 	 * @return string          print_r formated
 	 */
@@ -637,13 +652,31 @@ class Logging
 	}
 
 	/**
+	 * Convert bool value to string value
+	 *
+	 * @param  bool   $bool  Bool value to be transformed
+	 * @param  string $true  Override default string 'true'
+	 * @param  string $false Override default string 'false'
+	 * @return string        $true or $false string for true/false bool
+	 */
+	public function prBl(
+		bool $bool,
+		string $true = 'true',
+		string $false = 'false'
+	): string {
+		return $bool ? $true : $false;
+	}
+
+	/**
 	 * write debug data to error_msg array
+	 *
 	 * @param  string $level  id for error message, groups messages together
 	 * @param  string $string the actual error message
 	 * @param  bool   $strip  default on false, if set to true,
 	 *                        all html tags will be stripped and <br> changed to \n
 	 *                        this is only used for debug output
-	 * @param  string $prefix Attach some block before $string. Will not be stripped even
+	 * @param  string $prefix Attach some block before $string.
+	 *                        Will not be stripped even
 	 *                        when strip is true
 	 *                        if strip is false, recommended to add that to $string
 	 * @return bool           True if logged, false if not logged
@@ -729,6 +762,7 @@ class Logging
 	/**
 	 * for ECHO ON only
 	 * returns error data as string so it can be echoed out
+	 *
 	 * @param  string $header_prefix prefix string for header
 	 * @return string                error msg for all levels
 	 */
@@ -780,6 +814,7 @@ class Logging
 	 * unsests the error message array
 	 * can be used if writing is primary to file
 	 * if no level given resets all
+	 *
 	 * @param  string $level optional level
 	 * @return void          has no return
 	 */
@@ -795,6 +830,7 @@ class Logging
 	/**
 	 * for ECHO ON only
 	 * Get current error message array
+	 *
 	 * @return array<mixed> error messages collected
 	 */
 	public function getErrorMsg(): array
@@ -806,6 +842,7 @@ class Logging
 	 * for ECHO ON only
 	 * merges the given error array with the one from this class
 	 * only merges visible ones
+	 *
 	 * @param  array<mixed> $error_msg error array
 	 * @return void                    has no return
 	 */

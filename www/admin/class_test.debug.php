@@ -181,6 +181,10 @@ $debug->debug('TEST PER LEVEL', 'Per level test');
 $debug->debug('()', 'Per level test: invalid chars');
 $debug->setLogPer('level', false);
 
+$ar = ['A', 1, ['B' => 'D']];
+$debug->debug('ARRAY', 'Array: ' . $debug->prAr($ar));
+$debug->debug('BOOL', 'True: ' . $debug->prBl(true) . ', False: ' . $debug->prBl(false));
+
 // error message
 // future DEPRECATED
 // $debug->debug('BASIC CLASS', 'Debug test');
