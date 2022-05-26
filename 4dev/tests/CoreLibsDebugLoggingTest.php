@@ -709,6 +709,64 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		);
 	}
 
+	public function prBlProvider(): array
+	{
+		return [
+			'true bool default' => [
+				true,
+				null,
+				null,
+				'true'
+			],
+			'false bool default' => [
+				false,
+				null,
+				null,
+				'false'
+			],
+			'true bool override' => [
+				true,
+				'ok',
+				'not ok',
+				'ok'
+			],
+			'false bool override' => [
+				false,
+				'ok',
+				'not ok',
+				'not ok'
+			],
+		];
+	}
+
+	/**
+	 * check bool to string converter
+	 *
+	 * @covers ::prBl
+	 * @dataProvider prBlProvider
+	 * @textdox check prBl $input ($true/$false) is expected $false [$_dataName]
+	 *
+	 * @param  bool        $input
+	 * @param  string|null $true
+	 * @param  string|null $false
+	 * @param  string      $expected
+	 * @return void
+	 */
+	public function testPrBl(bool $input, ?string $true, ?string $false, string $expected): void
+	{
+		$this->log = new \CoreLibs\Debug\Logging();
+		$return = '';
+		if ($true === null && $false === null) {
+			$return = $this->log->prBl($input);
+		} elseif ($true !== null || $false !== null) {
+			$return = $this->log->prBl($input, $true ?? '', $false ?? '');
+		}
+		$this->assertEquals(
+			$expected,
+			$return
+		);
+	}
+
 	// from here are complex debug tests
 
 	/**
