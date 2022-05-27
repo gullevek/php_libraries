@@ -402,7 +402,7 @@ class L10n
 
 	/**
 	 * Sets the path for a domain.
-	 * must be set before running l10nReloadMOfile
+	 * must be set before running getTranslator (former l10nReloadMOfile)
 	 *
 	 * @param string $domain Domain name
 	 * @param string $path   Path where to find locales
