@@ -1,6 +1,6 @@
 -- adds the created or updated date tags
 
-CREATE OR REPLACE FUNCTION set_generic() RETURNS TRIGGER AS '
+CREATE OR REPLACE FUNCTION set_date() RETURNS TRIGGER AS '
 	BEGIN
 		IF TG_OP = ''INSERT'' THEN
 			NEW.date_created := ''now'';

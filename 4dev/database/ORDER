@@ -1,9 +1,9 @@
+# this list only holds edit_* related table data
 # functions
-function/set_uid.sql
-function/set_generic.sql
 function/random_string.sql
 function/set_edit_generic.sql
-function/edit_set_access_uid.sql
+function/edit_access_set_uid.sql
+function/edit_group_set_uid.sql
 function/edit_log_partition_insert.sql
 # generic tables
 table/edit_temp_files.sql

@@ -68,10 +68,11 @@ INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('Visitor', 'B0C4B3
 INSERT INTO edit_scheme (name, header_color, enabled) VALUES ('User', '1E789E', 1);
 
 -- edit language
+-- short_name = locale without encoding
 -- iso_name = encoding
 DELETE FROM edit_language;
 INSERT INTO edit_language (long_name, short_name, iso_name, order_number, enabled, lang_default) VALUES ('English', 'en_US', 'UTF-8', 1, 1, 1);
-INSERT INTO edit_language (long_name, short_name, long_name, iso_name, order_number, enabled, lang_default) VALUES ('Japanese', 'ja_JP', 'UTF-8', 2, 1, 0);
+INSERT INTO edit_language (long_name, short_name, iso_name, order_number, enabled, lang_default) VALUES ('Japanese', 'ja_JP', 'UTF-8', 2, 1, 0);
 
 -- edit group
 DELETE FROM edit_group;
@@ -130,7 +131,7 @@ INSERT INTO edit_page_access (enabled, edit_group_id, edit_page_id, edit_access_
 -- inserts admin user so basic users can be created
 DELETE FROM edit_user;
 INSERT INTO edit_user (username, password, enabled, debug, db_debug, email, protected, admin, edit_language_id, edit_group_id, edit_scheme_id, edit_access_right_id) VALUES ('admin', 'admin', 1, 1, 1, '', 1, 1,
-    (SELECT edit_language_id FROM edit_language WHERE short_name = 'en'),
+    (SELECT edit_language_id FROM edit_language WHERE short_name = 'en_US'),
     (SELECT edit_group_id FROM edit_group WHERE name = 'Admin'),
     (SELECT edit_scheme_id FROM edit_scheme WHERE name = 'Admin'),
     (SELECT edit_access_right_id FROM edit_access_right WHERE type = 'admin')

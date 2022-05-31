@@ -1,4 +1,4 @@
--- update missing edit_* table data
+-- 2019/12/11 update missing edit_* table data
 
 ALTER TABLE edit_generic ADD cuid VARCHAR;
 
