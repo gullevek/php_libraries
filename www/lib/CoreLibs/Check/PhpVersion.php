@@ -10,6 +10,7 @@ class PhpVersion
 	 * checks if running PHP version matches given PHP version (min or max)
 	 * if either is empty or null it will be ignored
 	 * if no min version (null or empty)
+	 *
 	 * @param  string|null $min_version minimum version as string (x, x.y, x.y.x)
 	 * @param  string|null $max_version optional maximum version as string (x, x.y, x.y.x)
 	 * @return bool                true if ok, false if not matching version

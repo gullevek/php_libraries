@@ -13,6 +13,7 @@ class Math
 	/**
 	 * some float numbers will be rounded up even if they have no decimal entries
 	 * this function fixes this by pre-rounding before calling ceil
+	 *
 	 * @param  float       $number    number to round
 	 * @param  int|integer $precision intermediat round up decimals (default 10)
 	 * @return float                  correct ceil number
@@ -25,6 +26,7 @@ class Math
 	/**
 	 * round inside an a number, not the decimal part only
 	 * eg 48767 with -2 -> 48700
+	 *
 	 * @param  float $number    number to round
 	 * @param  int   $precision negative number for position in number (default -2)
 	 * @return float            rounded number
@@ -42,6 +44,7 @@ class Math
 
 	/**
 	 * inits input to 0, if value is not numeric
+	 *
 	 * @param  string|int|float $number string or number to check
 	 * @return float                    if not number, then returns 0, else original input
 	 */

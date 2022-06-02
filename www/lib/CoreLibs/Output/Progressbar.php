@@ -109,6 +109,7 @@ class ProgressBar
 
 	/**
 	 * progress bar constructor
+	 *
 	 * @param integer $width  progress bar width, default 0
 	 * @param integer $height progress bar height, default 0
 	 */
@@ -130,6 +131,7 @@ class ProgressBar
 
 	/**
 	 * flush cache hack for IE and others
+	 *
 	 * @param  integer $clear_buffer_size buffer size override
 	 * @return void                       has not return
 	 */
@@ -146,6 +148,7 @@ class ProgressBar
 
 	/**
 	 * [__calculatePercent description]
+	 *
 	 * @param  float $step percent step to do
 	 * @return float       percent step done
 	 */
@@ -164,6 +167,7 @@ class ProgressBar
 
 	/**
 	 * calculate position in bar step
+	 *
 	 * @param  float        $step percent step to do
 	 * @return array<string,int|float> bar position as array
 	 */
@@ -224,6 +228,7 @@ class ProgressBar
 
 	/**
 	 * set the step
+	 *
 	 * @param  float $step percent step to do
 	 * @return void
 	 */
@@ -241,6 +246,7 @@ class ProgressBar
 	// public functions
 	/**
 	 * set frame layout
+	 *
 	 * @param  integer $width  bar width
 	 * @param  integer $height bar height
 	 * @return void
@@ -269,6 +275,7 @@ class ProgressBar
 	/**
 	 * set bar label text
 	 * allowed types are: text, button, step, percent, percentlbl, crossbar
+	 *
 	 * @param  string $type  label type
 	 * @param  string $name  label name (internal)
 	 * @param  string $value label output name (optional)
@@ -374,6 +381,7 @@ class ProgressBar
 
 	/**
 	 * add a button to the progress bar
+	 *
 	 * @param  string $name   button name (internal)
 	 * @param  string $value  button text (output)
 	 * @param  string $action button action (link)
@@ -389,6 +397,7 @@ class ProgressBar
 
 	/**
 	 * set the label position
+	 *
 	 * @param  string $name   label name to set
 	 * @param  int    $left   left px
 	 * @param  int    $top    top px
@@ -439,6 +448,7 @@ class ProgressBar
 
 	/**
 	 * set label color
+	 *
 	 * @param  string $name  label name to set
 	 * @param  string $color color value in rgb html hex
 	 * @return void
@@ -455,6 +465,7 @@ class ProgressBar
 
 	/**
 	 * set the label background color
+	 *
 	 * @param  string $name  label name to set
 	 * @param  string $color background color to set in rgb html hex
 	 * @return void
@@ -471,6 +482,7 @@ class ProgressBar
 
 	/**
 	 * [setLabelFont description]
+	 *
 	 * @param  string $name   label name to set
 	 * @param  int    $size   font size in px
 	 * @param  string $family font family (default empty)
@@ -521,7 +533,8 @@ class ProgressBar
 	}
 
 	/**
-	 * set the label valeu
+	 * set the label value
+	 *
 	 * @param  string $name  label name to set
 	 * @param  string $value label value (output)
 	 * @return void
@@ -539,6 +552,7 @@ class ProgressBar
 
 	/**
 	 * set the bar color
+	 *
 	 * @param  string $color color for the progress bar in rgb html hex
 	 * @return void
 	 */
@@ -554,6 +568,7 @@ class ProgressBar
 
 	/**
 	 * set the progress bar background color
+	 *
 	 * @param  string $color background color in rgb html hex
 	 * @return void
 	 */
@@ -569,6 +584,7 @@ class ProgressBar
 
 	/**
 	 * progress bar direct (left/right)
+	 *
 	 * @param  string $direction set direction as left/right
 	 * @return void
 	 */
@@ -591,6 +607,7 @@ class ProgressBar
 
 	/**
 	 * get the progress bar base HTML
+	 *
 	 * @return string progress bar HTML code
 	 */
 	public function getHtml(): string
@@ -780,6 +797,7 @@ class ProgressBar
 
 	/**
 	 * show the progress bar after initialize
+	 *
 	 * @return void has no return
 	 */
 	public function show(): void
@@ -792,6 +810,7 @@ class ProgressBar
 	/**
 	 * move the progress bar by one step
 	 * prints out javascript to move progress bar
+	 *
 	 * @param  float  $step percent step
 	 * @return void         has no return
 	 */
@@ -851,6 +870,7 @@ class ProgressBar
 
 	/**
 	 * moves progress bar by one step (1)
+	 *
 	 * @return void has no return
 	 */
 	public function moveNext(): void
@@ -860,6 +880,7 @@ class ProgressBar
 
 	/**
 	 * moves the progress bar back to the beginning
+	 *
 	 * @return void has no return
 	 */
 	public function moveMin(): void
@@ -869,6 +890,7 @@ class ProgressBar
 
 	/**
 	 * hide the progress bar if it is visible
+	 *
 	 * @return void has no return
 	 */
 	public function hide(): void
@@ -888,6 +910,7 @@ class ProgressBar
 
 	/**
 	 * show progress bar again after it was hidden with hide()
+	 *
 	 * @return void has no return
 	 */
 	public function unhide(): void

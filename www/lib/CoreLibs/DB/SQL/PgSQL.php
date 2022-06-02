@@ -60,14 +60,8 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	private $dbh;
 
 	/**
-	 * class constructor, empty does nothing
-	 */
-	// public function __construct()
-	// {
-	// }
-
-	/**
 	 * queries last error query and returns true or false if error was set
+	 *
 	 * @return bool true/false if last error is set
 	 */
 	public function __dbLastErrorQuery(): bool
@@ -81,6 +75,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_query, catches error and stores it in class var
+	 *
 	 * @param  string $query Query string
 	 * @return object|resource|bool query result (PgSql\Result)
 	 */
@@ -102,6 +97,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * Proposed
 	 * wrapperf or pg_query_params for queries in the style of
 	 * SELECT foo FROM bar WHERE foobar = $1
+	 *
 	 * @param  string       $query  Query string with placeholders $1, ..
 	 * @param  array<mixed> $params Matching parameters for each placerhold
 	 * @return object|resource|bool Query result (PgSql\Result)
@@ -124,6 +120,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * sends an async query to the server
+	 *
 	 * @param  string $query query string
 	 * @return bool          true/false if query was sent successful
 	 */
@@ -138,6 +135,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_get_result
+	 *
 	 * @return object|resource|bool resource handler or false for error (PgSql\Result)
 	 */
 	public function __dbGetResult()
@@ -158,6 +156,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_close
+	 *
 	 * @return void has no return
 	 */
 	public function __dbClose(): void
@@ -173,9 +172,11 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_prepare
+	 *
 	 * @param  string $name  statement name
 	 * @param  string $query query string
-	 * @return object|resource|bool prepare statement handler or false for error (PgSql\Result)
+	 * @return object|resource|bool prepare statement handler or
+	 *                              false for error (PgSql\Result)
 	 */
 	public function __dbPrepare(string $name, string $query)
 	{
@@ -191,6 +192,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_execute for running a prepared statement
+	 *
 	 * @param  string        $name statement name
 	 * @param  array<mixed>  $data data array
 	 * @return object|resource|bool returns status or false for error (PgSql\Result)
@@ -209,6 +211,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_num_rows
+	 *
 	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
 	 * @return int                  number of rows, -1 on error
 	 */
@@ -222,6 +225,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_num_fields
+	 *
 	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
 	 * @return int                  number for fields in result, -1 on error
 	 */
@@ -235,6 +239,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_field_name
+	 *
 	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
 	 * @param  int                  $i      field position
 	 * @return string|bool          name or false on error
@@ -250,6 +255,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_fetch_array
 	 * if through/true false, use __dbResultType(true)
+	 *
 	 * @param  object|resource|bool $cursor      cursor PgSql\Result (former resource)
 	 * @param  int                  $result_type result type as int number
 	 * @return array<mixed>|bool    array result data or false on end/error
@@ -265,6 +271,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * simple match up between assoc true/false
+	 *
 	 * @param  bool $assoc_type true (default) for PGSQL_ASSOC, false for PGSQL_BOTH
 	 * @return int              valid result type for fetch array
 	 */
@@ -279,6 +286,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_fetch_all
+	 *
 	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
 	 * @return array<mixed>|bool    data array or false for end/error
 	 */
@@ -292,6 +300,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_affected_rows
+	 *
 	 * @param object|resource|bool $cursor cursor PgSql\Result (former resource)
 	 * @return int                 affected rows, 0 for none, -1 for error
 	 */
@@ -306,7 +315,9 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * reads the last inserted primary key for the query
 	 * if there is no pk_name tries to auto built it from the table name
-	 * this only works if db schema is after "no plural names. and pk name is table name + _id
+	 * this only works if db schema is after no plural names
+	 * and pk name is table name + _id
+	 *
 	 * detects schema prefix in table name
 	 * @param  string           $query   query string
 	 * @param  string|null      $pk_name primary key name, if '' then auto detect
@@ -355,6 +366,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * queries database for the primary key name to this table in the selected schema
+	 *
 	 * @param  string      $table  table name
 	 * @param  string      $schema optional schema name, '' for default
 	 * @return string|bool         primary key name or false if not found
@@ -407,6 +419,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_connect, writes out failure to screen if error occurs (hidden var)
+	 *
 	 * @param  string  $db_host host name
 	 * @param  string  $db_user user name
 	 * @param  string  $db_pass password
@@ -456,6 +469,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * reads the last error for this cursor and returns
 	 * html formatted string with error name
+	 *
 	 * @param  bool|object|resource $cursor cursor PgSql\Result (former resource)
 	 *                              or null
 	 * @return string               error string
@@ -481,6 +495,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_meta_data
+	 *
 	 * @param  string $table     table name
 	 * @param  bool   $extended  show extended info (default true)
 	 * @return array<mixed>|bool array data for the table info or false on error
@@ -496,6 +511,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_escape_string
+	 *
 	 * @param  string|int|float|bool $string any string/int/float/bool
 	 * @return string                excaped string
 	 */
@@ -511,6 +527,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * wrapper for pg_escape_literal
 	 * difference to escape string is that this one adds quotes ('') around
 	 * the string too
+	 *
 	 * @param  string|int|float|bool $string any string/int/float/bool
 	 * @return string                excaped string including quites
 	 */
@@ -526,6 +543,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_escape_identifier
 	 * Only used for table names, column names
+	 *
 	 * @param  string $string any string
 	 * @return string         escaped string
 	 */
@@ -540,6 +558,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_escape_byte
+	 *
 	 * @param  string $bytea bytea data stream
 	 * @return string        escaped bytea string
 	 */
@@ -553,6 +572,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * wrapper for pg_connection_busy
+	 *
 	 * @return bool True if connection is busy, False if not or no db connection at all
 	 */
 	public function __dbConnectionBusy(): bool
@@ -565,6 +585,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * Experimental wrapper with scoket timetout
+	 *
 	 * @param integer $timeout_seconds Wait how many seconds on timeout
 	 * @return boolean                 True if connection is busy, or false on
 	 *                                 not busy or no db connection at all
@@ -593,6 +614,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * if not in array return empty string
 	 * On default 'version' will be stripped of any space attached info
 	 * eg 13.5 (other info) will return only 13.5
+	 *
 	 * @param  string  $parameter Parameter string to extract from array
 	 * @param  boolean $strip     If parameter is server strip out on default
 	 *                            Set to false to get original string AS is
@@ -617,6 +639,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * Returns all parameters that are possible from the db_version
+	 *
 	 * @return array<mixed> Parameter key names from pg_version
 	 */
 	public function __dbVersionInfoParameterList(): array
@@ -631,6 +654,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * wrapper for pg_version
 	 * Note: this only returns server version
 	 * not connection version OR client version
+	 *
 	 * @return string version string
 	 */
 	public function __dbVersion(): string
@@ -649,6 +673,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * Old version is 9.5.6 where 9.5 is the major version
 	 * Newer Postgresql (10 on) have only one major version so eg 13.5
 	 * is returned as 130005
+	 *
 	 * @return integer Server version
 	 */
 	public function __dbVersionNumeric(): int
@@ -662,6 +687,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * This is a fallback for old PostgreSQL versions
 	 * postgresql array to php array
 	 * https://stackoverflow.com/a/27964420
+	 *
 	 * @param  string   $array_text Array text from PostgreSQL
 	 * @param  int      $start      Start string position
 	 * @param  int|null $end        End string position from recursive call
@@ -721,6 +747,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * Returns any server setting
 	 * if no connection or empty parameter or other error returns false
 	 * else returns a string
+	 *
 	 * @param  string      $parameter Parameter to query
 	 * @return string|bool            Settings value as string
 	 */
@@ -738,6 +765,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for any SHOW data blocks
 	 * eg search_path or client_encoding
+	 *
 	 * @param  string $show_string Part to show, if invalid will return empty string
 	 * @return string              Found part as is
 	 */
@@ -758,6 +786,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * Sets a new database schema/search_path
 	 * Checks if schema exits and if not aborts with error code 2
+	 *
 	 * @param  string $db_schema Schema to set
 	 * @return int               Returns 0 if no error
 	 *                           1 for check query failed
@@ -788,6 +817,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 
 	/**
 	 * Returns current set schema/search_path
+	 *
 	 * @return string Search Path as currently set in DB
 	 */
 	public function __dbGetSchema(): string
@@ -798,6 +828,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * set the client encoding
 	 * Returns 0 on set ok, or 3 if the client encoding could not be set
+	 *
 	 * @param  string $db_encoding
 	 * @return int    Returns 0 for no error
 	 *                [not used] 1 for check query failed

@@ -12,6 +12,7 @@ class File
 {
 	/**
 	 * quick return the extension of the given file name
+	 *
 	 * @param  string $filename file name
 	 * @return string           extension of the file name
 	 */
@@ -23,6 +24,7 @@ class File
 
 	/**
 	 * get lines in a file
+	 *
 	 * @param  string $file file for line count read
 	 * @return int          number of lines or -1 for non readable file
 	 */

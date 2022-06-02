@@ -12,6 +12,7 @@ class Password
 {
 	/**
 	 * creates the password hash
+	 *
 	 * @param  string $password password
 	 * @return string           hashed password
 	 */
@@ -25,6 +26,7 @@ class Password
 
 	/**
 	 * checks if the entered password matches the hash
+	 *
 	 * @param  string $password password
 	 * @param  string $hash     password hash
 	 * @return bool             true or false
@@ -40,6 +42,7 @@ class Password
 
 	/**
 	 * checks if the password needs to be rehashed
+	 *
 	 * @param  string $hash password hash
 	 * @return bool         true or false
 	 */

@@ -13,6 +13,7 @@ class ArrayHandler
 	/**
 	 * searches key = value in an array / array
 	 * only returns the first one found
+	 *
 	 * @param  string|int   $needle         needle (search for)
 	 * @param  array<mixed> $haystack       haystack (search in)
 	 * @param  string|null  $key_search_for the key to look out for, default empty
@@ -68,10 +69,12 @@ class ArrayHandler
 
 	/**
 	 * recursive array search function, which returns all found not only the first one
+	 *
 	 * @param  string|int        $needle         needle (search for)
 	 * @param  array<mixed>      $haystack       haystack (search in)
 	 * @param  string|int        $key_search_for the key to look for in
-	 * @param  bool              $old            [true], if set to false will return new flat layout
+	 * @param  bool              $old            [true], if set to false will
+	 *                                           return new flat layout
 	 * @param  array<mixed>|null $path           recursive call for previous path
 	 * @return array<mixed>|null                 all array elements paths where
 	 *                                           the element was found
@@ -148,6 +151,7 @@ class ArrayHandler
 	/**
 	 * array search simple. looks for key, value combination, if found, returns true
 	 * on default does not strict check, so string '4' will match int 4 and vica versa
+	 *
 	 * @param  array<mixed> $array search in as array
 	 * @param  string|int  $key    key (key to search in)
 	 * @param  string|int  $value  value (what to find)
@@ -184,6 +188,7 @@ class ArrayHandler
 	 *         ...   etc
 	 *         bool  key flag: true: handle keys as string or int
 	 *               default false: all keys are string
+	 *
 	 * @return array<mixed>|bool merged array
 	 */
 	public static function arrayMergeRecursive()
@@ -240,6 +245,7 @@ class ArrayHandler
 	 * array_diff only checks elements from A that are not in B, but not the
 	 * other way around.
 	 * Note that like array_diff this only checks first level values not keys
+	 *
 	 * @param  array<mixed>  $a array to compare a
 	 * @param  array<mixed>  $b array to compare b
 	 * @return array<mixed>     array with missing elements from a & b
@@ -254,9 +260,12 @@ class ArrayHandler
 	 * search for the needle array elements in haystack and
 	 * return the ones found as an array,
 	 * is there nothing found, it returns FALSE (boolean)
+	 *
 	 * @param  array<mixed> $needle   elements to search for
-	 * @param  array<mixed> $haystack array where the $needle elements should be searched int
-	 * @return array<mixed>|bool      either the found elements or false for nothing found or error
+	 * @param  array<mixed> $haystack array where the $needle elements should
+	 *                                be searched int
+	 * @return array<mixed>|bool      either the found elements or
+	 *                                false for nothing found or error
 	 */
 	public static function inArrayAny(array $needle, array $haystack)
 	{
@@ -275,6 +284,7 @@ class ArrayHandler
 
 	/**
 	 * creates out of a normal db_return array an assoc array
+	 *
 	 * @param  array<mixed>    $db_array return array from the database
 	 * @param  string|int|bool $key      key set, false for not set
 	 * @param  string|int|bool $value    value set, false for not set
@@ -313,6 +323,7 @@ class ArrayHandler
 	/**
 	 * converts multi dimensional array to a flat array
 	 * does NOT preserve keys
+	 *
 	 * @param  array<mixed> $array multi dimensionial array
 	 * @return array<mixed>        flattened array
 	 */
@@ -330,6 +341,7 @@ class ArrayHandler
 
 	/**
 	 * will loop through an array recursivly and write the array keys back
+	 *
 	 * @param  array<mixed> $array  multidemnsional array to flatten
 	 * @param  array<mixed> $return recoursive pass on array of keys
 	 * @return array<mixed>         flattened keys array
@@ -348,6 +360,7 @@ class ArrayHandler
 	/**
 	 * as above will flatten an array, but in this case only the outmost
 	 * leave nodes, all other keyswill be skipped
+	 *
 	 * @param  array<mixed> $array multidemnsional array to flatten
 	 * @return array<mixed>        flattened keys array
 	 */
@@ -366,6 +379,7 @@ class ArrayHandler
 	/**
 	 * searches for key -> value in an array tree and writes the value one level up
 	 * this will remove this leaf will all other values
+	 *
 	 * @param  array<mixed> $array  nested array
 	 * @param  string|int   $search key to find that has no sub leaf
 	 *                              and will be pushed up

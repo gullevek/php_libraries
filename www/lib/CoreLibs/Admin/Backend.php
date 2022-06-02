@@ -116,6 +116,7 @@ class Backend
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**
 	 * main class constructor
+	 *
 	 * @param \CoreLibs\DB\IO          $db      Database connection class
 	 * @param \CoreLibs\Debug\Logging  $log     Logging class
 	 * @param \CoreLibs\Create\Session $session Session interface class
@@ -175,6 +176,7 @@ class Backend
 
 	/**
 	 * set internal ACL from login ACL
+	 *
 	 * @param array<mixed> $acl login acl array
 	 */
 	public function setACL(array $acl): void
@@ -183,7 +185,8 @@ class Backend
 	}
 
 	/**
-	 * writes all action vars plus other info into edit_log tabl
+	 * writes all action vars plus other info into edit_log table
+	 *
 	 * @param  string              $event      any kind of event description,
 	 * @param  string|array<mixed> $data       any kind of data related to that event
 	 * @param  string              $write_type write type can bei STRING or BINARY
@@ -255,6 +258,7 @@ class Backend
 
 	/**
 	 * Set the menu show flag
+	 *
 	 * @param string|int $menu_show_flag
 	 * @return string|int
 	 */
@@ -267,6 +271,7 @@ class Backend
 
 	/**
 	 * Return the menu show flag
+	 *
 	 * @return string|int
 	 */
 	public function adbGetMenuShowFlag()
@@ -276,6 +281,7 @@ class Backend
 
 	/**
 	 * menu creater (from login menu session pages)
+	 *
 	 * @param  int $flag    visible flag trigger
 	 * @return array<mixed> menu array for output on page (smarty)
 	 */
@@ -403,6 +409,7 @@ class Backend
 	/**
 	 * ONLY USED IN adbTopMenu
 	 * checks if this filename is in the current situation (user id, etc) available
+	 *
 	 * @param  string|null $filename filename
 	 * @return bool                  true for visible/accessable menu point, false for not
 	 */
@@ -422,8 +429,8 @@ class Backend
 	}
 
 	/**
-	 * @deprecated
 	 * creates out of a normal db_return array an assoc array
+	 *
 	 * @param  array<mixed>    $db_array input array
 	 * @param  string|int|bool $key      key
 	 * @param  string|int|bool $value    value
@@ -440,8 +447,8 @@ class Backend
 	}
 
 	/**
-	 * @deprecated
 	 * converts bytes into formated string with KB, MB, etc
+	 *
 	 * @param  string|int|float $number string or int or number
 	 * @return string                   formatted string
 	 * @deprecated \CoreLibs\Convert\Byte::humanReadableByteFormat()
@@ -456,8 +463,8 @@ class Backend
 	}
 
 	/**
-	 * @deprecated
 	 * converts picture to a thumbnail with max x and max y size
+	 *
 	 * @param  string      $pic    source image file with or without path
 	 * @param  int         $size_x maximum size width
 	 * @param  int         $size_y maximum size height
@@ -485,6 +492,7 @@ class Backend
 
 	/**
 	 * wrapper function to fill up the mssages array
+	 *
 	 * @param  string       $level info/warning/error
 	 * @param  string       $msg   string, can be printf formated
 	 * @param  array<mixed> $vars  optional data for a possible printf formated msg
@@ -514,6 +522,7 @@ class Backend
 
 	/**
 	 * writes live queue
+	 *
 	 * @param  string  $queue_key string to identfy the queue
 	 * @param  string  $type      [description]
 	 * @param  string  $target    [description]
@@ -559,17 +568,22 @@ class Backend
 	/**
 	 * Basic class holds exact the same, except the Year/Month/Day/etc strings
 	 * are translated in this call
+	 *
 	 * @param  int    $year          year YYYY
 	 * @param  int    $month         month m
 	 * @param  int    $day           day d
 	 * @param  int    $hour          hour H
 	 * @param  int    $min           min i
-	 * @param  string $suffix        additional info printed after the date time variable in the drop down
+	 * @param  string $suffix        additional info printed after the date time
+	 *                               variable in the drop down
 	 *                               also used for ID in the on change JS call
-	 * @param  int    $min_steps     default is 1 (minute), can set to anything, is used as sum up from 0
-	 * @param  bool   $name_pos_back default false, if set to true, the name will be printend
+	 * @param  int    $min_steps     default is 1 (minute), can set to anything,
+	 *                               is used as sum up from 0
+	 * @param  bool   $name_pos_back default false, if set to true,
+	 *                               the name will be printend
 	 *                               after the drop down and not before the drop down
-	 * @return string                HTML formated strings for drop down lists of date and time
+	 * @return string                HTML formated strings for drop down lists
+	 *                               of date and time
 	 */
 	public function adbPrintDateTime(
 		$year,

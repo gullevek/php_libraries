@@ -13,6 +13,7 @@ class Token
 {
 	/**
 	 * sets a form token in a session and returns form token
+	 *
 	 * @param  string $name optional form name, default form_token
 	 * @return string       token name for given form id string
 	 */
@@ -26,6 +27,7 @@ class Token
 
 	/**
 	 * checks if the form token matches the session set form token
+	 *
 	 * @param  string $token token string to check
 	 * @param  string $name  optional form name to check to, default form_token
 	 * @return bool          false if not set, or true/false if matching or not mtaching

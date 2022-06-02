@@ -12,6 +12,7 @@ class Elements
 {
 	/**
 	 * print the date/time drop downs, used in any queue/send/insert at date/time place
+	 *
 	 * @param  int    $year          year YYYY
 	 * @param  int    $month         month m
 	 * @param  int    $day           day d
@@ -22,8 +23,9 @@ class Elements
 	 *                               also used for ID in the on change JS call
 	 * @param  int    $min_steps     default is 1 (minute), can set to anything,
 	 *                               is used as sum up from 0
-	 * @param  bool   $name_pos_back default false, if set to true, the name will be printend
-	 *                               after the drop down and not before the drop down
+	 * @param  bool   $name_pos_back default false, if set to true,
+	 *                               the name will be printend after the drop down
+	 *                               and not before the drop down
 	 * @return string                HTML formated strings for drop down lists of date and time
 	 */
 	public static function printDateTime(
@@ -132,9 +134,11 @@ class Elements
 	}
 
 	/**
-	 * tries to find mailto:user@bubu.at and changes it into -> <a href="mailto:user@bubu.at">E-Mail senden</a>
+	 * tries to find mailto:user@bubu.at and changes it into ->
+	 * <a href="mailto:user@bubu.at">E-Mail senden</a>
 	 * or tries to take any url (http, ftp, etc) and transform it into a valid URL
 	 * the string is in the format: some url|name#css|, same for email
+	 *
 	 * @param  string $string data to transform to a valid HTML url
 	 * @param  string $target target string, default _blank
 	 * @return string         correctly formed html url link
@@ -202,7 +206,8 @@ class Elements
 			$output
 		) ?: '';
 
-		// we have one slashes after the Protocol -> internal link no domain, strip out the proto
+		// we have one slashes after the Protocol ->
+		// internal link no domain, strip out the proto
 		// $output = preg_replace("/($protRegex)\/(.*)/e", "\\2", $ouput);
 
 		// post processing
@@ -217,6 +222,7 @@ class Elements
 	/**
 	 * internal function, called by the magic url create functions.
 	 * checks if title $_4 exists, if not, set url as title
+	 *
 	 * @param  string $href  url link
 	 * @param  string $atag  anchor tag (define both type or url)
 	 * @param  string $_1    part of the URL, if atag is set, _1 is not used
@@ -253,6 +259,7 @@ class Elements
 
 	/**
 	 * internal function for createing email, returns data to magic_url method
+	 *
 	 * @param  string $mailto email address
 	 * @param  string $atag   atag (define type of url)
 	 * @param  string $_1     parts of the email _1 before @, 3_ tld

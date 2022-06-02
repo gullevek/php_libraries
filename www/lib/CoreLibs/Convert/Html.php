@@ -15,6 +15,7 @@ class Html
 
 	/**
 	 * full wrapper for html entities
+	 *
 	 * @param  mixed $string string to html encode
 	 * @return mixed         if string, encoded, else as is (eg null)
 	 */
@@ -42,10 +43,14 @@ class Html
 	 * returns 'checked' or 'selected' if okay
 	 * $needle is a var, $haystack an array or a string
 	 * **** THE RETURN: VALUE WILL CHANGE TO A DEFAULT NULL IF NOT FOUND ****
-	 * @param  array<mixed>|string $haystack (search in) haystack can be an array or a string
+	 *
+	 * @param  array<mixed>|string $haystack (search in) haystack can be
+	 *                                       an array or a string
 	 * @param  string              $needle   needle (search for)
-	 * @param  int                 $type     type: 0: returns selected, 1, returns checked
-	 * @return ?string                       returns checked or selected, else returns null
+	 * @param  int                 $type     type: 0: returns selected, 1,
+	 *                                       returns checked
+	 * @return ?string                       returns checked or selected,
+	 *                                       else returns null
 	 */
 	public static function checked($haystack, string $needle, int $type = 0): ?string
 	{

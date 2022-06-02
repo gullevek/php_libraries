@@ -23,6 +23,7 @@ class Colors
 	 * converts the rgb values from int data to the valid rgb html hex string
 	 * optional can turn of leading #
 	 * if one value is invalid, will return false
+	 *
 	 * @param  int    $red        red 0-255
 	 * @param  int    $green      green 0-255
 	 * @param  int    $blue       blue 0-255
@@ -49,6 +50,7 @@ class Colors
 
 	/**
 	 * converts a hex RGB color to the int numbers
+	 *
 	 * @param  string $hexStr           RGB hexstring
 	 * @param  bool   $return_as_string flag to return as string
 	 * @param  string $seperator        string seperator: default: ","
@@ -90,6 +92,7 @@ class Colors
 	 * converts RGB to HSB/V values
 	 * returns:
 	 * array with hue (0-360), sat (0-100%), brightness/value (0-100%)
+	 *
 	 * @param  int $red              red 0-255
 	 * @param  int $green            green 0-255
 	 * @param  int $blue             blue 0-255
@@ -136,6 +139,7 @@ class Colors
 	 * hsb2rgb does not clean convert back to hsb in a round trip
 	 * converts HSB/V to RGB values RGB is full INT
 	 * if HSB/V value is invalid, sets this value to 0
+	 *
 	 * @param  float $H          hue 0-360 (int)
 	 * @param  float $S          saturation 0-100 (int)
 	 * @param  float $V          brightness/value 0-100 (int)
@@ -218,6 +222,7 @@ class Colors
 	 * converts a RGB (0-255) to HSL
 	 * return:
 	 * array with hue (0-360), saturation (0-100%) and luminance (0-100%)
+	 *
 	 * @param  int $red          red 0-255
 	 * @param  int $green        green 0-255
 	 * @param  int $blue         blue 0-255
@@ -271,6 +276,7 @@ class Colors
 	/**
 	 * converts an HSL to RGB
 	 * if HSL value is invalid, set this value to 0
+	 *
 	 * @param  float $hue                hue: 0-360 (degrees)
 	 * @param  float $sat                saturation: 0-100
 	 * @param  float $lum                luminance: 0-100

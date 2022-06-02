@@ -33,6 +33,7 @@ class StringReader
 
 	/**
 	 * constructor for string reader
+	 *
 	 * @param string $str basic string
 	 */
 	public function __construct(string $str = '')
@@ -43,6 +44,7 @@ class StringReader
 
 	/**
 	 * read bytes in string
+	 *
 	 * @param  int $bytes bytes to read in string
 	 * @return string     data read in length of bytes as string
 	 */
@@ -59,6 +61,7 @@ class StringReader
 
 	/**
 	 * go to position in string
+	 *
 	 * @param  int $pos position in string
 	 * @return int      new position in string after seek
 	 */
@@ -73,6 +76,7 @@ class StringReader
 
 	/**
 	 * get current position in string
+	 *
 	 * @return int position in string
 	 */
 	public function currentpos(): int
@@ -82,6 +86,7 @@ class StringReader
 
 	/**
 	 * get length of string
+	 *
 	 * @return int return length of assigned string
 	 */
 	public function length(): int

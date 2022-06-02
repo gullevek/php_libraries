@@ -50,6 +50,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	/**
 	 * constructor for the array io class, set the
 	 * primary key name automatically (from array)
+	 *
 	 * @param array<mixed> $db_config   db connection config
 	 * @param array<mixed> $table_array table array config
 	 * @param string       $table_name  table name string
@@ -93,6 +94,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * works for <b>,<i>, and <a> (thought <a> can be / or should
 	 * be handled with the magic links functions
 	 * used with the read function
+	 *
 	 * @param  string $text any html encoded string
 	 * @return string       decoded html string
 	 */
@@ -111,6 +113,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * changeds all HTML entities into non HTML ones
+	 *
 	 * @param  string $text encoded html string
 	 * @return string       decoded html string
 	 */
@@ -126,6 +129,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * dumps the current data
+	 *
 	 * @param  bool   $write write to error message, default false
 	 * @return string        the array data as html string entry
 	 */
@@ -144,7 +148,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 	}
 
 	/**
-	 * checks if pk is set and if not, set from pk_id and if this also not set return 0
+	 * checks if pk is set and if not, set from pk_id and
+	 * if this also not set return 0
+	 *
 	 * @return bool true if pk value is set, else false
 	 */
 	public function dbCheckPkSet()
@@ -182,6 +188,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * deletes one dataset
+	 *
 	 * @param  array<mixed> $table_array optional override for table array set
 	 *                                   set this as new table array too
 	 * @return array<mixed>              returns the table array that was deleted
@@ -241,8 +248,10 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * reads one row into the array
+	 *
 	 * @param  boolean      $edit        on true convert data, else as is
-	 * @param  array<mixed> $table_array optional table array, overwrites internal set array
+	 * @param  array<mixed> $table_array optional table array, overwrites
+	 *                                   internal set array
 	 * @return array<mixed>              set table array with values
 	 */
 	public function dbRead($edit = false, $table_array = [])
@@ -315,6 +324,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * writes one set into DB or updates one set (if PK exists)
+	 *
 	 * @param  boolean      $addslashes  old convert entities and set set escape
 	 * @param  array<mixed> $table_array optional table array, overwrites internal one
 	 * @return array<mixed>              table array or null

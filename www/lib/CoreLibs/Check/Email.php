@@ -165,6 +165,7 @@ class Email
 	/**
 	 * guesses the email type (mostly for mobile) from the domain
 	 * if second is set to true, it will return short naming scheme (only provider)
+	 *
 	 * @param  string      $email email string
 	 * @param  bool        $short default false, if true,
 	 *                            returns only short type (pc instead of pc_html)
@@ -197,6 +198,7 @@ class Email
 
 	/**
 	 * gets the short email type from a long email type
+	 *
 	 * @param  string $email_type email string
 	 * @return string|bool              short string or false for invalid
 	 */
@@ -227,7 +229,7 @@ class Email
 	}
 
 	/**
-	 * Undocumented function
+	 * check email with all regex checks possible and return errors as array
 	 *
 	 * @param  string $email           Email address, will be checkd as lower
 	 * @param  bool   $error_code_only If this is set to true it will only return

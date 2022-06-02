@@ -21,6 +21,7 @@ class Json
 	 * or failed convert to array
 	 * In ANY case it will ALWAYS return array.
 	 * Does not throw errors
+	 *
 	 * @param  string|null $json     a json string, or null data
 	 * @param  bool        $override if set to true, then on json error
 	 *                               set original value as array
@@ -49,6 +50,7 @@ class Json
 
 	/**
 	 * returns human readable string for json errors thrown in jsonConvertToArray
+	 *
 	 * @param  bool|boolean $return_string [default=false] if set to true
 	 *                                     it will return the message string and not
 	 *                                     the error number

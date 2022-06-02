@@ -38,6 +38,7 @@ class StreamReader
 
 	/**
 	 * should return a string [FIXME: perhaps return array of bytes?]
+	 *
 	 * @param  int $bytes bytes to read
 	 * @return bool       dummy false
 	 */
@@ -48,6 +49,7 @@ class StreamReader
 
 	/**
 	 * should return new position
+	 *
 	 * @param  int $position seek to position
 	 * @return bool          dummy false
 	 */
@@ -58,6 +60,7 @@ class StreamReader
 
 	/**
 	 * returns current position
+	 *
 	 * @return bool dummy false
 	 */
 	public function currentpos(): bool
@@ -67,6 +70,7 @@ class StreamReader
 
 	/**
 	 * returns length of entire stream (limit for seekto()s)
+	 *
 	 * @return bool dummy false
 	 */
 	public function length(): bool

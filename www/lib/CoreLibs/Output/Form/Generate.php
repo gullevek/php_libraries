@@ -299,6 +299,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * construct form generator
+	 *
 	 * @param array<mixed>                 $db_config db config array, mandatory
 	 * @param \CoreLibs\Debug\Logging|null $log       Logging class, null auto set
 	 * @param \CoreLibs\Language\L10n|null $l10n      l10n language class, null auto set
@@ -463,6 +464,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * dumps all values into output (for error msg)
+	 *
 	 * @return string full table array data output as string html formatted
 	 */
 	public function formDumpTableArray()
@@ -482,6 +484,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * the value of the $want_key array field
 	 * works only with fields that appear only ONCE
 	 * if multiple gets only FIRST
+	 *
 	 * @param  string        $want_key  key to search for
 	 * @param  string|null   $key_value value to match to (optional)
 	 * @return string|null              returns key found or empty string
@@ -505,6 +508,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * array of fields
+	 *
 	 * @param  string      $want_key  the key where you want the data from
 	 * @param  string|null $key_value if set searches for special right value
 	 * @return array<mixed>           found key fields
@@ -529,6 +533,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * formated output for the error && warning msg
+	 *
 	 * @return array<string,string|int> error message with msg, width, clas
 	 */
 	public function formPrintMsg(): array
@@ -550,6 +555,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// next for functions are pre_test fkts for easier default new,load, etc handling
 	/**
 	 * default load procedure
+	 *
 	 * @param  string $archive_id archive id to load
 	 * @return void               has no return
 	 */
@@ -568,6 +574,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * default new procedure
+	 *
 	 * @return void has no return
 	 */
 	public function formProcedureNew(): void
@@ -589,6 +596,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * default save procedure
+	 *
 	 * @return void has no return
 	 */
 	public function formProcedureSave(): void
@@ -608,6 +616,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * default delete procedure
+	 *
 	 * @return void has no return
 	 */
 	public function formProcedureDelete(): void
@@ -634,6 +643,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * default delete procedure
+	 *
 	 * @param  array<mixed> $element_list element array that should be removed
 	 * @param  array<mixed> $remove_name  key names that should be removed
 	 * @return void                       has no return
@@ -732,6 +742,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * create the load list and return it as an array
+	 *
+	 *
 	 * @return array<string,mixed> load list array with primary key, name and selected entry
 	 */
 	public function formCreateLoad(): array
@@ -794,6 +806,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * Create new entry element for HTML output
+	 *
 	 * @param  bool $hide_new_checkbox  show or hide the new checkbox, default is false
 	 * @return array<string,string|int> return the new create array with name & checkbox show flag
 	 */
@@ -879,6 +892,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * create a form element based on the settings in the element array entry
+	 *
 	 * @param  string      $element_name the name from the array, you want to have build
 	 * @param  string|null $query        can overrule internal query data,
 	 *                                   for drop down, as data comes from a reference table
@@ -1120,6 +1134,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * should be cought like this ...
 	 * if ($msg = $form->form_error_check())
 	 *   $error=1;
+	 *
 	 * @return void has no return
 	 */
 	public function formErrorCheck(): void
@@ -1530,6 +1545,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * sets the order to the maximum, if order flag is set in array
+	 *
 	 * @return array<mixed> table array with set order number
 	 */
 	public function formSetOrder(): array
@@ -1569,6 +1585,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * resets all values in table_array and in the reference tables
+	 *
 	 * @return void has no return
 	 */
 	public function formUnsetTableArray(): void
@@ -1601,6 +1618,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * load a table & reference
+	 *
 	 * @param  string|null $pk_id overrule pk_id
 	 * @return void               has no return
 	 */
@@ -1644,6 +1662,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * save a table, reference and all input fields
 	 * note that the addslashes flag here is passed on to the dbWrite method
 	 * it only does html conversion, add slashes for DB is done automatically
+	 *
 	 * @param  bool $addslashes override internal addslasahes flag (default false)
 	 * @return void             has no return
 	 */
@@ -2036,6 +2055,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * delete a table and reference fields
+	 *
 	 * @return void
 	 */
 	public function formDeleteTableArray()
@@ -2081,6 +2101,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * creates HTML hidden input fields out of an hash array
+	 *
 	 * @param  array<mixed> $hidden_array The list of fields to be added as hidden
 	 * @return array<mixed>               key -> value list of hidden fileds data
 	 */
@@ -2114,6 +2135,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 	/**
 	 * creates the multiple select part for a reference_table
+	 *
 	 * @param  string $table_name  Table name for reference array lookup
 	 * @return array<string,mixed> Reference table output array
 	 */
@@ -2151,6 +2173,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * this currently only works for a list that is filled from a sub table and creates
 	 * only a connection to this one new version will allow a sub list with free input
 	 * fields to directly fill a sub table to a master table
+	 *
 	 * @param  string $table_name  Which element entry to create
 	 * @return array<string,mixed> Element for html creation
 	 */

@@ -12,11 +12,14 @@ class Image
 {
 	/**
 	 * converts picture to a thumbnail with max x and max y size
+	 *
 	 * @param  string      $pic          source image file with or without path
 	 * @param  int         $size_x       maximum size width
 	 * @param  int         $size_y       maximum size height
-	 * @param  string      $dummy        empty, or file_type to show an icon instead of nothing if file is not found
-	 * @param  string      $path         if source start is not ROOT path, if empty ROOT is choosen
+	 * @param  string      $dummy        empty, or file_type to show an icon
+	 *                                   instead of nothing if file is not found
+	 * @param  string      $path         if source start is not ROOT path,
+	 *                                   if empty ROOT is choosen
 	 * @param  string      $cache_source cache path, if not given TMP is used
 	 * @param  bool        $clear_cache  if set to true, will create thumb all the tame
 	 * @return string|bool               thumbnail name, or false for error
@@ -154,6 +157,7 @@ class Image
 	 *   the resize is to max of one size
 	 *   if both are set, those are the max sizes (aspect ration is always ekpt)
 	 * - if path is not given will cache folder for current path set
+	 *
 	 * @param  string      $filename       source file name with full path
 	 * @param  int         $thumb_width    thumbnail width
 	 * @param  int         $thumb_height   thumbnail height
@@ -162,7 +166,8 @@ class Image
 	 *                                     create a dummy image file and return it
 	 * @param  bool        $use_cache      default to true, set to false to skip
 	 *                                     creating new image if exists
-	 * @param  bool        $high_quality   default to true, uses sample version, set to false
+	 * @param  bool        $high_quality   default to true, uses sample version,
+	 *                                     set to false to not use (default true)
 	 *                                     to use quick but less nice version
 	 * @param  int         $jpeg_quality   default 80, set image quality for jpeg only
 	 * @return string|bool                 thumbnail with path
@@ -416,6 +421,7 @@ class Image
 	 * reads the rotation info of an file and rotates it to be correctly upright
 	 * this is done because not all software honers the exit Orientation flag
 	 * only works with jpg or png
+	 *
 	 * @param  string $filename path + filename to rotate. This file must be writeable
 	 * @return void
 	 */

@@ -55,6 +55,7 @@ class MimeAppName
 
 	/**
 	 * Sets or updates a mime type
+	 *
 	 * @param  string $mime MIME Name, no validiation
 	 * @param  string $app  Applicaiton name
 	 * @return void
@@ -71,6 +72,7 @@ class MimeAppName
 	/**
 	 * get the application name from mime type
 	 * if not set returns "Other file"
+	 *
 	 * @param  string $mime MIME Name
 	 * @return string       Application name matching
 	 */

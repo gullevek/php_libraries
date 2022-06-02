@@ -37,6 +37,7 @@ class FileReader
 
 	/**
 	 * file read constructor
+	 *
 	 * @param string $filename file name to load
 	 */
 	public function __construct(string $filename)
@@ -55,6 +56,7 @@ class FileReader
 
 	/**
 	 * read byte data length
+	 *
 	 * @param  int $bytes how many bytes to read
 	 * @return string     read data as string
 	 */
@@ -83,6 +85,7 @@ class FileReader
 
 	/**
 	 * seek to a position in the file
+	 *
 	 * @param  int $pos position where to go to
 	 * @return int      file position after seek done
 	 */
@@ -98,6 +101,7 @@ class FileReader
 
 	/**
 	 * get current position in file
+	 *
 	 * @return int current position in bytes
 	 */
 	public function currentpos(): int
@@ -107,6 +111,7 @@ class FileReader
 
 	/**
 	 * file length/size
+	 *
 	 * @return int file size in bytes
 	 */
 	public function length(): int
@@ -116,6 +121,7 @@ class FileReader
 
 	/**
 	 * close open file handler
+	 *
 	 * @return void has no return
 	 */
 	public function close(): void

@@ -12,7 +12,6 @@ use CoreLibs\Convert\Json;
 
 class Jason
 {
-
 	/**
 	 * @param  string|null $json     a json string, or null data
 	 * @param  bool        $override if set to true, then on json error

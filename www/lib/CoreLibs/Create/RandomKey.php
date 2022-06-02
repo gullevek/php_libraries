@@ -29,6 +29,7 @@ class RandomKey
 	}
 	/**
 	 * sets the random key range with the default values
+	 *
 	 * @return void has no return
 	 */
 	private static function initRandomKeyData()
@@ -44,6 +45,7 @@ class RandomKey
 
 	/**
 	 * validates they key length for random string generation
+	 *
 	 * @param  int  $key_length key length
 	 * @return bool             true for valid, false for invalid length
 	 */
@@ -63,6 +65,7 @@ class RandomKey
 	/**
 	 * sets the key length and checks that they key given is valid
 	 * if failed it will not change the default key length and return false
+	 *
 	 * @param  int  $key_length key length
 	 * @return bool             true/false for set status
 	 */
@@ -91,6 +94,7 @@ class RandomKey
 	 * creates a random key based on the key_range with key_length
 	 * if override key length is set, it will check on valid key and use this
 	 * this will not set the class key length variable
+	 *
 	 * @param  int    $key_length key length override, -1 for use default
 	 * @return string             random key
 	 */

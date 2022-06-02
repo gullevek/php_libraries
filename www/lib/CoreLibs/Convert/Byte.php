@@ -30,6 +30,7 @@ class Byte
 	 * BYTE_FORMAT_ADJUST  [2] use sprintf to always print two decimals
 	 * BYTE_FORMAT_SI      [3] use si standard 1000 instead of bytes 1024
 	 * To use the constant from outside use class::CONSTANT
+	 *
 	 * @param  string|int|float $bytes bytes as string int or pure int
 	 * @param  int              $flags bitwise flag with use space turned on
 	 * @return string                  converted byte number (float) with suffix
@@ -106,6 +107,7 @@ class Byte
 	 * NOTE: large exabyte numbers will overflow
 	 * flag allowed:
 	 * BYTE_FORMAT_SI      [3] use si standard 1000 instead of bytes 1024
+	 *
 	 * @param  string|int|float $number any string or number to convert
 	 * @param  int              $flags  bitwise flag with use space turned on
 	 * @return string|int|float         converted value or original value

@@ -156,6 +156,7 @@ class SmartyExtend extends \Smarty
 	 * constructor class, just sets the language stuff
 	 * calls L10 for pass on internaly in smarty
 	 * also registers the getvar caller plugin
+	 *
 	 * @param \CoreLibs\Language\L10n $l10n l10n language class
 	 * @param array<string,string>    $locale locale data read from setLocale
 	 */
@@ -250,6 +251,7 @@ class SmartyExtend extends \Smarty
 
 	/**
 	 * sets all internal paths and names that need to be passed on to the smarty template
+	 *
 	 * @return void
 	 */
 	public function setSmartyPaths(): void
@@ -344,6 +346,7 @@ class SmartyExtend extends \Smarty
 	/**
 	 * wrapper call for setSmartyVars
 	 * this is for frontend type and will not set any only admin needed variables
+	 *
 	 * @return void
 	 */
 	public function setSmartyVarsFrontend(): void
@@ -362,6 +365,7 @@ class SmartyExtend extends \Smarty
 
 	/**
 	 * set smarty pass on variables, sub template names and finally calls the smarty parser
+	 *
 	 * @param  boolean $admin_call default false, will set admin only variables
 	 * @return void
 	 */
@@ -472,6 +476,7 @@ class SmartyExtend extends \Smarty
 
 	/**
 	 * merge outside object HEADER/DATA/DEBUG_DATA vars into the smarty class
+	 *
 	 * @param  object $cms object that has header/data/debug_data
 	 * @return void
 	 */
@@ -490,6 +495,7 @@ class SmartyExtend extends \Smarty
 
 	/**
 	 * render smarty data (can be called sepparate)
+	 *
 	 * @return void
 	 */
 	public function renderSmarty(): void

@@ -15,6 +15,7 @@ class Uids
 	 * creates psuedo random uuid v4
 	 * Code take from class here:
 	 * https://www.php.net/manual/en/function.uniqid.php#94959
+	 *
 	 * @return string pseudo random uuid v4
 	 */
 	public static function uuidv4(): string
@@ -44,6 +45,7 @@ class Uids
 	 * TODO: make this a proper uniq ID creation
 	 *       add uuidv4 subcall to the uuid function too
 	 * creates a uniq id
+	 *
 	 * @param  string $type uniq id type, currently md5 or sha256 allowed
 	 *                      if not set will use DEFAULT_HASH if set
 	 * @return string       uniq id
@@ -81,7 +83,7 @@ class Uids
 		return $uniq_id;
 	}
 
-		/**
+	/**
 	 * create a unique id with the standard hash type defined in __hash
 	 *
 	 * @return string Unique ID with fixed length of 8 characters

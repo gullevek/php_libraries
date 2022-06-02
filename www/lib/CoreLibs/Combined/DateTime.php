@@ -66,9 +66,11 @@ class DateTime
 	/**
 	 * a simple wrapper for the date format
 	 * if an invalid timestamp is give zero timestamp unix time is used
+	 *
 	 * @param  int|float $timestamp      unix timestamp
 	 * @param  bool      $show_micro     show the micro time (default false)
-	 * @param  bool      $micro_as_float Add the micro time with . instead of ms (default false)
+	 * @param  bool      $micro_as_float Add the micro time with . instead
+	 *                                   of ms (default false)
 	 * @return string                    formated date+time in Y-M-D h:m:s ms
 	 */
 	public static function dateStringFormat(
@@ -92,7 +94,9 @@ class DateTime
 
 	/**
 	 * formats a timestamp into interval, not into a date
-	 * @param  string|int|float $timestamp  interval in seconds and optional float micro seconds
+	 *
+	 * @param  string|int|float $timestamp  interval in seconds and optional
+	 *                                      float micro seconds
 	 * @param  bool             $show_micro show micro seconds, default true
 	 * @return string                       interval formatted string or string as is
 	 */
@@ -149,6 +153,7 @@ class DateTime
 	/**
 	 * does a reverse of the timeStringFormat and converts the string from
 	 * xd xh xm xs xms to a timestamp.microtime format
+	 *
 	 * @param  string|int|float $timestring formatted interval
 	 * @return string|int|float             converted float interval, or string as is
 	 */
@@ -190,6 +195,7 @@ class DateTime
 
 	/**
 	 * splits & checks date, wrap around for check_date function
+	 *
 	 * @param  string $date a date string in the format YYYY-MM-DD
 	 * @return bool         true if valid date, false if date not valid
 	 */
@@ -214,6 +220,7 @@ class DateTime
 
 	/**
 	 * splits & checks date, wrap around for check_date function
+	 *
 	 * @param  string $datetime date (YYYY-MM-DD) + time (HH:MM:SS), SS can be dropped
 	 * @return bool             true if valid date, false if date not valid
 	 */
@@ -263,6 +270,7 @@ class DateTime
 	 *     0 if both are equal
 	 *     1 if the first date is bigger than the last
 	 *     false (bool): error
+	 *
 	 * @param  string $start_date start date string in YYYY-MM-DD
 	 * @param  string $end_date   end date string in YYYY-MM-DD
 	 * @return int|bool           false on error, or int -1/0/1 as difference
@@ -297,12 +305,14 @@ class DateTime
 	}
 
 	/**
-	 * compares the two dates + times. if seconds missing in one set, add :00, converts / to -
+	 * compares the two dates + times. if seconds missing in one set,
+	 * add :00, converts / to -
 	 * returns int/bool in:
 	 *     -1 if the first date is smaller the last
 	 *     0 if both are equal
 	 *     1 if the first date is bigger than the last
 	 *     false if no valid date/times chould be found
+	 *
 	 * @param  string $start_datetime start date/time in YYYY-MM-DD HH:mm:ss
 	 * @param  string $end_datetime   end date/time in YYYY-MM-DD HH:mm:ss
 	 * @return int|bool               false for error or -1/0/1 as difference
@@ -336,6 +346,7 @@ class DateTime
 	 * calculates the days between two dates
 	 * return: overall days, week days, weekend days as array 0...2 or named
 	 * as overall, weekday and weekend
+	 *
 	 * @param  string $start_date   valid start date (y/m/d)
 	 * @param  string $end_date     valid end date (y/m/d)
 	 * @param  bool   $return_named return array type, false (default), true for named

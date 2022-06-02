@@ -17,6 +17,7 @@ class System
 
 	/**
 	 * helper function for PHP file upload error messgaes to messge string
+	 *
 	 * @param  int    $error_code integer _FILE upload error code
 	 * @return string                     message string, translated
 	 */
@@ -53,6 +54,7 @@ class System
 
 	/**
 	 * get the host name without the port as given by the SELF var
+	 *
 	 * @return array<mixed> host name/port name
 	 */
 	public static function getHostName(): array
@@ -64,6 +66,7 @@ class System
 
 	/**
 	 * get the page name of the curronte page
+	 *
 	 * @param  int    $strip_ext WITH_EXTENSION: keep filename as is (default)
 	 *                           NO_EXTENSION: strip page file name extension
 	 *                           FULL_PATH: keep filename as is, but add dirname too

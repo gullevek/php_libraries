@@ -16,7 +16,7 @@ class FileWriter
 	/** @var string */
 	private static $debug_folder;
 
-		/**
+	/**
 	 * Set a debug log folder, if not set BASE+LOG folders are set
 	 * if they are defined
 	 * This folder name must exist and must be writeable
@@ -60,6 +60,7 @@ class FileWriter
 
 	/**
 	 * writes a string to a file immediatly, for fast debug output
+	 *
 	 * @param  string  $string string to write to the file
 	 * @param  boolean $enter  default true, if set adds a linebreak \n at the end
 	 * @return bool            True for log written, false for not wirrten
