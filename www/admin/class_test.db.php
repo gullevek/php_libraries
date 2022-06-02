@@ -44,6 +44,7 @@ print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><a href="class_test.db.dbReturn.php">Class Test DB dbReturn</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 print "LOGFILE NAME: " . $db->log->getSetting('log_file_name') . "<br>";
@@ -72,6 +73,8 @@ $db->dbSetEncoding('SJIS');
 print "ENCODING TEST: " . $db->dbVersionInfo('client_encoding') . "/" . $db->dbGetEncoding() . "<br>";
 $db->dbResetEncoding();
 
+// TEST CACHE READS
+
 $res = $db->dbReturn("SELECT * FROM max_test");
 print "DB RETURN ROWS: " . $db->dbGetNumRows() . "<br>";
 
@@ -96,6 +99,12 @@ print "NO CACHED DATA: <pre>" . print_r($db->dbGetCursorExt(), true) . "</pre><b
 // while (is_array($res = $db->dbReturn("SELECT * FROM max_test", DbIo::USE_CACHE))) {
 // 	print "UUD/TIME: " . $res['uid'] . "/" . $res['time'] . "<br>";
 // }
+
+// dbReturn tests on separate page
+print "<br>";
+print "<b>dbReturn CACHE tests</b><br>";
+print '<a href="class_test.db.dbReturn.php">Class Test DB dbReturn</a><br>';
+print "<br>";
 
 print "<pre>";
 
@@ -182,7 +191,6 @@ print "UPDATE WITH PK " . $last_insert_pk
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
-
 // INSERT WITH NO RETURNING
 $status = $db->dbExec("INSERT INTO test_foobar (type, integer) VALUES ('WITHOUT DATA', 456)");
 print "INSERT WITH NO PRIMARY KEY NO RETURNING STATUS: " . Support::printToString($status) . " |<br>"
@@ -221,7 +229,6 @@ if (
 		$i++;
 	}
 }
-
 
 # db write class test
 $table = 'test_foo';

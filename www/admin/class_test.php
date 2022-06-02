@@ -54,6 +54,7 @@ print "<html><head><title>TEST CLASS</title><head>";
 print "<body>";
 
 print '<div><a href="class_test.db.php">Class Test: DB</a></div>';
+print '<div><a href="class_test.db.DbReturn.php">Class Test: DB dbReturn</a></div>';
 print '<div><a href="class_test.colors.php">Class Test: COLORS</a></div>';
 print '<div><a href="class_test.mime.php">Class Test: MIME</a></div>';
 print '<div><a href="class_test.json.php">Class Test: JSON</a></div>';
@@ -75,6 +76,7 @@ print '<div><a href="class_test.randomkey.php">Class Test: RANDOM KEY</a></div>'
 print '<div><a href="class_test.system.php">Class Test: SYSTEM</a></div>';
 print '<div><a href="class_test.readenvfile.php">Class Test: READ ENV FILE</a></div>';
 print '<div><a href="class_test.runningtime.php">Class Test: RUNNING TIME</a></div>';
+print '<div><a href="class_test.memoryusage.php">Class Test: MEMORY USAGE</a></div>';
 print '<div><a href="class_test.debug.php">Class Test: DEBUG</a></div>';
 print '<div><a href="class_test.output.form.php">Class Test: OUTPUT FORM</a></div>';
 print '<div><a href="class_test.admin.backend.php">Class Test: BACKEND ADMIN CLASS</a></div>';
