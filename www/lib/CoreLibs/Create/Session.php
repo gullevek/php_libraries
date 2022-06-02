@@ -19,6 +19,19 @@ class Session
 	private $session_intern_error_str = '';
 
 	/**
+	 * Start session
+	 * startSession should be called for complete check
+	 * If this is called without any name set before the php.ini name is
+	 * used.
+	 *
+	 * @return void
+	 */
+	protected function startSessionCall(): void
+	{
+		session_start();
+	}
+
+	/**
 	 * init a session, if array is empty or array does not have session_name set
 	 * then no auto init is run
 	 *
@@ -56,19 +69,6 @@ class Session
 		}
 		session_name($session_name);
 		return true;
-	}
-
-	/**
-	 * Start session
-	 * startSession should be called for complete check
-	 * If this is called without any name set before the php.ini name is
-	 * used.
-	 *
-	 * @return void
-	 */
-	public function startSessionCall(): void
-	{
-		session_start();
 	}
 
 	/**
@@ -204,6 +204,39 @@ class Session
 	public function writeClose(): bool
 	{
 		return session_write_close();
+	}
+
+	/**
+	 * Proper destroy a session
+	 * - unset the _SESSION array
+	 * - unset cookie if cookie on and we have not strict mode
+	 * - destroy session
+	 *
+	 * @return bool
+	 */
+	public function sessionDestroy(): bool
+	{
+		$_SESSION = [];
+		if (
+			ini_get('session.use_cookies') &&
+			!ini_get('session.use_strict_mode')
+		) {
+			$session_name = $this->getSessionName();
+			if ($session_name === false) {
+				$session_name = '';
+			}
+			$params = session_get_cookie_params();
+			setcookie(
+				(string)$session_name,
+				'',
+				time() - 42000,
+				$params['path'],
+				$params['domain'],
+				$params['secure'],
+				$params['httponly']
+			);
+		}
+		return session_destroy();
 	}
 
 	/**
