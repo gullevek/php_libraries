@@ -52,8 +52,17 @@ echo "TIMED [hr]: " . RunningTime::hrRunningTime() . "<br>";
 echo "TIMED [def]: " . RunningTime::runningTime() . "<br>";
 echo "TIMED [string]: " . RunningTime::runningTimeString() . "<br>";
 RunningTime::hrRunningTime();
+echo "TIMED [hr-end] " . RunningTime::hrRunningTimeFromStart() . "<br>";
+echo "<br>";
 echo "RANDOM KEY [default]: " . \CoreLibs\Create\RandomKey::randomKeyGen() . "<br>";
-echo "TIMED [hr]: " . RunningTime::hrRunningTime() . "<br>";
+echo "TIMED 1 [hr]: " . RunningTime::hrRunningTime() . "<br>";
+echo "TIMED 1 [hr-n]: " . RunningTime::hrRunningTime() . "<br>";
+echo "TIMED 1 [hr-b]: " . RunningTime::hrRunningTime() . "<br>";
+echo "TIMED 1 [hr-end]: " . RunningTime::hrRunningTimeFromStart() . "<br>";
+RunningTime::hrRunningTimeReset();
+RunningTime::hrRunningTime();
+echo "TIMED 2 [hr]: " . RunningTime::hrRunningTime() . "<br>";
+echo "TIMED 2 [hr-end]: " . RunningTime::hrRunningTimeFromStart() . "<br>";
 
 // error message
 print $log->printErrorMsg();

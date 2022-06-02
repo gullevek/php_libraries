@@ -15,6 +15,8 @@ final class CoreLibsDebugRunningTimeTest extends TestCase
 {
 	public function hrRunningTimeProvider(): array
 	{
+		// 0: return time difference
+		// 1: return time on first run in regex
 		return [
 			'default time' => [
 				0 => null,
@@ -69,21 +71,73 @@ final class CoreLibsDebugRunningTimeTest extends TestCase
 	 */
 	public function testHrRunningTime(?string $out_time, string $expected): void
 	{
+		// reset for each run
+		\CoreLibs\Debug\RunningTime::hrRunningTimeReset();
 		$start = \CoreLibs\Debug\RunningTime::hrRunningTime();
 		$this->assertEquals(
 			0,
-			$start
+			$start,
+			'assert first run 0'
 		);
 		time_nanosleep(1, 500);
 		if ($out_time === null) {
-			$end = \CoreLibs\Debug\RunningTime::hrRunningTime();
+			$second = \CoreLibs\Debug\RunningTime::hrRunningTime();
 		} else {
-			$end = \CoreLibs\Debug\RunningTime::hrRunningTime($out_time);
+			$second = \CoreLibs\Debug\RunningTime::hrRunningTime($out_time);
 		}
 		// print "E: " . $end . "\n";
 		$this->assertMatchesRegularExpression(
 			$expected,
-			(string)$end
+			(string)$second,
+			'assert second run regex'
+		);
+		if ($out_time === null) {
+			$end_second = \CoreLibs\Debug\RunningTime::hrRunningTimeFromStart();
+		} else {
+			$end_second = \CoreLibs\Debug\RunningTime::hrRunningTimeFromStart($out_time);
+		}
+		$this->assertEquals(
+			$end_second,
+			$second,
+			'assert end is equal second'
+		);
+		// sleep again, second messurement
+		time_nanosleep(1, 500);
+		if ($out_time === null) {
+			$third = \CoreLibs\Debug\RunningTime::hrRunningTime();
+		} else {
+			$third = \CoreLibs\Debug\RunningTime::hrRunningTime($out_time);
+		}
+		// third call is not null
+		$this->assertNotEquals(
+			0,
+			$third,
+			'assert third call not null'
+		);
+		// third call is bigger than end
+		$this->assertNotEquals(
+			$second,
+			$third,
+			'assert third different second'
+		);
+		// last messurement, must match start - end + last
+		if ($out_time === null) {
+			$end = \CoreLibs\Debug\RunningTime::hrRunningTimeFromStart();
+		} else {
+			$end = \CoreLibs\Debug\RunningTime::hrRunningTimeFromStart($out_time);
+		}
+		$this->assertGreaterThan(
+			$third,
+			$end,
+			'assert end greater third'
+		);
+		// new start
+		\CoreLibs\Debug\RunningTime::hrRunningTimeReset();
+		$new_start = \CoreLibs\Debug\RunningTime::hrRunningTime();
+		$this->assertEquals(
+			0,
+			$new_start,
+			'assert new run 0'
 		);
 	}
 

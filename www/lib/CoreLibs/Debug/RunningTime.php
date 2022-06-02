@@ -12,43 +12,30 @@ class RunningTime
 {
 	// hr
 	/** @var float */
-	private static $hr_starttime;
+	private static $hr_start_time;
 	/** @var float */
-	private static $hr_runtime;
+	private static $hr_end_time;
 	/** @var float */
-	private static $hr_endtime;
+	private static $hr_last_time;
 	// normal
 	/** @var float */
-	private static $starttime;
+	private static $start_time;
 	/** @var float */
-	private static $endtime;
+	private static $end_time;
 	/** @var string */
-	private static $runningtime_string;
+	private static $running_time_string;
 
 	/**
-	 * for messure run time between two calls for this method
-	 * uses the hrtime() for running time
-	 * first call sets start time and returns 0,
-	 * second call sets end time and returns the run time
-	 * the out_time parameter can be:
-	 * n/ns (nano), y/ys (micro), m/ms (milli), s (seconds)
-	 * default is milliseconds
-	 * @param  string $out_time set return time adjustment calculation
-	 * @return float            running time without out_time suffix
+	 * sub calculation for running time based on out time.
+	 * If no running time set, return 0
+	 *
+	 * @param  string $out_time
+	 * @return float
 	 */
-	public static function hrRunningTime(string $out_time = 'ms'): float
-	{
-		// if start time not set, set start time
-		if (!self::$hr_starttime) {
-			self::$hr_starttime = hrtime(true);
-			self::$hr_runtime = 0;
-		} else {
-			self::$hr_endtime = hrtime(true);
-			self::$hr_runtime = self::$hr_endtime - self::$hr_starttime;
-			// reset start and end time past run
-			self::$hr_starttime = 0;
-			self::$hr_endtime = 0;
-		}
+	private static function hrRunningTimeCalc(
+		float $run_time,
+		string $out_time = 'ms'
+	): float {
 		// init divisor, just in case
 		$divisor = 1;
 		// check through valid out time, if nothing matches default to ms
@@ -74,8 +61,67 @@ class RunningTime
 				break;
 		}
 		// return the run time in converted format
-		self::$hr_runtime /= $divisor;
-		return self::$hr_runtime;
+		return $run_time /= $divisor;
+	}
+
+	/**
+	 * for messure run time between two calls for this method
+	 * uses the hrtime() for running time
+	 * first call sets start time and returns 0,
+	 * every other call sets end time and returns the run time since start
+	 * the out_time parameter can be:
+	 * n/ns (nano), y/ys (micro), m/ms (milli), s (seconds)
+	 * default is milliseconds
+	 *
+	 * @param  string $out_time set return time adjustment calculation
+	 * @return float            running time without out_time suffix
+	 */
+	public static function hrRunningTime(string $out_time = 'ms'): float
+	{
+		// if start time not set, set start time
+		if (!self::$hr_start_time) {
+			self::$hr_start_time = hrtime(true);
+			self::$hr_last_time = self::$hr_start_time;
+			$run_time = 0;
+		} else {
+			self::$hr_end_time = hrtime(true);
+			$run_time = self::$hr_end_time - self::$hr_last_time;
+			self::$hr_last_time = self::$hr_end_time;
+		}
+		return self::hrRunningTimeCalc($run_time, $out_time);
+	}
+
+	/**
+	 * print overall end time , can only be called after hrRunningtime
+	 * see $out_time parameter description in hrRunningtime.
+	 * Does not record a new timestamp, only prints different between start and
+	 * last recoreded timestamp
+	 *
+	 * @param  string $out_time set return time adjustment calculation
+	 * @return float            overall running time without out_time suffix
+	 */
+	public static function hrRunningTimeFromStart(string $out_time = 'ms'): float
+	{
+		if (!self::$hr_start_time) {
+			return (float)0;
+		}
+		$time = self::hrRunningTimeCalc(
+			self::$hr_end_time - self::$hr_start_time,
+			$out_time
+		);
+		return $time;
+	}
+
+	/**
+	 * reset hr running time internal variables (start, end, last)
+	 *
+	 * @return void
+	 */
+	public static function hrRunningTimeReset(): void
+	{
+		self::$hr_start_time = 0;
+		self::$hr_end_time = 0;
+		self::$hr_last_time = 0;
 	}
 
 	/**
@@ -91,24 +137,24 @@ class RunningTime
 		list($micro, $timestamp) = explode(' ', microtime());
 		$running_time = 0;
 		// set start & end time
-		if (!self::$starttime) {
+		if (!self::$start_time) {
 			// always reset running time string on first call
-			self::$runningtime_string = '';
-			self::$starttime = ((float)$micro + (float)$timestamp);
-			self::$runningtime_string .= $simple ? 'Start: ' : "<b>Started at</b>: ";
+			self::$running_time_string = '';
+			self::$start_time = ((float)$micro + (float)$timestamp);
+			self::$running_time_string .= $simple ? 'Start: ' : "<b>Started at</b>: ";
 		} else {
-			self::$endtime = ((float)$micro + (float)$timestamp);
-			self::$runningtime_string .= $simple ? 'End: ' : "<b>Stopped at</b>: ";
+			self::$end_time = ((float)$micro + (float)$timestamp);
+			self::$running_time_string .= $simple ? 'End: ' : "<b>Stopped at</b>: ";
 		}
-		self::$runningtime_string .= date('Y-m-d H:i:s', (int)$timestamp);
-		self::$runningtime_string .= ' ' . $micro . ($simple ? ', ' : '<br>');
+		self::$running_time_string .= date('Y-m-d H:i:s', (int)$timestamp);
+		self::$running_time_string .= ' ' . $micro . ($simple ? ', ' : '<br>');
 		// if both are set
-		if (self::$starttime && self::$endtime) {
-			$running_time = self::$endtime - self::$starttime;
-			self::$runningtime_string .= ($simple ? 'Run: ' : "<b>Script running time</b>: ") . $running_time . " s";
+		if (self::$start_time && self::$end_time) {
+			$running_time = self::$end_time - self::$start_time;
+			self::$running_time_string .= ($simple ? 'Run: ' : "<b>Script running time</b>: ") . $running_time . " s";
 			// reset start & end time after run
-			self::$starttime = 0;
-			self::$endtime = 0;
+			self::$start_time = 0;
+			self::$end_time = 0;
 		}
 		return $running_time;
 	}
@@ -120,7 +166,7 @@ class RunningTime
 	 */
 	public static function runningTimeString(): string
 	{
-		return self::$runningtime_string;
+		return self::$running_time_string;
 	}
 }
 
