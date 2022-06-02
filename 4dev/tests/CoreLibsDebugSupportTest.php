@@ -45,7 +45,7 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function printArProvider(): array
+	public function printArrayProvider(): array
 	{
 		return [
 			'empty array' => [
@@ -58,6 +58,51 @@ final class CoreLibsDebugSupportTest extends TestCase
 					. "    [0] => a\n"
 					. "    [1] => b\n"
 					. ")\n</pre>"
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function printBoolProvider(): array
+	{
+		return [
+			'true input default' => [
+				0 => true,
+				1 => [],
+				2 => 'true'
+			],
+			'false input default' => [
+				0 => false,
+				1 => [],
+				2 => 'false'
+			],
+			'false input param name' => [
+				0 => false,
+				1 => [
+					'name' => 'param test'
+				],
+				2 => '<b>param test</b>: false'
+			],
+			'true input param name, true override' => [
+				0 => true,
+				1 => [
+					'name' => 'param test',
+					'true' => 'ok'
+				],
+				2 => '<b>param test</b>: ok'
+			],
+			'false input param name, true override, false override' => [
+				0 => false,
+				1 => [
+					'name' => 'param test',
+					'true' => 'ok',
+					'false' => 'not',
+				],
+				2 => '<b>param test</b>: not'
 			],
 		];
 	}
@@ -184,8 +229,9 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @cover ::printAr
-	 * @dataProvider printArProvider
-	 * @testdox printAr $input will be $expected [$_dataName]
+	 * @cover ::printArray
+	 * @dataProvider printArrayProvider
+	 * @testdox printAr/printArray $input will be $expected [$_dataName]
 	 *
 	 * @param array $input
 	 * @param string $expected
@@ -195,7 +241,59 @@ final class CoreLibsDebugSupportTest extends TestCase
 	{
 		$this->assertEquals(
 			$expected,
-			\CoreLibs\Debug\Support::printAr($input)
+			\CoreLibs\Debug\Support::printAr($input),
+			'assert printAr'
+		);
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Debug\Support::printArray($input),
+			'assert printArray'
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::printBool
+	 * @dataProvider printBoolProvider
+	 * @testdox printBool $input will be $expected [$_dataName]
+	 *
+	 * @param  bool   $input
+	 * @param  array  $params
+	 * @param  string $expected
+	 * @return void
+	 */
+	public function testPrintBool(bool $input, array $params, string $expected): void
+	{
+		if (
+			isset($params['name']) &&
+			isset($params['true']) &&
+			isset($params['false'])
+		) {
+			$string = \CoreLibs\Debug\Support::printBool(
+				$input,
+				$params['name'],
+				$params['true'],
+				$params['false']
+			);
+		} elseif (isset($params['name']) && isset($params['true'])) {
+			$string = \CoreLibs\Debug\Support::printBool(
+				$input,
+				$params['name'],
+				$params['true']
+			);
+		} elseif (isset($params['name'])) {
+			$string = \CoreLibs\Debug\Support::printBool(
+				$input,
+				$params['name']
+			);
+		} else {
+			$string = \CoreLibs\Debug\Support::printBool($input);
+		}
+		$this->assertEquals(
+			$expected,
+			$string,
+			'assert printBool'
 		);
 	}
 

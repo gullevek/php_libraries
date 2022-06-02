@@ -12,7 +12,9 @@ class Support
 {
 	/**
 	 * wrapper around microtime function to print out y-m-d h:i:s.ms
-	 * @param  int $set_microtime -1 to set micro time, 0 for none, positive for rounding
+	 *
+	 * @param  int $set_microtime -1 to set micro time, 0 for none,
+	 *                            positive for rounding
 	 * @return string             formated datetime string with microtime
 	 */
 	public static function printTime(int $set_microtime = -1): string
@@ -31,6 +33,7 @@ class Support
 
 	/**
 	 * prints a html formatted (pre) array
+	 *
 	 * @param  array<mixed> $array   any array
 	 * @param  bool         $no_html set to true to use ##HTMLPRE##
 	 * @return string                formatted array for output with <pre> tag added
@@ -45,11 +48,46 @@ class Support
 	}
 
 	/**
+	 * alternate name for printAr function
+	 *
+	 * @param  array<mixed> $array   any array
+	 * @param  bool         $no_html set to true to use ##HTMLPRE##
+	 * @return string                formatted array for output with <pre> tag added
+	 */
+	public static function printArray(array $array, bool $no_html = false): string
+	{
+		return self::printAr($array, $no_html);
+	}
+
+	/**
+	 * convert bool value to string
+	 * if $name is set prefix with nae
+	 * default true: true, false: false
+	 *
+	 * @param  bool   $bool  Variable to convert
+	 * @param  string $name  [default: ''] Prefix name
+	 * @param  string $true  [default: true] True string
+	 * @param  string $false [default: false] False string
+	 * @return string        String with converted bool text for debug
+	 */
+	public static function printBool(
+		bool $bool,
+		string $name = '',
+		string $true = 'true',
+		string $false = 'false'
+	): string {
+		$string = (!empty($name) ? '<b>' . $name . '</b>: ' : '')
+			. ($bool ? $true : $false);
+		return $string;
+	}
+
+	/**
 	 * print out any data as string
 	 * will convert boolean to TRUE/FALSE
 	 * if object return get_class
 	 * for array use printAr function, can be controlled with no_html for
 	 * Debug\Logging compatible output
+	 *
 	 * @param  mixed  $mixed
 	 * @param  bool   $no_html set to true to use ##HTMLPRE##
 	 * @return string
@@ -57,7 +95,7 @@ class Support
 	public static function printToString($mixed, bool $no_html = false): string
 	{
 		if (is_bool($mixed)) {
-			return $mixed ? 'TRUE' : 'FALSE';
+			return self::printBool($mixed, '', 'TRUE', 'FALSE');
 		} elseif (is_resource($mixed)) {
 			return (string)$mixed;
 		} elseif (is_object($mixed)) {
@@ -74,9 +112,11 @@ class Support
 	/**
 	 * if there is a need to find out which parent method called a child method,
 	 * eg for debugging, this function does this
+	 *
 	 * call this method in the child method and you get the parent function that called
 	 * @param  int    $level debug level, default 1
-	 * @return ?string       null or the function that called the function where this method is called
+	 * @return ?string       null or the function that called the function
+	 *                       where this method is called
 	 */
 	public static function getCallerMethod(int $level = 1): ?string
 	{
@@ -95,6 +135,7 @@ class Support
 	 * called is last in order
 	 * Will start with start_level to skip unwanted from stack
 	 * Defaults to skip level 0 wich is this methid
+	 *
 	 * @param  integer $start_level From what level on, as defaul starts with 1
 	 *                              to exclude self
 	 * @return array<mixed>         All method names in list where max is last called
@@ -119,6 +160,7 @@ class Support
 	 * was called
 	 * gets top level class
 	 *　loops over the debug backtrace until if finds the first class (from the end)
+	 *
 	 * @return string Class name with namespace
 	 */
 	public static function getCallerClass(): string
