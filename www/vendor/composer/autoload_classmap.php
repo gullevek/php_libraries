@@ -37,6 +37,7 @@ return array(
     'CoreLibs\\DB\\SQL\\SqlInterface\\SqlFunctions' => $baseDir . '/lib/CoreLibs/DB/SQL/SqlInterface/SqlFunctions.php',
     'CoreLibs\\Debug\\FileWriter' => $baseDir . '/lib/CoreLibs/Debug/FileWriter.php',
     'CoreLibs\\Debug\\Logging' => $baseDir . '/lib/CoreLibs/Debug/Logging.php',
+    'CoreLibs\\Debug\\MemoryUsage' => $baseDir . '/lib/CoreLibs/Debug/MemoryUsage.php',
     'CoreLibs\\Debug\\RunningTime' => $baseDir . '/lib/CoreLibs/Debug/RunningTime.php',
     'CoreLibs\\Debug\\Support' => $baseDir . '/lib/CoreLibs/Debug/Support.php',
     'CoreLibs\\Get\\ReadEnvFile' => $baseDir . '/lib/CoreLibs/Get/ReadEnvFile.php',

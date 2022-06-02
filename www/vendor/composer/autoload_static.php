@@ -102,6 +102,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\DB\\SQL\\SqlInterface\\SqlFunctions' => __DIR__ . '/../..' . '/lib/CoreLibs/DB/SQL/SqlInterface/SqlFunctions.php',
         'CoreLibs\\Debug\\FileWriter' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/FileWriter.php',
         'CoreLibs\\Debug\\Logging' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/Logging.php',
+        'CoreLibs\\Debug\\MemoryUsage' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/MemoryUsage.php',
         'CoreLibs\\Debug\\RunningTime' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/RunningTime.php',
         'CoreLibs\\Debug\\Support' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/Support.php',
         'CoreLibs\\Get\\ReadEnvFile' => __DIR__ . '/../..' . '/lib/CoreLibs/Get/ReadEnvFile.php',
