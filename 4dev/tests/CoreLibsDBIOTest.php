@@ -3686,8 +3686,9 @@ final class CoreLibsDBIOTest extends TestCase
 	public function returingProvider(): array
 	{
 		// NOTE that query can have multiple inserts
-		// NOTE if there are different INSERTS before the primary keys will not match anymore
-		$table_with_primary_key_id = 43;
+		// NOTE if there are different INSERTS before the primary keys
+		// will not match anymore. Must be updated by hand
+		$table_with_primary_key_id = 55;
 		// 0: query + returning
 		// 1: pk name for db exec
 		// 2: key name/value or null (dbGetReturningExt)
