@@ -66,7 +66,7 @@ $q_db_ret = "SELECT * FROM test_db_return ORDER BY uid";
 
 RunningTime::hrRunningTime();
 
-$cache_flag = 'USE_CACHE';
+$cache_flag = 'USE_CACHE (0)';
 print "dbReturn '" . $cache_flag . "'/Default: " . $q_db_ret . "<br>";
 // SINGLE read on multi row return
 // Do twice
@@ -84,24 +84,7 @@ for ($i = 1; $i <= 6; $i++) {
 // reset all read data
 $db->dbCacheReset($q_db_ret);
 echo "<hr>";
-$cache_flag = 'CLEAR_CACHE';
-print "dbReturn '" . $cache_flag . "': " . $q_db_ret . "<br>";
-// NO CACHE
-for ($i = 1; $i <= 6; $i++) {
-	$res = $db->dbReturn($q_db_ret, $db::CLEAR_CACHE);
-	print $i . ") " . $cache_flag . ": "
-		. "res: " . (is_bool($res) ?
-			"<b>Bool:</b> " . $db->log->prBl($res) :
-			(is_array($res) ?
-				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
-		) . ", "
-		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
-	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
-}
-// reset all read data
-$db->dbCacheReset($q_db_ret);
-echo "<hr>";
-$cache_flag = 'READ_NEW';
+$cache_flag = 'READ_NEW (1)';
 print "dbReturn '" . $cache_flag . "': " . $q_db_ret . "<br>";
 // NO CACHE
 for ($i = 1; $i <= 6; $i++) {
@@ -118,7 +101,24 @@ for ($i = 1; $i <= 6; $i++) {
 // reset all read data
 $db->dbCacheReset($q_db_ret);
 echo "<hr>";
-$cache_flag = 'NO_CACHE';
+$cache_flag = 'CLEAR_CACHE (2)';
+print "dbReturn '" . $cache_flag . "': " . $q_db_ret . "<br>";
+// NO CACHE
+for ($i = 1; $i <= 6; $i++) {
+	$res = $db->dbReturn($q_db_ret, $db::CLEAR_CACHE);
+	print $i . ") " . $cache_flag . ": "
+		. "res: " . (is_bool($res) ?
+			"<b>Bool:</b> " . $db->log->prBl($res) :
+			(is_array($res) ?
+				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
+		) . ", "
+		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
+	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
+}
+// reset all read data
+$db->dbCacheReset($q_db_ret);
+echo "<hr>";
+$cache_flag = 'NO_CACHE (3)';
 print "dbReturn '" . $cache_flag . "': " . $q_db_ret . "<br>";
 // NO CACHE
 for ($i = 1; $i <= 6; $i++) {

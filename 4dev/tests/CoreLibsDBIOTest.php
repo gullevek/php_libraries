@@ -203,6 +203,37 @@ final class CoreLibsDBIOTest extends TestCase
 		// print_r(self::$db_config);
 	}
 
+	/**
+	 * For all Warning and Error checks in all tests
+	 * DB Warning/Error checks
+	 *
+	 * @param  \CoreLibs\DB\IO $db
+	 * @param  string          $warning
+	 * @param  string          $error
+	 * @return array
+	 */
+	private function subAssertErrorTest(
+		\CoreLibs\DB\IO $db,
+		string $warning,
+		string $error
+	): array {
+		// get last error/warnings
+		$last_warning = $db->dbGetLastWarning();
+		$last_error = $db->dbGetLastError();
+		// if string for warning or error is not empty check
+		$this->assertEquals(
+			$warning,
+			$last_warning,
+			'Assert query warning'
+		);
+		$this->assertEquals(
+			$error,
+			$last_error,
+			'Assert query warning'
+		);
+		return [$last_warning, $last_error];
+	}
+
 	// - connected version test
 	//   dbVerions, dbVersionNum, dbVersionInfo, dbVersionInfoParameters,
 	//   dbCompareVersion
@@ -387,28 +418,15 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbVerson(string $input, bool $expected): void
 	{
-		// connect to valid DB
-		// $db = new \CoreLibs\DB\IO(
-		// 	self::$db_config['valid'],
-		// 	self::$log
-		// );
-
 		/** @var \CoreLibs\DB\IO&MockObject $db_io_mock */
 		$db_io_mock = $this->createPartialMock(\CoreLibs\DB\IO::class, ['dbVersion']);
 		$db_io_mock->method('dbVersion')->willReturn('13.6.0');
-
-		// print "DB VERSION: " . $db->dbVersion()  . "\n";
-		// print "DB Mock: " . $stub->dbVersion() . "\n";
-		// print "TEST: " . ($stub->dbCompareVersion('=13.1.0') ? 'YES' : 'NO') . "\n";
-		// print "TEST: " . ($stub->dbCompareVersion('=13.6.0') ? 'YES' : 'NO') . "\n";
 
 		$this->assertEquals(
 			$expected,
 			// $db->dbCompareVersion($input)
 			$db_io_mock->dbCompareVersion($input)
 		);
-
-		// print "IT HAS TO BE 13.1.0: " . $stub->dbVersion() . "\n";
 	}
 
 	// - connect to DB test (dbGetConnectionStatus)
@@ -1564,14 +1582,10 @@ final class CoreLibsDBIOTest extends TestCase
 					@$db->dbExec($query) :
 					@$db->dbExec($query, $pk_name)
 			);
-			$last_warning = $db->dbGetLastWarning();
-			$last_error = $db->dbGetLastError();
 		} else {
 			$result = $pk_name === null ?
 				$db->dbExec($query) :
 				$db->dbExec($query, $pk_name);
-			$last_warning = $db->dbGetLastWarning();
-			$last_error = $db->dbGetLastError();
 			// if PHP or newer, must be Object PgSql\Result
 			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
 				$this->assertIsObject(
@@ -1602,8 +1616,6 @@ final class CoreLibsDBIOTest extends TestCase
 					$db->dbExec($query) :
 					$db->dbExec($query, $pk_name)
 			);
-			$last_warning = $db->dbGetLastWarning();
-			$last_error = $db->dbGetLastError();
 			// check query called matching
 			$current_count = $db->dbGetQueryCalled($query);
 			$this->assertEquals(
@@ -1618,14 +1630,7 @@ final class CoreLibsDBIOTest extends TestCase
 		}
 
 		// if string for warning or error is not empty check
-		$this->assertEquals(
-			$warning,
-			$last_warning
-		);
-		$this->assertEquals(
-			$error,
-			$last_error
-		);
+		$this->subAssertErrorTest($db, $warning, $error);
 
 		// reset all data
 		$db->dbExec("TRUNCATE table_with_primary_key");
@@ -1749,18 +1754,8 @@ final class CoreLibsDBIOTest extends TestCase
 				$db->dbReturnRow($query, $flag_assoc)
 		);
 		// get last error/warnings
-		$last_warning = $db->dbGetLastWarning();
-		$last_error = $db->dbGetLastError();
-		// print "ER: " . $last_error . "/" . $last_warning . "\n";
 		// if string for warning or error is not empty check
-		$this->assertEquals(
-			$warning,
-			$last_warning
-		);
-		$this->assertEquals(
-			$error,
-			$last_error
-		);
+		$this->subAssertErrorTest($db, $warning, $error);
 
 		// reset all data
 		$db->dbExec("TRUNCATE table_with_primary_key");
@@ -1886,17 +1881,8 @@ final class CoreLibsDBIOTest extends TestCase
 				$db->dbReturnArray($query, $flag_assoc)
 		);
 		// get last error/warnings
-		$last_warning = $db->dbGetLastWarning();
-		$last_error = $db->dbGetLastError();
 		// if string for warning or error is not empty check
-		$this->assertEquals(
-			$warning,
-			$last_warning
-		);
-		$this->assertEquals(
-			$error,
-			$last_error
-		);
+		$this->subAssertErrorTest($db, $warning, $error);
 
 		// reset all data
 		$db->dbExec("TRUNCATE table_with_primary_key");
@@ -1918,80 +1904,619 @@ final class CoreLibsDBIOTest extends TestCase
 		$insert_query = "INSERT INTO table_with_primary_key (row_int, uid) VALUES "
 			. "(1, 'A'), (2, 'B')";
 		$read_query = "SELECT row_int, uid FROM table_with_primary_key";
+		$row_a = [
+			'row_int' => 1,
+			0 => 1,
+			'uid' => 'A',
+			1 => 'A'
+		];
+		$row_a_assoc = [
+			'row_int' => 1,
+			'uid' => 'A',
+		];
+		$row_b = [
+			'row_int' => 2,
+			0 => 2,
+			'uid' => 'B',
+			1 => 'B'
+		];
+		$row_b_assoc = [
+			'row_int' => 2,
+			'uid' => 'B',
+		];
 		// 0: read query
 		// 1: reset flag, null for default
 		// 2: assoc flag, null for default
-		// 3: expected return
-		// 4: read first, read all flag
-		// 5: read all check array
-		// 6: warning
-		// 7: error
-		// 8: insert data
+		// 3: expected return (cursor_ext/data)
+		// 4: step through, or normal loop read
+		// 5: cursor ext compare array
+		// 6: first only, extended cursor (for each step)
+		// 7: warning
+		// 8: error
+		// 9: insert data
 		return [
-			'valid select' => [
+			// *** READ STEP BY STEP
+			// default cache: USE_CACHE
+			'valid select, default cache settings' => [
 				$read_query,
 				null,
 				null,
-				[
-					'row_int' => 1,
-					0 => 1,
-					'uid' => 'A',
-					1 => 'A'
-				],
+				$row_a,
 				true,
-				[],
+				// check cursor_ext
+				[
+					// if <8.1 check against resource
+					'cursor' => 'PgSql\Result',
+					'data' => [
+						0 => $row_a,
+					],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 1,
+					'query' => $read_query,
+					'read_rows' => 1,
+					'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+					'assoc_flag' => false,
+					'cached' => true,
+					'finished' => false,
+					'read_finished' => false,
+					'db_read_finished' => false,
+				],
+				// extended cursor per step (first only true)
+				[
+					// second row
+					[
+						'data' => [
+							0 => $row_b,
+						],
+						'cursor' => [
+							'cursor' => 'PgSql\Result',
+							'data' => [
+								0 => $row_a,
+								1 => $row_b,
+							],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 2,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+							'assoc_flag' => false,
+							'cached' => true,
+							'finished' => false,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					],
+					// end row, false
+					[
+						'data' => false,
+						'cursor' => [
+							'cursor' => 1,
+							'data' => [
+								0 => $row_a,
+								1 => $row_b,
+							],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 0,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+							'assoc_flag' => false,
+							'cached' => true,
+							'finished' => true,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					]
+				],
 				'',
 				'',
 				$insert_query
 			],
-			'valid select, default cache, assoc only' => [
+			'valid select, use cache, assoc only' => [
 				$read_query,
 				\CoreLibs\DB\IO::USE_CACHE,
 				true,
-				[
-					'row_int' => 1,
-					'uid' => 'A',
-				],
+				$row_a_assoc,
 				true,
-				[],
+				// is same as default
+				[
+					'cursor' => 'PgSql\Result',
+					'data' => [
+						0 => $row_a_assoc,
+					],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 1,
+					'query' => $read_query,
+					'read_rows' => 1,
+					'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+					'assoc_flag' => true,
+					'cached' => true,
+					'finished' => false,
+					'read_finished' => false,
+					'db_read_finished' => false,
+				],
+				[
+					// second row
+					[
+						'data' => [
+							0 => $row_b_assoc,
+						],
+						'cursor' => [
+							'cursor' => 'PgSql\Result',
+							'data' => [
+								0 => $row_a_assoc,
+								1 => $row_b_assoc,
+							],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 2,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+							'assoc_flag' => true,
+							'cached' => true,
+							'finished' => false,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					],
+					// end row, false
+					[
+						'data' => false,
+						'cursor' => [
+							'cursor' => 1,
+							'data' => [
+								0 => $row_a_assoc,
+								1 => $row_b_assoc,
+							],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 0,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+							'assoc_flag' => true,
+							'cached' => true,
+							'finished' => true,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					]
+				],
 				'',
 				'',
 				$insert_query
 			],
-			'empty select' => [
+			'valid select, read new, assoc only' => [
+				$read_query,
+				\CoreLibs\DB\IO::READ_NEW,
+				true,
+				$row_a_assoc,
+				true,
+				[
+					'cursor' => 'PgSql\Result',
+					'data' => [
+						0 => $row_a_assoc,
+					],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 1,
+					'query' => $read_query,
+					'read_rows' => 1,
+					'cache_flag' => \CoreLibs\DB\IO::READ_NEW,
+					'assoc_flag' => true,
+					'cached' => true,
+					'finished' => false,
+					'read_finished' => false,
+					'db_read_finished' => false,
+				],
+				[
+					// second row
+					[
+						'data' => [
+							0 => $row_b_assoc,
+						],
+						'cursor' => [
+							'cursor' => 'PgSql\Result',
+							'data' => [
+								0 => $row_a_assoc,
+								1 => $row_b_assoc,
+							],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 2,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::READ_NEW,
+							'assoc_flag' => true,
+							'cached' => true,
+							'finished' => false,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					],
+					// end row, false
+					[
+						'data' => false,
+						'cursor' => [
+							'cursor' => 1,
+							'data' => [
+								0 => $row_a_assoc,
+								1 => $row_b_assoc,
+							],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 0,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::READ_NEW,
+							'assoc_flag' => true,
+							'cached' => true,
+							'finished' => true,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					]
+				],
+				'',
+				'',
+				$insert_query
+			],
+			'valid select, clear cache, assoc only' => [
+				$read_query,
+				\CoreLibs\DB\IO::CLEAR_CACHE,
+				true,
+				$row_a_assoc,
+				true,
+				[
+					'cursor' => 'PgSql\Result',
+					'data' => [
+						0 => $row_a_assoc,
+					],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 1,
+					'query' => $read_query,
+					'read_rows' => 1,
+					'cache_flag' => \CoreLibs\DB\IO::CLEAR_CACHE,
+					'assoc_flag' => true,
+					'cached' => true,
+					'finished' => false,
+					'read_finished' => false,
+					'db_read_finished' => false,
+				],
+				[
+					// second row
+					[
+						'data' => [
+							0 => $row_b_assoc,
+						],
+						'cursor' => [
+							'cursor' => 'PgSql\Result',
+							'data' => [
+								0 => $row_a_assoc,
+								1 => $row_b_assoc,
+							],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 2,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::CLEAR_CACHE,
+							'assoc_flag' => true,
+							'cached' => true,
+							'finished' => false,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					],
+					// end row, false
+					[
+						'data' => false,
+						'cursor' => [
+							'cursor' => 1,
+							'data' => [],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 0,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::CLEAR_CACHE,
+							'assoc_flag' => true,
+							'cached' => false,
+							'finished' => true,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					]
+				],
+				'',
+				'',
+				$insert_query
+			],
+			'valid select, no cache, assoc only' => [
+				$read_query,
+				\CoreLibs\DB\IO::NO_CACHE,
+				true,
+				$row_a_assoc,
+				true,
+				[
+					'cursor' => 'PgSql\Result',
+					'data' => [],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 1,
+					'query' => $read_query,
+					'read_rows' => 1,
+					'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
+					'assoc_flag' => true,
+					'cached' => false,
+					'finished' => false,
+					'read_finished' => false,
+					'db_read_finished' => false,
+				],
+				[
+					// second row
+					[
+						'data' => [
+							0 => $row_b_assoc,
+						],
+						'cursor' => [
+							'cursor' => 'PgSql\Result',
+							'data' => [],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 2,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
+							'assoc_flag' => true,
+							'cached' => false,
+							'finished' => false,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					],
+					// end row, false
+					[
+						'data' => false,
+						'cursor' => [
+							'cursor' => 1,
+							'data' => [],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'num_fields' => 2,
+							'num_rows' => 2,
+							'pos' => 0,
+							'query' => $read_query,
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
+							'assoc_flag' => true,
+							'cached' => false,
+							'finished' => true,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					]
+				],
+				'',
+				'',
+				$insert_query
+			],
+			// *** READ STEP BY STEP, ERROR TRIGGER
+			'empty select error' => [
 				'',
 				null,
 				null,
 				false,
 				true,
+				[],
 				[],
 				'',
 				'11',
 				$insert_query,
 			],
-			'insert query' => [
+			'insert query error' => [
 				$insert_query,
 				null,
 				null,
 				false,
 				true,
 				[],
+				[],
 				'',
 				'17',
 				$insert_query
 			],
+			// *** READ AS LOOP
 			// from here on a complex read all full tests
-			'valid select, full read' => [
+			'valid select, full read DEFAULT CACHE' => [
 				$read_query,
 				null,
 				null,
-				[
-					'row_int' => 1,
-					0 => 1,
-					'uid' => 'A',
-					1 => 'A'
-				],
+				[$row_a, $row_b,],
 				false,
+				[
+					'cursor' => 1,
+					'data' => [
+						0 => $row_a,
+						1 => $row_b,
+					],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 0,
+					'query' => $read_query,
+					'read_rows' => 2,
+					'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+					'assoc_flag' => false,
+					'cached' => true,
+					'finished' => true,
+					'read_finished' => true,
+					'db_read_finished' => true,
+				],
+				[],
+				'',
+				'',
+				$insert_query
+			],
+			// READ_NEW
+			'valid select, full read READ NEW' => [
+				$read_query,
+				\CoreLibs\DB\IO::READ_NEW,
+				null,
+				[$row_a, $row_b,],
+				false,
+				[
+					'cursor' => 1,
+					'data' => [
+						0 => $row_a,
+						1 => $row_b,
+					],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 0,
+					'query' => $read_query,
+					'read_rows' => 2,
+					'cache_flag' => \CoreLibs\DB\IO::READ_NEW,
+					'assoc_flag' => false,
+					'cached' => true,
+					'finished' => true,
+					'read_finished' => true,
+					'db_read_finished' => true,
+				],
+				[],
+				'',
+				'',
+				$insert_query
+			],
+			// CLEAR_CACHE
+			'valid select, full read CLEAR CACHE' => [
+				$read_query,
+				\CoreLibs\DB\IO::CLEAR_CACHE,
+				null,
+				[$row_a, $row_b,],
+				false,
+				[
+					'cursor' => 1,
+					'data' => [
+					],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 0,
+					'query' => $read_query,
+					'read_rows' => 2,
+					'cache_flag' => \CoreLibs\DB\IO::CLEAR_CACHE,
+					'assoc_flag' => false,
+					'cached' => false,
+					'finished' => true,
+					'read_finished' => true,
+					'db_read_finished' => true,
+				],
+				[],
+				'',
+				'',
+				$insert_query
+			],
+			'valid select, full read NO CACHE' => [
+				$read_query,
+				\CoreLibs\DB\IO::NO_CACHE,
+				null,
+				[$row_a, $row_b,],
+				false,
+				[
+					'cursor' => 1,
+					'data' => [
+					],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 0,
+					'query' => $read_query,
+					'read_rows' => 2,
+					'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
+					'assoc_flag' => false,
+					'cached' => false,
+					'finished' => true,
+					'read_finished' => true,
+					'db_read_finished' => true,
+				],
 				[],
 				'',
 				'',
@@ -2001,7 +2526,65 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
-	 * Undocumented function
+	 * dbReturn cursor extended checks
+	 *
+	 * @param  \CoreLibs\DB\IO $db
+	 * @param  string          $query
+	 * @param  array           $cursor_ext_checks
+	 * @return void
+	 */
+	private function subAssertCursorExtTestDbReturnFunction(
+		\CoreLibs\DB\IO $db,
+		string $query,
+		array $cursor_ext_checks,
+	): void {
+		// cursor check
+		if (
+			empty($db->dbGetLastWarning()) &&
+			empty($db->dbGetLastError()) &&
+			count($cursor_ext_checks)
+		) {
+			$cursor_ext = $db->dbGetCursorExt($query);
+			foreach ($cursor_ext_checks as $key => $expected) {
+				if ($key != 'cursor') {
+					$this->assertEquals(
+						$expected,
+						$cursor_ext[$key],
+						'assert equal cursor ext for ' . $key
+					);
+				} else {
+					// for int, it has to be one
+					// else depends on PHP version, either object or REsource
+					if (is_int($expected)) {
+						$this->assertEquals(
+							1,
+							$cursor_ext[$key],
+							'assert equal cursor ext cursor int 1'
+						);
+					} elseif (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
+						$this->assertIsObject(
+							$cursor_ext[$key],
+							'assert is object cursor ext cursor'
+						);
+						// also check that this is correct instance type
+						$this->assertInstanceOf(
+							$expected,
+							$cursor_ext[$key],
+							'assert is instance of cursor ext cursor'
+						);
+					} else {
+						$this->assertIsResource(
+							$cursor_ext[$key],
+							'assert is resource cursor ext cursor'
+						);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * dbReturn Function Test
 	 *
 	 * @covers ::dbReturn
 	 * @covers ::dbCacheReset
@@ -2009,26 +2592,28 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @covers ::dbCursorPos
 	 * @covers ::dbCursorNumRows
 	 * @dataProvider dbReturnProvider
-	 * @testdox dbReturn $query and cache $flag_cache and assoc $flag_assoc with $expected (Warning: $warning/Error: $error) [$_dataName]
+	 * @testdox dbReturn Read Frist $read_first_only only and cache $flag_cache and assoc $flag_assoc with (Warning: $warning/Error: $error) [$_dataName]
 	 *
 	 * @param string $query
 	 * @param integer|null $flag_cache
 	 * @param boolean|null $flag_assoc
 	 * @param array<mixed>|bool $expected
 	 * @param bool $read_first_only
-	 * @param array $cursor_ext_checks
+	 * @param array<mixed> $cursor_ext_checks
+	 * @param array<mixed> $cursor_ext_checks_step
 	 * @param string $warning
 	 * @param string $error
 	 * @param string $insert_data
 	 * @return void
 	 */
-	public function testDbReturn(
+	public function testDbReturnFunction(
 		string $query,
 		?int $flag_cache,
 		?bool $flag_assoc,
 		$expected,
 		bool $read_first_only,
 		array $cursor_ext_checks,
+		array $cursor_ext_checks_step,
 		string $warning,
 		string $error,
 		string $insert_data
@@ -2045,7 +2630,7 @@ final class CoreLibsDBIOTest extends TestCase
 		// all checks below
 		if ($read_first_only === true) {
 			// simple assert first read, then discard result
-			// compare
+			// compare data
 			$this->assertEquals(
 				$expected,
 				$flag_cache === null && $flag_assoc === null ?
@@ -2053,24 +2638,17 @@ final class CoreLibsDBIOTest extends TestCase
 					($flag_assoc === null ?
 						$db->dbReturn($query, $flag_cache) :
 						$db->dbReturn($query, $flag_cache, $flag_assoc)
-					)
+					),
+				'Assert dbReturn first only equal'
 			);
-			// get last error/warnings
-			$last_warning = $db->dbGetLastWarning();
-			$last_error = $db->dbGetLastError();
-			// if string for warning or error is not empty check
-			$this->assertEquals(
-				$warning,
-				$last_warning
-			);
-			$this->assertEquals(
-				$error,
-				$last_error
-			);
+			$this->subAssertErrorTest($db, $warning, $error);
+			$this->subAssertCursorExtTestDbReturnFunction($db, $query, $cursor_ext_checks);
+			// extended checks. read until end of data and check per steck cursor data
+			foreach ($cursor_ext_checks_step as $_cursor_ext_checks) {
+				// each step matches a read step
+			}
 		} else {
-			// all tests here have valid returns already, error checks not needed
 			// read all, and then do result compare
-			// cursor ext data checks (field names, rows, pos, data)
 			// do cache reset test
 			$data = [];
 			$pos = 0;
@@ -2089,14 +2667,18 @@ final class CoreLibsDBIOTest extends TestCase
 				// check cursor pos
 				$this->assertEquals(
 					$pos,
-					$db->dbGetCursorPos($query)
+					$db->dbGetCursorPos($query),
+					'Assert dbReturn pos'
 				);
 			}
 			// does count match for returned data and the cursor num rows
 			$this->assertEquals(
 				count($data),
-				$db->dbGetCursorNumRows($query)
+				$db->dbGetCursorNumRows($query),
+				'Assert dbReturn num rows'
 			);
+			// run cursor ext checks after first run
+			$this->subAssertCursorExtTestDbReturnFunction($db, $query, $cursor_ext_checks);
 			// does data match
 			// try get cursor data for non existing, must be null
 			$this->assertNull(
@@ -2105,8 +2687,66 @@ final class CoreLibsDBIOTest extends TestCase
 			// does reset data work, query cursor must be null
 			$db->dbCacheReset($query);
 			$this->assertNull(
-				$db->dbGetCursorExt($query)
+				$db->dbGetCursorExt($query),
+				'Assert dbReturn reset cache'
 			);
+			// New run after reset
+			// for read all, test that two reads result in same data
+			$data = [];
+			$pos = 0;
+			while (
+				is_array(
+					$res = $flag_cache === null && $flag_assoc === null ?
+						$db->dbReturn($query) :
+						($flag_assoc === null ?
+							$db->dbReturn($query, $flag_cache) :
+							$db->dbReturn($query, $flag_cache, $flag_assoc)
+						)
+				)
+			) {
+				$data[] = $res;
+				$pos++;
+				// check cursor pos
+				$this->assertEquals(
+					$pos,
+					$db->dbGetCursorPos($query),
+					'Assert dbReturn double read 1 pos: ' . $flag_cache
+				);
+			}
+			$this->subAssertCursorExtTestDbReturnFunction($db, $query, $cursor_ext_checks);
+			$data_second = [];
+			$pos_second = 0;
+			while (
+				is_array(
+					$res = $flag_cache === null && $flag_assoc === null ?
+						$db->dbReturn($query) :
+						($flag_assoc === null ?
+							$db->dbReturn($query, $flag_cache) :
+							$db->dbReturn($query, $flag_cache, $flag_assoc)
+						)
+				)
+			) {
+				$data_second[] = $res;
+				$pos_second++;
+				// check cursor pos
+				$this->assertEquals(
+					$pos_second,
+					$db->dbGetCursorPos($query),
+					'Assert dbReturn double read 2 pos: ' . $flag_cache
+				);
+			}
+			$this->assertEquals(
+				$data,
+				$data_second,
+				'Assert first and second run are equal: return data'
+			);
+			$this->assertEquals(
+				$pos,
+				$pos_second,
+				'Assert first and second run are equal: count'
+			);
+			// run cursor ext checks after second run
+			$this->subAssertCursorExtTestDbReturnFunction($db, $query, $cursor_ext_checks);
 		}
 
 		// reset all data
@@ -2376,8 +3016,6 @@ final class CoreLibsDBIOTest extends TestCase
 				$db->dbPrepare($stm_name, $query) :
 				$db->dbPrepare($stm_name, $query, $pk_name);
 		}
-		$last_warning = $db->dbGetLastWarning();
-		$last_error = $db->dbGetLastError();
 		// if result type, or if forced bool
 		if (is_string($expected_prepare) && $expected_prepare == 'result') {
 			// if PHP or newer, must be Object PgSql\Result
@@ -2402,22 +3040,13 @@ final class CoreLibsDBIOTest extends TestCase
 			);
 		}
 		// error/warning check
-		$this->assertEquals(
-			$warning_prepare,
-			$last_warning,
-		);
-		$this->assertEquals(
-			$error_prepare,
-			$last_error,
-		);
+		$this->subAssertErrorTest($db, $warning_prepare, $error_prepare);
 
 		// for non fail prepare test exec
 		// check test result
 		$execute_result = $query_data === null ?
 			$db->dbExecute($stm_name) :
 			$db->dbExecute($stm_name, $query_data);
-		$last_warning = $db->dbGetLastWarning();
-		$last_error = $db->dbGetLastError();
 		if ($expected_execute == 'result') {
 			// if PHP or newer, must be Object PgSql\Result
 			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
@@ -2442,14 +3071,7 @@ final class CoreLibsDBIOTest extends TestCase
 			);
 		}
 		// error/warning check
-		$this->assertEquals(
-			$warning_execute,
-			$last_warning,
-		);
-		$this->assertEquals(
-			$error_execute,
-			$last_error,
-		);
+		$this->subAssertErrorTest($db, $warning_execute, $error_execute);
 		// now check test result if expected return is result
 		if (
 			$expected_execute == 'result' &&
@@ -3540,21 +4162,12 @@ final class CoreLibsDBIOTest extends TestCase
 		$result_exec = $pk_name === null ?
 			$db->dbExecAsync($query) :
 			$db->dbExecAsync($query, $pk_name);
-		$last_warning = $db->dbGetLastWarning();
-		$last_error = $db->dbGetLastError();
 		$this->assertEquals(
 			$expected_exec,
 			$result_exec
 		);
 		// error/warning check
-		$this->assertEquals(
-			$warning_exec,
-			$last_warning,
-		);
-		$this->assertEquals(
-			$error_exec,
-			$last_error,
-		);
+		$this->subAssertErrorTest($db, $warning_exec, $error_exec);
 
 		$run = 1;
 		// first loop check
@@ -3567,8 +4180,6 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 			$run++;
 		}
-		$last_warning = $db->dbGetLastWarning();
-		$last_error = $db->dbGetLastError();
 		// check after final
 		if ($expected_final == 'result') {
 			// post end check
@@ -3594,14 +4205,7 @@ final class CoreLibsDBIOTest extends TestCase
 			);
 		}
 		// error/warning check
-		$this->assertEquals(
-			$warning_final,
-			$last_warning,
-		);
-		$this->assertEquals(
-			$error_final,
-			$last_error,
-		);
+		$this->subAssertErrorTest($db, $warning_final, $error_final);
 
 		// reset all data
 		$db->dbExec("TRUNCATE table_with_primary_key");

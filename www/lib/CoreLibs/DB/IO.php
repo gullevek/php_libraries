@@ -263,15 +263,15 @@ use CoreLibs\Create\Uids;
 class IO
 {
 	// 0: normal read, store in cache
-	// 1: read cache, clean at the end
-	// 2: read new, clean at end
+	// 1: read new, keep at end, clean before new run
+	// 2: read new, clean at the end (temporary cache)
 	// 3: never cache
 	/** @var int */
 	public const USE_CACHE = 0;
 	/** @var int */
-	public const CLEAR_CACHE = 1;
+	public const READ_NEW = 1;
 	/** @var int */
-	public const READ_NEW = 2;
+	public const CLEAR_CACHE = 2;
 	/** @var int */
 	public const NO_CACHE = 3;
 	/** @var string */
@@ -1682,18 +1682,18 @@ class IO
 	 * data, or with reset flag set calls data from DB again
 	 * NOTE on $cache param:
 	 * - if set to 0, if same query run again, will read from cache
-	 * - if set to 1, at the end of the query (last row returned),
-	 *   the stored array will be deleted ...
-	 * - if set to 2, the data will be read new and cached
+	 * - if set to 1, the data will be read new and cached, cache reset a new run
 	 *   (wheres 1 reads cache AND destroys at end of read)
+	 * - if set to 2, at the end of the query (last row returned),
+	 *   the stored array will be deleted ...
 	 * - if set to 3, after EACH row, the data will be reset,
 	 *   no caching is done except for basic (count, etc)
 	 * @param  string $query      Query string
 	 * @param  int    $cache      reset status: default: USE_CACHE
 	 *                            USE_CACHE/0: normal read from cache on second run
-	 *                            CLEAR_CACHE/1: read cache, clean at the end
-	 *                            READ_NEW/2: read new, clean at end
-	 *                            NO_CACHE/3: never cache [default]
+	 *                            READ_NEW/1: write to cache, clean before new run
+	 *                            CLEAR_CACHE/2: write cache, clean after finished
+	 *                            NO_CACHE/3: don't write cache
 	 * @param  bool   $assoc_only True to only returned the named and not
 	 *                            index position ones
 	 * @return array<mixed>|bool  return array data or false on error/end
@@ -1714,17 +1714,44 @@ class IO
 		// pre declare array
 		if (!isset($this->cursor_ext[$query_hash])) {
 			$this->cursor_ext[$query_hash] = [
+				// cursor, null: unset, 1: finished read/cache, 2: object/resource reading
 				'cursor' => null,
+				// cached data
 				'data' => [],
+				// field names as array
 				'field_names' => [],
-				'firstcall' => 0,
+				// number of fields (field names)
 				'num_fields' => 0,
+				// number of rows that will be maximum returned
 				'num_rows' => 0,
-				'pos' => 0,
-				'query' => '',
+				// how many rows have been read from db
 				'read_rows' => 0,
+				// current read pos (db/cache), 0 on last read (finished)
+				'pos' => 0,
+				// the query used in this call
+				'query' => '',
+				// cache flag from method call
+				'cache_flag' => $cache,
+				// flag if we only have assoc data
+				'assoc_flag' => $assoc_only,
+				// flag if we have cache data stored at the moment
+				'cached' => false,
+				// when fetch array or cache read returns false
+				// in loop read that means dbReturn retuns false without erro
+				'finished' => false,
+				 // read from cache/db (pos == rows)
+				'read_finished' => false,
+				 // read from db only (read == rows)
+				'db_read_finished' => false,
+				// for debug
+				'log_pos' => 1, // how many times called overall
+				'log' => [], // current run log
 			];
+		} else {
+			$this->cursor_ext[$query_hash]['log_pos'] ++;
 		}
+		// reset log for each read
+		$this->cursor_ext[$query_hash]['log'] = [];
 		// set the query
 		$this->cursor_ext[$query_hash]['query'] = $query;
 		// before doing ANYTHING check if query is "SELECT ..." everything else does not work
@@ -1732,20 +1759,25 @@ class IO
 			$this->__dbError(17, false, $this->cursor_ext[$query_hash]['query']);
 			return false;
 		}
+		// set first call to false
+		$first_call = false;
 		// init return als false
 		$return = false;
 		// if it is a call with reset in it we reset the cursor,
 		// so we get an uncached return
 		// but only for the FIRST call (pos == 0)
 		if ($cache > self::USE_CACHE && !$this->cursor_ext[$query_hash]['pos']) {
+			$this->cursor_ext[$query_hash]['log'][] = 'Reset cursor';
 			$this->cursor_ext[$query_hash]['cursor'] = null;
+			if ($cache == self::READ_NEW) {
+				$this->cursor_ext[$query_hash]['log'][] = 'Cache reset';
+				$this->cursor_ext[$query_hash]['data'] = [];
+			}
 		}
-		// $this->debug('MENU', 'Reset: '.$reset.', Cursor: '
-		//	.$this->cursor_ext[$query_hash]['cursor'].', Pos: '.$this->cursor_ext[$query_hash]['pos']
-		//	.', Query: '.$query);
 
 		// if no cursor yet, execute
 		if (!$this->cursor_ext[$query_hash]['cursor']) {
+			$this->cursor_ext[$query_hash]['log'][] = 'No cursor';
 			// for DEBUG, print out each query executed
 			if ($this->db_debug) {
 				$this->__dbDebug('db', $this->cursor_ext[$query_hash]['query'], 'dbReturn', 'Q');
@@ -1773,13 +1805,14 @@ class IO
 				$this->__dbError(13, $this->cursor_ext[$query_hash]['cursor']);
 				return false;
 			} else {
-				$this->cursor_ext[$query_hash]['firstcall'] = 1;
+				$first_call = true;
 			}
 		} // only go if NO cursor exists
 
 		// if cursor exists ...
 		if ($this->cursor_ext[$query_hash]['cursor']) {
-			if ($this->cursor_ext[$query_hash]['firstcall'] == 1) {
+			if ($first_call === true) {
+				$this->cursor_ext[$query_hash]['log'][] = 'First call';
 				// count the rows returned (if select)
 				$this->cursor_ext[$query_hash]['num_rows'] =
 					$this->db_functions->__dbNumRows($this->cursor_ext[$query_hash]['cursor']);
@@ -1799,35 +1832,51 @@ class IO
 						);
 				}
 				$this->field_names = $this->cursor_ext[$query_hash]['field_names'];
-				// reset first call vars
-				$this->cursor_ext[$query_hash]['firstcall'] = 0;
+				// reset first call var
+				$first_call = false;
 				// reset the internal pos counter
 				$this->cursor_ext[$query_hash]['pos'] = 0;
 				// reset the global (for cache) read counter
 				$this->cursor_ext[$query_hash]['read_rows'] = 0;
+				// reset read finished flag
+				$this->cursor_ext[$query_hash]['finished'] = false;
+				$this->cursor_ext[$query_hash]['read_finished'] = false;
+				$this->cursor_ext[$query_hash]['db_read_finished'] = false;
+				// set cursor ccached flag based on cache flag
+				if ($cache < self::NO_CACHE) {
+					$this->cursor_ext[$query_hash]['cached'] = true;
+				}
 			}
-			// read data for further work ... but only if necessarry
+			// main database read if not all read and we have an active cursor
 			if (
-				$this->cursor_ext[$query_hash]['read_rows'] ==
-					$this->cursor_ext[$query_hash]['num_rows']
+				$this->cursor_ext[$query_hash]['read_rows'] !=
+					$this->cursor_ext[$query_hash]['num_rows'] &&
+				!is_int($this->cursor_ext[$query_hash]['cursor'])
 			) {
-				$return = false;
-			} else {
 				$return = $this->__dbConvertEncoding(
 					$this->db_functions->__dbFetchArray(
 						$this->cursor_ext[$query_hash]['cursor'],
 						$this->db_functions->__dbResultType($assoc_only)
 					)
 				);
+				$this->cursor_ext[$query_hash]['log'][] = 'DB Reading data: '
+					. (is_bool($return) ? 'EOF' : 'DATA');
 				// if returned is NOT an array, abort to false
 				if (!is_array($return)) {
 					$return = false;
 				}
 			}
-			// check if cached call or reset call ...
+			// read from cache, or do partial cache set and caching
 			if (!$return && $cache == self::USE_CACHE) {
 				// check if end of output ...
-				if ($this->cursor_ext[$query_hash]['pos'] >= $this->cursor_ext[$query_hash]['num_rows']) {
+				if (
+					$this->cursor_ext[$query_hash]['pos'] >=
+						$this->cursor_ext[$query_hash]['num_rows']
+				) {
+					$this->cursor_ext[$query_hash]['log'][] = 'USE CACHE, end';
+					// finish read
+					$this->cursor_ext[$query_hash]['finished'] = true;
+					// reset pos for next read
 					$this->cursor_ext[$query_hash]['pos'] = 0;
 					// if not reset given, set the cursor to true, so in a cached
 					// call on a different page we don't get problems from
@@ -1835,36 +1884,55 @@ class IO
 					$this->cursor_ext[$query_hash]['cursor'] = 1;
 					$return = false;
 				} else {
+					$this->cursor_ext[$query_hash]['log'][] = 'USE CACHE, read data';
+					$this->cursor_ext[$query_hash]['read_finished'] = false;
+					$this->cursor_ext[$query_hash]['finished'] = false;
 					// cached data read
 					$return = $this->__dbReturnCacheRead($query_hash, $assoc_only);
+					if (
+						$this->cursor_ext[$query_hash]['pos'] ==
+						$this->cursor_ext[$query_hash]['num_rows']
+					) {
+						$this->cursor_ext[$query_hash]['log'][] = 'USE CACHE, all cache rows read';
+						$this->cursor_ext[$query_hash]['read_finished'] = true;
+					}
 				}
 			} else {
-				// return row, if last && reset, then unset the hole hash array
-				if (
-					!$return &&
-					($cache == self::CLEAR_CACHE || $cache == self::NO_CACHE) &&
-					$this->cursor_ext[$query_hash]['pos']
-				) {
-					// unset data block only
-					$this->cursor_ext[$query_hash]['data'] = [];
-					$this->cursor_ext[$query_hash]['pos'] = 0;
-				} elseif (
-					!$return && $cache == self::READ_NEW &&
-					$this->cursor_ext[$query_hash]['pos']
-				) {
-					// at end of read reset pos & set cursor to 1
-					// (so it does not get lost in session transfer)
+				// return row, if last && reset, then unset the whole hash array
+				if (!$return && $this->cursor_ext[$query_hash]['pos']) {
 					$this->cursor_ext[$query_hash]['pos'] = 0;
 					$this->cursor_ext[$query_hash]['cursor'] = 1;
-					$return = false;
+					$this->cursor_ext[$query_hash]['finished'] = true;
+					// for clear cache, clear cache, else only write log info
+					if ($cache == self::CLEAR_CACHE) {
+						$this->cursor_ext[$query_hash]['log'][] = 'CLEAR CACHE, end';
+						// unset data block only
+						$this->cursor_ext[$query_hash]['data'] = [];
+						$this->cursor_ext[$query_hash]['cached'] = false;
+					} elseif ($cache == self::READ_NEW) {
+						$this->cursor_ext[$query_hash]['log'][] = 'READ NEW, end';
+					} elseif ($cache == self::NO_CACHE) {
+						$this->cursor_ext[$query_hash]['log'][] = 'NO CACHE, end';
+					}
 				}
 				// if something found, write data into hash array
 				if ($return) {
+					$this->cursor_ext[$query_hash]['log'][] = 'Return Data';
 					// internal position counter
 					$this->cursor_ext[$query_hash]['pos'] ++;
 					$this->cursor_ext[$query_hash]['read_rows'] ++;
+					// read is finished
+					if (
+						$this->cursor_ext[$query_hash]['read_rows'] ==
+							$this->cursor_ext[$query_hash]['num_rows']
+					) {
+						$this->cursor_ext[$query_hash]['log'][] = 'Return data all db rows read';
+						$this->cursor_ext[$query_hash]['db_read_finished'] = true;
+						$this->cursor_ext[$query_hash]['read_finished'] = true;
+					}
 					// if reset is < NO_CACHE level caching is done, else no
 					if ($cache < self::NO_CACHE) {
+						$this->cursor_ext[$query_hash]['log'][] = 'Cache Data';
 						// why was this here?
 						// $temp = [];
 						// foreach ($return as $field_name => $data) {
