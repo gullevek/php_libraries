@@ -101,6 +101,17 @@ final class CoreLibsACLLoginTest extends TestCase
 				'Cannot find edit_user table in ACL\Login database for testing'
 			);
 		}
+		// insert additional content for testing (locked user, etc)
+		$queries = [
+			"INSERT INTO edit_access_data "
+				. "(edit_access_id, name, value, enabled) VALUES "
+				. "((SELECT edit_access_id FROM edit_access WHERE uid = 'AdminAccess'), "
+				. "'test', 'value', 1)"
+		];
+		foreach ($queries as $query) {
+			self::$db->dbExec($query);
+		}
+
 		// define mandatory constant
 		// must set
 		// TARGET
@@ -146,15 +157,15 @@ final class CoreLibsACLLoginTest extends TestCase
 	 */
 	public function loginProvider(): array
 	{
-		// 0: mock settings
+		// 0: mock settings/override flag settings
 		// 1: post array IN
 		//    login_login, login_username, login_password, login_logout
 		//    change_password, pw_username, pw_old_password, pw_new_password,
 		//    pw_new_password_confirm
 		// 2: override session set
-		// 3: expected error code, 0 for all ok, 3 for login page view
-		//    note that 1 (no db), 2 (no session) must be tested too
-		// 4: expected return on ok (error: 0)
+		// 3: expected error code, 0 for all ok, 3000 for login page view
+		//    note that 1000 (no db), 2000 (no session) must be tested too
+		// 4: expected return array, eg login_error code, or other info data to match
 		return [
 			'load, no login' => [
 				// error code, only for exceptions
@@ -165,7 +176,9 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				3000,
 				[
-					'login_error' => 0
+					'login_error' => 0,
+					'error_string' => 'Success: <b>No error</b>',
+					'error_string_text' => 'Success: No error',
 				],
 			],
 			'load, session euid set only, php error' => [
@@ -183,6 +196,8 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
 					'base_access' => 'list',
 					'page_access' => 'list',
 				],
@@ -195,14 +210,19 @@ final class CoreLibsACLLoginTest extends TestCase
 					'GROUP_ACL_LEVEL' => -1,
 					'PAGES_ACL_LEVEL' => [],
 					'USER_ACL_LEVEL' => -1,
+					'UNIT_UID' => [
+						'AdminAccess' => 1,
+					],
 					'UNIT' => [
 						1 => [
 							'acl_level' => 80,
 							'name' => 'Admin Access',
-							'uid' => '',
+							'uid' => 'AdminAccess',
 							'level' => -1,
 							'default' => 0,
-							'data' => []
+							'data' => [
+								'test' => 'value',
+							],
 						],
 					],
 					// 'UNIT_DEFAULT' => '',
@@ -214,6 +234,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
 				],
@@ -231,7 +252,11 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				3000,
 				[
-					'login_error' => 102
+					'login_error' => 102,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Please enter username and password</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Please enter username and password'
 				]
 			],
 			// login: missing username
@@ -247,7 +272,11 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				3000,
 				[
-					'login_error' => 102
+					'login_error' => 102,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Please enter username and password</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Please enter username and password'
 				]
 			],
 			// login: missing password
@@ -263,7 +292,11 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				3000,
 				[
-					'login_error' => 102
+					'login_error' => 102,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Please enter username and password</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Please enter username and password'
 				]
 			],
 			// login: user not found
@@ -279,7 +312,11 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				3000,
 				[
-					'login_error' => 1010
+					'login_error' => 1010,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Wrong Username or Password</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Wrong Username or Password'
 				]
 			],
 			// login: invalid password
@@ -299,16 +336,91 @@ final class CoreLibsACLLoginTest extends TestCase
 				3000,
 				[
 					// default password is plain text
-					'login_error' => 1012
+					'login_error' => 1012,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Wrong Username or Password</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Wrong Username or Password'
 				]
 			],
 			// login: ok (but not enabled)
+			'login: ok, but not enabled' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_enabled' => true
+				],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				3000,
+				[
+					'login_error' => 104,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - User not enabled</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - User not enabled'
+				]
+			],
 			// login: ok (but locked)
+			'login: ok, but locked' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_locked' => true
+				],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				3000,
+				[
+					'login_error' => 105,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - User is locked</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - User is locked'
+				]
+			],
+			// login: make user get locked strict
+			'login: ok, get locked, strict' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_get_locked' => true,
+					'max_login_error_count' => 2,
+					'test_locked_strict' => true,
+				],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				0,
+				[
+					'lock_run_login_error' => 1012,
+					'login_error' => 105,
+				]
+			],
 			// login: ok
 			'login: ok' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
 					'base_access' => 'list',
 					'page_access' => 'list',
 				],
@@ -324,6 +436,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
 				]
@@ -340,7 +453,7 @@ final class CoreLibsACLLoginTest extends TestCase
 	 * @dataProvider loginProvider
 	 * @testdox ACL\Login Class tests [$_dataName]
 	 *
-	 * @param  array<string,string> $mock_settings
+	 * @param  array<string,mixed>  $mock_settings
 	 * @param  array<string,string> $post
 	 * @param  array<string,mixed>  $session
 	 * @param  int                  $error
@@ -354,9 +467,7 @@ final class CoreLibsACLLoginTest extends TestCase
 		int $error,
 		array $expected
 	): void {
-		// echo "ACL LOGIN TEST\n";
 		$_SESSION = [];
-
 		// init session (as MOCK)
 		/** @var \CoreLibs\Create\Session&MockObject */
 		$session_mock = $this->createPartialMock(
@@ -404,6 +515,77 @@ final class CoreLibsACLLoginTest extends TestCase
 			->method('loginPrintLogin')
 			->willReturnCallback(function () {
 			});
+
+		// if mock_settings: enabled OFF
+		// run DB update and set off
+		if (!empty($mock_settings['test_enabled'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET enabled = 0 WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		// test locked already
+		if (!empty($mock_settings['test_locked'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET locked = 1 WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		// test get locked
+		if (!empty($mock_settings['test_get_locked'])) {
+			// enable strict if needed
+			if (!empty($mock_settings['test_locked_strict'])) {
+				self::$db->dbExec(
+					"UPDATE edit_user SET strict = 1 WHERE LOWER(username) = "
+						. self::$db->dbEscapeLiteral($post['login_username'])
+				);
+			}
+			// reset any previous login error counts
+			self::$db->dbExec(
+				"UPDATE edit_user "
+					. "SET login_error_count = 0, login_error_date_last = NULL, "
+					. "login_error_date_first = NULL "
+					. "WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+			// check the max login error count and try login until one time before
+			// on each run, check that lock count is matching
+			// next run (run test) should then fail with user locked IF strict,
+			// else fail as normal login
+			$login_mock->loginSetMaxLoginErrorCount($mock_settings['max_login_error_count']);
+			// temporary wrong password
+			$_POST['login_password'] = 'wrong';
+			for ($run = 1, $max_run = $login_mock->loginGetMaxLoginErrorCount(); $run <= $max_run; $run++) {
+				try {
+					$login_mock->loginMainCall();
+				} catch (\Exception $e) {
+					// print 'Expected error code: ' . $e->getCode()
+					// . ', M:' . $e->getMessage()
+					// . ', L:' . $e->getLine()
+					// . ', E: ' . $login_mock->loginGetLastErrorCode()
+					// . "\n";
+					$this->assertEquals(
+						$expected['lock_run_login_error'],
+						$login_mock->loginGetLastErrorCode(),
+						'Assert login error code, exit on lock run'
+					);
+				}
+				// check user error count
+				$res = self::$db->dbReturnRow(
+					"SELECT login_error_count FROM edit_user "
+						. "WHERE LOWER(username) = "
+						. self::$db->dbEscapeLiteral($post['login_username'])
+				);
+				$this->assertEquals(
+					$res['login_error_count'],
+					$run,
+					'Assert equal login error count'
+				);
+			}
+			// set correct password next locked login
+			$_POST['login_password'] = $post['login_password'];
+		}
+
 		// run test
 		try {
 			$login_mock->loginMainCall();
@@ -421,7 +603,21 @@ final class CoreLibsACLLoginTest extends TestCase
 				'Assert page name'
 			);
 			// - loginCheckPermissions [duplicated from loginrun]
+			$this->assertTrue(
+				$login_mock->loginCheckPermissions(),
+				'Assert true for login permission ok'
+			);
 			// - loginCheckAccess [use Base, Page below]
+			$this->assertEquals(
+				$expected['base_access'],
+				$login_mock->loginCheckAccess('base', $mock_settings['base_access']),
+				'Assert base access, via main method'
+			);
+			$this->assertEquals(
+				$expected['base_access'],
+				$login_mock->loginCheckAccess('page', $mock_settings['base_access']),
+				'Assert page access, via main method'
+			);
 			// - loginCheckAccessBase
 			$this->assertEquals(
 				$expected['base_access'],
@@ -446,14 +642,39 @@ final class CoreLibsACLLoginTest extends TestCase
 				$login_mock->loginCheckEditAccessId((int)$mock_settings['edit_access_id']),
 				'Assert check access id valid'
 			);
-			// - loginGetEditAccessData [test extra]
+			// - loginGetEditAccessIdFromUid
+			$this->assertEquals(
+				$expected['check_access_id'],
+				$login_mock->loginGetEditAccessIdFromUid($mock_settings['edit_access_uid']),
+				'Assert check access uid to id valid'
+			);
+			// - loginGetEditAccessData
+			$this->assertEquals(
+				$expected['check_access_data'],
+				$login_mock->loginGetEditAccessData(
+					$mock_settings['edit_access_id'],
+					$mock_settings['edit_access_data']
+				),
+				'Assert check access id data value valid'
+			);
 			// - loginIsAdmin
 			$this->assertEquals(
 				$expected['admin_flag'],
 				$login_mock->loginIsAdmin(),
 				'Assert admin flag set'
 			);
+			// - loginGetAcl
+			$this->assertIsArray(
+				$login_mock->loginGetAcl(),
+				'Assert get acl is array'
+			);
+			// TODO: detail match of ACL array (loginGetAcl)
+
 			// .. end with: loginLogoutUser
+			// _POST['login_logout'] = 'lgogout
+			// $login_mock->loginMainCall();
+			// - loginCheckPermissions
+			// - loginGetPermissionOkay
 		} catch (\Exception $e) {
 			// print "[E]: " . $e->getCode() . ", ERROR: " . $login_mock->loginGetLastErrorCode() . "/"
 			// 	. ($expected['login_error'] ?? 0) . "\n";
@@ -464,6 +685,37 @@ final class CoreLibsACLLoginTest extends TestCase
 					$login_mock->loginGetLastErrorCode(),
 					'Assert login error code, exit'
 				);
+				// - loginGetErrorMsg
+				$this->assertEquals(
+					$expected['error_string'],
+					$login_mock->loginGetErrorMsg($login_mock->loginGetLastErrorCode()),
+					'Assert error string, html'
+				);
+				$this->assertEquals(
+					$expected['error_string_text'],
+					$login_mock->loginGetErrorMsg($login_mock->loginGetLastErrorCode(), true),
+					'Assert error string, text'
+				);
+				// - loginGetLoginHTML
+				$this->assertStringContainsString(
+					'<html>',
+					$login_mock->loginGetLoginHTML(),
+					'Assert login html string exits'
+				);
+				// check that login script has above error message
+				if (!empty($login_mock->loginGetLastErrorCode())) {
+					$this->assertStringContainsString(
+						$login_mock->loginGetErrorMsg($login_mock->loginGetLastErrorCode()),
+						$login_mock->loginGetLoginHTML(),
+						'Assert login error string exits'
+					);
+				} else {
+					$this->assertStringNotContainsString(
+						$login_mock->loginGetErrorMsg($login_mock->loginGetLastErrorCode()),
+						$login_mock->loginGetLoginHTML(),
+						'Assert login error string does not exit'
+					);
+				}
 			}
 			// print "EXCEPTION: " . print_r($e, true) . "\n";
 			$this->assertEquals(
@@ -474,38 +726,418 @@ final class CoreLibsACLLoginTest extends TestCase
 					. ', ' . $e->getLine()
 			);
 		}
-		// print "PAGENAME: " . $login_mock->loginGetPageName() . "\n";
-		// $echo_string = $this->getActualOutput();
 
-		// $this->setOutputCallback(
-		// 	function ($echo) {
-		// 		// echo "A";
-		// 		echo "--" . $echo . "--\n";
-		// 	}
-		// );
-
-		// $echo_string = $this->getActualOutput();
-		// echo "~~~~~~~~~~~~~~~~\n";
-		// print "ECHO: " . $echo_string . "\n";
-
-		// compare result to expected
+		// enable user again if flag set
+		if (!empty($mock_settings['test_enabled'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET enabled = 1 "
+					. "WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		// reset lock flag
+		if (!empty($mock_settings['test_locked'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET locked = 0 "
+					. "WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		// rest the get locked flow
+		if (!empty($mock_settings['test_get_locked'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user "
+					. "SET login_error_count = 0, login_error_date_last = NULL, "
+					. "login_error_date_first = NULL, locked = 0, strict = 0 "
+					. "WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
 	}
 
-	// other tests
-	// - loginSetPasswordMinLength
-	//
+	// - loginGetAclList (null, invalid,)
+
+	public function aclListProvider(): array
+	{
+		// 0: level (int|null)
+		// 2: type (string), null for skip (if 0 = null)
+		// 1: acl return from level (array)
+		// 2: level number to return (must match 0)
+		return [
+			'null, get full list' => [
+				null,
+				null,
+				[
+					0 => [
+						'type' => 'none',
+						'name' => 'No Access',
+					],
+					10 => [
+						'type' => 'list',
+						'name' => 'List',
+					],
+					20 => [
+						'type' => 'read',
+						'name' => 'Read',
+					],
+					30 => [
+						'type' => 'mod_trans',
+						'name' => 'Translator',
+					],
+					40 => [
+						'type' => 'mod',
+						'name' => 'Modify',
+					],
+					60 => [
+						'type' => 'write',
+						'name' => 'Create/Write',
+					],
+					80 => [
+						'type' => 'del',
+						'name' => 'Delete',
+					],
+					90 => [
+						'type' => 'siteadmin',
+						'name' => 'Site Admin',
+					],
+					100 => [
+						'type' => 'admin',
+						'name' => 'Admin',
+					],
+				],
+				null
+			],
+			'valid, search' => [
+				20,
+				'read',
+				[
+					'type' => 'read',
+					'name' => 'Read'
+				],
+				20
+			],
+			'invalud search' => [
+				12,
+				'foo',
+				[],
+				false,
+			]
+		];
+	}
 
 	/**
 	 * Undocumented function
 	 *
-	 * @testdox ACL\Login Class empty void
+	 * @dataProvider aclListProvider()
+	 * @testdox ACL\Login list if $level and $type exepcted level is $expected_level [$_dataName]
 	 *
+	 * @param  int|null      $level
+	 * @param  string|null   $type
+	 * @param  array         $expected_list
+	 * @param  int|null|bool $expected_level
 	 * @return void
 	 */
-	// public function testOther(): void
-	// {
-	// 	echo "HERE EMPTY 1\n";
-	// }
+	public function testAclLoginList(
+		?int $level,
+		?string $type,
+		array $expected_list,
+		$expected_level
+	): void {
+		$_SESSION = [];
+		// init session (as MOCK)
+		/** @var \CoreLibs\Create\Session&MockObject */
+		$session_mock = $this->createPartialMock(
+			\CoreLibs\Create\Session::class,
+			['startSession', 'checkActiveSession', 'sessionDestroy']
+		);
+		$session_mock->method('startSession')->willReturn('ACLLOGINTEST34');
+		$session_mock->method('checkActiveSession')->willReturn(true);
+		$session_mock->method('sessionDestroy')->will(
+			$this->returnCallback(function () {
+				global $_SESSION;
+				$_SESSION = [];
+				return true;
+			})
+		);
+		/** @var \CoreLibs\ACL\Login&MockObject */
+		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
+			->setConstructorArgs([self::$db, self::$log, $session_mock, false])
+			->onlyMethods(['loginTerminate'])
+			->getMock();
+		$login_mock->expects($this->any())
+			->method('loginTerminate')
+			->will(
+				$this->returnCallback(function ($code) {
+					throw new \Exception('', $code);
+				})
+			);
+
+		$list = $login_mock->loginGetAclList($level);
+		$this->assertIsArray(
+			$list,
+			'assert get acl list is array'
+		);
+		$this->assertEquals(
+			$expected_list,
+			$list
+		);
+		if ($type !== null) {
+			$this->assertEquals(
+				$expected_level,
+				$login_mock->loginGetAclListFromType($type),
+				'assert type is level'
+			);
+			// only back assert if found
+			if (isset($list['type'])) {
+				$this->assertEquals(
+					$list['type'],
+					$type,
+					'assert level read type is type'
+				);
+			}
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function minPasswordCheckProvider(): array
+	{
+		// 0: set length
+		// 1: expected return from set
+		// 2: expected set length
+		return [
+			'set new length' => [
+				12,
+				true,
+				12,
+			],
+			'set new length, too short' => [
+				5,
+				false,
+				9
+			],
+			'set new length, too long' => [
+				500,
+				false,
+				9
+			]
+		];
+	}
+
+	/**
+	 * check setting minimum password length
+	 *
+	 * @covers ::loginSetPasswordMinLength
+	 * @covers ::loginGetPasswordLenght
+	 * @dataProvider minPasswordCheckProvider()
+	 * @testdox ACL\Login password min length set $input is $expected_return and matches $expected [$_dataName]
+	 *
+	 * @param  int  $input
+	 * @param  bool $expected_return
+	 * @param  int  $expected
+	 * @return void
+	 */
+	public function testACLLoginPasswordMinLenght(int $input, bool $expected_return, int $expected): void
+	{
+		$_SESSION = [];
+		// init session (as MOCK)
+		/** @var \CoreLibs\Create\Session&MockObject */
+		$session_mock = $this->createPartialMock(
+			\CoreLibs\Create\Session::class,
+			['startSession', 'checkActiveSession', 'sessionDestroy']
+		);
+		$session_mock->method('startSession')->willReturn('ACLLOGINTEST34');
+		$session_mock->method('checkActiveSession')->willReturn(true);
+		$session_mock->method('sessionDestroy')->will(
+			$this->returnCallback(function () {
+				global $_SESSION;
+				$_SESSION = [];
+				return true;
+			})
+		);
+		/** @var \CoreLibs\ACL\Login&MockObject */
+		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
+			->setConstructorArgs([self::$db, self::$log, $session_mock, false])
+			->onlyMethods(['loginTerminate'])
+			->getMock();
+		$login_mock->expects($this->any())
+			->method('loginTerminate')
+			->will(
+				$this->returnCallback(function ($code) {
+					throw new \Exception('', $code);
+				})
+			);
+
+		// set new min password length
+		$this->assertEquals(
+			$expected_return,
+			$login_mock->loginSetPasswordMinLength($input),
+			'assert bool set password min length'
+		);
+		// check value
+		$this->assertEquals(
+			$expected,
+			$login_mock->loginGetPasswordLenght('min'),
+			'assert get password min length'
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function getPasswordLengthProvider(): array
+	{
+		return [
+			'min' => ['min'],
+			'lower' => ['lower'],
+			'max' => ['max'],
+			'upper' => ['upper'],
+			'minimum_length' => ['minimum_length'],
+			'min_length' => ['min_length'],
+			'length' => ['length'],
+		];
+	}
+
+	/**
+	 * check all possible readable password length params
+	 *
+	 * @covers ::loginGetPasswordLenght
+	 * @dataProvider getPasswordLengthProvider()
+	 * @testdox ACL\Login get password length $input [$_dataName]
+	 *
+	 * @param  string $input
+	 * @return void
+	 */
+	public function testACLLoginGetPasswordLenght(string $input): void
+	{
+		$_SESSION = [];
+		// init session (as MOCK)
+		/** @var \CoreLibs\Create\Session&MockObject */
+		$session_mock = $this->createPartialMock(
+			\CoreLibs\Create\Session::class,
+			['startSession', 'checkActiveSession', 'sessionDestroy']
+		);
+		$session_mock->method('startSession')->willReturn('ACLLOGINTEST34');
+		$session_mock->method('checkActiveSession')->willReturn(true);
+		$session_mock->method('sessionDestroy')->will(
+			$this->returnCallback(function () {
+				global $_SESSION;
+				$_SESSION = [];
+				return true;
+			})
+		);
+		/** @var \CoreLibs\ACL\Login&MockObject */
+		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
+			->setConstructorArgs([self::$db, self::$log, $session_mock, false])
+			->onlyMethods(['loginTerminate'])
+			->getMock();
+		$login_mock->expects($this->any())
+			->method('loginTerminate')
+			->will(
+				$this->returnCallback(function ($code) {
+					throw new \Exception('', $code);
+				})
+			);
+
+		$this->assertMatchesRegularExpression(
+			"/^\d+$/",
+			(string)$login_mock->loginGetPasswordLenght($input)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function loginMaxErrorProvider(): array
+	{
+		return [
+			'set valid max failed login' => [
+				10,
+				true,
+				10
+			],
+			'set valid unlimted' => [
+				-1,
+				true,
+				-1
+			],
+			'set invalid 0' => [
+				0,
+				false,
+				-1
+			],
+			'set invalid negative' => [
+				-5,
+				false,
+				-1
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::loginSetMaxLoginErrorCount
+	 * @covers ::loginGetMaxLoginErrorCount
+	 * @dataProvider loginMaxErrorProvider()
+	 * @testdox ACL\Login failed login set/get $input is $expected_return and matches $expected [$_dataName]
+	 *
+	 * @param  int  $input
+	 * @param  bool $expected_return
+	 * @param  int  $expected
+	 * @return void
+	 */
+	public function testACLLoginErrorCount(int $input, bool $expected_return, int $expected): void
+	{
+		$_SESSION = [];
+		// init session (as MOCK)
+		/** @var \CoreLibs\Create\Session&MockObject */
+		$session_mock = $this->createPartialMock(
+			\CoreLibs\Create\Session::class,
+			['startSession', 'checkActiveSession', 'sessionDestroy']
+		);
+		$session_mock->method('startSession')->willReturn('ACLLOGINTEST34');
+		$session_mock->method('checkActiveSession')->willReturn(true);
+		$session_mock->method('sessionDestroy')->will(
+			$this->returnCallback(function () {
+				global $_SESSION;
+				$_SESSION = [];
+				return true;
+			})
+		);
+		/** @var \CoreLibs\ACL\Login&MockObject */
+		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
+			->setConstructorArgs([self::$db, self::$log, $session_mock, false])
+			->onlyMethods(['loginTerminate'])
+			->getMock();
+		$login_mock->expects($this->any())
+			->method('loginTerminate')
+			->will(
+				$this->returnCallback(function ($code) {
+					throw new \Exception('', $code);
+				})
+			);
+
+		// set new min password length
+		$this->assertEquals(
+			$expected_return,
+			$login_mock->loginSetMaxLoginErrorCount($input),
+			'assert bool set max login errors'
+		);
+		// check value
+		$this->assertEquals(
+			$expected,
+			$login_mock->loginGetMaxLoginErrorCount(),
+			'assert get max login errors'
+		);
+	}
 }
 
 // __END__
