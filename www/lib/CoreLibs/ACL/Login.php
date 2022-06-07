@@ -153,7 +153,7 @@ class Login
 	private $acl = [];
 	/** @var array<mixed> */
 	private $default_acl_list = [];
-	/** @var array<string,int> Reverse list to lookup level from type */
+	/** @var array<int|string,mixed> Reverse list to lookup level from type */
 	private $default_acl_list_type = [];
 	/** @var int default ACL level to be based on if nothing set */
 	private $default_acl_level = 0;
@@ -815,9 +815,9 @@ class Login
 		// set the default edit access
 		$this->acl['default_edit_access'] = $_SESSION['UNIT_DEFAULT'] ?? null;
 		// integrate the type acl list, but only for the keyword -> level
-		$this->acl['min'] = $this->default_acl_list_type ?? [];
+		$this->acl['min'] = $this->default_acl_list_type;
 		// set the full acl list too (lookup level number and get level data)
-		$this->acl['acl_list'] = $this->default_acl_list ?? [];
+		$this->acl['acl_list'] = $this->default_acl_list;
 		// debug
 		// $this->debug('ACL', $this->print_ar($this->acl));
 	}
@@ -1794,10 +1794,7 @@ EOM;
 			return $this->default_acl_list;
 		}
 		// if level given and exist return this array block (name/level)
-		if (
-			!empty($level) &&
-			!empty($this->default_acl_list[$level])
-		) {
+		if (!empty($this->default_acl_list[$level])) {
 			return $this->default_acl_list[$level];
 		} else {
 			// else return empty array

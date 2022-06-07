@@ -96,13 +96,13 @@ print "<div>READ _ENV ARRAY:</div>";
 print CoreLibs\Debug\Support::printAr(array_map('htmlentities', $_ENV));
 // set + check edit access id
 $edit_access_id = 3;
-if (is_object($login) && isset($login->acl['unit'])) {
-	print "ACL UNIT: " . print_r(array_keys($login->acl['unit']), true) . "<br>";
+if (is_object($login) && isset($login->loginGetAcl()['unit'])) {
+	print "ACL UNIT: " . print_r(array_keys($login->loginGetAcl()['unit']), true) . "<br>";
 	print "ACCESS CHECK: " . (string)$login->loginCheckEditAccess($edit_access_id) . "<br>";
 	if ($login->loginCheckEditAccess($edit_access_id)) {
 		$backend->edit_access_id = $edit_access_id;
 	} else {
-		$backend->edit_access_id = $login->acl['unit_id'];
+		$backend->edit_access_id = $login->loginGetAcl()['unit_id'];
 	}
 } else {
 	print "Something went wrong with the login<br>";
@@ -133,8 +133,8 @@ $log->debug('SOME MARK', 'Some error output');
 // INTERNAL SET
 print "EDIT ACCESS ID: " . $backend->edit_access_id . "<br>";
 if (is_object($login)) {
-	//	print "ACL: <br>".$backend->print_ar($login->acl)."<br>";
-	$log->debug('ACL', "ACL: " . \CoreLibs\Debug\Support::printAr($login->acl));
+	//	print "ACL: <br>".$backend->print_ar($login->loginGetAcl())."<br>";
+	$log->debug('ACL', "ACL: " . \CoreLibs\Debug\Support::printAr($login->loginGetAcl()));
 	//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
 	//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
 	// $result = array_flip(
@@ -149,7 +149,7 @@ if (is_object($login)) {
 	// );
 	//	print "DEFAULT ACL: <br>".$backend->print_ar($result)."<br>";
 	// DEPRICATED CALL
-	//	$backend->adbSetACL($login->acl);
+	//	$backend->adbSetACL($login->loginGetAcl());
 }
 
 print "THIS HOST: " . HOST_NAME . ", with PROTOCOL: " . HOST_PROTOCOL . " is running SSL: " . HOST_SSL . "<br>";

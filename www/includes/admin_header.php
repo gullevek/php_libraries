@@ -92,7 +92,7 @@ $cms->menu_show_flag = 'main';
 // db info
 $cms->db->dbInfo();
 // set acl
-$cms->setACL($login->acl);
+$cms->setACL($login->loginGetAcl());
 // flush (can we move that to header block above)
 ob_end_flush();
 //------------------------------ class init end
