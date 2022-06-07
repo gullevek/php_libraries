@@ -232,10 +232,16 @@ if (
 	exit;
 }
 // set SSL on
-if (
-	(array_key_exists('HTTPS', $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
-	$_SERVER['SERVER_PORT'] == 443
+$is_secure = false;
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+	$is_secure = true;
+} elseif (
+	!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' ||
+	!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on'
 ) {
+	$is_secure = true;
+}
+if ($is_secure) {
 	define('HOST_SSL', true);
 	define('HOST_PROTOCOL', 'https://');
 } else {
