@@ -50,7 +50,7 @@ for (
 		is_file($__DIR__PATH . $CONFIG_PATH_PREFIX . CONFIG_PATH . 'config.master.php')
 	) {
 		// load enviorment file if it exists
-		\CoreLibs\Get\ReadEnvFile::readEnvFile(
+		\CoreLibs\Get\DotEnv::readEnvFile(
 			$__DIR__PATH . $CONFIG_PATH_PREFIX . CONFIG_PATH
 		);
 		// load master config file that loads all other config files

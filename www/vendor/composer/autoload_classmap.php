@@ -40,6 +40,7 @@ return array(
     'CoreLibs\\Debug\\MemoryUsage' => $baseDir . '/lib/CoreLibs/Debug/MemoryUsage.php',
     'CoreLibs\\Debug\\RunningTime' => $baseDir . '/lib/CoreLibs/Debug/RunningTime.php',
     'CoreLibs\\Debug\\Support' => $baseDir . '/lib/CoreLibs/Debug/Support.php',
+    'CoreLibs\\Get\\DotEnv' => $baseDir . '/lib/CoreLibs/Get/DotEnv.php',
     'CoreLibs\\Get\\ReadEnvFile' => $baseDir . '/lib/CoreLibs/Get/ReadEnvFile.php',
     'CoreLibs\\Get\\System' => $baseDir . '/lib/CoreLibs/Get/System.php',
     'CoreLibs\\Language\\Core\\CachedFileReader' => $baseDir . '/lib/CoreLibs/Language/Core/CachedFileReader.php',
