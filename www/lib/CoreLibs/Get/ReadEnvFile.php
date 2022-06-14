@@ -9,9 +9,6 @@ namespace CoreLibs\Get;
  */
 class ReadEnvFile
 {
-	/** @var string constant comment char, set to # */
-	private const COMMENT_CHAR = '#';
-
 	/**
 	 * parses .env file
 	 *
