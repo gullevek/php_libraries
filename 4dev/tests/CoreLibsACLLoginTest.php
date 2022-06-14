@@ -181,6 +181,50 @@ final class CoreLibsACLLoginTest extends TestCase
 					'error_string_text' => 'Success: No error',
 				],
 			],
+			'load, no login, ajax flag' => [
+				// error code, only for exceptions
+				[
+					'page_name' => 'edit_users.php',
+					// for ajax
+					'ajax_page' => true,
+					'ajax_test_type' => 'parameter',
+				],
+				[],
+				[],
+				3000,
+				[
+					'login_error' => 0,
+					'error_string' => 'Success: <b>No error</b>',
+					'error_string_text' => 'Success: No error',
+					// for ajax
+					'action' => 'login',
+					'ajax_get_count' => 0,
+					'ajax_post_count' => 5,
+					'ajax_post_action' => 'login',
+				],
+			],
+			'load, no login, ajax globals' => [
+				// error code, only for exceptions
+				[
+					'page_name' => 'edit_users.php',
+					// for ajax
+					'ajax_page' => true,
+					'ajax_test_type' => 'globals',
+				],
+				[],
+				[],
+				3000,
+				[
+					'login_error' => 0,
+					'error_string' => 'Success: <b>No error</b>',
+					'error_string_text' => 'Success: No error',
+					// for ajax
+					'action' => 'login',
+					'ajax_get_count' => 0,
+					'ajax_post_count' => 5,
+					'ajax_post_action' => 'login',
+				],
+			],
 			'load, session euid set only, php error' => [
 				[
 					'page_name' => 'edit_users.php',
@@ -467,7 +511,13 @@ final class CoreLibsACLLoginTest extends TestCase
 		int $error,
 		array $expected
 	): void {
+		// reset session
 		$_SESSION = [];
+		// reset post & get
+		$_GET = [];
+		$_POST = [];
+		// reset global ajax page call
+		unset($GLOBALS['AJAX_PAGE']);
 		// init session (as MOCK)
 		/** @var \CoreLibs\Create\Session&MockObject */
 		$session_mock = $this->createPartialMock(
@@ -588,7 +638,23 @@ final class CoreLibsACLLoginTest extends TestCase
 
 		// run test
 		try {
-			$login_mock->loginMainCall();
+			// if ajax call
+			// check if parameter, or globals (old type)
+			// else normal call
+			if (
+				!empty($mock_settings['ajax_test_type']) &&
+				$mock_settings['ajax_test_type'] == 'parameter'
+			) {
+				$login_mock->loginMainCall($mock_settings['ajax_page']);
+			} elseif (
+				!empty($mock_settings['ajax_test_type']) &&
+				$mock_settings['ajax_test_type'] == 'globals'
+			) {
+				$GLOBALS['AJAX_PAGE'] = $mock_settings['ajax_page'];
+				$login_mock->loginMainCall();
+			} else {
+				$login_mock->loginMainCall();
+			}
 			// on ok, do post login check based on expected return
 			// - loginGetLastErrorCode
 			$this->assertEquals(
@@ -678,8 +744,14 @@ final class CoreLibsACLLoginTest extends TestCase
 		} catch (\Exception $e) {
 			// print "[E]: " . $e->getCode() . ", ERROR: " . $login_mock->loginGetLastErrorCode() . "/"
 			// 	. ($expected['login_error'] ?? 0) . "\n";
+			// print "AJAX: " . $login_mock->loginGetAjaxFlag() . "\n";
+			// print "AJAX GLOBAL: " . ($GLOBALS['AJAX_PAGE'] ?? '{f}') . "\n";
+			// print "Login error expext: " . ($expected['login_error'] ?? '{0}') . "\n";
 			// if this is 3000, then we do further error checks
-			if ($e->getCode() == 3000) {
+			if (
+				$e->getCode() == 3000 ||
+				!empty($_POST['login_exit']) && $_POST['login_exit'] == 3000
+			) {
 				$this->assertEquals(
 					$expected['login_error'],
 					$login_mock->loginGetLastErrorCode(),
@@ -716,10 +788,51 @@ final class CoreLibsACLLoginTest extends TestCase
 						'Assert login error string does not exit'
 					);
 				}
+				// for ajax type, test post return values
+				if ($login_mock->loginGetAjaxFlag()) {
+					$this->assertCount(
+						$expected['ajax_get_count'],
+						$_GET,
+						'Assert ajax error _GET is valid count'
+					);
+					// post has only action, login_exit, login_error,
+					// login_error_text and login_html
+					// 5 entries
+					$this->assertCount(
+						$expected['ajax_post_count'],
+						$_POST,
+						'Assert ajax error _POST is valid count'
+					);
+					// test post entries
+					$this->assertEquals(
+						$expected['ajax_post_action'],
+						$_POST['action'],
+						'Assert ajax _POST action'
+					);
+					$this->assertEquals(
+						$login_mock->loginGetLastErrorCode(),
+						$_POST['login_error'],
+						'Assert ajax _POST error'
+					);
+					$this->assertEquals(
+						$login_mock->loginGetErrorMsg($login_mock->loginGetLastErrorCode(), true),
+						$_POST['login_error_text'],
+						'Assert ajax _POST error text'
+					);
+					// html login basic check only, content is the same as when
+					// read from loginGetLoginHTML()
+					$this->assertStringContainsString(
+						'<html>',
+						$_POST['login_html'],
+						'Assert ajax _POST html string exits'
+					);
+				}
 			}
 			// print "EXCEPTION: " . print_r($e, true) . "\n";
 			$this->assertEquals(
-				$e->getCode(),
+				!$login_mock->loginGetAjaxFlag() ?
+					$e->getCode() :
+					$_POST['login_exit'] ?? 0,
 				$error,
 				'Expected error code: ' . $e->getCode()
 					. ', ' . $e->getMessage()

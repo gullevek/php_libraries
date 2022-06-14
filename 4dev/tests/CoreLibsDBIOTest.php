@@ -3683,7 +3683,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function returingProvider(): array
+	public function returningPrvoider(): array
 	{
 		// NOTE that query can have multiple inserts
 		// NOTE if there are different INSERTS before the primary keys
@@ -3801,7 +3801,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 *
 	 * @covers ::dbGetReturningExt
 	 * @covers ::dbGetReturningArray
-	 * @dataProvider returingProvider
+	 * @dataProvider returningPrvoider
 	 * @testdox Check returning cursor using $pk_name with $key and $pos [$_dataName]
 	 *
 	 * @param string $query
