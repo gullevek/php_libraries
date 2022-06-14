@@ -1318,11 +1318,14 @@ EOM;
 	/**
 	 * Main call that needs to be run to actaully check for login
 	 * If this is not called, no login checks are done, unless the class
-	 * is initialzied with the legacy call parameter
+	 * is initialzied with the legacy call parameter.
+	 * If ajax_page is true or AJAX_PAGE global var is true then the internal
+	 * ajax flag will be set and no echo or exit will be done.
 	 *
+	 * @param  bool $ajax_page [false] Set to true to never print out anythng
 	 * @return void
 	 */
-	public function loginMainCall(): void
+	public function loginMainCall(bool $ajax_page = false): void
 	{
 		// start with no error
 		$this->login_error = 0;
@@ -1388,7 +1391,10 @@ EOM;
 		// set global is ajax page for if we show the data directly,
 		// or need to pass it back
 		// to the continue AJAX class for output back to the user
-		$this->login_is_ajax_page = isset($GLOBALS['AJAX_PAGE']) && $GLOBALS['AJAX_PAGE'] ? true : false;
+		$this->login_is_ajax_page = false;
+		if ($ajax_page === true || !empty($GLOBALS['AJAX_PAGE'])) {
+			$this->login_is_ajax_page = true;
+		}
 
 		// if there is none, there is none, saves me POST/GET check
 		$this->euid = array_key_exists('EUID', $_SESSION) ? $_SESSION['EUID'] : 0;
@@ -1493,6 +1499,12 @@ EOM;
 				$_GET = [];
 				// set the action to login so we can trigger special login html return
 				$_POST['action'] = 'login';
+				$_POST['login_exit'] = 3000;
+				$_POST['login_error'] = $this->loginGetLastErrorCode();
+				$_POST['login_error_text'] = $this->loginGetErrorMsg(
+					$this->loginGetLastErrorCode(),
+					true
+				);
 				$_POST['login_html'] = $this->login_html;
 				// NOTE: this part needs to be catched by the frontend AJAX
 				// and some function needs to then set something like this
@@ -1521,6 +1533,16 @@ EOM;
 	public function loginGetPageName(): string
 	{
 		return $this->page_name;
+	}
+
+	/**
+	 * Returns the current flag if this call is for an ajax type apge
+	 *
+	 * @return bool True for yes, False for normal HTML return
+	 */
+	public function loginGetAjaxFlag(): bool
+	{
+		return $this->login_is_ajax_page;
 	}
 
 	/**
