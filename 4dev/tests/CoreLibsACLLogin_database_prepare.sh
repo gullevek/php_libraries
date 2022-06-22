@@ -7,6 +7,7 @@
 # PARAMETER 2: db user WHO MUST BE ABLE TO CREATE A DATABASE
 # PARAMETER 3: db name
 # PARAMETER 4: db host
+# PARAMETER 5: print out for testing
 
 load_sql="${1}";
 # abort with 1 if we cannot find the file
@@ -34,8 +35,13 @@ if [ $? -ne 0 ]; then
 	echo 4;
 	exit 4;
 fi;
-# load data (redirect ALL error to null), on error exit with 5
-psql -U ${db_user} -h ${db_host} -f ${load_sql} ${db_name} 2>&1 1>/dev/null 2>/dev/null;
+# if error 5 thrown, test with enabled below
+if [ ! -z "${5}" ]; then
+	psql -U ${db_user} -h ${db_host} -f ${load_sql} ${db_name};
+else
+	# load data (redirect ALL error to null), on error exit with 5
+	psql -U ${db_user} -h ${db_host} -f ${load_sql} ${db_name} 2>&1 1>/dev/null 2>/dev/null;
+fi;
 if [ $? -ne 0 ]; then
 	echo 5;
 	exit 5;

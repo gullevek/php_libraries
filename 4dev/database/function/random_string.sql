@@ -1,7 +1,8 @@
 -- create random string with length X
 
 CREATE FUNCTION random_string(randomLength int)
-RETURNS text AS $$
+RETURNS text AS
+$$
 SELECT array_to_string(
 	ARRAY(
 		SELECT substring(
@@ -13,6 +14,7 @@ SELECT array_to_string(
 	),
 	''
 )
-$$ LANGUAGE SQL
+$$
+LANGUAGE SQL
 RETURNS NULL ON NULL INPUT
 VOLATILE; -- LEAKPROOF;

@@ -72,30 +72,36 @@ use CoreLibs\Check\Password;
 
 class Login
 {
-	/** @var string */
-	private $euid; // the user id var
+	/** @var string the user id var*/
+	private $euid;
+	/** @var string _GET/_POST loginUserId parameter for non password login */
+	private $login_user_id;
+	/** @var string source, either _GET or _POST or empty */
+	private $login_user_id_source;
+	/** @var bool set to true if illegal characters where found in the login user id string */
+	private $login_unclear = false;
 	// is set to one if login okay, or EUID is set and user is okay to access this page
 	/** @var bool */
 	private $permission_okay = false;
-	/** @var string */
-	public $login; // pressed login
-	/** @var string */
-	private $action; // master action command
-	/** @var string */
-	private $username; // login name
-	/** @var string */
-	private $password; // login password
-	/** @var string */
-	private $logout; // logout button
-	/** @var bool */
-	private $password_change = false; // if this is set to true, the user can change passwords
-	/** @var bool */
-	private $password_change_ok = false; // password change was successful
+	/** @var string pressed login */
+	public $login;
+	/** @var string master action command */
+	private $action;
+	/** @var string login name */
+	private $username;
+	/** @var string login password */
+	private $password;
+	/** @var string logout button */
+	private $logout;
+	/** @var bool if this is set to true, the user can change passwords */
+	private $password_change = false;
+	/** @var bool password change was successful */
+	private $password_change_ok = false;
 	// can we reset password and mail to user with new password set screen
 	/** @var bool */
 	private $password_forgot = false;
-	/** @var bool */
-	// private $password_forgot_ok = false; // password forgot mail send ok
+	/** @var bool password forgot mail send ok */
+	// private $password_forgot_ok = false;
 	/** @var string */
 	private $change_password;
 	/** @var string */
@@ -106,8 +112,8 @@ class Login
 	private $pw_new_password;
 	/** @var string */
 	private $pw_new_password_confirm;
-	/** @var array<string> */
-	private $pw_change_deny_users = []; // array of users for which the password change is forbidden
+	/** @var array<string> array of users for which the password change is forbidden */
+	private $pw_change_deny_users = [];
 	/** @var string */
 	private $logout_target = '';
 	/** @var int */
@@ -117,8 +123,7 @@ class Login
 	/** @var string */
 	private $page_name = '';
 
-	// if we have password change we need to define some rules
-	/** @var int */
+	/** @var int if we have password change we need to define some rules */
 	private $password_min_length = 9;
 	/** @var int an true maxium min, can never be set below this */
 	private $password_min_length_max = 9;
@@ -126,8 +131,7 @@ class Login
 	// it will be set back to 255
 	/** @var int */
 	private $password_max_length = 255;
-	// can have several regexes, if nothing set, all is ok
-	/** @var array<string> */
+	/** @var array<string> can have several regexes, if nothing set, all is ok */
 	private $password_valid_chars = [
 		// '^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$',
 		// '^(?.*(\pL)u)(?=.*(\pN)u)(?=.*([^\pL\pN])u).{8,}',
@@ -234,6 +238,14 @@ class Login
 				'msg' => 'Login Failed - Wrong Username or Password',
 				'flag' => 'e'
 			],
+			'1101' => [
+				'msg' => 'Login Failed - Login User ID must be validated',
+				'flag' => 'e'
+			],
+			'1102' => [
+				'msg' => 'Login Failed - Login User ID is outside valid date range',
+				'flag' => 'e'
+			],
 			'102' => [
 				'msg' => 'Login Failed - Please enter username and password',
 				'flag' => 'e'
@@ -248,6 +260,18 @@ class Login
 			],
 			'105' => [
 				'msg' => 'Login Failed - User is locked',
+				'flag' => 'e'
+			],
+			'106' => [
+				'msg' => 'Login Failed - User is deleted',
+				'flag' => 'e'
+			],
+			'107' => [
+				'msg' => 'Login Failed - User in locked via date period',
+				'flag' => 'e'
+			],
+			'108' => [
+				'msg' => 'Login Failed - User is locked via Login User ID',
 				'flag' => 'e'
 			],
 			'109' => [
@@ -361,6 +385,47 @@ class Login
 	// *************************************************************************
 
 	/**
+	 * Checks for all flags and sets error codes for each
+	 * In order:
+	 * delete > enable > lock > period lock > login user id lock
+	 *
+	 * @param  int  $deleted              User deleted check
+	 * @param  int  $enabled              User not enabled check
+	 * @param  int  $locked               Locked because of too many invalid passwords
+	 * @param  int  $locked_period        Locked because of time period set
+	 * @param  int  $login_user_id_locked Locked from using Login User Id
+	 * @return bool
+	 */
+	private function loginValidationCheck(
+		int $deleted,
+		int $enabled,
+		int $locked,
+		int $locked_period,
+		int $login_user_id_locked
+	): bool {
+		$validation = false;
+		if ($deleted) {
+			// user is deleted
+			$this->login_error = 106;
+		} elseif (!$enabled) {
+			// user is not  enabled
+			$this->login_error = 104;
+		} elseif ($locked) {
+			// user is locked, either set or auto set
+			$this->login_error = 105;
+		} elseif ($locked_period) {
+			// locked date trigger
+			$this->login_error = 107;
+		} elseif ($login_user_id_locked) {
+			// user is locked, either set or auto set
+			$this->login_error = 108;
+		} else {
+			$validation = true;
+		}
+		return $validation;
+	}
+
+	/**
 	 * checks if password is valid, sets internal error login variable
 	 *
 	 * @param  string $hash     password hash
@@ -393,7 +458,6 @@ class Login
 		) {
 			// this means password cannot be decrypted because of missing crypt methods
 			$this->login_error = 9999;
-			$password_ok = false;
 		} elseif (
 			preg_match("/^\\$2y\\$/", $hash) &&
 			!Password::passwordVerify($password, $hash)
@@ -401,7 +465,6 @@ class Login
 			// this is the new password hash method, is only $2y$
 			// all others are not valid anymore
 			$this->login_error = 1013;
-			$password_ok = false;
 		} elseif (
 			!preg_match("/^\\$2(a|y)\\$/", $hash) &&
 			!preg_match("/^\\$1\\$/", $hash) &&
@@ -410,12 +473,33 @@ class Login
 		) {
 			// check old plain password, case sensitive
 			$this->login_error = 1012;
-			$password_ok = false;
 		} else {
 			// all ok
 			$password_ok = true;
 		}
 		return $password_ok;
+	}
+
+	/**
+	 * Check if Login User ID is allowed to login
+	 *
+	 * @param  int  $login_user_id_valid_date
+	 * @param  int  $login_user_id_revalidate
+	 * @return bool
+	 */
+	private function loginLoginUserIdCheck(
+		int $login_user_id_valid_date,
+		int $login_user_id_revalidate
+	): bool {
+		$login_id_ok = false;
+		if ($login_user_id_revalidate) {
+			$this->login_error = 1101;
+		} elseif (!$login_user_id_valid_date) {
+			$this->login_error = 1102;
+		} else {
+			$login_id_ok = true;
+		}
+		return $login_id_ok;
 	}
 
 	/**
@@ -427,11 +511,12 @@ class Login
 	private function loginLoginUser(): void
 	{
 		// if pressed login at least and is not yet loggined in
-		if ($this->euid || !$this->login) {
+		if ($this->euid || (!$this->login && !$this->login_user_id)) {
 			return;
 		}
 		// if not username AND password where given
-		if (!($this->password && $this->username)) {
+		// OR no login_user_id
+		if (!($this->username && $this->password) && !$this->login_user_id) {
 			$this->login_error = 102;
 			$this->permission_okay = false;
 			return;
@@ -441,12 +526,39 @@ class Login
 		$q = "SELECT eu.edit_user_id, eu.username, eu.password, "
 			. "eu.edit_group_id, "
 			. "eg.name AS edit_group_name, admin, "
+			// login error + locked
 			. "eu.login_error_count, eu.login_error_date_last, "
 			. "eu.login_error_date_first, eu.strict, eu.locked, "
+			// date based lock
+			. "CASE WHEN ("
+			. "(eu.lock_until IS NULL "
+			. "OR (eu.lock_until IS NOT NULL AND NOW() >= eu.lock_until)) "
+			. "AND (eu.lock_after IS NULL "
+			. "OR (eu.lock_after IS NOT NULL AND NOW() <= eu.lock_after))"
+			. ") THEN 0::INT ELSE 1::INT END locked_period, "
+			// debug (legacy)
 			. "eu.debug, eu.db_debug, "
+			// enabled
+			. "eu.enabled, eu.deleted, "
+			// login id validation
+			. "CASE WHEN ("
+			. "(eu.login_user_id_valid_from IS NULL "
+			. "OR (eu.login_user_id_valid_from IS NOT NULL AND NOW() >= eu.login_user_id_valid_from)) "
+			. "AND (eu.login_user_id_valid_until IS NULL "
+			. "OR (eu.login_user_id_valid_until IS NOT NULL AND NOW() <= eu.login_user_id_valid_until))"
+			. ") THEN 1::INT ELSE 0::INT END AS login_user_id_valid_date, "
+			// check if user must login
+			. "CASE WHEN eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
+			. "AND (eu.login_user_id_set_date + eu.login_user_id_revalidate_after)::DATE "
+			. "<= NOW()::DATE "
+			.  "THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate, "
+			. "eu.login_user_id_locked, "
+			// language
+			. "el.short_name AS locale, el.iso_name AS encoding, "
+			//  levels
 			. "eareu.level AS user_level, eareu.type AS user_type, "
 			. "eareg.level AS group_level, eareg.type AS group_type, "
-			. "eu.enabled, el.short_name AS locale, el.iso_name AS encoding, "
+			// colors
 			. "first.header_color AS first_header_color, "
 			. "second.header_color AS second_header_color, second.template "
 			. "FROM edit_user eu "
@@ -458,11 +570,17 @@ class Login
 			. "edit_scheme first "
 			. "WHERE first.edit_scheme_id = eg.edit_scheme_id "
 			. "AND eu.edit_group_id = eg.edit_group_id "
-			. "AND eu.edit_language_id = el.edit_language_id AND "
-			. "eu.edit_access_right_id = eareu.edit_access_right_id AND "
-			. "eg.edit_access_right_id = eareg.edit_access_right_id AND "
-			// password match is done in script, against old plain or new blowfish encypted
-			. "(LOWER(username) = '" . $this->db->dbEscapeString(strtolower($this->username)) . "') ";
+			. "AND eu.edit_language_id = el.edit_language_id "
+			. "AND eu.edit_access_right_id = eareu.edit_access_right_id "
+			. "AND eg.edit_access_right_id = eareg.edit_access_right_id "
+			. "AND "
+			// either login_user_id OR password must be given
+			. (!empty($this->login_user_id && empty($this->username)) ?
+				// check with login id if set and NO username
+				"eu.login_user_id = " . $this->db->dbEscapeLiteral($this->login_user_id) . " " :
+				// password match is done in script, against old plain or new blowfish encypted
+				"LOWER(username) = " . $this->db->dbEscapeLiteral(strtolower($this->username)) . " "
+			);
 		// reset any query data that might exist
 		$this->db->dbCacheReset($q);
 		// never cache return data
@@ -488,17 +606,34 @@ class Login
 		// - password is readable
 		// - encrypted password matches
 		// - plain password matches
-
-		if (!$res['enabled']) {
-			// user is enabled
-			$this->login_error = 104;
-		} elseif ($res['locked']) {
-			// user is locked, either set or auto set
-			$this->login_error = 105;
-		} elseif (!$this->loginPasswordCheck($res['password'])) {
+		if (
+			!$this->loginValidationCheck(
+				(int)$res['deleted'],
+				(int)$res['enabled'],
+				(int)$res['locked'],
+				(int)$res['locked_period'],
+				(int)$res['login_user_id_locked']
+			)
+		) {
+			// error set in method (104, 105, 106, 107, 108)
+		} elseif (
+			empty($this->username) &&
+			!empty($this->login_user_id) &&
+			!$this->loginLoginUserIdCheck(
+				(int)$res['login_user_id_valid_date'],
+				(int)$res['login_user_id_revalidate']
+			)
+		) {
+			// check done in loginLoginIdCheck method
+			// aborts on must revalidate and not valid (date range)
+		} elseif (
+			!empty($this->username) &&
+			!$this->loginPasswordCheck($res['password'])
+		) {
 			// none to be set, set in login password check
 			// this is not valid password input error here
 			// all error codes are set in loginPasswordCheck method
+			// also valid if login_user_id is ok
 		} else {
 			// check if the current password is an invalid hash and do a rehash and set password
 			// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '
@@ -1396,6 +1531,34 @@ EOM;
 			$this->login_is_ajax_page = true;
 		}
 
+		// attach outside uid for login post > get > empty
+		$this->login_user_id = $_POST['loginUserId'] ?? $_GET['loginUserId'] ?? '';
+		// cleanup only alphanumeric
+		if (!empty($this->login_user_id)) {
+			// set post/get only if actually set
+			if (isset($_POST['loginUserId'])) {
+				$this->login_user_id_source = 'POST';
+			} elseif (isset($_GET['loginUserId'])) {
+				$this->login_user_id_source = 'GET';
+			}
+			// clean login user id
+			$login_user_id_changed = 0;
+			$this->login_user_id = preg_replace(
+				"/[^A-Za-z0-9]/",
+				'',
+				$this->login_user_id,
+				-1,
+				$login_user_id_changed
+			);
+			// flag unclean input data
+			if ($login_user_id_changed > 0) {
+				$this->login_unclear = true;
+				// error for invalid user id?
+				$this->log->debug('LOGIN USER ID', 'Invalid characters: '
+					. $login_user_id_changed . ' in loginUserId: '
+					. $this->login_user_id . ' (' . $this->login_user_id_source . ')');
+			}
+		}
 		// if there is none, there is none, saves me POST/GET check
 		$this->euid = array_key_exists('EUID', $_SESSION) ? $_SESSION['EUID'] : 0;
 		// get login vars, are so, can't be changed
@@ -1706,8 +1869,30 @@ EOM;
 		if ($this->login_error == 103) {
 			return $this->permission_okay;
 		}
-		// if ($this->euid && $this->login_error != 103) {
-		$q = "SELECT ep.filename "
+		$q = "SELECT ep.filename, "
+			// base lock flags
+			. "eu.deleted, eu.enabled, eu.locked, "
+			// date based lock
+			. "CASE WHEN ("
+			. "(eu.lock_until IS NULL "
+			. "OR (eu.lock_until IS NOT NULL AND NOW() >= eu.lock_until)) "
+			. "AND (eu.lock_after IS NULL "
+			. "OR (eu.lock_after IS NOT NULL AND NOW() <= eu.lock_after))"
+			. ") THEN 0::INT ELSE 1::INT END locked_period, "
+			// login id validation
+			. "login_user_id, "
+			. "CASE WHEN ("
+			. "(eu.login_user_id_valid_from IS NULL "
+			. "OR (eu.login_user_id_valid_from IS NOT NULL AND NOW() >= eu.login_user_id_valid_from)) "
+			. "AND (eu.login_user_id_valid_until IS NULL "
+			. "OR (eu.login_user_id_valid_until IS NOT NULL AND NOW() <= eu.login_user_id_valid_until))"
+			. ") THEN 1::INT ELSE 0::INT END AS login_user_id_valid_date, "
+			// check if user must login
+			. "CASE WHEN eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
+			. "AND eu.login_user_id_set_date + eu.login_user_id_revalidate_after <= NOW()::DATE "
+			.  "THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate, "
+			. "eu.login_user_id_locked "
+			//
 			. "FROM edit_page ep, edit_page_access epa, edit_group eg, edit_user eu "
 			. "WHERE ep.edit_page_id = epa.edit_page_id "
 			. "AND eg.edit_group_id = epa.edit_group_id "
@@ -1718,6 +1903,30 @@ EOM;
 		$res = $this->db->dbReturnRow($q);
 		if (!is_array($res)) {
 			$this->login_error = 109;
+			return $this->permission_okay;
+		}
+		if (
+			!$this->loginValidationCheck(
+				(int)$res['deleted'],
+				(int)$res['enabled'],
+				(int)$res['locked'],
+				(int)$res['locked_period'],
+				(int)$res['login_user_id_locked']
+			)
+		) {
+			// errors set in method
+			return $this->permission_okay;
+		}
+		// if login user id parameter and no username, check period here
+		if (
+			empty($this->username) &&
+			!empty($this->login_user_id) &&
+			!$this->loginLoginUserIdCheck(
+				(int)$res['login_user_id_valid_date'],
+				(int)$res['login_user_id_revalidate']
+			)
+		) {
+			// errors set in method
 			return $this->permission_okay;
 		}
 		if (isset($res['filename']) && $res['filename'] == $this->page_name) {
@@ -1915,6 +2124,37 @@ EOM;
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Returns current set loginUserId or empty if unset
+	 *
+	 * @return string loginUserId or empty string for not set
+	 */
+	public function loginGetLoginUserId(): string
+	{
+		return $this->login_user_id;
+	}
+
+	/**
+	 * Returns GET/POST for where the loginUserId was set
+	 *
+	 * @return string GET or POST or empty string for not set
+	 */
+	public function loginGetLoginUserIdSource(): string
+	{
+		return $this->login_user_id_source;
+	}
+
+	/**
+	 * Returns unclear login user id state. If true then illegal characters
+	 * where present in the loginUserId parameter
+	 *
+	 * @return bool False for clear, True if illegal characters found
+	 */
+	public function loginGetLoginUserIdUnclean(): bool
+	{
+		return $this->login_unclear;
 	}
 
 	/**

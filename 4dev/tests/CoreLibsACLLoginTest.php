@@ -16,8 +16,6 @@ final class CoreLibsACLLoginTest extends TestCase
 {
 	private static $db;
 	private static $log;
-	/** @var \CoreLibs\Create\Session&MockObject */
-	private static $session;
 
 	/**
 	 * start DB conneciton, setup DB, etc
@@ -101,6 +99,8 @@ final class CoreLibsACLLoginTest extends TestCase
 				'Cannot find edit_user table in ACL\Login database for testing'
 			);
 		}
+		// always disable max query calls
+		self::$db->dbSetMaxQueryCall(-1);
 		// insert additional content for testing (locked user, etc)
 		$queries = [
 			"INSERT INTO edit_access_data "
@@ -158,6 +158,7 @@ final class CoreLibsACLLoginTest extends TestCase
 	public function loginProvider(): array
 	{
 		// 0: mock settings/override flag settings
+		// 2: get array IN
 		// 1: post array IN
 		//    login_login, login_username, login_password, login_logout
 		//    change_password, pw_username, pw_old_password, pw_new_password,
@@ -172,6 +173,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 				],
+				[],
 				[],
 				[],
 				3000,
@@ -189,6 +191,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'ajax_page' => true,
 					'ajax_test_type' => 'parameter',
 				],
+				[],
 				[],
 				[],
 				3000,
@@ -213,6 +216,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				],
 				[],
 				[],
+				[],
 				3000,
 				[
 					'login_error' => 0,
@@ -230,6 +234,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'page_name' => 'edit_users.php',
 				],
 				[],
+				[],
 				[
 					'EUID' => 1,
 				],
@@ -245,6 +250,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'base_access' => 'list',
 					'page_access' => 'list',
 				],
+				[],
 				[],
 				[
 					'EUID' => 1,
@@ -288,6 +294,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 				],
+				[],
 				[
 					'login_login' => 'Login',
 					'login_username' => '',
@@ -308,6 +315,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 				],
+				[],
 				[
 					'login_login' => 'Login',
 					'login_username' => '',
@@ -328,6 +336,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 				],
+				[],
 				[
 					'login_login' => 'Login',
 					'login_username' => 'abc',
@@ -348,6 +357,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 				],
+				[],
 				[
 					'login_login' => 'Login',
 					'login_username' => 'abc',
@@ -371,6 +381,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 				],
+				[],
 				[
 					'login_login' => 'Login',
 					'login_username' => 'admin',
@@ -387,6 +398,31 @@ final class CoreLibsACLLoginTest extends TestCase
 						. 'Login Failed - Wrong Username or Password'
 				]
 			],
+			// login: ok (but deleted)
+			'login: ok, but deleted' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_deleted' => true
+				],
+				[],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				3000,
+				[
+					'login_error' => 106,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - User is deleted</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - User is deleted'
+				]
+			],
 			// login: ok (but not enabled)
 			'login: ok, but not enabled' => [
 				[
@@ -396,6 +432,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'page_access' => 'list',
 					'test_enabled' => true
 				],
+				[],
 				[
 					'login_login' => 'Login',
 					'login_username' => 'admin',
@@ -420,6 +457,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'page_access' => 'list',
 					'test_locked' => true
 				],
+				[],
 				[
 					'login_login' => 'Login',
 					'login_username' => 'admin',
@@ -446,6 +484,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'max_login_error_count' => 2,
 					'test_locked_strict' => true,
 				],
+				[],
 				[
 					'login_login' => 'Login',
 					'login_username' => 'admin',
@@ -458,6 +497,136 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_error' => 105,
 				]
 			],
+			// login ok, but in locked period (until)
+			'login: ok, but locked period (until:on)' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_locked_period_until' => 'on'
+				],
+				[],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				3000,
+				[
+					'login_error' => 107,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - User in locked via date period</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - User in locked via date period'
+				]
+			],
+			// login ok, but in locked period (until)
+			'login: ok, but locked period (until:off)' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_locked_period_until' => 'off'
+				],
+				[],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				0,
+				[
+					'login_error' => 0,
+					'admin_flag' => true,
+					'check_access' => true,
+					'check_access_id' => 1,
+					'check_access_data' => 'value',
+					'base_access' => true,
+					'page_access' => true,
+				]
+			],
+			// login ok, but in locked period (after)
+			'login: ok, but locked period (after:on)' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_locked_period_after' => 'on'
+				],
+				[],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				3000,
+				[
+					'login_error' => 107,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - User in locked via date period</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - User in locked via date period'
+				]
+			],
+			// login ok, but in locked period (until, after)
+			'login: ok, but locked period (until:on, after:on)' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_locked_period_until' => 'on',
+					'test_locked_period_after' => 'on'
+				],
+				[],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				3000,
+				[
+					'login_error' => 107,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - User in locked via date period</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - User in locked via date period'
+				]
+			],
+			// login ok, but login user id locked
+			'login: ok, but login user id locked' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id_locked' => true
+				],
+				[],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				3000,
+				[
+					'login_error' => 108,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - User is locked via Login User ID</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - User is locked via Login User ID'
+				]
+			],
 			// login: ok
 			'login: ok' => [
 				[
@@ -467,6 +636,148 @@ final class CoreLibsACLLoginTest extends TestCase
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
 					'page_access' => 'list',
+				],
+				[],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				0,
+				[
+					'login_error' => 0,
+					'admin_flag' => true,
+					'check_access' => true,
+					'check_access_id' => 1,
+					'check_access_data' => 'value',
+					'base_access' => true,
+					'page_access' => true,
+				]
+			],
+			// login check via _GET loginUserId
+			'login: ok, _GET loginUserId' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[],
+				[],
+				0,
+				[
+					'login_error' => 0,
+					'admin_flag' => true,
+					'check_access' => true,
+					'check_access_id' => 1,
+					'check_access_data' => 'value',
+					'base_access' => true,
+					'page_access' => true,
+				]
+			],
+			// login check via _POST loginUserId
+			'login: ok, _POST loginUserId' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[],
+				[
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[],
+				0,
+				[
+					'login_error' => 0,
+					'admin_flag' => true,
+					'check_access' => true,
+					'check_access_id' => 1,
+					'check_access_data' => 'value',
+					'base_access' => true,
+					'page_access' => true,
+				]
+			],
+			// login: wrong GET loginUserId
+			'login: ok, illegal chars in _GET loginUserId' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG'
+				],
+				[
+					'loginUserId' => '123$%_/45678¥\-^9~~0$AB&CDEFG',
+				],
+				[],
+				[],
+				0,
+				[
+					'login_error' => 0,
+					'admin_flag' => true,
+					'check_access' => true,
+					'check_access_id' => 1,
+					'check_access_data' => 'value',
+					'base_access' => true,
+					'page_access' => true,
+				]
+			],
+			'login: not matching _GET loginUserId' => [
+				[
+					'page_name' => 'edit_users.php',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG'
+				],
+				[
+					'loginUserId' => 'ABC'
+				],
+				[],
+				[],
+				3000,
+				[
+					'login_error' => 1010,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Wrong Username or Password</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Wrong Username or Password'
+				]
+			],
+			// login ok with both _GET loginUserId and _POST login username/password
+			'login: ok, _GET loginUserId AND login post user data' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[
+					'loginUserId' => '1234567890ABCDEFG',
 				],
 				[
 					'login_login' => 'Login',
@@ -485,9 +796,208 @@ final class CoreLibsACLLoginTest extends TestCase
 					'page_access' => true,
 				]
 			],
+			// login with invalid loginUserId but valid username/password
+			'login: ok, bad _GET loginUserId AND good login post user data' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[
+					'loginUserId' => 'ABCS',
+				],
+				[
+					'login_login' => 'Login',
+					'login_username' => 'admin',
+					'login_password' => 'admin',
+				],
+				[],
+				0,
+				[
+					'login_error' => 0,
+					'admin_flag' => true,
+					'check_access' => true,
+					'check_access_id' => 1,
+					'check_access_data' => 'value',
+					'base_access' => true,
+					'page_access' => true,
+				]
+			],
+			// loginUserId check with revalidate on/off
+			'login: ok, but revalidate trigger, _GET loginUserId' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id_revalidate_after' => 'on',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[],
+				[],
+				3000,
+				[
+					'login_error' => 1101,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Login User ID must be validated</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Login User ID must be validated'
+				]
+			],
+			// loginUserId check with revalidate on/off
+			'login: ok, revalidate set (outside), _GET loginUserId' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id_revalidate_after' => 'off',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[],
+				[],
+				0,
+				[
+					'login_error' => 0,
+					'admin_flag' => true,
+					'check_access' => true,
+					'check_access_id' => 1,
+					'check_access_data' => 'value',
+					'base_access' => true,
+					'page_access' => true,
+				]
+			],
+			// loginUserId check with active time from only
+			'login: ok, _GET loginUserId, but outside valid (from:on) ' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id_valid_from' => 'on',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[],
+				[],
+				3000,
+				[
+					'login_error' => 1102,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Login User ID is outside valid date range</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Login User ID is outside valid date range'
+				]
+			],
+			// loginUserId check with inactive time from only
+			'login: ok, _GET loginUserId, but outside valid (from:off) ' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id_valid_from' => 'off',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[],
+				[],
+				0,
+				[
+					'login_error' => 0,
+					'admin_flag' => true,
+					'check_access' => true,
+					'check_access_id' => 1,
+					'check_access_data' => 'value',
+					'base_access' => true,
+					'page_access' => true,
+				]
+			],
+			// loginUserId check with active time until only
+			'login: ok, _GET loginUserId, but outside valid (until:on) ' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id_valid_until' => 'on',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[],
+				[],
+				3000,
+				[
+					'login_error' => 1102,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Login User ID is outside valid date range</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Login User ID is outside valid date range'
+				]
+			],
+			// loginUserId check with active time from/until
+			'login: ok, _GET loginUserId, but outside valid (from:on,until:on) ' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id_valid_from' => 'on',
+					'test_login_user_id_valid_until' => 'on',
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[
+					'loginUserId' => '1234567890ABCDEFG',
+				],
+				[],
+				[],
+				3000,
+				[
+					'login_error' => 1102,
+					'error_string' => '<span style="color: red;">Fatal Error:</span> '
+						. '<b>Login Failed - Login User ID is outside valid date range</b>',
+					'error_string_text' => 'Fatal Error: '
+						. 'Login Failed - Login User ID is outside valid date range'
+				]
+			],
 			//
 			// other:
 			// login check edit access id of ID not null and not in array
+			// login OK, but during action user gets disabled/deleted/etc
 		];
 	}
 
@@ -498,14 +1008,16 @@ final class CoreLibsACLLoginTest extends TestCase
 	 * @testdox ACL\Login Class tests [$_dataName]
 	 *
 	 * @param  array<string,mixed>  $mock_settings
+	 * @param  array<string,string> $get
 	 * @param  array<string,string> $post
 	 * @param  array<string,mixed>  $session
 	 * @param  int                  $error
 	 * @param  array<string,mixed>  $expected
 	 * @return void
 	 */
-	public function testACLLogin(
+	public function testACLLoginFlow(
 		array $mock_settings,
+		array $get,
 		array $post,
 		array $session,
 		int $error,
@@ -533,6 +1045,11 @@ final class CoreLibsACLLoginTest extends TestCase
 				return true;
 			})
 		);
+
+		// set _GET data
+		foreach ($get as $get_var => $get_value) {
+			$_GET[$get_var] = $get_value;
+		}
 
 		// set _POST data
 		foreach ($post as $post_var => $post_value) {
@@ -571,6 +1088,47 @@ final class CoreLibsACLLoginTest extends TestCase
 		if (!empty($mock_settings['test_enabled'])) {
 			self::$db->dbExec(
 				"UPDATE edit_user SET enabled = 0 WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		if (!empty($mock_settings['test_deleted'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET deleted = 1 WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		if (!empty($mock_settings['test_login_user_id_locked'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET login_user_id_locked = 1 WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		if (
+			!empty($mock_settings['test_locked_period_until']) ||
+			!empty($mock_settings['test_locked_period_after'])
+		) {
+			$q_sub = '';
+			if (!empty($mock_settings['test_locked_period_until'])) {
+				if ($mock_settings['test_locked_period_until'] == 'on') {
+					$q_sub .= "lock_until = NOW() + '1 day'::interval ";
+				} elseif ($mock_settings['test_locked_period_until'] == 'off') {
+					$q_sub .= "lock_until = NOW() - '1 day'::interval ";
+				}
+			}
+			if (!empty($mock_settings['test_locked_period_after'])) {
+				if (!empty($q_sub)) {
+					$q_sub .= ", ";
+				}
+				if ($mock_settings['test_locked_period_after'] == 'on') {
+					$q_sub .= "lock_after = NOW() - '1 day'::interval ";
+				} elseif ($mock_settings['test_locked_period_after'] == 'off') {
+					$q_sub .= "lock_after = NOW() + '1 day'::interval ";
+				}
+			}
+			self::$db->dbExec(
+				"UPDATE edit_user SET "
+					. $q_sub
+					. "WHERE LOWER(username) = "
 					. self::$db->dbEscapeLiteral($post['login_username'])
 			);
 		}
@@ -634,6 +1192,62 @@ final class CoreLibsACLLoginTest extends TestCase
 			}
 			// set correct password next locked login
 			$_POST['login_password'] = $post['login_password'];
+		}
+		if (!empty($mock_settings['test_login_user_id'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET "
+				. "login_user_id_set_date = NOW(), "
+				. "login_user_id = "
+				. self::$db->dbEscapeLiteral($mock_settings['loginUserId'])
+				. " "
+				. "WHERE LOWER(username) = "
+				. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+			);
+		}
+		if (!empty($mock_settings['test_login_user_id_revalidate_after'])) {
+			$q_sub = '';
+			if ($mock_settings['test_login_user_id_revalidate_after'] == 'on') {
+				$q_sub = "login_user_id_set_date = NOW() - '1 day'::interval, "
+					. "login_user_id_revalidate_after = '1 day'::interval ";
+			} else {
+				$q_sub = "login_user_id_set_date = NOW(), "
+					. "login_user_id_revalidate_after = '6 day'::interval ";
+			}
+			self::$db->dbExec(
+				"UPDATE edit_user SET "
+				. $q_sub
+				. "WHERE LOWER(username) = "
+				. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+			);
+		}
+		if (
+			!empty($mock_settings['test_login_user_id_valid_from']) ||
+			!empty($mock_settings['test_login_user_id_valid_until'])
+		) {
+			$q_sub = '';
+			if (!empty($mock_settings['test_login_user_id_valid_from'])) {
+				if ($mock_settings['test_login_user_id_valid_from'] == 'on') {
+					$q_sub .= "login_user_id_valid_from = NOW() + '1 day'::interval ";
+				} elseif ($mock_settings['test_login_user_id_valid_from'] == 'off') {
+					$q_sub .= "login_user_id_valid_from = NOW() - '1 day'::interval ";
+				}
+			}
+			if (!empty($mock_settings['test_login_user_id_valid_until'])) {
+				if (!empty($q_sub)) {
+					$q_sub .= ", ";
+				}
+				if ($mock_settings['test_login_user_id_valid_until'] == 'on') {
+					$q_sub .= "login_user_id_valid_until = NOW() - '1 day'::interval ";
+				} elseif ($mock_settings['test_login_user_id_valid_until'] == 'off') {
+					$q_sub .= "login_user_id_valid_until = NOW() + '1 day'::interval ";
+				}
+			}
+			self::$db->dbExec(
+				"UPDATE edit_user SET "
+					. $q_sub
+					. "WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+			);
 		}
 
 		// run test
@@ -734,6 +1348,13 @@ final class CoreLibsACLLoginTest extends TestCase
 				$login_mock->loginGetAcl(),
 				'Assert get acl is array'
 			);
+			// if loginUserId in _GET or _POST check that it is set
+			if (!empty($get['loginUserId']) || !empty($post['loginUserId'])) {
+				$this->assertNotEmpty(
+					$login_mock->loginGetLoginUserId(),
+					'Assert loginUserId is set'
+				);
+			}
 			// TODO: detail match of ACL array (loginGetAcl)
 
 			// .. end with: loginLogoutUser
@@ -840,10 +1461,63 @@ final class CoreLibsACLLoginTest extends TestCase
 			);
 		}
 
+		// always check, even on error or not set
+		if (!$login_mock->loginGetLoginUserIdUnclean()) {
+			$this->assertEquals(
+				$_GET['loginUserId'] ?? $_POST['loginUserId'] ?? '',
+				$login_mock->loginGetLoginUserId(),
+				'Assert loginUserId matches'
+			);
+		} else {
+			$this->assertTrue(
+				$login_mock->loginGetLoginUserIdUnclean(),
+				'Assert loginUserId is unclear'
+			);
+			$this->assertNotEquals(
+				$_GET['loginUserId'] ?? $_POST['loginUserId'] ?? '',
+				$login_mock->loginGetLoginUserId(),
+				'Assert loginUserId does not matche _GET/_POST'
+			);
+		}
+		// check get/post login user id
+		$this->assertEquals(
+			(!empty($_GET['loginUserId']) ?
+				'GET' :
+				(!empty($_POST['loginUserId']) ?
+					'POST' : '')
+			),
+			$login_mock->loginGetLoginUserIdSource(),
+			'Assert loginUserId source matches'
+		);
+
 		// enable user again if flag set
 		if (!empty($mock_settings['test_enabled'])) {
 			self::$db->dbExec(
 				"UPDATE edit_user SET enabled = 1 "
+					. "WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		if (!empty($mock_settings['test_deleted'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET deleted = 0 WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		if (!empty($mock_settings['test_login_user_id_locked'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET login_user_id_locked = 0 WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($post['login_username'])
+			);
+		}
+		if (
+			!empty($mock_settings['test_locked_period_until']) ||
+			!empty($mock_settings['test_locked_period_after'])
+		) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET "
+					. "lock_until = NULL, "
+					. "lock_after = NULL "
 					. "WHERE LOWER(username) = "
 					. self::$db->dbEscapeLiteral($post['login_username'])
 			);
@@ -866,6 +1540,36 @@ final class CoreLibsACLLoginTest extends TestCase
 					. self::$db->dbEscapeLiteral($post['login_username'])
 			);
 		}
+		// if (!empty($mock_settings['test_login_user_id'])) {
+		// 	self::$db->dbExec(
+		// 		"UPDATE edit_user SET "
+		// 		. "login_user_id = NULL, "
+		// 		. "login_user_id_set_date = NULL "
+		// 		. "WHERE LOWER(username) = "
+		// 		. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+		// 	);
+		// }
+		// if (!empty($mock_settings['test_login_user_id_revalidate_after'])) {
+		// 	self::$db->dbExec(
+		// 		"UPDATE edit_user SET "
+		// 		. "login_user_id_set_date = NULL, "
+		// 		. "login_user_id_revalidate_after = NULL "
+		// 		. "WHERE LOWER(username) = "
+		// 		. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+		// 	);
+		// }
+		// if (
+		// 	!empty($mock_settings['test_login_user_id_valid_from']) ||
+		// 	!empty($mock_settings['test_login_user_id_valid_until'])
+		// ) {
+		// 	self::$db->dbExec(
+		// 		"UPDATE edit_user SET "
+		// 			. "login_user_id_valid_from = NULL, "
+		// 			. "login_user_id_valid_until = NULL "
+		// 			. "WHERE LOWER(username) = "
+		// 			. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+		// 	);
+		// }
 	}
 
 	// - loginGetAclList (null, invalid,)
@@ -1126,7 +1830,7 @@ final class CoreLibsACLLoginTest extends TestCase
 	 * @param  string $input
 	 * @return void
 	 */
-	public function testACLLoginGetPasswordLenght(string $input): void
+	public function testACLLoginGetPasswordLength(string $input): void
 	{
 		$_SESSION = [];
 		// init session (as MOCK)

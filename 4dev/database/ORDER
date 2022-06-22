@@ -5,6 +5,7 @@ function/set_edit_generic.sql
 function/edit_access_set_uid.sql
 function/edit_group_set_uid.sql
 function/edit_log_partition_insert.sql
+function/edit_user_set_login_user_id_set_date.sql
 # generic tables
 table/edit_temp_files.sql
 table/edit_generic.sql
