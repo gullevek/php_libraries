@@ -15,8 +15,10 @@ BEGIN
 		(OLD.login_user_id IS NULL OR NEW.login_user_id <> OLD.login_user_id)
 	THEN
 		NEW.login_user_id_set_date = NOW();
+		NEW.login_user_id_revalidate_after = NOW();
 	ELSIF NEW.login_user_id IS NULL OR NEW.login_user_id = '' THEN
 		NEW.login_user_id_set_date = NULL;
+		NEW.login_user_id_revalidate_after = NULL;
 	END IF;
 	RETURN NEW;
 END;

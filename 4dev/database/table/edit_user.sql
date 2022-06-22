@@ -57,6 +57,7 @@ CREATE TABLE edit_user (
 	-- _GET login id for direct login
 	login_user_id	VARCHAR UNIQUE, -- the login uid, at least 32 chars
 	login_user_id_set_date	TIMESTAMP WITHOUT TIME ZONE, -- when above uid was set
+	login_user_id_last_login	TIMESTAMP WITHOUT TIME ZONE, -- when the last login was done with user name and password
 	login_user_id_valid_from	TIMESTAMP WITHOUT TIME ZONE, -- if set, from when the above uid is valid
 	login_user_id_valid_until	TIMESTAMP WITHOUT TIME ZONE, -- if set, until when the above uid is valid
 	login_user_id_revalidate_after	INTERVAL, -- user must login to revalidated login id after set days, 0 for forever
@@ -90,6 +91,7 @@ COMMENT ON COLUMN edit_user.password_reset_time IS 'When the password reset was 
 COMMENT ON COLUMN edit_user.password_reset_uid IS 'Password reset page uid, one time, invalid after reset successful or time out';
 COMMENT ON COLUMN edit_user.login_user_id IS 'Min 32 character UID to be used to login without password. Via GET/POST parameter';
 COMMENT ON COLUMN edit_user.login_user_id_set_date IS 'login id was set at what date';
+COMMENT ON COLUMN edit_user.login_user_id_last_login IS 'set when username/password login is done';
 COMMENT ON COLUMN edit_user.login_user_id_valid_from IS 'login id is valid from this date, >=';
 COMMENT ON COLUMN edit_user.login_user_id_valid_until IS 'login id is valid until this date, <=';
 COMMENT ON COLUMN edit_user.login_user_id_revalidate_after IS 'If set to a number greater 0 then user must login after given amount of days to revalidate, set to 0 for valid forver';

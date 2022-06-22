@@ -994,6 +994,7 @@ final class CoreLibsACLLoginTest extends TestCase
 						. 'Login Failed - Login User ID is outside valid date range'
 				]
 			],
+			// TODO: Test that if we have n day check with login, that after login we can use parameter login again
 			//
 			// other:
 			// login check edit access id of ID not null and not in array
@@ -1196,7 +1197,6 @@ final class CoreLibsACLLoginTest extends TestCase
 		if (!empty($mock_settings['test_login_user_id'])) {
 			self::$db->dbExec(
 				"UPDATE edit_user SET "
-				. "login_user_id_set_date = NOW(), "
 				. "login_user_id = "
 				. self::$db->dbEscapeLiteral($mock_settings['loginUserId'])
 				. " "
@@ -1207,10 +1207,10 @@ final class CoreLibsACLLoginTest extends TestCase
 		if (!empty($mock_settings['test_login_user_id_revalidate_after'])) {
 			$q_sub = '';
 			if ($mock_settings['test_login_user_id_revalidate_after'] == 'on') {
-				$q_sub = "login_user_id_set_date = NOW() - '1 day'::interval, "
+				$q_sub = "login_user_id_last_login = NOW() - '1 day'::interval, "
 					. "login_user_id_revalidate_after = '1 day'::interval ";
 			} else {
-				$q_sub = "login_user_id_set_date = NOW(), "
+				$q_sub = "login_user_id_last_login = NOW(), "
 					. "login_user_id_revalidate_after = '6 day'::interval ";
 			}
 			self::$db->dbExec(
@@ -1540,36 +1540,37 @@ final class CoreLibsACLLoginTest extends TestCase
 					. self::$db->dbEscapeLiteral($post['login_username'])
 			);
 		}
-		// if (!empty($mock_settings['test_login_user_id'])) {
-		// 	self::$db->dbExec(
-		// 		"UPDATE edit_user SET "
-		// 		. "login_user_id = NULL, "
-		// 		. "login_user_id_set_date = NULL "
-		// 		. "WHERE LOWER(username) = "
-		// 		. self::$db->dbEscapeLiteral($mock_settings['test_username'])
-		// 	);
-		// }
-		// if (!empty($mock_settings['test_login_user_id_revalidate_after'])) {
-		// 	self::$db->dbExec(
-		// 		"UPDATE edit_user SET "
-		// 		. "login_user_id_set_date = NULL, "
-		// 		. "login_user_id_revalidate_after = NULL "
-		// 		. "WHERE LOWER(username) = "
-		// 		. self::$db->dbEscapeLiteral($mock_settings['test_username'])
-		// 	);
-		// }
-		// if (
-		// 	!empty($mock_settings['test_login_user_id_valid_from']) ||
-		// 	!empty($mock_settings['test_login_user_id_valid_until'])
-		// ) {
-		// 	self::$db->dbExec(
-		// 		"UPDATE edit_user SET "
-		// 			. "login_user_id_valid_from = NULL, "
-		// 			. "login_user_id_valid_until = NULL "
-		// 			. "WHERE LOWER(username) = "
-		// 			. self::$db->dbEscapeLiteral($mock_settings['test_username'])
-		// 	);
-		// }
+		if (!empty($mock_settings['test_login_user_id'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET "
+				. "login_user_id = NULL, "
+				. "login_user_id_set_date = NULL, "
+				. "login_user_id_last_login = NULL "
+				. "WHERE LOWER(username) = "
+				. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+			);
+		}
+		if (!empty($mock_settings['test_login_user_id_revalidate_after'])) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET "
+				. "login_user_id_last_login = NULL, "
+				. "login_user_id_revalidate_after = NULL "
+				. "WHERE LOWER(username) = "
+				. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+			);
+		}
+		if (
+			!empty($mock_settings['test_login_user_id_valid_from']) ||
+			!empty($mock_settings['test_login_user_id_valid_until'])
+		) {
+			self::$db->dbExec(
+				"UPDATE edit_user SET "
+					. "login_user_id_valid_from = NULL, "
+					. "login_user_id_valid_until = NULL "
+					. "WHERE LOWER(username) = "
+					. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+			);
+		}
 	}
 
 	// - loginGetAclList (null, invalid,)
