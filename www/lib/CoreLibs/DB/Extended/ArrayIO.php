@@ -177,7 +177,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function dbResetArray($reset_pk = false): void
 	{
 		reset($this->table_array);
-		foreach ($this->table_array as $column => $data_array) {
+		foreach (array_keys($this->table_array) as $column) {
 			if (!$this->table_array[$column]['pk']) {
 				unset($this->table_array[$column]['value']);
 			} elseif ($reset_pk) {
@@ -208,7 +208,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// delete files and build FK query
 		reset($this->table_array);
 		$q_where = '';
-		foreach ($this->table_array as $column => $data_array) {
+		foreach (array_keys($this->table_array) as $column) {
 			// suchen nach bildern und lschen ...
 			if (
 				!empty($this->table_array[$column]['file']) &&
@@ -282,8 +282,11 @@ class ArrayIO extends \CoreLibs\DB\IO
 			}
 
 			// check FK ...
-			if (isset($this->table_array[$column]['fk']) && isset($this->table_array[$column]['value'])) {
-				if ($q_where) {
+			if (
+				isset($this->table_array[$column]['fk']) &&
+				isset($this->table_array[$column]['value'])
+			) {
+				if (!empty($q_where)) {
 					$q_where .= ' AND ';
 				}
 				$q_where .= $column .= ' = ' . $this->table_array[$column]['value'];
@@ -513,7 +516,10 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// create select part & addition FK part
 		foreach ($this->table_array as $column => $data_array) {
 			// check FK ...
-			if (isset($this->table_array[$column]['fk']) && isset($this->table_array[$column]['value'])) {
+			if (
+				isset($this->table_array[$column]['fk']) &&
+				isset($this->table_array[$column]['value'])
+			) {
 				if (!empty($q_where)) {
 					$q_where .= ' AND ';
 				}
@@ -559,7 +565,6 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// set primary key
 		if ($insert) {
-			// FIXME: this has to be fixes by fixing DB::IO clas
 			$insert_id = $this->dbGetInsertPK();
 			if (is_array($insert_id)) {
 				$insert_id = 0;
