@@ -1198,7 +1198,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							}
 							break;
 						case 'intervalshort': // ony interval n [Y/M/D] only
-							if (preg_match("/^\d{1,3}\ ?[YMDymd]{1}$/", $this->table_array[$key]['value'])) {
+							if (
+								!preg_match(
+									"/^\d{1,3}\ ?([ymd]{1}|day(s)?|year(s)?|month(s)?)$/i",
+									$this->table_array[$key]['value']
+								)
+							) {
 								$this->msg .= sprintf(
 									$this->l->__(
 										'Please enter a valid time interval in the format '

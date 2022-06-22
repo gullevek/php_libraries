@@ -471,7 +471,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 					) {
 						$_value = 'NULL';
 					} elseif (isset($this->table_array[$column]['value'])) {
-						$_value = $this->table_array[$column]['value'];
+						$_value = $this->dbEscapeLiteral($this->table_array[$column]['value']);
 					} else {
 						// fallback
 						$_value = 'NULL';
