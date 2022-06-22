@@ -6,7 +6,7 @@ ALTER TABLE edit_user ADD login_user_id VARCHAR UNIQUE;
 -- ALTER TABLE edit_user ADD CONSTRAINT edit_user_login_user_id_key UNIQUE (login_user_id);
 -- when above uid was set
 ALTER TABLE edit_user ADD login_user_id_set_date TIMESTAMP WITHOUT TIME ZONE;
-ALTER TABLE edit_user ADD login_user_id_last_login TIMESTAMP WITHOUT TIME ZONE;
+ALTER TABLE edit_user ADD login_user_id_last_revalidate TIMESTAMP WITHOUT TIME ZONE;
 -- if set, from/until when the above uid is valid
 ALTER TABLE edit_user ADD login_user_id_valid_from TIMESTAMP WITHOUT TIME ZONE;
 ALTER TABLE edit_user ADD login_user_id_valid_until TIMESTAMP WITHOUT TIME ZONE;
@@ -34,10 +34,10 @@ BEGIN
 		(OLD.login_user_id IS NULL OR NEW.login_user_id <> OLD.login_user_id)
 	THEN
 		NEW.login_user_id_set_date = NOW();
-		NEW.login_user_id_revalidate_after = NOW();
+		NEW.login_user_id_last_revalidate = NOW();
 	ELSIF NEW.login_user_id IS NULL OR NEW.login_user_id = '' THEN
 		NEW.login_user_id_set_date = NULL;
-		NEW.login_user_id_revalidate_after = NULL;
+		NEW.login_user_id_last_revalidate = NULL;
 	END IF;
 	RETURN NEW;
 END;

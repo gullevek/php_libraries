@@ -552,7 +552,7 @@ class Login
 			// check if user must login
 			. "CASE WHEN eu.login_user_id_revalidate_after IS NOT NULL "
 			. "AND eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
-			. "AND (eu.login_user_id_last_login + eu.login_user_id_revalidate_after)::DATE "
+			. "AND (eu.login_user_id_last_revalidate + eu.login_user_id_revalidate_after)::DATE "
 			. "<= NOW()::DATE "
 			.  "THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate, "
 			. "eu.login_user_id_locked, "
@@ -660,7 +660,7 @@ class Login
 					!empty($this->username) && !empty($this->password)
 				) {
 					$q = "UPDATE edit_user SET "
-						. "login_user_id_last_login = NOW() "
+						. "login_user_id_last_revalidate = NOW() "
 						. "WHERE edit_user_id = " . $this->euid;
 					$this->db->dbExec($q);
 				}
@@ -1902,7 +1902,7 @@ EOM;
 			// check if user must login
 			. "CASE WHEN eu.login_user_id_revalidate_after IS NOT NULL "
 			. "AND eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
-			. "AND eu.login_user_id_last_login + eu.login_user_id_revalidate_after <= NOW()::DATE "
+			. "AND eu.login_user_id_last_revalidate + eu.login_user_id_revalidate_after <= NOW()::DATE "
 			.  "THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate, "
 			. "eu.login_user_id_locked "
 			//

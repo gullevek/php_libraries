@@ -55,13 +55,13 @@ CREATE TABLE edit_user (
 	password_reset_time	TIMESTAMP WITHOUT TIME ZONE, -- when the password reset was requested
 	password_reset_uid	VARCHAR, -- the uid to access the password reset page
 	-- _GET login id for direct login
-	login_user_id	VARCHAR UNIQUE, -- the login uid, at least 32 chars
+	login_user_id	VARCHAR UNIQUE, -- the loginUserId, at least 32 chars
 	login_user_id_set_date	TIMESTAMP WITHOUT TIME ZONE, -- when above uid was set
-	login_user_id_last_login	TIMESTAMP WITHOUT TIME ZONE, -- when the last login was done with user name and password
+	login_user_id_last_revalidate	TIMESTAMP WITHOUT TIME ZONE, -- when the last login was done with user name and password
 	login_user_id_valid_from	TIMESTAMP WITHOUT TIME ZONE, -- if set, from when the above uid is valid
 	login_user_id_valid_until	TIMESTAMP WITHOUT TIME ZONE, -- if set, until when the above uid is valid
-	login_user_id_revalidate_after	INTERVAL, -- user must login to revalidated login id after set days, 0 for forever
-	login_user_id_locked	SMALLINT DEFAULT 0, -- lock for login user id, but still allow normal login
+	login_user_id_revalidate_after	INTERVAL, -- user must login to revalidated loginUserId after set days, 0 for forever
+	login_user_id_locked	SMALLINT DEFAULT 0, -- lock for loginUserId, but still allow normal login
 	-- additional ACL json block
 	additional_acl	JSONB -- additional ACL as JSON string (can be set by other pages)
 ) INHERITS (edit_generic) WITHOUT OIDS;
@@ -90,10 +90,10 @@ COMMENT ON COLUMN edit_user.password_change_interval IS 'After how many days the
 COMMENT ON COLUMN edit_user.password_reset_time IS 'When the password reset was requested. For reset page uid valid check';
 COMMENT ON COLUMN edit_user.password_reset_uid IS 'Password reset page uid, one time, invalid after reset successful or time out';
 COMMENT ON COLUMN edit_user.login_user_id IS 'Min 32 character UID to be used to login without password. Via GET/POST parameter';
-COMMENT ON COLUMN edit_user.login_user_id_set_date IS 'login id was set at what date';
-COMMENT ON COLUMN edit_user.login_user_id_last_login IS 'set when username/password login is done';
-COMMENT ON COLUMN edit_user.login_user_id_valid_from IS 'login id is valid from this date, >=';
-COMMENT ON COLUMN edit_user.login_user_id_valid_until IS 'login id is valid until this date, <=';
-COMMENT ON COLUMN edit_user.login_user_id_revalidate_after IS 'If set to a number greater 0 then user must login after given amount of days to revalidate, set to 0 for valid forver';
-COMMENT ON COLUMN edit_user.login_user_id_locked IS 'A separte lock flag for login id, user can still login normal';
+COMMENT ON COLUMN edit_user.login_user_id_set_date IS 'loginUserId was set at what date';
+COMMENT ON COLUMN edit_user.login_user_id_last_revalidate IS 'set when username/password login is done and loginUserId is set';
+COMMENT ON COLUMN edit_user.login_user_id_valid_from IS 'loginUserId is valid from this date, >=';
+COMMENT ON COLUMN edit_user.login_user_id_valid_until IS 'loginUserId is valid until this date, <=';
+COMMENT ON COLUMN edit_user.login_user_id_revalidate_after IS 'If set to a number greater 0 then user must login after given amount of days to revalidate the loginUserId, set to 0 for valid forver';
+COMMENT ON COLUMN edit_user.login_user_id_locked IS 'A separte lock flag for loginUserId, user can still login normal';
 COMMENT ON COLUMN edit_user.additional_acl IS 'Additional Access Control List stored in JSON format';

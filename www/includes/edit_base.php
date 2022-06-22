@@ -404,6 +404,7 @@ if ($form->my_page_name == 'edit_order') {
 				$elements[] = $form->formCreateElement('password_change_interval');
 				$elements[] = $form->formCreateElement('login_user_id');
 				$elements[] = $form->formCreateElement('login_user_id_set_date');
+				$elements[] = $form->formCreateElement('login_user_id_last_revalidate');
 				$elements[] = $form->formCreateElement('login_user_id_locked');
 				$elements[] = $form->formCreateElement('login_user_id_revalidate_after');
 				$elements[] = $form->formCreateElement('login_user_id_valid_from');

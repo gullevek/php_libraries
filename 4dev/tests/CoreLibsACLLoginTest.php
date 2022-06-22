@@ -167,7 +167,7 @@ final class CoreLibsACLLoginTest extends TestCase
 		// 3: expected error code, 0 for all ok, 3000 for login page view
 		//    note that 1000 (no db), 2000 (no session) must be tested too
 		// 4: expected return array, eg login_error code, or other info data to match
-		return [
+		$tests = [
 			'load, no login' => [
 				// error code, only for exceptions
 				[
@@ -290,7 +290,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				],
 			],
 			// login: all missing
-			'login: all missing' => [
+			'login: failed: all missing' => [
 				[
 					'page_name' => 'edit_users.php',
 				],
@@ -311,7 +311,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login: missing username
-			'login: missing username' => [
+			'login: failed: missing username' => [
 				[
 					'page_name' => 'edit_users.php',
 				],
@@ -332,7 +332,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login: missing password
-			'login: missing password' => [
+			'login: failed: missing password' => [
 				[
 					'page_name' => 'edit_users.php',
 				],
@@ -353,7 +353,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login: user not found
-			'login: user not found' => [
+			'login: failed: user not found' => [
 				[
 					'page_name' => 'edit_users.php',
 				],
@@ -377,7 +377,7 @@ final class CoreLibsACLLoginTest extends TestCase
 			//           9999: not valid password encoding
 			//           1013: normal password failed
 			//           1012: plain password check failed
-			'login: invalid password' => [
+			'login: failed: invalid password' => [
 				[
 					'page_name' => 'edit_users.php',
 				],
@@ -399,7 +399,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login: ok (but deleted)
-			'login: ok, but deleted' => [
+			'login: ok -> failed: but deleted' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -424,7 +424,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login: ok (but not enabled)
-			'login: ok, but not enabled' => [
+			'login: ok -> failed: but not enabled' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -449,7 +449,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login: ok (but locked)
-			'login: ok, but locked' => [
+			'login: ok -> failed: but locked' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -474,7 +474,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login: make user get locked strict
-			'login: ok, get locked, strict' => [
+			'login: ok -> failed: get locked, strict' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -498,7 +498,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login ok, but in locked period (until)
-			'login: ok, but locked period (until:on)' => [
+			'login: ok -> failed: but locked period (until:on)' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -552,7 +552,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login ok, but in locked period (after)
-			'login: ok, but locked period (after:on)' => [
+			'login: ok -> failed: but locked period (after:on)' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -577,7 +577,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login ok, but in locked period (until, after)
-			'login: ok, but locked period (until:on, after:on)' => [
+			'login: ok -> failed:, but locked period (until:on, after:on)' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -603,7 +603,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// login ok, but login user id locked
-			'login: ok, but login user id locked' => [
+			'login: ok -> failed:, but loginUserId locked' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -830,7 +830,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// loginUserId check with revalidate on/off
-			'login: ok, but revalidate trigger, _GET loginUserId' => [
+			'login: ok -> failed:, but revalidate trigger, _GET loginUserId' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -886,7 +886,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// loginUserId check with active time from only
-			'login: ok, _GET loginUserId, but outside valid (from:on) ' => [
+			'login: ok -> failed:, _GET loginUserId, but outside valid (from:on) ' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -942,7 +942,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// loginUserId check with active time until only
-			'login: ok, _GET loginUserId, but outside valid (until:on) ' => [
+			'login: ok -> failed:, _GET loginUserId, but outside valid (until:on) ' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -968,7 +968,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// loginUserId check with active time from/until
-			'login: ok, _GET loginUserId, but outside valid (from:on,until:on) ' => [
+			'login: ok -> failed:, _GET loginUserId, but outside valid (from:on,until:on) ' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -995,11 +995,52 @@ final class CoreLibsACLLoginTest extends TestCase
 				]
 			],
 			// TODO: Test that if we have n day check with login, that after login we can use parameter login again
+			'login: ok -> failed -> ok:, _GET loginUserId, but must revalidate, normal login, _GET loginUserId' => [
+				[
+					'page_name' => 'edit_users.php',
+					'edit_access_id' => 1,
+					'edit_access_uid' => 'AdminAccess',
+					'edit_access_data' => 'test',
+					'base_access' => 'list',
+					'page_access' => 'list',
+					'test_login_user_id_revalidate_reset' => true,
+					'test_login_user_id' => true,
+					'test_username' => 'admin',
+					'loginUserId' => '1234567890ABCDEFG',
+					// this error is thrown on first login round
+					'login_error' => 1101,
+					// get post as set sub arrays
+					'get' => [
+						'loginUserId' => '1234567890ABCDEFG',
+					],
+					'post' => [
+						'login_login' => 'Login',
+						'login_username' => 'admin',
+						'login_password' => 'admin',
+					],
+				],
+				// all empty get, post, session
+				[],
+				[],
+				[],
+				0,
+				[
+					'login_error' => 0,
+					'admin_flag' => true,
+					'check_access' => true,
+					'check_access_id' => 1,
+					'check_access_data' => 'value',
+					'base_access' => true,
+					'page_access' => true,
+				]
+			]
 			//
 			// other:
 			// login check edit access id of ID not null and not in array
 			// login OK, but during action user gets disabled/deleted/etc
 		];
+
+		return $tests;
 	}
 
 	/**
@@ -1207,10 +1248,10 @@ final class CoreLibsACLLoginTest extends TestCase
 		if (!empty($mock_settings['test_login_user_id_revalidate_after'])) {
 			$q_sub = '';
 			if ($mock_settings['test_login_user_id_revalidate_after'] == 'on') {
-				$q_sub = "login_user_id_last_login = NOW() - '1 day'::interval, "
+				$q_sub = "login_user_id_last_revalidate = NOW() - '1 day'::interval, "
 					. "login_user_id_revalidate_after = '1 day'::interval ";
 			} else {
-				$q_sub = "login_user_id_last_login = NOW(), "
+				$q_sub = "login_user_id_last_revalidate = NOW(), "
 					. "login_user_id_revalidate_after = '6 day'::interval ";
 			}
 			self::$db->dbExec(
@@ -1219,6 +1260,50 @@ final class CoreLibsACLLoginTest extends TestCase
 				. "WHERE LOWER(username) = "
 				. self::$db->dbEscapeLiteral($mock_settings['test_username'])
 			);
+		}
+		if (!empty($mock_settings['test_login_user_id_revalidate_reset'])) {
+			// init dates data for revalidate frame,
+			// set to last revalidate 3 days ago and set revalidate frame to
+			// three days
+			self::$db->dbExec(
+				"UPDATE edit_user SET "
+				. "login_user_id_last_revalidate = NOW() - '3 day'::interval, "
+				. "login_user_id_revalidate_after = '3 day'::interval "
+				. "WHERE LOWER(username) = "
+				. self::$db->dbEscapeLiteral($mock_settings['test_username'])
+			);
+			$_GET = $mock_settings['get'];
+			// login with loginUserId -> fail
+			try {
+				$login_mock->loginMainCall();
+			} catch (\Exception $e) {
+				$this->assertEquals(
+					$mock_settings['login_error'],
+					$login_mock->loginGetLastErrorCode(),
+					'loginUserId reset 1: Assert first loginUserId run failes'
+				);
+			}
+			$_GET = [];
+			// login with username and password -> reset -> ok
+			// set _POST data
+			$_POST = $mock_settings['post'];
+			try {
+				$login_mock->loginMainCall();
+				$this->assertEquals(
+					0,
+					$login_mock->loginGetLastErrorCode(),
+					'loginUserId reset 2: Assert username/password login is successful'
+				);
+			} catch (\Exception $e) {
+				// if we end up here we have an issue
+				$this->assertTrue(
+					false,
+					'loginUserId reset 2: FAILED successful login'
+				);
+			}
+			$_POST = [];
+			// logut and run normal login with loginUserId
+			$_GET = $mock_settings['get'];
 		}
 		if (
 			!empty($mock_settings['test_login_user_id_valid_from']) ||
@@ -1544,8 +1629,9 @@ final class CoreLibsACLLoginTest extends TestCase
 			self::$db->dbExec(
 				"UPDATE edit_user SET "
 				. "login_user_id = NULL, "
+				// below to rows are automatcially reset
 				. "login_user_id_set_date = NULL, "
-				. "login_user_id_last_login = NULL "
+				. "login_user_id_last_revalidate = NULL "
 				. "WHERE LOWER(username) = "
 				. self::$db->dbEscapeLiteral($mock_settings['test_username'])
 			);
@@ -1553,7 +1639,7 @@ final class CoreLibsACLLoginTest extends TestCase
 		if (!empty($mock_settings['test_login_user_id_revalidate_after'])) {
 			self::$db->dbExec(
 				"UPDATE edit_user SET "
-				. "login_user_id_last_login = NULL, "
+				. "login_user_id_last_revalidate = NULL, "
 				. "login_user_id_revalidate_after = NULL "
 				. "WHERE LOWER(username) = "
 				. self::$db->dbEscapeLiteral($mock_settings['test_username'])

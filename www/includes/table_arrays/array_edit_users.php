@@ -159,6 +159,12 @@ $edit_users = [
 			'type' => 'view',
 			'empty' => '-'
 		],
+		'login_user_id_last_revalidate' => [
+			'output_name' => 'loginUserId last revalidate date',
+			'value' => $GLOBALS['login_user_id_last_revalidate'] ?? '',
+			'type' => 'view',
+			'empty' => '-'
+		],
 		'login_user_id_locked' => [
 			'value' => $GLOBALS['login_user_id_locked'] ?? '',
 			'output_name' => 'loginUserId usage locked',
