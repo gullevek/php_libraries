@@ -36,9 +36,9 @@ final class CoreLibsDBExtendedArrayIOTest extends TestCase
 	 *
 	 * @return void
 	 */
-	public function testDBIO()
+	public function testArrayDBIO()
 	{
-		$this->assertTrue(true, 'DB Extended ArrayIO Tests not implemented');
+		// $this->assertTrue(true, 'DB Extended ArrayIO Tests not implemented');
 		$this->markTestIncomplete(
 			'DB\Extended\ArrayIO Tests have not yet been implemented'
 		);

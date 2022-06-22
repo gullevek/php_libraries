@@ -22,7 +22,7 @@ final class CoreLibsOutputImageTest extends TestCase
 	 */
 	public function testOutputImage()
 	{
-		$this->assertTrue(true, 'Output Image Tests not implemented');
+		// $this->assertTrue(true, 'Output Image Tests not implemented');
 		$this->markTestIncomplete(
 			'Output\Image Tests have not yet been implemented'
 		);

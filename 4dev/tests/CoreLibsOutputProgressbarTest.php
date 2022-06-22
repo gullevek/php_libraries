@@ -22,10 +22,10 @@ final class CoreLibsOutputProgressbarTest extends TestCase
 	 */
 	public function testOutputProgressbar()
 	{
-		/* $this->assertTrue(true, 'Output Progressbar Tests not implemented');
-		$this->markTestIncomplete(
-			'Output\Progressbar Tests have not yet been implemented'
-		); */
+		// $this->assertTrue(true, 'Output Progressbar Tests not implemented');
+		// $this->markTestIncomplete(
+		// 	'Output\Progressbar Tests have not yet been implemented'
+		// );
 		$this->markTestSkipped('No implementation for Output\Progressbar at the moment');
 	}
 }

@@ -22,7 +22,7 @@ final class CoreLibsOutputFormTokenTest extends TestCase
 	 */
 	public function testOutputFormToken()
 	{
-		$this->assertTrue(true, 'Output Form Token Tests not implemented');
+		// $this->assertTrue(true, 'Output Form Token Tests not implemented');
 		$this->markTestIncomplete(
 			'Output\Form\Token Tests have not yet been implemented'
 		);

@@ -22,7 +22,7 @@ final class CoreLibsOutputFormElementsTest extends TestCase
 	 */
 	public function testOutputFormElements()
 	{
-		$this->assertTrue(true, 'Output Form Elements Tests not implemented');
+		// $this->assertTrue(true, 'Output Form Elements Tests not implemented');
 		$this->markTestIncomplete(
 			'Output\Form\Elements Tests have not yet been implemented'
 		);
