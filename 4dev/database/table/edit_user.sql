@@ -55,7 +55,7 @@ CREATE TABLE edit_user (
 	password_reset_time	TIMESTAMP WITHOUT TIME ZONE, -- when the password reset was requested
 	password_reset_uid	VARCHAR, -- the uid to access the password reset page
 	-- _GET login id for direct login
-	login_user_id	VARCHAR, -- the login uid, at least 32 chars
+	login_user_id	VARCHAR UNIQUE, -- the login uid, at least 32 chars
 	login_user_id_set_date	TIMESTAMP WITHOUT TIME ZONE, -- when above uid was set
 	login_user_id_valid_from	TIMESTAMP WITHOUT TIME ZONE, -- if set, from when the above uid is valid
 	login_user_id_valid_until	TIMESTAMP WITHOUT TIME ZONE, -- if set, until when the above uid is valid
@@ -66,7 +66,7 @@ CREATE TABLE edit_user (
 ) INHERITS (edit_generic) WITHOUT OIDS;
 
 -- create unique index
-CREATE UNIQUE INDEX edit_user_login_user_id_key ON edit_user (login_user_id) WHERE login_user_id IS NOT NULL;
+-- CREATE UNIQUE INDEX edit_user_login_user_id_key ON edit_user (login_user_id) WHERE login_user_id IS NOT NULL;
 
 COMMENT ON COLUMN edit_user.username IS 'Login username, must set';
 COMMENT ON COLUMN edit_user.password IS 'Login password, must set';
