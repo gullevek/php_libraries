@@ -397,10 +397,17 @@ if ($form->my_page_name == 'edit_order') {
 				$elements[] = $form->formCreateElement('login_error_date_last');
 				$elements[] = $form->formCreateElement('login_error_date_first');
 				$elements[] = $form->formCreateElement('enabled');
+				$elements[] = $form->formCreateElement('deleted');
 				$elements[] = $form->formCreateElement('protected');
 				$elements[] = $form->formCreateElement('username');
 				$elements[] = $form->formCreateElement('password');
 				$elements[] = $form->formCreateElement('password_change_interval');
+				$elements[] = $form->formCreateElement('login_user_id');
+				$elements[] = $form->formCreateElement('login_user_id_set_date');
+				$elements[] = $form->formCreateElement('login_user_id_locked');
+				$elements[] = $form->formCreateElement('login_user_id_revalidate_after');
+				$elements[] = $form->formCreateElement('login_user_id_valid_from');
+				$elements[] = $form->formCreateElement('login_user_id_valid_until');
 				$elements[] = $form->formCreateElement('email');
 				$elements[] = $form->formCreateElement('last_name');
 				$elements[] = $form->formCreateElement('first_name');
@@ -408,6 +415,8 @@ if ($form->my_page_name == 'edit_order') {
 				$elements[] = $form->formCreateElement('edit_access_right_id');
 				$elements[] = $form->formCreateElement('strict');
 				$elements[] = $form->formCreateElement('locked');
+				$elements[] = $form->formCreateElement('lock_until');
+				$elements[] = $form->formCreateElement('lock_after');
 				$elements[] = $form->formCreateElement('admin');
 				$elements[] = $form->formCreateElement('debug');
 				$elements[] = $form->formCreateElement('db_debug');

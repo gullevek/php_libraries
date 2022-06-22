@@ -599,11 +599,14 @@ CREATE TABLE edit_user (
 	login_user_id_set_date	TIMESTAMP WITHOUT TIME ZONE, -- when above uid was set
 	login_user_id_valid_from	TIMESTAMP WITHOUT TIME ZONE, -- if set, from when the above uid is valid
 	login_user_id_valid_until	TIMESTAMP WITHOUT TIME ZONE, -- if set, until when the above uid is valid
-	login_user_id_revalidate_after	INTERVAL DEFAULT '0 days', -- user must login to revalidated login id after set days, 0 for forever
+	login_user_id_revalidate_after	INTERVAL, -- user must login to revalidated login id after set days, 0 for forever
 	login_user_id_locked	SMALLINT DEFAULT 0, -- lock for login user id, but still allow normal login
 	-- additional ACL json block
 	additional_acl	JSONB -- additional ACL as JSON string (can be set by other pages)
 ) INHERITS (edit_generic) WITHOUT OIDS;
+
+-- create unique index
+CREATE UNIQUE INDEX edit_user_login_user_id_key ON edit_user (login_user_id) WHERE login_user_id IS NOT NULL;
 
 COMMENT ON COLUMN edit_user.username IS 'Login username, must set';
 COMMENT ON COLUMN edit_user.password IS 'Login password, must set';

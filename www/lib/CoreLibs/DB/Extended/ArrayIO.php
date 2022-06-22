@@ -271,7 +271,15 @@ class ArrayIO extends \CoreLibs\DB\IO
 			if ($q_select) {
 				$q_select .= ', ';
 			}
-			$q_select .= $column;
+			if (
+				!empty($data_array['type']) && $data_array['type'] == 'datetime' &&
+				!empty($data_array['sql_read'])
+			) {
+				// convert tom different timestamp type
+				$q_select .= "TO_CHAR($column, '" . $data_array['sql_read'] . "') AS $column";
+			} else {
+				$q_select .= $column;
+			}
 
 			// check FK ...
 			if (isset($this->table_array[$column]['fk']) && isset($this->table_array[$column]['value'])) {
@@ -450,7 +458,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 				} elseif (isset($this->table_array[$column]['bool'])) {
 					// boolean storeage (reverse check on ifset)
 					$q_data .= "'" . $this->dbBoolean($this->table_array[$column]['value'], true) . "'";
-				} elseif (isset($this->table_array[$column]['interval'])) {
+				} elseif (
+					isset($this->table_array[$column]['interval']) ||
+					isset($this->table_array[$column]['date']) ||
+					isset($this->table_array[$column]['datetime']) ||
+					isset($this->table_array[$column]['emptynull'])
+				) {
 					// for interval we check if no value, then we set null
 					if (
 						!isset($this->table_array[$column]['value']) ||

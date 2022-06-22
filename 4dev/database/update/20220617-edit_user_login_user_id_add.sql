@@ -2,13 +2,14 @@
 
 -- the login uid, at least 32 chars
 ALTER TABLE edit_user ADD login_user_id VARCHAR;
+CREATE UNIQUE INDEX edit_user_login_user_id_key ON edit_user (login_user_id) WHERE login_user_id IS NOT NULL;
 -- when above uid was set
 ALTER TABLE edit_user ADD login_user_id_set_date TIMESTAMP WITHOUT TIME ZONE;
 -- if set, from/until when the above uid is valid
 ALTER TABLE edit_user ADD login_user_id_valid_from TIMESTAMP WITHOUT TIME ZONE;
 ALTER TABLE edit_user ADD login_user_id_valid_until TIMESTAMP WITHOUT TIME ZONE;
 -- user must login to revalidated login id after set days, 0 for forever
-ALTER TABLE edit_user ADD login_user_id_revalidate_after INTERVAL NOT NULL DEFAULT '0 days';
+ALTER TABLE edit_user ADD login_user_id_revalidate_after INTERVAL;
 -- lock for login user id, but still allow normal login
 ALTER TABLE edit_user ADD login_user_id_locked SMALLINT NOT NULL DEFAULT 0;
 
@@ -38,7 +39,6 @@ BEGIN
 END;
 $$
 LANGUAGE 'plpgsql';
-
 
 CREATE TRIGGER trg_edit_user_set_login_user_id_set_date
 BEFORE INSERT OR UPDATE ON edit_user

@@ -969,11 +969,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		// date (YYYY-MM-DD)
 		if ($this->table_array[$element_name]['type'] == 'date') {
-			if (!$this->table_array[$element_name]['value']) {
-				$this->table_array[$element_name]['value'] = 'YYYY-MM-DD';
-			}
 			$data['name'] = $element_name;
-			$data['value'] = $this->table_array[$element_name]['value'];
+			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
+		}
+		// date time (no sec) (YYYY-MM-DD HH:mm)
+		if ($this->table_array[$element_name]['type'] == 'datetime') {
+			$data['name'] = $element_name;
+			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
 		}
 		// textarea
 		if ($this->table_array[$element_name]['type'] == 'textarea') {
@@ -1168,7 +1170,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							if (!\CoreLibs\Combined\DateTime::checkDate($this->table_array[$key]['value'])) {
 								$this->msg .= sprintf(
 									$this->l->__(
-										'Please enter a vailid date (YYYY-MM-DD) for the <b>%s</b> Field!<br>'
+										'Please enter a valid date (YYYY-MM-DD) for the <b>%s</b> Field!<br>'
 									),
 									$this->table_array[$key]['output_name']
 								);
@@ -1178,14 +1180,22 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							if (!\CoreLibs\Combined\DateTime::checkDateTime($this->table_array[$key]['value'])) {
 								$this->msg .= sprintf(
 									$this->l->__(
-										'Please enter a vailid time (HH:MM[:SS]) for the <b>%s</b> Field!<br>'
+										'Please enter a valid time (HH:mm[:SS]) for the <b>%s</b> Field!<br>'
 									),
 									$this->table_array[$key]['output_name']
 								);
 							}
 							break;
 						case 'datetime': // YYYY-MM-DD HH:MM[:SS]
-							// not implemented
+							if (!\CoreLibs\Combined\DateTime::checkDateTime($this->table_array[$key]['value'])) {
+								$this->msg .= sprintf(
+									$this->l->__(
+										'Please enter a valid date time (YYYY-MM-DD HH:mm) '
+											. 'for the <b>%s</b> Field!<br>'
+									),
+									$this->table_array[$key]['output_name']
+								);
+							}
 							break;
 						case 'intervalshort': // ony interval n [Y/M/D] only
 							if (preg_match("/^\d{1,3}\ ?[YMDymd]{1}$/", $this->table_array[$key]['value'])) {

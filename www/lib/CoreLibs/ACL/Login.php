@@ -75,9 +75,9 @@ class Login
 	/** @var string the user id var*/
 	private $euid;
 	/** @var string _GET/_POST loginUserId parameter for non password login */
-	private $login_user_id;
+	private $login_user_id = '';
 	/** @var string source, either _GET or _POST or empty */
-	private $login_user_id_source;
+	private $login_user_id_source = '';
 	/** @var bool set to true if illegal characters where found in the login user id string */
 	private $login_unclear = false;
 	// is set to one if login okay, or EUID is set and user is okay to access this page
@@ -548,7 +548,8 @@ class Login
 			. "OR (eu.login_user_id_valid_until IS NOT NULL AND NOW() <= eu.login_user_id_valid_until))"
 			. ") THEN 1::INT ELSE 0::INT END AS login_user_id_valid_date, "
 			// check if user must login
-			. "CASE WHEN eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
+			. "CASE WHEN eu.login_user_id_revalidate_after IS NOT NULL "
+			. "AND eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
 			. "AND (eu.login_user_id_set_date + eu.login_user_id_revalidate_after)::DATE "
 			. "<= NOW()::DATE "
 			.  "THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate, "
@@ -1888,7 +1889,8 @@ EOM;
 			. "OR (eu.login_user_id_valid_until IS NOT NULL AND NOW() <= eu.login_user_id_valid_until))"
 			. ") THEN 1::INT ELSE 0::INT END AS login_user_id_valid_date, "
 			// check if user must login
-			. "CASE WHEN eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
+			. "CASE WHEN eu.login_user_id_revalidate_after IS NOT NULL "
+			. "AND eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
 			. "AND eu.login_user_id_set_date + eu.login_user_id_revalidate_after <= NOW()::DATE "
 			.  "THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate, "
 			. "eu.login_user_id_locked "

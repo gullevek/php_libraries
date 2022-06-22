@@ -53,6 +53,16 @@ $edit_users = [
 				'0' => 'No'
 			],
 		],
+		'deleted' => [
+			'value' => $GLOBALS['deleted'] ?? '',
+			'output_name' => 'Deleted',
+			'type' => 'binary',
+			'int' => 1,
+			'element_list' => [
+				'1' => 'Yes',
+				'0' => 'No'
+			],
+		],
 		'strict' => [
 			'value' => $GLOBALS['strict'] ?? '',
 			'output_name' => 'Strict (Lock after errors)',
@@ -118,6 +128,71 @@ $edit_users = [
 			'value' => $GLOBALS['first_name'] ?? '',
 			'output_name' => 'First Name',
 			'type' => 'text'
+		],
+		'lock_until' => [
+			'value' => $GLOBALS['lock_until'] ?? '',
+			'output_name' => 'Lock account until',
+			'type' => 'datetime',
+			'error_check' => 'datetime',
+			'sql_read' => 'YYYY-MM-DD HH24:MI',
+			'datetime' => 1,
+		],
+		'lock_after' => [
+			'value' => $GLOBALS['lock_after'] ?? '',
+			'output_name' => 'Lock account after',
+			'type' => 'datetime',
+			'error_check' => 'datetime',
+			'sql_read' => 'YYYY-MM-DD HH24:MI',
+			'datetime' => 1,
+		],
+		'login_user_id' => [
+			'value' => $GLOBALS['login_user_id'] ?? '',
+			'output_name' => '_GET/_POST loginUserId direct login ID',
+			'type' => 'text',
+			'error_check' => 'unique|custom',
+			'error_regex' => "/^[A-Za-z0-9]+$/",
+			'emptynull' => 1,
+		],
+		'login_user_id_set_date' => [
+			'output_name' => 'loginUserId set date',
+			'value' => $GLOBALS['login_user_id_set_date'] ?? '',
+			'type' => 'view',
+			'empty' => '-'
+		],
+		'login_user_id_locked' => [
+			'value' => $GLOBALS['login_user_id_locked'] ?? '',
+			'output_name' => 'loginUserId usage locked',
+			'type' => 'binary',
+			'int' => 1,
+			'element_list' => [
+				'1' => 'Yes',
+				'0' => 'No'
+			],
+		],
+		'login_user_id_revalidate_after' => [
+			'value' => $GLOBALS['login_user_id_revalidate_after'] ?? '',
+			'output_name' => 'loginUserId, User must login after n days',
+			'type' => 'text',
+			'error_check' => 'intervalshort',
+			'interval' => 1, // interval needs NULL write for empty
+			'size' => 5, // make it 5 chars long
+			'length' => 5
+		],
+		'login_user_id_valid_from' => [
+			'value' => $GLOBALS['login_user_id_valid_from'] ?? '',
+			'output_name' => 'loginUserId valid from',
+			'type' => 'datetime',
+			'error_check' => 'datetime',
+			'sql_read' => 'YYYY-MM-DD HH24:MI',
+			'datetime' => 1,
+		],
+		'login_user_id_valid_until' => [
+			'value' => $GLOBALS['login_user_id_valid_until'] ?? '',
+			'output_name' => 'loginUserId valid until',
+			'type' => 'datetime',
+			'error_check' => 'datetime',
+			'sql_read' => 'YYYY-MM-DD HH24:MI',
+			'datetime' => 1,
 		],
 		'edit_language_id' => [
 			'value' => $GLOBALS['edit_language_id'] ?? '',
@@ -187,7 +262,8 @@ $edit_users = [
 			'cols' => 60
 		],
 	],
-	'load_query' => "SELECT edit_user_id, username, enabled, debug, db_debug, strict, locked, login_error_count "
+	'load_query' => "SELECT edit_user_id, username, enabled, deleted, "
+		. "strict, locked, login_error_count "
 		. "FROM edit_user ORDER BY username",
 	'table_name' => 'edit_user',
 	'show_fields' => [
@@ -197,31 +273,26 @@ $edit_users = [
 		[
 			'name' => 'enabled',
 			'binary' => ['Yes', 'No'],
-			'before_value' => 'Enabled: '
+			'before_value' => 'ENBL: '
 		],
 		[
-			'name' => 'debug',
+			'name' => 'deleted',
 			'binary' => ['Yes', 'No'],
-			'before_value' => 'Debug: '
-		],
-		[
-			'name' => 'db_debug',
-			'binary' => ['Yes', 'No'],
-			'before_value' => 'DB Debug: '
+			'before_value' => 'DEL: '
 		],
 		[
 			'name' => 'strict',
 			'binary' => ['Yes', 'No'],
-			'before_value' => 'Strict: '
+			'before_value' => 'STRC: '
 		],
 		[
 			'name' => 'locked',
 			'binary' => ['Yes', 'No'],
-			'before_value' => 'Locked: '
+			'before_value' => 'LCK: '
 		],
 		[
 			'name' => 'login_error_count',
-			'before_value' => 'Errors: '
+			'before_value' => 'ERR: '
 		],
 	],
 	'element_list' => [

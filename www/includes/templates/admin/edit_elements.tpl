@@ -32,7 +32,10 @@
 			<input type="hidden" name="HIDDEN_{$element.data.name}" value="{$element.data.HIDDEN_value}">
 		{/if}
 		{if $element.type == 'date'}
-			<input type="text" name="{$element.data.name}" value="{$element.data.value}" size="10" maxlength="10">
+			<input type="text" name="{$element.data.name}" value="{$element.data.value}" size="10" maxlength="10" placeholder="YYYY-MM-DD">
+		{/if}
+		{if $element.type == 'datetime'}
+			<input type="text" name="{$element.data.name}" value="{$element.data.value}" size="16" maxlength="16" placeholder="YYYY-MM-DD HH:mm">
 		{/if}
 		{if $element.type == 'textarea'}
 			<textarea name="{$element.data.name}"{if $element.data.rows} rows="{$element.data.rows}"{/if}{if $element.data.cols} cols="{$element.data.cols}"{/if}>{$element.data.value}</textarea>
