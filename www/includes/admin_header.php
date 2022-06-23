@@ -108,7 +108,7 @@ $data = [
 ];
 // log action
 // no log if login
-if (!$login->login) {
+if (!$login->loginActionRun()) {
 	$cms->adbEditLog('Submit', $data, 'BINARY');
 }
 //------------------------------ logging end

@@ -157,16 +157,17 @@ final class CoreLibsACLLoginTest extends TestCase
 	 */
 	public function loginProvider(): array
 	{
-		// 0: mock settings/override flag settings
-		// 2: get array IN
-		// 1: post array IN
-		//    login_login, login_username, login_password, login_logout
-		//    change_password, pw_username, pw_old_password, pw_new_password,
-		//    pw_new_password_confirm
-		// 2: override session set
-		// 3: expected error code, 0 for all ok, 3000 for login page view
-		//    note that 1000 (no db), 2000 (no session) must be tested too
-		// 4: expected return array, eg login_error code, or other info data to match
+		// 0[mock]   : mock settings/override flag settings
+		// 1[get]    : get array IN
+		// 2[post]   : post array IN
+		//             login_login, login_username, login_password, login_logout
+		//             change_password, pw_username, pw_old_password, pw_new_password,
+		//             pw_new_password_confirm
+		// 3[session]: override session set
+		// 4[error]  : expected error code, 0 for all ok, 3000 for login page view
+		//             note that 1000 (no db), 2000 (no session) must be tested too
+		// 5[return] : expected return array, eg login_error code,
+		//             or other info data to match
 		$tests = [
 			'load, no login' => [
 				// error code, only for exceptions
@@ -1543,6 +1544,14 @@ final class CoreLibsACLLoginTest extends TestCase
 				'Expected error code: ' . $e->getCode()
 					. ', ' . $e->getMessage()
 					. ', ' . $e->getLine()
+			);
+		}
+
+		// if _POST login set check this is matching
+		if (!empty($post['login_login'])) {
+			$this->assertTrue(
+				$login_mock->loginActionRun(),
+				'Assert that post login_login was pressed'
 			);
 		}
 

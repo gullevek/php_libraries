@@ -79,12 +79,12 @@ class Login
 	/** @var string source, either _GET or _POST or empty */
 	private $login_user_id_source = '';
 	/** @var bool set to true if illegal characters where found in the login user id string */
-	private $login_unclear = false;
+	private $login_user_id_unclear = false;
 	// is set to one if login okay, or EUID is set and user is okay to access this page
 	/** @var bool */
 	private $permission_okay = false;
 	/** @var string pressed login */
-	public $login;
+	private $login = '';
 	/** @var string master action command */
 	private $action;
 	/** @var string login name */
@@ -1564,7 +1564,7 @@ EOM;
 			);
 			// flag unclean input data
 			if ($login_user_id_changed > 0) {
-				$this->login_unclear = true;
+				$this->login_user_id_unclear = true;
 				// error for invalid user id?
 				$this->log->debug('LOGIN USER ID', 'Invalid characters: '
 					. $login_user_id_changed . ' in loginUserId: '
@@ -2140,6 +2140,16 @@ EOM;
 	}
 
 	/**
+	 * Returns true if login button was pressed
+	 *
+	 * @return bool If login action was run, return true
+	 */
+	public function loginActionRun(): bool
+	{
+		return empty($this->login) ? false : true;
+	}
+
+	/**
 	 * Returns current set loginUserId or empty if unset
 	 *
 	 * @return string loginUserId or empty string for not set
@@ -2167,7 +2177,7 @@ EOM;
 	 */
 	public function loginGetLoginUserIdUnclean(): bool
 	{
-		return $this->login_unclear;
+		return $this->login_user_id_unclear;
 	}
 
 	/**
