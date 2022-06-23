@@ -25,7 +25,7 @@ declare(strict_types=1);
  *                          1 for file loadable, but no data inside
  *                          2 for file not readable
  *                          3 for file not found
- * @deprecated V6 Use \CoreLibs\Get\ReadEnvFile::readEnvFile()
+ * @deprecated V6 Use \CoreLibs\Get\DotEnv::readEnvFile()
  */
 function readEnvFile(string $path = __DIR__, string $env_file = '.env'): int
 {
