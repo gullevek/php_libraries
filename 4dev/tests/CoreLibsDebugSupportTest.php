@@ -120,6 +120,16 @@ final class CoreLibsDebugSupportTest extends TestCase
 				null,
 				'a string',
 			],
+			'string with html chars, encode' => [
+				'a string with <> &',
+				true,
+				'a string with &lt;&gt; &amp;',
+			],
+			'string with html chars' => [
+				'a string with <> &',
+				null,
+				'a string with <> &',
+			],
 			'a number' => [
 				1234,
 				null,
@@ -180,22 +190,41 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 */
 	public function debugStringProvider(): array
 	{
+		// 0: input string
+		// 1: replace
+		// 2: html flag
+		// 3: expected
 		return [
 			'null string, default' => [
-				0 => null,
-				1 => null,
-				2 => '-'
+				null,
+				null,
+				null,
+				'-'
 			],
 			'empty string, ... replace' => [
-				0 => '',
-				1 => '...',
-				2 => '...'
+				'',
+				'...',
+				null,
+				'...'
 			],
 			'filled string' => [
-				0 => 'some string',
-				1 => null,
-				2 => 'some string'
-			]
+				'some string',
+				null,
+				null,
+				'some string'
+			],
+			'string with html chars, encode' => [
+				'a string with <> &',
+				'-',
+				true,
+				'a string with &lt;&gt; &amp;',
+			],
+			'string with html chars' => [
+				'a string with <> &',
+				'-',
+				null,
+				'a string with <> &',
+			],
 		];
 	}
 
@@ -366,12 +395,14 @@ final class CoreLibsDebugSupportTest extends TestCase
 		if (count($compare) == 10) {
 			$this->assertEquals(
 				$expected,
-				\CoreLibs\Debug\Support::getCallerMethodList()
+				\CoreLibs\Debug\Support::getCallerMethodList(),
+				'assert expected 10'
 			);
 		} else {
 			$this->assertEquals(
 				$expected_group,
-				\CoreLibs\Debug\Support::getCallerMethodList()
+				\CoreLibs\Debug\Support::getCallerMethodList(),
+				'assert expected group'
 			);
 		}
 	}
@@ -398,24 +429,33 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 *
 	 * @cover ::debugString
 	 * @dataProvider debugStringProvider
-	 * @testdox debugString $input with replace $replace will be $expected [$_dataName]
+	 * @testdox debugString $input with replace $replace and html $flag will be $expected [$_dataName]
 	 *
 	 * @param string|null $input
 	 * @param string|null $replace
-	 * @param string $expected
+	 * @param bool|null   $flag
+	 * @param string      $expected
 	 * @return void
 	 */
-	public function testDebugString(?string $input, ?string $replace, string $expected)
+	public function testDebugString(?string $input, ?string $replace, ?bool $flag, string $expected): void
 	{
-		if ($replace === null) {
+		if ($replace === null && $flag === null) {
 			$this->assertEquals(
 				$expected,
-				\CoreLibs\Debug\Support::debugString($input)
+				\CoreLibs\Debug\Support::debugString($input),
+				'assert all default'
+			);
+		} elseif ($flag === null) {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Debug\Support::debugString($input, $replace),
+				'assert flag default'
 			);
 		} else {
 			$this->assertEquals(
 				$expected,
-				\CoreLibs\Debug\Support::debugString($input, $replace)
+				\CoreLibs\Debug\Support::debugString($input, $replace, $flag),
+				'assert all set'
 			);
 		}
 	}

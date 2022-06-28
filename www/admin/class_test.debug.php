@@ -71,6 +71,7 @@ print "S::PRINTBOOL(name): " . DebugSupport::printBool(true, 'Name') . "<br>";
 print "S::PRINTBOOL(name, ok): " . DebugSupport::printBool(true, 'Name', 'ok') . "<br>";
 print "S::PRINTBOOL(name, ok, not): " . DebugSupport::printBool(false, 'Name', 'ok', 'not') . "<br>";
 print "S::DEBUSTRING(s): " . DebugSupport::debugString('SET') . "<br>";
+print "S::DEBUSTRING(s&gt;): " . DebugSupport::debugString('<SET>') . "<br>";
 print "S::DEBUSTRING(''): " . DebugSupport::debugString('') . "<br>";
 print "S::DEBUSTRING(,s): " . DebugSupport::debugString(null, '{-}') . "<br>";
 

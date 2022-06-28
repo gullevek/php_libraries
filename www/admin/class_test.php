@@ -63,6 +63,7 @@ print '<div><a href="class_test.password.php">Class Test: PASSWORD</a></div>';
 print '<div><a href="class_test.math.php">Class Test: MATH</a></div>';
 print '<div><a href="class_test.html.php">Class Test: HTML/ELEMENTS</a></div>';
 print '<div><a href="class_test.email.php">Class Test: EMAIL</a></div>';
+print '<div><a href="class_test.create_email.php">Class Test: CREATE EMAIL</a></div>';
 print '<div><a href="class_test.uids.php">Class Test: UIDS</a></div>';
 print '<div><a href="class_test.phpv.php">Class Test: PHP VERSION</a></div>';
 print '<div><a href="class_test.hash.php">Class Test: HASH</a></div>';

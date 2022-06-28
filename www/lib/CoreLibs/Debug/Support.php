@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\Debug;
 
+use CoreLibs\Convert\Html;
+
 class Support
 {
 	/**
@@ -89,7 +91,7 @@ class Support
 	 * Debug\Logging compatible output
 	 *
 	 * @param  mixed  $mixed
-	 * @param  bool   $no_html set to true to use ##HTMLPRE##
+	 * @param  bool   $no_html set to true to use ##HTMLPRE##or html escape
 	 * @return string
 	 */
 	public static function printToString($mixed, bool $no_html = false): string
@@ -103,6 +105,12 @@ class Support
 		} elseif (is_array($mixed)) {
 			// use the pre one OR debug one
 			return self::printAr($mixed, $no_html);
+		} elseif (is_string($mixed)) {
+			if ($no_html) {
+				return Html::htmlent((string)$mixed);
+			} else {
+				return (string)$mixed;
+			}
 		} else {
 			// should be int/float/string
 			return (string)$mixed;
@@ -190,12 +198,19 @@ class Support
 	 * @param  string      $replace [default '-'] What to replace the empty string with
 	 * @return string               String itself or the replaced value
 	 */
-	public static function debugString(?string $string, string $replace = '-'): string
-	{
+	public static function debugString(
+		?string $string,
+		string $replace = '-',
+		bool $no_html = false
+	): string {
 		if (empty($string)) {
-			return $replace;
+			$string = $replace;
 		}
-		return $string;
+		if ($no_html) {
+			return Html::htmlent($string);
+		} else {
+			return $string;
+		}
 	}
 }
 

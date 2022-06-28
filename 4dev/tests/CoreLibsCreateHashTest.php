@@ -13,7 +13,11 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsCreateHashTest extends TestCase
 {
-
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function hashData(): array
 	{
 		return [
