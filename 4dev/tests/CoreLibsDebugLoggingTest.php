@@ -15,8 +15,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsDebugLoggingTest extends TestCase
 {
-	public $log;
-
 	/**
 	 * test set for options BASIC
 	 *
@@ -83,6 +81,47 @@ final class CoreLibsDebugLoggingTest extends TestCase
 				[]
 			]
 		];
+	}
+
+	/**
+	 * init logging class
+	 *
+	 * @dataProvider optionsProvider
+	 * @testdox init test [$_dataName]
+	 *
+	 * @param array|null $options
+	 * @param array $expected
+	 * @param array $override
+	 * @return void
+	 */
+	public function testClassInit(?array $options, array $expected, array $override): void
+	{
+		if (!empty($override['constant'])) {
+			foreach ($override['constant'] as $var => $value) {
+				define($var, $value);
+			}
+		}
+		if ($options === null) {
+			$log = new \CoreLibs\Debug\Logging();
+		} else {
+			$log = new \CoreLibs\Debug\Logging($options);
+		}
+		// check that settings match
+		$this->assertEquals(
+			$expected['log_folder'],
+			$log->getSetting('log_folder')
+		);
+		$this->assertEquals(
+			$expected['debug_all'],
+			$log->getSetting('debug_output_all')
+		);
+		$this->assertEquals(
+			$expected['print_all'],
+			$log->getSetting('print_output_all')
+		);
+		// print "LOG: " . $log->getSetting('log_folder') . "\n";
+		// print "DEBUG: " . $log->getSetting('debug_output_all') . "\n";
+		// print "PRINT: " . $log->getSetting('print_output_all') . "\n";
 	}
 
 	/**
@@ -174,12 +213,62 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	}
 
 	/**
+	 * test the setting and getting of LogId
+	 *
+	 * @covers ::setLogId
+	 * @dataProvider logIdOptionsProvider
+	 * @testdox log id set/get tests [$_dataName]
+	 *
+	 * @param array|null $options
+	 * @param array $expected
+	 * @param array $override
+	 * @return void
+	 */
+	public function testLogId(?array $options, array $expected, array $override): void
+	{
+		// we need to set with file_id option, globals LOG_FILE_ID, constant LOG_FILE_ID
+		if (!empty($override['constant'])) {
+			foreach ($override['constant'] as $var => $value) {
+				define($var, $value);
+			}
+		}
+		if (!empty($override['globals'])) {
+			foreach ($override['globals'] as $var => $value) {
+				$GLOBALS[$var] = $value;
+			}
+		}
+		if ($options === null) {
+			$log = new \CoreLibs\Debug\Logging();
+		} else {
+			$log = new \CoreLibs\Debug\Logging($options);
+		}
+		// check current
+		$this->assertEquals(
+			$log->getLogId(),
+			$expected['log_file_id']
+		);
+		// we need to override now too
+		if (!empty($override['values'])) {
+			// check if we have values, set them post and assert
+			$log->setLogId($override['values']['log_file_id']);
+			$this->assertEquals(
+				$log->getLogId(),
+				$expected['set_log_file_id']
+			);
+		}
+	}
+
+	/**
 	 * Undocumented function
 	 *
 	 * @return array
 	 */
 	public function logLevelAllProvider(): array
 	{
+		// 0: type
+		// 1: flag
+		// 2: expected set
+		// 3: expected get
 		return [
 			'debug all true' => [
 				'debug',
@@ -209,12 +298,50 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	}
 
 	/**
+	 * check set/get for log level all flag
+	 *
+	 * @dataProvider logLevelAllProvider
+	 * @testdox set/get all log level $type with flag $flag [$_dataName]
+	 *
+	 * @param string $type
+	 * @param bool $flag
+	 * @param bool $expected_set
+	 * @param bool $expected_get
+	 * @return void
+	 */
+	public function testSetGetLogLevelAll(
+		string $type,
+		bool $flag,
+		bool $expected_set,
+		bool $expected_get
+	): void {
+		// neutral start with default
+		$log = new \CoreLibs\Debug\Logging();
+		// set and check
+		$this->assertEquals(
+			$log->setLogLevelAll($type, $flag),
+			$expected_set
+		);
+		// get and check
+		$this->assertEquals(
+			$log->getLogLevelAll($type),
+			$expected_get
+		);
+	}
+
+	/**
 	 * Undocumented function
 	 *
 	 * @return array
 	 */
 	public function logLevelProvider(): array
 	{
+		// 0: type
+		// 1: flag
+		// 2: debug on (array)
+		// 3: expected set
+		// 4: level
+		// 5: expected get
 		return [
 			'set debug on for level A,B,C and check full set' => [
 				'debug',
@@ -288,12 +415,53 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	}
 
 	/**
+	 * checks setting for per log info level
+	 *
+	 * @covers ::setLogLevel
+	 * @dataProvider logLevelProvider
+	 * @testdox set/get log level $type to $flag check with $level [$_dataName]
+	 *
+	 * @param string $type
+	 * @param string $flag
+	 * @param array $debug_on
+	 * @param bool $expected_set
+	 * @param string|null $level
+	 * @param bool|array<mixed> $expected_get
+	 * @return void
+	 */
+	public function testSetGetLogLevel(
+		string $type,
+		string $flag,
+		array $debug_on,
+		bool $expected_set,
+		?string $level,
+		$expected_get
+	): void {
+		// neutral start with default
+		$log = new \CoreLibs\Debug\Logging();
+		// set
+		$this->assertEquals(
+			$log->setLogLevel($type, $flag, $debug_on),
+			$expected_set
+		);
+		// get, if level is null compare to?
+		$this->assertEquals(
+			$log->getLogLevel($type, $flag, $level),
+			$expected_get
+		);
+	}
+
+	/**
 	 * Undocumented function
 	 *
 	 * @return array
 	 */
 	public function logPerProvider(): array
 	{
+		// 0: type
+		// 1: set
+		// 2: expected set
+		// 3: expected get
 		return [
 			'level set true' => [
 				'level',
@@ -326,6 +494,68 @@ final class CoreLibsDebugLoggingTest extends TestCase
 				false,
 			]
 		];
+	}
+
+	/**
+	 * set and get per log
+	 * for level/class/page/run flags
+	 *
+	 * @covers ::setLogPer
+	 * @dataProvider logPerProvider
+	 * @testdox set/get log per $type with $set [$_dataName]
+	 *
+	 * @param string $type
+	 * @param boolean $set
+	 * @param boolean $expected_set
+	 * @param boolean $expected_get
+	 * @return void
+	 */
+	public function testSetGetLogPer(
+		string $type,
+		bool $set,
+		bool $expected_set,
+		bool $expected_get
+	): void {
+		// neutral start with default
+		$log = new \CoreLibs\Debug\Logging();
+		// set and check
+		$this->assertEquals(
+			$log->setLogPer($type, $set),
+			$expected_set
+		);
+		// get and check
+		$this->assertEquals(
+			$log->getLogPer($type),
+			$expected_get
+		);
+	}
+
+	/**
+	 * set the print log file date part
+	 *
+	 * @covers ::setGetLogPrintFileDate
+	 * @testWith [true, true, true]
+	 *           [false, false, false]
+	 * @testdox set/get log file date to $input [$_dataName]
+	 *
+	 * @param boolean $input
+	 * @param boolean $expected_set
+	 * @param boolean $expected_get
+	 * @return void
+	 */
+	public function testSetGetLogPrintFileDate(bool $input, bool $expected_set, bool $expected_get): void
+	{
+		// neutral start with default
+		$log = new \CoreLibs\Debug\Logging();
+		// set and check
+		$this->assertEquals(
+			$log->setGetLogPrintFileDate($input),
+			$expected_set
+		);
+		$this->assertEquals(
+			$log->setGetLogPrintFileDate(),
+			$expected_get
+		);
 	}
 
 	/**
@@ -368,6 +598,95 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			],
 		];
 	}
+
+	/**
+	 * convert array to string with ## pre replace space holders
+	 *
+	 * @covers ::prAr
+	 * @dataProvider prArProvider
+	 * @testdox check prAr array to string conversion [$_dataName]
+	 *
+	 * @param array $input
+	 * @param string $expected
+	 * @return void
+	 */
+	public function testPrAr(array $input, string $expected): void
+	{
+		$log = new \CoreLibs\Debug\Logging();
+		$this->assertEquals(
+			$log->prAr($input),
+			$expected
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function prBlProvider(): array
+	{
+		// 0: input flag (bool)
+		// 1: is true
+		// 2: is flase
+		// 3: epxected
+		return [
+			'true bool default' => [
+				true,
+				null,
+				null,
+				'true'
+			],
+			'false bool default' => [
+				false,
+				null,
+				null,
+				'false'
+			],
+			'true bool override' => [
+				true,
+				'ok',
+				'not ok',
+				'ok'
+			],
+			'false bool override' => [
+				false,
+				'ok',
+				'not ok',
+				'not ok'
+			],
+		];
+	}
+
+	/**
+	 * check bool to string converter
+	 *
+	 * @covers ::prBl
+	 * @dataProvider prBlProvider
+	 * @testdox check prBl $input ($true/$false) is expected $false [$_dataName]
+	 *
+	 * @param  bool        $input
+	 * @param  string|null $true
+	 * @param  string|null $false
+	 * @param  string      $expected
+	 * @return void
+	 */
+	public function testPrBl(bool $input, ?string $true, ?string $false, string $expected): void
+	{
+		$log = new \CoreLibs\Debug\Logging();
+		$return = '';
+		if ($true === null && $false === null) {
+			$return = $log->prBl($input);
+		} elseif ($true !== null || $false !== null) {
+			$return = $log->prBl($input, $true ?? '', $false ?? '');
+		}
+		$this->assertEquals(
+			$expected,
+			$return
+		);
+	}
+
+	// from here are complex debug tests
 
 	/**
 	 * Undocumented function
@@ -472,304 +791,6 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	}
 
 	/**
-	 * init logging class
-	 *
-	 * @dataProvider optionsProvider
-	 * @testdox init test [$_dataName]
-	 *
-	 * @param array|null $options
-	 * @param array $expected
-	 * @param array $override
-	 * @return void
-	 */
-	public function testClassInit(?array $options, array $expected, array $override): void
-	{
-		if (!empty($override['constant'])) {
-			foreach ($override['constant'] as $var => $value) {
-				define($var, $value);
-			}
-		}
-		if ($options === null) {
-			$this->log = new \CoreLibs\Debug\Logging();
-		} else {
-			$this->log = new \CoreLibs\Debug\Logging($options);
-		}
-		// check that settings match
-		$this->assertEquals(
-			$expected['log_folder'],
-			$this->log->getSetting('log_folder')
-		);
-		$this->assertEquals(
-			$expected['debug_all'],
-			$this->log->getSetting('debug_output_all')
-		);
-		$this->assertEquals(
-			$expected['print_all'],
-			$this->log->getSetting('print_output_all')
-		);
-		// print "LOG: " . $this->log->getSetting('log_folder') . "\n";
-		// print "DEBUG: " . $this->log->getSetting('debug_output_all') . "\n";
-		// print "PRINT: " . $this->log->getSetting('print_output_all') . "\n";
-	}
-
-	/**
-	 * test the setting and getting of LogId
-	 *
-	 * @covers ::setLogId
-	 * @dataProvider logIdOptionsProvider
-	 * @testdox log id set/get tests [$_dataName]
-	 *
-	 * @param array|null $options
-	 * @param array $expected
-	 * @param array $override
-	 * @return void
-	 */
-	public function testLogId(?array $options, array $expected, array $override): void
-	{
-		// we need to set with file_id option, globals LOG_FILE_ID, constant LOG_FILE_ID
-		if (!empty($override['constant'])) {
-			foreach ($override['constant'] as $var => $value) {
-				define($var, $value);
-			}
-		}
-		if (!empty($override['globals'])) {
-			foreach ($override['globals'] as $var => $value) {
-				$GLOBALS[$var] = $value;
-			}
-		}
-		if ($options === null) {
-			$this->log = new \CoreLibs\Debug\Logging();
-		} else {
-			$this->log = new \CoreLibs\Debug\Logging($options);
-		}
-		// check current
-		$this->assertEquals(
-			$this->log->getLogId(),
-			$expected['log_file_id']
-		);
-		// we need to override now too
-		if (!empty($override['values'])) {
-			// check if we have values, set them post and assert
-			$this->log->basicSetLogId($override['values']['log_file_id']);
-			$this->assertEquals(
-				$this->log->getLogId(),
-				$expected['set_log_file_id']
-			);
-		}
-	}
-
-	/**
-	 * check set/get for log level all flag
-	 *
-	 * @dataProvider logLevelAllProvider
-	 * @testdox set/get all log level $type with flag $flag [$_dataName]
-	 *
-	 * @param string $type
-	 * @param bool $flag
-	 * @param bool $expected_set
-	 * @param bool $expected_get
-	 * @return void
-	 */
-	public function testSetGetLogLevelAll(
-		string $type,
-		bool $flag,
-		bool $expected_set,
-		bool $expected_get
-	): void {
-		// neutral start with default
-		$this->log = new \CoreLibs\Debug\Logging();
-		// set and check
-		$this->assertEquals(
-			$this->log->setLogLevelAll($type, $flag),
-			$expected_set
-		);
-		// get and check
-		$this->assertEquals(
-			$this->log->getLogLevelAll($type),
-			$expected_get
-		);
-	}
-
-	/**
-	 * checks setting for per log info level
-	 *
-	 * @covers ::setLogLevel
-	 * @dataProvider logLevelProvider
-	 * @testdox set/get log level $type to $flag check with $level [$_dataName]
-	 *
-	 * @param string $type
-	 * @param string $flag
-	 * @param array $debug_on
-	 * @param bool $expected_set
-	 * @param string|null $level
-	 * @param bool|array<mixed> $expected_get
-	 * @return void
-	 */
-	public function testSetGetLogLevel(
-		string $type,
-		string $flag,
-		array $debug_on,
-		bool $expected_set,
-		?string $level,
-		$expected_get
-	): void {
-		// neutral start with default
-		$this->log = new \CoreLibs\Debug\Logging();
-		// set
-		$this->assertEquals(
-			$this->log->setLogLevel($type, $flag, $debug_on),
-			$expected_set
-		);
-		// get, if level is null compare to?
-		$this->assertEquals(
-			$this->log->getLogLevel($type, $flag, $level),
-			$expected_get
-		);
-	}
-
-	/**
-	 * set and get per log
-	 * for level/class/page/run flags
-	 *
-	 * @covers ::setLogPer
-	 * @dataProvider logPerProvider
-	 * @testdox set/get log per $type with $set [$_dataName]
-	 *
-	 * @param string $type
-	 * @param boolean $set
-	 * @param boolean $expected_set
-	 * @param boolean $expected_get
-	 * @return void
-	 */
-	public function testSetGetLogPer(
-		string $type,
-		bool $set,
-		bool $expected_set,
-		bool $expected_get
-	): void {
-		// neutral start with default
-		$this->log = new \CoreLibs\Debug\Logging();
-		// set and check
-		$this->assertEquals(
-			$this->log->setLogPer($type, $set),
-			$expected_set
-		);
-		// get and check
-		$this->assertEquals(
-			$this->log->getLogPer($type),
-			$expected_get
-		);
-	}
-
-	/**
-	 * set the print log file date part
-	 *
-	 * @covers ::setGetLogPrintFileDate
-	 * @testWith [true, true, true]
-	 *           [false, false, false]
-	 * @testdox set/get log file date to $input [$_dataName]
-	 *
-	 * @param boolean $input
-	 * @param boolean $expected_set
-	 * @param boolean $expected_get
-	 * @return void
-	 */
-	public function testSetGetLogPrintFileDate(bool $input, bool $expected_set, bool $expected_get): void
-	{
-		// neutral start with default
-		$this->log = new \CoreLibs\Debug\Logging();
-		// set and check
-		$this->assertEquals(
-			$this->log->setGetLogPrintFileDate($input),
-			$expected_set
-		);
-		$this->assertEquals(
-			$this->log->setGetLogPrintFileDate(),
-			$expected_get
-		);
-	}
-
-	/**
-	 * convert array to string with ## pre replace space holders
-	 *
-	 * @covers ::prAr
-	 * @dataProvider prArProvider
-	 * @testdox check prAr array to string conversion [$_dataName]
-	 *
-	 * @param array $input
-	 * @param string $expected
-	 * @return void
-	 */
-	public function testPrAr(array $input, string $expected): void
-	{
-		$this->log = new \CoreLibs\Debug\Logging();
-		$this->assertEquals(
-			$this->log->prAr($input),
-			$expected
-		);
-	}
-
-	public function prBlProvider(): array
-	{
-		return [
-			'true bool default' => [
-				true,
-				null,
-				null,
-				'true'
-			],
-			'false bool default' => [
-				false,
-				null,
-				null,
-				'false'
-			],
-			'true bool override' => [
-				true,
-				'ok',
-				'not ok',
-				'ok'
-			],
-			'false bool override' => [
-				false,
-				'ok',
-				'not ok',
-				'not ok'
-			],
-		];
-	}
-
-	/**
-	 * check bool to string converter
-	 *
-	 * @covers ::prBl
-	 * @dataProvider prBlProvider
-	 * @textdox check prBl $input ($true/$false) is expected $false [$_dataName]
-	 *
-	 * @param  bool        $input
-	 * @param  string|null $true
-	 * @param  string|null $false
-	 * @param  string      $expected
-	 * @return void
-	 */
-	public function testPrBl(bool $input, ?string $true, ?string $false, string $expected): void
-	{
-		$this->log = new \CoreLibs\Debug\Logging();
-		$return = '';
-		if ($true === null && $false === null) {
-			$return = $this->log->prBl($input);
-		} elseif ($true !== null || $false !== null) {
-			$return = $this->log->prBl($input, $true ?? '', $false ?? '');
-		}
-		$this->assertEquals(
-			$expected,
-			$return
-		);
-	}
-
-	// from here are complex debug tests
-
-	/**
 	 * Test debug flow
 	 *
 	 * @covers ::debug
@@ -824,11 +845,11 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		// remove any files named /tmp/error_log_TestDebug*.log
 		array_map('unlink', glob($options['log_folder'] . 'error_msg_' . $options['file_id'] . '*.log'));
 		// init logger
-		$this->log = new \CoreLibs\Debug\Logging($options);
+		$log = new \CoreLibs\Debug\Logging($options);
 		// * debug (A/B)
 		// NULL check for strip/prefix
 		$this->assertEquals(
-			$this->log->debug(
+			$log->debug(
 				$debug_msg['level'],
 				$debug_msg['string'],
 				$debug_msg['strip'],
@@ -837,7 +858,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			$expected_debug
 		);
 		// * if print check data in log file
-		$log_file = $this->log->getLogFileName();
+		$log_file = $log->getLogFileName();
 		if (!empty($options['debug_all']) && !empty($options['print_all'])) {
 			// file name matching
 			$this->assertStringStartsWith(
@@ -866,10 +887,10 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			);
 		}
 		// ** ECHO ON
-		$log_string =  $this->log->printErrorMsg();
+		$log_string =  $log->printErrorMsg();
 		// * print
 		if (!empty($options['debug_all']) && !empty($options['echo_all'])) {
-			// print $this->log->printErrorMsg() . "\n";
+			// print $log->printErrorMsg() . "\n";
 			// echo string must start with
 			$this->assertStringStartsWith(
 				$expected_string_start,
@@ -890,6 +911,77 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			$this->assertEquals(
 				$log_string,
 				''
+			);
+		}
+	}
+
+	// TODO: setLogUniqueId/getLogUniqueId
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function logUniqueIdProvider(): array
+	{
+		return [
+			'option set' => [
+				'option' => true,
+				'override' => false,
+			],
+			'direct set' => [
+				'option' => false,
+				'override' => false,
+			],
+			'override set' => [
+				'option' => false,
+				'override' => true,
+			],
+			'option and override set' => [
+				'option' => false,
+				'override' => true,
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::setLogUniqueId
+	 * @covers ::getLogUniqueId
+	 * @dataProvider logUniqueIdProvider
+	 * @testdox per run log id set test: option: $option, override: $override [$_dataName]
+	 *
+	 * @param  bool $option
+	 * @param  bool $override
+	 * @return void
+	 */
+	public function testLogUniqueId(bool $option, bool $override): void
+	{
+		if ($option === true) {
+			$log = new \CoreLibs\Debug\Logging(['per_run' => $option]);
+		} else {
+			$log = new \CoreLibs\Debug\Logging();
+			$log->setLogUniqueId();
+		}
+		$per_run_id = $log->getLogUniqueId();
+		$this->assertMatchesRegularExpression(
+			"/^\d{4}-\d{2}-\d{2}_\d{6}_U_[a-z0-9]{8}$/",
+			$per_run_id,
+			'assert per log run id 1st'
+		);
+		if ($override === true) {
+			$log->setLogUniqueId(true);
+			$per_run_id_2nd = $log->getLogUniqueId();
+			$this->assertMatchesRegularExpression(
+				"/^\d{4}-\d{2}-\d{2}_\d{6}_U_[a-z0-9]{8}$/",
+				$per_run_id_2nd,
+				'assert per log run id 2nd'
+			);
+			$this->assertNotEquals(
+				$per_run_id,
+				$per_run_id_2nd,
+				'1st and 2nd don\'t match'
 			);
 		}
 	}

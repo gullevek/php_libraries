@@ -293,15 +293,7 @@ class Logging
 		}
 		// set per run ID
 		if ($this->log_per_run) {
-			/* if (isset($GLOBALS['LOG_FILE_UNIQUE_ID'])) {
-				$this->log_file_unique_id = $GLOBALS['LOG_FILE_UNIQUE_ID'];
-			} */
-			if (!$this->log_file_unique_id) {
-				// $GLOBALS['LOG_FILE_UNIQUE_ID'] =
-				$this->log_file_unique_id =
-					date('Y-m-d_His') . '_U_'
-						. substr(hash('sha1', uniqid((string)mt_rand(), true)), 0, 8);
-			}
+			$this->setLogUniqueId();
 		}
 	}
 
@@ -394,7 +386,10 @@ class Logging
 
 		// write to file
 		// first check if max file size is is set and file is bigger
-		if ($this->log_max_filesize > 0 && ((filesize($fn) / 1024) > $this->log_max_filesize)) {
+		if (
+			$this->log_max_filesize > 0 &&
+			((filesize($fn) / 1024) > $this->log_max_filesize)
+		) {
 			// for easy purpose, rename file only to attach timestamp, nur sequence numbering
 			rename($fn, $fn . '.' . date("YmdHis"));
 		}
@@ -593,6 +588,10 @@ class Logging
 			return false;
 		}
 		$this->{'log_per_' . $type} = $set;
+		// if per run set unique id
+		if ($type == 'run' && $set == true) {
+			$this->setLogUniqueId();
+		}
 		return true;
 	}
 
@@ -608,6 +607,33 @@ class Logging
 			return false;
 		}
 		return $this->{'log_per_' . $type};
+	}
+
+	/**
+	 * Sets a unique id based on current date (y/m/d, h:i:s) and a unique id (8 chars)
+	 * if override is set to true it will be newly set, else if already set nothing changes
+	 *
+	 * @param  bool $override True to force new set
+	 * @return void
+	 */
+	public function setLogUniqueId(bool $override = false): void
+	{
+		if (!$this->log_file_unique_id || $override == true) {
+			$this->log_file_unique_id =
+				date('Y-m-d_His') . '_U_'
+					. substr(hash('sha1', uniqid((string)mt_rand(), true)), 0, 8);
+		}
+	}
+
+	/**
+	 * Return current set log file unique id,
+	 * empty string for not set
+	 *
+	 * @return string
+	 */
+	public function getLogUniqueId(): string
+	{
+		return $this->log_file_unique_id;
 	}
 
 	/**
