@@ -143,7 +143,325 @@ final class CoreLibsCreateEmailTest extends TestCase
 				'encoding' => null,
 				'expected_status' => -2,
 				'expected_content' => [],
-			]
+			],
+			'sending email 1' => [
+				'subject' => 'SUBJECT',
+				'body' => 'BODY',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					'test@test.com'
+				],
+				'replace' => null,
+				'encoding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'test@test.com',
+						'subject' => 'SUBJECT',
+						'body' => 'BODY',
+					]
+				],
+			],
+			'sending email 1, encoded' => [
+				'subject' => 'SUBJECT 日本語',
+				'body' => 'BODY 日本語',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					'test@test.com'
+				],
+				'replace' => null,
+				'encoding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'test@test.com',
+						'subject' => 'SUBJECT =?UTF-8?B?5pel5pys6Kqe?=',
+						'body' => 'BODY 日本語',
+					]
+				],
+			],
+			'sending email 1, encoded subject ISO-2022-JP' => [
+				'subject' => 'SUBJECT 日本語',
+				'body' => 'BODY 日本語',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					'test@test.com'
+				],
+				'replace' => null,
+				'encoding' => 'ISO-2022-JP',
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'test@test.com',
+						'subject' => 'SUBJECT =?ISO-2022-JP?B?GyRCRnxLXDhsGyhC?=',
+						// body is stored as UTF-8 in log and here, so both must be translated
+						'body' => 'BODY 日本語',
+					]
+				],
+			],
+			'sending email 2' => [
+				'subject' => 'SUBJECT',
+				'body' => 'BODY',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					'e1@test.com',
+					'e2@test.com'
+				],
+				'replace' => null,
+				'encoding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'e1@test.com',
+						'subject' => 'SUBJECT',
+						'body' => 'BODY',
+					],
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'e2@test.com',
+						'subject' => 'SUBJECT',
+						'body' => 'BODY',
+					]
+				],
+			],
+			'sending email 1: dynamic' => [
+				'subject' => 'SUBJECT {FOO}',
+				'body' => 'BODY {FOO} {VAR}',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					'test@test.com'
+				],
+				'replace' => [
+					'FOO' => 'foo',
+					'VAR' => 'bar',
+				],
+				'encoding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'test@test.com',
+						'subject' => 'SUBJECT foo',
+						'body' => 'BODY foo bar',
+					]
+				],
+			],
+			'sending email 1: dynamic encoded' => [
+				'subject' => 'SUBJECT 日本語 {FOO}',
+				'body' => 'BODY 日本語 {FOO} {VAR}',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					'test@test.com'
+				],
+				'replace' => [
+					'FOO' => 'foo',
+					'VAR' => 'bar',
+				],
+				'encoding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'test@test.com',
+						'subject' => 'SUBJECT =?UTF-8?B?5pel5pys6KqeIGZvbw==?=',
+						'body' => 'BODY 日本語 foo bar',
+					]
+				],
+			],
+			'sending email 1: dynamic, to override' => [
+				'subject' => 'SUBJECT {FOO}',
+				'body' => 'BODY {FOO} {VAR}',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					[
+						'email' => 'test@test.com',
+						'replace' => [
+							'FOO' => 'foo to'
+						]
+					]
+				],
+				'replace' => [
+					'FOO' => 'foo',
+					'VAR' => 'bar',
+				],
+				'encoding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'test@test.com',
+						'subject' => 'SUBJECT foo to',
+						'body' => 'BODY foo to bar',
+					]
+				],
+			],
+			'sending email 1: dynamic, to override encoded' => [
+				'subject' => 'SUBJECT 日本語 {FOO}',
+				'body' => 'BODY 日本語 {FOO} {VAR}',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					[
+						'email' => 'test@test.com',
+						'replace' => [
+							'FOO' => 'foo to'
+						]
+					]
+				],
+				'replace' => [
+					'FOO' => 'foo',
+					'VAR' => 'bar',
+				],
+				'encoding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'test@test.com',
+						'subject' => 'SUBJECT =?UTF-8?B?5pel5pys6KqeIGZvbyB0bw==?=',
+						'body' => 'BODY 日本語 foo to bar',
+					]
+				],
+			],
+			'sending email 3: dynamic, to mixed override' => [
+				'subject' => 'SUBJECT {FOO}',
+				'body' => 'BODY {FOO} {VAR}',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					[
+						'email' => 't1@test.com',
+						'replace' => [
+							'FOO' => 'foo to 1'
+						]
+					],
+					[
+						'email' => 't2@test.com',
+						'replace' => [
+							'FOO' => 'foo to 2'
+						]
+					],
+					[
+						'email' => 't3@test.com',
+					],
+				],
+				'replace' => [
+					'FOO' => 'foo',
+					'VAR' => 'bar',
+				],
+				'encoding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 't1@test.com',
+						'subject' => 'SUBJECT foo to 1',
+						'body' => 'BODY foo to 1 bar',
+					],
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 't2@test.com',
+						'subject' => 'SUBJECT foo to 2',
+						'body' => 'BODY foo to 2 bar',
+					],
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 't3@test.com',
+						'subject' => 'SUBJECT foo',
+						'body' => 'BODY foo bar',
+					],
+				],
+			],
+			'sending email 3: dynamic, to mixed override encoded' => [
+				'subject' => 'SUBJECT 日本語 {FOO}',
+				'body' => 'BODY 日本語 {FOO} {VAR}',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					[
+						'email' => 't1@test.com',
+						'replace' => [
+							'FOO' => 'foo to 1'
+						]
+					],
+					[
+						'email' => 't2@test.com',
+						'replace' => [
+							'FOO' => 'foo to 2'
+						]
+					],
+					[
+						'email' => 't3@test.com',
+					],
+				],
+				'replace' => [
+					'FOO' => 'foo',
+					'VAR' => 'bar',
+				],
+				'encoding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 't1@test.com',
+						'subject' => 'SUBJECT =?UTF-8?B?5pel5pys6KqeIGZvbyB0byAx?=',
+						'body' => 'BODY 日本語 foo to 1 bar',
+					],
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 't2@test.com',
+						'subject' => 'SUBJECT =?UTF-8?B?5pel5pys6KqeIGZvbyB0byAy?=',
+						'body' => 'BODY 日本語 foo to 2 bar',
+					],
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 't3@test.com',
+						'subject' => 'SUBJECT =?UTF-8?B?5pel5pys6KqeIGZvbw==?=',
+						'body' => 'BODY 日本語 foo bar',
+					],
+				],
+			],
 		];
 	}
 
@@ -181,6 +499,11 @@ final class CoreLibsCreateEmailTest extends TestCase
 		if ($encoding === null) {
 			$encoding = 'UTF-8';
 		}
+		// force new set for each run
+		self::$log->setLogUniqueId(true);
+		// set on of unique log id
+		self::$log->setLogPer('run', true);
+		// init logger
 		$status = \CoreLibs\Create\Email::sendEmail(
 			$subject,
 			$body,
@@ -197,7 +520,63 @@ final class CoreLibsCreateEmailTest extends TestCase
 			$status,
 			'Assert sending status'
 		);
-		// assert content: must load JSON from log file?
+		// assert content: must load JSON from log file
+		if ($status == 2) {
+			// open file, get last entry with 'SEND EMAIL JSON' key
+			$file = file_get_contents(self::$log->getLogFileName());
+			if ($file !== false) {
+				// extract SEND EMAIL JSON line
+				$found = preg_match_all("/^.* <SEND EMAIL JSON> - (.*)$/m", $file, $matches);
+				// print "Found: $found | EMAIL: " . print_r($matches, true) . "\n";
+				if (!empty($matches[1])) {
+					foreach ($matches[1] as $pos => $email_json) {
+						$email = \CoreLibs\Convert\Json::jsonConvertToArray($email_json);
+						// print "EMAIL: " . print_r($email, true) . "\n";
+						$this->assertEquals(
+							$expected_content[$pos]['header']['From'] ?? 'MISSING FROM',
+							$email['header']['From'] ?? '',
+							'Email check: assert header from'
+						);
+						$this->assertEquals(
+							'text/plain; charset=' . $encoding ?? 'UTF-8',
+							$email['header']['Content-type'] ?? '',
+							'Email check: assert header content type'
+						);
+						$this->assertEquals(
+							'1.0',
+							$email['header']['MIME-Version'] ?? '',
+							'Email check: assert header mime version'
+						);
+						$this->assertEquals(
+							$expected_content[$pos]['to'] ?? 'MISSING TO',
+							$email['to'] ?? '',
+							'Email check: assert to'
+						);
+						$this->assertEquals(
+							$expected_content[$pos]['subject'] ?? 'MISSING SUBJECT',
+							$email['subject'] ?? '',
+							'Email check: assert subject'
+						);
+						// body must be translated back to encoding if encoding is not UTF-8
+						$this->assertEquals(
+							$encoding != 'UTF-8' ?
+								mb_convert_encoding($expected_content[$pos]['body'] ?? '', $encoding, 'UTF-8') :
+								$expected_content[$pos]['body'] ?? 'MISSING BODY',
+							$encoding != 'UTF-8' ?
+								mb_convert_encoding($email['body'] ?? '', $encoding, 'UTF-8') :
+								$email['body'] ?? '',
+							'Email check: assert body'
+						);
+						/*
+						[header] [From] => test@test.com
+						[to] => test@test.com
+						[subject] => SUBJECT
+						[body] => BODY
+						*/
+					}
+				}
+			}
+		}
 	}
 }
 

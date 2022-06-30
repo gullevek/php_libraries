@@ -79,8 +79,8 @@ class Email
 		}
 		// if encoding is NOT UTF-8 convert to target
 		if ($encoding != 'UTF-8') {
-			$out_subject = mb_convert_encoding($out_subject, $encoding, 'UTF-8');
-			$out_body = mb_convert_encoding($out_body, $encoding, 'UTF-8');
+			$subject = mb_convert_encoding($subject, $encoding, 'UTF-8');
+			$body = mb_convert_encoding($body, $encoding, 'UTF-8');
 		}
 		// we need to encodde the subject
 		$subject = mb_encode_mimeheader($subject, $encoding);
@@ -142,11 +142,11 @@ class Email
 			// else expect 'email' & 'name'
 			if (
 				is_array($to_email) &&
-				isset($to_email['name']) && isset($to_email['email'])
+				isset($to_email['email'])
 			) {
 				$_to_email = self::encodeEmailName(
 					$to_email['email'],
-					$to_email['name'],
+					$to_email['name'] ?? '',
 					$encoding
 				);
 				$to_emails[] = $_to_email;
@@ -176,7 +176,12 @@ class Email
 
 		// if we have a replace string, we need to do replace run
 		// only if there is no dedicated to replace
-		if (count($replace_content) && !count($to_replace)) {
+		// also run replace if there is nothing to replace at all
+		// this will mime encode the subject
+		if (
+			!count($to_replace) &&
+			count($replace_content) || !count($replace_content)
+		) {
 			list($out_subject, $out_body) = self::replaceContent(
 				$subject,
 				$body,
@@ -185,9 +190,10 @@ class Email
 			);
 		}
 
-		$mail_sent_status = 1;
+		$mail_delivery_status = 1;
 		// send the email
 		foreach ($to_emails as $to_email) {
+			$mail_status = true;
 			// if there is a to replace, if not use the original replace content
 			if (count($to_replace)) {
 				$_replace = [];
@@ -206,7 +212,7 @@ class Email
 				}
 			}
 			if ($test === false) {
-				$status = mail($to_email, $out_subject, $out_body, $headers);
+				$mail_status = mail($to_email, $out_subject, $out_body, $headers);
 			} else {
 				if ($log instanceof \CoreLibs\Debug\Logging) {
 					// build debug strings: convert to UTF-8 if not utf-8
@@ -217,21 +223,22 @@ class Email
 							$out_body :
 							mb_convert_encoding($out_body, 'UTF-8', $encoding)));
 					$log->debug('SEND EMAIL JSON', json_encode([
+						'encoding' => $encoding,
 						'header' => $headers,
 						'to' => $to_email,
 						'subject' => $out_subject,
 						'body' => ($encoding == 'UTF-8' ?
 							$out_body :
 							mb_convert_encoding($out_body, 'UTF-8', $encoding))
-					]));
+					]) ?: '{}');
 				}
-				$mail_sent_status = 2;
+				$mail_delivery_status = 2;
 			}
-			if (!$status) {
-				$mail_sent_status = 0;
+			if (!$mail_status) {
+				$mail_delivery_status = 0;
 			}
 		}
-		return $mail_sent_status;
+		return $mail_delivery_status;
 	}
 }
 
