@@ -567,12 +567,6 @@ final class CoreLibsCreateEmailTest extends TestCase
 								$email['body'] ?? '',
 							'Email check: assert body'
 						);
-						/*
-						[header] [From] => test@test.com
-						[to] => test@test.com
-						[subject] => SUBJECT
-						[body] => BODY
-						*/
 					}
 				}
 			}
