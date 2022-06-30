@@ -562,8 +562,8 @@ final class CoreLibsCreateEmailTest extends TestCase
 							$encoding != 'UTF-8' ?
 								mb_convert_encoding($expected_content[$pos]['body'] ?? '', $encoding, 'UTF-8') :
 								$expected_content[$pos]['body'] ?? 'MISSING BODY',
-							$encoding != 'UTF-8' ?
-								mb_convert_encoding($email['body'] ?? '', $encoding, 'UTF-8') :
+							$email['encoding'] != 'UTF-8' ?
+								mb_convert_encoding($email['body'] ?? '', $email['encoding'], 'UTF-8') :
 								$email['body'] ?? '',
 							'Email check: assert body'
 						);
