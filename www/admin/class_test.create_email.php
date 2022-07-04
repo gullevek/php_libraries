@@ -70,10 +70,11 @@ $status = Email::sendEmail(
 	],
 	[],
 	'UTF-8',
+	false,
 	true,
 	$log
 );
-print "SENDING: " . $status . "<br>";
+print "SENDING A: " . $status . "<br>";
 $status = Email::sendEmail(
 	'TEST {REPLACE}',
 	'BODY {OTHER}',
@@ -97,10 +98,11 @@ $status = Email::sendEmail(
 		'OTHER' => '**other**'
 	],
 	'UTF-8',
+	false,
 	true,
 	$log
 );
-print "SENDING: " . $status . "<br>";
+print "SENDING B: " . $status . "<br>";
 
 $status = Email::sendEmail(
 	'TEST',
@@ -110,10 +112,29 @@ $status = Email::sendEmail(
 	['a@a.com', 'b@b.com'],
 	[],
 	'UTF-8',
+	false,
 	true,
 	$log
 );
-print "SENDING: " . $status . "<br>";
+print "SENDING C: " . $status . "<br>";
+
+// SUBJECT 日本語ｶﾀｶﾅﾊﾟ
+$status = Email::sendEmail(
+	'TEST 日本語ｶﾀｶﾅﾊﾟカタカナバ',
+	'BODY 日本語ｶﾀｶﾅﾊﾟカタカナバ',
+	'test@test.com',
+	'Test Name 日本語ｶﾀｶﾅﾊﾟ',
+	[
+		['email' => 'a@a.com', 'name' => 'a 日本語ｶﾀｶﾅﾊﾟカタカナバ'],
+		['email' => 'b@b.com', 'name' => 'b 日本語ﾌﾟﾌﾞｶﾞﾊﾞｹブプガバケ'],
+	],
+	[],
+	'UTF-8',
+	false,
+	true,
+	$log
+);
+print "SENDING D: " . $status . "<br>";
 
 // error message
 print $log->printErrorMsg();

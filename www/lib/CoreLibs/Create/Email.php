@@ -13,6 +13,20 @@ namespace CoreLibs\Create;
  */
 class Email
 {
+	/** @var array<string> allowed list for encodings that can do KV folding */
+	private static $encoding_kv_allowed = [
+		'UTF-8',
+		'EUC-JP',
+		'SJIS',
+		'SJIS-win',
+		'ISO-2022-JP',
+		'ISO-2022-JP-MS',
+		'JIS',
+		'JIS-ms',
+	];
+	/** @var string, normaly this does not need to be changed */
+	private static $mb_convert_kana_mode = 'KV';
+
 	/**
 	 * create mime encoded email part for to/from emails.
 	 * If encoding is not UTF-8 it will convert the email name to target encoding
@@ -22,12 +36,14 @@ class Email
 	 * @param  string $email      E-Mail address
 	 * @param  string $email_name Name for the email address, in UTF-8, if not set, empty
 	 * @param  string $encoding   Encoding, if not set UTF-8
+	 * @param  bool   $kv_fodling If set to true and a valid encoding, do KV folding
 	 * @return string             Correctly encoded and build email string
 	 */
 	public static function encodeEmailName(
 		string $email,
 		string $email_name = '',
-		string $encoding = 'UTF-8'
+		string $encoding = 'UTF-8',
+		bool $kv_folding = false
 	): string {
 		if (!empty($email_name)) {
 			// if encoding is not UTF-8 then we convert
@@ -36,11 +52,13 @@ class Email
 			}
 			$email_name =
 				mb_encode_mimeheader(
-					mb_convert_kana(
+					in_array($encoding, self::$encoding_kv_allowed) && $kv_folding ?
+						mb_convert_kana(
+							$email_name,
+							self::$mb_convert_kana_mode,
+							$encoding
+						) :
 						$email_name,
-						'KV',
-						$encoding
-					),
 					$encoding
 				);
 			return '"' . $email_name . '" '
@@ -53,17 +71,20 @@ class Email
 	/**
 	 * Subject/Body replace sub function
 	 *
-	 * @param  string               $subject  Subject string, in UTF-8
-	 * @param  string               $body     Body string, in UTF-8
-	 * @param  array<string,string> $replace  Replace the array as key -> value, in UTF-8
-	 * @param  string               $encoding Encoding for subject encode mime header
-	 * @return array<string>                  Pos 0: Subject, Pos 1: Body
+	 * @param  string               $subject    Subject string, in UTF-8
+	 * @param  string               $body       Body string, in UTF-8
+	 * @param  array<string,string> $replace    Replace the array as key -> value, in UTF-8
+	 * @param  string               $encoding   Encoding for subject encode mime header
+	 * @param  bool                 $kv_fodling If set to true and a valid encoding,
+	 *                                          do KV folding
+	 * @return array<string>                    Pos 0: Subject, Pos 1: Body
 	 */
 	private static function replaceContent(
 		string $subject,
 		string $body,
 		array $replace,
-		string $encoding
+		string $encoding,
+		bool $kv_folding
 	): array {
 		foreach (['subject', 'body'] as $element) {
 			$$element = str_replace(
@@ -83,7 +104,17 @@ class Email
 			$body = mb_convert_encoding($body, $encoding, 'UTF-8');
 		}
 		// we need to encodde the subject
-		$subject = mb_encode_mimeheader($subject, $encoding);
+		$subject = mb_encode_mimeheader(
+			in_array($encoding, self::$encoding_kv_allowed) && $kv_folding ?
+				// for any non UTF-8 encoding convert kana
+				mb_convert_kana(
+					$subject,
+					self::$mb_convert_kana_mode,
+					$encoding
+				) :
+				$subject,
+			$encoding
+		);
 		return [$subject, $body];
 	}
 
@@ -104,6 +135,8 @@ class Email
 	 * @param  array<string,string> $replace_content Subject/Body replace as
 	 *                                               search -> replace, in UTF-8
 	 * @param  string               $encoding        E-Mail encoding, default UTF-8
+	 * @param  bool                 $kv_folding      If set to true and a valid encoding,
+	 *                                               do KV folding
 	 * @param  bool                 $test            test flag, default off
 	 * @param  \CoreLibs\Debug\Logging|null $log     Logging class,
 	 *                                               only used if test flag is true
@@ -112,6 +145,7 @@ class Email
 	 *                              0 for send not ok
 	 *                              -1 for nothing set (emails, subject, body)
 	 *                              -2 for empty to list
+	 *                              -3 encoding target not valid or not installed
 	 */
 	public static function sendEmail(
 		string $subject,
@@ -121,6 +155,7 @@ class Email
 		array $send_to_emails,
 		array $replace_content = [],
 		string $encoding = 'UTF-8',
+		bool $kv_folding = false,
 		bool $test = false,
 		?\CoreLibs\Debug\Logging $log = null
 	): int {
@@ -136,6 +171,12 @@ class Email
 		if (empty($subject) || empty($body) || empty($from_email)) {
 			return -1;
 		}
+		if (
+			$encoding != 'UTF-8' &&
+			!in_array($encoding, mb_list_encodings())
+		) {
+			return -3;
+		}
 		// if not one valid to, abort
 		foreach ($send_to_emails as $to_email) {
 			// to_email can be string, then only to email
@@ -147,7 +188,8 @@ class Email
 				$_to_email = self::encodeEmailName(
 					$to_email['email'],
 					$to_email['name'] ?? '',
-					$encoding
+					$encoding,
+					$kv_folding
 				);
 				$to_emails[] = $_to_email;
 				// if we have to replacement, this override replace content
@@ -183,7 +225,8 @@ class Email
 				$subject,
 				$body,
 				$replace_content,
-				$encoding
+				$encoding,
+				$kv_folding
 			);
 		}
 
@@ -205,7 +248,8 @@ class Email
 						$subject,
 						$body,
 						$_replace,
-						$encoding
+						$encoding,
+						$kv_folding
 					);
 				}
 			}
@@ -220,6 +264,7 @@ class Email
 				// build debug strings: convert to UTF-8 if not utf-8
 				$log->debug('SEND EMAIL', 'HEADERS: ' . $log->prAr($headers) . ', '
 					. 'ENCODING: ' . $encoding . ',  '
+					. 'KV FOLDING: ' . $log->prBl($kv_folding) . ',  '
 					. 'TO: ' . $to_email . ', '
 					. 'SUBJECT: ' . $out_subject . ', '
 					. 'BODY: ' . ($encoding == 'UTF-8' ?
@@ -227,6 +272,7 @@ class Email
 						mb_convert_encoding($out_body, 'UTF-8', $encoding)));
 				$log->debug('SEND EMAIL JSON', json_encode([
 					'encoding' => $encoding,
+					'kv_folding' => $kv_folding,
 					'header' => $headers,
 					'to' => $to_email,
 					'subject' => $out_subject,

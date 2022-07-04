@@ -41,10 +41,12 @@ final class CoreLibsCreateEmailTest extends TestCase
 		// 0: email
 		// 1: name
 		// 2: encoding
-		// 3: expected
+		// 3: kv_folding
+		// 4: expected
 		return [
 			'all empty' => [
 				'',
+				null,
 				null,
 				null,
 				''
@@ -53,11 +55,13 @@ final class CoreLibsCreateEmailTest extends TestCase
 				'test@test.com',
 				null,
 				null,
+				null,
 				'test@test.com'
 			],
 			'email and name' => [
 				'test@test.com',
 				'Test Name',
+				null,
 				null,
 				'"Test Name" <test@test.com>'
 			],
@@ -65,12 +69,28 @@ final class CoreLibsCreateEmailTest extends TestCase
 				'test@test.com',
 				'日本語',
 				null,
+				null,
 				'"=?UTF-8?B?5pel5pys6Kqe?=" <test@test.com>'
+			],
+			'name in mime encoded with half width Katakana, default UTF-8' => [
+				'test@test.com',
+				'日本語ｶﾀｶﾅﾊﾟ',
+				null,
+				null,
+				'"=?UTF-8?B?5pel5pys6Kqe7722776A7722776F776K776f?=" <test@test.com>'
+			],
+			'name in mime encoded with half width Katakana, folding on, default UTF-8' => [
+				'test@test.com',
+				'日本語ｶﾀｶﾅﾊﾟ',
+				'UTF-8',
+				true,
+				'"=?UTF-8?B?5pel5pys6Kqe44Kr44K/44Kr44OK44OR?=" <test@test.com>'
 			],
 			'name in mime encoded, UTF-8 parameter' => [
 				'test@test.com',
 				'日本語',
 				'UTF-8',
+				null,
 				'"=?UTF-8?B?5pel5pys6Kqe?=" <test@test.com>'
 			],
 			// does internal UTF-8 to ISO-2022-JP convert
@@ -78,7 +98,22 @@ final class CoreLibsCreateEmailTest extends TestCase
 				'test@test.com',
 				'日本語',
 				'ISO-2022-JP',
-				'"=?ISO-2022-JP?B?GyRCRnxLXA==?=" <test@test.com>'
+				null,
+				'"=?ISO-2022-JP?B?GyRCRnxLXDhsGyhC?=" <test@test.com>'
+			],
+			'encoding with half width Katakana in ISO-2022-JP' => [
+				'test@test.com',
+				'日本語ｶﾀｶﾅﾊﾟ',
+				'ISO-2022-JP',
+				null,
+				'"=?ISO-2022-JP?B?GyRCRnxLXDhsGyhCPz8/Pz8/?=" <test@test.com>'
+			],
+			'encoding with half width Katakana, folding on in ISO-2022-JP' => [
+				'test@test.com',
+				'日本語ｶﾀｶﾅﾊﾟ',
+				'ISO-2022-JP',
+				true,
+				'"=?ISO-2022-JP?B?GyRCRnxLXDhsGyhCPz8/Pz8=?=" <test@test.com>'
 			]
 		];
 	}
@@ -95,14 +130,17 @@ final class CoreLibsCreateEmailTest extends TestCase
 		string $email,
 		?string $name,
 		?string $encoding,
+		?bool $kv_folding,
 		string $expected
 	): void {
-		if ($name === null && $encoding === null) {
+		if ($name === null && $encoding === null && $kv_folding === null) {
 			$encoded_email = \CoreLibs\Create\Email::encodeEmailName($email);
-		} elseif ($encoding === null) {
+		} elseif ($encoding === null && $kv_folding === null) {
 			$encoded_email = \CoreLibs\Create\Email::encodeEmailName($email, $name);
-		} else {
+		} elseif ($kv_folding === null) {
 			$encoded_email = \CoreLibs\Create\Email::encodeEmailName($email, $name, $encoding);
+		} else {
+			$encoded_email = \CoreLibs\Create\Email::encodeEmailName($email, $name, $encoding, $kv_folding);
 		}
 		$this->assertEquals(
 			$expected,
@@ -119,6 +157,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 		// 4: array for to email
 		// 5: replace content ([]/null)
 		// 6: encoding (UTF-8/null)
+		// 7: kv_folding
 		// 8: return status
 		// 9: expected content
 		return [
@@ -130,6 +169,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 				'to_email' => [],
 				'replace' => null,
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => -1,
 				'expected_content' => [],
 			],
@@ -141,7 +181,20 @@ final class CoreLibsCreateEmailTest extends TestCase
 				'to_email' => [],
 				'replace' => null,
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => -2,
+				'expected_content' => [],
+			],
+			'bad encoding, fail -3' => [
+				'subject' => 'SUBJECT',
+				'body' => 'BODY',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => ['to@test.com'],
+				'replace' => null,
+				'encoding' => 'IDONTEXISTENCODING',
+				'kv_folding' => null,
+				'expected_status' => -3,
 				'expected_content' => [],
 			],
 			'sending email 1' => [
@@ -154,6 +207,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 				],
 				'replace' => null,
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -176,6 +230,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 				],
 				'replace' => null,
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -184,6 +239,52 @@ final class CoreLibsCreateEmailTest extends TestCase
 						],
 						'to' => 'test@test.com',
 						'subject' => 'SUBJECT =?UTF-8?B?5pel5pys6Kqe?=',
+						'body' => 'BODY 日本語',
+					]
+				],
+			],
+			'sending email 1, encoded, with half width katakanata' => [
+				'subject' => 'SUBJECT 日本語ｶﾀｶﾅﾊﾟ',
+				'body' => 'BODY 日本語',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					'test@test.com'
+				],
+				'replace' => null,
+				'encoding' => 'UTF-8',
+				'kv_folding' => null,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'test@test.com',
+						'subject' => 'SUBJECT =?UTF-8?B?5pel5pys6Kqe7722776A7722776F776K776f?=',
+						'body' => 'BODY 日本語',
+					]
+				],
+			],
+			'sending email 1, encoded, with half width katakanata, folding on' => [
+				'subject' => 'SUBJECT 日本語ｶﾀｶﾅﾊﾟ',
+				'body' => 'BODY 日本語',
+				'from_email' => 'test@test.com',
+				'from_name' => '',
+				'to_email' => [
+					'test@test.com'
+				],
+				'replace' => null,
+				'encoding' => 'UTF-8',
+				'kv_folding' => true,
+				'expected_status' => 2,
+				'expected_content' => [
+					[
+						'header' => [
+							'From' => 'test@test.com'
+						],
+						'to' => 'test@test.com',
+						'subject' => 'SUBJECT =?UTF-8?B?5pel5pys6Kqe44Kr44K/44Kr44OK44OR?=',
 						'body' => 'BODY 日本語',
 					]
 				],
@@ -198,6 +299,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 				],
 				'replace' => null,
 				'encoding' => 'ISO-2022-JP',
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -222,6 +324,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 				],
 				'replace' => null,
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -255,6 +358,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 					'VAR' => 'bar',
 				],
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -280,6 +384,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 					'VAR' => 'bar',
 				],
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -310,6 +415,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 					'VAR' => 'bar',
 				],
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -340,6 +446,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 					'VAR' => 'bar',
 				],
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -379,6 +486,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 					'VAR' => 'bar',
 				],
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -434,6 +542,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 					'VAR' => 'bar',
 				],
 				'encoding' => null,
+				'kv_folding' => null,
 				'expected_status' => 2,
 				'expected_content' => [
 					[
@@ -478,6 +587,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 	 * @param  array       $to_email
 	 * @param  array|null  $replace
 	 * @param  string|null $encoding
+	 * @param  bool|null   $kv_folding
 	 * @param  int         $expected_status
 	 * @param  array       $expected_content
 	 * @return void
@@ -490,6 +600,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 		array $to_email,
 		?array $replace,
 		?string $encoding,
+		?bool $kv_folding,
 		int $expected_status,
 		array $expected_content
 	): void {
@@ -498,6 +609,9 @@ final class CoreLibsCreateEmailTest extends TestCase
 		}
 		if ($encoding === null) {
 			$encoding = 'UTF-8';
+		}
+		if ($kv_folding === null) {
+			$kv_folding = false;
 		}
 		// force new set for each run
 		self::$log->setLogUniqueId(true);
@@ -512,6 +626,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 			$to_email,
 			$replace,
 			$encoding,
+			$kv_folding,
 			true,
 			self::$log
 		);
