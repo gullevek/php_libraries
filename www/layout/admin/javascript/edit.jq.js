@@ -14,9 +14,9 @@ if (!DEBUG) {
 	});
 }*/
 
-// open overlay boxes counter
-var GL_OB_S = 30;
-var GL_OB_BASE = 30;
+// open overlay boxes counter for z-index
+var GL_OB_S = 100;
+var GL_OB_BASE = 100;
 
 /**
  * opens a popup window with winName and given features (string)

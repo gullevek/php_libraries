@@ -1,5 +1,7 @@
 -- 2022/6/17 update edit_user with login uid
 
+-- !!! COPY TABLE ARRAY FOLDER !!!
+
 -- the login uid, at least 32 chars
 ALTER TABLE edit_user ADD login_user_id VARCHAR UNIQUE;
 -- CREATE UNIQUE INDEX edit_user_login_user_id_key ON edit_user (login_user_id) WHERE login_user_id IS NOT NULL;

@@ -24,7 +24,7 @@ class Email
 		'JIS',
 		'JIS-ms',
 	];
-	/** @var string, normaly this does not need to be changed */
+	/** @var string normaly this does not need to be changed */
 	private static $mb_convert_kana_mode = 'KV';
 
 	/**
@@ -36,7 +36,7 @@ class Email
 	 * @param  string $email      E-Mail address
 	 * @param  string $email_name Name for the email address, in UTF-8, if not set, empty
 	 * @param  string $encoding   Encoding, if not set UTF-8
-	 * @param  bool   $kv_fodling If set to true and a valid encoding, do KV folding
+	 * @param  bool   $kv_folding If set to true and a valid encoding, do KV folding
 	 * @return string             Correctly encoded and build email string
 	 */
 	public static function encodeEmailName(
@@ -75,7 +75,7 @@ class Email
 	 * @param  string               $body       Body string, in UTF-8
 	 * @param  array<string,string> $replace    Replace the array as key -> value, in UTF-8
 	 * @param  string               $encoding   Encoding for subject encode mime header
-	 * @param  bool                 $kv_fodling If set to true and a valid encoding,
+	 * @param  bool                 $kv_folding If set to true and a valid encoding,
 	 *                                          do KV folding
 	 * @return array<string>                    Pos 0: Subject, Pos 1: Body
 	 */
