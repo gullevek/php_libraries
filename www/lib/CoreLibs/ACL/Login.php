@@ -1287,6 +1287,7 @@ class Login
 					. $strings['PASSWORD_CHANGE_BUTTON_VALUE']
 					. '" OnClick="ShowHideDiv(\'pw_change_div\');">'
 			]);
+			// TODO: submit or JS to set target page as ajax call
 			// NOTE: for the HTML block I ignore line lengths
 			// phpcs:disable
 			$this->login_template['password_change'] = <<<EOM
@@ -1329,9 +1330,11 @@ EOM;
 		}
 
 		// now check templates
+		// TODO: submit or JS to set target page as ajax call
 		if (!$this->login_template['template']) {
 			$this->login_template['template'] = <<<EOM
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <title>{HTML_TITLE}</title>
 <style type="text/css">
@@ -1485,7 +1488,6 @@ EOM;
 		}
 		// initial the session if there is no session running already
 		// check if session exists and could be created
-		// TODO: move session creation and check to outside?
 		if ($this->session->checkActiveSession() === false) {
 			$this->login_error = 2;
 			echo '<b>No active session found</b>';

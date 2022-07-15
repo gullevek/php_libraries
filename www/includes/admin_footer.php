@@ -2,9 +2,9 @@
 
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
-* CREATED: 2008/08/14
+* CREATED:
 * SHORT DESCRIPTION:
-* URL redirect header
+*
 * HISTORY:
 *********************************************************************/
 
