@@ -92,6 +92,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Convert\\Math' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Math.php',
         'CoreLibs\\Convert\\MimeAppName' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/MimeAppName.php',
         'CoreLibs\\Convert\\MimeEncode' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/MimeEncode.php',
+        'CoreLibs\\Convert\\Strings' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Strings.php',
         'CoreLibs\\Create\\Email' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/Email.php',
         'CoreLibs\\Create\\Hash' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/Hash.php',
         'CoreLibs\\Create\\RandomKey' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/RandomKey.php',

@@ -70,6 +70,7 @@ print '<div><a href="class_test.hash.php">Class Test: HASH</a></div>';
 print '<div><a href="class_test.encoding.php">Class Test: ENCODING (CHECK/CONVERT/MIME)</a></div>';
 print '<div><a href="class_test.image.php">Class Test: IMAGE</a></div>';
 print '<div><a href="class_test.byte.php">Class Test: BYTE CONVERT</a></div>';
+print '<div><a href="class_test.strings.php">Class Test: STRING CONVERT</a></div>';
 print '<div><a href="class_test.datetime.php">Class Test: DATE/TIME</a></div>';
 print '<div><a href="class_test.array.php">Class Test: ARRAY HANDLER</a></div>';
 print '<div><a href="class_test.file.php">Class Test: FILE</a></div>';

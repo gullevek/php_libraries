@@ -27,6 +27,7 @@ return array(
     'CoreLibs\\Convert\\Math' => $baseDir . '/lib/CoreLibs/Convert/Math.php',
     'CoreLibs\\Convert\\MimeAppName' => $baseDir . '/lib/CoreLibs/Convert/MimeAppName.php',
     'CoreLibs\\Convert\\MimeEncode' => $baseDir . '/lib/CoreLibs/Convert/MimeEncode.php',
+    'CoreLibs\\Convert\\Strings' => $baseDir . '/lib/CoreLibs/Convert/Strings.php',
     'CoreLibs\\Create\\Email' => $baseDir . '/lib/CoreLibs/Create/Email.php',
     'CoreLibs\\Create\\Hash' => $baseDir . '/lib/CoreLibs/Create/Hash.php',
     'CoreLibs\\Create\\RandomKey' => $baseDir . '/lib/CoreLibs/Create/RandomKey.php',
