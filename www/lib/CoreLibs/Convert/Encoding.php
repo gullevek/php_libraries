@@ -1,7 +1,7 @@
 <?php
 
 /*
- * check if string is valid in target encoding
+ * convert string frmo one encdoing to another with auto detect flags
  */
 
 declare(strict_types=1);

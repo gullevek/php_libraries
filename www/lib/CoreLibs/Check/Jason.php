@@ -1,7 +1,7 @@
 <?php
 
 /*
- * DEPRECATED: Use correct Json:: instead
+ * DEPRECATED: Use correct Convert\Json:: instead
  */
 
 declare(strict_types=1);

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * image thumbnail, rotate, etc
+ * byte conversion from and to human readable
  */
 
 declare(strict_types=1);

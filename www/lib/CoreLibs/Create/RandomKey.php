@@ -1,7 +1,7 @@
 <?php
 
 /*
- * html convert functions
+ * random key functions
  */
 
 declare(strict_types=1);

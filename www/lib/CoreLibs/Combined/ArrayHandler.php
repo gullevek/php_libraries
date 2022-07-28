@@ -1,7 +1,7 @@
 <?php
 
 /*
- * html convert functions
+ * array search and transform functions
  */
 
 declare(strict_types=1);
