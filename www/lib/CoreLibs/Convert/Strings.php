@@ -11,6 +11,38 @@ namespace CoreLibs\Convert;
 class Strings
 {
 	/**
+	 * return the elements in the split list
+	 * 0 if nothing / invalid split
+	 * 1 if no split character found
+	 *
+	 * @param  string $split_format
+	 * @param  string $split_characters
+	 * @return int
+	 */
+	public static function countSplitParts(
+		string $split_format,
+		string $split_characters = '-'
+	): int {
+		if (
+			empty($split_format) ||
+			// non valid characters inside, abort
+			!preg_match("/^[0-9" . $split_characters . "]/", $split_format) ||
+			preg_match('/[^\x20-\x7e]/', $split_characters)
+		) {
+			return 0;
+		}
+		$split_list = preg_split(
+			// allowed split characters
+			"/([" . $split_characters . "]{1})/",
+			$split_format
+		);
+		if (!is_array($split_list)) {
+			return 0;
+		}
+		return count(array_filter($split_list));
+	}
+
+	/**
 	 * split format a string base on a split format string
 	 * split format string is eg
 	 * 4-4-4 that means 4 characters DASH 4 characters DASH 4 characters
@@ -31,18 +63,19 @@ class Strings
 		string $split_format,
 		string $split_characters = '-'
 	): string {
-		// abort if split format is empty
-		if (empty($split_format)) {
+		if (
+			// abort if split format is empty
+			empty($split_format) ||
+			// if not in the valid ASCII character range for any of the strings
+			preg_match('/[^\x20-\x7e]/', $value) ||
+			// preg_match('/[^\x20-\x7e]/', $split_format) ||
+			preg_match('/[^\x20-\x7e]/', $split_characters) ||
+			// only numbers and split characters in split_format
+			!preg_match("/[0-9" . $split_characters . "]/", $split_format)
+		) {
 			return $value;
 		}
-		// if not in the valid ASCII character range
-		// might need some tweaking
-		if (preg_match('/[^\x20-\x7e]/', $value)) {
-			return $value;
-		}
-		// if (!mb_check_encoding($value, 'ASCII')) {
-		// 	return $value;
-		// }
+		// split format list
 		$split_list = preg_split(
 			// allowed split characters
 			"/([" . $split_characters . "]{1})/",
@@ -65,7 +98,7 @@ class Strings
 				}
 				$out .= $_part;
 				$pos += (int)$offset;
-			} else {
+			} elseif ($pos) { // if first, do not add
 				$out .= $offset;
 				$last_split = $offset;
 			}

@@ -68,7 +68,15 @@ print "Convert: $string with $split to: "
 	. \CoreLibs\Convert\Strings::splitFormatString($string, $split)
 	. "<br>";
 
-
+$test_splits = [
+	'',
+	'2',
+	'2-2',
+	'2-3-4',
+];
+foreach ($test_splits as $split) {
+	print "$split with count: " . \CoreLibs\Convert\Strings::countSplitParts($split) . "<br>";
+}
 
 // error message
 print $log->printErrorMsg();

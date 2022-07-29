@@ -49,6 +49,24 @@ final class CoreLibsConvertStringsTest extends TestCase
 				null,
 				'12-34'
 			],
+			'string format trailing match' => [
+				'1234',
+				'2-2-',
+				null,
+				'12-34'
+			],
+			'string format leading match' => [
+				'1234',
+				'-2-2',
+				null,
+				'12-34'
+			],
+			'string format double inside match' => [
+				'1234',
+				'2--2',
+				null,
+				'12--34',
+			],
 			'string format short first' => [
 				'1',
 				'2-2',
@@ -109,6 +127,12 @@ final class CoreLibsConvertStringsTest extends TestCase
 				null,
 				'あいうえ'
 			],
+			'mutltibyte split string' => [
+				'1234',
+				'２-２',
+				null,
+				'1234'
+			],
 		];
 	}
 
@@ -140,6 +164,90 @@ final class CoreLibsConvertStringsTest extends TestCase
 			$output = \CoreLibs\Convert\Strings::splitFormatString(
 				$input,
 				$format,
+				$split_characters
+			);
+		}
+		$this->assertEquals(
+			$expected,
+			$output
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function countSplitPartsProvider(): array
+	{
+		return [
+			'0 elements' => [
+				'',
+				null,
+				0
+			],
+			'1 element' => [
+				'1',
+				null,
+				1,
+			],
+			'2 elements, trailing' => [
+				'1-2-',
+				null,
+				2
+			],
+			'2 elements, leading' => [
+				'-1-2',
+				null,
+				2
+			],
+			'2 elements, midde double' => [
+				'1--2',
+				null,
+				2
+			],
+			'4 elements' => [
+				'1-2-3-4',
+				null,
+				4
+			],
+			'3 elemenst, other splitter' => [
+				'2-3_3',
+				'-_',
+				3
+			],
+			'illegal splitter' => [
+				'あsdf',
+				null,
+				0
+			]
+		];
+	}
+
+	/**
+	 * count split parts
+	 *
+	 * @covers ::countSplitParts
+	 * @dataProvider countSplitPartsProvider
+	 * @testdox countSplitParts $input with splitters $split_characters will be $expected [$_dataName]
+	 *
+	 * @param  string      $input
+	 * @param  string|null $split_characters
+	 * @param  int         $expected
+	 * @return void
+	 */
+	public function testCountSplitParts(
+		string $input,
+		?string $split_characters,
+		int $expected
+	): void {
+		if ($split_characters === null) {
+			$output = \CoreLibs\Convert\Strings::countSplitParts(
+				$input
+			);
+		} else {
+			$output = \CoreLibs\Convert\Strings::countSplitParts(
+				$input,
 				$split_characters
 			);
 		}
