@@ -35,6 +35,14 @@ class Strings
 		if (empty($split_format)) {
 			return $value;
 		}
+		// if not in the valid ASCII character range
+		// might need some tweaking
+		if (preg_match('/[^\x20-\x7e]/', $value)) {
+			return $value;
+		}
+		// if (!mb_check_encoding($value, 'ASCII')) {
+		// 	return $value;
+		// }
 		$split_list = preg_split(
 			// allowed split characters
 			"/([" . $split_charcters . "]{1})/",

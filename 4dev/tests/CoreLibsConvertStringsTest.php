@@ -97,7 +97,13 @@ final class CoreLibsConvertStringsTest extends TestCase
 				'2-2',
 				null,
 				'12--3-4'
-			]
+			],
+			'mutltibyte string' => [
+				'あいうえ',
+				'2-2',
+				null,
+				'あいうえ'
+			],
 		];
 	}
 

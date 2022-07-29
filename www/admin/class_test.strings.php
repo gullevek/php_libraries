@@ -64,6 +64,13 @@ $string = '1234';
 print "Convert: $string with $split to: "
 	. \CoreLibs\Convert\Strings::splitFormatString($string, $split)
 	. "<br>";
+$split = '2-2';
+$string = 'あいうえ';
+print "Convert: $string with $split to: "
+	. \CoreLibs\Convert\Strings::splitFormatString($string, $split)
+	. "<br>";
+
+
 
 // error message
 print $log->printErrorMsg();
