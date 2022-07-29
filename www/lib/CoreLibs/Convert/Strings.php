@@ -11,9 +11,10 @@ namespace CoreLibs\Convert;
 class Strings
 {
 	/**
-	 * return the elements in the split list
+	 * return the number of elements in the split list
 	 * 0 if nothing / invalid split
 	 * 1 if no split character found
+	 * n for the numbers in the split list
 	 *
 	 * @param  string $split_format
 	 * @param  string $split_characters
