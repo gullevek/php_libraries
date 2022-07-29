@@ -13,6 +13,11 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsConvertStringsTest extends TestCase
 {
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function splitFormatStringProvider(): array
 	{
 		// 0: input

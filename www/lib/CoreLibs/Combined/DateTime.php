@@ -1,7 +1,7 @@
 <?php
 
 /*
- * image thumbnail, rotate, etc
+ * date convert and check functions
  */
 
 declare(strict_types=1);
@@ -191,6 +191,54 @@ class DateTime
 		} else {
 			return $timestring;
 		}
+	}
+
+	/**
+	 * Returns long or short day of week name based on ISO day of week number
+	 * 1: Monday
+	 * ...
+	 * 7: Sunday
+	 *
+	 * @param  int    $isodow 1: Monday, 7: Sunday
+	 * @param  bool   $long   Default false 'Mon', if true 'Monday'
+	 * @return string         Day of week string either short 'Mon' or long 'Monday'
+	 */
+	public static function setWeekdayNameFromIsoDow(int $isodow, bool $long = false): string
+	{
+		// if not valid, set to invalid
+		if ($isodow < 1 || $isodow > 7) {
+			return $long ? 'Invalid' : 'Inv';
+		}
+		return date($long ? 'l' : 'D', strtotime("Sunday +{$isodow} days"));
+	}
+
+	/**
+	 * Get the day of week Name from date
+	 *
+	 * @param  string $date Any valid date
+	 * @param  bool   $long Default false 'Mon', if true 'Monday'
+	 * @return string       Day of week string either short 'Mon' or long 'Monday'
+	 */
+	public static function setWeekdayNameFromDate(string $date, bool $long = false): string
+	{
+		if (!self::checkDate($date)) {
+			return $long ? 'Invalid' : 'Inv';
+		}
+		return date($long ? 'l' : 'D', strtotime($date));
+	}
+
+	/**
+	 * Get the day of week Name from date
+	 *
+	 * @param  string $date  Any valid date
+	 * @return int           ISO Weekday number 1: Monday, 7: Sunday, -1 for invalid date
+	 */
+	public static function setWeekdayNumberFromDate(string $date): int
+	{
+		if (!self::checkDate($date)) {
+			return -1;
+		}
+		return (int)date('N', strtotime($date));
 	}
 
 	/**

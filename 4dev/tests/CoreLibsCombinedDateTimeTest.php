@@ -13,7 +13,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsCombinedDateTimeTest extends TestCase
 {
-
 	/**
 	 * timestamps
 	 *
@@ -618,11 +617,167 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	 * @param array $expected
 	 * @return void
 	 */
-	public function testCalcDaysInterval(string $input_a, string $input_b, bool $flag, $expected): void
-	{
+	public function testCalcDaysInterval(
+		string $input_a,
+		string $input_b,
+		bool $flag,
+		$expected
+	): void {
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Combined\DateTime::calcDaysInterval($input_a, $input_b, $flag)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function weekdayNumberProvider(): array
+	{
+		return [
+			'0 invalid' => [0, null, 'Inv',],
+			'0 invalid long' => [0, true, 'Invalid',],
+			'1 short' => [1, null, 'Mon',],
+			'1 long' => [1, true, 'Monday',],
+			'2 short' => [2, null, 'Tue',],
+			'2 long' => [2, true, 'Tuesday',],
+			'3 short' => [3, null, 'Wed',],
+			'3 long' => [3, true, 'Wednesday',],
+			'4 short' => [4, null, 'Thu',],
+			'4 long' => [4, true, 'Thursday',],
+			'5 short' => [5, null, 'Fri',],
+			'5 long' => [5, true, 'Friday',],
+			'6 short' => [6, null, 'Sat',],
+			'6 long' => [6, true, 'Saturday',],
+			'7 short' => [7, null, 'Sun',],
+			'7 long' => [7, true, 'Sunday',],
+			'8 invalid' => [8, null, 'Inv',],
+			'8 invalid long' => [8, true, 'Invalid',],
+		];
+	}
+
+	/**
+	 * int weekday number to string weekday
+	 *
+	 * @covers ::setWeekdayNameFromIsoDow
+	 * @dataProvider weekdayNumberProvider
+	 * @testdox weekdayListProvider $input (short $flag) will be $expected [$_dataName]
+	 *
+	 * @param  int       $input
+	 * @param  bool|null $flag
+	 * @param  string    $expected
+	 * @return void
+	 */
+	public function testSetWeekdayNameFromIsoDow(
+		int $input,
+		?bool $flag,
+		string $expected
+	): void {
+		if ($flag === null) {
+			$output = \CoreLibs\Combined\DateTime::setWeekdayNameFromIsoDow($input);
+		} else {
+			$output = \CoreLibs\Combined\DateTime::setWeekdayNameFromIsoDow($input, $flag);
+		}
+		$this->assertEquals(
+			$expected,
+			$output
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function weekdayDateProvider(): array
+	{
+		return [
+			'invalid date' => ['2022-02-31', -1],
+			'1: monday' => ['2022-07-25', 1],
+			'2: tuesday' => ['2022-07-26', 2],
+			'3: wednesday' => ['2022-07-27', 3],
+			'4: thursday' => ['2022-07-28', 4],
+			'5: friday' => ['2022-07-29', 5],
+			'6: saturday' => ['2022-07-30', 6],
+			'7: sunday' => ['2022-07-31', 7],
+		];
+	}
+
+	/**
+	 * date to weekday number
+	 *
+	 * @covers ::setWeekdayNumberFromDate
+	 * @dataProvider weekdayDateProvider
+	 * @testdox setWeekdayNumberFromDate $input will be $expected [$_dataName]
+	 *
+	 * @param  string $input
+	 * @param  int    $expected
+	 * @return void
+	 */
+	public function testSetWeekdayNumberFromDate(
+		string $input,
+		int $expected
+	): void {
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::setWeekdayNumberFromDate($input)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function weekdayDateNameProvider(): array
+	{
+		return [
+			'invalid date short' => ['2022-02-31', null, 'Inv'],
+			'invalid date long' => ['2022-02-31', true, 'Invalid'],
+			'Mon short' => ['2022-07-25', null, 'Mon'],
+			'Monday long' => ['2022-07-25', true, 'Monday'],
+			'Tue short' => ['2022-07-26', null, 'Tue'],
+			'Tuesday long' => ['2022-07-26', true, 'Tuesday'],
+			'Wed short' => ['2022-07-27', null, 'Wed'],
+			'Wednesday long' => ['2022-07-27', true, 'Wednesday'],
+			'Thu short' => ['2022-07-28', null, 'Thu'],
+			'Thursday long' => ['2022-07-28', true, 'Thursday'],
+			'Fri short' => ['2022-07-29', null, 'Fri'],
+			'Friday long' => ['2022-07-29', true, 'Friday'],
+			'Sat short' => ['2022-07-30', null, 'Sat'],
+			'Saturday long' => ['2022-07-30', true, 'Saturday'],
+			'Sun short' => ['2022-07-31', null, 'Sun'],
+			'Sunday long' => ['2022-07-31', true, 'Sunday'],
+		];
+	}
+
+	/**
+	 * date to weekday name
+	 *
+	 * @covers ::setWeekdayNameFromDate
+	 * @dataProvider weekdayDateNameProvider
+	 * @testdox setWeekdayNameFromDate $input (short $flag) will be $expected [$_dataName]
+	 *
+	 * @param  string $input
+	 * @param  bool|null $flag
+	 * @param  string $expected
+	 * @return void
+	 */
+	public function testSetWeekdayNameFromDate(
+		string $input,
+		?bool $flag,
+		string $expected
+	): void {
+		if ($flag === null) {
+			$output = \CoreLibs\Combined\DateTime::setWeekdayNameFromDate($input);
+		} else {
+			$output = \CoreLibs\Combined\DateTime::setWeekdayNameFromDate($input, $flag);
+		}
+		$this->assertEquals(
+			$expected,
+			$output
 		);
 	}
 }

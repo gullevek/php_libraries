@@ -139,6 +139,22 @@ foreach ($compare_dates as $compare_date) {
 		. DgS::printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1], true)) . "<br>";
 }
 
+// test date conversion
+$dow = 2;
+print "DOW[$dow]: " . DateTime::setWeekdayNameFromIsoDow($dow) . "<br>";
+print "DOW[$dow],long: " . DateTime::setWeekdayNameFromIsoDow($dow, true) . "<br>";
+$date = '2022-7-22';
+print "DATE-dow[$date]: " . DateTime::setWeekdayNameFromDate($date) . "<br>";
+print "DATE-dow[$date],long: " . DateTime::setWeekdayNameFromDate($date, true) . "<br>";
+print "DOW-date[$date]: " . DateTime::setWeekdayNumberFromDate($date) . "<br>";
+$dow = 11;
+print "DOW[$dow];invalid: " . DateTime::setWeekdayNameFromIsoDow($dow) . "<br>";
+print "DOW[$dow],long;invalid: " . DateTime::setWeekdayNameFromIsoDow($dow, true) . "<br>";
+$date = '2022-70-242';
+print "DATE-dow[$date];invalid: " . DateTime::setWeekdayNameFromDate($date) . "<br>";
+print "DATE-dow[$date],long;invalid: " . DateTime::setWeekdayNameFromDate($date, true) . "<br>";
+print "DOW-date[$date];invalid: " . DateTime::setWeekdayNumberFromDate($date) . "<br>";
+
 // error message
 print $log->printErrorMsg();
 
