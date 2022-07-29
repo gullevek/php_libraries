@@ -21,8 +21,6 @@ require 'config.php';
 $LOG_FILE_ID = 'classTest-string';
 ob_end_flush();
 
-use CoreLibs\Convert\Byte;
-
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
 	'file_id' => $LOG_FILE_ID,

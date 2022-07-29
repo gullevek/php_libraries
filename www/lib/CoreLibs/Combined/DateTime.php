@@ -209,7 +209,7 @@ class DateTime
 		if ($isodow < 1 || $isodow > 7) {
 			return $long ? 'Invalid' : 'Inv';
 		}
-		return date($long ? 'l' : 'D', strtotime("Sunday +{$isodow} days"));
+		return date($long ? 'l' : 'D', strtotime("Sunday +{$isodow} days") ?: null);
 	}
 
 	/**
@@ -224,7 +224,7 @@ class DateTime
 		if (!self::checkDate($date)) {
 			return $long ? 'Invalid' : 'Inv';
 		}
-		return date($long ? 'l' : 'D', strtotime($date));
+		return date($long ? 'l' : 'D', strtotime($date) ?: null);
 	}
 
 	/**
@@ -238,7 +238,7 @@ class DateTime
 		if (!self::checkDate($date)) {
 			return -1;
 		}
-		return (int)date('N', strtotime($date));
+		return (int)date('N', strtotime($date) ?: null);
 	}
 
 	/**

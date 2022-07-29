@@ -29,7 +29,7 @@ class Strings
 	public static function splitFormatString(
 		string $value,
 		string $split_format,
-		string $split_charcters = '-'
+		string $split_characters = '-'
 	): string {
 		// abort if split format is empty
 		if (empty($split_format)) {
@@ -45,7 +45,7 @@ class Strings
 		// }
 		$split_list = preg_split(
 			// allowed split characters
-			"/([" . $split_charcters . "]{1})/",
+			"/([" . $split_characters . "]{1})/",
 			$split_format,
 			-1,
 			PREG_SPLIT_DELIM_CAPTURE
@@ -74,7 +74,7 @@ class Strings
 			$out .= $last_split . substr($value, $pos);
 		}
 		// if last is not alphanumeric remove, remove
-		if (!strcspn(substr($out, -1, 1), $split_charcters)) {
+		if (!strcspn(substr($out, -1, 1), $split_characters)) {
 			$out = substr($out, 0, -1);
 		}
 		// overwrite only if out is set
