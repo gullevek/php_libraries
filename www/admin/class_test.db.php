@@ -209,13 +209,12 @@ print "INSERT WITH NO PRIMARY KEY WITH RETURNING STATUS: " . Support::printToStr
 print "</pre>";
 
 // READ PREPARE
-if (
-	$db->dbPrepare(
-		'sel_test_foo',
-		"SELECT test_foo_id, test, some_bool, string_a, number_a, number_a_numeric, some_time "
-		. "FROM test_foo ORDER BY test_foo_id DESC LIMIT 5"
-	) === false
-) {
+$q_prep = "SELECT test_foo_id, test, some_bool, string_a, number_a, "
+	. "number_a_numeric, some_time "
+	. "FROM test_foo "
+	. "WHERE test = $1 "
+	. "ORDER BY test_foo_id DESC LIMIT 5";
+if ($db->dbPrepare('sel_test_foo', $q_prep) === false) {
 	print "Error in sel_test_foo prepare<br>";
 } else {
 	$max_rows = 6;
@@ -229,6 +228,29 @@ if (
 		$i++;
 	}
 }
+// prepre a second time on normal connection
+if ($db->dbPrepare('sel_test_foo', $q_prep) === false) {
+	print "Error prepareing<br>";
+	print "ERROR (dbPrepare on same query): "
+	. $db->dbGetLastError() . "/" . $db->dbGetLastWarning() . "/"
+	. "<pre>" . print_r($db->dbGetCombinedErrorHistory(), true) . "</pre><br>";
+}
+// NOTE: try to replacate connection still exists if script is run a second time
+// open pg bouncer connection
+$db_pgb = new CoreLibs\DB\IO($DB_CONFIG['test_pgbouncer'], $log);
+print "[PGB] DBINFO: " . $db_pgb->dbInfo() . "<br>";
+if ($db->dbPrepare('pgb_sel_test_foo', $q_prep) === false) {
+	print "[PGB] [1] Error in pgb_sel_test_foo prepare<br>";
+} else {
+	print "[PGB] [1] pgb_sel_test_foo prepare OK<br>";
+}
+// second prepare
+if ($db->dbPrepare('pgb_sel_test_foo', $q_prep) === false) {
+	print "[PGB] [2] Error in pgb_sel_test_foo prepare<br>";
+} else {
+	print "[PGB] [2] pgb_sel_test_foo prepare OK<br>";
+}
+$db_pgb->dbClose();
 
 # db write class test
 $table = 'test_foo';

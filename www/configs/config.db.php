@@ -17,7 +17,20 @@ $DB_CONFIG = [
 		'db_user' => $_ENV['DB_USER.TEST'] ?? '',
 		'db_pass' => $_ENV['DB_PASS.TEST'] ?? '',
 		'db_host' => $_ENV['DB_HOST.TEST'] ?? '',
-		'db_port' => 5432,
+		'db_port' => $_ENV['DB_PORT.PG'] ?? 5432,
+		'db_schema' => 'public',
+		'db_type' => 'pgsql',
+		'db_encoding' => '',
+		'db_ssl' => 'allow', // allow, disable, require, prefer
+		'db_debug' => true, // turn on logging or not
+	],
+	// same as above, but uses pg bouncer
+	'test_pgbouncer' => [
+		'db_name' => $_ENV['DB_NAME.TEST'] ?? '',
+		'db_user' => $_ENV['DB_USER.TEST'] ?? '',
+		'db_pass' => $_ENV['DB_PASS.TEST'] ?? '',
+		'db_host' => $_ENV['DB_HOST.TEST'] ?? '',
+		'db_port' => $_ENV['DB_PORT.PG_BOUNCER'] ?? 5432,
 		'db_schema' => 'public',
 		'db_type' => 'pgsql',
 		'db_encoding' => '',

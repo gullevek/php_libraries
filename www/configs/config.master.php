@@ -252,7 +252,7 @@ if ($is_secure) {
 define('DB_CONFIG_NAME', $SITE_CONFIG[HOST_NAME]['db_host']);
 define('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME] ?? []);
 // because we can't change constant, but we want to for db debug flag
-$GLOBALS['DB_CONFIG'] = DB_CONFIG;
+$GLOBALS['DB_CONFIG_SET'] = DB_CONFIG;
 // define('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
 // define('DB_CONFIG_OTHER', SITE_CONFIG[$HOST_NAME]['db_host_other']);
 // override for login and global schemas

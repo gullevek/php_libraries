@@ -2963,7 +2963,7 @@ class IO
 	 * Either as single array level for single insert
 	 * Or nested array for multiple insert values
 	 *
-	 * If key was set only returns tghose values directly or as array
+	 * If key was set only returns those values directly or as array
 	 *
 	 * On multiple insert return the position for which to return can be set too
 	 *
@@ -2978,7 +2978,7 @@ class IO
 		// return as is if key is null
 		if ($key === null) {
 			if (count($this->insert_id_arr) == 1) {
-				// return as nul if not found
+				// return as null if not found
 				return $this->insert_id_arr[0] ?? null;
 			} else {
 				return $this->insert_id_arr;
