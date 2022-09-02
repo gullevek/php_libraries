@@ -1,72 +1,47 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#1 \\$connection of function pg_connection_busy expects PgSql\\\\Connection, object\\|resource given\\.$#"
-			count: 3
-			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
-
-		-
-			message: "#^Parameter \\#1 \\$connection of function pg_connection_status expects PgSql\\\\Connection, object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$connection of function pg_escape_bytea expects PgSql\\\\Connection\\|string, object\\|resource given\\.$#"
 			count: 1
 			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
 
 		-
-			message: "#^Parameter \\#1 \\$connection of function pg_get_result expects PgSql\\\\Connection, object\\|resource given\\.$#"
-			count: 2
-			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
-
-		-
-			message: "#^Parameter \\#1 \\$connection of function pg_meta_data expects PgSql\\\\Connection, object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$connection of function pg_escape_identifier expects PgSql\\\\Connection\\|string, object\\|resource given\\.$#"
 			count: 1
 			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
 
 		-
-			message: "#^Parameter \\#1 \\$connection of function pg_send_query expects PgSql\\\\Connection, object\\|resource given\\.$#"
-			count: 2
-			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
-
-		-
-			message: "#^Parameter \\#1 \\$connection of function pg_socket expects PgSql\\\\Connection, object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$connection of function pg_escape_literal expects PgSql\\\\Connection\\|string, object\\|resource given\\.$#"
 			count: 1
 			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
 
 		-
-			message: "#^Parameter \\#1 \\$connection of function pg_version expects PgSql\\\\Connection\\|null, object\\|resource given\\.$#"
-			count: 2
-			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
-
-		-
-			message: "#^Parameter \\#1 \\$result of function pg_affected_rows expects PgSql\\\\Result, object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$connection of function pg_escape_string expects PgSql\\\\Connection\\|string, object\\|resource given\\.$#"
 			count: 1
 			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
 
 		-
-			message: "#^Parameter \\#1 \\$result of function pg_fetch_all expects PgSql\\\\Result, object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$connection of function pg_execute expects PgSql\\\\Connection\\|string, object\\|resource given\\.$#"
 			count: 1
 			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
 
 		-
-			message: "#^Parameter \\#1 \\$result of function pg_fetch_array expects PgSql\\\\Result, object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$connection of function pg_parameter_status expects PgSql\\\\Connection\\|string, object\\|resource given\\.$#"
 			count: 1
 			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
 
 		-
-			message: "#^Parameter \\#1 \\$result of function pg_field_name expects PgSql\\\\Result, object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$connection of function pg_prepare expects PgSql\\\\Connection\\|string, object\\|resource given\\.$#"
 			count: 1
 			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
 
 		-
-			message: "#^Parameter \\#1 \\$result of function pg_num_fields expects PgSql\\\\Result, object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$connection of function pg_query expects PgSql\\\\Connection\\|string, object\\|resource given\\.$#"
 			count: 1
 			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
 
 		-
-			message: "#^Parameter \\#1 \\$result of function pg_num_rows expects PgSql\\\\Result, object\\|resource given\\.$#"
-			count: 1
-			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
-
-		-
-			message: "#^Parameter \\#1 \\$result of function pg_result_error expects PgSql\\\\Result, object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$connection of function pg_query_params expects PgSql\\\\Connection\\|string, object\\|resource given\\.$#"
 			count: 1
 			path: www/lib/CoreLibs/DB/SQL/PgSQL.php
 

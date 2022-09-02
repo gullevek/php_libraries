@@ -423,7 +423,7 @@ class SmartyExtend extends \Smarty
 				$this->DATA['ADMIN'] = $cms->acl['admin'] ?? 0;
 				// top menu
 				$this->DATA['nav_menu'] = $cms->adbTopMenu();
-				$this->DATA['nav_menu_count'] = is_array($this->DATA['nav_menu']) ? count($this->DATA['nav_menu']) : 0;
+				$this->DATA['nav_menu_count'] = count($this->DATA['nav_menu']);
 				// messages = ['msg' =>, 'class' => 'error/warning/...']
 				$this->DATA['messages'] = $cms->messages;
 			} else { /** @phpstan-ignore-line Because I assume object for phpstan */

@@ -173,7 +173,7 @@ class Logging
 
 		// can be overridden with basicSetLogFileId later
 		if (!empty($this->options['file_id'])) {
-			$this->setLogId($this->options['file_id'] ?? '');
+			$this->setLogId($this->options['file_id']);
 		} elseif (!empty($GLOBALS['LOG_FILE_ID'])) {
 			// legacy flow, should be removed and only set via options
 			$this->setLogId($GLOBALS['LOG_FILE_ID']);

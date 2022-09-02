@@ -49,11 +49,11 @@ parameters:
 		- www/vendor
 	# ignore errores with
 	ignoreErrors:
-		- # this error is ignore because of the PHP 8.0 to 8.1 change for pg_*, only for 8.0 or lower
-			message: "#^Parameter \\#1 \\$(result|connection) of function pg_\\w+ expects resource(\\|null)?, object\\|resource(\\|bool)? given\\.$#"
-			path: %currentWorkingDirectory%/www/lib/CoreLibs/DB/SQL/PgSQL.php
+		#- # this error is ignore because of the PHP 8.0 to 8.1 change for pg_*, only for 8.0 or lower
+			# message: "#^Parameter \\#1 \\$(result|connection) of function pg_\\w+ expects resource(\\|null)?, object\\|resource(\\|bool)? given\\.$#"
+			# path: %currentWorkingDirectory%/www/lib/CoreLibs/DB/SQL/PgSQL.php
 		- # this is for 8.1 or newer
-			message: "#^Parameter \\#1 \\$(result|connection) of function pg_\\w+ expects PgSql\\\\(Result|Connection(\\|null)?), object\\|resource given\\.$#"
+			message: "#^Parameter \\#1 \\$(result|connection) of function pg_\\w+ expects PgSql\\\\(Result|Connection(\\|string)?(\\|null)?), object\\|resource given\\.$#"
 			path: %currentWorkingDirectory%/www/lib/CoreLibs/DB/SQL/PgSQL.php
 		# this is ignored for now
 		# - '#Expression in empty\(\) is always falsy.#'

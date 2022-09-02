@@ -2580,9 +2580,9 @@ class IO
 		// loop through the write array and each field to build the query
 		foreach ($write_array as $field) {
 			if (
-				(empty($primary_key['value']) ||
-					(!empty($primary_key['value']) &&
-					!in_array($field, $not_write_update_array))
+				(
+					empty($primary_key['value']) ||
+					!in_array($field, $not_write_update_array)
 				) &&
 				!in_array($field, $not_write_array)
 			) {
