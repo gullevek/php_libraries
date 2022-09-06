@@ -46,21 +46,28 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public $pk_name = ''; // the primary key from this table
 	/** @var int|string|null */
 	public $pk_id; // the PK id
+	// security values
+	/** @var int base acl for current page */
+	private $base_acl_level = 0;
 
 	/**
 	 * constructor for the array io class, set the
 	 * primary key name automatically (from array)
 	 *
-	 * @param array<mixed> $db_config   db connection config
-	 * @param array<mixed> $table_array table array config
-	 * @param string       $table_name  table name string
+	 * @param array<mixed> $db_config      db connection config
+	 * @param array<mixed> $table_array    table array config
+	 * @param string       $table_name     table name string
 	 * @param \CoreLibs\Debug\Logging|null $log Logging class, default set if not set
+	 * @param int          $base_acl_level Set base acl level, if needed
+	 * @param int          $acl_admin      Flag if this is an admin ACL access level
 	 */
 	public function __construct(
 		array $db_config,
 		array $table_array,
 		string $table_name,
-		\CoreLibs\Debug\Logging $log = null
+		\CoreLibs\Debug\Logging $log = null,
+		int $base_acl_level = 0,
+		int $acl_admin = 0
 	) {
 		// instance db_io class
 		parent::__construct($db_config, $log ?? new \CoreLibs\Debug\Logging());
@@ -79,6 +86,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 				}
 			}
 		} // set pk_name IF table_array was given
+		$this->dbArrayIOSetAcl($base_acl_level, $acl_admin);
 	}
 
 	/**
@@ -87,6 +95,33 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function __destruct()
 	{
 		parent::__destruct();
+	}
+
+	/**
+	 * set the base acl level and admin acl flag
+	 * This is needed for table array ACL checks
+	 * if not set I assume 0 (non write/non read/non admin)
+	 *
+	 * @param  int  $base_acl_level ACL Level from 0 to 100, -1 is not allowed
+	 *                              Will sett 0 if invalid
+	 * @param  int  $acl_admin      0 for non admin, 1 for admin (base acl is 100)
+	 * @return void
+	 */
+	public function dbArrayIOSetAcl(int $base_acl_level, int $acl_admin): void
+	{
+		// default not allowed, must be 0 at least
+		if ($base_acl_level < 0) {
+			$base_acl_level = 0;
+		}
+		// only 0 or 1 allowed
+		if (!in_array($acl_admin, [0, 1])) {
+			$acl_admin = 0;
+		}
+		// if the user is admin flagged, auto set to 100, if not already set to 100
+		if ($acl_admin == 1) {
+			$base_acl_level = 100;
+		}
+		$this->base_acl_level = $base_acl_level;
 	}
 
 	/**
@@ -191,15 +226,21 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 *
 	 * @param  array<mixed> $table_array optional override for table array set
 	 *                                   set this as new table array too
+	 * @param  boolean      $acl_limit   [false], if set to true, well do ACL limit check
 	 * @return array<mixed>              returns the table array that was deleted
 	 */
-	public function dbDelete($table_array = [])
+	public function dbDelete($table_array = [], $acl_limit = false)
 	{
 		// is array and has values, override set and set new
 		if (is_array($table_array) && count($table_array)) {
 			$this->table_array = $table_array;
 		}
 		if (!$this->dbCheckPkSet()) {
+			return $this->table_array;
+		}
+		if ($acl_limit === true && $this->base_acl_level < 100) {
+			$this->log->debug('DB DELETE ERROR', 'ACL Limit on, Delete, '
+				. 'but base ACL level of 100 not met: ' . $this->base_acl_level);
 			return $this->table_array;
 		}
 		// delete query
@@ -338,10 +379,14 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 *
 	 * @param  boolean      $addslashes  old convert entities and set set escape
 	 * @param  array<mixed> $table_array optional table array, overwrites internal one
+	 * @param  boolean      $acl_limit   [false], if set to true, well do ACL limit check
 	 * @return array<mixed>              table array or null
 	 */
-	public function dbWrite($addslashes = false, $table_array = [])
-	{
+	public function dbWrite(
+		bool $addslashes = false,
+		array $table_array = [],
+		bool $acl_limit = false
+	): array {
 		if (is_array($table_array) && count($table_array)) {
 			$this->table_array = $table_array;
 		}
@@ -354,6 +399,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 			$insert = 1;
 		} else {
 			$insert = 0;
+		}
+		// early abort for new write with not enough ACL level
+		if ($insert && $acl_limit === true && $this->base_acl_level < 100) {
+			$this->log->debug('DB WRITE ERROR', 'ACL Limit on, Insert, '
+				. 'but base ACL level of 100 not met: ' . $this->base_acl_level);
+			return $this->table_array;
 		}
 
 		reset($this->table_array);
@@ -408,11 +459,25 @@ class ArrayIO extends \CoreLibs\DB\IO
 			/********************************* END FILE **************************************/
 
 			// do not write 'pk' (primary key) or 'view' values
+			// also do not write UPDATE for elements that are
+			// acl flagged, not if we have an ACL limiter, don't insert
+			// $this->log->debug('DB WRITE', 'C: ' . $column . ', '
+			// 	. 'ACL Level ' . $this->log->prBl($acl_limit) . ', '
+			// 	. 'TA ACL: ' . ($this->table_array[$column]['min_edit_acl'] ?? 100) . ', '
+			// 	. 'Base ACL: ' . $this->base_acl_level);
 			if (
 				!isset($this->table_array[$column]['pk']) &&
 				isset($this->table_array[$column]['type']) &&
 				$this->table_array[$column]['type'] != 'view' &&
-				strlen($column) > 0
+				strlen($column) > 0 &&
+				// no acl limiter
+				($acl_limit === false ||
+				(
+					// acl limit is true, min edit must be at larger than set
+					$acl_limit === true &&
+					$this->base_acl_level >=
+						($this->table_array[$column]['min_edit_acl'] ?? 100)
+				))
 			) {
 				// for password use hidden value if main is not set
 				if (
@@ -509,6 +574,11 @@ class ArrayIO extends \CoreLibs\DB\IO
 				}
 			}
 		} // while ...
+
+		if (empty($q_data)) {
+			$this->log->debug('DB WRITE ERROR', 'No data to write, possible through ACL');
+			return $this->table_array;
+		}
 
 		// NOW get PK, and FK settings (FK only for update query)
 		// get it at the end, cause now we can be more sure of no double IDs, etc

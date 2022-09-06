@@ -270,9 +270,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public $save;
 	/** @var string */
 	public $remove_button;
-	// security publics
-	/** @var int */
-	public $base_acl_level;
+	// security values
+	/** @var int base acl for current page */
+	private $base_acl_level = 0;
+	/** @var int admin master flag (1/0) */
+	private $acl_admin = 0;
 	/** @var array<mixed> */
 	public $security_level;
 	// layout publics
@@ -336,6 +338,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// load config array
 		// get table array definitions for current page name
 
+		// security settings
+		$this->base_acl_level = (int)$_SESSION['BASE_ACL_LEVEL'];
+		$this->acl_admin = (int)$_SESSION['ADMIN'];
+		$GLOBALS['base_acl_level'] = $this->base_acl_level;
+		$GLOBALS['acl_admin'] = $this->acl_admin;
+
 		// first check if we have a in page override as $table_arrays[page name]
 		if (
 			/* isset($GLOBALS['table_arrays']) &&
@@ -348,7 +356,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// $config_array = $GLOBALS['table_arrays'][System::getPageName(1)];
 			$config_array = $table_arrays[System::getPageName(1)];
 		} else {
-			// WARNING: auto spl load does not work with this as it is an array and not a function/object
+			// WARNING: auto spl load does not work with this as it is an array
+			// and not a function/object
 			// check if this is the old path or the new path
 			// check local folder in current path
 			// then check general global folder
@@ -383,14 +392,21 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$db_config,
 			$config_array['table_array'],
 			$config_array['table_name'],
-			$log ?? new \CoreLibs\Debug\Logging()
+			$log ?? new \CoreLibs\Debug\Logging(),
+			// set the ACL
+			$this->base_acl_level,
+			$this->acl_admin
 		);
+		// $this->log->debug('SESSION FORM', 'sessin: ' . $this->log->prAr($_SESSION));
 		// here should be a check if the config_array is correct ...
 		if (isset($config_array['show_fields']) && is_array($config_array['show_fields'])) {
 			$this->field_array = $config_array['show_fields'];
 		}
 		if (isset($config_array['load_query']) && $config_array['load_query']) {
 			$this->load_query = $config_array['load_query'];
+		}
+		if (empty($this->load_query)) {
+			$this->log->debug('INIT ERROR', 'Missing Load Query for: ' . $this->my_page_name);
 		}
 		$this->archive_pk_name = 'a_' . $this->pk_name;
 		$this->col_name = str_replace('_id', '', $this->pk_name);
@@ -416,8 +432,6 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->save = $_POST['save'] ?? '';
 		$this->remove_button = $_POST['remove_button'] ?? '';
 
-		// security settings
-		$this->base_acl_level = $_SESSION['BASE_ACL_LEVEL'] ?? 0;
 		// security levels for buttons/actions
 		// if array does not exists create basic
 		if (
@@ -428,9 +442,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			)
 		) {
 			$this->security_level = [
-				'load' => 100,
+				'load' => 20,
 				'new' => 100,
-				'save' => 100,
+				'save' => 40,
 				'delete' => 100
 			];
 		} else {
@@ -438,9 +452,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$this->security_level = isset($config_array['security_level']) ?
 				$config_array['security_level'] :
 				[
-					'load' => 100,
+					'load' => 20,
 					'new' => 100,
-					'save' => 100,
+					'save' => 40,
 					'delete' => 100
 				];
 		}
@@ -489,8 +503,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * @param  string|null   $key_value value to match to (optional)
 	 * @return string|null              returns key found or empty string
 	 */
-	public function formGetColNameFromKey(string $want_key, ?string $key_value = null): ?string
-	{
+	public function formGetColNameFromKey(
+		string $want_key,
+		?string $key_value = null
+	): ?string {
 		if (!is_array($this->table_array)) {
 			$this->table_array = [];
 		}
@@ -513,8 +529,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * @param  string|null $key_value if set searches for special right value
 	 * @return array<mixed>           found key fields
 	 */
-	public function formGetColNameArrayFromKey(string $want_key, ?string $key_value = null): array
-	{
+	public function formGetColNameArrayFromKey(
+		string $want_key,
+		?string $key_value = null
+	): array {
 		$key_array = [];
 		if (!is_array($this->table_array)) {
 			$this->table_array = [];
@@ -648,8 +666,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * @param  array<mixed> $remove_name  key names that should be removed
 	 * @return void                       has no return
 	 */
-	public function formProcedureDeleteFromElementList(array $element_list, array $remove_name): void
-	{
+	public function formProcedureDeleteFromElementList(
+		array $element_list,
+		array $remove_name
+	): void {
 		/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 		$this->log->debug('REMOVE ELEMENT', 'Remove REF ELEMENT: ' . $this->base_acl_level . ' >= '
 			. $this->security_level['delete']);
@@ -752,55 +772,72 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$t_pk_name = '';
 		$pk_names = [];
 		$pk_ids = [];
+		$seclevel_okay = false;
+		// for error abort only
+		$return_array = [
+			't_pk_name' => $t_pk_name,
+			'pk_ids' => $pk_ids,
+			'pk_names' => $pk_names,
+			'pk_selected' => $pk_selected,
+			'seclevel_okay' => $seclevel_okay,
+		];
 		// when security level is okay ...
 		if (
-			isset($this->security_level['load']) &&
-			$this->base_acl_level >= $this->security_level['load']
+			empty($this->security_level['load']) ||
+			$this->base_acl_level < $this->security_level['load']
 		) {
-			$t_pk_name = $this->archive_pk_name;
+			return $return_array;
+		}
+		if (empty($this->load_query)) {
+			$this->log->debug('LOAD LIST ERROR', 'Missing load list query');
+			return $return_array;
+		}
 
-			// load list data
-			$this->dbExec($this->load_query);
-			while (is_array($res = $this->dbFetchArray())) {
-				$pk_ids[] = $res[$this->int_pk_name];
-				if (
-					isset($this->table_array[$this->int_pk_name]['value']) &&
-					$res[$this->int_pk_name] == $this->table_array[$this->int_pk_name]['value']
-				) {
-					$pk_selected = $res[$this->int_pk_name];
-				}
-				$t_string = '';
-				foreach ($this->field_array as $i => $field_array) {
-					if ($t_string) {
-						$t_string .= ', ';
-					}
-					if (isset($field_array['before_value'])) {
-						$t_string .= $field_array['before_value'];
-					}
-					// must have res element set
-					if (
-						isset($field_array['name']) &&
-						isset($res[$field_array['name']])
-					) {
-						if (isset($field_array['binary'])) {
-							if (isset($field_array['binary'][0])) {
-								$t_string .= $field_array['binary'][0];
-							} elseif (isset($field_array['binary'][1])) {
-								$t_string .= $field_array['binary'][1];
-							}
-						} else {
-							$t_string .= $res[$field_array['name']];
-						}
-					}
-				}
-				$pk_names[] = $t_string;
+		$t_pk_name = $this->archive_pk_name;
+
+		// load list data
+		$this->dbExec($this->load_query);
+		while (is_array($res = $this->dbFetchArray())) {
+			$pk_ids[] = $res[$this->int_pk_name];
+			if (
+				isset($this->table_array[$this->int_pk_name]['value']) &&
+				$res[$this->int_pk_name] == $this->table_array[$this->int_pk_name]['value']
+			) {
+				$pk_selected = $res[$this->int_pk_name];
 			}
-		} // show it at all
+			$t_string = '';
+			foreach ($this->field_array as $i => $field_array) {
+				if ($t_string) {
+					$t_string .= ', ';
+				}
+				if (isset($field_array['before_value'])) {
+					$t_string .= $field_array['before_value'];
+				}
+				// must have res element set
+				if (
+					isset($field_array['name']) &&
+					isset($res[$field_array['name']])
+				) {
+					if (isset($field_array['binary'])) {
+						if (isset($field_array['binary'][0])) {
+							$t_string .= $field_array['binary'][0];
+						} elseif (isset($field_array['binary'][1])) {
+							$t_string .= $field_array['binary'][1];
+						}
+					} else {
+						$t_string .= $res[$field_array['name']];
+					}
+				}
+			}
+			$pk_names[] = $t_string;
+		}
+		$seclevel_okay = true;
 		return [
 			't_pk_name' => $t_pk_name,
 			'pk_ids' => $pk_ids,
 			'pk_names' => $pk_names,
-			'pk_selected' => $pk_selected
+			'pk_selected' => $pk_selected,
+			'seclevel_okay' => $seclevel_okay,
 		];
 	}
 
@@ -808,30 +845,38 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * Create new entry element for HTML output
 	 *
 	 * @param  bool $hide_new_checkbox  show or hide the new checkbox, default is false
-	 * @return array<string,string|int> return the new create array with name & checkbox show flag
+	 * @return array<string,string|bool> return the new create array with name & checkbox show flag
 	 */
-	public function formCreateNew($hide_new_checkbox = false): array
+	public function formCreateNew(bool $hide_new_checkbox = false): array
 	{
-		$show_checkbox = 0;
+		$show_checkbox = false;
 		$new_name = '';
+		$seclevel_okay = false;
 		// when security level is okay
 		if (
-			isset($this->security_level['new']) &&
-			$this->base_acl_level >= $this->security_level['new']
+			empty($this->security_level['new']) ||
+			$this->base_acl_level < $this->security_level['new']
 		) {
-			if ($this->yes && !$hide_new_checkbox) {
-				$show_checkbox = 1;
-			}
-			// set type of new name
-			if ($this->yes) {
-				$new_name = $this->l->__('Clear all and create new');
-			} else {
-				$new_name = $this->l->__('New');
-			}
-		} // security level okay
+			return [
+				'new_name' => $new_name,
+				'show_checkbox' => $show_checkbox,
+				'seclevel_okay' => $seclevel_okay,
+			];
+		}
+		if ($this->yes && !$hide_new_checkbox) {
+			$show_checkbox = false;
+		}
+		// set type of new name
+		if ($this->yes) {
+			$new_name = $this->l->__('Clear all and create new');
+		} else {
+			$new_name = $this->l->__('New');
+		}
+		$seclevel_okay = true;
 		return [
 			'new_name' => $new_name,
-			'show_checkbox' => $show_checkbox
+			'show_checkbox' => $show_checkbox,
+			'seclevel_okay' => $seclevel_okay,
 		];
 	}
 
@@ -842,42 +887,57 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * @return array<string,mixed>         return the hide/show delete framework
 	 *                                     for html creation
 	 */
-	public function formCreateSaveDelete($hide_delete = false, $hide_delete_checkbox = false): array
-	{
-		$seclevel_okay = 0;
+	public function formCreateSaveDelete(
+		bool $hide_delete = false,
+		bool $hide_delete_checkbox = false,
+		bool $old_school_hidden = false
+	): array {
+		$seclevel_okay = false;
 		$save = '';
 		$pk_name = '';
 		$pk_value = '';
-		$show_delete = 0;
-		$old_school_hidden = 0;
+		$show_delete = false;
 		if (
-			(isset($this->security_level['save']) &&
-				$this->base_acl_level >= $this->security_level['save']) ||
-			(isset($this->security_level['delete']) &&
-				$this->base_acl_level >= $this->security_level['delete'])
+			(empty($this->security_level['save']) ||
+			$this->base_acl_level < $this->security_level['save']) &&
+			(empty($this->security_level['delete']) ||
+			$this->base_acl_level < $this->security_level['delete'])
 		) {
-			if ($this->base_acl_level >= $this->security_level['save']) {
-				$seclevel_okay = 1;
-				if (empty($this->table_array[$this->int_pk_name]['value'])) {
-					$save = $this->l->__('Save');
-				} else {
-					$save = $this->l->__('Update');
-				}
-				// print the old_school hidden if requestet
-				if ($old_school_hidden == 1) { /** @phpstan-ignore-line Unclear logic */
-					$pk_name = $this->int_pk_name;
-					$pk_value = $this->table_array[$this->int_pk_name]['value'];
-				}
-			} // show save part
-			// show delete part only if pk is set && we want to see the delete
-			if (
-				!empty($this->table_array[$this->int_pk_name]['value']) &&
-				!$hide_delete &&
-				$this->base_acl_level >= $this->security_level['delete']
-			) {
-				$show_delete = 1;
+			return [
+				'seclevel_okay' => $seclevel_okay,
+				'save' => $save,
+				'pk_name' => $pk_name,
+				'pk_value' => $pk_value,
+				'show_delete' => $show_delete,
+				'old_school_hidden' => $old_school_hidden,
+				'hide_delete_checkbox' => $hide_delete_checkbox
+			];
+		}
+		if (
+			!empty($this->security_level['save']) &&
+			$this->base_acl_level >= $this->security_level['save']
+		) {
+			$seclevel_okay = true;
+			if (empty($this->table_array[$this->int_pk_name]['value'])) {
+				$save = $this->l->__('Save');
+			} else {
+				$save = $this->l->__('Update');
 			}
-		} // print save/delete row at all$
+			// print the old_school hidden if requestet
+			if ($old_school_hidden === true) {
+				$pk_name = $this->int_pk_name;
+				$pk_value = $this->table_array[$this->int_pk_name]['value'];
+			}
+		} // show save part
+		// show delete part only if pk is set && we want to see the delete
+		if (
+			!empty($this->table_array[$this->int_pk_name]['value']) &&
+			!$hide_delete &&
+			!empty($this->security_level['delete']) &&
+			$this->base_acl_level >= $this->security_level['delete']
+		) {
+			$show_delete = true;
+		}
 		return [
 			'seclevel_okay' => $seclevel_okay,
 			'save' => $save,
@@ -921,11 +981,16 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		// create right side depending on 'definiton' in table_array
 		$type = $this->table_array[$element_name]['type'];
+		// set default min edit/read to 100 (admin)
+		$min_edit_acl = $this->table_array[$element_name]['min_edit_acl'] ?? 100;
+		$min_show_acl = $this->table_array[$element_name]['min_show_acl'] ?? 100;
+		$show_value = '-';
 		// view only output
 		if ($this->table_array[$element_name]['type'] == 'view') {
 			$data['value'] = empty($this->table_array[$element_name]['value']) ?
 				$this->table_array[$element_name]['empty'] :
 				$this->table_array[$element_name]['value'];
+			$show_value = $data['value'];
 		}
 		// binary true/false element
 		if ($this->table_array[$element_name]['type'] == 'binary') {
@@ -940,6 +1005,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					(!$i && !$this->table_array[$element_name]['value']))
 				) {
 					$data['checked'] = $this->table_array[$element_name]['value'];
+					$show_value = $this->table_array[$element_name]['element_list'][$i] ?? $data['checked'];
 				}
 
 				if ($i) {
@@ -952,6 +1018,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$data['name'] = $element_name;
 			$data['value'][] = $this->table_array[$element_name]['element_list'];
 			$data['checked'] = $this->table_array[$element_name]['value'];
+			// array map element list + value
+			// foreach ($data['checked'] as $checked)
+			$show_value = join(', ', $data['checked']);
 		}
 		// normal text element
 		if ($this->table_array[$element_name]['type'] == 'text') {
@@ -959,6 +1028,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
 			$data['size'] = $this->table_array[$element_name]['size'] ?? '';
 			$data['length'] = $this->table_array[$element_name]['length'] ?? '';
+			$show_value = $data['value'];
 		}
 		// password element, does not write back the value
 		if ($this->table_array[$element_name]['type'] == 'password') {
@@ -971,11 +1041,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if ($this->table_array[$element_name]['type'] == 'date') {
 			$data['name'] = $element_name;
 			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
+			$show_value = $data['value'];
 		}
 		// date time (no sec) (YYYY-MM-DD HH:mm)
 		if ($this->table_array[$element_name]['type'] == 'datetime') {
 			$data['name'] = $element_name;
 			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
+			$show_value = $data['value'];
 		}
 		// textarea
 		if ($this->table_array[$element_name]['type'] == 'textarea') {
@@ -983,6 +1055,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
 			$data['rows'] = $this->table_array[$element_name]['rows'] ?? '';
 			$data['cols'] = $this->table_array[$element_name]['cols'] ?? '';
+			$show_value = $data['value'];
 		}
 		// for drop_down_*
 		if (preg_match("/^drop_down_/", $this->table_array[$element_name]['type'])) {
@@ -1047,6 +1120,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					$this->table_array[$element_name]['value'] == $res[0]
 				) {
 					$data['selected'] = $this->table_array[$element_name]['value'];
+					$show_value = $res[1];
 				}
 			}
 			// for _input put additional field next to drop down
@@ -1079,6 +1153,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$data['output'][] = $value;
 				if ($this->table_array[$element_name]['value'] == $key) {
 					$data['selected'] = $this->table_array[$element_name]['value'];
+					$show_value = $value;
 				}
 			}
 		}
@@ -1093,6 +1168,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				$data['output'][] = $value;
 				if ($this->table_array[$element_name]['value'] == $key) {
 					$data['checked'] = $this->table_array[$element_name]['value'];
+					$show_value = $value;
 				}
 				$data['separator'] = '';
 			}
@@ -1126,7 +1202,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			'output_name' => $output_name,
 			'color' => $EDIT_FGCOLOR_T,
 			'type' => $type,
-			'data' => $data
+			'data' => $data,
+			'show_value' => $show_value,
+			'allow_edit' => $this->base_acl_level >= $min_edit_acl ? 1 : 0,
+			'allow_show' => $this->base_acl_level >= $min_show_acl ? 1 : 0,
 		];
 	}
 
@@ -1146,6 +1225,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		reset($this->table_array);
 		foreach ($this->table_array as $key => $value) {
+			// skip if we are not allowe to write this anyway
+			// $this->log->debug('ERROR CHECK', 'ACL K: ' . $key . ', '
+			// 	. ($value['min_edit_acl'] ?? 100) . ' < ' . $this->base_acl_level);
+			if ($this->base_acl_level < ($value['min_edit_acl'] ?? 100)) {
+				continue;
+			}
 			//if ($value['mandatory'] && $value['error_check'])
 			// if error value set && somethign input, check if input okay
 			if (
@@ -1373,6 +1458,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// do check for reference tables
 		reset($this->reference_array);
 		foreach ($this->reference_array as $key => $value) {
+			// skip if not allowed to write
+			if (
+				$this->base_acl_level < ($this->reference_array[$key]['min_edit_acl'] ?? 100)
+			) {
+				continue;
+			}
 			if (
 				isset($this->reference_array[$key]['mandatory']) &&
 				$this->reference_array[$key]['mandatory'] &&
@@ -1391,6 +1482,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			foreach ($this->element_list as $table_name => $reference_array) {
 				if (!is_array($reference_array)) {
 					$reference_array = [];
+				}
+				// skip if not allowed to write
+				if (
+					$this->base_acl_level < ($this->reference_array['min_edit_acl'] ?? 100)
+				) {
+					continue;
 				}
 				// set pk/fk id for this
 				$_pk_name = '';
@@ -1567,32 +1664,33 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		// get order name
 		$order_name = $this->formGetColNameFromKey('order');
-		if ($order_name) {
-			// first check out of order ...
-			if (empty($this->table_array[$order_name]['value'])) {
-				// set order (read max)
-				$q = 'SELECT MAX(' . $order_name . ') + 1 AS max_page_order '
-					. 'FROM ' . $this->table_name;
-				if (
-					is_array($res = $this->dbReturnRow($q)) &&
-					!empty($res['max_page_order'])
-				) {
-					$this->table_array[$order_name]['value'] = $res['max_page_order'];
-				}
-				// frist element is 0 because NULL gets returned, set to 1
-				if (!$this->table_array[$order_name]['value']) {
-					$this->table_array[$order_name]['value'] = 1;
-				}
-			} elseif (!empty($this->table_array[$this->int_pk_name]['value'])) {
-				$q = 'SELECT ' . $order_name . ' AS order_name '
-					. 'FROM ' . $this->table_name . ' '
-					. 'WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
-				if (
-					is_array($res = $this->dbReturnRow($q)) &&
-					!empty($res['order_name'])
-				) {
-					$this->table_array[$order_name]['value'] = $res['order_name'];
-				}
+		if (empty($order_name)) {
+			return $this->table_array;
+		}
+		// first check out of order ...
+		if (empty($this->table_array[$order_name]['value'])) {
+			// set order (read max)
+			$q = 'SELECT MAX(' . $order_name . ') + 1 AS max_page_order '
+				. 'FROM ' . $this->table_name;
+			if (
+				is_array($res = $this->dbReturnRow($q)) &&
+				!empty($res['max_page_order'])
+			) {
+				$this->table_array[$order_name]['value'] = $res['max_page_order'];
+			}
+			// frist element is 0 because NULL gets returned, set to 1
+			if (!$this->table_array[$order_name]['value']) {
+				$this->table_array[$order_name]['value'] = 1;
+			}
+		} elseif (!empty($this->table_array[$this->int_pk_name]['value'])) {
+			$q = 'SELECT ' . $order_name . ' AS order_name '
+				. 'FROM ' . $this->table_name . ' '
+				. 'WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
+			if (
+				is_array($res = $this->dbReturnRow($q)) &&
+				!empty($res['order_name'])
+			) {
+				$this->table_array[$order_name]['value'] = $res['order_name'];
 			}
 		}
 		return $this->table_array;
@@ -1681,7 +1779,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * @param  bool $addslashes override internal addslasahes flag (default false)
 	 * @return void             has no return
 	 */
-	public function formSaveTableArray($addslashes = false)
+	public function formSaveTableArray(bool $addslashes = false)
 	{
 		// for drop_down_db_input check if text field is filled and if, if not yet in db ...
 		// and upload files
@@ -1827,7 +1925,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		//	. $this->table_array[$this->pk_name]['value'] . "/"
 		//	. $this->table_array[$this->int_pk_name]['value']);
 		// write the object
-		$this->dbWrite($addslashes);
+		$this->dbWrite($addslashes, [], true);
 		// write reference array (s) if necessary
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
@@ -1852,6 +1950,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$type = [];
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $reference_array) {
+				// early skip if not enought ACL
+				if ($this->base_acl_level < ($reference_array['min_edit_acl'] ?? 100)) {
+					continue;
+				}
 				// init arrays
 				$q_begin = [];
 				$q_middle = [];
@@ -2157,7 +2259,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formCreateElementReferenceTable(string $table_name): array
 	{
 		$data = [];
+		//
+		$show_value = '';
+		// set default min edit/read to 100 (admin)
+		$min_edit_acl = $this->reference_array[$table_name]['min_edit_acl'] ?? 100;
+		$min_show_acl = $this->reference_array[$table_name]['min_show_acl'] ?? 100;
+		// output name
 		$output_name = $this->reference_array[$table_name]['output_name'];
+		// mandatory flag
 		if (
 			isset($this->reference_array[$table_name]['mandatory']) &&
 			$this->reference_array[$table_name]['mandatory']
@@ -2169,17 +2278,27 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		while (is_array($res = $this->dbReturn($this->reference_array[$table_name]['query']))) {
 			$data['value'][] = $res[0];
 			$data['output'][] = $res[1];
-			$data['selected'][] = (\CoreLibs\Convert\Html::checked(
+			$selected = (\CoreLibs\Convert\Html::checked(
 				$this->reference_array[$table_name]['selected'] ?? '',
 				$res[0]
 			)) ? $res[0] : '';
+			$data['selected'][] = $selected;
+			if (!empty($selected)) {
+				if (!empty($show_value)) {
+					$show_value .= ", ";
+				}
+				$show_value .= $res[1];
+			}
 		}
 		$type = 'reference_table';
 		return [
 			'output_name' => $output_name,
 			'type' => $type,
 			'color' => 'edit_fgcolor',
-			'data' => $data
+			'data' => $data,
+			'show_value' => empty($show_value) ? '-' : $show_value,
+			'allow_edit' => $this->base_acl_level >= $min_edit_acl ? 1 : 0,
+			'allow_show' => $this->base_acl_level >= $min_show_acl ? 1 : 0,
 		];
 	}
 
@@ -2211,8 +2330,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			'pos' => [],
 			'table_name' => $table_name // sub table name
 		];
+		$show_value = '-';
+		// set default min edit/read to 100 (admin)
+		$min_edit_acl = $this->element_list[$table_name]['min_edit_acl'] ?? 100;
+		$min_show_acl = $this->element_list[$table_name]['min_show_acl'] ?? 100;
 		// output name for the viewable left table td box, prefixed with * if mandatory
 		$output_name = $this->element_list[$table_name]['output_name'];
+		// mandatory flag
 		if (
 			isset($this->element_list[$table_name]['mandatory']) &&
 			$this->element_list[$table_name]['mandatory']
@@ -2523,7 +2647,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			'output_name' => $output_name,
 			'type' => $type,
 			'color' => 'edit_fgcolor',
-			'data' => $data
+			'data' => $data,
+			'show_value' => $show_value,
+			'allow_edit' => $this->base_acl_level >= $min_edit_acl ? 1 : 0,
+			'allow_show' => $this->base_acl_level >= $min_show_acl ? 1 : 0,
 		];
 	}
 	// end of class

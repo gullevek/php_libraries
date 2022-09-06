@@ -181,7 +181,7 @@ final class CoreLibsCreateSessionTest extends TestCase
 		string $type,
 		array $mock_data,
 		string $expected,
-		string $expected_error,
+		string $expected_error
 	): void {
 		// override expected
 		if ($type == 'd') {

@@ -7,7 +7,7 @@
 	* HISTORY:
 	********************************************************************
 *}
-
+<!-- LOAD START //-->
 <tr>
 	<td class="edit_fgcolor_alt" class="normal">
 		Load:
@@ -20,3 +20,4 @@
 		<input type="submit" name="archive" value="{t}Load{/t}">
 	</td>
 </tr>
+<!-- LOAD END //-->

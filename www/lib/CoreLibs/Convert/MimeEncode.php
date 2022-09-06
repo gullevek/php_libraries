@@ -26,6 +26,7 @@ class MimeEncode
 		string $encoding,
 		string $line_break = "\r\n"
 	): string {
+		$current_internal_encoding = mb_internal_encoding();
 		// set internal encoding, so the mimeheader encode works correctly
 		mb_internal_encoding($encoding);
 		// if a subject, make a work around for the broken mb_mimencode
@@ -60,6 +61,9 @@ class MimeEncode
 		}
 		// strip out any spaces BEFORE a line break
 		$string = str_replace(" " . $line_break, $line_break, $_string);
+		// before we end, reset internal encoding
+		mb_internal_encoding($current_internal_encoding);
+		// return mime encoded string
 		return $string;
 	}
 }

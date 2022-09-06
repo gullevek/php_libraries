@@ -92,6 +92,7 @@ final class CoreLibsCheckEncodingTest extends TestCase
 		$error_char,
 		$expected
 	): void {
+		$current_subsitute_character = mb_substitute_character();
 		if ($error_char !== null) {
 			\CoreLibs\Check\Encoding::setErrorChar($error_char);
 			if (!in_array($error_char, ['none', 'long', 'entity'])) {
@@ -111,6 +112,8 @@ final class CoreLibsCheckEncodingTest extends TestCase
 			$expected,
 			$return
 		);
+		// reset after test
+		mb_substitute_character($current_subsitute_character);
 	}
 }
 

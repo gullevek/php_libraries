@@ -2536,7 +2536,7 @@ final class CoreLibsDBIOTest extends TestCase
 	private function subAssertCursorExtTestDbReturnFunction(
 		\CoreLibs\DB\IO $db,
 		string $query,
-		array $cursor_ext_checks,
+		array $cursor_ext_checks
 	): void {
 		// cursor check
 		if (

@@ -45,27 +45,26 @@ class Email
 		string $encoding = 'UTF-8',
 		bool $kv_folding = false
 	): string {
-		if (!empty($email_name)) {
-			// if encoding is not UTF-8 then we convert
-			if ($encoding != 'UTF-8') {
-				$email_name = mb_convert_encoding($email_name, $encoding, 'UTF-8');
-			}
-			$email_name =
-				mb_encode_mimeheader(
-					in_array($encoding, self::$encoding_kv_allowed) && $kv_folding ?
-						mb_convert_kana(
-							$email_name,
-							self::$mb_convert_kana_mode,
-							$encoding
-						) :
-						$email_name,
-					$encoding
-				);
-			return '"' . $email_name . '" '
-				. '<' . (string)$email . '>';
-		} else {
+		if (empty($email_name)) {
 			return $email;
 		}
+		// if encoding is not UTF-8 then we convert
+		if ($encoding != 'UTF-8') {
+			$email_name = mb_convert_encoding($email_name, $encoding, 'UTF-8');
+		}
+		$email_name =
+			mb_encode_mimeheader(
+				in_array($encoding, self::$encoding_kv_allowed) && $kv_folding ?
+					mb_convert_kana(
+						$email_name,
+						self::$mb_convert_kana_mode,
+						$encoding
+					) :
+					$email_name,
+				$encoding
+			);
+		return '"' . $email_name . '" '
+			. '<' . (string)$email . '>';
 	}
 
 	/**

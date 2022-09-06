@@ -552,6 +552,7 @@ if (is_dir(BASE . CACHE)) {
 }
 $smarty->display($EDIT_TEMPLATE, 'editAdmin_' . $smarty->lang, 'editAdmin_' . $smarty->lang);
 
+$form->log->debug('DEBUGEND', '==================================== [Form END]');
 // debug output
 echo $login->log->printErrorMsg();
 echo $form->log->printErrorMsg();

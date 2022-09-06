@@ -122,7 +122,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider encodeEmailNameProvider
-	 * @testdox encode email $email, name $name, encoding $encoding will be $expected [$_dataName]
+	 * @testdox encode email $email, name $name, encoding $encoding, folding $kv_folding will be $expected [$_dataName]
 	 *
 	 * @return void
 	 */

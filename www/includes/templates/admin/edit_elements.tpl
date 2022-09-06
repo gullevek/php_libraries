@@ -8,6 +8,7 @@
 	********************************************************************
 *}
 {foreach from=$elements item=element key=key name=loop}
+{if $element.allow_edit}
 	<tr>
 		<td class="edit_fgcolor" class="normal" valign="top">
 			{$element.output_name}
@@ -129,4 +130,21 @@
 		{/if}
 		</td>
 	</tr>
+{elseif $element.allow_show}
+	<tr>
+		<td class="edit_fgcolor" class="normal" valign="top">
+			{$element.output_name}
+		</td>
+		<td class="{$element.color}" class="normal">
+			{if $element.type != 'view'}
+			{$element.show_value}
+			<input type="hidden" name="{$element.data.name}" value="{$element.show_value}">
+			{else}
+			{$element.data.value}
+			{/if}
+		</td>
+	</tr>
+{* {else}
+<!-- No {$key} --> *}
+{/if}
 {/foreach}

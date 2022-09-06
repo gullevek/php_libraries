@@ -83,13 +83,8 @@ function pop(theURL, winName, features) {
 	<td width="{$table_width}" class="edit_bgcolor">
 		<form method="post" name="edit_form" style="margin-block-end: 0em;">
 		<table width="100%" border="0" cellpadding="2" cellspacing="1">
-	 <!-- LOAD START //-->
 	{include file="edit_load.tpl"}
-	 <!-- LOAD END //-->
-	 <!-- NEW START //-->
 	{include file="edit_new.tpl"}
-	{* $form_create_new*}
-	 <!-- NEW END //-->
 	{if $form_yes}
 		{include file="edit_save_delete.tpl"}
 		{if $form_my_page_name == "edit_pages" && $filename_exist}

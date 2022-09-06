@@ -1131,6 +1131,9 @@ class Login
 
 		$html_string = (string)$this->login_template['template'];
 
+		$locales = $this->l->parseLocale($this->l->getLocale());
+		$this->login_template['strings']['LANGUAGE'] = $locales['lang'] ?? 'en';
+
 		// if password change is okay
 		if ($this->password_change) {
 			$html_string_password_change = $this->login_template['password_change'];
@@ -1334,7 +1337,7 @@ EOM;
 		if (!$this->login_template['template']) {
 			$this->login_template['template'] = <<<EOM
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{LANGUAGE}">
 <head>
 <title>{HTML_TITLE}</title>
 <style type="text/css">
@@ -1617,7 +1620,7 @@ EOM;
 		// set the locale
 		if (
 			$this->session->checkActiveSession() === true &&
-			!empty($_SESSION['DEFAULT_LANG'])
+			!empty($_SESSION['DEFAULT_LOCALE'])
 		) {
 			$locale = $_SESSION['DEFAULT_LOCALE'] ?? '';
 		} else {

@@ -1477,7 +1477,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				);
 				// - loginGetLoginHTML
 				$this->assertStringContainsString(
-					'<html>',
+					'<html lang="',
 					$login_mock->loginGetLoginHTML(),
 					'Assert login html string exits'
 				);
@@ -1529,7 +1529,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					// html login basic check only, content is the same as when
 					// read from loginGetLoginHTML()
 					$this->assertStringContainsString(
-						'<html>',
+						'<html lang="',
 						$_POST['login_html'],
 						'Assert ajax _POST html string exits'
 					);

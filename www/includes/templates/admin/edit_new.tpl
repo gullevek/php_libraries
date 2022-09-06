@@ -7,7 +7,8 @@
 	* HISTORY:
 	********************************************************************
 *}
-
+{if $new.seclevel_okay}
+	<!-- NEW START //-->
 	<tr>
 		<td class="edit_fgcolor_alt" class="normal">
 			{t}Create new media:{/t}
@@ -21,3 +22,5 @@
 			<input type="submit" name="new" value="{$new.new_name}">
 		</td>
 	</tr>
+	<!-- NEW END //-->
+{/if}

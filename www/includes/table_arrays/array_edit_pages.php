@@ -66,8 +66,8 @@ $edit_pages = [
 			'int' => 1,
 			'type' => 'binary',
 			'element_list' => [
-				 '1' => 'Yes',
-				 '0' => 'No'
+				'1' => 'Yes',
+				'0' => 'No'
 			],
 		],
 		'popup' => [
@@ -76,8 +76,8 @@ $edit_pages = [
 			'int' => 1,
 			'type' => 'binary',
 			'element_list' => [
-				 '1' => 'Yes',
-				 '0' => 'No'
+				'1' => 'Yes',
+				'0' => 'No'
 			],
 		],
 		'popup_x' => [
@@ -128,12 +128,12 @@ $edit_pages = [
 			'name' => 'filename',
 			'before_value' => 'Filename: '
 		],
-		 [
-		   'name' => 'online',
-		   'binary' => ['Yes', 'No'],
-		   'before_value' => 'Online: '
-		 ],
-		 [
+		[
+			'name' => 'online',
+			'binary' => ['Yes', 'No'],
+			'before_value' => 'Online: '
+		],
+		[
 			'name' => 'menu',
 			'binary' => ['Yes', 'No'],
 			'before_value' => 'Menu: '
