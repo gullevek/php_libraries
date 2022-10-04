@@ -105,6 +105,8 @@ class SmartyExtend extends \Smarty
 	public $CSS_TEMPLATE_NAME;
 	/** @var string|null */
 	public $TEMPLATE_TRANSLATE;
+	/** @var string|null */
+	public $JS_TRANSLATE;
 	// core group
 	/** @var string */
 	public $JS_CORE_TEMPLATE_NAME;
@@ -317,14 +319,14 @@ class SmartyExtend extends \Smarty
 		}
 		// javascript translate data as template for auto translate
 		if (empty($this->TEMPLATE_TRANSLATE)) {
-			$this->TEMPLATE_TRANSLATE = 'jsTranslate_'
+			$this->TEMPLATE_TRANSLATE = 'jsTranslate-'
 				. $this->locale_set . '.' . $this->encoding
 				. '.tpl';
 		} else {
 			// we assume we have some fixed set
-			// we must add _<$this->lang>
+			// we must add _<locale>.<encoding>
 			// if .tpl, put before .tpl
-			// if not .tpl, add _<$this->lang>.tpl
+			// if not .tpl, add _<locale>.<encoding>.tpl
 			if (strpos($this->TEMPLATE_TRANSLATE, '.tpl')) {
 				$this->TEMPLATE_TRANSLATE = str_replace(
 					'.tpl',
@@ -332,7 +334,7 @@ class SmartyExtend extends \Smarty
 					$this->TEMPLATE_TRANSLATE
 				);
 			} else {
-				$this->TEMPLATE_TRANSLATE .= '_'
+				$this->TEMPLATE_TRANSLATE .= '-'
 					. $this->locale_set . '.' . $this->encoding
 					. '.tpl';
 			}
@@ -340,6 +342,31 @@ class SmartyExtend extends \Smarty
 		// if we can't find it, dump it
 		if (!file_exists($this->getTemplateDir()[0] . DIRECTORY_SEPARATOR . $this->TEMPLATE_TRANSLATE)) {
 			$this->TEMPLATE_TRANSLATE = null;
+		}
+		if (empty($this->JS_TRANSLATE)) {
+			$this->JS_TRANSLATE = 'translate-'
+				. $this->locale_set . '.' . $this->encoding . '.js';
+		} else {
+			// we assume we have some fixed set
+			// we must add _<locale>.<encoding>
+			// if .js, put before .js
+			// if not .js, add _<locale>.<encoding>.js
+			if (strpos($this->JS_TRANSLATE, '.js')) {
+				$this->JS_TRANSLATE = str_replace(
+					'.js',
+					'-' . $this->locale_set . '.' . $this->encoding . '.js',
+					$this->JS_TRANSLATE
+				);
+			} else {
+				$this->JS_TRANSLATE .= '-'
+					. $this->locale_set . '.' . $this->encoding
+					. '.js';
+			}
+		}
+		if (!file_exists($this->JAVASCRIPT . $this->JS_TRANSLATE)) {
+			$this->JS_TRANSLATE = null;
+		} else {
+			$this->JS_TRANSLATE = $this->JAVASCRIPT . $this->JS_TRANSLATE;
 		}
 	}
 
@@ -469,6 +496,7 @@ class SmartyExtend extends \Smarty
 		$this->DATA['TEMPLATE_NAME'] = $this->TEMPLATE_NAME;
 		$this->DATA['CONTENT_INCLUDE'] = $this->CONTENT_INCLUDE;
 		$this->DATA['TEMPLATE_TRANSLATE'] = $this->TEMPLATE_TRANSLATE ?? null;
+		$this->DATA['JS_TRANSLATE'] = $this->JS_TRANSLATE ?? null;
 		$this->DATA['PAGE_FILE_NAME'] = str_replace('.php', '', $this->page_name) . '.tpl';
 		// render page
 		$this->renderSmarty();

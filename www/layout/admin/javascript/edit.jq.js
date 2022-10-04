@@ -1329,11 +1329,12 @@ function createLoginRow(login_string, header_id = 'mainHeader') // eslint-disabl
 		}
 		// clear out just in case for first entry
 		// fill with div name & login/logout button
-		$('#loginRow').html(phfo(cel('div', '', login_string)));
+		$('#loginRow').html(phfo(cel('div', 'loginRow-name', login_string)));
+		$('#loginRow').append(phfo(cel('div', 'loginRow-info', '')));
 		$('#loginRow').append(phfo(
 			aelx(
 				// outer div
-				cel('div'),
+				cel('div', 'loginRow-logout'),
 				// inner element
 				cel('input', 'logout', '', [], {
 					value: __('Logout'),
