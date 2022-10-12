@@ -1387,6 +1387,8 @@ function createNavMenu(nav_menu, header_id = 'mainHeader') // eslint-disable-lin
 			}
 		});
 		$('#menuRow').html(content.join(''));
+	} else {
+		$('#menuRow').hide();
 	}
 }
 

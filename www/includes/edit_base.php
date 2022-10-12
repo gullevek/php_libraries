@@ -457,6 +457,8 @@ if ($form->my_page_name == 'edit_order') {
 						$pathinfo = pathinfo($output_file);
 						if (!empty($pathinfo['dirname'])) {
 							$pathinfo['dirname'] .= DIRECTORY_SEPARATOR;
+						} else {
+							$pathinfo['dirname'] = '';
 						}
 						if ($t_q) {
 							$t_q .= ', ';

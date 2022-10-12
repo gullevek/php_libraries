@@ -66,7 +66,7 @@ class Basic
 	// logging interface, Debug\Logging class
 	/** @var \CoreLibs\Debug\Logging */
 	public $log;
-	/** @var\CoreLibs\Create\Session */
+	/** @var \CoreLibs\Create\Session */
 	public $session;
 
 	// email valid checks

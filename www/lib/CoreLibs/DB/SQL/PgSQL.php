@@ -779,7 +779,6 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 		}
 		// get result
 		$db_schema = $this->__dbFetchArray($cursor, PGSQL_ASSOC);
-		/** @phpstan-ignore-next-line Cannot access offset string on array|bool */
 		return $db_schema[$show_string] ?? '';
 	}
 
@@ -806,7 +805,6 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 		}
 		// check if schema does not exists
 		$row = $this->__dbFetchArray($cursor, PGSQL_ASSOC);
-		/** @phpstan-ignore-next-line */
 		if (empty($row['exists']) || $row['exists'] == 'f') {
 			return 2;
 		}

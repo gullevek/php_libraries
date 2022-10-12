@@ -312,16 +312,17 @@ class DateTime
 	}
 
 	/**
-	 * plits & checks date, wrap around for check_date function
-	 * returns int in:
-	 *     -1 if the first date is smaller the last
-	 *     0 if both are equal
-	 *     1 if the first date is bigger than the last
-	 *     false (bool): error
+	 * compares two dates, tries to convert them via strtotime to timestamps
+	 * returns int/bool in:
+	 * -1 if the first date is smaller the last
+	 * 0 if both are equal
+	 * 1 if the first date is bigger than the last
+	 * false if date validation/conversion failed
 	 *
 	 * @param  string $start_date start date string in YYYY-MM-DD
 	 * @param  string $end_date   end date string in YYYY-MM-DD
-	 * @return int|bool           false on error, or int -1/0/1 as difference
+	 * @return int|bool           false on error
+	 *                            or int -1 (s<e)/0 (s=e)/1 (s>e) as difference
 	 */
 	public static function compareDate($start_date, $end_date)
 	{
@@ -354,16 +355,17 @@ class DateTime
 
 	/**
 	 * compares the two dates + times. if seconds missing in one set,
-	 * add :00, converts / to -
+	 * adds :00, converts date + times via strtotime to timestamps
 	 * returns int/bool in:
-	 *     -1 if the first date is smaller the last
-	 *     0 if both are equal
-	 *     1 if the first date is bigger than the last
-	 *     false if no valid date/times chould be found
+	 * -1 if the first date is smaller the last
+	 * 0 if both are equal
+	 * 1 if the first date is bigger than the last
+	 * false if date/times validation/conversion failed
 	 *
 	 * @param  string $start_datetime start date/time in YYYY-MM-DD HH:mm:ss
 	 * @param  string $end_datetime   end date/time in YYYY-MM-DD HH:mm:ss
-	 * @return int|bool               false for error or -1/0/1 as difference
+	 * @return int|bool               false for error
+	 *                                or -1 (s<e)/0 (s=e)/1 (s>e) as difference
 	 */
 	public static function compareDateTime($start_datetime, $end_datetime)
 	{

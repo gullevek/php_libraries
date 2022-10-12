@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-base_folder='/var/www/html/developers/clemens/core_data/php_libraries/trunk/www/';
+BASE_FOLDER=$(dirname $(readlink -f $0))"/";
+# Assume script is in 4dev/bin
+base_folder="${BASE_FOLDER}../../www/";
 
 # locale gettext po to mo translator master
 for file in $(ls -1 ${base_folder}../4dev/locale/*.po); do
