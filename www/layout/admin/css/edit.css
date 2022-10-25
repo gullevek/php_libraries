@@ -159,9 +159,9 @@ input[type="text"]:focus, textarea:focus, select:focus {
 	text-align: center;
 }
 
-.warning {
-	border: 1px solid #df7700;
-	color: #d57200;
+.warning, .warn {
+	border: 1px solid #ffa947;
+	color: #ffa947;
 	margin: 5px;
 	padding: 2px;
 	text-align: center;
@@ -181,8 +181,8 @@ input[type="text"]:focus, textarea:focus, select:focus {
 	margin-top: 1px;
 }
 
-.div_warning {
-	border: 1px solid #df7700;
+.div_warning, .div_warn {
+	border: 1px solid #ffa947;
 }
 
 /* borders */

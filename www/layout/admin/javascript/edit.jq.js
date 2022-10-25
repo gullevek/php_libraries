@@ -974,7 +974,7 @@ function phfo(tree)
 	if (tree.id) {
 		line += ' id="' + tree.id + '"';
 		// if anything input (input, textarea, select then add name too)
-		if (['input', 'textarea', 'select'].includes(tree.tag)) {
+		if (['input', 'textarea', 'select', 'button'].includes(tree.tag)) {
 			line += ' name="' + (tree.name ? tree.name : tree.id) + '"';
 		}
 	}
