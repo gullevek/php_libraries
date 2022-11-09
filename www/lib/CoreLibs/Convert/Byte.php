@@ -134,7 +134,7 @@ class Byte
 			// remove all non valid characters from the number
 			$number = preg_replace('/[^0-9\.]/', '', $matches[2]);
 			// final clean up and convert to float
-			$number = (float)trim($number);
+			$number = (float)trim((string)$number);
 			// convert any mb/gb/etc to single m/b
 			$unit = preg_replace('/[^bkmgtpezy]/i', '', $matches[3]);
 			if ($unit) {
