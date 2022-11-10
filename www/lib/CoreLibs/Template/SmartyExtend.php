@@ -465,7 +465,7 @@ class SmartyExtend extends \Smarty
 			$this->HEADER['JAVASCRIPT'] = $this->ADMIN_JAVASCRIPT ? $this->ADMIN_JAVASCRIPT : ADMIN_JAVASCRIPT;
 			// the page name
 			$this->DATA['page_name'] = $this->page_name;
-			$this->DATA['table_width'] = empty($this->PAGE_WIDTH) ?: PAGE_WIDTH;
+			$this->DATA['table_width'] = !empty($this->PAGE_WIDTH) ?: PAGE_WIDTH;
 			$this->DATA['form_name'] = $this->DATA['FORM_NAME'];
 			// for tinymce special
 			$this->DATA['TINYMCE_LANG'] = $this->lang_short;

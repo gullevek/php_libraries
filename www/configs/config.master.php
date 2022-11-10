@@ -249,7 +249,7 @@ if ($is_secure) {
 	define('HOST_PROTOCOL', 'http://');
 }
 // define the db config set name, the db config and the db schema
-define('DB_CONFIG_NAME', $SITE_CONFIG[HOST_NAME]['db_host']);
+define('DB_CONFIG_NAME', $SITE_CONFIG[HOST_NAME]['db_host'] ?? '');
 define('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME] ?? []);
 // because we can't change constant, but we want to for db debug flag
 $GLOBALS['DB_CONFIG_SET'] = DB_CONFIG;
@@ -268,9 +268,9 @@ define('SITE_ENCODING', $SITE_CONFIG[HOST_NAME]['site_encoding'] ?? DEFAULT_ENCO
 define('LOGIN_ENABLED', $SITE_CONFIG[HOST_NAME]['login_enabled'] ?? false);
 define('AUTH', $SITE_CONFIG[HOST_NAME]['auth'] ?? false);
 // paths
-// define('CSV_PATH', $PATHS[TARGET]['csv_path']);
-// define('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin']);
-// define('REDIRECT_URL', $PATHS[TARGET]['redirect_url']);
+// define('CSV_PATH', $PATHS[TARGET]['csv_path'] ?? '');
+// define('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin'] ?? '');
+// define('REDIRECT_URL', $PATHS[TARGET]['redirect_url'] ?? '');
 
 // show all errors if debug_all & show_error_handling are enabled
 define('SHOW_ALL_ERRORS', true);
