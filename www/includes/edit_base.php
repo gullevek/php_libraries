@@ -112,7 +112,7 @@ if (defined('LAYOUT')) {
 }
 // set table width
 $table_width = '100%';
-
+$ADMIN_STYLESHEET = 'edit.css';
 // define all needed smarty stuff for the general HTML/page building
 $HEADER['CSS'] = CSS;
 $HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
