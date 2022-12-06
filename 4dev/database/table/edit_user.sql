@@ -7,63 +7,63 @@
 
 -- DROP TABLE edit_user;
 CREATE TABLE edit_user (
-	edit_user_id	SERIAL PRIMARY KEY,
-	connect_edit_user_id	INT, -- possible reference to other user
-	FOREIGN KEY (connect_edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_language_id INT NOT NULL,
-	FOREIGN KEY (edit_language_id) REFERENCES edit_language (edit_language_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_group_id INT NOT NULL,
-	FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_scheme_id INT,
-	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_access_right_id INT NOT NULL,
-	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	-- username/password
-	username	VARCHAR UNIQUE,
-	password	VARCHAR,
-	-- name block
-	first_name	VARCHAR,
-	last_name	VARCHAR,
-	first_name_furigana	VARCHAR,
-	last_name_furigana	VARCHAR,
-	-- email
-	email	VARCHAR,
-	-- eanbled/deleted flag
-	enabled	SMALLINT NOT NULL DEFAULT 0,
-	deleted	SMALLINT NOT NULL DEFAULT 0,
-	-- general flags
-	strict	SMALLINT DEFAULT 0,
-	locked	SMALLINT DEFAULT 0,
-	protected SMALLINT NOT NULL DEFAULT 0,
-	-- legacy, debug flags
-	debug	SMALLINT NOT NULL DEFAULT 0,
-	db_debug	SMALLINT NOT NULL DEFAULT 0,
-	-- is admin user
-	admin	SMALLINT NOT NULL DEFAULT 0,
-	-- last login log
-	last_login	TIMESTAMP WITHOUT TIME ZONE,
-	-- login error
-	login_error_count	INT DEFAULT 0,
-	login_error_date_last	TIMESTAMP WITHOUT TIME ZONE,
-	login_error_date_first	TIMESTAMP WITHOUT TIME ZONE,
-	-- time locked
-	lock_until	TIMESTAMP WITHOUT TIME ZONE,
-	lock_after	TIMESTAMP WITHOUT TIME ZONE,
-	-- password change
-	password_change_date	TIMESTAMP WITHOUT TIME ZONE, -- only when password is first set or changed
-	password_change_interval	INTERVAL, -- null if no change is needed, or d/m/y time interval
-	password_reset_time	TIMESTAMP WITHOUT TIME ZONE, -- when the password reset was requested
-	password_reset_uid	VARCHAR, -- the uid to access the password reset page
-	-- _GET login id for direct login
-	login_user_id	VARCHAR UNIQUE, -- the loginUserId, at least 32 chars
-	login_user_id_set_date	TIMESTAMP WITHOUT TIME ZONE, -- when above uid was set
-	login_user_id_last_revalidate	TIMESTAMP WITHOUT TIME ZONE, -- when the last login was done with user name and password
-	login_user_id_valid_from	TIMESTAMP WITHOUT TIME ZONE, -- if set, from when the above uid is valid
-	login_user_id_valid_until	TIMESTAMP WITHOUT TIME ZONE, -- if set, until when the above uid is valid
-	login_user_id_revalidate_after	INTERVAL, -- user must login to revalidated loginUserId after set days, 0 for forever
-	login_user_id_locked	SMALLINT DEFAULT 0, -- lock for loginUserId, but still allow normal login
-	-- additional ACL json block
-	additional_acl	JSONB -- additional ACL as JSON string (can be set by other pages)
+    edit_user_id SERIAL PRIMARY KEY,
+    connect_edit_user_id INT, -- possible reference to other user
+    FOREIGN KEY (connect_edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_language_id INT NOT NULL,
+    FOREIGN KEY (edit_language_id) REFERENCES edit_language (edit_language_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_group_id INT NOT NULL,
+    FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_scheme_id INT,
+    FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_access_right_id INT NOT NULL,
+    FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    -- username/password
+    username VARCHAR UNIQUE,
+    password VARCHAR,
+    -- name block
+    first_name VARCHAR,
+    last_name VARCHAR,
+    first_name_furigana VARCHAR,
+    last_name_furigana VARCHAR,
+    -- email
+    email VARCHAR,
+    -- eanbled/deleted flag
+    enabled SMALLINT NOT NULL DEFAULT 0,
+    deleted SMALLINT NOT NULL DEFAULT 0,
+    -- general flags
+    strict SMALLINT DEFAULT 0,
+    locked SMALLINT DEFAULT 0,
+    protected SMALLINT NOT NULL DEFAULT 0,
+    -- legacy, debug flags
+    debug SMALLINT NOT NULL DEFAULT 0,
+    db_debug SMALLINT NOT NULL DEFAULT 0,
+    -- is admin user
+    admin SMALLINT NOT NULL DEFAULT 0,
+    -- last login log
+    last_login TIMESTAMP WITHOUT TIME ZONE,
+    -- login error
+    login_error_count INT DEFAULT 0,
+    login_error_date_last TIMESTAMP WITHOUT TIME ZONE,
+    login_error_date_first TIMESTAMP WITHOUT TIME ZONE,
+    -- time locked
+    lock_until TIMESTAMP WITHOUT TIME ZONE,
+    lock_after TIMESTAMP WITHOUT TIME ZONE,
+    -- password change
+    password_change_date TIMESTAMP WITHOUT TIME ZONE, -- only when password is first set or changed
+    password_change_interval INTERVAL, -- null if no change is needed, or d/m/y time interval
+    password_reset_time TIMESTAMP WITHOUT TIME ZONE, -- when the password reset was requested
+    password_reset_uid VARCHAR, -- the uid to access the password reset page
+    -- _GET login id for direct login
+    login_user_id VARCHAR UNIQUE, -- the loginUserId, at least 32 chars
+    login_user_id_set_date TIMESTAMP WITHOUT TIME ZONE, -- when above uid was set
+    login_user_id_last_revalidate TIMESTAMP WITHOUT TIME ZONE, -- when the last login was done with user name and password
+    login_user_id_valid_from TIMESTAMP WITHOUT TIME ZONE, -- if set, from when the above uid is valid
+    login_user_id_valid_until TIMESTAMP WITHOUT TIME ZONE, -- if set, until when the above uid is valid
+    login_user_id_revalidate_after INTERVAL, -- user must login to revalidated loginUserId after set days, 0 for forever
+    login_user_id_locked SMALLINT DEFAULT 0, -- lock for loginUserId, but still allow normal login
+    -- additional ACL json block
+    additional_acl JSONB -- additional ACL as JSON string (can be set by other pages)
 ) INHERITS (edit_generic) WITHOUT OIDS;
 
 -- create unique index

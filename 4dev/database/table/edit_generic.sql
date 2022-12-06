@@ -7,7 +7,7 @@
 
 -- DROP TABLE edit_generic;
 CREATE TABLE edit_generic (
-	cuid	VARCHAR,
-	date_created	TIMESTAMP WITHOUT TIME ZONE DEFAULT clock_timestamp(),
-	date_updated	TIMESTAMP WITHOUT TIME ZONE
+    cuid VARCHAR,
+    date_created TIMESTAMP WITHOUT TIME ZONE DEFAULT clock_timestamp(),
+    date_updated TIMESTAMP WITHOUT TIME ZONE
 );

@@ -7,6 +7,6 @@
 
 -- DROP TABLE temp_files;
 CREATE TABLE temp_files (
-	filename	VARCHAR,
-	folder	VARCHAR
+    filename VARCHAR,
+    folder VARCHAR
 );

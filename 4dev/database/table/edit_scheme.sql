@@ -7,10 +7,10 @@
 
 -- DROP TABLE edit_scheme;
 CREATE TABLE edit_scheme (
-	edit_scheme_id	SERIAL PRIMARY KEY,
-	enabled	SMALLINT NOT NULL DEFAULT 0,
-	name	VARCHAR,
-	header_color	VARCHAR,
-	css_file	VARCHAR,
-	template	VARCHAR
+    edit_scheme_id SERIAL PRIMARY KEY,
+    enabled SMALLINT NOT NULL DEFAULT 0,
+    name VARCHAR,
+    header_color VARCHAR,
+    css_file VARCHAR,
+    template VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;

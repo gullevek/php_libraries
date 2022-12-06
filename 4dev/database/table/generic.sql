@@ -7,7 +7,7 @@
 
 -- DROP TABLE generic;
 CREATE TABLE generic (
-	date_created	TIMESTAMP WITHOUT TIME ZONE DEFAULT clock_timestamp(),
-	date_updated	TIMESTAMP WITHOUT TIME ZONE,
-	uid	VARCHAR
+    date_created TIMESTAMP WITHOUT TIME ZONE DEFAULT clock_timestamp(),
+    date_updated TIMESTAMP WITHOUT TIME ZONE,
+    uid VARCHAR
 );
