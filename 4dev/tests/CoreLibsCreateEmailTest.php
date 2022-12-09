@@ -113,7 +113,10 @@ final class CoreLibsCreateEmailTest extends TestCase
 				'日本語ｶﾀｶﾅﾊﾟ',
 				'ISO-2022-JP',
 				true,
-				'"=?ISO-2022-JP?B?GyRCRnxLXDhsGyhCPz8/Pz8=?=" <test@test.com>'
+				// was ok php 8.1
+				// '"=?ISO-2022-JP?B?GyRCRnxLXDhsGyhCPz8/Pz8=?=" <test@test.com>'
+				// below ok php 8.1.12, 2022/12/9
+				'"=?ISO-2022-JP?B?GyRCRnxLXDhsGyhCPz8/Pz8/?=" <test@test.com>'
 			]
 		];
 	}
@@ -124,6 +127,11 @@ final class CoreLibsCreateEmailTest extends TestCase
 	 * @dataProvider encodeEmailNameProvider
 	 * @testdox encode email $email, name $name, encoding $encoding, folding $kv_folding will be $expected [$_dataName]
 	 *
+	 * @param  string      $email
+	 * @param  string|null $name
+	 * @param  string|null $encoding
+	 * @param  bool|null   $kv_folding
+	 * @param  string      $expected
 	 * @return void
 	 */
 	public function testEncodeEmailName(

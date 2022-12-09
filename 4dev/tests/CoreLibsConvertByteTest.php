@@ -16,7 +16,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsConvertByteTest extends TestCase
 {
-
 	/**
 	 * Undocumented function
 	 *
@@ -24,7 +23,31 @@ final class CoreLibsConvertByteTest extends TestCase
 	 */
 	public function byteProvider(): array
 	{
+		/*
+		 * 0: input string
+		 * 1: default flags
+		 * 2: BYTE_FORMAT_SI
+		 * 3: BYTE_FORMAT_NOSPACE
+		 * 4: BYTE_FORMAT_ADJUST
+		 * 5: BYTE_FORMAT_SI | BYTE_FORMAT_NOSPACE
+		 */
 		return [
+			'string number' => [
+				0 => '1024',
+				1 => '1 KB',
+				2 => '1.02 KiB',
+				3 => '1KB',
+				4 => '1.00 KB',
+				5 => '1.02KiB',
+			],
+			'invalud string number' => [
+				0 => '1024 MB',
+				1 => '1024 MB',
+				2 => '1024 MB',
+				3 => '1024 MB',
+				4 => '1024 MB',
+				5 => '1024 MB',
+			],
 			'negative number' => [
 				0 => -123123123,
 				1 => '-117.42 MB',

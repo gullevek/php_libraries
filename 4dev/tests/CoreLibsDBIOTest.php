@@ -1189,7 +1189,13 @@ final class CoreLibsDBIOTest extends TestCase
 
 		$this->assertEquals(
 			$expected,
-			$db->dbEscapeBytea($input)
+			$db->dbEscapeBytea($input),
+			'Assert error to bytea'
+		);
+		$this->assertEquals(
+			$input,
+			$db->dbUnescapeBytea($expected),
+			'Assert error from bytes'
 		);
 
 		$db->dbClose();
