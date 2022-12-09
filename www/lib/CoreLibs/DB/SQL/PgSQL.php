@@ -559,15 +559,26 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_escape_byte
 	 *
-	 * @param  string $bytea bytea data stream
-	 * @return string        escaped bytea string
+	 * @param  string $data data stream
+	 * @return string       escaped bytea string
 	 */
-	public function __dbEscapeBytea(string $bytea): string
+	public function __dbEscapeBytea(string $data): string
 	{
 		if ($this->dbh === false || is_bool($this->dbh)) {
 			return '';
 		}
-		return pg_escape_bytea($this->dbh, $bytea);
+		return pg_escape_bytea($this->dbh, $data);
+	}
+
+	/**
+	 * unescape bytea data from postgesql
+	 *
+	 * @param  string $bytea Bytea data stream
+	 * @return string        Unescaped bytea data
+	 */
+	public function __dbUnescapeBytea(string $bytea): string
+	{
+		return pg_unescape_bytea($bytea);
 	}
 
 	/**

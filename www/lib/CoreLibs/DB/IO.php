@@ -1488,12 +1488,17 @@ class IO
 
 	/**
 	 * escape data for writing to bytea type column field
-	 * @param  string $bytea bytea to escape
-	 * @return string        escaped bytea
+	 * @param  string $data data to escape to bytea
+	 * @return string       escaped bytea
 	 */
-	public function dbEscapeBytea($bytea)
+	public function dbEscapeBytea($data)
 	{
-		return $this->db_functions->__dbEscapeBytea($bytea);
+		return $this->db_functions->__dbEscapeBytea($data);
+	}
+
+	public function dbUnescapeBytea($bytea)
+	{
+		return $this->db_functions->__dbUnescapeBytea($bytea);
 	}
 
 	/**

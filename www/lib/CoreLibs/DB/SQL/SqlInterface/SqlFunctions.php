@@ -217,7 +217,15 @@ interface SqlFunctions
 	 * @param string $bytea
 	 * @return string
 	 */
-	public function __dbEscapeBytea(string $bytea): string;
+	public function __dbEscapeBytea(string $data): string;
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string $bytea
+	 * @return string
+	 */
+	public function __dbUnescapeBytea(string $bytea): string;
 
 	/**
 	 * Undocumented function
