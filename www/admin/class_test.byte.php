@@ -50,21 +50,22 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 $byte = 254779258;
 $string = '242.98 MB';
 // static
-print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte) . "<br>";
-print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_SI) . "<br>";
-print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_ADJUST) . "<br>";
-print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_NOSPACE) . "<br>";
-print "S::BYTE FROM: $string: " . $byte_class::stringByteFormat($string) . "<br>";
+print "S::BYTE TO (calls as var): $byte: " . $byte_class::humanReadableByteFormat($byte) . "<br>";
+print "S::BYTE TO: $byte: " . Byte::humanReadableByteFormat($byte) . "<br>";
+print "S::BYTE TO: $byte: " . Byte::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_SI) . "<br>";
+print "S::BYTE TO: $byte: " . Byte::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_ADJUST) . "<br>";
+print "S::BYTE TO: $byte: " . Byte::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_NOSPACE) . "<br>";
+print "S::BYTE FROM: $string: " . Byte::stringByteFormat($string) . "<br>";
 //
 $byte = 314572800;
 $string = '300 MB';
-print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte) . "<br>";
-print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_SI) . "<br>";
-print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_ADJUST) . "<br>";
+print "S::BYTE TO: $byte: " . Byte::humanReadableByteFormat($byte) . "<br>";
+print "S::BYTE TO: $byte: " . Byte::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_SI) . "<br>";
+print "S::BYTE TO: $byte: " . Byte::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_ADJUST) . "<br>";
 print "S::BYTE TO: $byte: "
-	. $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_ADJUST | Byte::BYTE_FORMAT_NOSPACE) . "<br>";
-print "S::BYTE TO: $byte: " . $byte_class::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_NOSPACE) . "<br>";
-print "S::BYTE FROM: $string: " . $byte_class::stringByteFormat($string) . "<br>";
+	. Byte::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_ADJUST | Byte::BYTE_FORMAT_NOSPACE) . "<br>";
+print "S::BYTE TO: $byte: " . Byte::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_NOSPACE) . "<br>";
+print "S::BYTE FROM: $string: " . Byte::stringByteFormat($string) . "<br>";
 
 // *** BYTES TEST ***
 $bytes = [

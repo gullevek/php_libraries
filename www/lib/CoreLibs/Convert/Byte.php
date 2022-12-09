@@ -26,13 +26,16 @@ class Byte
 	 * Source Idea: SOURCE: https://programming.guide/worlds-most-copied-so-snippet.html
 	 *
 	 * The class itself hast the following defined
-	 * BYTE_FORMAT_NOSPACE [1] turn off spaces between number and extension
+	 * BYTE_FORMAT_NOSPACE [1] turn off spaces between number and suffix
 	 * BYTE_FORMAT_ADJUST  [2] use sprintf to always print two decimals
 	 * BYTE_FORMAT_SI      [3] use si standard 1000 instead of bytes 1024
 	 * To use the constant from outside use class::CONSTANT
 	 *
 	 * @param  string|int|float $bytes bytes as string int or pure int
 	 * @param  int              $flags bitwise flag with use space turned on
+	 *                                 BYTE_FORMAT_NOSPACE: no space between number and suffix
+	 *                                 BYTE_FORMAT_ADJUST: sprintf adjusted two 2 decimals
+	 *                                 BYTE_FORMAT_SI: use 1000 instead of 1024
 	 * @return string                  converted byte number (float) with suffix
 	 */
 	public static function humanReadableByteFormat($bytes, int $flags = 0): string
@@ -110,6 +113,7 @@ class Byte
 	 *
 	 * @param  string|int|float $number any string or number to convert
 	 * @param  int              $flags  bitwise flag with use space turned on
+	 *                                  BYTE_FORMAT_SI: use 1000 instead of 1024
 	 * @return string|int|float         converted value or original value
 	 */
 	public static function stringByteFormat($number, int $flags = 0)
