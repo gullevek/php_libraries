@@ -65,7 +65,7 @@ class Byte
 			// si or normal
 			$unit = $si ? 1000 : 1024;
 			// always positive
-			$abs_bytes = $bytes == PHP_INT_MIN ? PHP_INT_MAX : abs($bytes);
+			$abs_bytes = $bytes == PHP_INT_MIN ? PHP_INT_MAX : abs((float)$bytes);
 			// smaller than unit is always B
 			if ($abs_bytes < $unit) {
 				return $bytes . 'B';
