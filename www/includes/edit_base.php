@@ -116,6 +116,7 @@ $ADMIN_STYLESHEET = 'edit.css';
 // define all needed smarty stuff for the general HTML/page building
 $HEADER['CSS'] = CSS;
 $HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
+/** @phpstan-ignore-next-line because ADMIN_STYLESHEET can be null */
 $HEADER['STYLESHEET'] = $ADMIN_STYLESHEET ?? ADMIN_STYLESHEET;
 
 if ($form->my_page_name == 'edit_order') {

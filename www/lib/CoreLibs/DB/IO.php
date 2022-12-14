@@ -1481,7 +1481,7 @@ class IO
 	 * @param  string $string string to escape
 	 * @return string         escaped string
 	 */
-	public function dbEscapeIdentifier($string): string
+	public function dbEscapeIdentifier(string $string): string
 	{
 		return $this->db_functions->__dbEscapeIdentifier($string);
 	}
@@ -1489,14 +1489,19 @@ class IO
 	/**
 	 * escape data for writing to bytea type column field
 	 * @param  string $data data to escape to bytea
-	 * @return string       escaped bytea
+	 * @return string       escaped bytea string
 	 */
-	public function dbEscapeBytea($data)
+	public function dbEscapeBytea(string $data): string
 	{
 		return $this->db_functions->__dbEscapeBytea($data);
 	}
 
-	public function dbUnescapeBytea($bytea)
+	/**
+	 * unescape bytea data back to normal binrary data
+	 * @param  string $bytea bytea data stream
+	 * @return string        binary data string
+	 */
+	public function dbUnescapeBytea(string $bytea): string
 	{
 		return $this->db_functions->__dbUnescapeBytea($bytea);
 	}
@@ -1816,6 +1821,7 @@ class IO
 
 		// if cursor exists ...
 		if ($this->cursor_ext[$query_hash]['cursor']) {
+			/** @phpstan-ignore-next-line claims this is always false, but can be true */
 			if ($first_call === true) {
 				$this->cursor_ext[$query_hash]['log'][] = 'First call';
 				// count the rows returned (if select)
