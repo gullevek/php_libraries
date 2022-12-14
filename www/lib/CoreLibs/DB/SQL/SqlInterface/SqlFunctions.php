@@ -214,7 +214,7 @@ interface SqlFunctions
 	/**
 	 * Undocumented function
 	 *
-	 * @param string $bytea
+	 * @param string $data
 	 * @return string
 	 */
 	public function __dbEscapeBytea(string $data): string;
