@@ -16,6 +16,7 @@ if [ ! -z "${1}" ]; then
 		"7.4") php_bin="/usr/bin/php7.4 "; ;;
 		"8.0") php_bin="/usr/bin/php8.0 "; ;;
 		"8.1") php_bin="/usr/bin/php8.1 "; ;;
+		"8.2") php_bin="/usr/bin/php8.2 "; ;;
 		*) echo "Not support PHP: ${1}"; exit; ;;
 	esac;
 fi;
@@ -25,6 +26,7 @@ if [ ! -z "${2}" ] && [ -z "${php_bin}" ]; then
 		"7.4") php_bin="/usr/bin/php7.4 "; ;;
 		"8.0") php_bin="/usr/bin/php8.0 "; ;;
 		"8.1") php_bin="/usr/bin/php8.1 "; ;;
+		"8.2") php_bin="/usr/bin/php8.2 "; ;;
 		*) echo "Not support PHP: ${1}"; exit; ;;
 	esac;
 fi;

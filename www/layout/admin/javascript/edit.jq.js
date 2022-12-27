@@ -1014,8 +1014,12 @@ function phfo(tree)
 	} else if (tree.content) {
 		content.push(tree.content);
 	}
-	// if not input close
-	if (tree.tag != 'input') {
+	// if not input, image or br, then close
+	if (
+		tree.tag != 'input' ||
+		tree.tag != 'img' ||
+		tree.tag != 'br'
+	) {
 		content.push('</' + tree.tag + '>');
 	}
 	// combine to string

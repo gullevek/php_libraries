@@ -18,6 +18,7 @@ rm -f $tmpf_web;
 echo ".*.swp" >> $tmpf_web;
 echo "._*" >> $tmpf_web;
 echo ".DS_Store" >> $tmpf_web;
+echo ".user.ini" >> $tmpf_web;
 echo ".svn" >> $tmpf_web;
 echo ".svnignore" >> $tmpf_web;
 echo ".git" >> $tmpf_web;
