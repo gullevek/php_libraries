@@ -2206,7 +2206,7 @@ class IO
 	public function dbGetQueryCalled(string $query): int
 	{
 		$query_hash = $this->dbGetQueryHash($query);
-		if ($this->query_called[$query_hash]) {
+		if (!empty($this->query_called[$query_hash])) {
 			return $this->query_called[$query_hash];
 		} else {
 			return 0;
