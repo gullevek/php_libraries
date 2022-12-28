@@ -57,7 +57,7 @@ return array(
     'CoreLibs\\Output\\Form\\Generate' => $baseDir . '/lib/CoreLibs/Output/Form/Generate.php',
     'CoreLibs\\Output\\Form\\Token' => $baseDir . '/lib/CoreLibs/Output/Form/Token.php',
     'CoreLibs\\Output\\Image' => $baseDir . '/lib/CoreLibs/Output/Image.php',
-    'CoreLibs\\Output\\ProgressBar' => $baseDir . '/lib/CoreLibs/Output/Progressbar.php',
+    'CoreLibs\\Output\\ProgressBar' => $baseDir . '/lib/CoreLibs/Output/ProgressBar.php',
     'CoreLibs\\Template\\SmartyExtend' => $baseDir . '/lib/CoreLibs/Template/SmartyExtend.php',
     'FileUpload\\Core\\qqUploadedFile' => $baseDir . '/lib/FileUpload/Core/qqUploadedFile.php',
     'FileUpload\\Core\\qqUploadedFileForm' => $baseDir . '/lib/FileUpload/Core/qqUploadedFileForm.php',
