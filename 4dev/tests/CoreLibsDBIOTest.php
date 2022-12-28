@@ -1576,6 +1576,13 @@ final class CoreLibsDBIOTest extends TestCase
 		// clear any current query
 		// $db->dbResetQuery();
 
+		// assert never called query is 0
+		$this->assertEquals(
+			0,
+			$db->dbGetQueryCalled($query),
+			'Assert never called query is null'
+		);
+
 		// if expected result is not a bool
 		// for PHP 8.1 or higher it has to be an object
 		// for anything before PHP 8.1 this has to be a resource
