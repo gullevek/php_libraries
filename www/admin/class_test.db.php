@@ -145,6 +145,11 @@ print "PREPARE INSERT[ins_test_foo] STATUS: " . Support::printToString($status) 
 print "PREPARE INSERT PREVIOUS INSERTED: "
 	. print_r($db->dbReturnRow("SELECT test_foo_id, test FROM test_foo "
 	. "WHERE test_foo_id = " . $db->dbGetInsertPK()), true) . "<br>";
+
+print "PREPARE CURSOR RETURN:<br>";
+foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
+	print "KEY: " . $key . ': ' . $db->dbGetPrepareCursorValue('ins_test_foo', $key) . "<br>";
+}
 // returning test with multiple entries
 // $status = $db->db_exec(
 // 	"INSERT INTO test_foo (test) VALUES "

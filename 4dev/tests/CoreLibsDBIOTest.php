@@ -2770,7 +2770,7 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	// - prepared query execute
-	//   dbPrepare, dbExecute, dbFetchArray
+	//   dbPrepare, dbExecute, dbFetchArray, dbGetPrepareCursorValue
 
 	/**
 	 * Undocumented function
@@ -2795,6 +2795,7 @@ final class CoreLibsDBIOTest extends TestCase
 		// 11: read query (if insert/update)
 		// 11: execute data to check (array)
 		// 12: insert data
+		// 13: prepated cursor array data match values
 		return [
 			// insert
 			'prepare query insert' => [
@@ -2818,6 +2819,14 @@ final class CoreLibsDBIOTest extends TestCase
 				],
 				// insert data (for select)
 				'',
+				// get prepared data
+				[
+					'pk_name' => 'table_with_primary_key_id',
+					'count' => 2,
+					'query' =>  'INSERT INTO table_with_primary_key (row_int, uid) '
+						. 'VALUES ($1, $2) RETURNING table_with_primary_key_id',
+					'returning_id' => true,
+				],
 			],
 			// update
 			'prepare query update' => [
@@ -2844,6 +2853,14 @@ final class CoreLibsDBIOTest extends TestCase
 				//
 				"INSERT INTO table_with_primary_key (row_int, uid) VALUES "
 					. "(111, 'TEST A')",
+				//
+				[
+					'pk_name' => '',
+					'count' => 3,
+					'query' => 'UPDATE table_with_primary_key SET row_int = $1, '
+						. 'row_varchar = $2 WHERE uid = $3',
+					'returning_id' => false,
+				],
 			],
 			// select
 			'prepare select query' => [
@@ -2865,7 +2882,14 @@ final class CoreLibsDBIOTest extends TestCase
 					],
 				],
 				//
-				$insert_query
+				$insert_query,
+				//
+				[
+					'pk_name' => '',
+					'count' => 1,
+					'query' => 'SELECT row_int, uid FROM table_with_primary_key WHERE uid = $1',
+					'returning_id' => false,
+				],
 			],
 			// any query but with no parameters
 			'prepare select query no parameter' => [
@@ -2890,7 +2914,14 @@ final class CoreLibsDBIOTest extends TestCase
 					],
 				],
 				//
-				$insert_query
+				$insert_query,
+				//
+				[
+					'pk_name' => '',
+					'count' => 0,
+					'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+					'returning_id' => false,
+				],
 			],
 			// no statement name (25)
 			'empty statement' => [
@@ -2907,6 +2938,13 @@ final class CoreLibsDBIOTest extends TestCase
 				[],
 				//
 				'',
+				//
+				[
+					'pk_name' => '',
+					'count' => 0,
+					'query' => '',
+					'returning_id' => false,
+				],
 			],
 			// no query (prepare 11)
 			// no prepared cursor found with statement name (execute 24)
@@ -2924,6 +2962,13 @@ final class CoreLibsDBIOTest extends TestCase
 				[],
 				//
 				'',
+				//
+				[
+					'pk_name' => '',
+					'count' => 0,
+					'query' => '',
+					'returning_id' => false,
+				],
 			],
 			// no db connection (prepare/execute 16)
 			// TODO no db connection test
@@ -2944,8 +2989,15 @@ final class CoreLibsDBIOTest extends TestCase
 				// no query but data for data only compare
 				'',
 				[],
-				//,
-				$insert_query
+				//
+				$insert_query,
+				//
+				[
+					'pk_name' => '',
+					'count' => 0,
+					'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+					'returning_id' => false,
+				],
 			],
 			// insert wrong data count compared to needed (execute 23)
 			'wrong parmeter count' => [
@@ -2962,7 +3014,15 @@ final class CoreLibsDBIOTest extends TestCase
 				'',
 				[],
 				//
-				''
+				'',
+				//
+				[
+					'pk_name' => 'table_with_primary_key_id',
+					'count' => 2,
+					'query' => 'INSERT INTO table_with_primary_key (row_int, uid) VALUES '
+						. '($1, $2) RETURNING table_with_primary_key_id',
+					'returning_id' => true,
+				],
 			],
 			// execute does not return a result (22)
 			// TODO execute does not return a result
@@ -2975,6 +3035,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @covers ::dbPrepare
 	 * @covers ::dbExecute
 	 * @covers ::dbFetchArray
+	 * @covers ::dbGetPrepareCursorValue
 	 * @dataProvider preparedProvider
 	 * @testdox prepared query $stm_name with $expected_prepare (warning $warning_prepare/error $error_prepare) and $expected_execute (warning $warning_execute/error $error_execute) [$_dataName]
 	 *
@@ -2991,6 +3052,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @param string $expected_data_query
 	 * @param array $expected_data
 	 * @param string $insert_data
+	 * @param array $prepare_cursor
 	 * @return void
 	 */
 	public function testDbPrepared(
@@ -3006,7 +3068,8 @@ final class CoreLibsDBIOTest extends TestCase
 		string $error_execute,
 		string $expected_data_query,
 		array $expected_data,
-		string $insert_data
+		string $insert_data,
+		array $prepare_cursor,
 	): void {
 		// self::$log->setLogLevelAll('debug', true);
 		// self::$log->setLogLevelAll('print', true);
@@ -3116,11 +3179,104 @@ final class CoreLibsDBIOTest extends TestCase
 			);
 		}
 
+		// check dbGetPrepareCursorValue
+		foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
+			$this->assertEquals(
+				$prepare_cursor[$key],
+				$db->dbGetPrepareCursorValue($stm_name, $key),
+				'Prepared cursor: ' . $key . ': failed assertion'
+			);
+		}
+
 		// reset all data
 		$db->dbExec("TRUNCATE table_with_primary_key");
 		$db->dbExec("TRUNCATE table_without_primary_key");
 		// close connection
 		$db->dbClose();
+	}
+
+	// dedicated error checks for prepare cursor return
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function preparedProviderValue(): array
+	{
+		// 1: query (can be empty for do not set)
+		// 2: stm name
+		// 3: key
+		// 4: expected error return
+		return [
+			'no error' => [
+				"SELECT row_int, uid FROM table_with_primary_key",
+				'read',
+				'pk_name',
+				''
+			],
+			'statement name empty' => [
+				'',
+				'',
+				'',
+				'101',
+			],
+			'key empty' => [
+				'',
+				'read',
+				'',
+				'102',
+			],
+			'key invalid' => [
+				'',
+				'read',
+				'invalid',
+				'102',
+			],
+			'statement name not found' => [
+				'',
+				'invalid',
+				'pk_name',
+				'103',
+			],
+		];
+	}
+
+	/**
+	 * test return prepare cursor errors
+	 *
+	 * @covers ::dbGetPrepareCursorValue
+	 * @dataProvider preparedProviderValue
+	 * @testdox prepared query $stm_name with $key expect error id $error_id [$_dataName]
+	 *
+	 * @param string $query
+	 * @param string $stm_name
+	 * @param string $key
+	 * @param string $error_id
+	 * @return void
+	 */
+	public function testDbGetPrepareCursorValue(
+		string $query,
+		string $stm_name,
+		string $key,
+		$error_id
+	): void {
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		if (!empty($query)) {
+			$db->dbPrepare($stm_name, $query);
+			$db->dbExecute($stm_name);
+		}
+		$db->dbGetPrepareCursorValue($stm_name, $key);
+		// match check error
+		$last_error = $db->dbGetLastError();
+		$this->assertEquals(
+			$error_id,
+			$last_error,
+			'get prepare cursor value error check'
+		);
 	}
 
 	// - schema set/get tests

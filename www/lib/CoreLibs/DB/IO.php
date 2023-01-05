@@ -452,6 +452,11 @@ class IO
 			'71' => 'Failed to set search path/schema',
 			'80' => 'Trying to set an empty encoding',
 			'81' => 'Failed to set client encoding',
+			// for prepared cursor return
+			'101' => 'Statement name empty for get prepare cursor',
+			'102' => 'Key empty for get prepare cursir',
+			'103' => 'No prepared cursor with this name',
+			'104' => 'No Key with this name in the prepared cursor array'
 		];
 
 		// load the core DB functions wrapper class
@@ -3064,6 +3069,60 @@ class IO
 	public function dbGetFieldNames(): array
 	{
 		return $this->field_names;
+	}
+
+	/**
+	 * Returns the value for given key in statement
+	 * Will write error if statemen id does not exist
+	 * or key is invalid
+	 *
+	 * @param string $stm_name  The name of the stored statement
+	 * @param string $key       Key field name in prepared cursor array
+	 *                          Allowed are: pk_name, count, query, returning_id
+	 * @return null|string|int|bool Entry from each of the valid keys
+	 *                          Will return false on error
+	 *                          Not ethat returnin_id also can return false
+	 *                          but will not set an error entry
+	 */
+	public function dbGetPrepareCursorValue(string $stm_name, string $key)
+	{
+		// if no statement name
+		if (empty($stm_name)) {
+			$this->__dbError(
+				101,
+				false,
+				'No statement name given'
+			);
+			return false;
+		}
+		// if not a valid key
+		if (!in_array($key, ['pk_name', 'count', 'query', 'returning_id'])) {
+			$this->__dbError(
+				102,
+				false,
+				'Invalid key name'
+			);
+			return false;
+		}
+		// statement name not in prepared list
+		if (empty($this->prepare_cursor[$stm_name])) {
+			$this->__dbError(
+				103,
+				false,
+				'Statement name does not exist in prepare cursor array'
+			);
+			return false;
+		}
+		// key doest not exists, this will never hit as we filter out invalid ones
+		if (!isset($this->prepare_cursor[$stm_name][$key])) {
+			$this->__dbError(
+				104,
+				false,
+				'Key does not exist in prepare cursor array'
+			);
+			return false;
+		}
+		return $this->prepare_cursor[$stm_name][$key];
 	}
 
 	// ***************************
