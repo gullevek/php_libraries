@@ -95,7 +95,7 @@ return [
 		'www/vendor',
 		'www/tests',
 		'www/lib/Smarty',
-		'www/lib/smarty-4.1.0',
+		'www/lib/smarty-4.3.0',
 		'www/templates_c',
 		'www/log',
 		'www/tmp',
@@ -117,7 +117,7 @@ return [
 		'www/admin/qq_file_upload_front.php',
 		'www/admin/qq_file_upload_ajax.php',
 		// symlink ignore
-		'www/lib/smarty-4.1.0/libs/Smarty.class.php'
+		'www/lib/smarty-4.3.0/libs/Smarty.class.php'
 	],
 
 	// what not to show as problem

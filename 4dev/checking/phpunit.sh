@@ -3,7 +3,7 @@ base="/storage/var/www/html/developers/clemens/core_data/php_libraries/trunk/";
 # --testdox
 # call with "t" to give verbose testdox output
 # SUPPORTED: https://www.php.net/supported-versions.php
-# call with 7.3, 7.4, 8.0, 8.1 to force a certain php version
+# call with 7.4, 8.0, 8.1 to force a certain php version
 
 opt_testdox="";
 if [ "${1}" = "t" ] || [ "${2}" = "t" ]; then
