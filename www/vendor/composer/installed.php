@@ -11,12 +11,12 @@
     ),
     'versions' => array(
         'doctrine/instantiator' => array(
-            'pretty_version' => '1.4.1',
-            'version' => '1.4.1.0',
+            'pretty_version' => '1.5.0',
+            'version' => '1.5.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../doctrine/instantiator',
             'aliases' => array(),
-            'reference' => '10dcfce151b967d20fde1b34ae6640712c3891bc',
+            'reference' => '0a0fa9780f5d4e507415a065172d26a98d02047b',
             'dev_requirement' => true,
         ),
         'gullevek/corelibs-dev' => array(
@@ -38,12 +38,12 @@
             'dev_requirement' => true,
         ),
         'nikic/php-parser' => array(
-            'pretty_version' => 'v4.15.1',
-            'version' => '4.15.1.0',
+            'pretty_version' => 'v4.15.2',
+            'version' => '4.15.2.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nikic/php-parser',
             'aliases' => array(),
-            'reference' => '0ef6c55a3f47f89d7a374e6f835197a0b5fcf900',
+            'reference' => 'f59bbe44bf7d96f24f3e2b4ddc21cd52c1d2adbc',
             'dev_requirement' => true,
         ),
         'phar-io/manifest' => array(
@@ -65,12 +65,12 @@
             'dev_requirement' => true,
         ),
         'phpunit/php-code-coverage' => array(
-            'pretty_version' => '9.2.17',
-            'version' => '9.2.17.0',
+            'pretty_version' => '9.2.23',
+            'version' => '9.2.23.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../phpunit/php-code-coverage',
             'aliases' => array(),
-            'reference' => 'aa94dc41e8661fe90c7316849907cba3007b10d8',
+            'reference' => '9f1f0f9a2fbb680b26d1cf9b61b6eac43a6e4e9c',
             'dev_requirement' => true,
         ),
         'phpunit/php-file-iterator' => array(
@@ -110,12 +110,12 @@
             'dev_requirement' => true,
         ),
         'phpunit/phpunit' => array(
-            'pretty_version' => '9.5.25',
-            'version' => '9.5.25.0',
+            'pretty_version' => '9.5.27',
+            'version' => '9.5.27.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../phpunit/phpunit',
             'aliases' => array(),
-            'reference' => '3e6f90ca7e3d02025b1d147bd8d4a89fd4ca8a1d',
+            'reference' => 'a2bc7ffdca99f92d959b3f2270529334030bba38',
             'dev_requirement' => true,
         ),
         'sebastian/cli-parser' => array(

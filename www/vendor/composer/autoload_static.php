@@ -7,8 +7,8 @@ namespace Composer\Autoload;
 class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
 {
     public static $files = array (
-        'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -191,6 +191,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'PHPUnit\\Framework\\MockObject\\CannotUseOnlyMethodsException' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/MockObject/Exception/CannotUseOnlyMethodsException.php',
         'PHPUnit\\Framework\\MockObject\\ClassAlreadyExistsException' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/MockObject/Exception/ClassAlreadyExistsException.php',
         'PHPUnit\\Framework\\MockObject\\ClassIsFinalException' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/MockObject/Exception/ClassIsFinalException.php',
+        'PHPUnit\\Framework\\MockObject\\ClassIsReadonlyException' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/MockObject/Exception/ClassIsReadonlyException.php',
         'PHPUnit\\Framework\\MockObject\\ConfigurableMethod' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/MockObject/ConfigurableMethod.php',
         'PHPUnit\\Framework\\MockObject\\ConfigurableMethodsAlreadyInitializedException' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/MockObject/Exception/ConfigurableMethodsAlreadyInitializedException.php',
         'PHPUnit\\Framework\\MockObject\\DuplicateMethodException' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/MockObject/Exception/DuplicateMethodException.php',
@@ -719,13 +720,8 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'SmartyException' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smartyexception.php',
         'Smarty_Autoloader' => __DIR__ . '/../..' . '/lib/Smarty/Autoloader.php',
         'Smarty_CacheResource' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_cacheresource.php',
-        'Smarty_CacheResource_Apc' => __DIR__ . '/../..' . '/lib/smarty-4.1.0/demo/plugins/cacheresource.apc.php',
         'Smarty_CacheResource_Custom' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_cacheresource_custom.php',
         'Smarty_CacheResource_KeyValueStore' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_cacheresource_keyvaluestore.php',
-        'Smarty_CacheResource_Memcache' => __DIR__ . '/../..' . '/lib/smarty-4.1.0/demo/plugins/cacheresource.memcache.php',
-        'Smarty_CacheResource_Mysql' => __DIR__ . '/../..' . '/lib/smarty-4.1.0/demo/plugins/cacheresource.mysql.php',
-        'Smarty_CacheResource_Pdo' => __DIR__ . '/../..' . '/lib/smarty-4.1.0/demo/plugins/cacheresource.pdo.php',
-        'Smarty_CacheResource_Pdo_Gzip' => __DIR__ . '/../..' . '/lib/smarty-4.1.0/demo/plugins/cacheresource.pdo_gzip.php',
         'Smarty_Data' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_data.php',
         'Smarty_Internal_Block' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_internal_block.php',
         'Smarty_Internal_CacheResource_File' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_internal_cacheresource_file.php',
@@ -876,9 +872,6 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'Smarty_Internal_Undefined' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_internal_undefined.php',
         'Smarty_Resource' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_resource.php',
         'Smarty_Resource_Custom' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_resource_custom.php',
-        'Smarty_Resource_Extendsall' => __DIR__ . '/../..' . '/lib/smarty-4.1.0/demo/plugins/resource.extendsall.php',
-        'Smarty_Resource_Mysql' => __DIR__ . '/../..' . '/lib/smarty-4.1.0/demo/plugins/resource.mysql.php',
-        'Smarty_Resource_Mysqls' => __DIR__ . '/../..' . '/lib/smarty-4.1.0/demo/plugins/resource.mysqls.php',
         'Smarty_Resource_Recompiled' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_resource_recompiled.php',
         'Smarty_Resource_Uncompiled' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_resource_uncompiled.php',
         'Smarty_Security' => __DIR__ . '/../..' . '/lib/Smarty/sysplugins/smarty_security.php',
