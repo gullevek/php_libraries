@@ -27,6 +27,10 @@ $ECHO_ALL = true;
 $LOG_FILE_ID = 'classTest-form';
 ob_end_flush();
 
+// start session, needed for Form\Generate
+$SET_SESSION_NAME = EDIT_SESSION_NAME;
+$session = new CoreLibs\Create\Session($SET_SESSION_NAME);
+
 // define an array for page use
 $table_arrays = [];
 $table_arrays[\CoreLibs\Get\System::getPageName(1)] = [

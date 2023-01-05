@@ -54,7 +54,7 @@ print "<html><head><title>TEST CLASS</title><head>";
 print "<body>";
 
 print '<div><a href="class_test.db.php">Class Test: DB</a></div>';
-print '<div><a href="class_test.db.DbReturn.php">Class Test: DB dbReturn</a></div>';
+print '<div><a href="class_test.db.dbReturn.php">Class Test: DB dbReturn</a></div>';
 print '<div><a href="class_test.colors.php">Class Test: COLORS</a></div>';
 print '<div><a href="class_test.mime.php">Class Test: MIME</a></div>';
 print '<div><a href="class_test.json.php">Class Test: JSON</a></div>';
@@ -84,6 +84,7 @@ print '<div><a href="class_test.output.form.php">Class Test: OUTPUT FORM</a></di
 print '<div><a href="class_test.admin.backend.php">Class Test: BACKEND ADMIN CLASS</a></div>';
 print '<div><a href="class_test.lang.php">Class Test: LANG/L10n</a></div>';
 print '<div><a href="class_test.session.php">Class Test: SESSION</a></div>';
+print '<div><a href="class_test.session.read.php">Class Test: SESSION: READ</a></div>';
 print '<div><a href="class_test.smarty.php">Class Test: SMARTY</a></div>';
 print '<div><a href="class_test.login.php">Class Test: LOGIN</a></div>';
 print '<div><a href="class_test.autoloader.php">Class Test: AUTOLOADER</a></div>';

@@ -26,6 +26,7 @@
 use Phan\Config;
 
 return [
+	// "target_php_version" => "8.2",
 	// turn color on (-C)
 	"color_issue_messages_if_supported" => true,
 	// If true, missing properties will be created when
