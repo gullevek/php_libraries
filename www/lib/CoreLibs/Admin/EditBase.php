@@ -242,7 +242,11 @@ class EditBase
 		$this->form->formProcedureSave();
 		$this->form->formProcedureDelete();
 		// delete call only if those two are set
+		// and we are not in new/save/master delete
 		if (
+			!$this->form->new &&
+			!$this->form->save &&
+			!$this->form->delete &&
 			!empty($_POST['element_list']) &&
 			!empty($_POST['remove_name'])
 		) {
