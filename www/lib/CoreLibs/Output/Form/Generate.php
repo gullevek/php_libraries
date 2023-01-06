@@ -314,6 +314,11 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		?\CoreLibs\Language\L10n $l10n = null,
 		?array $locale = null
 	) {
+		// don't log per class
+		if ($log !== null) {
+			$log->setLogPer('class', false);
+		}
+		// if set global table array variable
 		global $table_arrays;
 		// replace any non valid variable names
 		// TODO extract only alphanumeric and _ after . to _ replacement
@@ -383,10 +388,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				];
 			}
 		}
-		// don't log per class
-		if ($log !== null) {
-			$log->setLogPer('class', false);
-		}
+		// $log->debug('CONFIG ARRAY', $log->prAr($config_array));
 		// start the array_io class which will start db_io ...
 		parent::__construct(
 			$db_config,

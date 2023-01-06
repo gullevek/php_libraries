@@ -10,6 +10,7 @@ return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'CoreLibs\\ACL\\Login' => $baseDir . '/lib/CoreLibs/ACL/Login.php',
     'CoreLibs\\Admin\\Backend' => $baseDir . '/lib/CoreLibs/Admin/Backend.php',
+    'CoreLibs\\Admin\\EditBase' => $baseDir . '/lib/CoreLibs/Admin/EditBase.php',
     'CoreLibs\\Basic' => $baseDir . '/lib/CoreLibs/Basic.php',
     'CoreLibs\\Check\\Email' => $baseDir . '/lib/CoreLibs/Check/Email.php',
     'CoreLibs\\Check\\Encoding' => $baseDir . '/lib/CoreLibs/Check/Encoding.php',

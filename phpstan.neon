@@ -36,6 +36,7 @@ parameters:
 		# deprecated files
 		- www/includes/admin_set_paths.php # ignore the admin include stuff
 		- www/includes/admin_smarty.php # ignore the admin include stuff
+		- www/includes/edit_base.LEGACY.php # old style
 		# folders with data no check needed
 		- www/templates_c
 		- www/cache

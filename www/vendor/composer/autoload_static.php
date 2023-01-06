@@ -7,8 +7,8 @@ namespace Composer\Autoload;
 class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
 {
     public static $files = array (
-        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
+        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -43,6 +43,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'CoreLibs\\ACL\\Login' => __DIR__ . '/../..' . '/lib/CoreLibs/ACL/Login.php',
         'CoreLibs\\Admin\\Backend' => __DIR__ . '/../..' . '/lib/CoreLibs/Admin/Backend.php',
+        'CoreLibs\\Admin\\EditBase' => __DIR__ . '/../..' . '/lib/CoreLibs/Admin/EditBase.php',
         'CoreLibs\\Basic' => __DIR__ . '/../..' . '/lib/CoreLibs/Basic.php',
         'CoreLibs\\Check\\Email' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/Email.php',
         'CoreLibs\\Check\\Encoding' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/Encoding.php',

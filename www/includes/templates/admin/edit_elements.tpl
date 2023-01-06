@@ -51,7 +51,6 @@
 			{* not yet implemented *}
 		{/if}
 		{if $element.type == 'order'}
-{*			<input type="button" name="order" value="{$element.data.output_name}" OnClick="pop('order.php?col_name={$element.data.col_name}&table_name={$element.data.table_name}&where={$element.data.query}','Order','status=no,scrollbars=yes,width=700,height=500');"> *}
 			<input type="button" name="order" value="{$element.data.output_name}" OnClick="pop('edit_order.php?table_name={$element.data.table_name}&where={$element.data.query}','Order','status=no,scrollbars=yes,width=700,height=500');">
 			<input type="hidden" name="{$element.data.name}" value="{$element.data.value}">
 		{/if}
@@ -69,8 +68,20 @@
 			</select>
 		{/if}
 		{if $element.type == 'element_list'}
+			<script language="JavaScript">
+			function deleteElement(delete_name, line_item)
+			{
+				let confirm_val = confirm('{t}Do you want to remove this entry?{/t}');
+				if (confirm_val === false) {
+					return false;
+				}
+				document.getElementById(delete_name).value = line_item;
+				document.getElementById(delete_name + '_flag').value = confirm_val;
+				document.edit_form.submit();
+			}
+			</script>
 			{* each row of data *}
-			<table width="100%" border="0">
+			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 			{foreach from=$element.data.content item=line key=key}
 			<tr>
 				{* now each line of data *}
@@ -107,7 +118,7 @@
 					{/if}
 					{* if there is a hidden key, set delete, but only if we have a delete string *}
 					{if $element.data.type.$line_key == 'hidden' && $line_item && $element.data.delete_name}
-						<input type="submit" name="remove_button" value="{t}Delete{/t}" onClick="document.edit_form.{$element.data.delete_name}.value={$line_item};document.edit_form.{$element.data.delete_name}_flag.value=confirm('{t}Do you want to remove this entry?{/t}');document.edit_form.submit();">
+						<input type="button" name="remove_button" value="{t}Delete{/t}" onClick="deleteElement('{$element.data.delete_name}', '{$line_item}');">
 					{/if}
 					{if $element.data.type.$line_key == 'hidden' && $element.data.enable_name && $element.data.delete && $element.data.output_name.$line_key}
 						<input type="checkbox" name="{$element.data.enable_name}[{$key}]" value="1" {if $line_item}checked{/if}> {$element.data.output_name.$line_key}

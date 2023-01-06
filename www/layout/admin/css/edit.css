@@ -19,7 +19,7 @@ body {
 	background-color: white;
 	color: black;
 	font-family: Verdana,Arial,Helvetica,sans-serif;
-	font-size : 8pt;
+	font-size : 9pt;
 }
 
 .large {
@@ -453,6 +453,13 @@ input[type="text"]:focus, textarea:focus, select:focus {
 
 .edit_temp {
 	background-color: #FFDF6F;
+}
+
+td.edit_fgcolor tr:nth-child(odd) {
+	background-color: #e2e2c5;
+}
+td.edit_fgcolor tr:nth-child(even) {
+	background-color: #ffffcd;
 }
 
 /* ***************************** ADMIN EDIT INTERFACE COLORS ********************************* */
