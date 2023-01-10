@@ -690,6 +690,7 @@ class Login
 				// rgb(), rgba(), hsl(), hsla()
 				// rgb: nnn.n for each
 				// hsl: nnn.n for first, nnn.n% for 2nd, 3rd
+				// Check\Colors::validateColor()
 				$_SESSION['LANG'] = $res['locale'] ?? 'en';
 				$_SESSION['DEFAULT_CHARSET'] = $res['encoding'] ?? 'UTF-8';
 				$_SESSION['DEFAULT_LOCALE'] = $_SESSION['LANG']

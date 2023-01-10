@@ -45,6 +45,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Admin\\Backend' => __DIR__ . '/../..' . '/lib/CoreLibs/Admin/Backend.php',
         'CoreLibs\\Admin\\EditBase' => __DIR__ . '/../..' . '/lib/CoreLibs/Admin/EditBase.php',
         'CoreLibs\\Basic' => __DIR__ . '/../..' . '/lib/CoreLibs/Basic.php',
+        'CoreLibs\\Check\\Colors' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/Colors.php',
         'CoreLibs\\Check\\Email' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/Email.php',
         'CoreLibs\\Check\\Encoding' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/Encoding.php',
         'CoreLibs\\Check\\File' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/File.php',

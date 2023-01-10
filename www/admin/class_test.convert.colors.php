@@ -22,7 +22,7 @@ define('USE_DATABASE', false);
 // sample config
 require 'config.php';
 // define log file id
-$LOG_FILE_ID = 'classTest-colors';
+$LOG_FILE_ID = 'classTest-convert-colors';
 ob_end_flush();
 
 use CoreLibs\Convert\Colors;
@@ -40,7 +40,7 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 $color_class = 'CoreLibs\Convert\Colors';
 
-$PAGE_NAME = 'TEST CLASS: COLORS';
+$PAGE_NAME = 'TEST CLASS: CONVERT COLORS';
 print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";

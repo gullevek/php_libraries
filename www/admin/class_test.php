@@ -55,7 +55,8 @@ print "<body>";
 
 print '<div><a href="class_test.db.php">Class Test: DB</a></div>';
 print '<div><a href="class_test.db.dbReturn.php">Class Test: DB dbReturn</a></div>';
-print '<div><a href="class_test.colors.php">Class Test: COLORS</a></div>';
+print '<div><a href="class_test.convert.colors.php">Class Test: CONVERT COLORS</a></div>';
+print '<div><a href="class_test.check.colors.php">Class Test: CHECK COLORS</a></div>';
 print '<div><a href="class_test.mime.php">Class Test: MIME</a></div>';
 print '<div><a href="class_test.json.php">Class Test: JSON</a></div>';
 print '<div><a href="class_test.token.php">Class Test: FORM TOKEN</a></div>';

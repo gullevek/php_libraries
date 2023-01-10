@@ -122,6 +122,8 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 */
 	public function rgb2hslAndhsbList(): array
 	{
+		// if hsb_from or hsl_from is set, this will be used in hsb/hsl convert
+		// hsb_rgb is used for adjusted rgb valus due to round error to in
 		return [
 			'valid gray' => [
 				'rgb' => [12, 12, 12],
@@ -135,6 +137,16 @@ final class CoreLibsConvertColorsTest extends TestCase
 				'hsb' => [212, 95, 78.0],
 				'hsb_rgb' => [10, 98, 199], // should be rgb, but rounding error
 				'hsl' => [211.6, 90.5, 41.2],
+				'valid' => true,
+			],
+			// hsg/hsl with 360 which is seen as 0
+			'valid color hue 360' => [
+				'rgb' => [200, 10, 10],
+				'hsb' => [0, 95, 78.0],
+				'hsb_from' => [360, 95, 78.0],
+				'hsb_rgb' => [199, 10, 10], // should be rgb, but rounding error
+				'hsl' => [0.0, 90.5, 41.2],
+				'hsl_from' => [360.0, 90.5, 41.2],
 				'valid' => true,
 			],
 			// invalid values
@@ -176,9 +188,9 @@ final class CoreLibsConvertColorsTest extends TestCase
 		$list = [];
 		foreach ($this->rgb2hslAndhsbList() as $name => $values) {
 			$list[$name . ', hsb to rgb'] = [
-				0 => $values['hsb'][0],
-				1 => $values['hsb'][1],
-				2 => $values['hsb'][2],
+				0 => $values['hsb_from'][0] ?? $values['hsb'][0],
+				1 => $values['hsb_from'][1] ?? $values['hsb'][1],
+				2 => $values['hsb_from'][2] ?? $values['hsb'][2],
 				3 => $values['valid'] ? $values['hsb_rgb'] : false
 			];
 		}
@@ -214,9 +226,9 @@ final class CoreLibsConvertColorsTest extends TestCase
 		$list = [];
 		foreach ($this->rgb2hslAndhsbList() as $name => $values) {
 			$list[$name . ', hsl to rgb'] = [
-				0 => $values['hsl'][0],
-				1 => $values['hsl'][1],
-				2 => $values['hsl'][2],
+				0 => $values['hsl_from'][0] ?? $values['hsl'][0],
+				1 => $values['hsl_from'][1] ?? $values['hsl'][1],
+				2 => $values['hsl_from'][2] ?? $values['hsl'][2],
 				3 => $values['valid'] ? $values['rgb'] : false
 			];
 		}
@@ -380,6 +392,27 @@ final class CoreLibsConvertColorsTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Colors::hsl2rgb($input_h, $input_s, $input_l)
+		);
+	}
+
+	/**
+	 * edge case check hsl/hsb and hue 360 (= 0)
+	 *
+	 * @covers ::hsl2rgb
+	 * @covers ::hsb2rgb
+	 * @testdox hsl2rgb/hsb2rgb hue 360 valid check
+	 *
+	 * @return void
+	 */
+	public function testHslHsb360hue(): void
+	{
+		$this->assertNotFalse(
+			\CoreLibs\Convert\Colors::hsl2rgb(360.0, 90.5, 41.2),
+			'HSL to RGB with 360 hue'
+		);
+		$this->assertNotFalse(
+			\CoreLibs\Convert\Colors::hsb2rgb(360, 95, 78.0),
+			'HSB to RGB with 360 hue'
 		);
 	}
 }

@@ -12,6 +12,7 @@ return array(
     'CoreLibs\\Admin\\Backend' => $baseDir . '/lib/CoreLibs/Admin/Backend.php',
     'CoreLibs\\Admin\\EditBase' => $baseDir . '/lib/CoreLibs/Admin/EditBase.php',
     'CoreLibs\\Basic' => $baseDir . '/lib/CoreLibs/Basic.php',
+    'CoreLibs\\Check\\Colors' => $baseDir . '/lib/CoreLibs/Check/Colors.php',
     'CoreLibs\\Check\\Email' => $baseDir . '/lib/CoreLibs/Check/Email.php',
     'CoreLibs\\Check\\Encoding' => $baseDir . '/lib/CoreLibs/Check/Encoding.php',
     'CoreLibs\\Check\\File' => $baseDir . '/lib/CoreLibs/Check/File.php',
