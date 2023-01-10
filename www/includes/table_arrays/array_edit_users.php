@@ -1,5 +1,7 @@
 <?php
 
+/** @var \CoreLibs\Output\Form\Generate $this */
+
 declare(strict_types=1);
 
 $edit_users = [
