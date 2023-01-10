@@ -37,7 +37,7 @@ class Byte
 	 *                                 BYTE_FORMAT_ADJUST: sprintf adjusted two 2 decimals
 	 *                                 BYTE_FORMAT_SI: use 1000 instead of 1024
 	 * @return string                  converted byte number (float) with suffix
-	 * @throws Exception               1: no valid flag set
+	 * @throws \Exception               1: no valid flag set
 	 */
 	public static function humanReadableByteFormat($bytes, int $flags = 0): string
 	{
@@ -119,7 +119,7 @@ class Byte
 	 * @param  int              $flags  bitwise flag with use space turned on
 	 *                                  BYTE_FORMAT_SI: use 1000 instead of 1024
 	 * @return string|int|float         converted value or original value
-	 * @throws Exception                1: no valid flag set
+	 * @throws \Exception                1: no valid flag set
 	 */
 	public static function stringByteFormat($number, int $flags = 0)
 	{
