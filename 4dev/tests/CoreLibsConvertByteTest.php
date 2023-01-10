@@ -240,6 +240,41 @@ final class CoreLibsConvertByteTest extends TestCase
 			\CoreLibs\Convert\Byte::stringByteFormat($input, \CoreLibs\Convert\Byte::BYTE_FORMAT_SI)
 		);
 	}
+
+	/**
+	 * Exceptions tests
+	 *
+	 * @covers ::humanReadableByteFormat
+	 * @testWith [99]
+	 * @testdox Test exception for humanReadableByteFormat with flag $flag
+	 *
+	 * @param  int  $flag
+	 * @return void
+	 */
+	public function testHumanReadableByteFormatException(int $flag): void
+	{
+		$this->expectException(\Exception::class);
+		\CoreLibs\Convert\Byte::humanReadableByteFormat(12, $flag);
+	}
+
+	/**
+	 * Exceptions tests
+	 * can only be 4, try 1,2 and over
+	 *
+	 * @covers ::stringByteFormat
+	 * @testWith [1]
+	 *           [2]
+	 *           [99]
+	 * @testdox Test exception for stringByteFormat with flag $flag
+	 *
+	 * @param  int  $flag
+	 * @return void
+	 */
+	public function testStringByteFormatException(int $flag): void
+	{
+		$this->expectException(\Exception::class);
+		\CoreLibs\Convert\Byte::stringByteFormat(12, $flag);
+	}
 }
 
 // __END__

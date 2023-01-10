@@ -28,7 +28,7 @@ class Byte
 	 * The class itself hast the following defined
 	 * BYTE_FORMAT_NOSPACE [1] turn off spaces between number and suffix
 	 * BYTE_FORMAT_ADJUST  [2] use sprintf to always print two decimals
-	 * BYTE_FORMAT_SI      [3] use si standard 1000 instead of bytes 1024
+	 * BYTE_FORMAT_SI      [4] use si standard 1000 instead of bytes 1024
 	 * To use the constant from outside use class::CONSTANT
 	 *
 	 * @param  string|int|float $bytes bytes as string int or pure int
@@ -37,6 +37,7 @@ class Byte
 	 *                                 BYTE_FORMAT_ADJUST: sprintf adjusted two 2 decimals
 	 *                                 BYTE_FORMAT_SI: use 1000 instead of 1024
 	 * @return string                  converted byte number (float) with suffix
+	 * @throws Exception               1: no valid flag set
 	 */
 	public static function humanReadableByteFormat($bytes, int $flags = 0): string
 	{
@@ -60,6 +61,9 @@ class Byte
 				$si = true;
 			} else {
 				$si = false;
+			}
+			if ($flags > 7) {
+				throw new \Exception("Invalid flags parameter: $flags", 1);
 			}
 
 			// si or normal
@@ -109,12 +113,13 @@ class Byte
 	 * calculates the bytes based on a string with nnG, nnGB, nnM, etc
 	 * NOTE: large exabyte numbers will overflow
 	 * flag allowed:
-	 * BYTE_FORMAT_SI      [3] use si standard 1000 instead of bytes 1024
+	 * BYTE_FORMAT_SI      [4] use si standard 1000 instead of bytes 1024
 	 *
 	 * @param  string|int|float $number any string or number to convert
 	 * @param  int              $flags  bitwise flag with use space turned on
 	 *                                  BYTE_FORMAT_SI: use 1000 instead of 1024
 	 * @return string|int|float         converted value or original value
+	 * @throws Exception                1: no valid flag set
 	 */
 	public static function stringByteFormat($number, int $flags = 0)
 	{
@@ -123,6 +128,9 @@ class Byte
 			$si = true;
 		} else {
 			$si = false;
+		}
+		if ($flags != 0 && $flags != 4) {
+			throw new \Exception("Invalid flags parameter: $flags", 1);
 		}
 		// matches in regex
 		$matches = [];
