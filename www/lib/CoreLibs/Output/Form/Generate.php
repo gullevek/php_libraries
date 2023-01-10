@@ -294,6 +294,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// language
 	/** @var \CoreLibs\Language\L10n */
 	public $l;
+	// log
+	/** @var \CoreLibs\Debug\Logging */
+	public $log;
 
 	// now some default error msgs (english)
 	/** @var array<mixed> */
@@ -319,13 +322,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		?array $locale = null,
 		?array $table_arrays = null,
 	) {
+		// init logger if not set
+		$this->log = $log ?? new \CoreLibs\Debug\Logging();
 		// don't log per class
-		if ($log !== null) {
-			$log->setLogPer('class', false);
-		}
-		// replace any non valid variable names
-		// TODO extract only alphanumeric and _ after . to _ replacement
-		$this->my_page_name = str_replace(['.'], '_', System::getPageName(System::NO_EXTENSION));
+		$this->log->setLogPer('class', false);
 		// if pass on locale is null
 		if ($locale === null) {
 			$locale = \CoreLibs\Language\GetLocale::setLocale();
@@ -349,6 +349,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// security settings
 		$this->base_acl_level = (int)$_SESSION['BASE_ACL_LEVEL'];
 		$this->acl_admin = (int)$_SESSION['ADMIN'];
+
+		// replace any non valid variable names and set my page name
+		$this->my_page_name = str_replace(
+			['.'],
+			'_',
+			System::getPageName(System::NO_EXTENSION)
+		);
 
 		// first check if we have a in page override as $table_arrays[page name]
 		if (
@@ -374,7 +381,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$db_config,
 			$config_array['table_array'],
 			$config_array['table_name'],
-			$log ?? new \CoreLibs\Debug\Logging(),
+			$this->log,
 			// set the ACL
 			$this->base_acl_level,
 			$this->acl_admin
