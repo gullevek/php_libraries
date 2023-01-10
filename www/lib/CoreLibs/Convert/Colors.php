@@ -150,6 +150,9 @@ class Colors
 	{
 		// check that H is 0 to 359, 360 = 0
 		// and S and V are 0 to 1
+		if ($H == 360) {
+			$H = 0;
+		}
 		if ($H < 0 || $H > 359) {
 			return false;
 		}
@@ -286,6 +289,9 @@ class Colors
 	{
 		if (!is_numeric($hue)) {
 			return false;
+		}
+		if ($hue == 360) {
+			$hue = 0;
 		}
 		if ($hue < 0 || $hue > 359) {
 			return false;
