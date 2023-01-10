@@ -472,12 +472,22 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	*/
 	private function loadTableArray()
 	{
+		// note: it schould be Schemas but an original type made it to this
+		//       this file is kept for the old usage, new one should be EditSchemas
+		$table_array_shim = [
+			'EditSchemes' => 'EditSchemas'
+		];
 		// camel case $this->my_page_name from foo_bar_note to FooBarNote
 		$page_name_camel_case = '';
 		foreach (explode('_', $this->my_page_name) as $part) {
 			$page_name_camel_case .= ucfirst($part);
 		}
-		$class_string = __NAMESPACE__ . "\\TableArrays\\" . $page_name_camel_case;
+		$class_string = __NAMESPACE__ . "\\TableArrays\\"
+			. (
+				// shim lookup
+				$table_array_shim[$page_name_camel_case] ??
+					$page_name_camel_case
+			);
 		try {
 			/** @var \CoreLibs\Output\Form\TableArraysInterface|false $class */
 			$class = new $class_string($this);
