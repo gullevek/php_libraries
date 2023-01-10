@@ -677,9 +677,19 @@ class Login
 				$_SESSION['GROUP_ACL_TYPE'] = $res['group_type'];
 				// deprecated TEMPLATE setting
 				$_SESSION['TEMPLATE'] = $res['template'] ? $res['template'] : '';
-				$_SESSION['HEADER_COLOR'] = $res['second_header_color'] ?
+				$_SESSION['HEADER_COLOR'] = !empty($res['second_header_color']) ?
 					$res['second_header_color'] :
 					$res['first_header_color'];
+				// missing # before, this is for legacy data, will be deprecated
+				if (preg_match("/^[\dA-Fa-f]{6,8}$/", $_SESSION['HEADER_COLOR'])) {
+					$_SESSION['HEADER_COLOR'] = '#' . $_SESSION['HEADER_COLOR'];
+				}
+				// TODO: make sure that header color is valid:
+				// # + 6 hex
+				// # + 8 hex (alpha)
+				// rgb(), rgba(), hsl(), hsla()
+				// rgb: nnn.n for each
+				// hsl: nnn.n for first, nnn.n% for 2nd, 3rd
 				$_SESSION['LANG'] = $res['locale'] ?? 'en';
 				$_SESSION['DEFAULT_CHARSET'] = $res['encoding'] ?? 'UTF-8';
 				$_SESSION['DEFAULT_LOCALE'] = $_SESSION['LANG']

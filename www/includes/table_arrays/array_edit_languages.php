@@ -5,12 +5,12 @@ declare(strict_types=1);
 $edit_languages = [
 	'table_array' => [
 		'edit_language_id' => [
-			'value' => $GLOBALS['edit_language_id'] ?? '',
+			'value' => $_POST['edit_language_id'] ?? '',
 			'type' => 'hidden',
 			'pk' => 1
 		],
 		'short_name' => [
-			'value' => $GLOBALS['short_name'] ?? '',
+			'value' => $_POST['short_name'] ?? '',
 			'output_name' => 'Language (short)',
 			'mandatory' => 1,
 			'type' => 'text',
@@ -18,25 +18,25 @@ $edit_languages = [
 			'length' => 2
 		],
 		'long_name' => [
-			'value' => $GLOBALS['long_name'] ?? '',
+			'value' => $_POST['long_name'] ?? '',
 			'output_name' => 'Language (long)',
 			'mandatory' => 1,
 			'type' => 'text',
 			'size' => 40
 		],
 		'iso_name' => [
-			'value' => $GLOBALS['iso_name'] ?? '',
+			'value' => $_POST['iso_name'] ?? '',
 			'output_name' => 'ISO Code',
 			'mandatory' => 1,
 			'type' => 'text'
 		],
 		'order_number' => [
-			'value' => $GLOBALS['order_number'] ?? '',
+			'value' => $_POST['order_number'] ?? '',
 			'int' => 1,
 			'order' => 1
 		],
 		'enabled' => [
-			'value' => $GLOBALS['enabled'] ?? '',
+			'value' => $_POST['enabled'] ?? '',
 			'output_name' => 'Enabled',
 			'int' => 1,
 			'type' => 'binary',
@@ -46,7 +46,7 @@ $edit_languages = [
 			],
 		],
 		'lang_default' => [
-			'value' => $GLOBALS['lang_default'] ?? '',
+			'value' => $_POST['lang_default'] ?? '',
 			'output_name' => 'Default Language',
 			'int' => 1,
 			'type' => 'binary',

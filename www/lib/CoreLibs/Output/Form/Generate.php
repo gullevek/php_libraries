@@ -307,19 +307,21 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * @param \CoreLibs\Language\L10n|null $l10n      l10n language class, null auto set
 	 * @param array<string,string>|null    $locale    locale array from ::setLocale,
 	 *                                                null auto set
+	 * @param array<mixed>|null            $table_arrays Override table array data
+	 *                                                   instead of try to load from
+	 *                                                   include file
 	 */
 	public function __construct(
 		array $db_config,
 		?\CoreLibs\Debug\Logging $log = null,
 		?\CoreLibs\Language\L10n $l10n = null,
-		?array $locale = null
+		?array $locale = null,
+		?array $table_arrays = null,
 	) {
 		// don't log per class
 		if ($log !== null) {
 			$log->setLogPer('class', false);
 		}
-		// if set global table array variable
-		global $table_arrays;
 		// replace any non valid variable names
 		// TODO extract only alphanumeric and _ after . to _ replacement
 		$this->my_page_name = str_replace(['.'], '_', System::getPageName(System::NO_EXTENSION));
@@ -346,15 +348,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// security settings
 		$this->base_acl_level = (int)$_SESSION['BASE_ACL_LEVEL'];
 		$this->acl_admin = (int)$_SESSION['ADMIN'];
-		$GLOBALS['base_acl_level'] = $this->base_acl_level;
-		$GLOBALS['acl_admin'] = $this->acl_admin;
 
 		// first check if we have a in page override as $table_arrays[page name]
 		if (
-			/* isset($GLOBALS['table_arrays']) &&
-			is_array($GLOBALS['table_arrays']) &&
-			isset($GLOBALS['table_arrays'][System::getPageName(System::NO_EXTENSION)]) &&
-			is_array($GLOBALS['table_arrays'][System::getPageName(System::NO_EXTENSION)]) */
 			isset($table_arrays[System::getPageName(System::NO_EXTENSION)]) &&
 			is_array($table_arrays[System::getPageName(System::NO_EXTENSION)])
 		) {
@@ -1480,7 +1476,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// $this->log->debug('edit_error', 'QS: <pre>' . print_r($_POST, true) . '</pre>');
 		if (is_array($this->element_list)) {
 			// check the mandatory stuff
-			// if mandatory, check that at least on pk exists or if at least the mandatory field is filled
+			// if mandatory, check that at least on pk exists or
+			// if at least the mandatory field is filled
 			foreach ($this->element_list as $table_name => $reference_array) {
 				if (!is_array($reference_array)) {
 					$reference_array = [];
@@ -1520,7 +1517,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					//	. count($_POST[$prfx.$key]) . ' | M: $max');
 					// $this->log->debug('edit_error_chk', 'K: ' . $_POST[$prfx.$key] . ' | ' . $_POST[$prfx.$key][0]);
 				}
-				$this->log->debug('POST ARRAY', $this->log->prAr($_POST));
+				// $this->log->debug('POST ARRAY', $this->log->prAr($_POST));
 				// init variables before inner loop run
 				$mand_okay = 0;
 				$mand_name = '';
@@ -1532,15 +1529,17 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				for ($i = 0; $i < $max; $i++) {
 					// either one of the post pks is set, or the mandatory
 					foreach ($reference_array['elements'] as $el_name => $data_array) {
-						if (isset($data_array['mandatory']) && $data_array['mandatory']) {
+						if (
+							isset($data_array['mandatory']) &&
+							$data_array['mandatory']
+						) {
 							$mand_name = $data_array['output_name'];
 						}
 						// check if there is a primary ket inside, so it is okay
 						if (
 							isset($data_array['pk_id']) &&
 							count($_POST[$prfx . $el_name]) &&
-							isset($reference_array['mandatory']) &&
-							$reference_array['mandatory']
+							!empty($reference_array['mandatory'])
 						) {
 							$mand_okay = 1;
 						}
@@ -1551,15 +1550,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						// 	. $_POST[$prfx . $el_name] . ' - ' . $reference_array['enable_name'] . ' - '
 						// 	. $_POST[$reference_array['enable_name']][$_POST[$prfx . $el_name][$i]]);
 						if (
-							isset($data_array['mandatory']) &&
-							$data_array['mandatory'] &&
-							isset($_POST[$prfx . $el_name][$i]) &&
-							$_POST[$prfx . $el_name][$i]
+							!empty($data_array['mandatory']) &&
+							!empty($_POST[$prfx . $el_name][$i])
 						) {
 							$mand_okay = 1;
 							$row_okay[$i] = 1;
 						} elseif (
-							!empty($data_array['type']) && $data_array['type'] == 'radio_group' &&
+							!empty($data_array['type']) &&
+							$data_array['type'] == 'radio_group' &&
 							!isset($_POST[$prfx . $el_name])
 						) {
 							// radio group and set where one not active
@@ -1567,20 +1565,22 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							$row_okay[$_POST[$prfx . $el_name][$i] ?? 0] = 0;
 							$default_wrong[$_POST[$prfx . $el_name][$i] ?? 0] = 1;
 							$error[$_POST[$prfx . $el_name][$i] ?? 0] = 1;
-						} elseif (isset($_POST[$prfx . $el_name][$i]) && !isset($error[$i])) {
+						} elseif (
+							isset($_POST[$prfx . $el_name][$i]) &&
+							!isset($error[$i])
+						) {
 							// $this->log->debug('edit_error_chk', '[$i]');
 							$element_set[$i] = 1;
 							$row_okay[$i] = 1;
 						} elseif (
-							isset($data_array['mandatory']) &&
-							$data_array['mandatory'] &&
+							!empty($data_array['mandatory']) &&
 							!$_POST[$prfx . $el_name][$i]
 						) {
 							$row_okay[$i] = 0;
 						}
 						// do optional error checks like for normal fields
 						// currently active: unique/alphanumeric
-						if (isset($data_array['error_check'])) {
+						if (!empty($data_array['error_check'])) {
 							foreach (explode('|', $data_array['error_check']) as $error_check) {
 								switch ($error_check) {
 									// check unique, check if field is filled and not same in _POST set
@@ -1599,6 +1599,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 												$reference_array['output_name'],
 												$i
 											);
+											$_POST['ERROR'][$prfx][$i] = 1;
 										}
 										break;
 									case 'alphanumericspace':
@@ -1614,6 +1615,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 												$reference_array['output_name'],
 												$i
 											);
+											$_POST['ERROR'][$prfx][$i] = 1;
 										}
 										break;
 								}
@@ -1625,8 +1627,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// main mandatory is met -> error msg
 				if (
 					!$mand_okay &&
-					isset($reference_array['mandatory']) &&
-					$reference_array['mandatory']
+					!empty($reference_array['mandatory'])
 				) {
 					$this->msg .= sprintf(
 						$this->l->__('You need to enter at least one data set for field <b>%s</b>!<br>'),
@@ -2535,12 +2536,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		// $this->log->debug('CFG QUERY', 'Q: ' . $q);
 		// only run if we have query strnig
+		$written_pos = [];
 		if (isset($q)) {
+			$prfx = $data['prefix']; // short
 			$pos = 0; // position in while for overwrite if needed
 			// read out the list and add the selected data if needed
 			while (is_array($res = $this->dbReturn($q))) {
 				$_data = [];
-				$prfx = $data['prefix']; // short
 				// go through each res
 				for ($i = 0, $i_max = count($q_select); $i < $i_max; $i++) {
 					// query select part, set to the element name
@@ -2570,13 +2572,48 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				}
 				$data['content'][] = $_data;
 				$data['pos'][] = [0 => $pos]; // this is for the checkboxes
+				$written_pos[] = $pos;
 				$pos++; // move up one
 				// reset and unset before next run
 				unset($_data);
 			}
 		}
+		// add lost error ones
+		$this->log->debug('ERROR', 'P: ' . $data['prefix'] . ', '
+			. $this->log->prAr($_POST['ERROR'][$data['prefix']] ?? []));
+		if ($this->error && !empty($_POST['ERROR'][$data['prefix']])) {
+			$prfx = $data['prefix']; // short
+			$_post_data = [];
+			// MAX entries defined via $data['pk_name'] entry (must exist)
+			$_max_pos = count($_POST[$data['pk_name']] ?? []);
+			// write all excte previous loaded @ $pos
+			foreach ($q_select as $_el_name) {
+				for ($_pos = 0; $_pos <= $_max_pos; $_pos++) {
+					// if not in data pos
+					if (!in_array($_pos, $written_pos)) {
+						$_post_data[$_pos][$prfx . $_el_name] =
+							$_POST[$prfx . $_el_name][$_pos] ?? '';
+					}
+				}
+			}
+			// only add if all fields in data are filled, else skip
+			// pk_name field is excluded of check
+			foreach ($_post_data as $_pos => $_data) {
+				$filled = false;
+				foreach ($_data as $_name => $_value) {
+					if ($_name != $data['pk_name'] && !empty($_value)) {
+						$filled = true;
+					}
+				}
+				if ($filled == true) {
+					$data['content'][] = $_data;
+					$data['pos'][] = [0 => $_pos];
+				}
+			}
+		}
 		// if this is normal single reference data check the content on the element count
-		// if there is a max_empty is set, then fill up new elements (unfilled) until we reach max empty
+		// if there is a max_empty is set, then fill up new elements (unfilled)
+		// until we reach max empty
 		if (
 			/*isset($this->element_list[$table_name]['type']) &&
 			$this->element_list[$table_name]['type'] == 'reference_data' &&*/

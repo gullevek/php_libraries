@@ -5,29 +5,30 @@ declare(strict_types=1);
 $edit_schemes = [
 	'table_array' => [
 		'edit_scheme_id' => [
-			'value' => $GLOBALS['edit_scheme_id'] ?? '',
+			'value' => $_POST['edit_scheme_id'] ?? '',
 			'type' => 'hidden',
 			'pk' => 1
 		],
 		'name' => [
-			'value' => $GLOBALS['name'] ?? '',
+			'value' => $_POST['name'] ?? '',
 			'output_name' => 'Scheme Name',
 			'mandatory' => 1,
 			'type' => 'text'
 		],
 		'header_color' => [
-			'value' => $GLOBALS['header_color'] ?? '',
+			'value' => $_POST['header_color'] ?? '',
 			'output_name' => 'Header Color',
 			'mandatory' => 1,
 			'type' => 'text',
-			'size' => 6,
-			'length' => 6,
+			'size' => 10,
+			'length' => 9,
 			'error_check' => 'custom',
-			'error_regex' => '/[\dA-Fa-f]{6}/',
-			'error_example' => 'F6A544'
+			// FIXME: update regex check for hex/rgb/hsl with color check class
+			'error_regex' => '/^#([\dA-Fa-f]{6}|[\dA-Fa-f]{8})$/',
+			'error_example' => '#F6A544'
 		],
 		'enabled' => [
-			'value' => $GLOBALS['enabled'] ?? '',
+			'value' => $_POST['enabled'] ?? '',
 			'output_name' => 'Enabled',
 			'int' => 1,
 			'type' => 'binary',
@@ -37,7 +38,7 @@ $edit_schemes = [
 			],
 		],
 		'template' => [
-			'value' => $GLOBALS['template'] ?? '',
+			'value' => $_POST['template'] ?? '',
 			'output_name' => 'Template',
 			'type' => 'text'
 		],

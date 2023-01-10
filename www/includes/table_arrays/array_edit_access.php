@@ -5,35 +5,36 @@ declare(strict_types=1);
 $edit_access = [
 	'table_array' => [
 		'edit_access_id' => [
-			'value' => $GLOBALS['edit_access_id'] ?? '',
+			'value' => $_POST['edit_access_id'] ?? '',
 			'type' => 'hidden',
 			'pk' => 1
 		],
 		'name' => [
-			'value' => $GLOBALS['name'] ?? '',
+			'value' => $_POST['name'] ?? '',
 			'output_name' => 'Access Group Name',
 			'mandatory' => 1,
 			'type' => 'text',
 			'error_check' => 'alphanumericspace|unique'
 		],
 		'description' => [
-			'value' => $GLOBALS['description'] ?? '',
+			'value' => $_POST['description'] ?? '',
 			'output_name' => 'Description',
 			'type' => 'textarea'
 		],
 		'color' => [
-			'value' => $GLOBALS['color'] ?? '',
+			'value' => $_POST['color'] ?? '',
 			'output_name' => 'Color',
 			'mandatory' => 0,
 			'type' => 'text',
-			'size' => 6,
-			'length' => 6,
+			'size' => 10,
+			'length' => 9,
 			'error_check' => 'custom',
-			'error_regex' => "/[\dA-Fa-f]{6}/",
-			'error_example' => 'F6A544'
+			// FIXME: update regex check for hex/rgb/hsl with color check class
+			'error_regex' => '/^#([\dA-Fa-f]{6}|[\dA-Fa-f]{8})$/',
+			'error_example' => '#F6A544'
 		],
 		'enabled' => [
-			'value' => $GLOBALS['enabled'] ?? 0,
+			'value' => $_POST['enabled'] ?? 0,
 			'output_name' => 'Enabled',
 			'type' => 'binary',
 			'int' => 1, // OR 'bool' => 1
@@ -43,7 +44,7 @@ $edit_access = [
 			],
 		],
 		'protected' => [
-			'value' => $GLOBALS['protected'] ?? 0,
+			'value' => $_POST['protected'] ?? 0,
 			'output_name' => 'Protected',
 			'type' => 'binary',
 			'int' => 1,
@@ -53,7 +54,7 @@ $edit_access = [
 			],
 		],
 		'additional_acl' => [
-			'value' => $GLOBALS['additional_acl'] ?? '',
+			'value' => $_POST['additional_acl'] ?? '',
 			'output_name' => 'Additional ACL (as JSON)',
 			'type' => 'textarea',
 			'error_check' => 'json',

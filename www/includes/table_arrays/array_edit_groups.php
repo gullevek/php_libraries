@@ -5,12 +5,12 @@ declare(strict_types=1);
 $edit_groups = [
 	'table_array' => [
 		'edit_group_id' => [
-			'value' => $GLOBALS['edit_group_id'] ?? '',
+			'value' => $_POST['edit_group_id'] ?? '',
 			'pk' => 1,
 			'type' => 'hidden'
 		],
 		'enabled' => [
-			'value' => $GLOBALS['enabled'] ?? '',
+			'value' => $_POST['enabled'] ?? '',
 			'output_name' => 'Enabled',
 			'int' => 1,
 			'type' => 'binary',
@@ -20,13 +20,13 @@ $edit_groups = [
 			],
 		],
 		'name' => [
-			'value' => $GLOBALS['name'] ?? '',
+			'value' => $_POST['name'] ?? '',
 			'output_name' => 'Group Name',
 			'type' => 'text',
 			'mandatory' => 1
 		],
 		'edit_access_right_id' => [
-			'value' => $GLOBALS['edit_access_right_id'] ?? '',
+			'value' => $_POST['edit_access_right_id'] ?? '',
 			'output_name' => 'Group Level',
 			'mandatory' => 1,
 			'int' => 1,
@@ -34,14 +34,14 @@ $edit_groups = [
 			'query' => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level"
 		],
 		'edit_scheme_id' => [
-			'value' => $GLOBALS['edit_scheme_id'] ?? '',
+			'value' => $_POST['edit_scheme_id'] ?? '',
 			'output_name' => 'Group Scheme',
 			'int_null' => 1,
 			'type' => 'drop_down_db',
 			'query' => "SELECT edit_scheme_id, name FROM edit_scheme WHERE enabled = 1 ORDER BY name"
 		],
 		'additional_acl' => [
-			'value' => $GLOBALS['additional_acl'] ?? '',
+			'value' => $_POST['additional_acl'] ?? '',
 			'output_name' => 'Additional ACL (as JSON)',
 			'type' => 'textarea',
 			'error_check' => 'json',

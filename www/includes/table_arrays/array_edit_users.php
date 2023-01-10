@@ -5,13 +5,13 @@ declare(strict_types=1);
 $edit_users = [
 	'table_array' => [
 		'edit_user_id' => [
-			'value' => $GLOBALS['edit_user_id'] ?? '',
+			'value' => $_POST['edit_user_id'] ?? '',
 			'type' => 'hidden',
 			'pk' => 1,
 			'int' => 1
 		],
 		'username' => [
-			'value' => $GLOBALS['username'] ?? '',
+			'value' => $_POST['username'] ?? '',
 			'output_name' => 'Username',
 			'mandatory' => 1,
 			'error_check' => 'unique|alphanumericextended',
@@ -22,9 +22,9 @@ $edit_users = [
 			'min_show_acl' => '-1',
 		],
 		'password' => [
-			'value' => $GLOBALS['password'] ?? '',
-			'HIDDEN_value' => $GLOBALS['HIDDEN_password'] ?? '',
-			'CONFIRM_value' => $GLOBALS['CONFIRM_password'] ?? '',
+			'value' => $_POST['password'] ?? '',
+			'HIDDEN_value' => $_POST['HIDDEN_password'] ?? '',
+			'CONFIRM_value' => $_POST['CONFIRM_password'] ?? '',
 			'output_name' => 'Password',
 			'mandatory' => 1,
 			'type' => 'password', // later has to be password for encryption in database
@@ -40,7 +40,7 @@ $edit_users = [
 		// password date when first insert and password is set, needs special field with connection to password
 		// password reset force interval, if set, user needs to reset password after X time period
 		'password_change_interval' => [
-			'value' => $GLOBALS['password_change_interval'] ?? '',
+			'value' => $_POST['password_change_interval'] ?? '',
 			'output_name' => 'Password change interval',
 			// can be any date length format. n Y/M/D [not H/M/S], only one set, no combination
 			'error_check' => 'intervalshort',
@@ -52,7 +52,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'enabled' => [
-			'value' => $GLOBALS['enabled'] ?? '',
+			'value' => $_POST['enabled'] ?? '',
 			'output_name' => 'Enabled',
 			'type' => 'binary',
 			'int' => 1,
@@ -64,7 +64,7 @@ $edit_users = [
 			'min_show_acl' => '-1',
 		],
 		'deleted' => [
-			'value' => $GLOBALS['deleted'] ?? '',
+			'value' => $_POST['deleted'] ?? '',
 			'output_name' => 'Deleted',
 			'type' => 'binary',
 			'int' => 1,
@@ -76,7 +76,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'strict' => [
-			'value' => $GLOBALS['strict'] ?? '',
+			'value' => $_POST['strict'] ?? '',
 			'output_name' => 'Strict (Lock after errors)',
 			'type' => 'binary',
 			'int' => 1,
@@ -88,7 +88,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'locked' => [
-			'value' => $GLOBALS['locked'] ?? '',
+			'value' => $_POST['locked'] ?? '',
 			'output_name' => 'Locked (auto set if strict with errors)',
 			'type' => 'binary',
 			'int' => 1,
@@ -100,7 +100,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'admin' => [
-			'value' => $GLOBALS['admin'] ?? '',
+			'value' => $_POST['admin'] ?? '',
 			'output_name' => 'Admin',
 			'type' => 'binary',
 			'int' => 1,
@@ -112,7 +112,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'debug' => [
-			'value' => $GLOBALS['debug'] ?? '',
+			'value' => $_POST['debug'] ?? '',
 			'output_name' => 'Debug',
 			'type' => 'binary',
 			'int' => 1,
@@ -124,7 +124,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'db_debug' => [
-			'value' => $GLOBALS['db_debug'] ?? '',
+			'value' => $_POST['db_debug'] ?? '',
 			'output_name' => 'DB Debug',
 			'type' => 'binary',
 			'int' => 1,
@@ -136,7 +136,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'email' => [
-			'value' => $GLOBALS['email'] ?? '',
+			'value' => $_POST['email'] ?? '',
 			'output_name' => 'E-Mail',
 			'type' => 'text',
 			'error_check' => 'email',
@@ -144,21 +144,21 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'last_name' => [
-			'value' => $GLOBALS['last_name'] ?? '',
+			'value' => $_POST['last_name'] ?? '',
 			'output_name' => 'Last Name',
 			'type' => 'text',
 			'min_edit_acl' => '100',
 			'min_show_acl' => '100',
 		],
 		'first_name' => [
-			'value' => $GLOBALS['first_name'] ?? '',
+			'value' => $_POST['first_name'] ?? '',
 			'output_name' => 'First Name',
 			'type' => 'text',
 			'min_edit_acl' => '100',
 			'min_show_acl' => '100',
 		],
 		'lock_until' => [
-			'value' => $GLOBALS['lock_until'] ?? '',
+			'value' => $_POST['lock_until'] ?? '',
 			'output_name' => 'Lock account until',
 			'type' => 'datetime',
 			'error_check' => 'datetime',
@@ -168,7 +168,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'lock_after' => [
-			'value' => $GLOBALS['lock_after'] ?? '',
+			'value' => $_POST['lock_after'] ?? '',
 			'output_name' => 'Lock account after',
 			'type' => 'datetime',
 			'error_check' => 'datetime',
@@ -177,7 +177,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'login_user_id' => [
-			'value' => $GLOBALS['login_user_id'] ?? '',
+			'value' => $_POST['login_user_id'] ?? '',
 			'output_name' => '_GET/_POST loginUserId direct login ID',
 			'type' => 'text',
 			'error_check' => 'unique|custom',
@@ -187,20 +187,20 @@ $edit_users = [
 		],
 		'login_user_id_set_date' => [
 			'output_name' => 'loginUserId set date',
-			'value' => $GLOBALS['login_user_id_set_date'] ?? '',
+			'value' => $_POST['login_user_id_set_date'] ?? '',
 			'type' => 'view',
 			'empty' => '-',
 			'min_show_acl' => '100',
 		],
 		'login_user_id_last_revalidate' => [
 			'output_name' => 'loginUserId last revalidate date',
-			'value' => $GLOBALS['login_user_id_last_revalidate'] ?? '',
+			'value' => $_POST['login_user_id_last_revalidate'] ?? '',
 			'type' => 'view',
 			'empty' => '-',
 			'min_show_acl' => '100',
 		],
 		'login_user_id_locked' => [
-			'value' => $GLOBALS['login_user_id_locked'] ?? '',
+			'value' => $_POST['login_user_id_locked'] ?? '',
 			'output_name' => 'loginUserId usage locked',
 			'type' => 'binary',
 			'int' => 1,
@@ -212,7 +212,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'login_user_id_revalidate_after' => [
-			'value' => $GLOBALS['login_user_id_revalidate_after'] ?? '',
+			'value' => $_POST['login_user_id_revalidate_after'] ?? '',
 			'output_name' => 'loginUserId, User must login after n days',
 			'type' => 'text',
 			'error_check' => 'intervalshort',
@@ -223,7 +223,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'login_user_id_valid_from' => [
-			'value' => $GLOBALS['login_user_id_valid_from'] ?? '',
+			'value' => $_POST['login_user_id_valid_from'] ?? '',
 			'output_name' => 'loginUserId valid from',
 			'type' => 'datetime',
 			'error_check' => 'datetime',
@@ -233,7 +233,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'login_user_id_valid_until' => [
-			'value' => $GLOBALS['login_user_id_valid_until'] ?? '',
+			'value' => $_POST['login_user_id_valid_until'] ?? '',
 			'output_name' => 'loginUserId valid until',
 			'type' => 'datetime',
 			'error_check' => 'datetime',
@@ -243,7 +243,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'edit_language_id' => [
-			'value' => $GLOBALS['edit_language_id'] ?? '',
+			'value' => $_POST['edit_language_id'] ?? '',
 			'output_name' => 'Language',
 			'mandatory' => 1,
 			'int' => 1,
@@ -253,7 +253,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'edit_scheme_id' => [
-			'value' => $GLOBALS['edit_scheme_id'] ?? '',
+			'value' => $_POST['edit_scheme_id'] ?? '',
 			'output_name' => 'Scheme',
 			'int_null' => 1,
 			'type' => 'drop_down_db',
@@ -262,7 +262,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'edit_group_id' => [
-			'value' => $GLOBALS['edit_group_id'] ?? '',
+			'value' => $_POST['edit_group_id'] ?? '',
 			'output_name' => 'Group',
 			'int' => 1,
 			'type' => 'drop_down_db',
@@ -272,7 +272,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'edit_access_right_id' => [
-			'value' => $GLOBALS['edit_access_right_id'] ?? '',
+			'value' => $_POST['edit_access_right_id'] ?? '',
 			'output_name' => 'User Level',
 			'mandatory' => 1,
 			'int' => 1,
@@ -283,27 +283,27 @@ $edit_users = [
 		],
 		'login_error_count' => [
 			'output_name' => 'Login error count',
-			'value' => $GLOBALS['login_error_count'] ?? '',
+			'value' => $_POST['login_error_count'] ?? '',
 			'type' => 'view',
 			'empty' => '0',
 			'min_show_acl' => '100',
 		],
 		'login_error_date_last' => [
 			'output_name' => 'Last login error',
-			'value' => $GLOBALS['login_error_date_liast'] ?? '',
+			'value' => $_POST['login_error_date_liast'] ?? '',
 			'type' => 'view',
 			'empty' => '-',
 			'min_show_acl' => '100',
 		],
 		'login_error_date_first' => [
 			'output_name' => 'First login error',
-			'value' => $GLOBALS['login_error_date_first'] ?? '',
+			'value' => $_POST['login_error_date_first'] ?? '',
 			'type' => 'view',
 			'empty' => '-',
 			'min_show_acl' => '100',
 		],
 		'protected' => [
-			'value' => $GLOBALS['protected'] ?? '',
+			'value' => $_POST['protected'] ?? '',
 			'output_name' => 'Protected',
 			'type' => 'binary',
 			'int' => 1,
@@ -315,7 +315,7 @@ $edit_users = [
 			'min_show_acl' => '100',
 		],
 		'additional_acl' => [
-			'value' => $GLOBALS['additional_acl'] ?? '',
+			'value' => $_POST['additional_acl'] ?? '',
 			'output_name' => 'Additional ACL (as JSON)',
 			'type' => 'textarea',
 			'error_check' => 'json',
@@ -331,10 +331,10 @@ $edit_users = [
 		// if base acl is not 90 only list enabled
 		// if not admin flag, do not list admin flagged
 		. (
-			!$GLOBALS['acl_admin'] ?
+			!$_POST['acl_admin'] ?
 				"WHERE admin = 0 "
 				. (
-					$GLOBALS['base_acl_level'] < 90 ?
+					$_POST['base_acl_level'] < 90 ?
 						"AND enabled = 1 " :
 						""
 				)

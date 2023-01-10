@@ -5,40 +5,41 @@ declare(strict_types=1);
 $edit_pages = [
 	'table_array' => [
 		'edit_page_id' => [
-			'value' => $GLOBALS['edit_page_id'] ?? '',
+			'value' => $_POST['edit_page_id'] ?? '',
 			'type' => 'hidden',
 			'pk' => 1
 		],
 		'filename' => [
-			'value' => $GLOBALS['filename'] ?? '',
+			'value' => $_POST['filename'] ?? '',
 			'output_name' => 'Add File ...',
 			'mandatory' => 1,
 			'type' => 'drop_down_db',
-			'query' => "SELECT DISTINCT temp_files.filename AS id, temp_files.folder || temp_files.filename AS name "
+			'query' => "SELECT DISTINCT temp_files.filename AS id, "
+				. "temp_files.folder || temp_files.filename AS name "
 				. "FROM temp_files "
 				. "LEFT JOIN edit_page ep ON temp_files.filename = ep.filename "
 				. "WHERE ep.filename IS NULL"
 		],
 		'hostname' => [
-			'value' => $GLOBALS['hostname'] ?? '',
+			'value' => $_POST['hostname'] ?? '',
 			'output_name' => 'Hostname or folder',
 			'type' => 'text'
 		],
 		'name' => [
-			'value' => $GLOBALS['name'] ?? '',
+			'value' => $_POST['name'] ?? '',
 			'output_name' => 'Page name',
 			'mandatory' => 1,
 			'type' => 'text'
 		],
 		'order_number' => [
-			'value' => $GLOBALS['order_number'] ?? '',
+			'value' => $_POST['order_number'] ?? '',
 			'output_name' => 'Page order',
 			'type' => 'order',
 			'int' => 1,
 			'order' => 1
 		],
 		/* 'flag' => [
-			'value' => isset($GLOBALS['flag']) ? $GLOBALS['flag'] : '',
+			'value' => $_POST['flag']) ?? '',
 			'output_name' => 'Page Flag',
 			'type' => 'drop_down_array',
 			'query' => [
@@ -51,7 +52,7 @@ $edit_pages = [
 			],
 		],*/
 		'online' => [
-			'value' => $GLOBALS['online'] ?? '',
+			'value' => $_POST['online'] ?? '',
 			'output_name' => 'Online',
 			'int' => 1,
 			'type' => 'binary',
@@ -61,7 +62,7 @@ $edit_pages = [
 			],
 		],
 		'menu' => [
-			'value' => $GLOBALS['menu'] ?? '',
+			'value' => $_POST['menu'] ?? '',
 			'output_name' => 'Menu',
 			'int' => 1,
 			'type' => 'binary',
@@ -71,7 +72,7 @@ $edit_pages = [
 			],
 		],
 		'popup' => [
-			'value' => $GLOBALS['popup'] ?? '',
+			'value' => $_POST['popup'] ?? '',
 			'output_name' => 'Popup',
 			'int' => 1,
 			'type' => 'binary',
@@ -81,7 +82,7 @@ $edit_pages = [
 			],
 		],
 		'popup_x' => [
-			'value' => $GLOBALS['popup_x'] ?? '',
+			'value' => $_POST['popup_x'] ?? '',
 			'output_name' => 'Popup Width',
 			'int_null' => 1,
 			'type' => 'text',
@@ -89,7 +90,7 @@ $edit_pages = [
 			'length' => 4
 		],
 		'popup_y' => [
-			'value' => $GLOBALS['popup_y'] ?? '',
+			'value' => $_POST['popup_y'] ?? '',
 			'output_name' => 'Popup Height',
 			'int_null' =>  1,
 			'type' => 'text',
@@ -97,7 +98,7 @@ $edit_pages = [
 			'length' => 4
 		],
 		'content_alias_edit_page_id' => [
-			'value' => $GLOBALS['content_alias_edit_page_id'] ?? '',
+			'value' => $_POST['content_alias_edit_page_id'] ?? '',
 			'output_name' => 'Content Alias Source',
 			'int_null' => 1,
 			'type' => 'drop_down_db',
@@ -110,7 +111,7 @@ $edit_pages = [
 			'order_by' => 'order_number'
 			// 'query' => "SELECT edit_page_id AS content_alias_edit_page_id, name ".
 				// "FROM edit_page ".
-				// (isset($GLOBALS['edit_page_id']) ? " WHERE edit_page_id <> ".$GLOBALS['edit_page_id'] : "")." ".
+				// (!empty($_POST['edit_page_id']) ? " WHERE edit_page_id <> ".$_POST['edit_page_id'] : "")." ".
 				// "ORDER BY order_number"
 		],
 	],
@@ -151,7 +152,7 @@ $edit_pages = [
 			'output_name' => 'Visible Groups (access)',
 			'mandatory' => 1,
 			'select_size' => 10,
-			'selected' => $GLOBALS['edit_visible_group_id'] ?? '',
+			'selected' => $_POST['edit_visible_group_id'] ?? '',
 			'query' => "SELECT edit_visible_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag "
 				. "FROM edit_visible_group ORDER BY name"
 		],
@@ -161,7 +162,7 @@ $edit_pages = [
 			'output_name' => 'Menu Groups (grouping)',
 			'mandatory' => 1,
 			'select_size' => 10,
-			'selected' => $GLOBALS['edit_menu_group_id'] ?? '',
+			'selected' => $_POST['edit_menu_group_id'] ?? '',
 			'query' => "SELECT edit_menu_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag "
 				. "FROM edit_menu_group ORDER BY order_number"
 		],

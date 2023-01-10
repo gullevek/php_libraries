@@ -12,7 +12,7 @@
 *   you don't have to write any SQL queries, worry over update/insert
 *
 * HISTORY:
-* 2019/9/11 (cs) error string 21->91, 22->92 for not overlapping with IO
+* 2019/9/11 (cs) error string 21->1021, 22->1022 for not overlapping with IO
 * 2005/07/07 (cs) updated array class for postgres: set 0 & NULL if int field given, insert uses () values () syntax
 * 2005/03/31 (cs) fixed the class call with all debug vars
 * 2003-03-10: error_ids where still wrong chagned 11->21 and 12->22
@@ -72,20 +72,24 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// instance db_io class
 		parent::__construct($db_config, $log ?? new \CoreLibs\Debug\Logging());
 		// more error vars for this class
-		$this->error_string['91'] = 'No Primary Key given';
-		$this->error_string['92'] = 'Could not run Array Query';
+		$this->error_string['1999'] = 'No table array or table name set';
+		$this->error_string['1021'] = 'No Primary Key given';
+		$this->error_string['1022'] = 'Could not run Array Query';
 
 		$this->table_array = $table_array;
 		$this->table_name = $table_name;
 
+		// error abort if no table array or no table name
+		if (empty($table_array) || empty($table_name)) {
+			$this->__dbError(1999, false, 'MAJOR ERROR: Core settings missing');
+		}
+
 		// set primary key for given table_array
-		if (is_array($this->table_array)) {
-			foreach ($this->table_array as $key => $value) {
-				if (isset($value['pk'])) {
-					$this->pk_name = $key;
-				}
+		foreach ($this->table_array as $key => $value) {
+			if (!empty($value['pk'])) {
+				$this->pk_name = $key;
 			}
-		} // set pk_name IF table_array was given
+		}
 		$this->dbArrayIOSetAcl($base_acl_level, $acl_admin);
 	}
 
@@ -197,7 +201,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// if not set ... produce error
 		if (!$this->table_array[$this->pk_name]['value']) {
 			// if no PK found, error ...
-			$this->__dbError(91);
+			$this->__dbError(1021);
 			return false;
 		} else {
 			return true;
@@ -282,7 +286,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// if 0, error
 		$this->pk_id = null;
 		if (!$this->dbExec($q)) {
-			$this->__dbError(92);
+			$this->__dbError(1022);
 		}
 		return $this->table_array;
 	}
@@ -369,7 +373,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			// possible dbFetchArray errors ...
 			$this->pk_id = $this->table_array[$this->pk_name]['value'];
 		} else {
-			$this->__dbError(92);
+			$this->__dbError(1022);
 		}
 		return $this->table_array;
 	}
@@ -631,7 +635,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// return success or not
 		if (!$this->dbExec($q)) {
-			$this->__dbError(92);
+			$this->__dbError(1022);
 		}
 		// set primary key
 		if ($insert) {

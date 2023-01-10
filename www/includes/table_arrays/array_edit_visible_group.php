@@ -5,18 +5,18 @@ declare(strict_types=1);
 $edit_visible_group = [
 	'table_array' => [
 		'edit_visible_group_id' => [
-			'value' => $GLOBALS['edit_visible_group_id'] ?? '',
+			'value' => $_POST['edit_visible_group_id'] ?? '',
 			'type' => 'hidden',
 			'pk' => 1
 		],
 		'name' => [
-			'value' => $GLOBALS['name'] ?? '',
+			'value' => $_POST['name'] ?? '',
 			'output_name' => 'Group name',
 			'mandatory' => 1,
 			'type' => 'text'
 		],
 		'flag' => [
-			'value' => $GLOBALS['flag'] ?? '',
+			'value' => $_POST['flag'] ?? '',
 			'output_name' => 'Flag',
 			'mandatory' => 1,
 			'type' => 'text',

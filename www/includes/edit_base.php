@@ -58,10 +58,6 @@ $l10n = new \CoreLibs\Language\L10n(
 // flush and start
 ob_end_flush();
 
-// FIXME: only extract _POST data that is needed
-// FIXME: update table_arrays reader to use other than $_GLOBALS
-extract($_POST, EXTR_SKIP);
-
 // init smarty and form class
 $edit_base = new CoreLibs\Admin\EditBase(DB_CONFIG, $log, $l10n, $locale);
 // creates edit pages and runs actions
