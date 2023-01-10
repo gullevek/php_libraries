@@ -475,6 +475,27 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// PUBLIC METHODS |=================================================>
 
 	/**
+	 * return current acl admin flag (1/0)
+	 *
+	 * @return int Admin flag 1 for on or 0 for off
+	 */
+	public function getAclAdmin(): int
+	{
+		return $this->acl_admin;
+	}
+
+	/**
+	 * check if current acl level is match to requested on
+	 *
+	 * @param  int  $level Requested ACL level
+	 * @return bool        if current level equal or larger return tru, else false
+	 */
+	public function checkBaseACL(int $level): bool
+	{
+		return $this->base_acl_level >= $level ? true : false;
+	}
+
+	/**
 	 * dumps all values into output (for error msg)
 	 *
 	 * @return string full table array data output as string html formatted

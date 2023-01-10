@@ -331,10 +331,11 @@ $edit_users = [
 		// if base acl is not 90 only list enabled
 		// if not admin flag, do not list admin flagged
 		. (
-			!$_POST['acl_admin'] ?
+			!$this->getAclAdmin() ?
 				"WHERE admin = 0 "
 				. (
-					$_POST['base_acl_level'] < 90 ?
+					!$this->checkBaseACL(90) ?
+					// $_POST['base_acl_level'] < 90 ?
 						"AND enabled = 1 " :
 						""
 				)
