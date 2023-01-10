@@ -310,6 +310,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * @param array<mixed>|null            $table_arrays Override table array data
 	 *                                                   instead of try to load from
 	 *                                                   include file
+	 * @throws \Exception                  1: No table_arrays set/no class found for my page name
 	 */
 	public function __construct(
 		array $db_config,
@@ -357,31 +358,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// $config_array = $GLOBALS['table_arrays'][System::getPageName(1)];
 			$config_array = $table_arrays[System::getPageName(1)];
 		} else {
-			// WARNING: auto spl load does not work with this as it is an array
-			// and not a function/object
-			// check if this is the old path or the new path
-			// check local folder in current path
-			// then check general global folder
-			if (
-				is_dir(TABLE_ARRAYS) &&
-				is_file(TABLE_ARRAYS . 'array_' . $this->my_page_name . '.php')
-			) {
-				include(TABLE_ARRAYS . 'array_' . $this->my_page_name . '.php');
-			} elseif (
-				is_dir(BASE . INCLUDES . TABLE_ARRAYS) &&
-				is_file(BASE . INCLUDES . TABLE_ARRAYS . 'array_' . $this->my_page_name . '.php')
-			) {
-				include(BASE . INCLUDES . TABLE_ARRAYS . 'array_' . $this->my_page_name . '.php');
-			}
-			// in the include file there must be a variable with the page name matching
-			if (isset(${$this->my_page_name}) && is_array(${$this->my_page_name})) {
-				$config_array = ${$this->my_page_name};
+			// primary try to load the class
+			/** @var \CoreLibs\Output\Form\TableArraysInterface|false $content_class */
+			$content_class = $this->loadTableArray();
+			if (is_object($content_class)) {
+				$config_array = $content_class->setTableArray();
 			} else {
-				// dummy created
-				$config_array = [
-					'table_array' => [],
-					'table_name' => '',
-				];
+				// throw an error here as we cannot load the class at all
+				throw new \Exception("Cannot load " . $this->my_page_name, 1);
 			}
 		}
 		// $log->debug('CONFIG ARRAY', $log->prAr($config_array));
@@ -470,6 +454,34 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		// close DB connection
 		parent::__destruct();
+	}
+
+	// PRIVATE METHODS  |=================================================>
+
+	/**
+	* load table array class based on my page name converted to camel case
+	* class files are in \TableArrays folder in \Output\Form
+	* @return object|bool Return class object or false on failure
+	*/
+	private function loadTableArray()
+	{
+		// camel case $this->my_page_name from foo_bar_note to FooBarNote
+		$page_name_camel_case = '';
+		foreach (explode('_', $this->my_page_name) as $part) {
+			$page_name_camel_case .= ucfirst($part);
+		}
+		$class_string = __NAMESPACE__ . "\\TableArrays\\" . $page_name_camel_case;
+		try {
+			/** @var \CoreLibs\Output\Form\TableArraysInterface|false $class */
+			$class = new $class_string($this);
+		} catch (\Throwable $t) {
+			$this->log->debug('CLASS LOAD', 'Failed loading: ' . $class_string . ' => ' . $t->getMessage());
+			return false;
+		}
+		if (is_object($class)) {
+			return $class;
+		}
+		return false;
 	}
 
 	// PUBLIC METHODS |=================================================>
