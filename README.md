@@ -2,19 +2,20 @@
 
 ## Code Standard
 
- * Uses PSR-12
- * tab indent instead of 4 spaces indent
- * Warning at 120 character length, error at 240 character length
+* Uses PSR-12
+* tab indent instead of 4 spaces indent
+* Warning at 120 character length, error at 240 character length
 
 ## General information
 
 Base PHP class files to setup any project
-  * login
-  * database wrapper
-  * basic helper class for debugging and other features
-  * admin/frontend split
-  * domain controlled database/settings split
-  * dynamic layout groups
+
+* login
+* database wrapper
+* basic helper class for debugging and other features
+* admin/frontend split
+* domain controlled database/settings split
+* dynamic layout groups
 
 ## NOTE
 
@@ -50,7 +51,6 @@ pslam is setup but not configured
 With phpunit (`4dev/checking/phpunit.sh`)
 `phpunit -c $phpunit.xml 4dev/tests/`
 
-
 ## Other Notes
 
 ### Session used
@@ -58,29 +58,38 @@ With phpunit (`4dev/checking/phpunit.sh`)
 The following classes use _SESSION
 The main one is ACL\Login, this class will fail without a session started
 
-  * \CoreLibs\ACL\Login
-  * \CoreLibs\Admin\Backend
-  * \CoreLibs\Output\Form\Generate
-  * \CoreLibs\Output\Form\Token
-  * \CoreLibs\Template\SmartyExtend
+* \CoreLibs\ACL\Login
+* \CoreLibs\Admin\Backend
+* \CoreLibs\Output\Form\Generate
+* \CoreLibs\Output\Form\Token
+* \CoreLibs\Template\SmartyExtend
 
 ### Class extends
 
 The following classes extend these classes
 
-  * \CoreLibs\ACL\Login extends \CoreLibs\DB\IO
-  * \CoreLibs\Admin\Backend extends \CoreLibs\DB\IO
-  * \CoreLibs\DB\Extended\ArrayIO extends \CoreLibs\DB\IO
-  * \CoreLibs\Output\Form\Generate extends \CoreLibs\DB\Extended\ArrayIO
-  * \CoreLibs\Template\SmartyExtend extends SmartyBC
+* \CoreLibs\ACL\Login extends \CoreLibs\DB\IO
+* \CoreLibs\Admin\Backend extends \CoreLibs\DB\IO
+* \CoreLibs\DB\Extended\ArrayIO extends \CoreLibs\DB\IO
+* \CoreLibs\Output\Form\Generate extends \CoreLibs\DB\Extended\ArrayIO
+* \CoreLibs\Template\SmartyExtend extends SmartyBC
 
 ### Class used
 
 The following classes use the following classes
 
-* \CoreLibs\ACL\Login uses \CoreLibs\Debug\Logger, \CoreLibs\Language\L10n
-* \CoreLibs\DB\IO uses \CoreLibs\Debug\Logger, \CoreLibs\DB\SQL\PgSQL
-* \CoreLibs\Admin\Backend uses \CoreLibs\Debug\Logger, \CoreLibs\Language\L10n
-* \CoreLibs\Output\Form\Generate uses \CoreLibs\Debug\Logger, \CoreLibs\Language\L10n
+* \CoreLibs\ACL\Login uses \CoreLibs\Debug\Logging, \CoreLibs\Language\L10n
+* \CoreLibs\DB\IO uses \CoreLibs\Debug\Logging, \CoreLibs\DB\SQL\PgSQL
+* \CoreLibs\Admin\Backend uses \CoreLibs\Debug\Logging, \CoreLibs\Language\L10n
+* \CoreLibs\Output\Form\Generate uses \CoreLibs\Debug\Logging, \CoreLibs\Language\L10n
 * \CoreLibs\Template\SmartyExtend uses \CoreLibs\Language\L10n
 * \CoreLibs\Language\L10n uses FileReader, GetTextReader
+* \CoreLibs\Admin\EditBase uses \CoreLibs\Debug\Logging, \CoreLibs\Language\L10n
+
+### Class internal load
+
+Loads classes internal (not passed in, not extend)
+
+* \CoreLibs\Admin\EditBase loads \CoreLibs\Template\SmartyExtend, \CoreLibs\Output\Form\Generate
+* \CoreLibs\Output\From\Generate loads \CoreLibs\Debug\Logging, \CoreLibs\Language\L10n if not passed on
+* \CoreLibs\Output\From\Generate loads \CoreLibs\Output\From\TableArrays
