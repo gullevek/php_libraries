@@ -1633,7 +1633,7 @@ EOM;
 			$this->session->checkActiveSession() === true &&
 			!empty($_SESSION['DEFAULT_LOCALE'])
 		) {
-			$locale = $_SESSION['DEFAULT_LOCALE'] ?? '';
+			$locale = $_SESSION['DEFAULT_LOCALE'];
 		} else {
 			$locale = (defined('SITE_LOCALE') && !empty(SITE_LOCALE)) ?
 				SITE_LOCALE :
