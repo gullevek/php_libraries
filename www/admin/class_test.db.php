@@ -118,7 +118,8 @@ print "<b>TRUNCATE test_foobar</b><br>";
 $query = "TRUNCATE test_foobar";
 $db->dbExec($query);
 
-$status = $db->dbExec("INSERT INTO test_foo (test) VALUES ('FOO TEST " . time() . "') RETURNING test");
+$status = $db->dbExec("INSERT INTO test_foo (test, number_a) VALUES "
+	. "('FOO TEST " . time() . "', 1) RETURNING test, number_a");
 print "DIRECT INSERT STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "DB OBJECT: <pre>" . print_r($status, true) . "</pre>| "
@@ -126,6 +127,29 @@ print "DIRECT INSERT STATUS: " . Support::printToString($status) . " |<br>"
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING EXT[test]: " . print_r($db->dbGetReturningExt('test'), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+
+var_dump($db->dbGetReturningExt());
+
+// same as above but use an EOM string
+$some_time = time();
+$query = <<<EOM
+INSERT INTO test_foo (
+	test, number_a
+) VALUES (
+	'EOM FOO TEST $some_time', 1
+)
+RETURNING test, number_a
+EOM;
+$status = $db->dbExec($query);
+print "EOM STRING DIRECT INSERT STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
+	. "DB OBJECT: <pre>" . print_r($status, true) . "</pre>| "
+	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING EXT[test]: " . print_r($db->dbGetReturningExt('test'), true) . " | "
+	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+
+var_dump($db->dbGetReturningExt());
 
 // should throw deprecated error
 // $db->getReturningExt();
@@ -150,6 +174,23 @@ print "PREPARE CURSOR RETURN:<br>";
 foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
 	print "KEY: " . $key . ': ' . $db->dbGetPrepareCursorValue('ins_test_foo', $key) . "<br>";
 }
+
+$query = <<<EOM
+INSERT INTO test_foo (
+	test
+) VALUES (
+	$1
+)
+RETURNING test
+EOM;
+$db->dbPrepare("ins_test_foo_eom", $query);
+$status = $db->dbExecute("ins_test_foo_eom", ['EOM BAR TEST ' . time()]);
+print "EOM STRING PREPARE INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
+	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+
 // returning test with multiple entries
 // $status = $db->db_exec(
 // 	"INSERT INTO test_foo (test) VALUES "
@@ -166,6 +207,26 @@ $status = $db->dbExec(
 	. "RETURNING test_foo_id, test"
 );
 print "DIRECT MULTIPLE INSERT WITH RETURN STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
+	. "PRIMARY KEYS: " . print_r($db->dbGetInsertPK(), true) . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING EXT[test]: " . print_r($db->dbGetReturningExt('test'), true) . " | "
+	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+
+$t_1 = time();
+$t_2 = time();
+$t_3 = time();
+$query = <<<EOM
+INSERT INTO test_foo (
+	test
+) VALUES
+('EOM BAR 1 $t_1'),
+('EOM BAR 2 $t_2'),
+('EOM BAR 3 $t_3')
+RETURNING test_foo_id, test
+EOM;
+$status = $db->dbExec($query);
+print "EOM STRING DIRECT MULTIPLE INSERT WITH RETURN STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "PRIMARY KEYS: " . print_r($db->dbGetInsertPK(), true) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
@@ -240,6 +301,24 @@ if ($db->dbPrepare('sel_test_foo', $q_prep) === false) {
 	. $db->dbGetLastError() . "/" . $db->dbGetLastWarning() . "/"
 	. "<pre>" . print_r($db->dbGetCombinedErrorHistory(), true) . "</pre><br>";
 }
+
+echo "<hr>";
+print "EOM STYLE STRINGS<br>";
+$test_bar = $db->dbEscapeLiteral('SOMETHING DIFFERENT');
+// Test EOM block
+$q = <<<EOM
+SELECT test_foo_id, test, some_bool, string_a, number_a,
+-- comment
+number_a_numeric, some_time
+FROM test_foo
+WHERE test = $test_bar
+ORDER BY test_foo_id DESC LIMIT 5
+EOM;
+while (is_array($res = $db->dbReturn($q))) {
+	print "ROW: <pre>" . print_r($res, true) . "</pre><br>";
+}
+echo "<hr>";
+
 // NOTE: try to replacate connection still exists if script is run a second time
 // open pg bouncer connection
 $db_pgb = new CoreLibs\DB\IO($DB_CONFIG['test_pgbouncer'], $log);

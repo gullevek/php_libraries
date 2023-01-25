@@ -155,37 +155,57 @@ final class CoreLibsDBIOTest extends TestCase
 			$db->dbExec("DROP TABLE table_without_primary_key");
 			$db->dbExec("DROP TABLE test_meta");
 		}
-		$base_table = "uid VARCHAR, " // uid is for internal reference tests
-			. "row_int INT, "
-			. "row_numeric NUMERIC, "
-			. "row_varchar VARCHAR, "
-			. "row_varchar_literal VARCHAR, "
-			. "row_json JSON, "
-			. "row_jsonb JSONB, "
-			. "row_bytea BYTEA, "
-			. "row_timestamp TIMESTAMP WITHOUT TIME ZONE, "
-			. "row_date DATE, "
-			. "row_interval INTERVAL, "
-			. "row_array_int INT ARRAY, "
-			. "row_array_varchar VARCHAR ARRAY"
-			. ") WITHOUT OIDS";
+		// uid is for internal reference tests
+		$base_table = <<<EOM
+			uid VARCHAR,
+			row_int INT,
+			row_numeric NUMERIC,
+			row_varchar VARCHAR,
+			row_varchar_literal VARCHAR,
+			row_json JSON,
+			row_jsonb JSONB,
+			row_bytea BYTEA,
+			row_timestamp TIMESTAMP WITHOUT TIME ZONE,
+			row_date DATE,
+			row_interval INTERVAL,
+			row_array_int INT ARRAY,
+			row_array_varchar VARCHAR ARRAY
+		)
+		WITHOUT OIDS
+		EOM;
 		// create the tables
 		$db->dbExec(
-			"CREATE TABLE table_with_primary_key ("
+			// primary key name is table + '_id'
+			<<<EOM
+			CREATE TABLE table_with_primary_key (
+				table_with_primary_key_id SERIAL PRIMARY KEY,
+				$base_table
+			EOM
+			/* "CREATE TABLE table_with_primary_key ("
 			// primary key name is table + '_id'
 			. "table_with_primary_key_id SERIAL PRIMARY KEY, "
-			. $base_table
+			. $base_table */
 		);
 		$db->dbExec(
-			"CREATE TABLE table_without_primary_key ("
-			. $base_table
+			<<<EOM
+			CREATE TABLE table_without_primary_key (
+				$base_table
+			EOM
+			/* "CREATE TABLE table_without_primary_key ("
+			. $base_table */
 		);
 		// create simple table for meta test
 		$db->dbExec(
-			"CREATE TABLE test_meta ("
+			<<<EOM
+			CREATE TABLE test_meta (
+				row_1 VARCHAR,
+				row_2 INT
+			) WITHOUT OIDS
+			EOM
+			/* "CREATE TABLE test_meta ("
 			. "row_1 VARCHAR, "
 			. "row_2 INT"
-			. ") WITHOUT OIDS"
+			. ") WITHOUT OIDS" */
 		);
 		// set some test schema
 		$db->dbExec("CREATE SCHEMA IF NOT EXISTS testschema");
@@ -3893,6 +3913,38 @@ final class CoreLibsDBIOTest extends TestCase
 					]
 				]
 			],
+			// same but as EOM
+			'single insert (PK), EOM string' => [
+				<<<EOM
+				INSERT INTO table_with_primary_key (
+					row_varchar, row_varchar_literal, row_int, row_date
+				) VALUES (
+					'Text', 'Other', 123, '2022-03-01'
+				)
+				RETURNING row_varchar, row_varchar_literal, row_int, row_date
+				EOM,
+				null,
+				null,
+				null,
+				[
+					'row_varchar' => 'Text',
+					'row_varchar_literal' => 'Other',
+					'row_int' => 123,
+					'row_date' => '2022-03-01',
+					// 'table_with_primary_key_id' => "/^\d+$/",
+					'table_with_primary_key_id' => $table_with_primary_key_id + 2,
+				],
+				[
+					0 => [
+						'row_varchar' => 'Text',
+						'row_varchar_literal' => 'Other',
+						'row_int' => 123,
+						'row_date' => '2022-03-01',
+						// 'table_with_primary_key_id' => "/^\d+$/",
+						'table_with_primary_key_id' => $table_with_primary_key_id + 2,
+					]
+				]
+			],
 			// double insert (PK)
 			'dobule insert (PK)' => [
 				"INSERT INTO table_with_primary_key "
@@ -3910,14 +3962,14 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_varchar_literal' => 'Other',
 						'row_int' => 123,
 						'row_date' => '2022-03-01',
-						'table_with_primary_key_id' => $table_with_primary_key_id + 2,
+						'table_with_primary_key_id' => $table_with_primary_key_id + 3,
 					],
 					1 => [
 						'row_varchar' => 'Foxtrott',
 						'row_varchar_literal' => 'Tango',
 						'row_int' => 789,
 						'row_date' => '1982-10-15',
-						'table_with_primary_key_id' => $table_with_primary_key_id + 3,
+						'table_with_primary_key_id' => $table_with_primary_key_id + 4,
 					],
 				],
 				[
@@ -3926,14 +3978,14 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_varchar_literal' => 'Other',
 						'row_int' => 123,
 						'row_date' => '2022-03-01',
-						'table_with_primary_key_id' => $table_with_primary_key_id + 2,
+						'table_with_primary_key_id' => $table_with_primary_key_id + 3,
 					],
 					1 => [
 						'row_varchar' => 'Foxtrott',
 						'row_varchar_literal' => 'Tango',
 						'row_int' => 789,
 						'row_date' => '1982-10-15',
-						'table_with_primary_key_id' => $table_with_primary_key_id + 3,
+						'table_with_primary_key_id' => $table_with_primary_key_id + 4,
 					],
 				]
 			],
@@ -3961,7 +4013,35 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_date' => '2022-03-01',
 					]
 				]
-			]
+			],
+			// same as above but as EOM string
+			'single insert (No PK), EOM string' => [
+				<<<EOM
+				INSERT INTO table_without_primary_key (
+					row_varchar, row_varchar_literal, row_int, row_date
+				) VALUES (
+					'Text', 'Other', 123, '2022-03-01'
+				)
+				RETURNING row_varchar, row_varchar_literal, row_int, row_date
+				EOM,
+				null,
+				null,
+				null,
+				[
+					'row_varchar' => 'Text',
+					'row_varchar_literal' => 'Other',
+					'row_int' => 123,
+					'row_date' => '2022-03-01',
+				],
+				[
+					0 => [
+						'row_varchar' => 'Text',
+						'row_varchar_literal' => 'Other',
+						'row_int' => 123,
+						'row_date' => '2022-03-01',
+					]
+				]
+			],
 		];
 	}
 
@@ -4008,11 +4088,13 @@ final class CoreLibsDBIOTest extends TestCase
 
 		$this->assertEquals(
 			$expected_ret_ext,
-			$returning_ext
+			$returning_ext,
+			'Returning extended failed'
 		);
 		$this->assertEquals(
 			$expected_ret_arr,
-			$returning_arr
+			$returning_arr,
+			'Returning Array failed'
 		);
 
 		// print "EXT: " . print_r($returning_ext, true) . "\n";

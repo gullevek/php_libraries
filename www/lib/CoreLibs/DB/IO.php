@@ -1007,7 +1007,7 @@ class IO
 							$this->pk_name_table[$table] : 'NULL';
 				}
 				if (
-					!preg_match("/ returning /i", $this->query) &&
+					!preg_match("/\s?returning /i", $this->query) &&
 					$this->pk_name && $this->pk_name != 'NULL'
 				) {
 					// check if this query has a ; at the end and remove it
@@ -1016,7 +1016,7 @@ class IO
 					$this->query = !is_string($__query) ? $this->query : $__query;
 					$this->query .= " RETURNING " . $this->pk_name;
 					$this->returning_id = true;
-				} elseif (preg_match("/ returning (.*)/i", $this->query, $matches)) {
+				} elseif (preg_match("/\s?returning (.*)/i", $this->query, $matches)) {
 					if ($this->pk_name && $this->pk_name != 'NULL') {
 						// add the primary key if it is not in the returning set
 						if (!preg_match("/$this->pk_name/", $matches[1])) {
@@ -1030,7 +1030,7 @@ class IO
 		// if we have an UPDATE and RETURNING, flag for true, but do not add anything
 		if (
 			$this->__checkQueryForUpdate($this->query) &&
-			preg_match("/ returning (.*)/i", $this->query, $matches)
+			preg_match("/\s?returning (.*)/i", $this->query, $matches)
 		) {
 			$this->returning_id = true;
 		}
@@ -2288,11 +2288,11 @@ class IO
 						$this->prepare_cursor[$stm_name]['pk_name'] = $pk_name;
 					}
 					// if no returning, then add it
-					if (!preg_match("/ returning /i", $query) && $this->prepare_cursor[$stm_name]['pk_name']) {
+					if (!preg_match("/\s?returning /i", $query) && $this->prepare_cursor[$stm_name]['pk_name']) {
 						$query .= " RETURNING " . $this->prepare_cursor[$stm_name]['pk_name'];
 						$this->prepare_cursor[$stm_name]['returning_id'] = true;
 					} elseif (
-						preg_match("/ returning (.*)/i", $query, $matches) &&
+						preg_match("/\s?returning (.*)/i", $query, $matches) &&
 						$this->prepare_cursor[$stm_name]['pk_name']
 					) {
 						// if returning exists but not pk_name, add it
