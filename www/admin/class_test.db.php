@@ -161,7 +161,7 @@ print "DIRECT INSERT PREVIOUS INSERTED: "
 $db->dbPrepare("ins_test_foo", "INSERT INTO test_foo (test) VALUES ($1) RETURNING test");
 $status = $db->dbExecute("ins_test_foo", ['BAR TEST ' . time()]);
 print "PREPARE INSERT[ins_test_foo] STATUS: " . Support::printToString($status) . " |<br>"
-	. "QUERY: " . $db->dbGetQuery() . " |<br>"
+	. "QUERY: " . $db->dbGetPrepareCursorValue('ins_test_foo', 'query') . " |<br>"
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -186,7 +186,7 @@ EOM;
 $db->dbPrepare("ins_test_foo_eom", $query);
 $status = $db->dbExecute("ins_test_foo_eom", ['EOM BAR TEST ' . time()]);
 print "EOM STRING PREPARE INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
-	. "QUERY: " . $db->dbGetQuery() . " |<br>"
+	. "QUERY: " . $db->dbGetPrepareCursorValue('ins_test_foo_eom', 'query') . " |<br>"
 	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
