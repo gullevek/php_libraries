@@ -575,14 +575,14 @@ class IO
 	/**
 	 * checks if query is a SELECT, SHOW or WITH, if not error, 0 return
 	 * NOTE:
-	 * Query needs to start with SELECT, SHOW or WITH. if starts with "with" it is ignored
+	 * Query needs to start with SELECT, SHOW or WITH
 	 * @param  string $query query to check
 	 * @return bool          true if matching, false if not
 	 */
 	private function __checkQueryForSelect(string $query): bool
 	{
-		// perhaps allow spaces before select ?!?
-		if (preg_match("/^(select|show|with) /i", $query)) {
+		// change to string starts with?
+		if (preg_match("/^(?:SELECT|SHOW|WITH)\s/i", $query)) {
 			return true;
 		}
 		return false;
@@ -599,10 +599,10 @@ class IO
 	 */
 	private function __checkQueryForInsert(string $query, bool $pure = false): bool
 	{
-		if ($pure && preg_match("/^insert /i", $query)) {
+		if ($pure && preg_match("/^INSERT\s+?INTO\s/i", $query)) {
 			return true;
 		}
-		if (!$pure && preg_match("/^(insert|update|delete) /i", $query)) {
+		if (!$pure && preg_match("/^(?:INSERT\s+?INTO|DELETE\s+?FROM|UPDATE)\s/i", $query)) {
 			return true;
 		}
 		return false;
@@ -616,7 +616,7 @@ class IO
 	 */
 	private function __checkQueryForUpdate(string $query): bool
 	{
-		if (preg_match("/^update /i", $query)) {
+		if (preg_match("/^UPDATE\s?(.+)/i", $query)) {
 			return true;
 		}
 		return false;
@@ -881,12 +881,32 @@ class IO
 	private function __dbReturnTable(string $query): array
 	{
 		$matches = [];
-		if (preg_match("/^SELECT /i", $query)) {
-			preg_match("/ (FROM) \"?(([\w_]+)\.)?([\w_]+)\"? /i", $query, $matches);
+		$schema_table = [];
+		if ($this->__checkQueryForSelect($query)) {
+			// only selects the first one, this is more a fallback
+			// MATCHES 1 (call), 3 (schema), 4 (table)
+			preg_match("/\s+?(FROM)\s+?([\"'])?(?:([\w_]+)\.)?([\w_]+)(?:\2)?\s?/i", $query, $matches);
+			$schema_table = [
+				$matches[3] ?? '',
+				$matches[4] ?? '',
+			];
 		} else {
-			preg_match("/(INSERT INTO|DELETE FROM|UPDATE) \"?(([\w_]+)\.)?([\w_]+)\"? /i", $query, $matches);
+			preg_match(
+				// must start with
+				// INSERT INTO (table)
+				// DELETE FROM (table)
+				// UPDATE (table) SET
+				// MATCHES 1 (call), 4 (schema), 5 (table)
+				"/^(INSERT\s+?INTO|DELETE\s+?FROM|(UPDATE))\s+?([\"'])?(?:([\w_]+)\.)?([\w_]+)(?:\3)?\s?(?(2)SET|)/i",
+				$query,
+				$matches
+			);
+			$schema_table = [
+				$matches[4] ?? '',
+				$matches[5] ?? ''
+			];
 		}
-		return [$matches[3] ?? '', $matches[4] ?? ''];
+		return $schema_table;
 	}
 
 	/**
