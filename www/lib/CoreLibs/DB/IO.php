@@ -897,7 +897,8 @@ class IO
 				// DELETE FROM (table)
 				// UPDATE (table) SET
 				// MATCHES 1 (call), 4 (schema), 5 (table)
-				"/^(INSERT\s+?INTO|DELETE\s+?FROM|(UPDATE))\s+?([\"'])?(?:([\w_]+)\.)?([\w_]+)(?:\3)?\s?(?(2)SET|)/i",
+				"/^(INSERT\s+?INTO|DELETE\s+?FROM|(UPDATE))\s+?"
+					. "([\"'])?(?:([\w_]+)\.)?([\w_]+)(?:\3)?\s?(?(2)\s+?SET|)/i",
 				$query,
 				$matches
 			);
