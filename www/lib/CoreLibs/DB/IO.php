@@ -277,7 +277,7 @@ class IO
 	/** @var string default hash type */
 	public const ERROR_HASH_TYPE = 'adler32';
 	/** @var string regex to get returning with matches at position 1 */
-	public const REGEX_RETURNING = '/\s?returning(?: (.+?));?$/i';
+	public const REGEX_RETURNING = '/\s+returning\s+(.+?);?$/i';
 
 	// recommend to set private/protected and only allow setting via method
 	// can bet set from outside
@@ -582,7 +582,7 @@ class IO
 	private function __checkQueryForSelect(string $query): bool
 	{
 		// change to string starts with?
-		if (preg_match("/^(?:SELECT|SHOW|WITH)\s/i", $query)) {
+		if (preg_match("/^\s*(?:SELECT|SHOW|WITH)\s/i", $query)) {
 			return true;
 		}
 		return false;
@@ -599,10 +599,10 @@ class IO
 	 */
 	private function __checkQueryForInsert(string $query, bool $pure = false): bool
 	{
-		if ($pure && preg_match("/^INSERT\s+?INTO\s/i", $query)) {
+		if ($pure && preg_match("/^\s*INSERT\s+?INTO\s/i", $query)) {
 			return true;
 		}
-		if (!$pure && preg_match("/^(?:INSERT\s+?INTO|DELETE\s+?FROM|UPDATE)\s/i", $query)) {
+		if (!$pure && preg_match("/^\s*(?:INSERT\s+?INTO|DELETE\s+?FROM|UPDATE)\s/i", $query)) {
 			return true;
 		}
 		return false;
@@ -616,7 +616,7 @@ class IO
 	 */
 	private function __checkQueryForUpdate(string $query): bool
 	{
-		if (preg_match("/^UPDATE\s?(.+)/i", $query)) {
+		if (preg_match("/^\s*UPDATE\s?(.+)/i", $query)) {
 			return true;
 		}
 		return false;
@@ -897,7 +897,7 @@ class IO
 				// DELETE FROM (table)
 				// UPDATE (table) SET
 				// MATCHES 1 (call), 4 (schema), 5 (table)
-				"/^(INSERT\s+?INTO|DELETE\s+?FROM|(UPDATE))\s+?"
+				"/^\s*(INSERT\s+?INTO|DELETE\s+?FROM|(UPDATE))\s+?"
 					. "([\"'])?(?:([\w_]+)\.)?([\w_]+)(?:\3)?\s?(?(2)\s+?SET|)/i",
 				$query,
 				$matches

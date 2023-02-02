@@ -153,9 +153,19 @@ var_dump($db->dbGetReturningExt());
 
 // should throw deprecated error
 // $db->getReturningExt();
+$last_insert_pk = $db->dbGetInsertPK();
 print "DIRECT INSERT PREVIOUS INSERTED: "
 	. print_r($db->dbReturnRow("SELECT test_foo_id, test FROM test_foo "
-		. "WHERE test_foo_id = " . $db->dbGetInsertPK()), true) . "<br>";
+		. "WHERE test_foo_id = " . $last_insert_pk), true) . "<br>";
+$q = <<<EOM
+	SELECT
+		test_foo_id, test
+	FROM test_foo
+	WHERE test_foo_id = $last_insert_pk;
+EOM;
+print "EOM READ OF PREVIOUS INSERTED: " . print_r($db->dbReturnRow($q), true) . "<br>";
+print "LAST ERROR: " . $db->dbGetLastError() . "<br>";
+print "<br>";
 
 // PREPARED INSERT
 $db->dbPrepare("ins_test_foo", "INSERT INTO test_foo (test) VALUES ($1) RETURNING test");
