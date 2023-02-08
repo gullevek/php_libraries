@@ -114,7 +114,15 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 */
 	public function printToStringProvider(): array
 	{
+		// 0: unput
+		// 1: html flag (only for strings and arry)
+		// 2: expected
 		return [
+			'null' => [
+				null,
+				null,
+				'NULL',
+			],
 			'string' => [
 				'a string',
 				null,
@@ -333,16 +341,19 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 * @dataProvider printToStringProvider
 	 * @testdox printToString $input with $flag will be $expected [$_dataName]
 	 *
-	 * @param mixed $input
-	 * @param boolean|null $flag
-	 * @param string $expected
+	 * @param mixed $input anything
+	 * @param boolean|null $flag html flag, only for string and array
+	 * @param string $expected always string
 	 * @return void
 	 */
-	public function testPrintToString($input, ?bool $flag, string $expected): void
+	public function testPrintToString(mixed $input, ?bool $flag, string $expected): void
 	{
 		if ($flag === null) {
 			// if expected starts with / and ends with / then this is a regex compare
-			if (substr($expected, 0, 1) == '/' && substr($expected, -1, 1) == '/') {
+			if (
+				substr($expected, 0, 1) == '/' &&
+				substr($expected, -1, 1) == '/'
+			) {
 				$this->assertMatchesRegularExpression(
 					$expected,
 					\CoreLibs\Debug\Support::printToString($input)

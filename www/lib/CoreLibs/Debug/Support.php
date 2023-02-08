@@ -94,9 +94,11 @@ class Support
 	 * @param  bool   $no_html set to true to use ##HTMLPRE##or html escape
 	 * @return string
 	 */
-	public static function printToString($mixed, bool $no_html = false): string
+	public static function printToString(mixed $mixed, bool $no_html = false): string
 	{
-		if (is_bool($mixed)) {
+		if (is_null($mixed)) {
+			return (string)'NULL';
+		} elseif (is_bool($mixed)) {
 			return self::printBool($mixed, '', 'TRUE', 'FALSE');
 		} elseif (is_resource($mixed)) {
 			return (string)$mixed;

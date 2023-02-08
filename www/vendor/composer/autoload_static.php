@@ -7,8 +7,8 @@ namespace Composer\Autoload;
 class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
 {
     public static $files = array (
-        'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -57,12 +57,15 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Convert\\Byte' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Byte.php',
         'CoreLibs\\Convert\\Colors' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Colors.php',
         'CoreLibs\\Convert\\Encoding' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Encoding.php',
+        'CoreLibs\\Convert\\Extends\\VarSetTypeMain' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Extends/VarSetTypeMain.php',
         'CoreLibs\\Convert\\Html' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Html.php',
         'CoreLibs\\Convert\\Json' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Json.php',
         'CoreLibs\\Convert\\Math' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Math.php',
         'CoreLibs\\Convert\\MimeAppName' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/MimeAppName.php',
         'CoreLibs\\Convert\\MimeEncode' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/MimeEncode.php',
         'CoreLibs\\Convert\\Strings' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/Strings.php',
+        'CoreLibs\\Convert\\VarSetType' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/VarSetType.php',
+        'CoreLibs\\Convert\\VarSetTypeNull' => __DIR__ . '/../..' . '/lib/CoreLibs/Convert/VarSetTypeNull.php',
         'CoreLibs\\Create\\Email' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/Email.php',
         'CoreLibs\\Create\\Hash' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/Hash.php',
         'CoreLibs\\Create\\RandomKey' => __DIR__ . '/../..' . '/lib/CoreLibs/Create/RandomKey.php',
