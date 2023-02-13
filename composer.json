@@ -1,6 +1,7 @@
 {
-    "require": {
+    "require-dev": {
         "phpstan/phpstan": "^1.9",
-        "phan/phan": "^5.4"
+        "phan/phan": "^5.4",
+        "phpunit/phpunit": "^9"
     }
 }
