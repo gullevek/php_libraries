@@ -4,12 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4803358a39fae1c0e68aa8125f2ad09b",
-    "packages": [],
+    "content-hash": "645565cf406bc619ebe37b74b2d0590f",
+    "packages": [
+        {
+            "name": "egrajp/corelibs-composer-all",
+            "version": "7.11.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://git.egplusww.jp/Composer/CoreLibs-Composer-All/archive/v7.11.0.zip"
+            },
+            "type": "library"
+        }
+    ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "egrajp/corelibs-composer-all": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

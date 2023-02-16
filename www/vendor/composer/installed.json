@@ -1,5 +1,18 @@
 {
-    "packages": [],
+    "packages": [
+        {
+            "name": "egrajp/corelibs-composer-all",
+            "version": "7.11.0",
+            "version_normalized": "7.11.0.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://git.egplusww.jp/Composer/CoreLibs-Composer-All/archive/v7.11.0.zip"
+            },
+            "type": "library",
+            "installation-source": "dist",
+            "install-path": "../egrajp/corelibs-composer-all"
+        }
+    ],
     "dev": true,
     "dev-package-names": []
 }

@@ -1,0 +1,19 @@
+{
+    "name": "egrajp/corelibs-composer-all",
+    "description": "CoreLibs in a composer package",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Corelibs\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Clemens Schwaighofer",
+            "email": "clemens.schwaighofer@egplusww.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}

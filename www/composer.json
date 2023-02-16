@@ -9,6 +9,15 @@
             "email": "clemens.schwaighofer@egplusww.com"
         }
     ],
+	"repositories": [
+		{
+			"type": "composer",
+			"url": "http://composer-local.tokyo.tequila.jp"
+		}
+	],
+	"require": {
+		"egrajp/corelibs-composer-all": "@dev"
+	},
     "autoload": {
         "classmap": [
             "lib/"
