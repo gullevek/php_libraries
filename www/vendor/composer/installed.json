@@ -38,9 +38,9 @@
             "type": "library",
             "installation-source": "dist",
             "autoload": {
-                "psr-4": {
-                    "Smarty\\": "src/"
-                }
+                "classmap": [
+                    "src/"
+                ]
             },
             "license": [
                 "LGPL-3.0"

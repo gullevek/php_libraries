@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "10e66f9af9517d445305b92cde9eb35f",
+    "content-hash": "6dcbd22683ca78f96d11facca3320eda",
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
@@ -39,9 +39,9 @@
             },
             "type": "library",
             "autoload": {
-                "psr-4": {
-                    "Smarty\\": "src/"
-                }
+                "classmap": [
+                    "src/"
+                ]
             },
             "license": [
                 "LGPL-3.0"
@@ -63,8 +63,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "egrajp/corelibs-composer-all": 20,
-        "egrajp/smarty-extended": 20
+        "egrajp/corelibs-composer-all": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

@@ -17,7 +17,7 @@
 	],
 	"require": {
 		"egrajp/corelibs-composer-all": "@dev",
-		"egrajp/smarty-extended": "@dev"
+        "egrajp/smarty-extended": "^4"
 	},
     "autoload": {
         "classmap": [
