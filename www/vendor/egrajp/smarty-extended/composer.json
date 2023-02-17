@@ -1,0 +1,23 @@
+{
+    "name": "egrajp/smarty-extended",
+    "description": "Smarty, extended with gettext, checkbox/radio labels and index numbers",
+    "type": "library",
+    "keywords": [
+        "templating"
+    ],
+    "homepage": "https://github.com/smarty-php/smarty/",
+    "license": "LGPL-3.0",
+    "autoload": {
+        "psr-4": {
+            "Smarty\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Clemens Schwaighofer",
+            "email": "clemens.schwaighofer@egplusww.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}

@@ -10,7 +10,53 @@
             },
             "type": "library",
             "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "CoreLibs\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Clemens Schwaighofer",
+                    "email": "clemens.schwaighofer@egplusww.com"
+                }
+            ],
+            "description": "CoreLibs in a composer package",
             "install-path": "../egrajp/corelibs-composer-all"
+        },
+        {
+            "name": "egrajp/smarty-extended",
+            "version": "4.3.0",
+            "version_normalized": "4.3.0.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://git.egplusww.jp/Composer/Smarty-Extended/archive/v4.3.0.zip"
+            },
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Smarty\\": "src/"
+                }
+            },
+            "license": [
+                "LGPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Clemens Schwaighofer",
+                    "email": "clemens.schwaighofer@egplusww.com"
+                }
+            ],
+            "description": "Smarty, extended with gettext, checkbox/radio labels and index numbers",
+            "homepage": "https://github.com/smarty-php/smarty/",
+            "keywords": [
+                "templating"
+            ],
+            "install-path": "../egrajp/smarty-extended"
         }
     ],
     "dev": true,

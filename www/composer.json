@@ -12,15 +12,19 @@
 	"repositories": [
 		{
 			"type": "composer",
-			"url": "http://composer-local.tokyo.tequila.jp"
+			"url": "http://composer.tokyo.tequila.jp"
 		}
 	],
 	"require": {
-		"egrajp/corelibs-composer-all": "@dev"
+		"egrajp/corelibs-composer-all": "@dev",
+		"egrajp/smarty-extended": "@dev"
 	},
     "autoload": {
         "classmap": [
             "lib/"
         ]
+    },
+	"config": {
+        "secure-http": false
     }
 }

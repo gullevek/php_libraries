@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "645565cf406bc619ebe37b74b2d0590f",
+    "content-hash": "10e66f9af9517d445305b92cde9eb35f",
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
@@ -13,14 +13,58 @@
                 "type": "zip",
                 "url": "https://git.egplusww.jp/Composer/CoreLibs-Composer-All/archive/v7.11.0.zip"
             },
-            "type": "library"
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "CoreLibs\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Clemens Schwaighofer",
+                    "email": "clemens.schwaighofer@egplusww.com"
+                }
+            ],
+            "description": "CoreLibs in a composer package"
+        },
+        {
+            "name": "egrajp/smarty-extended",
+            "version": "4.3.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://git.egplusww.jp/Composer/Smarty-Extended/archive/v4.3.0.zip"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Smarty\\": "src/"
+                }
+            },
+            "license": [
+                "LGPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Clemens Schwaighofer",
+                    "email": "clemens.schwaighofer@egplusww.com"
+                }
+            ],
+            "description": "Smarty, extended with gettext, checkbox/radio labels and index numbers",
+            "homepage": "https://github.com/smarty-php/smarty/",
+            "keywords": [
+                "templating"
+            ]
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "egrajp/corelibs-composer-all": 20
+        "egrajp/corelibs-composer-all": 20,
+        "egrajp/smarty-extended": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

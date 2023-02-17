@@ -6,4 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Smarty\\' => array($vendorDir . '/egrajp/smarty-extended/src'),
+    'CoreLibs\\' => array($vendorDir . '/egrajp/corelibs-composer-all/src'),
 );
