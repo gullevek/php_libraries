@@ -28,6 +28,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'egrajp/smarty-extended' => array(
+            'pretty_version' => '4.3.0',
+            'version' => '4.3.0.0',
+            'reference' => NULL,
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../egrajp/smarty-extended',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'myclabs/deep-copy' => array(
             'pretty_version' => '1.11.0',
             'version' => '1.11.0.0',

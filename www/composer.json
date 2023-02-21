@@ -16,5 +16,14 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9"
+    },
+    "repositories": {
+        "git.egplusww.jp.Composer": {
+            "type": "composer",
+            "url": "https://git.egplusww.jp/api/packages/Composer/composer"
+        }
+    },
+    "require": {
+        "egrajp/smarty-extended": "^4.3"
     }
 }

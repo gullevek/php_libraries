@@ -74,6 +74,39 @@
             "install-path": "../doctrine/instantiator"
         },
         {
+            "name": "egrajp/smarty-extended",
+            "version": "4.3.0",
+            "version_normalized": "4.3.0.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fsmarty-extended/4.3.0/egrajp-smarty-extended.4.3.0.zip",
+                "shasum": "d41bda35c0d52da35cf911ab0b018655a09f072b"
+            },
+            "time": "2023-02-17T14:14:10+09:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "license": [
+                "LGPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Clemens Schwaighofer",
+                    "email": "clemens.schwaighofer@egplusww.com"
+                }
+            ],
+            "description": "Smarty, extended with gettext, checkbox/radio labels and index numbers",
+            "homepage": "https://github.com/smarty-php/smarty/",
+            "keywords": [
+                "templating"
+            ],
+            "install-path": "../egrajp/smarty-extended"
+        },
+        {
             "name": "myclabs/deep-copy",
             "version": "1.11.0",
             "version_normalized": "1.11.0.0",

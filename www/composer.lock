@@ -4,8 +4,39 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d8c65ab5a590dc9da5d04e4588e9abf3",
-    "packages": [],
+    "content-hash": "5b803d9f077cbb1b28dcb383f5e89b0a",
+    "packages": [
+        {
+            "name": "egrajp/smarty-extended",
+            "version": "4.3.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fsmarty-extended/4.3.0/egrajp-smarty-extended.4.3.0.zip",
+                "shasum": "d41bda35c0d52da35cf911ab0b018655a09f072b"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "license": [
+                "LGPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Clemens Schwaighofer",
+                    "email": "clemens.schwaighofer@egplusww.com"
+                }
+            ],
+            "description": "Smarty, extended with gettext, checkbox/radio labels and index numbers",
+            "homepage": "https://github.com/smarty-php/smarty/",
+            "keywords": [
+                "templating"
+            ],
+            "time": "2023-02-17T14:14:10+09:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "doctrine/instantiator",
