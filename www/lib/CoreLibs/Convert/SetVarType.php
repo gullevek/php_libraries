@@ -11,9 +11,9 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert;
 
-use CoreLibs\Convert\Extends\VarSetTypeMain;
+use CoreLibs\Convert\Extends\SetVarTypeMain;
 
-class VarSetType extends Extends\VarSetTypeMain
+class SetVarType extends Extends\SetVarTypeMain
 {
 	/**
 	 * Check is input is string, if not return default string.
@@ -25,7 +25,7 @@ class VarSetType extends Extends\VarSetTypeMain
 	 */
 	public static function setStr(mixed $val, string $default = ''): string
 	{
-		return (string)VarSetTypeMain::setStrMain($val, $default, false);
+		return (string)SetVarTypeMain::setStrMain($val, $default, false);
 	}
 
 	/**
@@ -39,7 +39,7 @@ class VarSetType extends Extends\VarSetTypeMain
 	 */
 	public static function makeStr(mixed $val, string $default = ''): string
 	{
-		return (string)VarSetTypeMain::makeStrMain($val, $default, false);
+		return (string)SetVarTypeMain::makeStrMain($val, $default, false);
 	}
 
 	/**
@@ -52,7 +52,7 @@ class VarSetType extends Extends\VarSetTypeMain
 	 */
 	public static function setInt(mixed $val, int $default = 0): int
 	{
-		return (int)VarSetTypeMain::setIntMain($val, $default, false);
+		return (int)SetVarTypeMain::setIntMain($val, $default, false);
 	}
 
 	/**
@@ -65,7 +65,7 @@ class VarSetType extends Extends\VarSetTypeMain
 	 */
 	public static function makeInt(mixed $val, int $default = 0): int
 	{
-		return (int)VarSetTypeMain::makeIntMain($val, $default, false);
+		return (int)SetVarTypeMain::makeIntMain($val, $default, false);
 	}
 
 	/**
@@ -78,7 +78,7 @@ class VarSetType extends Extends\VarSetTypeMain
 	 */
 	public static function setFloat(mixed $val, float $default = 0.0): float
 	{
-		return (float)VarSetTypeMain::setFloatMain($val, $default, false);
+		return (float)SetVarTypeMain::setFloatMain($val, $default, false);
 	}
 
 	/**
@@ -91,7 +91,7 @@ class VarSetType extends Extends\VarSetTypeMain
 	 */
 	public static function makeFloat(mixed $val, float $default = 0.0): float
 	{
-		return (float)VarSetTypeMain::makeFloatMain($val, $default, false);
+		return (float)SetVarTypeMain::makeFloatMain($val, $default, false);
 	}
 
 	/**
@@ -104,7 +104,7 @@ class VarSetType extends Extends\VarSetTypeMain
 	 */
 	public static function setArray(mixed $val, array $default = []): array
 	{
-		return (array)VarSetTypeMain::setArrayMain($val, $default, false);
+		return (array)SetVarTypeMain::setArrayMain($val, $default, false);
 	}
 
 	/**
@@ -117,7 +117,7 @@ class VarSetType extends Extends\VarSetTypeMain
 	 */
 	public static function setBool(mixed $val, bool $default = false): bool
 	{
-		return (bool)VarSetTypeMain::setBoolMain($val, $default, false);
+		return (bool)SetVarTypeMain::setBoolMain($val, $default, false);
 	}
 
 	/**
@@ -129,7 +129,7 @@ class VarSetType extends Extends\VarSetTypeMain
 	 */
 	public static function makeBool(mixed $val, bool $default = false): bool
 	{
-		return (bool)VarSetTypeMain::makeBoolMain($val, $default, false);
+		return (bool)SetVarTypeMain::makeBoolMain($val, $default, false);
 	}
 }
 

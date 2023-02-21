@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace tests;
 
 use PHPUnit\Framework\TestCase;
-use CoreLibs\Convert\VarSetTypeNull;
+use CoreLibs\Convert\SetVarTypeNull;
 
 /**
  * Test class for Convert\Strings
- * @coversDefaultClass \CoreLibs\Convert\VarSetTypeNull
- * @testdox \CoreLibs\Convert\VarSetTypeNull method tests
+ * @coversDefaultClass \CoreLibs\Convert\SetVarTypeNull
+ * @testdox \CoreLibs\Convert\SetVarTypeNull method tests
  */
-final class CoreLibsConvertVarSetTypeNullTest extends TestCase
+final class CoreLibsConvertSetVarTypeNullTest extends TestCase
 {
 	/**
 	 * Undocumented function
@@ -66,7 +66,7 @@ final class CoreLibsConvertVarSetTypeNullTest extends TestCase
 	 */
 	public function testSetString(mixed $input, ?string $default, ?string $expected): void
 	{
-		$set_var = VarSetTypeNull::setStr($input, $default);
+		$set_var = SetVarTypeNull::setStr($input, $default);
 		if ($expected !== null) {
 			$this->assertIsString($set_var);
 		} else {
@@ -155,7 +155,7 @@ final class CoreLibsConvertVarSetTypeNullTest extends TestCase
 	 */
 	public function testMakeString(mixed $input, ?string $default, ?string $expected): void
 	{
-		$set_var = VarSetTypeNull::makeStr($input, $default);
+		$set_var = SetVarTypeNull::makeStr($input, $default);
 		if ($expected !== null) {
 			$this->assertIsString($set_var);
 		} else {
@@ -219,7 +219,7 @@ final class CoreLibsConvertVarSetTypeNullTest extends TestCase
 	 */
 	public function testSetInt(mixed $input, ?int $default, ?int $expected): void
 	{
-		$set_var = VarSetTypeNull::setInt($input, $default);
+		$set_var = SetVarTypeNull::setInt($input, $default);
 		if ($expected !== null) {
 			$this->assertIsInt($set_var);
 		} else {
@@ -303,7 +303,7 @@ final class CoreLibsConvertVarSetTypeNullTest extends TestCase
 	 */
 	public function testMakeInt(mixed $input, ?int $default, ?int $expected): void
 	{
-		$set_var = VarSetTypeNull::makeInt($input, $default);
+		$set_var = SetVarTypeNull::makeInt($input, $default);
 		if ($expected !== null) {
 			$this->assertIsInt($set_var);
 		} else {
@@ -367,7 +367,7 @@ final class CoreLibsConvertVarSetTypeNullTest extends TestCase
 	 */
 	public function testSetFloat(mixed $input, ?float $default, ?float $expected): void
 	{
-		$set_var = VarSetTypeNull::setFloat($input, $default);
+		$set_var = SetVarTypeNull::setFloat($input, $default);
 		if ($expected !== null) {
 			$this->assertIsFloat($set_var);
 		} else {
@@ -452,7 +452,7 @@ final class CoreLibsConvertVarSetTypeNullTest extends TestCase
 	 */
 	public function testMakeFloat(mixed $input, ?float $default, ?float $expected): void
 	{
-		$set_var = VarSetTypeNull::makeFloat($input, $default);
+		$set_var = SetVarTypeNull::makeFloat($input, $default);
 		if ($expected !== null) {
 			$this->assertIsFloat($set_var);
 		} else {
@@ -511,7 +511,7 @@ final class CoreLibsConvertVarSetTypeNullTest extends TestCase
 	 */
 	public function testSetArray(mixed $input, ?array $default, ?array $expected): void
 	{
-		$set_var = VarSetTypeNull::setArray($input, $default);
+		$set_var = SetVarTypeNull::setArray($input, $default);
 		if ($expected !== null) {
 			$this->assertIsArray($set_var);
 		} else {
@@ -570,7 +570,7 @@ final class CoreLibsConvertVarSetTypeNullTest extends TestCase
 	 */
 	public function testSetBool(mixed $input, ?bool $default, ?bool $expected): void
 	{
-		$set_var = VarSetTypeNull::setBool($input, $default);
+		$set_var = SetVarTypeNull::setBool($input, $default);
 		if ($expected !== null) {
 			$this->assertIsBool($set_var);
 		} else {
@@ -636,7 +636,7 @@ final class CoreLibsConvertVarSetTypeNullTest extends TestCase
 	 */
 	public function testMakeBool(mixed $input, ?bool $expected): void
 	{
-		$set_var = VarSetTypeNull::makeBool($input);
+		$set_var = SetVarTypeNull::makeBool($input);
 		if ($expected !== null) {
 			$this->assertIsBool($set_var);
 		} else {
