@@ -13,5 +13,8 @@
         "classmap": [
             "lib/"
         ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
     }
 }
