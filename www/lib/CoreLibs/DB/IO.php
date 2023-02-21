@@ -1851,7 +1851,6 @@ class IO
 
 		// if cursor exists ...
 		if ($this->cursor_ext[$query_hash]['cursor']) {
-			/** @phpstan-ignore-next-line claims this is always false, but can be true */
 			if ($first_call === true) {
 				$this->cursor_ext[$query_hash]['log'][] = 'First call';
 				// count the rows returned (if select)
@@ -3048,7 +3047,6 @@ class IO
 			} else {
 				// find in all inside the array
 				$__arr = array_column($this->insert_id_arr, $key);
-				/** @phpstan-ignore-next-line [Why is this always true?] */
 				if (count($__arr)) {
 					return $__arr;
 				} else {

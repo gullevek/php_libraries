@@ -5,6 +5,7 @@ parameters:
 	tmpDir: /tmp/phpstan-corelibs
 	level: 8 # max is now 9
 	checkMissingCallableSignature: true
+	treatPhpDocTypesAsCertain: false
 	paths:
 		- %currentWorkingDirectory%/www
 	bootstrapFiles:
@@ -12,14 +13,13 @@ parameters:
 		# - %currentWorkingDirectory%/www/lib/autoloader.php
 		- %currentWorkingDirectory%/www/vendor/autoload.php
 	scanDirectories:
-		- www/lib/Smarty
+		- www/vendor
 	scanFiles:
 		- www/configs/config.php
 		- www/configs/config.master.php
 		# if composer.json autoloader defined, this is not needed
 		# - www/lib/autoloader.php
 		- www/vendor/autoload.php
-		- www/lib/Smarty/Autoloader.php
 	excludePaths:
 		# do not check old qq file uploader tests
 		- www/admin/qq_file_upload_*.php
@@ -43,9 +43,6 @@ parameters:
 		- www/log
 		- www/media
 		- www/tmp
-		# external libs are not checked
-		- www/lib/Smarty/
-		- www/lib/smarty-*/
 		# ignore composer
 		- www/vendor
 	# ignore errores with
