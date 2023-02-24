@@ -712,12 +712,23 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	 */
 	public function testArrayMergeRecursiveWarningA(): void
 	{
+		set_error_handler(
+			static function (int $errno, string $errstr): never {
+				throw new Exception($errstr, $errno);
+			},
+			E_USER_WARNING
+		);
+
 		$arrays = func_get_args();
 		// first is expected warning
 		$warning = array_shift($arrays);
-		$this->expectWarning();
-		$this->expectWarningMessage($warning);
+
+		// phpunit 10.0 compatible
+		$this->expectExceptionMessage(($warning));
+
 		\CoreLibs\Combined\ArrayHandler::arrayMergeRecursive(...$arrays);
+
+		restore_error_handler();
 	}
 
 	/**
