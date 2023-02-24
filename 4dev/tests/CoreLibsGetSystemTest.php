@@ -99,7 +99,7 @@ final class CoreLibsGetSystemTest extends TestCase
 				1 => 'phpunit',
 				2 => 'phpunit',
 				// NOTE: this can change, so it is a regex check
-				3 => "/^(\/?.*\/?)?www\/vendor\/bin\/phpunit$/",
+				3 => "/^(\/?.*\/?)?vendor\/bin\/phpunit$/",
 			],
 			'some path with extension' => [
 				0 => '/some/path/to/file.txt',
