@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\Output\Form\TableArrays;
 
-class EditVisibleGroup implements \CoreLibs\Output\Form\TableArraysInterface
+class EditVisibleGroup implements Interface\TableArraysInterface
 {
 	/** @var \CoreLibs\Output\Form\Generate */
 	private $form;
