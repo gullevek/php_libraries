@@ -233,11 +233,13 @@ if (
 }
 // set SSL on
 $is_secure = false;
-if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 	$is_secure = true;
 } elseif (
-	!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' ||
-	!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on'
+	!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+	$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https' ||
+	!empty($_SERVER['HTTP_X_FORWARDED_SSL']) &&
+	$_SERVER['HTTP_X_FORWARDED_SSL'] === 'on'
 ) {
 	$is_secure = true;
 }

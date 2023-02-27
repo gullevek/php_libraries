@@ -69,7 +69,6 @@ foreach (['admin', 'frontend'] as $folder) {
 	}
 }
 // if content path is empty, fallback is default
-/** @phpstan-ignore-next-line can be empty */
 if (empty($folder)) {
 	$folder = 'default';
 }

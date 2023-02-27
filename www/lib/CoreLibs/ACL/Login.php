@@ -1048,7 +1048,7 @@ class Login
 				$res = $this->db->dbReturnRow($q);
 				if (
 					!is_array($res) ||
-					(is_array($res) && empty($res['edit_user_id']))
+					empty($res['edit_user_id'])
 				) {
 					// username wrong
 					$this->login_error = 201;
@@ -1068,9 +1068,11 @@ class Login
 				}
 				if (
 					!is_array($res) ||
-					(is_array($res) &&
-					(empty($res['edit_user_id']) ||
-					!$this->loginPasswordCheck($res['old_password_hash'], $this->pw_old_password)))
+					empty($res['edit_user_id']) ||
+					!$this->loginPasswordCheck(
+						$res['old_password_hash'],
+						$this->pw_old_password
+					)
 				) {
 					// old password wrong
 					$this->login_error = 202;
@@ -1794,7 +1796,6 @@ EOM;
 		// check that numeric, positive numeric, not longer than max input string lenght
 		// and not short than min password length
 		if (
-			is_numeric($length) &&
 			$length >= $this->password_min_length_max &&
 			$length <= $this->password_max_length &&
 			$length <= 255

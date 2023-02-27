@@ -672,9 +672,6 @@ class Basic
 	public static function arrayToString(array $array, string $connect_char): string
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use join()', E_USER_DEPRECATED);
-		if (!is_array($array)) {
-			$array = [];
-		}
 		return join($connect_char, $array);
 	}
 
