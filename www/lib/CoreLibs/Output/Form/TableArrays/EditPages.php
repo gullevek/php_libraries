@@ -140,7 +140,10 @@ class EditPages implements Interface\TableArraysInterface
 				],
 			],
 			'load_query' => "SELECT edit_page_id, "
-				. "CASE WHEN hostname IS NOT NULL THEN hostname ELSE ''::VARCHAR END || filename AS filename, "
+				. "CASE "
+				. "WHEN hostname IS NOT NULL THEN hostname "
+				. "ELSE ''::VARCHAR "
+				. "END || filename AS filename, "
 				. "name, online, menu, popup "
 				. "FROM edit_page "
 				. "ORDER BY order_number",
@@ -178,7 +181,8 @@ class EditPages implements Interface\TableArraysInterface
 					'select_size' => 10,
 					'selected' => $_POST['edit_visible_group_id'] ?? '',
 					'query' => "SELECT edit_visible_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag "
-						. "FROM edit_visible_group ORDER BY name"
+						. "FROM edit_visible_group "
+						. "ORDER BY name"
 				],
 				'edit_menu_group' => [
 					'table_name' => 'edit_page_menu_group',
@@ -188,7 +192,8 @@ class EditPages implements Interface\TableArraysInterface
 					'select_size' => 10,
 					'selected' => $_POST['edit_menu_group_id'] ?? '',
 					'query' => "SELECT edit_menu_group_id, 'Name: ' || name || ', ' || 'Flag: ' || flag "
-						. "FROM edit_menu_group ORDER BY order_number"
+						. "FROM edit_menu_group "
+						. "ORDER BY order_number"
 				],
 			],
 			'element_list' => [
@@ -259,7 +264,9 @@ class EditPages implements Interface\TableArraysInterface
 							'output_name' => 'Access Level',
 							'int' => 1,
 							'preset' => 1, // first of the select
-							'query' => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level"
+							'query' => "SELECT edit_access_right_id, name "
+								. "FROM edit_access_right "
+								. "ORDER BY level"
 						],
 						'edit_page_content_id' => [
 							'type' => 'hidden',

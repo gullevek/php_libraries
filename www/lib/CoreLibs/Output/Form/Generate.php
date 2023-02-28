@@ -366,7 +366,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$config_array = $table_arrays[System::getPageName(1)];
 		} else {
 			// primary try to load the class
-			/** @var \CoreLibs\Output\Form\TableArraysInterface|false $content_class */
+			/** @var TableArrays\Interface\TableArraysInterface|false $content_class */
 			$content_class = $this->loadTableArray();
 			if (is_object($content_class)) {
 				$config_array = $content_class->setTableArray();
@@ -468,9 +468,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	/**
 	* load table array class based on my page name converted to camel case
 	* class files are in \TableArrays folder in \Output\Form
-	* @return object|bool Return class object or false on failure
+	* @return TableArrays\Interface\TableArraysInterface|false Return class object or false on failure
 	*/
-	private function loadTableArray()
+	private function loadTableArray(): TableArrays\Interface\TableArraysInterface|false
 	{
 		// note: it schould be Schemas but an original type made it to this
 		//       this file is kept for the old usage, new one should be EditSchemas
@@ -489,7 +489,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					$page_name_camel_case
 			);
 		try {
-			/** @var \CoreLibs\Output\Form\TableArraysInterface|false $class */
+			/** @var TableArrays\Interface\TableArraysInterface|false $class */
 			$class = new $class_string($this);
 		} catch (\Throwable $t) {
 			$this->log->debug('CLASS LOAD', 'Failed loading: ' . $class_string . ' => ' . $t->getMessage());
@@ -651,7 +651,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$this->base_acl_level >= $this->security_level['new']
 		) {
 			if ($this->really_new == 'yes') {
-				$this->formUnsetTablearray();
+				$this->formUnsetTableArray();
 			} else {
 				$this->msg .= $this->l->__('You have to select the <b>Checkbox for New</b>!<br>');
 				$this->error = 2;

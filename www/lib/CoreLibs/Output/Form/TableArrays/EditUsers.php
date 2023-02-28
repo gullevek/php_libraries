@@ -274,7 +274,7 @@ class EditUsers implements Interface\TableArraysInterface
 					'type' => 'drop_down_db',
 					'query' => "SELECT edit_language_id, long_name "
 						. "FROM edit_language "
-						. "WHERE enabled = 1"
+						. "WHERE enabled = 1 "
 						. "ORDER BY order_number",
 					'min_edit_acl' => '100',
 					'min_show_acl' => '100',
@@ -284,7 +284,10 @@ class EditUsers implements Interface\TableArraysInterface
 					'output_name' => 'Scheme',
 					'int_null' => 1,
 					'type' => 'drop_down_db',
-					'query' => "SELECT edit_scheme_id, name FROM edit_scheme WHERE enabled = 1 ORDER BY name",
+					'query' => "SELECT edit_scheme_id, name "
+						. "FROM edit_scheme "
+						. "WHERE enabled = 1 "
+						. "ORDER BY name",
 					'min_edit_acl' => '100',
 					'min_show_acl' => '100',
 				],
@@ -293,7 +296,10 @@ class EditUsers implements Interface\TableArraysInterface
 					'output_name' => 'Group',
 					'int' => 1,
 					'type' => 'drop_down_db',
-					'query' => "SELECT edit_group_id, name FROM edit_group WHERE enabled = 1 ORDER BY name",
+					'query' => "SELECT edit_group_id, name "
+						. "FROM edit_group "
+						. "WHERE enabled = 1 "
+						. "ORDER BY name",
 					'mandatory' => 1,
 					'min_edit_acl' => '100',
 					'min_show_acl' => '100',
@@ -304,7 +310,9 @@ class EditUsers implements Interface\TableArraysInterface
 					'mandatory' => 1,
 					'int' => 1,
 					'type' => 'drop_down_db',
-					'query' => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level",
+					'query' => "SELECT edit_access_right_id, name "
+						. "FROM edit_access_right "
+						. "ORDER BY level",
 					'min_edit_acl' => '100',
 					'min_show_acl' => '100',
 				],
@@ -434,7 +442,9 @@ class EditUsers implements Interface\TableArraysInterface
 							'output_name' => 'Access Level',
 							'preset' => 1, // first of the select
 							'int' => 1,
-							'query' => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level"
+							'query' => "SELECT edit_access_right_id, name "
+								. "FROM edit_access_right "
+								. "ORDER BY level"
 						],
 						'edit_default' => [
 							'type' => 'radio_group',

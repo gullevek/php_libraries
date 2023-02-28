@@ -55,14 +55,19 @@ class EditGroups implements Interface\TableArraysInterface
 					'mandatory' => 1,
 					'int' => 1,
 					'type' => 'drop_down_db',
-					'query' => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level"
+					'query' => "SELECT edit_access_right_id, name "
+						. "FROM edit_access_right "
+						. "ORDER BY level"
 				],
 				'edit_scheme_id' => [
 					'value' => $_POST['edit_scheme_id'] ?? '',
 					'output_name' => 'Group Scheme',
 					'int_null' => 1,
 					'type' => 'drop_down_db',
-					'query' => "SELECT edit_scheme_id, name FROM edit_scheme WHERE enabled = 1 ORDER BY name"
+					'query' => "SELECT edit_scheme_id, name "
+						. "FROM edit_scheme "
+						. "WHERE enabled = 1 "
+						. "ORDER BY name"
 				],
 				'additional_acl' => [
 					'value' => $_POST['additional_acl'] ?? '',
@@ -73,7 +78,9 @@ class EditGroups implements Interface\TableArraysInterface
 					'cols' => 60
 				],
 			],
-			'load_query' => "SELECT edit_group_id, name, enabled FROM edit_group ORDER BY name",
+			'load_query' => "SELECT edit_group_id, name, enabled "
+				. "FROM edit_group "
+				. "ORDER BY name",
 			'table_name' => 'edit_group',
 			'show_fields' => [
 				[
@@ -115,7 +122,9 @@ class EditGroups implements Interface\TableArraysInterface
 							'output_name' => 'Access Level',
 							'int' => 1,
 							'preset' => 1, // first of the select
-							'query' => "SELECT edit_access_right_id, name FROM edit_access_right ORDER BY level"
+							'query' => "SELECT edit_access_right_id, name "
+								. "FROM edit_access_right "
+								. "ORDER BY level"
 						],
 						'edit_page_id' => [
 							'int' => 1,

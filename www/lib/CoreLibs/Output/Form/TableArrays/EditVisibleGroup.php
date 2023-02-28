@@ -48,7 +48,9 @@ class EditVisibleGroup implements Interface\TableArraysInterface
 				],
 			],
 			'table_name' => 'edit_visible_group',
-			'load_query' => "SELECT edit_visible_group_id, name FROM edit_visible_group ORDER BY name",
+			'load_query' => "SELECT edit_visible_group_id, name "
+				. "FROM edit_visible_group "
+				. "ORDER BY name",
 			'show_fields' => [
 				[
 					'name' => 'name'

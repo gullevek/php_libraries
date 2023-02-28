@@ -414,6 +414,8 @@ class EditBase
 					$elements[] = $this->form->formCreateElement('additional_acl');
 					break;
 				case 'edit_schemes':
+					// @deprecated Will be removed
+				case 'edit_schemas':
 					$elements[] = $this->form->formCreateElement('enabled');
 					$elements[] = $this->form->formCreateElement('name');
 					$elements[] = $this->form->formCreateElement('header_color');
