@@ -453,7 +453,7 @@ class SmartyExtend extends \Smarty
 				$this->DATA['nav_menu_count'] = count($this->DATA['nav_menu']);
 				// messages = ['msg' =>, 'class' => 'error/warning/...']
 				$this->DATA['messages'] = $cms->messages;
-			} else { /** @phpstan-ignore-line Because I assume object for phpstan */
+			} else {
 				$this->DATA['show_ea_extra'] = false;
 				$this->DATA['ADMIN'] = 0;
 				$this->DATA['nav_menu'] = [];

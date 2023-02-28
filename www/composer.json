@@ -9,22 +9,19 @@
             "email": "clemens.schwaighofer@egplusww.com"
         }
     ],
-	"repositories": [
-		{
-			"type": "composer",
-			"url": "http://composer.tokyo.tequila.jp"
-		}
-	],
 	"require": {
-		"egrajp/corelibs-composer-all": "@dev",
-        "egrajp/smarty-extended": "^4"
+		"egrajp/corelibs-composer-all": "^7.11",
+        "egrajp/smarty-extended": "^4.3"
 	},
     "autoload": {
         "classmap": [
             "lib/"
         ]
     },
-	"config": {
-        "secure-http": false
+    "repositories": {
+        "git.egplusww.jp.Composer": {
+            "type": "composer",
+            "url": "https://git.egplusww.jp/api/packages/Composer/composer"
+        }
     }
 }

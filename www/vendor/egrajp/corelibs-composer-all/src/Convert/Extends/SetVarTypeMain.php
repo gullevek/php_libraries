@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Extends;
 
-class VarSetTypeMain
+class SetVarTypeMain
 {
 	/**
 	 * If input variable is string then returns it, else returns default set

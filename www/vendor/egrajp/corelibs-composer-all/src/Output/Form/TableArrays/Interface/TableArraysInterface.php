@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CoreLibs\Output\Form;
+namespace CoreLibs\Output\Form\TableArrays\Interface;
 
 interface TableArraysInterface
 {

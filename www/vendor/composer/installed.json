@@ -2,12 +2,23 @@
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
-            "version": "7.11.0",
-            "version_normalized": "7.11.0.0",
+            "version": "7.12.1",
+            "version_normalized": "7.12.1.0",
             "dist": {
                 "type": "zip",
-                "url": "https://git.egplusww.jp/Composer/CoreLibs-Composer-All/archive/v7.11.0.zip"
+                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fcorelibs-composer-all/7.12.1/egrajp-corelibs-composer-all.7.12.1.zip",
+                "shasum": "457089ac43cb9fff5091e163877bb56ecb868151"
             },
+            "require": {
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "egrajp/smarty-extended": "^4.3",
+                "phan/phan": "v5.x-dev",
+                "phpstan/phpstan": "1.10.x-dev",
+                "phpunit/phpunit": "^9"
+            },
+            "time": "2023-02-28T09:16:32+09:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

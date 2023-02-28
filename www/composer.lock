@@ -4,14 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6dcbd22683ca78f96d11facca3320eda",
+    "content-hash": "dc5d89075423c3c3df219079c491d91c",
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
-            "version": "7.11.0",
+            "version": "7.12.1",
             "dist": {
                 "type": "zip",
-                "url": "https://git.egplusww.jp/Composer/CoreLibs-Composer-All/archive/v7.11.0.zip"
+                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fcorelibs-composer-all/7.12.1/egrajp-corelibs-composer-all.7.12.1.zip",
+                "shasum": "457089ac43cb9fff5091e163877bb56ecb868151"
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "egrajp/smarty-extended": "^4.3",
+                "phan/phan": "v5.x-dev",
+                "phpstan/phpstan": "1.10.x-dev",
+                "phpunit/phpunit": "^9"
             },
             "type": "library",
             "autoload": {
@@ -28,14 +38,16 @@
                     "email": "clemens.schwaighofer@egplusww.com"
                 }
             ],
-            "description": "CoreLibs in a composer package"
+            "description": "CoreLibs in a composer package",
+            "time": "2023-02-28T09:16:32+09:00"
         },
         {
             "name": "egrajp/smarty-extended",
             "version": "4.3.0",
             "dist": {
                 "type": "zip",
-                "url": "https://git.egplusww.jp/Composer/Smarty-Extended/archive/v4.3.0.zip"
+                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fsmarty-extended/4.3.0/egrajp-smarty-extended.4.3.0.zip",
+                "shasum": "d41bda35c0d52da35cf911ab0b018655a09f072b"
             },
             "type": "library",
             "autoload": {
@@ -56,15 +68,14 @@
             "homepage": "https://github.com/smarty-php/smarty/",
             "keywords": [
                 "templating"
-            ]
+            ],
+            "time": "2023-02-17T14:14:10+09:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "egrajp/corelibs-composer-all": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

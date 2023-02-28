@@ -1,0 +1,44 @@
+# PHP Stan Config
+includes:
+	- phpstan-conditional.php
+parameters:
+	tmpDir: /tmp/phpstan-corelibs-composer
+	level: 8 # max is now 9
+	checkMissingCallableSignature: true
+	treatPhpDocTypesAsCertain: false
+	strictRules:
+		allRules: false
+	paths:
+		- %currentWorkingDirectory%/src
+	bootstrapFiles:
+		- %currentWorkingDirectory%/phpstan-bootstrap.php
+		- %currentWorkingDirectory%/vendor/autoload.php
+	scanDirectories:
+		- vendor/egrajp/smarty-extended
+	scanFiles:
+		- test/configs/config.php
+		- test/configs/config.master.php
+		- test/configs/config.other.php
+	# excludePaths:
+		# ignore composer
+		# - vendor
+	# ignore errores with
+	ignoreErrors:
+		#- # this error is ignore because of the PHP 8.0 to 8.1 change for pg_*, only for 8.0 or lower
+			# message: "#^Parameter \\#1 \\$(result|connection) of function pg_\\w+ expects resource(\\|null)?, object\\|resource(\\|bool)? given\\.$#"
+			# path: %currentWorkingDirectory%/www/lib/CoreLibs/DB/SQL/PgSQL.php
+		- # this is for 8.1 or newer
+			message: "#^Parameter \\#1 \\$(result|connection) of function pg_\\w+ expects PgSql\\\\(Result|Connection(\\|string)?(\\|null)?), object\\|resource given\\.$#"
+			path: %currentWorkingDirectory%/src/DB/SQL/PgSQL.php
+		# this is ignored for now
+		# - '#Expression in empty\(\) is always falsy.#'
+		# -
+		# 	message: '#Reflection error: [a-zA-Z0-9\\_]+ not found.#'
+		# 	path: www/includes/edit_base.php
+		#- 'error regex'
+		#-
+		#	message: 'error regex'
+		#	path: %currentWorkingDirectory%/www/some/*
+		#	paths:
+		#		- ...
+		#		- ...

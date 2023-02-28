@@ -4,20 +4,22 @@ This is just the lib/CoreLibs folder in a composer package.
 
 For local install only
 
-## Setup
+**Note**: for following classes the `egrajp/smarty-extended` has to be installed
 
-In the composer.json file add the following
+- Template\SmartyExtended
+- Admin\EditBase
 
-```json
-{
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://git.egplusww.jp/Composer/CoreLibs-Composer-All"
-        }
-    ],
-    "require": {
-        "egrajp/corelibs-composer-all": "@dev"
-    }
-}
+## Setup from central composer
+
+Setup from gitea internal servers
+
+```sh
+composer config repositories.git.egplusww.jp.Composer composer https://git.egplusww.jp/api/packages/Composer/composer
 ```
+
+Alternative setup composer local zip file repot:
+`composer config repositories.composer.egplusww.jp composer http://composer.egplusww.jp`
+
+## Install package
+
+`composer require egrajp/corelibs-composer-all:^7.11`
