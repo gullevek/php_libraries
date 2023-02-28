@@ -413,7 +413,7 @@ class Logging
 	 * @param  string $name what variable to return
 	 * @return mixed        can be anything, bool, string, int, array
 	 */
-	public function getSetting(string $name) //:mixed DOES not work with PHP 7.4
+	public function getSetting(string $name): mixed
 	{
 		// for debug purpose only
 		return $this->{$name};
@@ -550,9 +550,9 @@ class Logging
 	 * @param  string      $flag  on/off
 	 * @param  string|null $level if not null then check if this array entry is set
 	 *                            else return false
-	 * @return bool|array<mixed>  if $level is null, return array, else boolean true/false
+	 * @return array<mixed>|bool  if $level is null, return array, else boolean true/false
 	 */
-	public function getLogLevel(string $type, string $flag, ?string $level = null)
+	public function getLogLevel(string $type, string $flag, ?string $level = null): array|bool
 	{
 		// abort if not valid type
 		if (!in_array($type, ['debug', 'echo', 'print'])) {

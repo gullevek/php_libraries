@@ -12,7 +12,7 @@
 *   2013/10/10, prepare/excute were added, including auto RETURNING primary key if
 *   possible for any INSERT query in exec or prepare/execute, better debugging and
 *   data dumping. Proper string escape wrapper, special db exec writer for complex
-*   array inserts in auto calls. boolean converter from postresql to php
+*   array inserts in auto calls. bool converter from postresql to php
 *
 *   2003/12/08, one major change: renamed db_exec_ext to db_return, as it has not
 *   much in common with the normal db_exec wrapper, as it was written only for
@@ -168,7 +168,7 @@
 *     - all HTML from the query data (color codes, etc) via flag to debug call
 *
 * HISTORY:
-* 2008/10/25 (cs) add db_boolean to fix the postgres to php boolean var problem
+* 2008/10/25 (cs) add db_boolean to fix the postgres to php bool var problem
 *                 (TODO: implement this in any select return)
 * 2008/07/03 (cs) add db_write_data function, original written for inventory tool "invSQLWriteData"
 * 2008/04/16 (cs) add db_escape_string function for correct string escape
@@ -288,7 +288,7 @@ class IO
 	private $query; // the query string at the moment
 	// only inside
 	// basic vars
-	/** @var object|resource|bool|int|null */ // replace object with PgSql\Connection|
+	/** @var \PgSql\Connection|false|null */ // replace object with PgSql\Connection|
 	private $dbh; // the dbh handler, if disconnected by command is null, bool:false/int:-1 on error,
 	/** @var bool */
 	private $db_debug = false; // DB_DEBUG ... (if set prints out debug msgs)
@@ -315,7 +315,7 @@ class IO
 	/** @var array<mixed,mixed> */
 	private $cursor_ext; // hash of hashes
 	// per query vars
-	/** @var object|resource|bool */ // replace object with PgSql\Result
+	/** @var \PgSql\Result|false */ // replace object with PgSql\Result
 	private $cursor; // actual cursor (DBH)
 	/** @var int */
 	private $num_rows; // how many rows have been found
@@ -495,15 +495,15 @@ class IO
 	 * OTOH this whole class is so PgSQL specific
 	 * that non PgSQL doesn't make much sense anymore
 	 *
-	 * @return \CoreLibs\DB\SQL\PgSQL|null DB functions object or false on error
+	 * @return SQL\PgSQL|null DB functions object or false on error
 	 */
-	private function __loadDBFunctions()
+	private function __loadDBFunctions(): SQL\PgSQL|null
 	{
 		$db_functions = null;
 		switch ($this->db_type) {
 			// list of valid DB function objects
 			case 'pgsql':
-				$db_functions = new \CoreLibs\DB\SQL\PgSQL();
+				$db_functions = new SQL\PgSQL();
 				break;
 			// if non set or none matching abort
 			default:
@@ -566,7 +566,7 @@ class IO
 	 */
 	private function __closeDB(): void
 	{
-		if (!empty($this->dbh) && $this->dbh !== false) {
+		if (!empty($this->dbh)) {
 			$this->db_functions->__dbClose();
 			$this->dbh = null;
 		}
@@ -632,9 +632,6 @@ class IO
 	private function __printArray(array $array): string
 	{
 		$string = '';
-		if (!is_array($array)) {
-			$array = [];
-		}
 		foreach ($array as $key => $value) {
 			$string .= $this->nbsp . '<b>' . $key . '</b> => ';
 			if (is_array($value)) {
@@ -701,7 +698,7 @@ class IO
 
 	/**
 	 * Check if there is a cursor and write this cursors error info
-	 * @param object|resource|bool $cursor current cursor for pg_result_error,
+	 * @param \PgSql\Result|false $cursor current cursor for pg_result_error,
 	 *                             pg_last_error too, but pg_result_error
 	 *                             is more accurate (PgSql\Result)
 	 * @return array<mixed> Pos 0: if we could get the method where it was called
@@ -709,7 +706,7 @@ class IO
 	 *                      Pos 1: if we have the pg_error_string from last error
 	 *                             if nothing then empty string
 	 */
-	private function __dbErrorPreprocessor($cursor = false): array
+	private function __dbErrorPreprocessor(\PgSql\Result|false $cursor = false): array
 	{
 		$pg_error_string = '';
 		// 1 = self/__dbErrorPreprocessor, 2 = __dbError, __dbWarning,
@@ -774,12 +771,15 @@ class IO
 	/**
 	 * write an error
 	 * @param integer $error_id            Any Error ID, used in debug message string
-	 * @param object|resource|bool $cursor Optional cursor, passed on to preprocessor
+	 * @param \PgSql\Result|false $cursor Optional cursor, passed on to preprocessor
 	 * @param string $msg                  optional message added to debug
 	 * @return void
 	 */
-	protected function __dbError(int $error_id, $cursor = false, string $msg = ''): void
-	{
+	protected function __dbError(
+		int $error_id,
+		\PgSql\Result|false $cursor = false,
+		string $msg = ''
+	): void {
 		$error_id = (string)$error_id;
 		[$where_called, $pg_error_string] = $this->__dbErrorPreprocessor($cursor);
 		// write error msg ...
@@ -798,12 +798,15 @@ class IO
 	/**
 	 * write a warning
 	 * @param integer $warning_id          Integer warning id added to debug
-	 * @param object|resource|bool $cursor Optional cursor, passed on to preprocessor
+	 * @param \PgSql\Result|false $cursor Optional cursor, passed on to preprocessor
 	 * @param string $msg                  optional message added to debug
 	 * @return void
 	 */
-	protected function __dbWarning(int $warning_id, $cursor = false, string $msg = ''): void
-	{
+	protected function __dbWarning(
+		int $warning_id,
+		\PgSql\Result|false $cursor = false,
+		string $msg = ''
+	): void {
 		$warning_id = (string)$warning_id;
 		[$where_called, $pg_error_string] = $this->__dbErrorPreprocessor($cursor);
 		$this->__dbDebug(
@@ -821,18 +824,18 @@ class IO
 	/**
 	 * if there is the 'to_encoding' var set,
 	 * and the field is in the wrong encoding converts it to the target
-	 * @param  array<mixed>|bool|null $row Array from fetch_row
-	 * @return array<mixed>|bool           Convert fetch_row array, or false
+	 * @param  array<mixed>|false $row Array from fetch_row
+	 * @return array<mixed>|false      Convert fetch_row array, or false
 	 */
-	private function __dbConvertEncoding($row)
+	private function __dbConvertEncoding(array|false $row): array|false
 	{
-		if ($row === null) {
+		if (is_bool($row)) {
 			return false;
 		}
 		// only do if array, else pass through row (can be false)
 		if (
 			!is_array($row) ||
-			empty($this->to_encoding)// || empty($this->db_encoding)
+			empty($this->to_encoding)
 		) {
 			return $row;
 		}
@@ -914,7 +917,7 @@ class IO
 	 * check if there is another query running, or do we hang after a
 	 * PHP error
 	 * @param  integer $timeout_seconds For complex timeout waits, default 3 seconds
-	 * @return boolean                  True for connection OK, else false
+	 * @return bool                  True for connection OK, else false
 	 */
 	private function __dbCheckConnectionOk(int $timeout_seconds = 3): bool
 	{
@@ -932,7 +935,7 @@ class IO
 	 * dbReturn
 	 * Read data from previous written data cache
 	 * @param  string  $query_hash The hash for the current query
-	 * @param  boolean $assoc_only Only return assoc value (key named)
+	 * @param  bool $assoc_only Only return assoc value (key named)
 	 * @return array<mixed>        Current position query data from cache
 	 */
 	private function __dbReturnCacheRead(string $query_hash, bool $assoc_only): array
@@ -983,10 +986,11 @@ class IO
 	 * - sets internal hash for query
 	 * - checks multiple call count
 	 * @param  string      $query   query string
-	 * @param  string      $pk_name primary key [if set to NULL no returning will be added]
-	 * @return string|bool          queryt hash OR boolean false on error
+	 * @param  string      $pk_name primary key
+	 *                              [if set to NULL no returning will be added]
+	 * @return string|false         queryt hash OR bool false on error
 	 */
-	private function __dbPrepareExec(string $query, string $pk_name)
+	private function __dbPrepareExec(string $query, string $pk_name): string|false
 	{
 		// reset current cursor before exec
 		$this->cursor = false;
@@ -1152,10 +1156,10 @@ class IO
 	 * insert_id_ext [DEPRECATED, all in insert_id_arr]
 	 * - holds all returning as array
 	 * TODO: Only use insert_id_arr and use functions to get ok array or single
-	 * @param boolean         $returning_id
+	 * @param bool         $returning_id
 	 * @param string          $query
 	 * @param string|null     $pk_name
-	 * @param object|resource|bool $cursor       (PgSql\Result)
+	 * @param \PgSql\Result|false $cursor       (PgSql\Result)
 	 * @param string|null     $stm_name     If not null, is dbExecutre run
 	 * @return void
 	 */
@@ -1163,7 +1167,7 @@ class IO
 		bool $returning_id,
 		string $query,
 		?string $pk_name,
-		$cursor,
+		\PgSql\Result|false $cursor,
 		?string $stm_name = null
 	): void {
 		// $this->log->debug('DB SET INSERT ID', 'Ret: ' . ($returning_id ? 'Y' : 'N')
@@ -1271,10 +1275,10 @@ class IO
 
 	/**
 	 * get certain settings like username, db name
-	 * @param  string $name what setting to query
-	 * @return mixed        setting value, if not allowed name return false
+	 * @param  string          $name what setting to query
+	 * @return int|string|bool       setting value, if not allowed name return false
 	 */
-	public function dbGetSetting(string $name)
+	public function dbGetSetting(string $name): int|string|bool
 	{
 		$setting = '';
 		switch ($name) {
@@ -1373,7 +1377,7 @@ class IO
 	 * extended version info, can access all additional information data
 	 * @param  string  $parameter Array parameter name, if not valid returns
 	 *                            empty string
-	 * @param  boolean $strip     Strip extended server info string, default true
+	 * @param  bool $strip     Strip extended server info string, default true
 	 *                            eg nn.n (other info) will only return nn.n
 	 * @return string             Parameter value
 	 */
@@ -1392,14 +1396,15 @@ class IO
 	}
 
 	/**
-	 * returns boolean true or false if the string matches the database version
+	 * returns bool true or false if the string matches the database version
 	 * @param  string $compare string to match in type =X.Y, >X.Y, <X.Y, <=X.Y, >=X.Y
 	 * @return bool            true for ok, false on not ok
 	 */
 	public function dbCompareVersion(string $compare): bool
 	{
 		$matches = [];
-		// compare has =, >, < prefix, and gets stripped, if the rest is not X.Y format then error
+		// compare has =, >, < prefix, and gets stripped
+		// if the rest is not X.Y format then error
 		preg_match("/^([<>=]{1,})(\d{1,})\.(\d{1,})/", $compare, $matches);
 		$compare = $matches[1];
 		$to_master = $matches[2];
@@ -1464,7 +1469,7 @@ class IO
 	 *                       else current cursor
 	 * @return string        Formated string with all the data in the array
 	 */
-	public function dbDumpData($query = ''): string
+	public function dbDumpData(string $query = ''): string
 	{
 		// set start array
 		if ($query) {
@@ -1490,7 +1495,7 @@ class IO
 	 * @param  string|int|float|bool $string string to escape
 	 * @return string                        escaped string
 	 */
-	public function dbEscapeString($string): string
+	public function dbEscapeString(string|int|float|bool $string): string
 	{
 		return $this->db_functions->__dbEscapeString($string);
 	}
@@ -1501,7 +1506,7 @@ class IO
 	 * @param  string|int|float|bool $string string to escape
 	 * @return string                        escaped string
 	 */
-	public function dbEscapeLiteral($string): string
+	public function dbEscapeLiteral(string|int|float|bool $string): string
 	{
 		return $this->db_functions->__dbEscapeLiteral($string);
 	}
@@ -1538,11 +1543,11 @@ class IO
 
 	/**
 	 * clear up any data for valid DB insert
-	 * @param  int|float|string|null $value to escape data
-	 * @param  string           $kbn   escape trigger type
-	 * @return string                  escaped value
+	 * @param  int|float|string|bool|null $value to escape data
+	 * @param  string                     $kbn   escape trigger type
+	 * @return string                            escaped value
 	 */
-	public function dbSqlEscape($value, string $kbn = '')
+	public function dbSqlEscape(int|float|string|bool|null $value, string $kbn = ''): string
 	{
 		switch ($kbn) {
 			case 'i':
@@ -1551,24 +1556,35 @@ class IO
 			case 'f':
 				$value = empty($value) ? 'NULL' : floatval($value);
 				break;
+			// string (null is null, else is string)
 			case 't':
 				$value = $value === null ?
 					'NULL' :
 					"'" . $this->dbEscapeString($value) . "'";
 				break;
+			// string litereal (null is null, else is stirng)
 			case 'tl':
 				$value = $value === null ?
 					'NULL' :
 					$this->dbEscapeLiteral($value);
 				break;
-			// what is d?
+			// escape string, set empty to null
 			case 'd':
-				$value = empty($value) ? 'NULL' : "'" . $this->dbEscapeString($value) . "'";
+				$value = empty($value) ?
+					'NULL' :
+					"'" . $this->dbEscapeString($value) . "'";
+				break;
+			// escape string literal, set empty to null
+			case 'dl':
+				$value = empty($value) ?
+					'NULL' :
+					$this->dbEscapeLiteral($value);
 				break;
 			// bytea data
 			case 'by':
 				$value = empty($value) ? 'NULL' : $this->dbEscapeBytea((string)$value);
 				break;
+			// bool
 			case 'b':
 				if (is_float($value)) {
 					$value = (int)$value;
@@ -1577,6 +1593,7 @@ class IO
 					'NULL' :
 					"'" . $this->dbBoolean($value, true) . "'";
 				break;
+			// int, but with empty value is 0
 			case 'i2':
 				$value = empty($value) ? 0 : intval($value);
 				break;
@@ -1590,14 +1607,14 @@ class IO
 
 	/**
 	 * if the input is a single char 't' or 'f
-	 * it will return the boolean value instead
+	 * it will return the bool value instead
 	 * also converts smallint 1/0 to true false
 	 * @param  string|bool|int $string 't' / 'f' or any string, or bool true/false
-	 * @param  boolean         $rev    do reverse (bool to string)
-	 * @return bool|string             correct php boolean true/false
+	 * @param  bool            $rev    do reverse (bool to string)
+	 * @return bool|string             correct php bool true/false
 	 *                                 or postgresql 't'/'f'
 	 */
-	public function dbBoolean($string, $rev = false)
+	public function dbBoolean(string|bool|int $string, bool $rev = false): bool|string
 	{
 		if (!$rev) {
 			if ($string == 't' || $string == 'true') {
@@ -1696,9 +1713,9 @@ class IO
 	 * returns an array of the table with columns and values. FALSE on no table found
 	 * @param  string     $table  table name
 	 * @param  string     $schema optional schema name
-	 * @return array<mixed>|bool  array of table data, false on error (table not found)
+	 * @return array<mixed>|false array of table data, false on error (table not found)
 	 */
-	public function dbShowTableMetaData(string $table, string $schema = '')
+	public function dbShowTableMetaData(string $table, string $schema = ''): array|false
 	{
 		$this->__dbErrorReset();
 		$table = (!empty($schema) ? $schema . '.' : '') . $table;
@@ -1736,14 +1753,14 @@ class IO
 	 *                            NO_CACHE/3: don't write cache
 	 * @param  bool   $assoc_only True to only returned the named and not
 	 *                            index position ones
-	 * @return array<mixed>|bool  return array data or false on error/end
+	 * @return array<mixed>|false return array data or false on error/end
 	 * @#suppress PhanTypeMismatchDimFetch
 	 */
 	public function dbReturn(
 		string $query,
 		int $cache = self::USE_CACHE,
 		bool $assoc_only = false
-	) {
+	): array|false {
 		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
@@ -1754,7 +1771,7 @@ class IO
 		// pre declare array
 		if (!isset($this->cursor_ext[$query_hash])) {
 			$this->cursor_ext[$query_hash] = [
-				// cursor, null: unset, 1: finished read/cache, 2: object/resource reading
+				// cursor, null: unset, 1: finished read/cache, 2: object reading
 				'cursor' => null,
 				// cached data
 				'data' => [],
@@ -2000,9 +2017,9 @@ class IO
 	 *                         if pk name is table name and _id, pk_name
 	 *                         is not needed to be set
 	 *                         if NULL is given here, no RETURNING will be auto added
-	 * @return object|resource|bool    cursor for this query or false on error (PgSql\Result)
+	 * @return \PgSql\Result|false    cursor for this query or false on error
 	 */
-	public function dbExec(string $query = '', string $pk_name = '')
+	public function dbExec(string $query = '', string $pk_name = ''): \PgSql\Result|false
 	{
 		$this->__dbErrorReset();
 		// prepare and check if we can actually run it
@@ -2031,7 +2048,7 @@ class IO
 
 	/**
 	 * executes a cursor and returns the data, if no more data 0 will be returned
-	 * @param  object|resource|bool $cursor the cursor from db_exec or
+	 * @param  \PgSql\Result|false $cursor the cursor from db_exec or
 	 *                                       pg_query/pg_exec/mysql_query
 	 *                                       if not set will use internal cursor,
 	 *                                       if not found, stops with 0 (error)
@@ -2039,9 +2056,9 @@ class IO
 	 * @param  bool             $assoc_only  false is default,
 	 *                                       if true only named rows,
 	 *                                       not numbered index rows
-	 * @return array<mixed>|bool             row array or false on error
+	 * @return array<mixed>|false            row array or false on error
 	 */
-	public function dbFetchArray($cursor = false, bool $assoc_only = false)
+	public function dbFetchArray(\PgSql\Result|false $cursor = false, bool $assoc_only = false): array|false
 	{
 		$this->__dbErrorReset();
 		// set last available cursor if none set or false
@@ -2064,9 +2081,9 @@ class IO
 	 * returns the FIRST row of the given query
 	 * @param  string $query      the query to be executed
 	 * @param  bool   $assoc_only if true, only return assoc entry (default false)
-	 * @return array<mixed>|bool  row array or false on error
+	 * @return array<mixed>|false row array or false on error
 	 */
-	public function dbReturnRow(string $query, bool $assoc_only = false)
+	public function dbReturnRow(string $query, bool $assoc_only = false): array|false
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
@@ -2091,9 +2108,9 @@ class IO
 	 * createds an array of hashes of the query (all data)
 	 * @param  string $query      the query to be executed
 	 * @param  bool   $assoc_only if true, only name ref are returned (default true)
-	 * @return array<mixed>|bool  array of hashes (row -> fields), false on error
+	 * @return array<mixed>|false array of hashes (row -> fields), false on error
 	 */
-	public function dbReturnArray(string $query, bool $assoc_only = true)
+	public function dbReturnArray(string $query, bool $assoc_only = true): array|false
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
@@ -2151,41 +2168,44 @@ class IO
 	 * returns the full array for cursor ext
 	 * or cursor for one query
 	 * or detail data fonr one query cursor data
-	 * @param  string|null $query Query string, if not null convert to hash
-	 *                            and return set cursor ext for only this
-	 *                            if not found or null return null
-	 * @return array<mixed>|string|int|resource|object|null
-	 *                            Cursor Extended array full if no parameter
-	 *                            Key is hash string from query run
-	 *                            Or cursor data entry if query field is set
-	 *                            If nothing found return null
+	 * @param  string|null $query       Query string, if not null convert to hash
+	 *                                  and return set cursor ext for only this
+	 *                                  if not found or null return null
+	 * @param  string      $query_field [=''] optional query field to get
+	 * @return array<mixed>|string|int|\PgSql\Result|null
+	 *                                  Cursor Extended array full if no parameter
+	 *                                  Key is hash string from query run
+	 *                                  Or cursor data entry if query field is set
+	 *                                  If nothing found return null
 	 */
-	public function dbGetCursorExt($query = null, string $query_field = '')
-	{
-		if ($query !== null) {
-			$query_hash = $this->dbGetQueryHash($query);
-			if (
-				is_array($this->cursor_ext) &&
-				isset($this->cursor_ext[$query_hash])
-			) {
-				if (empty($query_field)) {
-					return $this->cursor_ext[$query_hash];
-				} else {
-					return $this->cursor_ext[$query_hash][$query_field] ?? null;
-				}
-			} else {
-				return null;
-			}
+	public function dbGetCursorExt(
+		$query = null,
+		string $query_field = ''
+	): array|string|int|\PgSql\Result|null {
+		if ($query === null) {
+			return $this->cursor_ext;
 		}
-		return $this->cursor_ext;
+		$query_hash = $this->dbGetQueryHash($query);
+		if (
+			is_array($this->cursor_ext) &&
+			isset($this->cursor_ext[$query_hash])
+		) {
+			if (empty($query_field)) {
+				return $this->cursor_ext[$query_hash];
+			} else {
+				return $this->cursor_ext[$query_hash][$query_field] ?? null;
+			}
+		} else {
+			return null;
+		}
 	}
 
 	/**
 	 * returns the current position the read out
 	 * @param  string   $query query to find in cursor_ext
-	 * @return int|bool        query position (row pos), false on error
+	 * @return int|false       query position (row pos), false on error
 	 */
-	public function dbGetCursorPos(string $query)
+	public function dbGetCursorPos(string $query): int|false
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
@@ -2199,9 +2219,9 @@ class IO
 	/**
 	 * returns the number of rows for the current select query
 	 * @param  string   $query query to find in cursor_ext
-	 * @return int|bool        query position (row pos), false on error
+	 * @return int|false       query position (row pos), false on error
 	 */
-	public function dbGetCursorNumRows(string $query)
+	public function dbGetCursorNumRows(string $query): int|false
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
@@ -2253,11 +2273,14 @@ class IO
 	 * @param  string        $stm_name statement name
 	 * @param  string        $query    queryt string to run
 	 * @param  string        $pk_name  optional primary key
-	 * @return bool|object|resource    false on error, true on warning or
-	 *                                 result on full ok (PgSql\Result)
+	 * @return \PgSql\Result|bool      false on error, true on warning or
+	 *                                 result on full ok
 	 */
-	public function dbPrepare(string $stm_name, string $query, string $pk_name = '')
-	{
+	public function dbPrepare(
+		string $stm_name,
+		string $query,
+		string $pk_name = ''
+	): \PgSql\Result|bool {
 		$this->__dbErrorReset();
 		$matches = [];
 		if (!$query) {
@@ -2361,9 +2384,9 @@ class IO
 	 * runs a prepare query
 	 * @param  string       $stm_name statement name for the query to run
 	 * @param  array<mixed> $data     data to run for this query, empty array for none
-	 * @return mixed                  false on error, or result on OK
+	 * @return \PgSql\Result|false     false on error, or result on OK
 	 */
-	public function dbExecute(string $stm_name, array $data = [])
+	public function dbExecute(string $stm_name, array $data = []): \PgSql\Result|false
 	{
 		$this->__dbErrorReset();
 		// if no DB Handler drop out
@@ -2483,11 +2506,10 @@ class IO
 	/**
 	 * checks a previous async query and returns data if finished
 	 * NEEDS : dbExecAsync
-	 * @return bool|object|resource cursor resource if the query is still running,
-	 *                              false if an error occured or cursor of that query
-	 *                              (PgSql\Result)
+	 * @return \PgSql\Result|bool cursor resource if the query is still running,
+	 *                            false if an error occured or cursor of that query
 	 */
-	public function dbCheckAsync()
+	public function dbCheckAsync(): \PgSql\Result|bool
 	{
 		$this->__dbErrorReset();
 		// if there is actually a async query there
@@ -2547,7 +2569,7 @@ class IO
 	 * @param  int          $primary_key     id key to decide if we write insert or update
 	 * @param  string       $table           name for the target table
 	 * @param  array<mixed> $data            data array to override _POST data
-	 * @return int|bool                      primary key
+	 * @return int|false                     primary key
 	 */
 	public function dbWriteData(
 		array $write_array,
@@ -2555,13 +2577,7 @@ class IO
 		int $primary_key,
 		string $table,
 		array $data = []
-	) {
-		if (!is_array($write_array)) {
-			$write_array = [];
-		}
-		if (!is_array($not_write_array)) {
-			$not_write_array = [];
-		}
+	): int|false {
 		$not_write_update_array = [];
 		return $this->dbWriteDataExt(
 			$write_array,
@@ -2586,16 +2602,16 @@ class IO
 	 *                                                         to write during update (optional)
 	 * @param  array<mixed>            $data            optional array with data
 	 *                                                  if not _POST vars are used
-	 * @return int|bool                                 primary key
+	 * @return int|false                                primary key
 	 */
 	public function dbWriteDataExt(
 		array $write_array,
-		$primary_key,
+		int|string|array $primary_key,
 		string $table,
 		array $not_write_array = [],
 		array $not_write_update_array = [],
 		array $data = []
-	) {
+	): int|false {
 		if (!is_array($primary_key)) {
 			$primary_key = [
 				'row' => $table . '_id',
@@ -2711,7 +2727,10 @@ class IO
 			$primary_key['value'] = $this->dbGetInsertPK();
 		}
 		// if there is not priamry key value field return false
-		return $primary_key['value'] ?? false;
+		if (!is_numeric($primary_key['value'])) {
+			return false;
+		}
+		return (int)$primary_key['value'];
 	}
 
 	// ***************************
@@ -2724,7 +2743,7 @@ class IO
 	 * @param  bool|null $debug true/false or null for just getting current set
 	 * @return bool             Current debug flag as set
 	 */
-	public function dbSetDebug($debug = null): bool
+	public function dbSetDebug(?bool $debug = null): bool
 	{
 		if ($debug !== null) {
 			$this->db_debug = $debug;
@@ -2805,7 +2824,7 @@ class IO
 	 * @return bool              False on failure to find schema value or set schema,
 	 *                           True on successful set
 	 */
-	public function dbSetSchema(string $db_schema)
+	public function dbSetSchema(string $db_schema): bool
 	{
 		$this->__dbErrorReset();
 		if (empty($db_schema)) {
@@ -2934,9 +2953,9 @@ class IO
 
 	/**
 	 * Return current database handler
-	 * @return object|resource|bool|int|null
+	 * @return \PgSql\Connection|false|null
 	 */
-	public function dbGetDbh()
+	public function dbGetDbh(): \PgSql\Connection|false|null
 	{
 		return $this->dbh;
 	}
@@ -2992,7 +3011,7 @@ class IO
 	 *
 	 * @return array<mixed>|string|int|null Current insert query primary key
 	 */
-	public function dbGetInsertPK()
+	public function dbGetInsertPK(): array|string|int|null
 	{
 		if (empty($this->insert_id_pk_name)) {
 			return null;
@@ -3016,7 +3035,7 @@ class IO
 	 * @param  integer|null $pos
 	 * @return array<mixed>|string|int|null
 	 */
-	public function dbGetReturningExt(?string $key = null, ?int $pos = null)
+	public function dbGetReturningExt(?string $key = null, ?int $pos = null): array|string|int|null
 	{
 		// return as is if key is null
 		if ($key === null) {
@@ -3110,7 +3129,7 @@ class IO
 	 *                          Not ethat returnin_id also can return false
 	 *                          but will not set an error entry
 	 */
-	public function dbGetPrepareCursorValue(string $stm_name, string $key)
+	public function dbGetPrepareCursorValue(string $stm_name, string $key): null|string|int|bool
 	{
 		// if no statement name
 		if (empty($stm_name)) {
@@ -3159,8 +3178,8 @@ class IO
 	 * Sets error number that was last
 	 * So we always have the last error number stored even if a new
 	 * one is created
-	 * @param  boolean $transform Set to true to transform into id + error message
-	 * @return string             Last error number as string or error message
+	 * @param  bool   $transform Set to true to transform into id + error message
+	 * @return string            Last error number as string or error message
 	 */
 	public function dbGetLastError(bool $transform = false): string
 	{
@@ -3180,10 +3199,10 @@ class IO
 	/**
 	 * Sets warning number that was last
 	 * So we always have the last warning number stored even if a new one is created
-	 * @param  boolean $transform Set to true to transform into id + warning message
-	 * @return string             Last Warning number as string or warning message
+	 * @param  bool   $transform Set to true to transform into id + warning message
+	 * @return string            Last Warning number as string or warning message
 	 */
-	public function dbGetLastWarning(bool $transform = false)
+	public function dbGetLastWarning(bool $transform = false): string
 	{
 		// if no warning, return empty
 		if (empty($this->warning_id)) {
@@ -3221,7 +3240,7 @@ class IO
 	 *                                           Null for error
 	 * @deprecated Use ->dbGetInsertPK();
 	 */
-	public function dbGetReturning()
+	public function dbGetReturning(): array|string|int|bool|null
 	{
 		return $this->dbGetInsertPK();
 	}
@@ -3271,7 +3290,7 @@ class IO
 	 * @return array<mixed>|string|int|bool|null      See above
 	 * @deprecated use getReturningExt($key = null) instead
 	 */
-	public function getInsertReturn($key = null)
+	public function getInsertReturn(?string $key = null): array|string|int|bool|null
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use getReturningExt($key = null)', E_USER_DEPRECATED);
 		return $this->dbGetReturningExt($key);
@@ -3282,7 +3301,7 @@ class IO
 	 * @return array<mixed>|string|int|bool|null [DEPRECATED]
 	 * @deprecated use dbGetReturning() instead
 	 */
-	public function getReturning()
+	public function getReturning(): array|string|int|bool|null
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetReturning()', E_USER_DEPRECATED);
 		return $this->dbGetInsertPK();
@@ -3293,7 +3312,7 @@ class IO
 	 * @return array<mixed>|string|int|bool|null [DEPRECATED]
 	 * @deprecated use dbGetInsertPK() instead
 	 */
-	public function getInsertPK()
+	public function getInsertPK(): array|string|int|bool|null
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetInsertPK()', E_USER_DEPRECATED);
 		return $this->dbGetInsertPK();
@@ -3305,7 +3324,7 @@ class IO
 	 * @return array<mixed>|string|bool|int|null [DEPRECATED]
 	 * @deprecated use dbGetReturningExt($key = null) instead
 	 */
-	public function getReturningExt($key = null)
+	public function getReturningExt(?string $key = null): array|string|int|bool|null
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetReturningExt($key = null)', E_USER_DEPRECATED);
 		return $this->dbGetReturningExt($key);
@@ -3314,10 +3333,10 @@ class IO
 	/**
 	 * DEPRECATED: getCursorExt
 	 * @param  string|null $q [DEPRECATED]
-	 * @return array<mixed>|string|int|resource|object|null [DEPRECATED]
+	 * @return array<mixed>|string|int|\PgSql\Result|null [DEPRECATED]
 	 * @deprecated use dbGetCursorExt($q = null) instead
 	 */
-	public function getCursorExt($q = null)
+	public function getCursorExt(?string $q = null): array|string|int|\PgSql\Result|null
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetCursorExt($q = null)', E_USER_DEPRECATED);
 		return $this->dbGetCursorExt($q);
@@ -3328,7 +3347,7 @@ class IO
 	 * @return int|null [DEPRECATED]
 	 * @deprecated use dbGetNumRows() instead
 	 */
-	public function getNumRows()
+	public function getNumRows(): ?int
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetNumRows()', E_USER_DEPRECATED);
 		return $this->dbGetNumRows();

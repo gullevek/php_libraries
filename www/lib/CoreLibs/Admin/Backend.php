@@ -194,7 +194,7 @@ class Backend
 	 */
 	public function adbEditLog(
 		string $event = '',
-		$data = '',
+		string|array $data = '',
 		string $write_type = 'STRING'
 	): void {
 		$data_binary = '';
@@ -262,7 +262,7 @@ class Backend
 	 * @param string|int $menu_show_flag
 	 * @return string|int
 	 */
-	public function adbSetMenuShowFlag($menu_show_flag)
+	public function adbSetMenuShowFlag(string|int $menu_show_flag): string|int
 	{
 		// must be string or int
 		$this->menu_show_flag = $menu_show_flag;
@@ -274,7 +274,7 @@ class Backend
 	 *
 	 * @return string|int
 	 */
-	public function adbGetMenuShowFlag()
+	public function adbGetMenuShowFlag(): string|int
 	{
 		return $this->menu_show_flag;
 	}
@@ -437,7 +437,7 @@ class Backend
 	 * @return array<mixed>              associative array
 	 * @deprecated \CoreLibs\Combined\ArrayHandler::genAssocArray()
 	 */
-	public function adbAssocArray(array $db_array, $key, $value): array
+	public function adbAssocArray(array $db_array, string|int|bool $key, string|int|bool $value): array
 	{
 		trigger_error(
 			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Combined\ArrayHandler::genAssocArray',
@@ -453,7 +453,7 @@ class Backend
 	 * @return string                   formatted string
 	 * @deprecated \CoreLibs\Convert\Byte::humanReadableByteFormat()
 	 */
-	public function adbByteStringFormat($number): string
+	public function adbByteStringFormat(string|int|float $number): string
 	{
 		trigger_error(
 			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Convert\Byte::humanReadableByteFormat()',
@@ -482,7 +482,7 @@ class Backend
 		string $dummy = '',
 		string $path = '',
 		string $cache = ''
-	) {
+	): string|bool {
 		trigger_error(
 			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Output\Image::createThumbnail()',
 			E_USER_DEPRECATED
@@ -569,28 +569,28 @@ class Backend
 	 * Basic class holds exact the same, except the Year/Month/Day/etc strings
 	 * are translated in this call
 	 *
-	 * @param  int    $year          year YYYY
-	 * @param  int    $month         month m
-	 * @param  int    $day           day d
-	 * @param  int    $hour          hour H
-	 * @param  int    $min           min i
-	 * @param  string $suffix        additional info printed after the date time
-	 *                               variable in the drop down
-	 *                               also used for ID in the on change JS call
-	 * @param  int    $min_steps     default is 1 (minute), can set to anything,
-	 *                               is used as sum up from 0
-	 * @param  bool   $name_pos_back default false, if set to true,
-	 *                               the name will be printend
-	 *                               after the drop down and not before the drop down
-	 * @return string                HTML formated strings for drop down lists
-	 *                               of date and time
+	 * @param  int|string $year          year YYYY
+	 * @param  int|string $month         month m
+	 * @param  int|string $day           day d
+	 * @param  int|string $hour          hour H
+	 * @param  int|string $min           min i
+	 * @param  string     $suffix        additional info printed after the date time
+	 *                                   variable in the drop down
+	 *                                   also used for ID in the on change JS call
+	 * @param  int        $min_steps     default is 1 (minute), can set to anything,
+	 *                                   is used as sum up from 0
+	 * @param  bool       $name_pos_back default false, if set to true,
+	 *                                   the name will be printend
+	 *                                   after the drop down and not before the drop down
+	 * @return string                    HTML formated strings for drop down lists
+	 *                                   of date and time
 	 */
 	public function adbPrintDateTime(
-		$year,
-		$month,
-		$day,
-		$hour,
-		$min,
+		int|string $year,
+		int|string $month,
+		int|string $day,
+		int|string $hour,
+		int|string $min,
 		string $suffix = '',
 		int $min_steps = 1,
 		bool $name_pos_back = false

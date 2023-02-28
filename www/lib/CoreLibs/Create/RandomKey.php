@@ -32,7 +32,7 @@ class RandomKey
 	 *
 	 * @return void has no return
 	 */
-	private static function initRandomKeyData()
+	private static function initRandomKeyData(): void
 	{
 		// random key generation base string
 		self::$key_range = join('', array_merge(
@@ -52,7 +52,6 @@ class RandomKey
 	private static function validateRandomKeyLenght(int $key_length): bool
 	{
 		if (
-			is_numeric($key_length) &&
 			$key_length > 0 &&
 			$key_length <= self::$max_key_length
 		) {

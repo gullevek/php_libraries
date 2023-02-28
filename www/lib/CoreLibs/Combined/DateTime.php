@@ -74,7 +74,7 @@ class DateTime
 	 * @return string                    formated date+time in Y-M-D h:m:s ms
 	 */
 	public static function dateStringFormat(
-		$timestamp,
+		int|float $timestamp,
 		bool $show_micro = false,
 		bool $micro_as_float = false
 	): string {
@@ -100,8 +100,10 @@ class DateTime
 	 * @param  bool             $show_micro show micro seconds, default true
 	 * @return string                       interval formatted string or string as is
 	 */
-	public static function timeStringFormat($timestamp, bool $show_micro = true): string
-	{
+	public static function timeStringFormat(
+		string|int|float $timestamp,
+		bool $show_micro = true
+	): string {
 		// check if the timestamp has any h/m/s/ms inside, if yes skip
 		if (!preg_match("/(h|m|s|ms)/", (string)$timestamp)) {
 			list($timestamp, $ms) = array_pad(explode('.', (string)round((float)$timestamp, 4)), 2, null);
@@ -157,7 +159,7 @@ class DateTime
 	 * @param  string|int|float $timestring formatted interval
 	 * @return string|int|float             converted float interval, or string as is
 	 */
-	public static function stringToTime($timestring)
+	public static function stringToTime(string|int|float $timestring): string|int|float
 	{
 		$timestamp = 0;
 		if (preg_match("/(d|h|m|s|ms)/", (string)$timestring)) {
@@ -247,9 +249,9 @@ class DateTime
 	 * @param  string $date a date string in the format YYYY-MM-DD
 	 * @return bool         true if valid date, false if date not valid
 	 */
-	public static function checkDate($date): bool
+	public static function checkDate(string $date): bool
 	{
-		if (!$date) {
+		if (empty($date)) {
 			return false;
 		}
 		list ($year, $month, $day) = array_pad(
@@ -324,7 +326,7 @@ class DateTime
 	 * @return int|bool           false on error
 	 *                            or int -1 (s<e)/0 (s=e)/1 (s>e) as difference
 	 */
-	public static function compareDate($start_date, $end_date)
+	public static function compareDate(string $start_date, string $end_date): int|bool
 	{
 		// pre check for empty or wrong
 		if ($start_date == '--' || $end_date == '--' || !$start_date || !$end_date) {
@@ -367,7 +369,7 @@ class DateTime
 	 * @return int|bool               false for error
 	 *                                or -1 (s<e)/0 (s=e)/1 (s>e) as difference
 	 */
-	public static function compareDateTime($start_datetime, $end_datetime)
+	public static function compareDateTime(string $start_datetime, string $end_datetime): int|bool
 	{
 		// pre check for empty or wrong
 		if ($start_datetime == '--' || $end_datetime == '--' || !$start_datetime || !$end_datetime) {
@@ -402,8 +404,11 @@ class DateTime
 	 * @param  bool   $return_named return array type, false (default), true for named
 	 * @return array<mixed>         0/overall, 1/weekday, 2/weekend
 	 */
-	public static function calcDaysInterval($start_date, $end_date, bool $return_named = false): array
-	{
+	public static function calcDaysInterval(
+		string $start_date,
+		string $end_date,
+		bool $return_named = false
+	): array {
 		// pos 0 all, pos 1 weekday, pos 2 weekend
 		$days = [];
 		// if anything invalid, return 0,0,0

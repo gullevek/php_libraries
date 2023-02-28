@@ -39,7 +39,7 @@ class Byte
 	 * @return string                  converted byte number (float) with suffix
 	 * @throws \Exception               1: no valid flag set
 	 */
-	public static function humanReadableByteFormat($bytes, int $flags = 0): string
+	public static function humanReadableByteFormat(string|int|float $bytes, int $flags = 0): string
 	{
 		// if not numeric, return as is
 		if (is_numeric($bytes)) {
@@ -121,7 +121,7 @@ class Byte
 	 * @return string|int|float         converted value or original value
 	 * @throws \Exception                1: no valid flag set
 	 */
-	public static function stringByteFormat($number, int $flags = 0)
+	public static function stringByteFormat(string|int|float $number, int $flags = 0): string|int|float
 	{
 		// use SI 1000 mod and not 1024 mod
 		if ($flags & self::BYTE_FORMAT_SI) {

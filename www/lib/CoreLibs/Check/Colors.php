@@ -42,8 +42,11 @@ class Colors
 	 * @param  int|false $hsl_flag flag to check for hsl type
 	 * @return bool                True if no error, False if error
 	 */
-	private static function rgbHslContentCheck(string $color, $rgb_flag, $hsl_flag): bool
-	{
+	private static function rgbHslContentCheck(
+		string $color,
+		int|false $rgb_flag,
+		int|false $hsl_flag
+	): bool {
 		// extract string between () and split into elements
 		preg_match("/\((.*)\)/", $color, $matches);
 		if (

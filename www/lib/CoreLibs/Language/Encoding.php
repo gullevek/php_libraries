@@ -46,7 +46,7 @@ class Encoding
 	 * @return void
 	 * @deprecated Use \CoreLibs\Check\Encoding::setErrorChar();
 	 */
-	public static function setErrorChar($string): void
+	public static function setErrorChar(string|int|null $string): void
 	{
 		\CoreLibs\Check\Encoding::setErrorChar($string);
 	}
@@ -60,7 +60,7 @@ class Encoding
 	 * @return string|int Set error character
 	 * @deprecated Use \CoreLibs\Check\Encoding::getErrorChar();
 	 */
-	public static function getErrorChar(bool $return_substitute_func = false)
+	public static function getErrorChar(bool $return_substitute_func = false): string|int
 	{
 		return \CoreLibs\Check\Encoding::getErrorChar($return_substitute_func);
 	}
@@ -81,7 +81,7 @@ class Encoding
 	 * @param  string     $string        string to test
 	 * @param  string     $from_encoding encoding of string to test
 	 * @param  string     $to_encoding   target encoding
-	 * @return bool|array<string>        false if no error or
+	 * @return array<string>|false       false if no error or
 	 *                                   array with failed characters
 	 * @deprecated Use \CoreLibs\Check\Encoding::checkConvertEncoding();
 	 */
@@ -89,7 +89,7 @@ class Encoding
 		string $string,
 		string $from_encoding,
 		string $to_encoding
-	) {
+	): array|false {
 		return \CoreLibs\Check\Encoding::checkConvertEncoding($string, $from_encoding, $to_encoding);
 	}
 

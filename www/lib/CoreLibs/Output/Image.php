@@ -22,7 +22,7 @@ class Image
 	 *                                   if empty ROOT is choosen
 	 * @param  string      $cache_source cache path, if not given TMP is used
 	 * @param  bool        $clear_cache  if set to true, will create thumb all the tame
-	 * @return string|bool               thumbnail name, or false for error
+	 * @return string|false              thumbnail name, or false for error
 	 */
 	public static function createThumbnail(
 		string $pic,
@@ -32,7 +32,7 @@ class Image
 		string $path = '',
 		string $cache_source = '',
 		bool $clear_cache = false
-	) {
+	): string|false {
 		// get image type flags
 		$image_types = [
 			1 => 'gif',
@@ -73,7 +73,7 @@ class Image
 			$create_file = false;
 			$delete_filename = '';
 			// check if we can skip the PDF creation: if we have size, if do not have type, we assume type png
-			if (!$type && is_numeric($size_x) && is_numeric($size_y)) {
+			if (!$type) {
 				$check_thumb = $tmp_src . 'thumb_' . $pic . '_' . $size_x . 'x' . $size_y . '.' . $image_types[3];
 				if (!is_file($check_thumb)) {
 					$create_file = true;
@@ -100,10 +100,10 @@ class Image
 				[$width, $height, $type] = getimagesize($filename) ?: [];
 			}
 			// if no size given, set size to original
-			if (!$size_x || $size_x < 1 || !is_numeric($size_x)) {
+			if (!$size_x || $size_x < 1) {
 				$size_x = $width;
 			}
-			if (!$size_y || $size_y < 1 || !is_numeric($size_y)) {
+			if (!$size_y || $size_y < 1) {
 				$size_y = $height;
 			}
 			$thumb = 'thumb_' . $pic . '_' . $size_x . 'x' . $size_y . '.' . $image_types[$type];
@@ -170,7 +170,7 @@ class Image
 	 *                                     set to false to not use (default true)
 	 *                                     to use quick but less nice version
 	 * @param  int         $jpeg_quality   default 80, set image quality for jpeg only
-	 * @return string|bool                 thumbnail with path
+	 * @return string|false                thumbnail with path
 	 */
 	public static function createThumbnailSimple(
 		string $filename,
@@ -181,7 +181,7 @@ class Image
 		bool $use_cache = true,
 		bool $high_quality = true,
 		int $jpeg_quality = 80
-	) {
+	): string|false {
 		$thumbnail = false;
 		// $this->debug('IMAGE PREPARE', "FILE: $filename (exists "
 		//	.(string)file_exists($filename)."), WIDTH: $thumb_width, HEIGHT: $thumb_height");
@@ -425,7 +425,7 @@ class Image
 	 * @param  string $filename path + filename to rotate. This file must be writeable
 	 * @return void
 	 */
-	public static function correctImageOrientation($filename): void
+	public static function correctImageOrientation(string $filename): void
 	{
 		// function exists & file is writeable, else do nothing
 		if (!function_exists('exif_read_data') || !is_writeable($filename)) {

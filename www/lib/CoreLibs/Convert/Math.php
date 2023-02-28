@@ -48,7 +48,7 @@ class Math
 	 * @param  string|int|float $number string or number to check
 	 * @return float                    if not number, then returns 0, else original input
 	 */
-	public static function initNumeric($number): float
+	public static function initNumeric(string|int|float $number): float
 	{
 		if (!is_numeric($number)) {
 			return 0;

@@ -63,13 +63,14 @@ if (!defined('DIR')) {
 	exit('Base config could not be loaded');
 }
 // find trigger name "admin/" or "frontend/" in the getcwd() folder
-foreach (['admin', 'frontend'] as $folder) {
-	if (strstr(getcwd() ?: '', DIRECTORY_SEPARATOR . $folder)) {
+$folder = '';
+foreach (['admin', 'frontend'] as $_folder) {
+	if (strstr(getcwd() ?: '', DIRECTORY_SEPARATOR . $_folder)) {
+		$folder = $_folder;
 		break;
 	}
 }
 // if content path is empty, fallback is default
-/** @phpstan-ignore-next-line can be empty */
 if (empty($folder)) {
 	$folder = 'default';
 }

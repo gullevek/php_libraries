@@ -107,6 +107,13 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	 */
 	public function arraySearchRecursiveAllProvider(): array
 	{
+		/*
+		0: $needle,
+		1: array $input,
+		2: ?string $key_search_for,
+		3: bool $flag,
+		4: array $expected
+		*/
 		return [
 			'find value' => [
 				0 => 'bar',
@@ -172,6 +179,13 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	 */
 	public function arraySearchSimpleProvider(): array
 	{
+		/*
+		0: array $input,
+		1: $key,
+		2: $value,
+		3: bool $flag,
+		4: bool $expected
+		*/
 		return [
 			'key/value exist' => [
 				0 => self::$array,
@@ -665,7 +679,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	 *
 	 * @param array $input
 	 * @param string|int $key
-	 * @param string|int $value
+	 * @param string|int|bool $value
 	 * @param bool $expected
 	 * @return void
 	 */

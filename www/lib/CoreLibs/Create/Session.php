@@ -19,19 +19,6 @@ class Session
 	private $session_intern_error_str = '';
 
 	/**
-	 * Start session
-	 * startSession should be called for complete check
-	 * If this is called without any name set before the php.ini name is
-	 * used.
-	 *
-	 * @return void
-	 */
-	protected function startSessionCall(): void
-	{
-		session_start();
-	}
-
-	/**
 	 * init a session, if array is empty or array does not have session_name set
 	 * then no auto init is run
 	 *
@@ -42,6 +29,19 @@ class Session
 		if (!empty($session_name)) {
 			$this->startSession($session_name);
 		}
+	}
+
+	/**
+	 * Start session
+	 * startSession should be called for complete check
+	 * If this is called without any name set before the php.ini name is
+	 * used.
+	 *
+	 * @return void
+	 */
+	protected function startSessionCall(): void
+	{
+		session_start();
 	}
 
 	/**
@@ -116,7 +116,7 @@ class Session
 	 * @param string|null $session_name
 	 * @return string|bool
 	 */
-	public function startSession(?string $session_name = null)
+	public function startSession(?string $session_name = null): string|bool
 	{
 		// we can't start sessions on command line
 		if ($this->checkCliStatus()) {
@@ -163,7 +163,7 @@ class Session
 	 *
 	 * @return string|bool
 	 */
-	public function getSessionId()
+	public function getSessionId(): string|bool
 	{
 		return session_id();
 	}
@@ -173,7 +173,7 @@ class Session
 	 *
 	 * @return string|bool
 	 */
-	public function getSessionName()
+	public function getSessionName(): string|bool
 	{
 		return session_name();
 	}
@@ -275,7 +275,7 @@ class Session
 	 * @param  mixed      $value value to set (can be anything)
 	 * @return void
 	 */
-	public function setS($name, $value): void
+	public function setS(string|int $name, mixed $value): void
 	{
 		$_SESSION[$name] = $value;
 	}
@@ -286,7 +286,7 @@ class Session
 	 * @param  string|int $name value key to get from _SESSION
 	 * @return mixed            value stored in _SESSION
 	 */
-	public function getS($name)
+	public function getS(string|int $name): mixed
 	{
 		return $_SESSION[$name] ?? '';
 	}
@@ -297,7 +297,7 @@ class Session
 	 * @param  string|int $name Name to check for
 	 * @return bool             True for set, False fornot set
 	 */
-	public function issetS($name): bool
+	public function issetS(string|int $name): bool
 	{
 		return isset($_SESSION[$name]);
 	}
@@ -308,7 +308,7 @@ class Session
 	 * @param  string|int $name _SESSION key name to remove
 	 * @return void
 	 */
-	public function unsetS($name): void
+	public function unsetS(string|int $name): void
 	{
 		if (isset($_SESSION[$name])) {
 			unset($_SESSION[$name]);
@@ -325,7 +325,7 @@ class Session
 	 * @param  mixed      $value
 	 * @return void
 	 */
-	public function __set($name, $value): void
+	public function __set(string|int $name, mixed $value): void
 	{
 		$_SESSION[$name] = $value;
 	}
@@ -334,13 +334,14 @@ class Session
 	 * Undocumented function
 	 *
 	 * @param  string|int $name
-	 * @return mixed
+	 * @return mixed            If name is not found, it will return null
 	 */
-	public function __get($name)
+	public function __get(string|int $name): mixed
 	{
 		if (isset($_SESSION[$name])) {
 			return $_SESSION[$name];
 		}
+		return null;
 	}
 
 	/**
@@ -349,7 +350,7 @@ class Session
 	 * @param  string|int $name
 	 * @return bool
 	 */
-	public function __isset($name): bool
+	public function __isset(string|int $name): bool
 	{
 		return isset($_SESSION[$name]);
 	}
@@ -360,7 +361,7 @@ class Session
 	 * @param  string|int $name
 	 * @return void
 	 */
-	public function __unset($name): void
+	public function __unset(string|int $name): void
 	{
 		if (isset($_SESSION[$name])) {
 			unset($_SESSION[$name]);

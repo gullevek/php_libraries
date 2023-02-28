@@ -31,8 +31,12 @@ class Colors
 	 * @return string|bool        rgb in hex values with leading # if set,
 	 *                            false for invalid color
 	 */
-	public static function rgb2hex(int $red, int $green, int $blue, bool $hex_prefix = true)
-	{
+	public static function rgb2hex(
+		int $red,
+		int $green,
+		int $blue,
+		bool $hex_prefix = true
+	): string|bool {
 		$hex_color = '';
 		if ($hex_prefix === true) {
 			$hex_color = '#';
@@ -61,7 +65,7 @@ class Colors
 		string $hexStr,
 		bool $return_as_string = false,
 		string $seperator = ','
-	) {
+	): string|array|bool {
 		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
 		if (!is_string($hexStr)) {
 			return false;
@@ -99,7 +103,7 @@ class Colors
 	 * @return array<int|float>|bool Hue, Sat, Brightness/Value
 	 *                               false for input value error
 	 */
-	public static function rgb2hsb(int $red, int $green, int $blue)
+	public static function rgb2hsb(int $red, int $green, int $blue): array|bool
 	{
 		// check that rgb is from 0 to 255
 		foreach (['red', 'green', 'blue'] as $c) {
@@ -146,7 +150,7 @@ class Colors
 	 * @return array<int>|bool 0 red/1 green/2 blue array as 0-255
 	 *                         false for input value error
 	 */
-	public static function hsb2rgb(float $H, float $S, float $V)
+	public static function hsb2rgb(float $H, float $S, float $V): array|bool
 	{
 		// check that H is 0 to 359, 360 = 0
 		// and S and V are 0 to 1
@@ -232,7 +236,7 @@ class Colors
 	 * @return array<float>|bool hue/sat/luminance
 	 *                           false for input value error
 	 */
-	public static function rgb2hsl(int $red, int $green, int $blue)
+	public static function rgb2hsl(int $red, int $green, int $blue): array|bool
 	{
 		// check that rgb is from 0 to 255
 		foreach (['red', 'green', 'blue'] as $c) {
@@ -285,11 +289,8 @@ class Colors
 	 * @param  float $lum                luminance: 0-100
 	 * @return array<int,float|int>|bool red/blue/green 0-255 each
 	 */
-	public static function hsl2rgb(float $hue, float $sat, float $lum)
+	public static function hsl2rgb(float $hue, float $sat, float $lum): array|bool
 	{
-		if (!is_numeric($hue)) {
-			return false;
-		}
 		if ($hue == 360) {
 			$hue = 0;
 		}

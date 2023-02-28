@@ -157,7 +157,7 @@ class Login
 	private $acl = [];
 	/** @var array<mixed> */
 	private $default_acl_list = [];
-	/** @var array<int|string,mixed> Reverse list to lookup level from type */
+	/** @var array<string,int> Reverse list to lookup level from type */
 	private $default_acl_list_type = [];
 	/** @var int default ACL level to be based on if nothing set */
 	private $default_acl_level = 0;
@@ -332,7 +332,7 @@ class Login
 				'type' => $res['type'],
 				'name' => $res['name']
 			];
-			$this->default_acl_list_type[$res['type']] = $res['level'];
+			$this->default_acl_list_type[(string)$res['type']] = (int)$res['level'];
 		}
 		// write that into the session
 		$_SESSION['DEFAULT_ACL_LIST'] = $this->default_acl_list;
@@ -986,7 +986,7 @@ class Login
 	 * @param  string $password the new password
 	 * @return bool             true or false if valid password or not
 	 */
-	private function loginPasswordChangeValidPassword($password): bool
+	private function loginPasswordChangeValidPassword(string $password): bool
 	{
 		$is_valid_password = true;
 		// check for valid in regex arrays in list
@@ -1048,7 +1048,7 @@ class Login
 				$res = $this->db->dbReturnRow($q);
 				if (
 					!is_array($res) ||
-					(is_array($res) && empty($res['edit_user_id']))
+					empty($res['edit_user_id'])
 				) {
 					// username wrong
 					$this->login_error = 201;
@@ -1068,9 +1068,11 @@ class Login
 				}
 				if (
 					!is_array($res) ||
-					(is_array($res) &&
-					(empty($res['edit_user_id']) ||
-					!$this->loginPasswordCheck($res['old_password_hash'], $this->pw_old_password)))
+					empty($res['edit_user_id']) ||
+					!$this->loginPasswordCheck(
+						$res['old_password_hash'],
+						$this->pw_old_password
+					)
 				) {
 					// old password wrong
 					$this->login_error = 202;
@@ -1124,7 +1126,7 @@ class Login
 	 *
 	 * @return string|null html data for login page, or null for nothing
 	 */
-	private function loginCreateLoginHTML()
+	private function loginCreateLoginHTML(): ?string
 	{
 		$html_string = null;
 		// if permission is ok, return null
@@ -1421,8 +1423,12 @@ EOM;
 	 * @param  string     $username login user username
 	 * @return void                 has no return
 	 */
-	private function writeLog(string $event, string $data, $error = '', string $username = ''): void
-	{
+	private function writeLog(
+		string $event,
+		string $data,
+		string|int $error = '',
+		string $username = ''
+	): void {
 		if ($this->login) {
 				$this->action = 'Login';
 		} elseif ($this->logout) {
@@ -1794,7 +1800,6 @@ EOM;
 		// check that numeric, positive numeric, not longer than max input string lenght
 		// and not short than min password length
 		if (
-			is_numeric($length) &&
 			$length >= $this->password_min_length_max &&
 			$length <= $this->password_max_length &&
 			$length <= 255
@@ -2069,9 +2074,12 @@ EOM;
 	 * @param  string   $type Type name to look in the acl list
 	 * @return int|bool       Either int level or false for not found
 	 */
-	public function loginGetAclListFromType(string $type)
+	public function loginGetAclListFromType(string $type): int|bool
 	{
-		return $this->default_acl_list_type[$type] ?? false;
+		if (!isset($this->default_acl_list_type[$type])) {
+			return false;
+		}
+		return (int)$this->default_acl_list_type[$type];
 	}
 
 	/**
@@ -2081,7 +2089,7 @@ EOM;
 	 * @return bool                     true/false: if the edit access is not
 	 *                                  in the valid list: false
 	 */
-	public function loginCheckEditAccess($edit_access_id): bool
+	public function loginCheckEditAccess(?int $edit_access_id): bool
 	{
 		if ($edit_access_id === null) {
 			return false;
@@ -2122,8 +2130,10 @@ EOM;
 	 * @param  string|int $data_key       key value to search for
 	 * @return bool|string                false for not found or string for found data
 	 */
-	public function loginGetEditAccessData(int $edit_access_id, $data_key)
-	{
+	public function loginGetEditAccessData(
+		int $edit_access_id,
+		string|int $data_key
+	): bool|string {
 		if (!isset($_SESSION['UNIT'][$edit_access_id]['data'][$data_key])) {
 			return false;
 		}
@@ -2137,9 +2147,12 @@ EOM;
 	 * @param  string   $uid Edit Access UID to look for
 	 * @return int|bool      Either primary key in int or false in bool for not found
 	 */
-	public function loginGetEditAccessIdFromUid(string $uid)
+	public function loginGetEditAccessIdFromUid(string $uid): int|bool
 	{
-		return $_SESSION['UNIT_UID'][$uid] ?? false;
+		if (!isset($_SESSION['UNIT_UID'][$uid])) {
+			return false;
+		}
+		return (int)$_SESSION['UNIT_UID'][$uid];
 	}
 
 	/**
@@ -2204,8 +2217,10 @@ EOM;
 	 * @param  string|int  $data_key
 	 * @return bool|string
 	 */
-	public function loginSetEditAccessData(int $edit_access_id, $data_key)
-	{
+	public function loginSetEditAccessData(
+		int $edit_access_id,
+		string|int $data_key
+	): bool|string {
 		return $this->loginGetEditAccessData($edit_access_id, $data_key);
 	}
 }

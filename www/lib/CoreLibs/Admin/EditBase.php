@@ -534,7 +534,7 @@ class EditBase
 	 * @throws Exception
 	 * @throws SmartyException
 	 */
-	public function editBaseRun()
+	public function editBaseRun(): void
 	{
 		// set the template dir
 		// WARNING: this has a special check for the mailing tool layout (old layout)

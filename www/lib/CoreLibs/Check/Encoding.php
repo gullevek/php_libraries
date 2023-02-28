@@ -25,7 +25,7 @@ class Encoding
 	 *                                 if null is set then "none"
 	 * @return void
 	 */
-	public static function setErrorChar($string): void
+	public static function setErrorChar(string|int|null $string): void
 	{
 		if (empty($string)) {
 			$string = 'none';
@@ -52,7 +52,7 @@ class Encoding
 	 *                                      directly
 	 * @return string|int Set error character
 	 */
-	public static function getErrorChar(bool $return_substitute_func = false)
+	public static function getErrorChar(bool $return_substitute_func = false): string|int
 	{
 		// return mb_substitute_character();
 		if ($return_substitute_func === true) {
@@ -78,14 +78,14 @@ class Encoding
 	 * @param  string     $string        string to test
 	 * @param  string     $from_encoding encoding of string to test
 	 * @param  string     $to_encoding   target encoding
-	 * @return bool|array<string>        false if no error or
+	 * @return array<string>|false       false if no error or
 	 *                                   array with failed characters
 	 */
 	public static function checkConvertEncoding(
 		string $string,
 		string $from_encoding,
 		string $to_encoding
-	) {
+	): array|false {
 		// convert to target encoding and convert back
 		$temp = mb_convert_encoding($string, $to_encoding, $from_encoding);
 		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);

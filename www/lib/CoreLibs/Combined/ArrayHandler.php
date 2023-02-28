@@ -21,12 +21,12 @@ class ArrayHandler
 	 *                                      the needle can be found in the
 	 *                                      haystack array
 	 */
-	public static function arraySearchRecursive($needle, array $haystack, ?string $key_search_for = null): array
-	{
+	public static function arraySearchRecursive(
+		string|int $needle,
+		array $haystack,
+		?string $key_search_for = null
+	): array {
 		$path = [];
-		if (!is_array($haystack)) {
-			$haystack = [];
-		}
 		if (
 			$key_search_for != null &&
 			array_key_exists($key_search_for, $haystack) &&
@@ -72,7 +72,7 @@ class ArrayHandler
 	 *
 	 * @param  string|int        $needle         needle (search for)
 	 * @param  array<mixed>      $haystack       haystack (search in)
-	 * @param  string|int        $key_search_for the key to look for in
+	 * @param  string|int|null   $key_search_for the key to look for in
 	 * @param  bool              $old            [true], if set to false will
 	 *                                           return new flat layout
 	 * @param  array<mixed>|null $path           recursive call for previous path
@@ -80,9 +80,9 @@ class ArrayHandler
 	 *                                           the element was found
 	 */
 	public static function arraySearchRecursiveAll(
-		$needle,
+		string|int $needle,
 		array $haystack,
-		$key_search_for,
+		string|int|null $key_search_for,
 		bool $old = true,
 		?array $path = null
 	): ?array {
@@ -100,10 +100,6 @@ class ArrayHandler
 			if (!isset($path['work'])) {
 				$path['work'] = [];
 			}
-		}
-		// should not be needed because it would trigger a php mehtod error
-		if (!is_array($haystack)) {
-			$haystack = [];
 		}
 
 		// go through the array,
@@ -152,17 +148,18 @@ class ArrayHandler
 	 * array search simple. looks for key, value combination, if found, returns true
 	 * on default does not strict check, so string '4' will match int 4 and vica versa
 	 *
-	 * @param  array<mixed> $array search in as array
-	 * @param  string|int  $key    key (key to search in)
-	 * @param  string|int  $value  value (what to find)
-	 * @param  bool        $strict [false], if set to true, will strict check key/value
-	 * @return bool                true on found, false on not found
+	 * @param  array<mixed>    $array search in as array
+	 * @param  string|int      $key    key (key to search in)
+	 * @param  string|int|bool $value  value (what to find)
+	 * @param  bool            $strict [false], if set to true, will strict check key/value
+	 * @return bool            true on found, false on not found
 	 */
-	public static function arraySearchSimple(array $array, $key, $value, bool $strict = false): bool
-	{
-		if (!is_array($array)) {
-			$array = [];
-		}
+	public static function arraySearchSimple(
+		array $array,
+		string|int $key,
+		string|int|bool $value,
+		bool $strict = false
+	): bool {
 		foreach ($array as $_key => $_value) {
 			// if value is an array, we search
 			if (is_array($_value)) {
@@ -189,9 +186,9 @@ class ArrayHandler
 	 *         bool  key flag: true: handle keys as string or int
 	 *               default false: all keys are string
 	 *
-	 * @return array<mixed>|bool merged array
+	 * @return array<mixed>|false merged array
 	 */
-	public static function arrayMergeRecursive()
+	public static function arrayMergeRecursive(): array|false
 	{
 		// croak on not enough arguemnts (we need at least two)
 		if (func_num_args() < 2) {
@@ -264,10 +261,10 @@ class ArrayHandler
 	 * @param  array<mixed> $needle   elements to search for
 	 * @param  array<mixed> $haystack array where the $needle elements should
 	 *                                be searched int
-	 * @return array<mixed>|bool      either the found elements or
+	 * @return array<mixed>|false     either the found elements or
 	 *                                false for nothing found or error
 	 */
-	public static function inArrayAny(array $needle, array $haystack)
+	public static function inArrayAny(array $needle, array $haystack): array|false
 	{
 		$found = [];
 		foreach ($needle as $element) {
@@ -291,8 +288,12 @@ class ArrayHandler
 	 * @param  bool            $set_only flag to return all (default), or set only
 	 * @return array<mixed>              associative array
 	 */
-	public static function genAssocArray(array $db_array, $key, $value, bool $set_only = false): array
-	{
+	public static function genAssocArray(
+		array $db_array,
+		string|int|bool $key,
+		string|int|bool $value,
+		bool $set_only = false
+	): array {
 		$ret_array = [];
 		// do this to only run count once
 		for ($i = 0, $iMax = count($db_array); $i < $iMax; $i++) {
@@ -385,11 +386,8 @@ class ArrayHandler
 	 *                              and will be pushed up
 	 * @return array<mixed>         modified, flattened array
 	 */
-	public static function arrayFlatForKey(array $array, $search): array
+	public static function arrayFlatForKey(array $array, string|int $search): array
 	{
-		if (!is_array($array)) {
-			$array = [];
-		}
 		foreach ($array as $key => $value) {
 			// if it is not an array do just nothing
 			if (!is_array($value)) {

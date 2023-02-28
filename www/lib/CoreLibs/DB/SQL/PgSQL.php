@@ -51,12 +51,11 @@ namespace CoreLibs\DB\SQL;
 // as main system. Currently all @var sets are written as object
 /** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
 
-class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
+class PgSQL implements Interface\SqlFunctions
 {
 	/** @var string */
 	private $last_error_query;
-	// NOTE for PHP 8.1 this is no longer a resource
-	/** @var object|resource|bool */ // replace object with PgSql\Connection
+	/** @var \PgSql\Connection|false */
 	private $dbh;
 
 	/**
@@ -77,12 +76,12 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * wrapper for pg_query, catches error and stores it in class var
 	 *
 	 * @param  string $query Query string
-	 * @return object|resource|bool query result (PgSql\Result)
+	 * @return \PgSql\Result|false query result
 	 */
-	public function __dbQuery(string $query)
+	public function __dbQuery(string $query): \PgSql\Result|false
 	{
 		$this->last_error_query = '';
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		// read out the query status and save the query if needed
@@ -100,12 +99,12 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 *
 	 * @param  string       $query  Query string with placeholders $1, ..
 	 * @param  array<mixed> $params Matching parameters for each placerhold
-	 * @return object|resource|bool Query result (PgSql\Result)
+	 * @return \PgSql\Result|false Query result
 	 */
-	public function __dbQueryParams(string $query, array $params)
+	public function __dbQueryParams(string $query, array $params): \PgSql\Result|false
 	{
 		$this->last_error_query = '';
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		// parse query and get all $n entries
@@ -126,7 +125,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 */
 	public function __dbSendQuery(string $query): bool
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		$result = pg_send_query($this->dbh, $query);
@@ -136,12 +135,12 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_get_result
 	 *
-	 * @return object|resource|bool resource handler or false for error (PgSql\Result)
+	 * @return \PgSql\Result|false resource handler or false for error
 	 */
-	public function __dbGetResult()
+	public function __dbGetResult(): \PgSql\Result|false
 	{
 		$this->last_error_query = '';
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		$result = pg_get_result($this->dbh);
@@ -161,7 +160,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 */
 	public function __dbClose(): void
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return;
 		}
 		if (pg_connection_status($this->dbh) === PGSQL_CONNECTION_OK) {
@@ -175,12 +174,12 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 *
 	 * @param  string $name  statement name
 	 * @param  string $query query string
-	 * @return object|resource|bool prepare statement handler or
-	 *                              false for error (PgSql\Result)
+	 * @return \PgSql\Result|false prepare statement handler or
+	 *                              false for error
 	 */
-	public function __dbPrepare(string $name, string $query)
+	public function __dbPrepare(string $name, string $query): \PgSql\Result|false
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		$result = pg_prepare($this->dbh, $name, $query);
@@ -195,11 +194,11 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 *
 	 * @param  string        $name statement name
 	 * @param  array<mixed>  $data data array
-	 * @return object|resource|bool returns status or false for error (PgSql\Result)
+	 * @return \PgSql\Result|false returns status or false for error
 	 */
-	public function __dbExecute(string $name, array $data)
+	public function __dbExecute(string $name, array $data): \PgSql\Result|false
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		$result = pg_execute($this->dbh, $name, $data);
@@ -212,12 +211,12 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_num_rows
 	 *
-	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
-	 * @return int                  number of rows, -1 on error
+	 * @param  \PgSql\Result|false $cursor cursor
+	 * @return int                         number of rows, -1 on error
 	 */
-	public function __dbNumRows($cursor): int
+	public function __dbNumRows(\PgSql\Result|false $cursor): int
 	{
-		if ($cursor === false || is_bool($cursor)) {
+		if (is_bool($cursor)) {
 			return -1;
 		}
 		return pg_num_rows($cursor);
@@ -226,12 +225,12 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_num_fields
 	 *
-	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
-	 * @return int                  number for fields in result, -1 on error
+	 * @param  \PgSql\Result|false $cursor cursor
+	 * @return int                         number for fields in result, -1 on error
 	 */
-	public function __dbNumFields($cursor): int
+	public function __dbNumFields(\PgSql\Result|false $cursor): int
 	{
-		if ($cursor === false || is_bool($cursor)) {
+		if (is_bool($cursor)) {
 			return -1;
 		}
 		return pg_num_fields($cursor);
@@ -240,13 +239,13 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_field_name
 	 *
-	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
-	 * @param  int                  $i      field position
-	 * @return string|bool          name or false on error
+	 * @param  \PgSql\Result|false $cursor cursor
+	 * @param  int                 $i      field position
+	 * @return string|false                name or false on error
 	 */
-	public function __dbFieldName($cursor, int $i)
+	public function __dbFieldName(\PgSql\Result|false $cursor, int $i): string|false
 	{
-		if ($cursor === false || is_bool($cursor)) {
+		if (is_bool($cursor)) {
 			return false;
 		}
 		return pg_field_name($cursor, $i);
@@ -256,13 +255,13 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * wrapper for pg_fetch_array
 	 * if through/true false, use __dbResultType(true)
 	 *
-	 * @param  object|resource|bool $cursor      cursor PgSql\Result (former resource)
-	 * @param  int                  $result_type result type as int number
-	 * @return array<mixed>|bool    array result data or false on end/error
+	 * @param  \PgSql\Result|false $cursor      cursor
+	 * @param  int                 $result_type result type as int number
+	 * @return array<mixed>|false               array result data or false on end/error
 	 */
-	public function __dbFetchArray($cursor, int $result_type = PGSQL_BOTH)
+	public function __dbFetchArray(\PgSql\Result|false $cursor, int $result_type = PGSQL_BOTH): array|false
 	{
-		if ($cursor === false || is_bool($cursor)) {
+		if (is_bool($cursor)) {
 			return false;
 		}
 		// result type is passed on as is [should be checked]
@@ -287,12 +286,12 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_fetch_all
 	 *
-	 * @param  object|resource|bool $cursor cursor PgSql\Result (former resource)
-	 * @return array<mixed>|bool    data array or false for end/error
+	 * @param  \PgSql\Result|false $cursor cursor
+	 * @return array<mixed>|false          data array or false for end/error
 	 */
-	public function __dbFetchAll($cursor)
+	public function __dbFetchAll(\PgSql\Result|false $cursor): array|false
 	{
-		if ($cursor === false || is_bool($cursor)) {
+		if (is_bool($cursor)) {
 			return false;
 		}
 		return pg_fetch_all($cursor);
@@ -301,12 +300,12 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_affected_rows
 	 *
-	 * @param object|resource|bool $cursor cursor PgSql\Result (former resource)
-	 * @return int                 affected rows, 0 for none, -1 for error
+	 * @param \PgSql\Result|false $cursor cursor
+	 * @return int                        affected rows, 0 for none, -1 for error
 	 */
-	public function __dbAffectedRows($cursor): int
+	public function __dbAffectedRows(\PgSql\Result|false $cursor): int
 	{
-		if ($cursor === false || is_bool($cursor)) {
+		if (is_bool($cursor)) {
 			return -1;
 		}
 		return pg_affected_rows($cursor);
@@ -323,7 +322,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * @param  string|null      $pk_name primary key name, if '' then auto detect
 	 * @return string|int|false          primary key value
 	 */
-	public function __dbInsertId(string $query, ?string $pk_name)
+	public function __dbInsertId(string $query, ?string $pk_name): string|int|false
 	{
 		// only if an insert has been done
 		if (preg_match("/^insert /i", $query)) {
@@ -371,7 +370,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * @param  string      $schema optional schema name, '' for default
 	 * @return string|bool         primary key name or false if not found
 	 */
-	public function __dbPrimaryKey(string $table, string $schema = '')
+	public function __dbPrimaryKey(string $table, string $schema = ''): string|bool
 	{
 		if ($table) {
 			// check if schema set is different from schema given,
@@ -426,7 +425,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * @param  string  $db_name databse name
 	 * @param  integer $db_port port (int, 5432 is default)
 	 * @param  string  $db_ssl  SSL (allow is default)
-	 * @return object|resource|bool db handler PgSql\Connection or false on error
+	 * @return \PgSql\Connection|false db handler or false on error
 	 */
 	public function __dbConnect(
 		string $db_host,
@@ -435,7 +434,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 		string $db_name,
 		int $db_port,
 		string $db_ssl = 'allow'
-	) {
+	): \PgSql\Connection|false {
 		if (empty($db_name)) {
 			return false;
 		}
@@ -470,22 +469,22 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * reads the last error for this cursor and returns
 	 * html formatted string with error name
 	 *
-	 * @param  bool|object|resource $cursor cursor PgSql\Result (former resource)
+	 * @param  \PgSql\Result|false $cursor cursor
 	 *                              or null
 	 * @return string               error string
 	 */
-	public function __dbPrintError($cursor = false): string
+	public function __dbPrintError(\PgSql\Result|false $cursor = false): string
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return '';
 		}
 		// run the query again for the error result here
-		if (($cursor === false || is_bool($cursor)) && $this->last_error_query) {
+		if ((is_bool($cursor)) && $this->last_error_query) {
 			pg_send_query($this->dbh, $this->last_error_query);
 			$this->last_error_query = '';
 			$cursor = pg_get_result($this->dbh);
 		}
-		if ($cursor && !is_bool($cursor) && $error_str = pg_result_error($cursor)) {
+		if ($cursor && $error_str = pg_result_error($cursor)) {
 			return '-PostgreSQL-Error- '
 				. $error_str;
 		} else {
@@ -500,9 +499,9 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * @param  bool   $extended  show extended info (default true)
 	 * @return array<mixed>|bool array data for the table info or false on error
 	 */
-	public function __dbMetaData(string $table, $extended = true)
+	public function __dbMetaData(string $table, bool $extended = true): array|bool
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		// needs to prefixed with @ or it throws a warning on not existing table
@@ -515,9 +514,9 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * @param  string|int|float|bool $string any string/int/float/bool
 	 * @return string                excaped string
 	 */
-	public function __dbEscapeString($string): string
+	public function __dbEscapeString(string|int|float|bool $string): string
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return '';
 		}
 		return pg_escape_string($this->dbh, (string)$string);
@@ -531,9 +530,9 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * @param  string|int|float|bool $string any string/int/float/bool
 	 * @return string                excaped string including quites
 	 */
-	public function __dbEscapeLiteral($string): string
+	public function __dbEscapeLiteral(string|int|float|bool $string): string
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return (string)'';
 		}
 		// for phpstan, thinks this is string|false?
@@ -549,7 +548,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 */
 	public function __dbEscapeIdentifier(string $string): string
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return '';
 		}
 		// for phpstan, thinks this is string|false?
@@ -564,7 +563,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 */
 	public function __dbEscapeBytea(string $data): string
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return '';
 		}
 		return pg_escape_bytea($this->dbh, $data);
@@ -584,11 +583,12 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * wrapper for pg_connection_busy
 	 *
-	 * @return bool True if connection is busy, False if not or no db connection at all
+	 * @return bool True if connection is busy
+	 *              False if not or no db connection at all
 	 */
 	public function __dbConnectionBusy(): bool
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		return pg_connection_busy($this->dbh);
@@ -597,13 +597,13 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	/**
 	 * Experimental wrapper with scoket timetout
 	 *
-	 * @param integer $timeout_seconds Wait how many seconds on timeout
-	 * @return boolean                 True if connection is busy, or false on
-	 *                                 not busy or no db connection at all
+	 * @param  integer $timeout_seconds Wait how many seconds on timeout
+	 * @return bool                     True if connection is busy, or false on
+	 *                                  not busy or no db connection at all
 	 */
 	public function __dbConnectionBusySocketWait(int $timeout_seconds = 3): bool
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		$busy = pg_connection_busy($this->dbh);
@@ -626,14 +626,14 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * On default 'version' will be stripped of any space attached info
 	 * eg 13.5 (other info) will return only 13.5
 	 *
-	 * @param  string  $parameter Parameter string to extract from array
-	 * @param  boolean $strip     If parameter is server strip out on default
-	 *                            Set to false to get original string AS is
-	 * @return string             The parameter value
+	 * @param  string $parameter Parameter string to extract from array
+	 * @param  bool    $strip    If parameter is server strip out on default
+	 *                           Set to false to get original string AS is
+	 * @return string            The parameter value
 	 */
 	public function __dbVersionInfo(string $parameter, bool $strip = true): string
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return '';
 		}
 		// extract element
@@ -655,7 +655,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 */
 	public function __dbVersionInfoParameterList(): array
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return [];
 		}
 		return array_keys(pg_version($this->dbh));
@@ -670,7 +670,7 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 */
 	public function __dbVersion(): string
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return '';
 		}
 		// array has client, protocol, server, we just return server stripped
@@ -762,9 +762,9 @@ class PgSQL implements \CoreLibs\DB\SQL\SqlInterface\SqlFunctions
 	 * @param  string      $parameter Parameter to query
 	 * @return string|bool            Settings value as string
 	 */
-	public function __dbParameter(string $parameter)
+	public function __dbParameter(string $parameter): string|bool
 	{
-		if ($this->dbh === false || is_bool($this->dbh)) {
+		if (is_bool($this->dbh)) {
 			return false;
 		}
 		if (empty($parameter)) {

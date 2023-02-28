@@ -1253,10 +1253,14 @@ final class CoreLibsDBIOTest extends TestCase
 			'string value literal' => ['string literal', 'tl', '\'string literal\'',],
 			'empty string value literal' => ['', 'tl', '\'\'',],
 			'null string value literal' => [null, 'tl', 'NULL',],
-			// ?d (I have no idea what that does, is like string)
+			// escape string, but set all empty strings to null ('' is null)
 			'string value d' => ['string d', 'd', '\'string d\'',],
 			'empty string value d' => ['', 'd', 'NULL',],
 			'null string value d' => [null, 'd', 'NULL',],
+			// escape literal string, but set all empty strings to null ('' is null)
+			'string value literal d' => ['string d', 'dl', '\'string d\'',],
+			'empty string value literal d' => ['', 'dl', 'NULL',],
+			'null string value literal d' => [null, 'dl', 'NULL',],
 			// by bytea
 			'string value d' => ['string d', 'by', '\x737472696e672064',],
 			'empty string value d' => ['', 'by', 'NULL',],
@@ -1281,7 +1285,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @dataProvider sqlEscapeProvider
 	 * @testdox Input value $input as $flag to $expected [$_dataName]
 	 *
-	 * @param int|float|string|null $input
+	 * @param int|float|string|bool|null $input
 	 * @param string $flag
 	 * @param int|float|string $expected
 	 * @return void

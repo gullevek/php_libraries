@@ -19,7 +19,7 @@ class Html
 	 * @param  mixed $string string to html encode
 	 * @return mixed         if string, encoded, else as is (eg null)
 	 */
-	public static function htmlent($string)
+	public static function htmlent(mixed $string): mixed
 	{
 		if (is_string($string)) {
 			return htmlentities($string, ENT_COMPAT | ENT_HTML401, 'UTF-8', false);
@@ -52,7 +52,7 @@ class Html
 	 * @return ?string                       returns checked or selected,
 	 *                                       else returns null
 	 */
-	public static function checked($haystack, string $needle, int $type = 0): ?string
+	public static function checked(array|string $haystack, string $needle, int $type = 0): ?string
 	{
 		if (is_array($haystack)) {
 			if (in_array($needle, $haystack)) {

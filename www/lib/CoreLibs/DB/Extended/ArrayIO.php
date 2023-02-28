@@ -137,7 +137,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  string $text any html encoded string
 	 * @return string       decoded html string
 	 */
-	public function convertData($text): string
+	public function convertData(string $text): string
 	{
 		$text = str_replace('&lt;b&gt;', '<b>', $text);
 		$text = str_replace('&lt;/b&gt;', '</b>', $text);
@@ -156,7 +156,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  string $text encoded html string
 	 * @return string       decoded html string
 	 */
-	public function convertEntities($text): string
+	public function convertEntities(string $text): string
 	{
 		$text = str_replace('&lt;', '<', $text);
 		$text = str_replace('&gt;', '>', $text);
@@ -172,7 +172,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  bool   $write write to error message, default false
 	 * @return string        the array data as html string entry
 	 */
-	public function dbDumpArray($write = false): string
+	public function dbDumpArray(bool $write = false): string
 	{
 		reset($this->table_array);
 		$string = '';
@@ -192,7 +192,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 *
 	 * @return bool true if pk value is set, else false
 	 */
-	public function dbCheckPkSet()
+	public function dbCheckPkSet(): bool
 	{
 		// if pk_id is set, overrule ...
 		if ($this->pk_id) {
@@ -210,10 +210,10 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * resets the whole array values
-	 * @param  boolean $reset_pk true if we want to reset the pk too
+	 * @param  bool $reset_pk true if we want to reset the pk too
 	 * @return void              has no return
 	 */
-	public function dbResetArray($reset_pk = false): void
+	public function dbResetArray(bool $reset_pk = false): void
 	{
 		reset($this->table_array);
 		foreach (array_keys($this->table_array) as $column) {
@@ -230,10 +230,10 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 *
 	 * @param  array<mixed> $table_array optional override for table array set
 	 *                                   set this as new table array too
-	 * @param  boolean      $acl_limit   [false], if set to true, well do ACL limit check
+	 * @param  bool      $acl_limit   [false], if set to true, well do ACL limit check
 	 * @return array<mixed>              returns the table array that was deleted
 	 */
-	public function dbDelete($table_array = [], $acl_limit = false)
+	public function dbDelete(array $table_array = [], bool $acl_limit = false): array
 	{
 		// is array and has values, override set and set new
 		if (is_array($table_array) && count($table_array)) {
@@ -294,12 +294,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 	/**
 	 * reads one row into the array
 	 *
-	 * @param  boolean      $edit        on true convert data, else as is
+	 * @param  bool      $edit        on true convert data, else as is
 	 * @param  array<mixed> $table_array optional table array, overwrites
 	 *                                   internal set array
 	 * @return array<mixed>              set table array with values
 	 */
-	public function dbRead($edit = false, $table_array = [])
+	public function dbRead(bool $edit = false, array $table_array = []): array
 	{
 		// if array give, overrules internal array
 		if (is_array($table_array) && count($table_array)) {
@@ -381,9 +381,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 	/**
 	 * writes one set into DB or updates one set (if PK exists)
 	 *
-	 * @param  boolean      $addslashes  old convert entities and set set escape
+	 * @param  bool      $addslashes  old convert entities and set set escape
 	 * @param  array<mixed> $table_array optional table array, overwrites internal one
-	 * @param  boolean      $acl_limit   [false], if set to true, well do ACL limit check
+	 * @param  bool      $acl_limit   [false], if set to true, well do ACL limit check
 	 * @return array<mixed>              table array or null
 	 */
 	public function dbWrite(
@@ -391,7 +391,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		array $table_array = [],
 		bool $acl_limit = false
 	): array {
-		if (is_array($table_array) && count($table_array)) {
+		if (count($table_array)) {
 			$this->table_array = $table_array;
 		}
 		// PK ID check
@@ -475,13 +475,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 				$this->table_array[$column]['type'] != 'view' &&
 				strlen($column) > 0 &&
 				// no acl limiter
-				($acl_limit === false ||
 				(
+					$acl_limit === false ||
 					// acl limit is true, min edit must be at larger than set
-					$acl_limit === true &&
 					$this->base_acl_level >=
 						($this->table_array[$column]['min_edit_acl'] ?? 100)
-				))
+				)
 			) {
 				// for password use hidden value if main is not set
 				if (
@@ -528,7 +527,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 					}
 					$q_data .= $_value;
 				} elseif (isset($this->table_array[$column]['bool'])) {
-					// boolean storeage (reverse check on ifset)
+					// bool storage (reverse check on ifset)
 					$q_data .= "'" . $this->dbBoolean($this->table_array[$column]['value'], true) . "'";
 				} elseif (
 					isset($this->table_array[$column]['interval']) ||

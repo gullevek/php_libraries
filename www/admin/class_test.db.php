@@ -62,7 +62,11 @@ print "VERSION LONG DB: " . $db->dbVersionInfo('server', false) . "<br>";
 print "VERSION NUMERIC DB: " . $db->dbVersionNumeric() . "<br>";
 print "SERVER ENCODING: " . $db->dbVersionInfo('server_encoding') . "<br>";
 print "ALL PG VERSION PARAMETERS: <pre>" . print_r($db->dbVersionInfoParameters(), true) . "</pre><br>";
-print "ALL OUTPUT [TEST]: <pre>" . print_r(pg_version($db->dbGetDbh()), true) . "</pre><br>";
+if (($dbh = $db->dbGetDbh()) instanceof \PgSql\Connection) {
+	print "ALL OUTPUT [TEST]: <pre>" . print_r(pg_version($dbh), true) . "</pre><br>";
+} else {
+	print "NO DB HANDLER<br>";
+}
 print "DB Version smaller $to_db_version: " . $db->dbCompareVersion('<' . $to_db_version) . "<br>";
 print "DB Version smaller than $to_db_version: " . $db->dbCompareVersion('<=' . $to_db_version) . "<br>";
 print "DB Version equal $to_db_version: " . $db->dbCompareVersion('=' . $to_db_version) . "<br>";
@@ -108,7 +112,11 @@ print "<br>";
 
 print "<pre>";
 
-print "SOCKET: " . pg_socket($db->dbGetDbh()) . "<br>";
+if (($dbh = $db->dbGetDbh()) instanceof \PgSql\Connection) {
+	print "SOCKET: " . pg_socket($dbh) . "<br>";
+} else {
+	print "NO SOCKET<br>";
+}
 
 // truncate test_foo table before testing
 print "<b>TRUNCATE test_foo</b><br>";

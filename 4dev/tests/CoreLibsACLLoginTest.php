@@ -1729,7 +1729,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				],
 				20
 			],
-			'invalud search' => [
+			'invalid search' => [
 				12,
 				'foo',
 				[],

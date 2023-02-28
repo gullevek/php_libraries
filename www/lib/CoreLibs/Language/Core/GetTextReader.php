@@ -122,7 +122,7 @@ class GetTextReader
 	* @param bool            $enable_cache Enable or disable caching
 	*                                      of strings (default on)
 	*/
-	public function __construct($Reader, bool $enable_cache = true)
+	public function __construct(FileReader|bool $Reader, bool $enable_cache = true)
 	{
 		// If there isn't a StreamReader, turn on short circuit mode.
 		if ((!is_object($Reader) && !$Reader) || (is_object($Reader) && $Reader->error)) {

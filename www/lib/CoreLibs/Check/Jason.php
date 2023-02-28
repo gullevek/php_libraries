@@ -32,7 +32,7 @@ class Jason
 	 *                                     or error string ('' for no error)
 	 * @deprecated Use Json::jsonGetLastError()
 	 */
-	public static function jsonGetLastError(bool $return_string = false)
+	public static function jsonGetLastError(bool $return_string = false): int|string
 	{
 		return Json::jsonGetLastError($return_string);
 	}

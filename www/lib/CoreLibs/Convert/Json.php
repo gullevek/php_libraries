@@ -51,13 +51,13 @@ class Json
 	/**
 	 * returns human readable string for json errors thrown in jsonConvertToArray
 	 *
-	 * @param  bool|boolean $return_string [default=false] if set to true
-	 *                                     it will return the message string and not
-	 *                                     the error number
-	 * @return int|string                  Either error number (0 for no error)
-	 *                                     or error string ('' for no error)
+	 * @param  bool       $return_string [default=false] if set to true
+	 *                                   it will return the message string and not
+	 *                                   the error number
+	 * @return int|string                Either error number (0 for no error)
+	 *                                   or error string ('' for no error)
 	 */
-	public static function jsonGetLastError(bool $return_string = false)
+	public static function jsonGetLastError(bool $return_string = false): int|string
 	{
 		$json_error_string = '';
 		// valid errors as of php 8.0

@@ -731,9 +731,6 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			empty($this->table_array['protected']['value']) &&
 			!$this->error
 		) {
-			if (!is_array($element_list)) {
-				$element_list = [];
-			}
 			for ($i = 0, $i_max = count($element_list); $i < $i_max; $i++) {
 				// $this->log->debug('form_error', 'Array: '
 				//	. is_array($this->element_list[$element_list[$i]]['read_data']) . ' | '
@@ -2294,11 +2291,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				}
 			}
 		}
-		if (is_array($hidden_array)) {
-			reset($hidden_array);
-			foreach ($hidden_array as $key => $value) {
-				$hidden[] = ['key' => $key, 'value' => $value];
-			}
+		reset($hidden_array);
+		foreach ($hidden_array as $key => $value) {
+			$hidden[] = ['key' => $key, 'value' => $value];
 		}
 		return $hidden;
 	}

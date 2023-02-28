@@ -13,27 +13,27 @@ class Elements
 	/**
 	 * print the date/time drop downs, used in any queue/send/insert at date/time place
 	 *
-	 * @param  int    $year          year YYYY
-	 * @param  int    $month         month m
-	 * @param  int    $day           day d
-	 * @param  int    $hour          hour H
-	 * @param  int    $min           min i
-	 * @param  string $suffix        additional info printed after the date time
-	 *                               variable in the drop down
-	 *                               also used for ID in the on change JS call
-	 * @param  int    $min_steps     default is 1 (minute), can set to anything,
-	 *                               is used as sum up from 0
-	 * @param  bool   $name_pos_back default false, if set to true,
-	 *                               the name will be printend after the drop down
-	 *                               and not before the drop down
-	 * @return string                HTML formated strings for drop down lists of date and time
+	 * @param  int|string $year          year YYYY
+	 * @param  int|string $month         month m
+	 * @param  int|string $day           day d
+	 * @param  int|string $hour          hour H
+	 * @param  int|string $min           min i
+	 * @param  string     $suffix        additional info printed after the date time
+	 *                                   variable in the drop down
+	 *                                   also used for ID in the on change JS call
+	 * @param  int        $min_steps     default is 1 (minute), can set to anything,
+	 *                                   is used as sum up from 0
+	 * @param  bool       $name_pos_back default false, if set to true,
+	 *                                   the name will be printend after the drop down
+	 *                                   and not before the drop down
+	 * @return string                    HTML formated strings for drop down lists of date and time
 	 */
 	public static function printDateTime(
-		$year,
-		$month,
-		$day,
-		$hour,
-		$min,
+		int|string $year,
+		int|string $month,
+		int|string $day,
+		int|string $hour,
+		int|string $min,
 		string $suffix = '',
 		int $min_steps = 1,
 		bool $name_pos_back = false
