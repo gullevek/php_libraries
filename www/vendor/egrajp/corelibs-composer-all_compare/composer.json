@@ -1,0 +1,33 @@
+{
+    "name": "egrajp/corelibs-composer-all",
+    "description": "CoreLibs in a composer package",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "CoreLibs\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Clemens Schwaighofer",
+            "email": "clemens.schwaighofer@egplusww.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "1.10.x-dev",
+        "phan/phan": "v5.x-dev",
+        "phpunit/phpunit": "^9",
+        "egrajp/smarty-extended": "^4.3"
+    },
+    "repositories": {
+        "git.egplusww.jp.Composer": {
+            "type": "composer",
+            "url": "https://git.egplusww.jp/api/packages/Composer/composer"
+        }
+    }
+}

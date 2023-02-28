@@ -10,8 +10,8 @@
         }
     ],
 	"require": {
-		"egrajp/corelibs-composer-all": "^7.11",
-        "egrajp/smarty-extended": "^4.3"
+		"egrajp/smarty-extended": "^4.3",
+        "egrajp/corelibs-composer-all": "@dev"
 	},
     "autoload": {
         "classmap": [
@@ -19,6 +19,13 @@
         ]
     },
     "repositories": {
+        "CoreLibs-Composer-All": {
+            "type": "path",
+            "url": "/storage/var/www/html/developers/clemens/core_data/composer-packages/CoreLibs-Composer-All",
+            "options": {
+                "symlink": false
+            }
+		},
         "git.egplusww.jp.Composer": {
             "type": "composer",
             "url": "https://git.egplusww.jp/api/packages/Composer/composer"

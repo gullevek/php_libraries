@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dc5d89075423c3c3df219079c491d91c",
+    "content-hash": "a80d1d945e4d8202a444c05b501eaf21",
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
-            "version": "7.12.1",
+            "version": "dev-development",
             "dist": {
-                "type": "zip",
-                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fcorelibs-composer-all/7.12.1/egrajp-corelibs-composer-all.7.12.1.zip",
-                "shasum": "457089ac43cb9fff5091e163877bb56ecb868151"
+                "type": "path",
+                "url": "/storage/var/www/html/developers/clemens/core_data/composer-packages/CoreLibs-Composer-All",
+                "reference": "0a80abe8a4524188b42c5b4cffdd9a813ef407e6"
             },
             "require": {
                 "php": ">=8.1"
@@ -39,7 +39,10 @@
                 }
             ],
             "description": "CoreLibs in a composer package",
-            "time": "2023-02-28T09:16:32+09:00"
+            "transport-options": {
+                "symlink": false,
+                "relative": false
+            }
         },
         {
             "name": "egrajp/smarty-extended",
@@ -75,7 +78,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "egrajp/corelibs-composer-all": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

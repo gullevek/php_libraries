@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace CoreLibs\DB\SQL\SqlInterface;
+namespace CoreLibs\DB\SQL\Interface;
 
 interface SqlFunctions
 {
@@ -21,33 +21,33 @@ interface SqlFunctions
 	 * Undocumented function
 	 *
 	 * @param string $query
-	 * @return object|resource|bool
+	 * @return \PgSql\Result|false
 	 */
-	public function __dbQuery(string $query);
+	public function __dbQuery(string $query): \PgSql\Result|false;
 
 	/**
 	 * Undocumented function
 	 *
 	 * @param string $query
 	 * @param array<mixed> $params
-	 * @return object|resource|bool
+	 * @return \PgSql\Result|false
 	 */
-	public function __dbQueryParams(string $query, array $params);
+	public function __dbQueryParams(string $query, array $params): \PgSql\Result|false;
 
 	/**
 	 * Undocumented function
 	 *
 	 * @param string $query
-	 * @return boolean
+	 * @return bool
 	 */
 	public function __dbSendQuery(string $query): bool;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @return object|resource|bool
+	 * @return \PgSql\Result|false
 	 */
-	public function __dbGetResult();
+	public function __dbGetResult(): \PgSql\Result|false;
 
 	/**
 	 * Undocumented function
@@ -61,85 +61,85 @@ interface SqlFunctions
 	 *
 	 * @param string $name
 	 * @param string $query
-	 * @return object|resource|bool
+	 * @return \PgSql\Result|false
 	 */
-	public function __dbPrepare(string $name, string $query);
+	public function __dbPrepare(string $name, string $query): \PgSql\Result|false;
 
 	/**
 	 * Undocumented function
 	 *
 	 * @param string $name
 	 * @param array<mixed> $data
-	 * @return object|resource|bool
+	 * @return \PgSql\Result|false
 	 */
-	public function __dbExecute(string $name, array $data);
+	public function __dbExecute(string $name, array $data): \PgSql\Result|false;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param object|resource|bool $cursor
-	 * @return integer
+	 * @param \PgSql\Result|false $cursor
+	 * @return int
 	 */
-	public function __dbNumRows($cursor): int;
+	public function __dbNumRows(\PgSql\Result|false $cursor): int;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param object|resource|bool $cursor
-	 * @return integer
+	 * @param \PgSql\Result|false $cursor
+	 * @return int
 	 */
-	public function __dbNumFields($cursor): int;
+	public function __dbNumFields(\PgSql\Result|false $cursor): int;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param object|resource|bool $cursor
+	 * @param \PgSql\Result|false $cursor
 	 * @param int $i
-	 * @return string|bool
+	 * @return string|false
 	 */
-	public function __dbFieldName($cursor, int $i);
+	public function __dbFieldName(\PgSql\Result|false $cursor, int $i): string|false;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param object|resource|bool $cursor
+	 * @param \PgSql\Result|false $cursor
 	 * @param int $result_type
 	 * @return array<mixed>|bool
 	 */
-	public function __dbFetchArray($cursor, int $result_type = PGSQL_BOTH);
+	public function __dbFetchArray(\PgSql\Result|false $cursor, int $result_type = PGSQL_BOTH);
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param boolean $assoc_type
-	 * @return integer
+	 * @param bool $assoc_type
+	 * @return int
 	 */
 	public function __dbResultType(bool $assoc_type = true): int;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param object|resource|bool $cursor
+	 * @param \PgSql\Result|false $cursor
 	 * @return array<mixed>|bool
 	 */
-	public function __dbFetchAll($cursor);
+	public function __dbFetchAll(\PgSql\Result|false $cursor): array|bool;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param object|resource|bool $cursor
-	 * @return integer
+	 * @param \PgSql\Result|false $cursor
+	 * @return int
 	 */
-	public function __dbAffectedRows($cursor): int;
+	public function __dbAffectedRows(\PgSql\Result|false $cursor): int;
 
 	/**
 	 * Undocumented function
 	 *
 	 * @param string $query
 	 * @param string|null $pk_name
-	 * @return string|integer|false
+	 * @return string|int|false
 	 */
-	public function __dbInsertId(string $query, ?string $pk_name);
+	public function __dbInsertId(string $query, ?string $pk_name): string|int|false;
 
 	/**
 	 * Undocumented function
@@ -148,7 +148,7 @@ interface SqlFunctions
 	 * @param string $schema
 	 * @return string|bool
 	 */
-	public function __dbPrimaryKey(string $table, string $schema = '');
+	public function __dbPrimaryKey(string $table, string $schema = ''): string|bool;
 
 	/**
 	 * Undocumented function
@@ -157,9 +157,9 @@ interface SqlFunctions
 	 * @param string $db_user
 	 * @param string $db_pass
 	 * @param string $db_name
-	 * @param integer $db_port
+	 * @param int $db_port
 	 * @param string $db_ssl
-	 * @return object|resource|bool
+	 * @return \PgSql\Connection|false
 	 */
 	public function __dbConnect(
 		string $db_host,
@@ -168,24 +168,24 @@ interface SqlFunctions
 		string $db_name,
 		int $db_port,
 		string $db_ssl = 'allow'
-	);
+	): \PgSql\Connection|false;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param object|resource|bool $cursor
+	 * @param \PgSql\Result|false $cursor
 	 * @return string
 	 */
-	public function __dbPrintError($cursor = false): string;
+	public function __dbPrintError(\PgSql\Result|false $cursor = false): string;
 
 	/**
 	 * Undocumented function
 	 *
 	 * @param string $table
-	 * @param boolean $extended
+	 * @param bool $extended
 	 * @return array<mixed>|bool
 	 */
-	public function __dbMetaData(string $table, $extended = true);
+	public function __dbMetaData(string $table, bool $extended = true): array|bool;
 
 	/**
 	 * Undocumented function
@@ -193,7 +193,7 @@ interface SqlFunctions
 	 * @param string|int|float|bool $string
 	 * @return string
 	 */
-	public function __dbEscapeString($string): string;
+	public function __dbEscapeString(string|int|float|bool $string): string;
 
 	/**
 	 * Undocumented function
@@ -201,7 +201,7 @@ interface SqlFunctions
 	 * @param string|int|float|bool $string
 	 * @return string
 	 */
-	public function __dbEscapeLiteral($string): string;
+	public function __dbEscapeLiteral(string|int|float|bool $string): string;
 
 	/**
 	 * Undocumented function
@@ -230,15 +230,15 @@ interface SqlFunctions
 	/**
 	 * Undocumented function
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function __dbConnectionBusy(): bool;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param integer $timeout_seconds
-	 * @return boolean
+	 * @param int $timeout_seconds
+	 * @return bool
 	 */
 	public function __dbConnectionBusySocketWait(int $timeout_seconds = 3): bool;
 
@@ -253,8 +253,8 @@ interface SqlFunctions
 	 * Undocumented function
 	 *
 	 * @param string $array_text
-	 * @param integer $start
-	 * @param integer|null $end
+	 * @param int $start
+	 * @param int|null $end
 	 * @return array<mixed>|null
 	 */
 	public function __dbArrayParse(
@@ -275,7 +275,7 @@ interface SqlFunctions
 	 * Undocumented function
 	 *
 	 * @param string $db_schema
-	 * @return integer
+	 * @return int
 	 */
 	public function __dbSetSchema(string $db_schema): int;
 
@@ -290,7 +290,7 @@ interface SqlFunctions
 	 * Undocumented function
 	 *
 	 * @param string $db_encoding
-	 * @return integer
+	 * @return int
 	 */
 	public function __dbSetEncoding(string $db_encoding): int;
 

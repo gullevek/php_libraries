@@ -1,0 +1,6 @@
+<phpunit
+	cacheResultFile="/tmp/phpunit-corelibs-composer.result.cache"
+	colors="true"
+	verbose="true"
+>
+</phpunit>
