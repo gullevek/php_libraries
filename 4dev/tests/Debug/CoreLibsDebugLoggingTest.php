@@ -33,10 +33,10 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		return [
 			'log folder set' => [
 				[
-					'log_folder' => '/tmp'
+					'log_folder' => DIRECTORY_SEPARATOR . 'tmp'
 				],
 				[
-					'log_folder' => '/tmp/',
+					'log_folder' => DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR,
 					'debug_all' => false,
 					'print_all' => false,
 				],
@@ -54,27 +54,27 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			'no options set, constant set' => [
 				null,
 				[
-					'log_folder' => str_replace('/configs', '', __DIR__)
-					. DIRECTORY_SEPARATOR . 'log/',
+					'log_folder' => str_replace(DIRECTORY_SEPARATOR . 'configs', '', __DIR__)
+							. DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR,
 					'debug_all' => false,
 					'print_all' => false,
 				],
 				[
 					'constant' => [
-						'BASE' => str_replace('/configs', '', __DIR__)
+						'BASE' => str_replace(DIRECTORY_SEPARATOR . 'configs', '', __DIR__)
 							. DIRECTORY_SEPARATOR,
-						'LOG' => 'log/'
+						'LOG' => 'log' . DIRECTORY_SEPARATOR
 					]
 				]
 			],
 			'standard test set' => [
 				[
-					'log_folder' => '/tmp',
+					'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
 					'debug_all' => true,
 					'print_all' => true,
 				],
 				[
-					'log_folder' => '/tmp/',
+					'log_folder' => DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR,
 					'debug_all' => true,
 					'print_all' => true,
 				],
@@ -98,7 +98,22 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	{
 		if (!empty($override['constant'])) {
 			foreach ($override['constant'] as $var => $value) {
-				define($var, $value);
+				if (!defined($var)) {
+					define($var, $value);
+				}
+			}
+			// for deprecated no log_folder set
+			// if base is defined and it does have AAASetupData set
+			// change the log_folder "Debug" to "AAASetupData"
+			if (
+				defined('BASE') &&
+				strpos(BASE, DIRECTORY_SEPARATOR . 'AAASetupData') !== false
+			) {
+				$expected['log_folder'] = str_replace(
+					DIRECTORY_SEPARATOR . 'Debug',
+					DIRECTORY_SEPARATOR . 'AAASetupData',
+					$expected['log_folder']
+				);
 			}
 		}
 		if ($options === null) {
@@ -109,15 +124,18 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		// check that settings match
 		$this->assertEquals(
 			$expected['log_folder'],
-			$log->getSetting('log_folder')
+			$log->getSetting('log_folder'),
+			'log folder not matching'
 		);
 		$this->assertEquals(
 			$expected['debug_all'],
-			$log->getSetting('debug_output_all')
+			$log->getSetting('debug_output_all'),
+			'debug all flag not matching'
 		);
 		$this->assertEquals(
 			$expected['print_all'],
-			$log->getSetting('print_output_all')
+			$log->getSetting('print_output_all'),
+			'print all flag not matching'
 		);
 		// print "LOG: " . $log->getSetting('log_folder') . "\n";
 		// print "DEBUG: " . $log->getSetting('debug_output_all') . "\n";
