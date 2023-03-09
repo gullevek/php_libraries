@@ -17,9 +17,12 @@ class TestDB
 
 	/**
 	 * Undocumented function
+	 *
+	 * @param \CoreLibs\Debug\Logging $log
 	 */
-	public function __construct()
-	{
+	public function __construct(
+		\CoreLibs\Debug\Logging $log
+	) {
 		$this->config = [
 			'db_name' => $_ENV['DB_NAME_TEST'] ?? '',
 			'db_user' => $_ENV['DB_USER_TEST'] ?? '',
@@ -31,7 +34,10 @@ class TestDB
 			'db_encoding' => '',
 			'db_ssl' => 'allow'
 		];
-		$this->db = new IO($this->config);
+		$this->db = new IO(
+			$this->config,
+			$log
+		);
 	}
 
 	/**

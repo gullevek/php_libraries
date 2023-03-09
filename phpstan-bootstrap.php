@@ -8,5 +8,7 @@ $_SERVER['HTTP_HOST'] = 'soba.tokyo.tequila.jp';
 // for whatever reason it does not load that from the confing.master.php
 // for includes/admin_header.php
 define('BASE_NAME', '');
+define('SITE_DOMAIN', '');
+define('HOST_NAME', 'soba.tokyo.tequila.jp');
 
 // __END__

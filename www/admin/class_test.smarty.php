@@ -11,10 +11,6 @@ $DEBUG_ALL = true;
 $PRINT_ALL = true;
 $DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
-
 ob_start();
 
 // basic class test file
@@ -33,9 +29,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'debug_all' => $DEBUG_ALL,
+	'echo_all' => $ECHO_ALL,
+	'print_all' => $PRINT_ALL,
 ]);
 $locale = \CoreLibs\Language\GetLocale::setLocale();
 $l10n = new \CoreLibs\Language\L10n(
@@ -43,7 +39,12 @@ $l10n = new \CoreLibs\Language\L10n(
 	$locale['domain'],
 	$locale['path'],
 );
-$smarty = new CoreLibs\Template\SmartyExtend($l10n, $locale);
+$smarty = new CoreLibs\Template\SmartyExtend(
+	$l10n,
+	$locale,
+	CACHE_ID,
+	COMPILE_ID,
+);
 
 $PAGE_NAME = 'TEST CLASS: SMARTY';
 print "<!DOCTYPE html>";
@@ -59,7 +60,7 @@ $smarty->CSS_SPECIAL_TEMPLATE_NAME = 'smart_test.css';
 $smarty->USE_PROTOTYPE = false;
 $smarty->USE_JQUERY = true;
 $smarty->JS_DATEPICKR = false;
-if ($smarty->USE_PROTOTYPE) {
+if ($smarty->USE_PROTOTYPE) { /** @phpstan-ignore-line for debug purpose */
 	$smarty->ADMIN_JAVASCRIPT = 'edit.pt.js';
 	$smarty->JS_SPECIAL_TEMPLATE_NAME = 'prototype.test.js';
 } elseif ($smarty->USE_JQUERY) {
@@ -67,7 +68,17 @@ if ($smarty->USE_PROTOTYPE) {
 	$smarty->JS_SPECIAL_TEMPLATE_NAME = 'jquery.test.js';
 }
 $smarty->PAGE_WIDTH = '100%';
-$smarty->setSmartyPaths();
+$smarty->setSmartyPaths(
+	BASE . INCLUDES,
+	BASE . INCLUDES . TEMPLATES . CONTENT_PATH,
+	LAYOUT . JS,
+	LAYOUT . CSS,
+	LAYOUT . FONT,
+	LAYOUT . IMAGES,
+	LAYOUT . CACHE,
+	ROOT . LAYOUT . CACHE,
+	null // master template name optional
+);
 
 // smarty test
 $smarty->DATA['SMARTY_TEST'] = 'Test Data';
@@ -122,7 +133,18 @@ $smarty->DATA['checkbox_test_selected'] = ['1', '-1'];
 $smarty->DATA['checkbox_test_pos_selected'] = ['0', '-1'];
 
 
-$smarty->setSmartyVarsAdmin();
+$smarty->setSmartyVarsAdmin(
+	BASE . TEMPLATES_C,
+	BASE . CACHE,
+	CSS,
+	FONT,
+	JS,
+	DEFAULT_ENCODING,
+	G_TITLE,
+	ADMIN_STYLESHEET,
+	ADMIN_JAVASCRIPT,
+	PAGE_WIDTH
+);
 
 // error message
 print $log->printErrorMsg();

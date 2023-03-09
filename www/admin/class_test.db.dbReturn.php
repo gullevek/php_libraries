@@ -31,9 +31,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'debug_all' => $DEBUG_ALL ?? true,
+	'echo_all' => $ECHO_ALL,
+	'print_all' => $PRINT_ALL ?? true,
 ]);
 // db connection and attach logger
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);

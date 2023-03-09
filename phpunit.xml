@@ -2,5 +2,6 @@
 	cacheResultFile="/tmp/phpunit-corelibs.result.cache"
 	colors="true"
 	verbose="true"
+	convertDeprecationsToExceptions="true"
 >
 </phpunit>

@@ -378,16 +378,16 @@ class IO
 	/**
 	 * main DB concstructor with auto connection to DB and failure set on failed connection
 	 * @param array<mixed> $db_config DB configuration array
-	 * @param \CoreLibs\Debug\Logging|null $log Logging class
+	 * @param \CoreLibs\Debug\Logging $log Logging class
 	 * @param bool|null $db_debug_override Overrides debug settings in db_config
 	 */
 	public function __construct(
 		array $db_config,
-		?\CoreLibs\Debug\Logging $log = null,
+		\CoreLibs\Debug\Logging $log,
 		?bool $db_debug_override = null
 	) {
 		// attach logger
-		$this->log = $log ?? new \CoreLibs\Debug\Logging();
+		$this->log = $log;
 		// sets the names (for connect/reconnect)
 		$this->db_name = $db_config['db_name'] ?? '';
 		$this->db_user = $db_config['db_user'] ?? '';
@@ -3243,114 +3243,6 @@ class IO
 	public function dbGetReturning(): array|string|int|bool|null
 	{
 		return $this->dbGetInsertPK();
-	}
-
-	/**
-	 * returns the db init error
-	 * if failed to connect it is set to true
-	 * else false
-	 * @return bool connection failure status
-	 * @deprecated Use dbGetConnectionStatus() and True means correct connection
-	 */
-	public function getConnectionStatus(): bool
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, '
-			. 'use dbGetConnectionStatus() with True for successful connection', E_USER_DEPRECATED);
-		// reverse because before it was reverse
-		return $this->dbGetConnectionStatus() ? false : true;
-	}
-
-	/**
-	 * Sets error number that was last
-	 * So we always have the last error number stored even if a new one is created
-	 * @return int last error number
-	 * @deprecated Use dbGetLastError()
-	 */
-	public function getHadError(): int
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetLastError()', E_USER_DEPRECATED);
-		return (int)$this->dbGetLastError();
-	}
-
-	/**
-	 * Sets warning number that was last
-	 * So we always have the last warning number stored even if a new one is created
-	 * @return int last error number
-	 * @deprecated Use dbGetLastWarning()
-	 */
-	public function getHadWarning(): int
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetLastWarning()', E_USER_DEPRECATED);
-		return (int)$this->dbGetLastWarning();
-	}
-
-	/**
-	 * old call for getInserReturnExt
-	 * @param  string|null              $key See above
-	 * @return array<mixed>|string|int|bool|null      See above
-	 * @deprecated use getReturningExt($key = null) instead
-	 */
-	public function getInsertReturn(?string $key = null): array|string|int|bool|null
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use getReturningExt($key = null)', E_USER_DEPRECATED);
-		return $this->dbGetReturningExt($key);
-	}
-
-	/**
-	 * DEPRECATED: getReturning
-	 * @return array<mixed>|string|int|bool|null [DEPRECATED]
-	 * @deprecated use dbGetReturning() instead
-	 */
-	public function getReturning(): array|string|int|bool|null
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetReturning()', E_USER_DEPRECATED);
-		return $this->dbGetInsertPK();
-	}
-
-	/**
-	 * DEPRECATED: getInsertPK
-	 * @return array<mixed>|string|int|bool|null [DEPRECATED]
-	 * @deprecated use dbGetInsertPK() instead
-	 */
-	public function getInsertPK(): array|string|int|bool|null
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetInsertPK()', E_USER_DEPRECATED);
-		return $this->dbGetInsertPK();
-	}
-
-	/**
-	 * DEPRECATED: getReturningExt
-	 * @param  string|null $key [DEPRECATED]
-	 * @return array<mixed>|string|bool|int|null [DEPRECATED]
-	 * @deprecated use dbGetReturningExt($key = null) instead
-	 */
-	public function getReturningExt(?string $key = null): array|string|int|bool|null
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetReturningExt($key = null)', E_USER_DEPRECATED);
-		return $this->dbGetReturningExt($key);
-	}
-
-	/**
-	 * DEPRECATED: getCursorExt
-	 * @param  string|null $q [DEPRECATED]
-	 * @return array<mixed>|string|int|\PgSql\Result|null [DEPRECATED]
-	 * @deprecated use dbGetCursorExt($q = null) instead
-	 */
-	public function getCursorExt(?string $q = null): array|string|int|\PgSql\Result|null
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetCursorExt($q = null)', E_USER_DEPRECATED);
-		return $this->dbGetCursorExt($q);
-	}
-
-	/**
-	 * DEPRECATED: getNumRows
-	 * @return int|null [DEPRECATED]
-	 * @deprecated use dbGetNumRows() instead
-	 */
-	public function getNumRows(): ?int
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use dbGetNumRows()', E_USER_DEPRECATED);
-		return $this->dbGetNumRows();
 	}
 
 	// end if db class

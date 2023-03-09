@@ -14,6 +14,7 @@ class GetLocale
 	/**
 	 * returns locale, lang, domain, encoding, path
 	 * from either parameter set or from sessions/config variables
+	 * NOTE: named constant usage is deprecated and will be removed in future
 	 *
 	 * @param  string|null $locale   override auto detect
 	 * @param  string|null $domain   override domain
@@ -36,6 +37,10 @@ class GetLocale
 				// parse from session (logged in)
 				$locale = $_SESSION['DEFAULT_LOCALE'];
 			} else {
+				trigger_error(
+					'setLocale: Unset $locale or unset SESSION locale is deprecated',
+					E_USER_DEPRECATED
+				);
 				// else parse from site locale
 				$locale = defined('SITE_LOCALE') && !empty(SITE_LOCALE) ?
 					SITE_LOCALE :
@@ -50,8 +55,16 @@ class GetLocale
 			empty($domain) ||
 			!preg_match("/^\w+$/", $domain)
 		) {
-			// if no domain is set, fall back to content path
-			$domain = str_replace('/', '', CONTENT_PATH);
+			if (!empty($_SESSION['DEFAULT_DOMAIN'])) {
+				$domain = $_SESSION['DEFAULT_DOMAIN'];
+			} else {
+				trigger_error(
+					'setLocale: Unset $domain is deprecated',
+					E_USER_DEPRECATED
+				);
+				// if no domain is set, fall back to content path
+				$domain = str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH);
+			}
 		}
 		// check that override encoding matches locale encoding
 		// if locale encoding is set
@@ -71,6 +84,10 @@ class GetLocale
 				// else set from session
 				$encoding = $_SESSION['DEFAULT_CHARSET'];
 			} else {
+				trigger_error(
+					'setLocale: Short $locale with unset $encoding or unset SESSION encoding is deprecated',
+					E_USER_DEPRECATED
+				);
 				// else set from site encoding
 				$encoding = defined('SITE_ENCODING') && !empty(SITE_ENCODING) ?
 					SITE_ENCODING :
@@ -85,7 +102,15 @@ class GetLocale
 			empty($path) ||
 			!is_dir($path)
 		) {
-			$path = BASE . INCLUDES . LOCALE;
+			if (!empty($_SESSION['LOCALE_PATH'])) {
+				$path = $_SESSION['LOCALE_PATH'];
+			} else {
+				trigger_error(
+					'setLocale: Unset $path is deprecated',
+					E_USER_DEPRECATED
+				);
+				$path = BASE . INCLUDES . LOCALE;
+			}
 		}
 		// extract lang & country from locale string, else set to en
 		if (

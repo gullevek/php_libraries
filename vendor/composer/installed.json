@@ -1,6 +1,254 @@
 {
     "packages": [
         {
+            "name": "amphp/amp",
+            "version": "v2.6.2",
+            "version_normalized": "2.6.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/amphp/amp.git",
+                "reference": "9d5100cebffa729aaffecd3ad25dc5aeea4f13bb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/amphp/amp/zipball/9d5100cebffa729aaffecd3ad25dc5aeea4f13bb",
+                "reference": "9d5100cebffa729aaffecd3ad25dc5aeea4f13bb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "amphp/php-cs-fixer-config": "dev-master",
+                "amphp/phpunit-util": "^1",
+                "ext-json": "*",
+                "jetbrains/phpstorm-stubs": "^2019.3",
+                "phpunit/phpunit": "^7 | ^8 | ^9",
+                "psalm/phar": "^3.11@dev",
+                "react/promise": "^2"
+            },
+            "time": "2022-02-20T17:52:18+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "files": [
+                    "lib/functions.php",
+                    "lib/Internal/functions.php"
+                ],
+                "psr-4": {
+                    "Amp\\": "lib"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Lowrey",
+                    "email": "rdlowrey@php.net"
+                },
+                {
+                    "name": "Aaron Piotrowski",
+                    "email": "aaron@trowski.com"
+                },
+                {
+                    "name": "Bob Weinand",
+                    "email": "bobwei9@hotmail.com"
+                },
+                {
+                    "name": "Niklas Keller",
+                    "email": "me@kelunik.com"
+                }
+            ],
+            "description": "A non-blocking concurrency framework for PHP applications.",
+            "homepage": "https://amphp.org/amp",
+            "keywords": [
+                "async",
+                "asynchronous",
+                "awaitable",
+                "concurrency",
+                "event",
+                "event-loop",
+                "future",
+                "non-blocking",
+                "promise"
+            ],
+            "support": {
+                "irc": "irc://irc.freenode.org/amphp",
+                "issues": "https://github.com/amphp/amp/issues",
+                "source": "https://github.com/amphp/amp/tree/v2.6.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/amphp",
+                    "type": "github"
+                }
+            ],
+            "install-path": "../amphp/amp"
+        },
+        {
+            "name": "amphp/byte-stream",
+            "version": "v1.8.1",
+            "version_normalized": "1.8.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/amphp/byte-stream.git",
+                "reference": "acbd8002b3536485c997c4e019206b3f10ca15bd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/amphp/byte-stream/zipball/acbd8002b3536485c997c4e019206b3f10ca15bd",
+                "reference": "acbd8002b3536485c997c4e019206b3f10ca15bd",
+                "shasum": ""
+            },
+            "require": {
+                "amphp/amp": "^2",
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "amphp/php-cs-fixer-config": "dev-master",
+                "amphp/phpunit-util": "^1.4",
+                "friendsofphp/php-cs-fixer": "^2.3",
+                "jetbrains/phpstorm-stubs": "^2019.3",
+                "phpunit/phpunit": "^6 || ^7 || ^8",
+                "psalm/phar": "^3.11.4"
+            },
+            "time": "2021-03-30T17:13:30+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "files": [
+                    "lib/functions.php"
+                ],
+                "psr-4": {
+                    "Amp\\ByteStream\\": "lib"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aaron Piotrowski",
+                    "email": "aaron@trowski.com"
+                },
+                {
+                    "name": "Niklas Keller",
+                    "email": "me@kelunik.com"
+                }
+            ],
+            "description": "A stream abstraction to make working with non-blocking I/O simple.",
+            "homepage": "http://amphp.org/byte-stream",
+            "keywords": [
+                "amp",
+                "amphp",
+                "async",
+                "io",
+                "non-blocking",
+                "stream"
+            ],
+            "support": {
+                "irc": "irc://irc.freenode.org/amphp",
+                "issues": "https://github.com/amphp/byte-stream/issues",
+                "source": "https://github.com/amphp/byte-stream/tree/v1.8.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/amphp",
+                    "type": "github"
+                }
+            ],
+            "install-path": "../amphp/byte-stream"
+        },
+        {
+            "name": "composer/package-versions-deprecated",
+            "version": "1.11.99.5",
+            "version_normalized": "1.11.99.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/package-versions-deprecated.git",
+                "reference": "b4f54f74ef3453349c24a845d22392cd31e65f1d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/package-versions-deprecated/zipball/b4f54f74ef3453349c24a845d22392cd31e65f1d",
+                "reference": "b4f54f74ef3453349c24a845d22392cd31e65f1d",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.1.0 || ^2.0",
+                "php": "^7 || ^8"
+            },
+            "replace": {
+                "ocramius/package-versions": "1.11.99"
+            },
+            "require-dev": {
+                "composer/composer": "^1.9.3 || ^2.0@dev",
+                "ext-zip": "^1.13",
+                "phpunit/phpunit": "^6.5 || ^7"
+            },
+            "time": "2022-01-17T14:14:24+00:00",
+            "type": "composer-plugin",
+            "extra": {
+                "class": "PackageVersions\\Installer",
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "PackageVersions\\": "src/PackageVersions"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Marco Pivetta",
+                    "email": "ocramius@gmail.com"
+                },
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be"
+                }
+            ],
+            "description": "Composer plugin that provides efficient querying for installed package versions (no runtime IO)",
+            "support": {
+                "issues": "https://github.com/composer/package-versions-deprecated/issues",
+                "source": "https://github.com/composer/package-versions-deprecated/tree/1.11.99.5"
+            },
+            "funding": [
+                {
+                    "url": "https://packagist.com",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/composer",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
+                    "type": "tidelift"
+                }
+            ],
+            "install-path": "./package-versions-deprecated"
+        },
+        {
             "name": "composer/pcre",
             "version": "3.1.0",
             "version_normalized": "3.1.0.0",
@@ -228,6 +476,46 @@
             "install-path": "./xdebug-handler"
         },
         {
+            "name": "dnoegel/php-xdg-base-dir",
+            "version": "v0.1.1",
+            "version_normalized": "0.1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dnoegel/php-xdg-base-dir.git",
+                "reference": "8f8a6e48c5ecb0f991c2fdcf5f154a47d85f9ffd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dnoegel/php-xdg-base-dir/zipball/8f8a6e48c5ecb0f991c2fdcf5f154a47d85f9ffd",
+                "reference": "8f8a6e48c5ecb0f991c2fdcf5f154a47d85f9ffd",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~7.0|~6.0|~5.0|~4.8.35"
+            },
+            "time": "2019-12-04T15:06:13+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "XdgBaseDir\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "implementation of xdg base directory specification for php",
+            "support": {
+                "issues": "https://github.com/dnoegel/php-xdg-base-dir/issues",
+                "source": "https://github.com/dnoegel/php-xdg-base-dir/tree/v0.1.1"
+            },
+            "install-path": "../dnoegel/php-xdg-base-dir"
+        },
+        {
             "name": "felixfbecker/advanced-json-rpc",
             "version": "v3.2.1",
             "version_normalized": "3.2.1.0",
@@ -276,18 +564,141 @@
             "install-path": "../felixfbecker/advanced-json-rpc"
         },
         {
-            "name": "microsoft/tolerant-php-parser",
-            "version": "v0.1.1",
-            "version_normalized": "0.1.1.0",
+            "name": "felixfbecker/language-server-protocol",
+            "version": "v1.5.2",
+            "version_normalized": "1.5.2.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/microsoft/tolerant-php-parser.git",
-                "reference": "6a965617cf484355048ac6d2d3de7b6ec93abb16"
+                "url": "https://github.com/felixfbecker/php-language-server-protocol.git",
+                "reference": "6e82196ffd7c62f7794d778ca52b69feec9f2842"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/microsoft/tolerant-php-parser/zipball/6a965617cf484355048ac6d2d3de7b6ec93abb16",
-                "reference": "6a965617cf484355048ac6d2d3de7b6ec93abb16",
+                "url": "https://api.github.com/repos/felixfbecker/php-language-server-protocol/zipball/6e82196ffd7c62f7794d778ca52b69feec9f2842",
+                "reference": "6e82196ffd7c62f7794d778ca52b69feec9f2842",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "*",
+                "squizlabs/php_codesniffer": "^3.1",
+                "vimeo/psalm": "^4.0"
+            },
+            "time": "2022-03-02T22:36:06+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "LanguageServerProtocol\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "ISC"
+            ],
+            "authors": [
+                {
+                    "name": "Felix Becker",
+                    "email": "felix.b@outlook.com"
+                }
+            ],
+            "description": "PHP classes for the Language Server Protocol",
+            "keywords": [
+                "language",
+                "microsoft",
+                "php",
+                "server"
+            ],
+            "support": {
+                "issues": "https://github.com/felixfbecker/php-language-server-protocol/issues",
+                "source": "https://github.com/felixfbecker/php-language-server-protocol/tree/v1.5.2"
+            },
+            "install-path": "../felixfbecker/language-server-protocol"
+        },
+        {
+            "name": "fidry/cpu-core-counter",
+            "version": "0.5.1",
+            "version_normalized": "0.5.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/theofidry/cpu-core-counter.git",
+                "reference": "b58e5a3933e541dc286cc91fc4f3898bbc6f1623"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/theofidry/cpu-core-counter/zipball/b58e5a3933e541dc286cc91fc4f3898bbc6f1623",
+                "reference": "b58e5a3933e541dc286cc91fc4f3898bbc6f1623",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "fidry/makefile": "^0.2.0",
+                "phpstan/extension-installer": "^1.2.0",
+                "phpstan/phpstan": "^1.9.2",
+                "phpstan/phpstan-deprecation-rules": "^1.0.0",
+                "phpstan/phpstan-phpunit": "^1.2.2",
+                "phpstan/phpstan-strict-rules": "^1.4.4",
+                "phpunit/phpunit": "^9.5.26 || ^8.5.31",
+                "theofidry/php-cs-fixer-config": "^1.0",
+                "webmozarts/strict-phpunit": "^7.5"
+            },
+            "time": "2022-12-24T12:35:10+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Fidry\\CpuCoreCounter\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Théo FIDRY",
+                    "email": "theo.fidry@gmail.com"
+                }
+            ],
+            "description": "Tiny utility to get the number of CPU cores.",
+            "keywords": [
+                "CPU",
+                "core"
+            ],
+            "support": {
+                "issues": "https://github.com/theofidry/cpu-core-counter/issues",
+                "source": "https://github.com/theofidry/cpu-core-counter/tree/0.5.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/theofidry",
+                    "type": "github"
+                }
+            ],
+            "install-path": "../fidry/cpu-core-counter"
+        },
+        {
+            "name": "microsoft/tolerant-php-parser",
+            "version": "v0.1.2",
+            "version_normalized": "0.1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/microsoft/tolerant-php-parser.git",
+                "reference": "3eccfd273323aaf69513e2f1c888393f5947804b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/microsoft/tolerant-php-parser/zipball/3eccfd273323aaf69513e2f1c888393f5947804b",
+                "reference": "3eccfd273323aaf69513e2f1c888393f5947804b",
                 "shasum": ""
             },
             "require": {
@@ -296,7 +707,7 @@
             "require-dev": {
                 "phpunit/phpunit": "^8.5.15"
             },
-            "time": "2021-07-16T21:28:12+00:00",
+            "time": "2022-10-05T17:30:19+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -319,7 +730,7 @@
             "description": "Tolerant PHP-to-AST parser designed for IDE usage scenarios",
             "support": {
                 "issues": "https://github.com/microsoft/tolerant-php-parser/issues",
-                "source": "https://github.com/microsoft/tolerant-php-parser/tree/v0.1.1"
+                "source": "https://github.com/microsoft/tolerant-php-parser/tree/v0.1.2"
             },
             "install-path": "../microsoft/tolerant-php-parser"
         },
@@ -378,18 +789,77 @@
             "install-path": "../netresearch/jsonmapper"
         },
         {
-            "name": "phan/phan",
-            "version": "5.4.1",
-            "version_normalized": "5.4.1.0",
+            "name": "nikic/php-parser",
+            "version": "v4.15.4",
+            "version_normalized": "4.15.4.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/phan/phan.git",
-                "reference": "fef40178a952bcfcc3f69b76989dd613c3d5c759"
+                "url": "https://github.com/nikic/PHP-Parser.git",
+                "reference": "6bb5176bc4af8bcb7d926f88718db9b96a2d4290"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phan/phan/zipball/fef40178a952bcfcc3f69b76989dd613c3d5c759",
-                "reference": "fef40178a952bcfcc3f69b76989dd613c3d5c759",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/6bb5176bc4af8bcb7d926f88718db9b96a2d4290",
+                "reference": "6bb5176bc4af8bcb7d926f88718db9b96a2d4290",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "ircmaxell/php-yacc": "^0.0.7",
+                "phpunit/phpunit": "^6.5 || ^7.0 || ^8.0 || ^9.0"
+            },
+            "time": "2023-03-05T19:49:14+00:00",
+            "bin": [
+                "bin/php-parse"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.9-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "PhpParser\\": "lib/PhpParser"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov"
+                }
+            ],
+            "description": "A PHP parser written in PHP",
+            "keywords": [
+                "parser",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/nikic/PHP-Parser/issues",
+                "source": "https://github.com/nikic/PHP-Parser/tree/v4.15.4"
+            },
+            "install-path": "../nikic/php-parser"
+        },
+        {
+            "name": "phan/phan",
+            "version": "5.4.2",
+            "version_normalized": "5.4.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phan/phan.git",
+                "reference": "4f2870ed6fea320f62f3c3c63f3274d357a7980e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phan/phan/zipball/4f2870ed6fea320f62f3c3c63f3274d357a7980e",
+                "reference": "4f2870ed6fea320f62f3c3c63f3274d357a7980e",
                 "shasum": ""
             },
             "require": {
@@ -399,7 +869,7 @@
                 "ext-json": "*",
                 "ext-tokenizer": "*",
                 "felixfbecker/advanced-json-rpc": "^3.0.4",
-                "microsoft/tolerant-php-parser": "0.1.1",
+                "microsoft/tolerant-php-parser": "0.1.2",
                 "netresearch/jsonmapper": "^1.6.0|^2.0|^3.0|^4.0",
                 "php": "^7.2.0|^8.0.0",
                 "sabre/event": "^5.1.3",
@@ -419,7 +889,7 @@
                 "ext-tokenizer": "Needed for fallback/polyfill parser support and file/line-based suppressions.",
                 "ext-var_representation": "Suggested for converting values to strings in issue messages"
             },
-            "time": "2022-08-26T00:49:07+00:00",
+            "time": "2023-03-03T17:20:24+00:00",
             "bin": [
                 "phan",
                 "phan_client",
@@ -455,7 +925,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phan/phan/issues",
-                "source": "https://github.com/phan/phan/tree/5.4.1"
+                "source": "https://github.com/phan/phan/tree/5.4.2"
             },
             "install-path": "../phan/phan"
         },
@@ -682,17 +1152,17 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.3",
-            "version_normalized": "1.10.3.0",
+            "version": "1.10.5",
+            "version_normalized": "1.10.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "5419375b5891add97dc74be71e6c1c34baaddf64"
+                "reference": "1fb6f494d82455151ecf15c5c191923f5d84324e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/5419375b5891add97dc74be71e6c1c34baaddf64",
-                "reference": "5419375b5891add97dc74be71e6c1c34baaddf64",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1fb6f494d82455151ecf15c5c191923f5d84324e",
+                "reference": "1fb6f494d82455151ecf15c5c191923f5d84324e",
                 "shasum": ""
             },
             "require": {
@@ -701,7 +1171,7 @@
             "conflict": {
                 "phpstan/phpstan-shim": "*"
             },
-            "time": "2023-02-25T14:47:13+00:00",
+            "time": "2023-03-07T16:48:45+00:00",
             "bin": [
                 "phpstan",
                 "phpstan.phar"
@@ -724,7 +1194,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/1.10.3"
+                "source": "https://github.com/phpstan/phpstan/tree/1.10.5"
             },
             "funding": [
                 {
@@ -921,18 +1391,153 @@
             "install-path": "../sabre/event"
         },
         {
-            "name": "symfony/console",
-            "version": "v6.2.5",
-            "version_normalized": "6.2.5.0",
+            "name": "sebastian/diff",
+            "version": "5.0.0",
+            "version_normalized": "5.0.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/console.git",
-                "reference": "3e294254f2191762c1d137aed4b94e966965e985"
+                "url": "https://github.com/sebastianbergmann/diff.git",
+                "reference": "70dd1b20bc198da394ad542e988381b44e64e39f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/3e294254f2191762c1d137aed4b94e966965e985",
-                "reference": "3e294254f2191762c1d137aed4b94e966965e985",
+                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/70dd1b20bc198da394ad542e988381b44e64e39f",
+                "reference": "70dd1b20bc198da394ad542e988381b44e64e39f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.0",
+                "symfony/process": "^4.2 || ^5"
+            },
+            "time": "2023-02-03T07:00:31+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "5.0-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sebastian@phpunit.de"
+                },
+                {
+                    "name": "Kore Nordmann",
+                    "email": "mail@kore-nordmann.de"
+                }
+            ],
+            "description": "Diff implementation",
+            "homepage": "https://github.com/sebastianbergmann/diff",
+            "keywords": [
+                "diff",
+                "udiff",
+                "unidiff",
+                "unified diff"
+            ],
+            "support": {
+                "issues": "https://github.com/sebastianbergmann/diff/issues",
+                "source": "https://github.com/sebastianbergmann/diff/tree/5.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sebastianbergmann",
+                    "type": "github"
+                }
+            ],
+            "install-path": "../sebastian/diff"
+        },
+        {
+            "name": "spatie/array-to-xml",
+            "version": "3.1.5",
+            "version_normalized": "3.1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/array-to-xml.git",
+                "reference": "13f76acef5362d15c71ae1ac6350cc3df5e25e43"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/array-to-xml/zipball/13f76acef5362d15c71ae1ac6350cc3df5e25e43",
+                "reference": "13f76acef5362d15c71ae1ac6350cc3df5e25e43",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.2",
+                "pestphp/pest": "^1.21",
+                "spatie/pest-plugin-snapshots": "^1.1"
+            },
+            "time": "2022-12-24T13:43:51+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\ArrayToXml\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://freek.dev",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Convert an array to xml",
+            "homepage": "https://github.com/spatie/array-to-xml",
+            "keywords": [
+                "array",
+                "convert",
+                "xml"
+            ],
+            "support": {
+                "source": "https://github.com/spatie/array-to-xml/tree/3.1.5"
+            },
+            "funding": [
+                {
+                    "url": "https://spatie.be/open-source/support-us",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "install-path": "../spatie/array-to-xml"
+        },
+        {
+            "name": "symfony/console",
+            "version": "v6.2.7",
+            "version_normalized": "6.2.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/console.git",
+                "reference": "cbad09eb8925b6ad4fb721c7a179344dc4a19d45"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/console/zipball/cbad09eb8925b6ad4fb721c7a179344dc4a19d45",
+                "reference": "cbad09eb8925b6ad4fb721c7a179344dc4a19d45",
                 "shasum": ""
             },
             "require": {
@@ -967,7 +1572,7 @@
                 "symfony/lock": "",
                 "symfony/process": ""
             },
-            "time": "2023-01-01T08:38:09+00:00",
+            "time": "2023-02-25T17:00:03+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -1001,7 +1606,7 @@
                 "terminal"
             ],
             "support": {
-                "source": "https://github.com/symfony/console/tree/v6.2.5"
+                "source": "https://github.com/symfony/console/tree/v6.2.7"
             },
             "funding": [
                 {
@@ -1021,23 +1626,23 @@
         },
         {
             "name": "symfony/deprecation-contracts",
-            "version": "v3.2.0",
-            "version_normalized": "3.2.0.0",
+            "version": "v3.2.1",
+            "version_normalized": "3.2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/deprecation-contracts.git",
-                "reference": "1ee04c65529dea5d8744774d474e7cbd2f1206d3"
+                "reference": "e2d1534420bd723d0ef5aec58a22c5fe60ce6f5e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/1ee04c65529dea5d8744774d474e7cbd2f1206d3",
-                "reference": "1ee04c65529dea5d8744774d474e7cbd2f1206d3",
+                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/e2d1534420bd723d0ef5aec58a22c5fe60ce6f5e",
+                "reference": "e2d1534420bd723d0ef5aec58a22c5fe60ce6f5e",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.1"
             },
-            "time": "2022-11-25T10:21:52+00:00",
+            "time": "2023-03-01T10:25:55+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -1071,7 +1676,7 @@
             "description": "A generic function and convention to trigger deprecation notices",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/deprecation-contracts/tree/v3.2.0"
+                "source": "https://github.com/symfony/deprecation-contracts/tree/v3.2.1"
             },
             "funding": [
                 {
@@ -1088,6 +1693,72 @@
                 }
             ],
             "install-path": "../symfony/deprecation-contracts"
+        },
+        {
+            "name": "symfony/filesystem",
+            "version": "v6.2.7",
+            "version_normalized": "6.2.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/filesystem.git",
+                "reference": "82b6c62b959f642d000456f08c6d219d749215b3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/82b6c62b959f642d000456f08c6d219d749215b3",
+                "reference": "82b6c62b959f642d000456f08c6d219d749215b3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1",
+                "symfony/polyfill-ctype": "~1.8",
+                "symfony/polyfill-mbstring": "~1.8"
+            },
+            "time": "2023-02-14T08:44:56+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Filesystem\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides basic utilities for the filesystem",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/filesystem/tree/v6.2.7"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "install-path": "../symfony/filesystem"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -1519,17 +2190,17 @@
         },
         {
             "name": "symfony/service-contracts",
-            "version": "v3.2.0",
-            "version_normalized": "3.2.0.0",
+            "version": "v3.2.1",
+            "version_normalized": "3.2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/service-contracts.git",
-                "reference": "aac98028c69df04ee77eb69b96b86ee51fbf4b75"
+                "reference": "a8c9cedf55f314f3a186041d19537303766df09a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/aac98028c69df04ee77eb69b96b86ee51fbf4b75",
-                "reference": "aac98028c69df04ee77eb69b96b86ee51fbf4b75",
+                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/a8c9cedf55f314f3a186041d19537303766df09a",
+                "reference": "a8c9cedf55f314f3a186041d19537303766df09a",
                 "shasum": ""
             },
             "require": {
@@ -1542,7 +2213,7 @@
             "suggest": {
                 "symfony/service-implementation": ""
             },
-            "time": "2022-11-25T10:21:52+00:00",
+            "time": "2023-03-01T10:32:47+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -1587,7 +2258,7 @@
                 "standards"
             ],
             "support": {
-                "source": "https://github.com/symfony/service-contracts/tree/v3.2.0"
+                "source": "https://github.com/symfony/service-contracts/tree/v3.2.1"
             },
             "funding": [
                 {
@@ -1607,17 +2278,17 @@
         },
         {
             "name": "symfony/string",
-            "version": "v6.2.5",
-            "version_normalized": "6.2.5.0",
+            "version": "v6.2.7",
+            "version_normalized": "6.2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/string.git",
-                "reference": "b2dac0fa27b1ac0f9c0c0b23b43977f12308d0b0"
+                "reference": "67b8c1eec78296b85dc1c7d9743830160218993d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/string/zipball/b2dac0fa27b1ac0f9c0c0b23b43977f12308d0b0",
-                "reference": "b2dac0fa27b1ac0f9c0c0b23b43977f12308d0b0",
+                "url": "https://api.github.com/repos/symfony/string/zipball/67b8c1eec78296b85dc1c7d9743830160218993d",
+                "reference": "67b8c1eec78296b85dc1c7d9743830160218993d",
                 "shasum": ""
             },
             "require": {
@@ -1637,7 +2308,7 @@
                 "symfony/translation-contracts": "^2.0|^3.0",
                 "symfony/var-exporter": "^5.4|^6.0"
             },
-            "time": "2023-01-01T08:38:09+00:00",
+            "time": "2023-02-24T10:42:00+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -1676,7 +2347,7 @@
                 "utf8"
             ],
             "support": {
-                "source": "https://github.com/symfony/string/tree/v6.2.5"
+                "source": "https://github.com/symfony/string/tree/v6.2.7"
             },
             "funding": [
                 {
@@ -1760,6 +2431,114 @@
             "install-path": "../tysonandre/var_representation_polyfill"
         },
         {
+            "name": "vimeo/psalm",
+            "version": "5.7.7",
+            "version_normalized": "5.7.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vimeo/psalm.git",
+                "reference": "e028ba46ba0d7f9a78bc3201c251e137383e145f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vimeo/psalm/zipball/e028ba46ba0d7f9a78bc3201c251e137383e145f",
+                "reference": "e028ba46ba0d7f9a78bc3201c251e137383e145f",
+                "shasum": ""
+            },
+            "require": {
+                "amphp/amp": "^2.4.2",
+                "amphp/byte-stream": "^1.5",
+                "composer/package-versions-deprecated": "^1.10.0",
+                "composer/semver": "^1.4 || ^2.0 || ^3.0",
+                "composer/xdebug-handler": "^2.0 || ^3.0",
+                "dnoegel/php-xdg-base-dir": "^0.1.1",
+                "ext-ctype": "*",
+                "ext-dom": "*",
+                "ext-json": "*",
+                "ext-libxml": "*",
+                "ext-mbstring": "*",
+                "ext-simplexml": "*",
+                "ext-tokenizer": "*",
+                "felixfbecker/advanced-json-rpc": "^3.1",
+                "felixfbecker/language-server-protocol": "^1.5.2",
+                "fidry/cpu-core-counter": "^0.4.1 || ^0.5.1",
+                "netresearch/jsonmapper": "^1.0 || ^2.0 || ^3.0 || ^4.0",
+                "nikic/php-parser": "^4.13",
+                "php": "^7.4 || ~8.0.0 || ~8.1.0 || ~8.2.0",
+                "sebastian/diff": "^4.0 || ^5.0",
+                "spatie/array-to-xml": "^2.17.0 || ^3.0",
+                "symfony/console": "^4.1.6 || ^5.0 || ^6.0",
+                "symfony/filesystem": "^5.4 || ^6.0"
+            },
+            "provide": {
+                "psalm/psalm": "self.version"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "brianium/paratest": "^6.9",
+                "ext-curl": "*",
+                "mockery/mockery": "^1.5",
+                "nunomaduro/mock-final-classes": "^1.1",
+                "php-parallel-lint/php-parallel-lint": "^1.2",
+                "phpstan/phpdoc-parser": "^1.6",
+                "phpunit/phpunit": "^9.6",
+                "psalm/plugin-mockery": "^1.1",
+                "psalm/plugin-phpunit": "^0.18",
+                "slevomat/coding-standard": "^8.4",
+                "squizlabs/php_codesniffer": "^3.6",
+                "symfony/process": "^4.4 || ^5.0 || ^6.0"
+            },
+            "suggest": {
+                "ext-curl": "In order to send data to shepherd",
+                "ext-igbinary": "^2.0.5 is required, used to serialize caching data"
+            },
+            "time": "2023-02-25T01:05:07+00:00",
+            "bin": [
+                "psalm",
+                "psalm-language-server",
+                "psalm-plugin",
+                "psalm-refactor",
+                "psalter"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.x-dev",
+                    "dev-4.x": "4.x-dev",
+                    "dev-3.x": "3.x-dev",
+                    "dev-2.x": "2.x-dev",
+                    "dev-1.x": "1.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Psalm\\": "src/Psalm/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Matthew Brown"
+                }
+            ],
+            "description": "A static analysis tool for finding errors in PHP applications",
+            "keywords": [
+                "code",
+                "inspection",
+                "php",
+                "static analysis"
+            ],
+            "support": {
+                "issues": "https://github.com/vimeo/psalm/issues",
+                "source": "https://github.com/vimeo/psalm/tree/5.7.7"
+            },
+            "install-path": "../vimeo/psalm"
+        },
+        {
             "name": "webmozart/assert",
             "version": "1.11.0",
             "version_normalized": "1.11.0.0",
@@ -1823,12 +2602,19 @@
     ],
     "dev": true,
     "dev-package-names": [
+        "amphp/amp",
+        "amphp/byte-stream",
+        "composer/package-versions-deprecated",
         "composer/pcre",
         "composer/semver",
         "composer/xdebug-handler",
+        "dnoegel/php-xdg-base-dir",
         "felixfbecker/advanced-json-rpc",
+        "felixfbecker/language-server-protocol",
+        "fidry/cpu-core-counter",
         "microsoft/tolerant-php-parser",
         "netresearch/jsonmapper",
+        "nikic/php-parser",
         "phan/phan",
         "phpdocumentor/reflection-common",
         "phpdocumentor/reflection-docblock",
@@ -1838,8 +2624,11 @@
         "psr/container",
         "psr/log",
         "sabre/event",
+        "sebastian/diff",
+        "spatie/array-to-xml",
         "symfony/console",
         "symfony/deprecation-contracts",
+        "symfony/filesystem",
         "symfony/polyfill-ctype",
         "symfony/polyfill-intl-grapheme",
         "symfony/polyfill-intl-normalizer",
@@ -1848,6 +2637,7 @@
         "symfony/service-contracts",
         "symfony/string",
         "tysonandre/var_representation_polyfill",
+        "vimeo/psalm",
         "webmozart/assert"
     ]
 }

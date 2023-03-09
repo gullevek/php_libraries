@@ -19,12 +19,12 @@ parameters:
 		- www/configs/config.master.php
 		# if composer.json autoloader defined, this is not needed
 		# - www/lib/autoloader.php
-		- www/vendor/autoload.php
+		# - www/vendor/autoload.php
 	excludePaths:
 		# do not check old qq file uploader tests
 		- www/admin/qq_file_upload_*.php
 		# ignore all test files
-		- www/admin/class_test*.php
+		# - www/admin/class_test*.php
 		# extra in sub folder
 		- www/admin/subfolder/class_test*.php
 		- www/admin/error_test.php

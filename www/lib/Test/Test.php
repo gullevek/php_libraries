@@ -23,15 +23,16 @@ class Test
 	/** @var DB\TestDB */
 	private $test_db;
 
-	public function __construct()
-	{
+	public function __construct(
+		\CoreLibs\Debug\Logging $log
+	) {
 		// calls all tests
 		$this->testPrivate();
 		$this->testProtected();
 		$this->testPublic();
 
 		// call intern
-		$this->test_db = new DB\TestDB();
+		$this->test_db = new DB\TestDB($log);
 	}
 
 	public function __destruct()

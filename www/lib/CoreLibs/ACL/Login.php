@@ -131,6 +131,31 @@ class Login
 	// it will be set back to 255
 	/** @var int */
 	private $password_max_length = 255;
+
+	/** @var int minum password length */
+	public const PASSWORD_MIN_LENGTH = 9;
+	/** @var int maxium password lenght */
+	public const PASSWORD_MAX_LENGTH = 255;
+	/** @var string special characters for regex */
+	public const PASSWORD_SPECIAL_RANGE = '@$!%*?&';
+	/** @var string regex for lower case alphabet */
+	public const PASSWORD_LOWER = '(?=.*[a-z])';
+	/** @var string regex for upper case alphabet */
+	public const PASSWORD_UPPER = '(?=.*[A-Z])';
+	/** @var string regex for numbers */
+	public const PASSWORD_NUMBER = '(?=.*\d)';
+	/** @var string regex for special chanagers */
+	public const PASSWORD_SPECIAL = "(?=.*[" . self::PASSWORD_SPECIAL_RANGE . "])";
+	/** @var string regex for fixed allowed characters password regex */
+	public const PASSWORD_REGEX = "/^"
+		. self::PASSWORD_LOWER
+		. self::PASSWORD_UPPER
+		. self::PASSWORD_NUMBER
+		. self::PASSWORD_SPECIAL
+		. "[A-Za-z\d" . self::PASSWORD_SPECIAL_RANGE . "]"
+		. "{" . self::PASSWORD_MIN_LENGTH . "," . self::PASSWORD_MAX_LENGTH . "}"
+		. "$/";
+
 	/** @var array<string> can have several regexes, if nothing set, all is ok */
 	private $password_valid_chars = [
 		// '^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$',
@@ -167,6 +192,12 @@ class Login
 	/** @var bool */
 	private $login_is_ajax_page = false;
 
+	// settings
+	/** @var array<string,mixed> options */
+	private $options = [];
+	/** @var array<string,string> locale options: locale, domain, encoding (opt), path */
+	private $locale = [];
+
 	/** @var \CoreLibs\Debug\Logging logger */
 	public $log;
 	/** @var \CoreLibs\DB\IO database */
@@ -183,15 +214,14 @@ class Login
 	 * @param \CoreLibs\DB\IO          $db      Database connection class
 	 * @param \CoreLibs\Debug\Logging  $log     Logging class
 	 * @param \CoreLibs\Create\Session $session Session interface class
-	 * @param bool $auto_login [default true]   Auto login flag, legacy
-	 *                                          If set to true will run login
-	 *                                          during construction
+	 * @param array<string,mixed>      $options Login ACL settings
+	 * $auto_login [default true]   DEPRECATED, moved into options
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
 		\CoreLibs\Debug\Logging $log,
 		\CoreLibs\Create\Session $session,
-		bool $auto_login = true
+		array $options = []
 	) {
 		// attach db class
 		$this->db = $db;
@@ -201,6 +231,13 @@ class Login
 		$this->log = $log;
 		// attach session class
 		$this->session = $session;
+
+		// set and check options
+		if (false === $this->loginSetOptions($options)) {
+			// on failure, exit
+			echo "<b>Could not set options</b>";
+			$this->loginTerminate(4000);
+		}
 
 		// string key, msg: string, flag: e (error), o (ok)
 		$this->login_error_msg = [
@@ -339,7 +376,7 @@ class Login
 		$_SESSION['DEFAULT_ACL_LIST_TYPE'] = $this->default_acl_list_type;
 
 		// this will be deprecated
-		if ($auto_login === true) {
+		if ($this->options['auto_login'] === true) {
 			$this->loginMainCall();
 		}
 	}
@@ -383,6 +420,183 @@ class Login
 	// *************************************************************************
 	// **** PRIVATE INTERNAL
 	// *************************************************************************
+
+	/**
+	 * Set options
+	 * Current allowed
+	 * target <string>: site target
+	 * debug <bool>
+	 * auto_login <bool>: self start login process
+	 * db_schema <string>
+	 * password_min_length <int>
+	 * default_acl_level <int>
+	 * logout_target <string>: should default be '' or target path to where
+	 * can_change <bool>: can change password (NOT IMPLEMENTED)
+	 * forget_flow <boo>: reset password on forget (NOT IMPLEMENTED)
+	 * locale_path <string>: absolue path to the locale folder
+	 * site_locale <string>: what locale to load
+	 * site_domain <string>: what domain (locale file name) to use
+	 *
+	 * @param  array<string,mixed> $options Options array from class load
+	 * @return bool                         True on ok, False on failure
+	 */
+	private function loginSetOptions(array $options): bool
+	{
+		// target and debug flag
+		if (
+			empty($options['target'])
+		) {
+			$options['target'] = 'test';
+		}
+		if (
+			empty($options['debug']) ||
+			!is_bool($options['debug'])
+		) {
+			$options['debug'] = false;
+		}
+
+		// AUTO LOGIN
+		if (
+			!isset($options['auto_login']) ||
+			!is_bool($options['auto_login'])
+		) {
+			// if set to true will run login call during class construction
+			$options['auto_login'] = false;
+		}
+
+		// DB SCHEMA
+		if (
+			empty($options['db_schema']) ||
+			// TODO more strict check
+			is_string($options['db_schema'])
+		) {
+			// get scham from db, else fallback to public
+			if (!empty($this->db->dbGetSchema(true))) {
+				$options['db_schema'] = $this->db->dbGetSchema(true);
+			} else {
+				$options['db_schema'] = 'public';
+			}
+		}
+		if ($this->db->dbGetSchema() != $options['db_schema']) {
+			$this->db->dbSetSchema($options['db_schema']);
+		}
+
+		// MIN PASSWORD LENGTH
+		// can only be in length of current defined min/max
+		if (
+			!empty($options['password_min_lenght']) &&
+			!is_numeric($options['password_min_length']) &&
+			$options['password_min_length'] >= self::PASSWORD_MIN_LENGTH &&
+			$options['password_min_length'] <= self::PASSWORD_MAX_LENGTH
+		) {
+			if (
+				false === $this->loginSetPasswordMinLength(
+					(int)$options['password_min_length']
+				)
+			) {
+				$options['password_min_length'] = self::PASSWORD_MIN_LENGTH;
+			}
+		}
+
+		// DEFAULT ACL LEVEL
+		if (
+			!isset($options['default_acl_level']) ||
+			!is_numeric($options['default_acl_level']) ||
+			$options['default_acl_level'] < 0 || $options['default_acl_level'] > 100
+		) {
+			$options['default_acl_level'] = 0;
+			if (defined('DEFAULT_ACL_LEVEL')) {
+				trigger_error(
+					'loginMainCall: DEFAULT_ACL_LEVEL should not be used',
+					E_USER_DEPRECATED
+				);
+				$options['default_acl_level'] = DEFAULT_ACL_LEVEL;
+			}
+		}
+		$this->default_acl_level = (int)$options['default_acl_level'];
+
+		// LOGOUT TARGET
+		if (!isset($options['logout_target'])) {
+			if (defined('LOGOUT_TARGET')) {
+				trigger_error(
+					'loginMainCall: LOGOUT_TARGET should not be used',
+					E_USER_DEPRECATED
+				);
+				$options['logout_target'] = LOGOUT_TARGET;
+				$this->logout_target = $options['logout_target'];
+			}
+		}
+
+		// *** PASSWORD SETTINGS
+		// User can change password
+		if (
+			!isset($options['can_change']) ||
+			!is_bool($options['can_change'])
+		) {
+			$options['can_change'] = false;
+		}
+		$this->password_change = $options['can_change'];
+		// User can trigger a forgot password flow
+		if (
+			!isset($options['forgot_flow']) ||
+			!is_bool($options['forgot_flow'])
+		) {
+			$options['forgot_flow'] = false;
+		}
+		$this->password_forgot = $options['forgot_flow'];
+
+		// *** LANGUAGE
+		// LANG: LOCALE PATH
+		if (empty($options['locale_path'])) {
+			// trigger deprecation error
+			trigger_error(
+				'loginSetOptions: misssing locale_path entry is deprecated',
+				E_USER_DEPRECATED
+			);
+			// set path
+			$options['locale_path'] = BASE . INCLUDES . LOCALE;
+			$_SESSION['LOCALE_PATH'] = $options['locale_path'];
+		}
+		// LANG: LOCALE
+		if (empty($options['site_locale'])) {
+			trigger_error(
+				'loginMainCall: SITE_LOCALE or DEFAULT_LOCALE should not be used',
+				E_USER_DEPRECATED
+			);
+			$options['site_locale'] = defined('SITE_LOCALE') && !empty(SITE_LOCALE) ?
+				SITE_LOCALE : 'en.UTF-8';
+		}
+		// LANG: DOMAIN
+		if (empty($options['site_domain'])) {
+			// we need to get domain set from outside
+			$options['site_domain'] = 'admin';
+			if (
+				defined('SITE_DOMAIN')
+			) {
+				// trigger deprecation error
+				trigger_error(
+					'loginSetOptions: misssing site_domain entry is deprecated (SITE_DOMAIN)',
+					E_USER_DEPRECATED
+				);
+				// set domain
+				$options['site_domain'] = SITE_DOMAIN;
+				$_SESSION['DEFAULT_DOMAIN'] = $options['site_domain'];
+			} elseif (
+				defined('CONTENT_PATH')
+			) {
+				// trigger deprecation error
+				trigger_error(
+					'loginSetOptions: misssing site_domain entry is deprecated (CONTENT_PATH)',
+					E_USER_DEPRECATED
+				);
+				$options['set_domain'] = str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH);
+			}
+		}
+
+		// write array to options
+		$this->options = $options;
+		return true;
+	}
 
 	/**
 	 * Checks for all flags and sets error codes for each
@@ -981,6 +1195,34 @@ class Login
 	}
 
 	/**
+	 * set locale and load mo translator
+	 *
+	 * @return void
+	 */
+	private function loginSetLocale(): void
+	{
+		// ** LANGUAGE SET AFTER LOGIN **
+		// set the locale
+		if (
+			!empty($_SESSION['DEFAULT_LOCALE'])
+		) {
+			$locale = $_SESSION['DEFAULT_LOCALE'];
+		} else {
+			$locale = $this->options['site_locale'];
+		}
+		$this->locale = [
+			'locale' => $locale,
+			'domain' => $this->options['site_domain'],
+			'path' => $this->options['locale_path'],
+		];
+		$this->l = new \CoreLibs\Language\L10n(
+			$this->locale['locale'],
+			$this->locale['domain'],
+			$this->locale['path']
+		);
+	}
+
+	/**
 	 * checks if the password is in a valid format
 	 *
 	 * @param  string $password the new password
@@ -1513,49 +1755,8 @@ EOM;
 			echo '<b>No active session found</b>';
 			$this->loginTerminate(2000);
 		}
-
-		// if we have a search path we need to set it, to use the correct DB to login
-		// check what schema to use. if there is a login schema use this, else check
-		// if there is a schema set in the config, or fall back to DB_SCHEMA
-		// if this exists, if this also does not exists use public schema
-		/** @phpstan-ignore-next-line */
-		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
-			$SCHEMA = LOGIN_DB_SCHEMA;
-		} elseif (!empty($this->db->dbGetSchema(true))) {
-			$SCHEMA = $this->db->dbGetSchema(true);
-		} elseif (defined('PUBLIC_SCHEMA')) {
-			$SCHEMA = PUBLIC_SCHEMA;
-		} else {
-			$SCHEMA = 'public';
-		}
-		// set schema if schema differs to schema set in db conneciton
-		if ($this->db->dbGetSchema() != $SCHEMA) {
-			$this->db->dbExec("SET search_path TO " . $SCHEMA);
-		}
-
 		// set internal page name
 		$this->page_name = $this->loginReadPageName();
-
-		// set default ACL Level
-		if (defined('DEFAULT_ACL_LEVEL')) {
-			$this->default_acl_level = DEFAULT_ACL_LEVEL;
-		}
-
-		if (defined('PASSWORD_MIN_LENGTH')) {
-			$this->password_min_length = PASSWORD_MIN_LENGTH;
-			$this->password_min_length_max = PASSWORD_MIN_LENGTH;
-		}
-		if (defined('PASSWORD_MIN_LENGTH')) {
-			$this->password_max_length = PASSWORD_MAX_LENGTH;
-		}
-
-		// pre-check that password min/max lengths are inbetween 1 and 255;
-		if ($this->password_max_length > 255) {
-			$this->password_max_length = 255;
-		}
-		if ($this->password_min_length < 1) {
-			$this->password_min_length = 1;
-		}
 
 		// set global is ajax page for if we show the data directly,
 		// or need to pass it back
@@ -1608,20 +1809,8 @@ EOM;
 		$this->pw_old_password = $_POST['pw_old_password'] ?? '';
 		$this->pw_new_password = $_POST['pw_new_password'] ?? '';
 		$this->pw_new_password_confirm = $_POST['pw_new_password_confirm'] ?? '';
-		// logout target (from config)
-		if (defined('LOGOUT_TARGET')) {
-			$this->logout_target = LOGOUT_TARGET;
-		}
 		// disallow user list for password change
 		$this->pw_change_deny_users = ['admin'];
-		// set flag if password change is okay
-		if (defined('PASSWORD_CHANGE')) {
-			$this->password_change = PASSWORD_CHANGE;
-		}
-		// NOTE: forgot password flow with email
-		if (defined('PASSWORD_FORGOT')) {
-			$this->password_forgot = PASSWORD_FORGOT;
-		}
 		// max login counts before error reporting
 		$this->max_login_error_count = 10;
 		// users that never get locked, even if they are set strict
@@ -1634,26 +1823,7 @@ EOM;
 		// logsout user
 		$this->loginLogoutUser();
 		// ** LANGUAGE SET AFTER LOGIN **
-		// set the locale
-		if (
-			$this->session->checkActiveSession() === true &&
-			!empty($_SESSION['DEFAULT_LOCALE'])
-		) {
-			$locale = $_SESSION['DEFAULT_LOCALE'];
-		} else {
-			$locale = (defined('SITE_LOCALE') && !empty(SITE_LOCALE)) ?
-				SITE_LOCALE :
-				/** @phpstan-ignore-next-line DEFAULT_LOCALE could be empty */
-				((defined('DEFAULT_LOCALE') && !empty(DEFAULT_LOCALE)) ?
-					DEFAULT_LOCALE : 'en.UTF-8');
-		}
-		// set domain
-		if (defined('CONTENT_PATH')) {
-			$domain = str_replace('/', '', CONTENT_PATH);
-		} else {
-			$domain = 'admin';
-		}
-		$this->l = new \CoreLibs\Language\L10n($locale, $domain);
+		$this->loginSetLocale();
 		// if the password change flag is okay, run the password change method
 		if ($this->password_change) {
 			$this->loginPasswordChange();
@@ -1669,18 +1839,21 @@ EOM;
 			// if variable AJAX flag is not set, show output
 			// else pass through for ajax work
 			if ($this->login_is_ajax_page === false) {
-				// the login screen if we hav no login permission & login screen html data
+				// the login screen if we hav no login permission and
+				// login screen html data
 				if ($this->login_html !== null) {
 					// echo $this->login_html;
 					$this->loginPrintLogin();
 				}
 				// do not go anywhere, quit processing here
 				// do something with possible debug data?
-				if (TARGET == 'live' || TARGET == 'remote')	{
+				if (
+					in_array($this->options['target'], ['live', 'remove'])
+				) {
 					// login
-					$this->log->setLogLevelAll('debug', DEBUG ? true : false);
+					$this->log->setLogLevelAll('debug', $this->options['debug']);
 					$this->log->setLogLevelAll('echo', false);
-					$this->log->setLogLevelAll('print', DEBUG ? true : false);
+					$this->log->setLogLevelAll('print', $this->options['debug']);
 				}
 				$status_msg = $this->log->printErrorMsg();
 				// if ($this->echo_output_all) {
@@ -1802,7 +1975,7 @@ EOM;
 		if (
 			$length >= $this->password_min_length_max &&
 			$length <= $this->password_max_length &&
-			$length <= 255
+			$length <= self::PASSWORD_MAX_LENGTH
 		) {
 			$this->password_min_length = $length;
 			return true;

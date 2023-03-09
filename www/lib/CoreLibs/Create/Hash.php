@@ -90,33 +90,6 @@ class Hash
 	{
 		return hash(self::STANDARD_HASH_LONG, $string);
 	}
-
-	/**
-	 * create a unique id with the standard hash type defined in __hash
-	 *
-	 * @return string Unique ID with fixed length of 8 characters
-	 * @deprecated Use \CoreLibs\Create\Uids::uniqIdShort() instead
-	 */
-	public static function __uniqId(): string
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, '
-			. '\CoreLibs\Create\Uids::uniqIdShort() class', E_USER_DEPRECATED);
-		return \CoreLibs\Create\Uids::uniqIdShort();
-	}
-
-	/**
-	 * create a unique id with the standard long hash type
-	 * defined in __hashLong
-	 *
-	 * @return string Unique ID with length of current default long hash
-	 * @deprecated Use \CoreLibs\Create\Uids::uniqIdLong() instead
-	 */
-	public static function __uniqIdLong(): string
-	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, '
-			. '\CoreLibs\Create\Uids::uniqIdLong() class', E_USER_DEPRECATED);
-		return \CoreLibs\Create\Uids::uniqIdLong();
-	}
 }
 
 // __END__

@@ -100,27 +100,6 @@ define('DEFAULT_ACL_LEVEL', 80);
 /************* LOGOUT ********************/
 // logout target
 define('LOGOUT_TARGET', '');
-// password change allowed
-define('PASSWORD_CHANGE', false);
-define('PASSWORD_FORGOT', false);
-// min/max password length
-define('PASSWORD_MIN_LENGTH', 9);
-define('PASSWORD_MAX_LENGTH', 255);
-// defines allowed special characters
-define('PASSWORD_SPECIAL_RANGE', '@$!%*?&');
-// password must have upper case, lower case, number, special
-// comment out for not mandatory
-define('PASSWORD_LOWER', '(?=.*[a-z])');
-define('PASSWORD_UPPER', '(?=.*[A-Z])');
-define('PASSWORD_NUMBER', '(?=.*\d)');
-define('PASSWORD_SPECIAL', "(?=.*[" . PASSWORD_SPECIAL_RANGE . "])");
-// define full regex
-define('PASSWORD_REGEX', "/^"
-	. (defined('PASSWORD_LOWER') ? PASSWORD_LOWER : '')
-	. (defined('PASSWORD_UPPER') ? PASSWORD_UPPER : '')
-	. (defined('PASSWORD_NUMBER') ? PASSWORD_NUMBER : '')
-	. (defined('PASSWORD_SPECIAL') ? PASSWORD_SPECIAL : '')
-	. "[A-Za-z\d" . PASSWORD_SPECIAL_RANGE . "]{" . PASSWORD_MIN_LENGTH . "," . PASSWORD_MAX_LENGTH . "}$/");
 
 /************* AJAX / ACCESS *************/
 // ajax request type
@@ -264,6 +243,7 @@ $GLOBALS['DB_CONFIG_SET'] = DB_CONFIG;
 define('TARGET', $SITE_CONFIG[HOST_NAME]['location'] ?? 'test');
 define('DEBUG', $SITE_CONFIG[HOST_NAME]['debug_flag'] ?? false);
 define('SITE_LOCALE', $SITE_CONFIG[HOST_NAME]['site_locale'] ?? DEFAULT_LOCALE);
+define('SITE_DOMAIN', str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH));
 define('SITE_ENCODING', $SITE_CONFIG[HOST_NAME]['site_encoding'] ?? DEFAULT_ENCODING);
 define('LOGIN_ENABLED', $SITE_CONFIG[HOST_NAME]['login_enabled'] ?? false);
 define('AUTH', $SITE_CONFIG[HOST_NAME]['auth'] ?? false);

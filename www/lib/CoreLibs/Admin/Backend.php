@@ -128,7 +128,8 @@ class Backend
 		\CoreLibs\Debug\Logging $log,
 		\CoreLibs\Create\Session $session,
 		\CoreLibs\Language\L10n $l10n,
-		array $locale
+		array $locale,
+		?int $set_default_acl_level = null
 	) {
 		// attach db class
 		$this->db = $db;
@@ -156,7 +157,14 @@ class Backend
 			$this->$_action = $_POST[$_action] ?? '';
 		}
 
-		$this->default_acl = DEFAULT_ACL_LEVEL;
+		if ($set_default_acl_level === null) {
+			/** @deprecated Admin::__construct missing default_acl_level parameter */
+			trigger_error(
+				'Calling Admin::__construct without default_acl_level parameter is deprecated',
+				E_USER_DEPRECATED
+			);
+		}
+		$this->default_acl = $set_default_acl_level ?? DEFAULT_ACL_LEVEL;
 
 		// queue key
 		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action)) {
@@ -190,35 +198,34 @@ class Backend
 	 * @param  string              $event      any kind of event description,
 	 * @param  string|array<mixed> $data       any kind of data related to that event
 	 * @param  string              $write_type write type can bei STRING or BINARY
+	 * @param  string|null         $db_schema  override target schema
 	 * @return void
 	 */
 	public function adbEditLog(
 		string $event = '',
 		string|array $data = '',
-		string $write_type = 'STRING'
+		string $write_type = 'STRING',
+		?string $db_schema = null
 	): void {
 		$data_binary = '';
+		$data_write = '';
 		if ($write_type == 'BINARY') {
 			$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($data)));
-			$data = 'see bzip compressed data_binary field';
+			$data_write = 'see bzip compressed data_binary field';
 		}
 		if ($write_type == 'STRING') {
 			$data_binary = '';
-			$data = $this->db->dbEscapeString(serialize($data));
+			$data_write = $this->db->dbEscapeString(serialize($data));
 		}
 
-		// check schema
-		$SCHEMA = 'public';
-		/** @phpstan-ignore-next-line */
-		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
-			$SCHEMA = LOGIN_DB_SCHEMA;
-		} elseif ($this->db->dbGetSchema()) {
-			$SCHEMA = $this->db->dbGetSchema();
-		} elseif (defined('PUBLIC_SCHEMA')) {
-			$SCHEMA = PUBLIC_SCHEMA;
+		/** @var string $DB_SCHEMA check schema */
+		$DB_SCHEMA = 'public';
+		if ($db_schema !== null) {
+			$DB_SCHEMA = $db_schema;
+		} elseif (!empty($this->db->dbGetSchema())) {
+			$DB_SCHEMA = $this->db->dbGetSchema();
 		}
-		/** @phpstan-ignore-next-line for whatever reason $SCHEMA is seen as possible array */
-		$q = "INSERT INTO " . $SCHEMA . ".edit_log "
+		$q = "INSERT INTO " . $DB_SCHEMA . ".edit_log "
 			. "(euid, event_date, event, data, data_binary, page, "
 			. "ip, user_agent, referer, script_name, query_string, server_name, http_host, "
 			. "http_accept, http_accept_charset, http_accept_encoding, session_id, "
@@ -229,10 +236,12 @@ class Backend
 				'NULL')
 			. ", "
 			. "NOW(), "
-			. "'" . $this->db->dbEscapeString((string)$event) . "', '" . $data . "', "
-			. "'" . $data_binary . "', '" . $this->db->dbEscapeString((string)$this->page_name) . "', "
-			. "'" . @$_SERVER["REMOTE_ADDR"] . "', "
-			. "'" . $this->db->dbEscapeString(@$_SERVER['HTTP_USER_AGENT']) . "', "
+			. "'" . $this->db->dbEscapeString((string)$event) . "', "
+			. "'" . $data_write . "', "
+			. "'" . $data_binary . "', "
+			. "'" . $this->db->dbEscapeString((string)$this->page_name) . "', "
+			. "'" . ($_SERVER["REMOTE_ADDR"] ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_USER_AGENT'] ?? '') . "', "
 			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_REFERER'] ?? '') . "', "
 			. "'" . $this->db->dbEscapeString($_SERVER['SCRIPT_FILENAME'] ?? '') . "', "
 			. "'" . $this->db->dbEscapeString($_SERVER['QUERY_STRING'] ?? '') . "', "
@@ -282,11 +291,25 @@ class Backend
 	/**
 	 * menu creater (from login menu session pages)
 	 *
-	 * @param  int $flag    visible flag trigger
+	 * @param  string|null $set_content_path
+	 * @param  int         $flag             visible flag trigger
 	 * @return array<mixed> menu array for output on page (smarty)
 	 */
-	public function adbTopMenu(int $flag = 0): array
-	{
+	public function adbTopMenu(
+		?string $set_content_path = null,
+		int $flag = 0,
+	): array {
+		if (
+			$set_content_path === null ||
+			!is_string($set_content_path)
+		) {
+			/** @deprecated adbTopMenu missing set_content_path parameter */
+			trigger_error(
+				'Calling adbTopMenu without set_content_path parameter is deprecated',
+				E_USER_DEPRECATED
+			);
+		}
+		$set_content_path = $set_content_path ?? CONTENT_PATH;
 		if ($this->menu_show_flag) {
 			$flag = $this->menu_show_flag;
 		}
@@ -377,7 +400,7 @@ class Backend
 						\CoreLibs\Get\System::getPageName() == $data['filename'] &&
 						(!isset($data['hostname']) || (
 							isset($data['hostname']) &&
-								(!$data['hostname'] || strstr($data['hostname'], CONTENT_PATH) !== false)
+								(!$data['hostname'] || strstr($data['hostname'], $set_content_path) !== false)
 						))
 					) {
 						$selected = 1;
@@ -427,69 +450,6 @@ class Backend
 		};
 		return $enabled;
 	}
-
-	/**
-	 * creates out of a normal db_return array an assoc array
-	 *
-	 * @param  array<mixed>    $db_array input array
-	 * @param  string|int|bool $key      key
-	 * @param  string|int|bool $value    value
-	 * @return array<mixed>              associative array
-	 * @deprecated \CoreLibs\Combined\ArrayHandler::genAssocArray()
-	 */
-	public function adbAssocArray(array $db_array, string|int|bool $key, string|int|bool $value): array
-	{
-		trigger_error(
-			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Combined\ArrayHandler::genAssocArray',
-			E_USER_DEPRECATED
-		);
-		return \CoreLibs\Combined\ArrayHandler::genAssocArray($db_array, $key, $value);
-	}
-
-	/**
-	 * converts bytes into formated string with KB, MB, etc
-	 *
-	 * @param  string|int|float $number string or int or number
-	 * @return string                   formatted string
-	 * @deprecated \CoreLibs\Convert\Byte::humanReadableByteFormat()
-	 */
-	public function adbByteStringFormat(string|int|float $number): string
-	{
-		trigger_error(
-			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Convert\Byte::humanReadableByteFormat()',
-			E_USER_DEPRECATED
-		);
-		return \CoreLibs\Convert\Byte::humanReadableByteFormat($number);
-	}
-
-	/**
-	 * converts picture to a thumbnail with max x and max y size
-	 *
-	 * @param  string      $pic    source image file with or without path
-	 * @param  int         $size_x maximum size width
-	 * @param  int         $size_y maximum size height
-	 * @param  string      $dummy  empty, or file_type to show an icon
-	 *                             instead of nothing if file is not found
-	 * @param  string      $path   if source start is not ROOT path
-	 *                             if empty ROOT is choosen
-	 * @return string|bool         thumbnail name, or false for error
-	 * @deprecated \CoreLibs\Output\Image::createThumbnail()
-	 */
-	public function adbCreateThumbnail(
-		string $pic,
-		int $size_x,
-		int $size_y,
-		string $dummy = '',
-		string $path = '',
-		string $cache = ''
-	): string|bool {
-		trigger_error(
-			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Output\Image::createThumbnail()',
-			E_USER_DEPRECATED
-		);
-		return \CoreLibs\Output\Image::createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
-	}
-
 	/**
 	 * wrapper function to fill up the mssages array
 	 *
@@ -523,15 +483,16 @@ class Backend
 	/**
 	 * writes live queue
 	 *
-	 * @param  string  $queue_key string to identfy the queue
-	 * @param  string  $type      [description]
-	 * @param  string  $target    [description]
-	 * @param  string  $data      [description]
-	 * @param  string  $key_name  [description]
-	 * @param  string  $key_value [description]
-	 * @param  ?string $associate [description]
-	 * @param  ?string $file      [description]
-	 * @return void               has no return
+	 * @param  string      $queue_key string to identfy the queue
+	 * @param  string      $type      [description]
+	 * @param  string      $target    [description]
+	 * @param  string      $data      [description]
+	 * @param  string      $key_name  [description]
+	 * @param  string      $key_value [description]
+	 * @param  string|null $associate [description]
+	 * @param  string|null $file      [description]
+	 * @param  string|null $db_schema override target schema
+	 * @return void
 	 */
 	public function adbLiveQueue(
 		string $queue_key,
@@ -541,19 +502,17 @@ class Backend
 		string $key_name,
 		string $key_value,
 		string $associate = null,
-		string $file = null
+		string $file = null,
+		string $db_schema = null,
 	): void {
-		/** @phpstan-ignore-next-line */
-		if (defined('GLOBAL_DB_SCHEMA') && !empty(GLOBAL_DB_SCHEMA)) {
-			$SCHEMA = GLOBAL_DB_SCHEMA;
-		} elseif ($this->db->dbGetSchema()) {
-			$SCHEMA = $this->db->dbGetSchema();
-		} elseif (defined('PUBLIC_SCHEMA')) {
-			$SCHEMA = PUBLIC_SCHEMA;
-		} else {
-			$SCHEMA = 'public';
+		/** @var string $DB_SCHEMA check schema */
+		$DB_SCHEMA = 'public';
+		if ($db_schema !== null) {
+			$DB_SCHEMA = $db_schema;
+		} elseif (!empty($this->db->dbGetSchema())) {
+			$DB_SCHEMA = $this->db->dbGetSchema();
 		}
-		$q = "INSERT INTO " . $SCHEMA . ".live_queue ("
+		$q = "INSERT INTO " . $DB_SCHEMA . ".live_queue ("
 			. "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file"
 			. ") VALUES ("
 			. "'" . $this->db->dbEscapeString($queue_key) . "', '" . $this->db->dbEscapeString($key_value) . "', "

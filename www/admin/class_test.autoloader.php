@@ -11,10 +11,6 @@ $DEBUG_ALL = true;
 $PRINT_ALL = true;
 $DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
-
 ob_start();
 // basic class test file
 define('USE_DATABASE', false);

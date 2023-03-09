@@ -136,6 +136,11 @@ class Logging
 		$this->log_folder = $this->options['log_folder'] ?? '';
 		// legacy flow, check must set constants
 		if (empty($this->log_folder) && defined('BASE') && defined('LOG')) {
+			/** @deprecated Do not use this anymore, define path on class load */
+			trigger_error(
+				'options: log_folder must be set. Setting via BASE and LOG constants is deprecated',
+				E_USER_DEPRECATED
+			);
 			// make sure this is writeable, else skip
 			$this->log_folder = BASE . LOG;
 		}
@@ -175,6 +180,11 @@ class Logging
 		if (!empty($this->options['file_id'])) {
 			$this->setLogId($this->options['file_id']);
 		} elseif (!empty($GLOBALS['LOG_FILE_ID'])) {
+			/** @deprecated Do not use this anymore, define file_id on class load */
+			trigger_error(
+				'options: file_id must be set. Setting via LOG_FILE_ID global variable is deprecated',
+				E_USER_DEPRECATED
+			);
 			// legacy flow, should be removed and only set via options
 			$this->setLogId($GLOBALS['LOG_FILE_ID']);
 			// TODO trigger deprecation error
@@ -183,6 +193,11 @@ class Logging
 			// 	E_USER_DEPRECATED
 			// );
 		} elseif (defined('LOG_FILE_ID')) {
+			/** @deprecated Do not use this anymore, define file_id on class load */
+			trigger_error(
+				'options: file_id must be set. Setting via LOG_FILE_ID constant is deprecated',
+				E_USER_DEPRECATED
+			);
 			// legacy flow, should be removed and only set via options
 			$this->setLogId(LOG_FILE_ID);
 			// trigger deprecation error

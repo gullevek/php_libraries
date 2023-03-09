@@ -6,14 +6,10 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
-
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
+$DEBUG_ALL = true;
+$PRINT_ALL = true;
+$DB_DEBUG = true;
 
 ob_start();
 
@@ -27,6 +23,7 @@ ob_end_flush();
 
 use CoreLibs\Convert\Colors;
 use CoreLibs\Debug\Support as DgS;
+use CoreLibs\Convert\SetVarType;
 
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
@@ -34,9 +31,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
+	'debug_all' => $DEBUG_ALL,
 	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'print_all' => $PRINT_ALL,
 ]);
 $color_class = 'CoreLibs\Convert\Colors';
 
@@ -59,24 +56,40 @@ $hsb = [210, 67, 12];
 $hsb_f = [210.5, 67.5, 12.5];
 $hsl = [210, 50, 7.8];
 print "S::COLOR rgb->hex: $rgb[0], $rgb[1], $rgb[2]: " . Colors::rgb2hex($rgb[0], $rgb[1], $rgb[2]) . "<br>";
-print "S::COLOR hex->rgb: $hex: " . DgS::printAr(Colors::hex2rgb($hex)) . "<br>";
-print "C::S/COLOR rgb->hext: $hex: " . DgS::printAr(CoreLibs\Convert\Colors::hex2rgb($hex)) . "<br>";
+print "S::COLOR hex->rgb: $hex: " . DgS::printAr(SetVarType::setArray(
+	Colors::hex2rgb($hex)
+)) . "<br>";
+print "C::S/COLOR rgb->hext: $hex: " . DgS::printAr(SetVarType::setArray(
+	CoreLibs\Convert\Colors::hex2rgb($hex)
+)) . "<br>";
 // C(to hsb/hsl)
 print "S::COLOR rgb->hsb: $rgb[0], $rgb[1], $rgb[2]: "
-	. DgS::printAr(Colors::rgb2hsb($rgb[0], $rgb[1], $rgb[2])) . "<br>";
+	. DgS::printAr(SetVarType::setArray(
+		Colors::rgb2hsb($rgb[0], $rgb[1], $rgb[2])
+	)) . "<br>";
 print "S::COLOR rgb->hsl: $rgb[0], $rgb[1], $rgb[2]: "
-	. DgS::printAr(Colors::rgb2hsl($rgb[0], $rgb[1], $rgb[2])) . "<br>";
+	. DgS::printAr(SetVarType::setArray(
+		Colors::rgb2hsl($rgb[0], $rgb[1], $rgb[2])
+	)) . "<br>";
 // D(from hsb/hsl) Note that param 2 + 3 is always 0-100 divided
 print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
-	. DgS::printAr(Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])) . "<br>";
-	print "S::COLOR hsb_f->rgb: $hsb_f[0], $hsb_f[1], $hsb_f[2]: "
-	. DgS::printAr(Colors::hsb2rgb($hsb_f[0], $hsb_f[1], $hsb_f[2])) . "<br>";
+	. DgS::printAr(SetVarType::setArray(
+		Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])
+	)) . "<br>";
+print "S::COLOR hsb_f->rgb: $hsb_f[0], $hsb_f[1], $hsb_f[2]: "
+	. DgS::printAr(SetVarType::setArray(
+		Colors::hsb2rgb($hsb_f[0], $hsb_f[1], $hsb_f[2])
+	)) . "<br>";
 print "S::COLOR hsl->rgb: $hsl[0], $hsl[1], $hsl[2]: "
-	. DgS::printAr(Colors::hsl2rgb($hsl[0], $hsl[1], $hsl[2])) . "<br>";
+	. DgS::printAr(SetVarType::setArray(
+		Colors::hsl2rgb($hsl[0], $hsl[1], $hsl[2])
+	)) . "<br>";
 
 $hsb = [0, 0, 5];
 print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
-	. DgS::printAr(Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])) . "<br>";
+	. DgS::printAr(SetVarType::setArray(
+		Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])
+	)) . "<br>";
 
 // Random text
 $h = rand(0, 359);
@@ -84,8 +97,8 @@ $s = rand(15, 70);
 $b = 100;
 $l = 50;
 print "RANDOM IN: H: " . $h . ", S: " . $s . ", B/L: " . $b . "/" . $l . "<br>";
-print "RANDOM hsb->rgb: <pre>" . DgS::printAr(Colors::hsb2rgb($h, $s, $b)) . "</pre><br>";
-print "RANDOM hsl->rgb: <pre>" . DgS::printAr(Colors::hsl2rgb($h, $s, $l)) . "</pre><br>";
+print "RANDOM hsb->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsb2rgb($h, $s, $b))) . "</pre><br>";
+print "RANDOM hsl->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsl2rgb($h, $s, $l))) . "</pre><br>";
 
 // TODO: run compare check input must match output
 
