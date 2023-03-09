@@ -50,9 +50,22 @@ for (
 		is_file($__DIR__PATH . $CONFIG_PATH_PREFIX . CONFIG_PATH . 'config.master.php')
 	) {
 		// load enviorment file if it exists
-		\CoreLibs\Get\DotEnv::readEnvFile(
+		\gullevek\dotEnv\DotEnv::readEnvFile(
 			$__DIR__PATH . $CONFIG_PATH_PREFIX . CONFIG_PATH
 		);
+		// find trigger name "admin/" or "frontend/" in the getcwd() folder
+		$folder = '';
+		foreach (['admin', 'frontend'] as $_folder) {
+			if (strstr(getcwd() ?: '', DIRECTORY_SEPARATOR . $_folder)) {
+				$folder = $_folder;
+				break;
+			}
+		}
+		// if content path is empty, fallback is default
+		if (empty($folder)) {
+			$folder = 'default';
+		}
+		define('CONTENT_PATH', $folder . DIRECTORY_SEPARATOR);
 		// load master config file that loads all other config files
 		require $__DIR__PATH . $CONFIG_PATH_PREFIX . CONFIG_PATH . 'config.master.php';
 		break;
@@ -62,18 +75,5 @@ for (
 if (!defined('DIR')) {
 	exit('Base config could not be loaded');
 }
-// find trigger name "admin/" or "frontend/" in the getcwd() folder
-$folder = '';
-foreach (['admin', 'frontend'] as $_folder) {
-	if (strstr(getcwd() ?: '', DIRECTORY_SEPARATOR . $_folder)) {
-		$folder = $_folder;
-		break;
-	}
-}
-// if content path is empty, fallback is default
-if (empty($folder)) {
-	$folder = 'default';
-}
-define('CONTENT_PATH', $folder . DIRECTORY_SEPARATOR);
 
 // __END__

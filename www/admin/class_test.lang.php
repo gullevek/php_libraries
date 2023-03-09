@@ -6,14 +6,10 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
-
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
+$DEBUG_ALL = true;
+$PRINT_ALL = true;
+$DB_DEBUG = true;
 
 ob_start();
 
@@ -33,30 +29,44 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 use CoreLibs\Language\L10n;
+use CoreLibs\Language;
 use CoreLibs\Debug\Support;
 
 echo "<br><b>LIST LOCALES</b><br>";
 
 $locale = 'en_US.UTF-8';
-$locales = CoreLibs\Language\L10n::listLocales($locale);
+$locales = L10n::listLocales($locale);
 print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
 $locale = 'en.UTF-8';
-$locales = CoreLibs\Language\L10n::listLocales($locale);
+$locales = L10n::listLocales($locale);
 print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
 
-echo "<br><b>LOCALE INFO</b><br>";
+echo "<br><b>PARSE LOCAL</b><br>";
 $locale = 'en_US.UTF-8';
-$locale_info = CoreLibs\Language\L10n::parseLocale($locale);
+$locale_info = L10n::parseLocale($locale);
 print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
 $locale = 'en.UTF-8';
-$locale_info = CoreLibs\Language\L10n::parseLocale($locale);
+$locale_info = L10n::parseLocale($locale);
 print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
 
 echo "<br><b>AUTO DETECT</b><br>";
 
-$get_locale = \CoreLibs\Language\GetLocale::setLocale();
-print "[AUTO]: " . Support::printAr($get_locale) . "<br>";
-$get_locale = \CoreLibs\Language\GetLocale::setLocale('en', 'foo', 'ISO-8895');
+// DEPRECATED
+// $get_locale = Language\GetLocale::setLocale();
+// print "[AUTO, DEPRECATED]: " . Support::printAr($get_locale) . "<br>";
+$get_locale = Language\GetLocale::setLocale(
+	SITE_LOCALE,
+	str_replace('/', '', CONTENT_PATH),
+	null,
+	BASE . INCLUDES . LOCALE
+);
+print "[NAMED CONSTANTS OUTSIDE]: " . Support::printAr($get_locale) . "<br>";
+$get_locale = Language\GetLocale::setLocale(
+	'en',
+	'foo',
+	'ISO-8895',
+	BASE . INCLUDES . LOCALE
+);
 print "[OVERRIDE]: " . Support::printAr($get_locale) . "<br>";
 
 // try to load non existing
@@ -69,7 +79,7 @@ $domain = 'admin';
 $encoding = 'UTF-8';
 $path = BASE . INCLUDES . LOCALE;
 // load direct
-$l = new CoreLibs\Language\L10n($lang, $domain, $path);
+$l = new L10n($lang, $domain, $path);
 echo "*<br>";
 echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
 echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";

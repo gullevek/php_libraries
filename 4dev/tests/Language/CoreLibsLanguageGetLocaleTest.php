@@ -60,7 +60,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 	/**
 	 * all the test data
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function setLocaleProvider(): array
 	{
@@ -72,6 +72,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 			// 4: SESSION: DEFAULT_LOCALE
 			// 5: SESSION: DEFAULT_CHARSET
 			// 6: expected array
+			// 7: deprecation message
 			'no params, all default constants' => [
 				// lang, domain, encoding, path
 				null, null, null, null,
@@ -85,6 +86,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'UTF-8',
 					'path' => "/^\/(.*\/)?includes\/locale\/$/",
 				],
+				'setLocale: Unset $locale or unset SESSION locale is deprecated',
 			],
 			'no params, session charset and lang' => [
 				// lang, domain, encoding, path
@@ -99,6 +101,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'UTF-8',
 					'path' => "/^\/(.*\/)?includes\/locale\/$/",
 				],
+				'setLocale: Unset $domain is deprecated'
 			],
 			'no params, session charset and lang short' => [
 				// lang, domain, encoding, path
@@ -113,6 +116,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'UTF-8',
 					'path' => "/^\/(.*\/)?includes\/locale\/$/",
 				],
+				'setLocale: Unset $domain is deprecated',
 			],
 			// param lang (no sessions)
 			'locale param only, no sessions' => [
@@ -128,6 +132,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'UTF-8',
 					'path' => "/^\/(.*\/)?includes\/locale\/$/",
 				],
+				'setLocale: Unset $domain is deprecated',
 			],
 			// different locale setting
 			'locale complex param only, no sessions' => [
@@ -143,6 +148,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'SJIS',
 					'path' => "/^\/(.*\/)?includes\/locale\/$/",
 				],
+				'setLocale: Unset $domain is deprecated',
 			],
 			// param lang and domain (no override)
 			'locale, domain params, no sessions' => [
@@ -158,6 +164,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'UTF-8',
 					'path' => "/^\/(.*\/)?includes\/locale\/$/",
 				],
+				'setLocale: Unset $path is deprecated',
 			],
 			// param lang and domain (no override)
 			'locale, domain, encoding params, no sessions' => [
@@ -173,6 +180,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'UTF-8',
 					'path' => "/^\/(.*\/)?includes\/locale\/$/",
 				],
+				'setLocale: Unset $path is deprecated'
 			],
 			// lang, domain, path (no override)
 			'locale, domain and path, no sessions' => [
@@ -188,6 +196,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'UTF-8',
 					'path' => "/^\/(.*\/)?locale_other\/$/",
 				],
+				null
 			],
 			// all params set (no override)
 			'all parameter, no sessions' => [
@@ -203,6 +212,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'UTF-8',
 					'path' => "/^\/(.*\/)?locale_other\/$/",
 				],
+				null
 			],
 			// param lang and domain (no override)
 			'long locale, domain, encoding params, no sessions' => [
@@ -218,6 +228,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 					'encoding' => 'UTF-8',
 					'path' => "/^\/(.*\/)?includes\/locale\/$/",
 				],
+				'setLocale: Unset $path is deprecated',
 			],
 			// TODO invalid params (bad path) (no override)
 			// TODO param calls, but with override set
@@ -225,14 +236,22 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 	}
 
 	/**
-	 * Undocumented function
-	 *
-	 * @covers ::setLocale
-	 * @dataProvider setLocaleProvider
-	 * @testdox lang settings lang $language, domain $domain, encoding $encoding, path $path; session lang: $SESSION_DEFAULT_LOCALE, session char: $SESSION_DEFAULT_CHARSET [$_dataName]
-	 *
-	 * @return void
-	 */
+	  * Undocumented function
+	  *
+	  * @covers ::setLocale
+	  * @dataProvider setLocaleProvider
+	  * @testdox lang settings lang $language, domain $domain, encoding $encoding, path $path; session lang: $SESSION_DEFAULT_LOCALE, session char: $SESSION_DEFAULT_CHARSET [$_dataName]
+	  *
+	  * @param  string|null  $language
+	  * @param  string|null  $domain
+	  * @param  string|null  $encoding
+	  * @param  string|null  $path
+	  * @param  string|null  $SESSION_DEFAULT_LOCALE
+	  * @param  string|null  $SESSION_DEFAULT_CHARSET
+	  * @param  array<mixed> $expected
+	  * @param  string|null  $deprecation_message
+	  * @return void
+	  */
 	public function testsetLocale(
 		?string $language,
 		?string $domain,
@@ -240,7 +259,8 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 		?string $path,
 		?string $SESSION_DEFAULT_LOCALE,
 		?string $SESSION_DEFAULT_CHARSET,
-		array $expected
+		array $expected,
+		?string $deprecation_message
 	): void {
 		$return_lang_settings = [];
 		global $_SESSION;
@@ -251,19 +271,41 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 		if ($SESSION_DEFAULT_CHARSET !== null) {
 			$_SESSION['DEFAULT_CHARSET'] = $SESSION_DEFAULT_CHARSET;
 		}
+		if ($deprecation_message !== null) {
+			set_error_handler(
+				static function (int $errno, string $errstr): never {
+					throw new \Exception($errstr, $errno);
+				},
+				E_USER_DEPRECATED
+			);
+			// catch this with the message
+			$this->expectExceptionMessage($deprecation_message);
+		}
 		// function call
-		if ($language === null && $domain === null && $encoding === null && $path === null) {
+		if (
+			$language === null && $domain === null &&
+			$encoding === null && $path === null
+		) {
 			$return_lang_settings  = \CoreLibs\Language\GetLocale::setLocale();
-		} elseif ($language !== null && $domain === null && $encoding === null && $path === null) {
+		} elseif (
+			$language !== null && $domain === null &&
+			$encoding === null && $path === null
+		) {
 			$return_lang_settings  = \CoreLibs\Language\GetLocale::setLocale(
 				$language
 			);
-		} elseif ($language !== null && $domain !== null && $encoding === null && $path === null) {
+		} elseif (
+			$language !== null && $domain !== null &&
+			$encoding === null && $path === null
+		) {
 			$return_lang_settings  = \CoreLibs\Language\GetLocale::setLocale(
 				$language,
 				$domain
 			);
-		} elseif ($language !== null && $domain !== null && $encoding !== null && $path === null) {
+		} elseif (
+			$language !== null && $domain !== null &&
+			$encoding !== null && $path === null
+		) {
 			$return_lang_settings  = \CoreLibs\Language\GetLocale::setLocale(
 				$language,
 				$domain,
@@ -277,6 +319,7 @@ final class CoreLibsLanguageGetLocaleTest extends TestCase
 				$path
 			);
 		}
+		restore_error_handler();
 		// print "RETURN: " . print_r($return_lang_settings, true) . "\n";
 
 		foreach (

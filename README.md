@@ -4,7 +4,6 @@
 
 * Uses PSR-12
 * tab indent instead of 4 spaces indent
-* Warning at 120 character length, error at 240 character length
 
 ## General information
 
@@ -24,9 +23,9 @@ There are three branches:
 ### master
 
 The active branch, which is the namespace branch.
-Currently compatible with PHP 7.4 and 8.0
+Compatible with PHP 8.1 or higher
 
-### legacy
+### legacy (deprecated)
 
 The old non namepsace format layout.
 This is fully deprecated and will no longer be maintaned.
@@ -39,17 +38,17 @@ Any current development is done here
 ## Static checks
 
 With phpstan (`4dev/checking/phpstan.sh`)
-`phpstan`
+`vendor/bin/phpstan`
 
 With phan (`4dev/checking/phan.sh`)
-`phan --progress-bar -C --analyze-twice`
+`vendor/bin/phan --progress-bar -C --analyze-twice`
 
 pslam is setup but not configured
 
 ## Unit tests
 
 With phpunit (`4dev/checking/phpunit.sh`)
-`phpunit -c $phpunit.xml 4dev/tests/`
+`www/vendor/bin/phpunit -c $phpunit.xml 4dev/tests/`
 
 ## Other Notes
 

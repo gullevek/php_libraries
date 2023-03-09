@@ -13,10 +13,6 @@ $PRINT_ALL = false;
 $ECHO_ALL = true;
 $DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
-
 ob_start();
 
 // basic class test file
@@ -51,12 +47,22 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
-function test()
+/**
+ * Undocumented function
+ *
+ * @return string|null
+ */
+function test(): ?string
 {
 	return DebugSupport::getCallerMethod(1);
 }
 
-function test2()
+/**
+ * Undocumented function
+ *
+ * @return array<mixed>
+ */
+function test2(): array
 {
 	return DebugSupport::getCallerMethodList(1);
 }
@@ -108,19 +114,28 @@ $new_log = new CoreLibs\Debug\Logging([
 $new_log->debug('OPTIONS TYPE', 'New Type error');
 print "OPTIONS LOGGER:<br>" . $new_log->printErrorMsg();
 $new_log->setLogLevel('debug', 'on', ['A', 'B', 'C' => false]);
-print "LOG LEVEL: " .  DebugSupport::printAr($new_log->getLogLevel('debug', 'on')) . "<br>";
+print "LOG LEVEL: " .  DebugSupport::printAr(\CoreLibs\Convert\SetVarType::setArray(
+	$new_log->getLogLevel('debug', 'on')
+)) . "<br>";
 
 echo "<b>CLASS DEBUG CALL</b><br>";
 
 // @codingStandardsIgnoreLine
 class TestL
 {
+	/** @var \CoreLibs\Debug\Logging */
 	public $log;
 	public function __construct()
 	{
 		$this->log = new CoreLibs\Debug\Logging();
 	}
-	public function test(string $ts = null)
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string|null $ts
+	 * @return bool
+	 */
+	public function test(?string $ts = null): bool
 	{
 		print "* GETCALLERCLASS(INSIDE CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
 		$this->log->debug('TESTL', 'Logging in class testL' . ($ts !== null ? ': ' . $ts : ''));
@@ -131,12 +146,18 @@ class TestL
 // @codingStandardsIgnoreLine
 class TestR extends TestL
 {
+	/** @var string */
 	public $foo;
 	public function __construct()
 	{
 		parent::__construct();
 	}
-	public function subTest()
+	/**
+	 * Undocumented function
+	 *
+	 * @return bool
+	 */
+	public function subTest(): bool
 	{
 		print "** GETCALLERCLASS(INSIDE EXTND CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
 		$this->log->debug('TESTR', 'Logging in class testR (extends testL)');
@@ -160,12 +181,18 @@ print "CLASS EXTEND: PRINTERRORMSG: <br>" . $tr->log->printErrorMsg() . "<br>";
 // @codingStandardsIgnoreLine
 class AttachOutside
 {
+	/** @var \CoreLibs\Debug\Logging */
 	public $log;
-	public function __construct(object $logger_class)
+	public function __construct(\CoreLibs\Debug\Logging $logger_class)
 	{
 		$this->log = $logger_class;
 	}
-	public function test()
+	/**
+	 * Undocumented function
+	 *
+	 * @return string
+	 */
+	public function test(): string
 	{
 		$this->log->debug('ATTACHOUTSIDE', 'A test');
 		return get_class($this);

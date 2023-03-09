@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="8"
+    resolveFromConfigFile="true"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    autoloader="psalm-config.php"
+    findUnusedBaselineEntry="true"
+    findUnusedCode="true"
+>
+    <projectFiles>
+        <file name="phpstan-conditional.php" />
+        <file name="phpstan-bootstrap.php" />
+        <directory name="www" />
+        <ignoreFiles>
+            <directory name="www/templates_c" />
+            <directory name="www/cache" />
+            <directory name="www/log" />
+            <directory name="www/media" />
+            <directory name="www/tmp" />
+            <directory name="www/vendor" />
+            <directory name="vendor" />
+        </ignoreFiles>
+    </projectFiles>
+</psalm>

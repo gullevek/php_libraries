@@ -61,6 +61,16 @@ ob_end_flush();
 // init smarty and form class
 $edit_base = new CoreLibs\Admin\EditBase(DB_CONFIG, $log, $l10n, $locale);
 // creates edit pages and runs actions
-$edit_base->editBaseRun();
+$edit_base->editBaseRun(
+	BASE . INCLUDES . TEMPLATES . CONTENT_PATH,
+	BASE . TEMPLATES_C,
+	BASE . CACHE,
+	ADMIN_STYLESHEET,
+	DEFAULT_ENCODING,
+	LAYOUT . CSS,
+	LAYOUT . JS,
+	ROOT,
+	CONTENT_PATH
+);
 
 // __END__

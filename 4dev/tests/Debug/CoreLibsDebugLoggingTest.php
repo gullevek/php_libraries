@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsDebugLoggingTest extends TestCase
 {
+	private const LOG_FOLDER = __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR;
 	/**
 	 * test set for options BASIC
 	 *
@@ -33,7 +34,8 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		return [
 			'log folder set' => [
 				[
-					'log_folder' => DIRECTORY_SEPARATOR . 'tmp'
+					'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
+					'file_id' => 'testClassInit'
 				],
 				[
 					'log_folder' => DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR,
@@ -43,7 +45,9 @@ final class CoreLibsDebugLoggingTest extends TestCase
 				[]
 			],
 			'nothing set' => [
-				null,
+				[
+					'file_id' => 'testClassInit'
+				],
 				[
 					'log_folder' => getcwd() . DIRECTORY_SEPARATOR,
 					'debug_all' => false,
@@ -51,8 +55,10 @@ final class CoreLibsDebugLoggingTest extends TestCase
 				],
 				[]
 			],
-			'no options set, constant set' => [
-				null,
+			'no options set, constant set [DEPRECATED]' => [
+				[
+					'file_id' => 'testClassInit'
+				],
 				[
 					'log_folder' => str_replace(DIRECTORY_SEPARATOR . 'configs', '', __DIR__)
 							. DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR,
@@ -70,6 +76,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			'standard test set' => [
 				[
 					'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
+					'file_id' => 'testClassInit',
 					'debug_all' => true,
 					'print_all' => true,
 				],
@@ -89,12 +96,12 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	 * @dataProvider optionsProvider
 	 * @testdox init test [$_dataName]
 	 *
-	 * @param array|null $options
+	 * @param array $options
 	 * @param array $expected
 	 * @param array $override
 	 * @return void
 	 */
-	public function testClassInit(?array $options, array $expected, array $override): void
+	public function testClassInit(array $options, array $expected, array $override): void
 	{
 		if (!empty($override['constant'])) {
 			foreach ($override['constant'] as $var => $value) {
@@ -116,11 +123,24 @@ final class CoreLibsDebugLoggingTest extends TestCase
 				);
 			}
 		}
-		if ($options === null) {
-			$log = new \CoreLibs\Debug\Logging();
-		} else {
-			$log = new \CoreLibs\Debug\Logging($options);
+		// if not log folder and constant set -> expect E_USER_DEPRECATION
+		if (!empty($override['constant']) && empty($options['log_folder'])) {
+			// the deprecation message
+			$deprecation_message = 'options: log_folder must be set. '
+				. 'Setting via BASE and LOG constants is deprecated';
+			// convert E_USER_DEPRECATED to a exception
+			set_error_handler(
+				static function (int $errno, string $errstr): never {
+					throw new \Exception($errstr, $errno);
+				},
+				E_USER_DEPRECATED
+			);
+			// catch this with the message
+			$this->expectExceptionMessage($deprecation_message);
 		}
+		$log = new \CoreLibs\Debug\Logging($options);
+		// reset error handler
+		restore_error_handler();
 		// check that settings match
 		$this->assertEquals(
 			$expected['log_folder'],
@@ -152,17 +172,23 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		// 0: options
 		// 1: expected
 		// 2: override
+		// 3: exception message
 		return [
 			'no log id set' => [
-				null,
+				[
+					'log_folder' => self::LOG_FOLDER,
+				],
 				[
 					'log_file_id' => ''
 				],
-				[]
+				[],
+				null
 			],
 			// set log id manually afterwards
 			'set log id manually' => [
-				null,
+				[
+					'log_folder' => self::LOG_FOLDER,
+				],
 				[
 					'log_file_id' => '',
 					'set_log_file_id' => 'abc123',
@@ -172,21 +198,26 @@ final class CoreLibsDebugLoggingTest extends TestCase
 					'values' => [
 						'log_file_id' => 'abc123'
 					]
-				]
+				],
+				null
 			],
 			// set log id from options
 			'set log id via options' => [
 				[
 					'file_id' => 'abc456',
+					'log_folder' => self::LOG_FOLDER,
 				],
 				[
 					'log_file_id' => 'abc456'
 				],
-				[]
+				[],
+				null
 			],
 			// set log id from GLOBALS [DEPRECATED]
-			'set log id via globals' => [
-				null,
+			'set log id via globals [DEPRECATED]' => [
+				[
+					'log_folder' => self::LOG_FOLDER,
+				],
 				[
 					'log_file_id' => 'def123'
 				],
@@ -194,11 +225,14 @@ final class CoreLibsDebugLoggingTest extends TestCase
 					'globals' => [
 						'LOG_FILE_ID' => 'def123'
 					]
-				]
+				],
+				'options: file_id must be set. Setting via LOG_FILE_ID global variable is deprecated'
 			],
 			// set log id from CONSTANT [DEPRECATED]
-			'set log id via constant' => [
-				null,
+			'set log id via constant [DEPRECATED]' => [
+				[
+					'log_folder' => self::LOG_FOLDER,
+				],
 				[
 					'log_file_id' => 'ghi123'
 				],
@@ -210,12 +244,14 @@ final class CoreLibsDebugLoggingTest extends TestCase
 					'constant' => [
 						'LOG_FILE_ID' => 'ghi123'
 					]
-				]
+				],
+				'options: file_id must be set. Setting via LOG_FILE_ID constant is deprecated'
 			],
 			// invalid, keep previous set
 			'invalid log id' => [
 				[
-					'file_id' => 'jkl456'
+					'file_id' => 'jkl456',
+					'log_folder' => self::LOG_FOLDER,
 				],
 				[
 					'log_file_id' => 'jkl456',
@@ -225,7 +261,8 @@ final class CoreLibsDebugLoggingTest extends TestCase
 					'values' => [
 						'log_file_id' => './#'
 					]
-				]
+				],
+				null
 			]
 		];
 	}
@@ -237,13 +274,18 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	 * @dataProvider logIdOptionsProvider
 	 * @testdox log id set/get tests [$_dataName]
 	 *
-	 * @param array|null $options
+	 * @param array $options
 	 * @param array $expected
 	 * @param array $override
+	 * @param string|null $deprecation_message until we remove the old code
 	 * @return void
 	 */
-	public function testLogId(?array $options, array $expected, array $override): void
-	{
+	public function testLogId(
+		array $options,
+		array $expected,
+		array $override,
+		?string $deprecation_message
+	): void {
 		// we need to set with file_id option, globals LOG_FILE_ID, constant LOG_FILE_ID
 		if (!empty($override['constant'])) {
 			foreach ($override['constant'] as $var => $value) {
@@ -255,11 +297,20 @@ final class CoreLibsDebugLoggingTest extends TestCase
 				$GLOBALS[$var] = $value;
 			}
 		}
-		if ($options === null) {
-			$log = new \CoreLibs\Debug\Logging();
-		} else {
-			$log = new \CoreLibs\Debug\Logging($options);
+		if (!empty($override['constant']) || !empty($override['globals'])) {
+			// convert E_USER_DEPRECATED to a exception
+			set_error_handler(
+				static function (int $errno, string $errstr): never {
+					throw new \Exception($errstr, $errno);
+				},
+				E_USER_DEPRECATED
+			);
+			// catch this with the message
+			$this->expectExceptionMessage($deprecation_message);
 		}
+		$log = new \CoreLibs\Debug\Logging($options);
+		// reset error handler
+		restore_error_handler();
 		// check current
 		$this->assertEquals(
 			$log->getLogId(),
@@ -334,7 +385,10 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		bool $expected_get
 	): void {
 		// neutral start with default
-		$log = new \CoreLibs\Debug\Logging();
+		$log = new \CoreLibs\Debug\Logging([
+			'file_id' => 'testSetGetLogLevelAll',
+			'log_folder' => self::LOG_FOLDER
+		]);
 		// set and check
 		$this->assertEquals(
 			$log->setLogLevelAll($type, $flag),
@@ -456,7 +510,10 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		$expected_get
 	): void {
 		// neutral start with default
-		$log = new \CoreLibs\Debug\Logging();
+		$log = new \CoreLibs\Debug\Logging([
+			'file_id' => 'testSetGetLogLevel',
+			'log_folder' => self::LOG_FOLDER
+		]);
 		// set
 		$this->assertEquals(
 			$log->setLogLevel($type, $flag, $debug_on),
@@ -535,7 +592,10 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		bool $expected_get
 	): void {
 		// neutral start with default
-		$log = new \CoreLibs\Debug\Logging();
+		$log = new \CoreLibs\Debug\Logging([
+			'file_id' => 'testSetGetLogPer',
+			'log_folder' => self::LOG_FOLDER
+		]);
 		// set and check
 		$this->assertEquals(
 			$log->setLogPer($type, $set),
@@ -564,7 +624,10 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	public function testSetGetLogPrintFileDate(bool $input, bool $expected_set, bool $expected_get): void
 	{
 		// neutral start with default
-		$log = new \CoreLibs\Debug\Logging();
+		$log = new \CoreLibs\Debug\Logging([
+			'file_id' => 'testSetGetLogPrintFileDate',
+			'log_folder' => self::LOG_FOLDER
+		]);
 		// set and check
 		$this->assertEquals(
 			$log->setGetLogPrintFileDate($input),
@@ -630,7 +693,10 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	 */
 	public function testPrAr(array $input, string $expected): void
 	{
-		$log = new \CoreLibs\Debug\Logging();
+		$log = new \CoreLibs\Debug\Logging([
+			'file_id' => 'testPrAr',
+			'log_folder' => self::LOG_FOLDER
+		]);
 		$this->assertEquals(
 			$log->prAr($input),
 			$expected
@@ -691,7 +757,10 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	 */
 	public function testPrBl(bool $input, ?string $true, ?string $false, string $expected): void
 	{
-		$log = new \CoreLibs\Debug\Logging();
+		$log = new \CoreLibs\Debug\Logging([
+			'file_id' => 'testPrBl',
+			'log_folder' => self::LOG_FOLDER
+		]);
 		$return = '';
 		if ($true === null && $false === null) {
 			$return = $log->prBl($input);
@@ -977,9 +1046,16 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	public function testLogUniqueId(bool $option, bool $override): void
 	{
 		if ($option === true) {
-			$log = new \CoreLibs\Debug\Logging(['per_run' => $option]);
+			$log = new \CoreLibs\Debug\Logging([
+				'file_id' => 'testLogUniqueId',
+				'log_folder' => self::LOG_FOLDER,
+				'per_run' => $option
+			]);
 		} else {
-			$log = new \CoreLibs\Debug\Logging();
+			$log = new \CoreLibs\Debug\Logging([
+				'file_id' => 'testLogUniqueId',
+				'log_folder' => self::LOG_FOLDER
+			]);
 			$log->setLogUniqueId();
 		}
 		$per_run_id = $log->getLogUniqueId();

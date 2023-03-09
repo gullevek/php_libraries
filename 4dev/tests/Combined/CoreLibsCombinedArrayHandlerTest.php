@@ -738,7 +738,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		$warning = array_shift($arrays);
 
 		// phpunit 10.0 compatible
-		$this->expectExceptionMessage(($warning));
+		$this->expectExceptionMessage($warning);
 
 		\CoreLibs\Combined\ArrayHandler::arrayMergeRecursive(...$arrays);
 

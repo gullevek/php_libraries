@@ -120,8 +120,6 @@ final class CoreLibsACLLoginTest extends TestCase
 		// define('LOGIN_DB_SCHEMA', '');
 
 		// SHOULD SET
-		// PASSWORD_MIN_LENGTH (d9)
-		// PASSWORD_MAX_LENGTH (d255)
 		// DEFAULT_ACL_LEVEL (d80)
 
 		// OPT:
@@ -1106,7 +1104,21 @@ final class CoreLibsACLLoginTest extends TestCase
 
 		/** @var \CoreLibs\ACL\Login&MockObject */
 		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
-			->setConstructorArgs([self::$db, self::$log, $session_mock, false])
+			->setConstructorArgs([
+				self::$db,
+				self::$log,
+				$session_mock,
+				[
+					'auto_login' => false,
+					'default_acl_level' => 80,
+					'logout_target' => '',
+					'site_locale' => 'en_US.UTF-8',
+					'site_domain' => 'admin',
+					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
+						. 'includes' . DIRECTORY_SEPARATOR
+						. 'locale' . DIRECTORY_SEPARATOR,
+				]
+			])
 			->onlyMethods(['loginTerminate', 'loginReadPageName', 'loginPrintLogin'])
 			->getMock();
 		$login_mock->expects($this->any())
@@ -1774,7 +1786,21 @@ final class CoreLibsACLLoginTest extends TestCase
 		);
 		/** @var \CoreLibs\ACL\Login&MockObject */
 		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
-			->setConstructorArgs([self::$db, self::$log, $session_mock, false])
+			->setConstructorArgs([
+				self::$db,
+				self::$log,
+				$session_mock,
+				[
+					'auto_login' => false,
+					'default_acl_level' => 80,
+					'logout_target' => '',
+					'site_locale' => 'en_US.UTF-8',
+					'site_domain' => 'admin',
+					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
+						. 'includes' . DIRECTORY_SEPARATOR
+						. 'locale' . DIRECTORY_SEPARATOR,
+				]
+			])
 			->onlyMethods(['loginTerminate'])
 			->getMock();
 		$login_mock->expects($this->any())
@@ -1873,7 +1899,21 @@ final class CoreLibsACLLoginTest extends TestCase
 		);
 		/** @var \CoreLibs\ACL\Login&MockObject */
 		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
-			->setConstructorArgs([self::$db, self::$log, $session_mock, false])
+			->setConstructorArgs([
+				self::$db,
+				self::$log,
+				$session_mock,
+				[
+					'auto_login' => false,
+					'default_acl_level' => 80,
+					'logout_target' => '',
+					'site_locale' => 'en_US.UTF-8',
+					'site_domain' => 'admin',
+					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
+						. 'includes' . DIRECTORY_SEPARATOR
+						. 'locale' . DIRECTORY_SEPARATOR,
+				]
+			])
 			->onlyMethods(['loginTerminate'])
 			->getMock();
 		$login_mock->expects($this->any())
@@ -1946,7 +1986,21 @@ final class CoreLibsACLLoginTest extends TestCase
 		);
 		/** @var \CoreLibs\ACL\Login&MockObject */
 		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
-			->setConstructorArgs([self::$db, self::$log, $session_mock, false])
+			->setConstructorArgs([
+				self::$db,
+				self::$log,
+				$session_mock,
+				[
+					'auto_login' => false,
+					'default_acl_level' => 80,
+					'logout_target' => '',
+					'site_locale' => 'en_US.UTF-8',
+					'site_domain' => 'admin',
+					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
+						. 'includes' . DIRECTORY_SEPARATOR
+						. 'locale' . DIRECTORY_SEPARATOR,
+				]
+			])
 			->onlyMethods(['loginTerminate'])
 			->getMock();
 		$login_mock->expects($this->any())
@@ -2027,7 +2081,21 @@ final class CoreLibsACLLoginTest extends TestCase
 		);
 		/** @var \CoreLibs\ACL\Login&MockObject */
 		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
-			->setConstructorArgs([self::$db, self::$log, $session_mock, false])
+			->setConstructorArgs([
+				self::$db,
+				self::$log,
+				$session_mock,
+				[
+					'auto_login' => false,
+					'default_acl_level' => 80,
+					'logout_target' => '',
+					'site_locale' => 'en_US.UTF-8',
+					'site_domain' => 'admin',
+					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
+						. 'includes' . DIRECTORY_SEPARATOR
+						. 'locale' . DIRECTORY_SEPARATOR,
+				]
+			])
 			->onlyMethods(['loginTerminate'])
 			->getMock();
 		$login_mock->expects($this->any())

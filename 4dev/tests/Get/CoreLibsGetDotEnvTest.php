@@ -134,6 +134,16 @@ final class CoreLibsGetDotEnvTest extends TestCase
 			$old_chmod = fileperms($folder . DIRECTORY_SEPARATOR . $file);
 			chmod($folder . DIRECTORY_SEPARATOR . $file, octdec($chmod));
 		}
+		$message = '\CoreLibs\Get\DotEnv is deprecated in favor for '
+			. 'composer package gullevek\dotenv which is a copy of this';
+		// convert E_USER_DEPRECATED to a exception
+		set_error_handler(
+			static function (int $errno, string $errstr): never {
+				throw new \Exception($errstr, $errno);
+			},
+			E_USER_DEPRECATED
+		);
+		$this->expectExceptionMessage($message);
 		if ($folder !== null && $file !== null) {
 			$status = DotEnv::readEnvFile($folder, $file);
 		} elseif ($folder !== null) {
@@ -141,6 +151,7 @@ final class CoreLibsGetDotEnvTest extends TestCase
 		} else {
 			$status = DotEnv::readEnvFile();
 		}
+		restore_error_handler();
 		$this->assertEquals(
 			$status,
 			$expected_status,

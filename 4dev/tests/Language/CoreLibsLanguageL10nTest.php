@@ -22,36 +22,15 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 */
 	public static function setUpBeforeClass(): void
 	{
-		// default web page encoding setting
-		if (!defined('DEFAULT_ENCODING')) {
-			define('DEFAULT_ENCODING', 'UTF-8');
-		}
-		if (!defined('DEFAULT_LOCALE')) {
-			// default lang + encoding
-			define('DEFAULT_LOCALE', 'en_US.UTF-8');
-		}
-		// site
-		if (!defined('SITE_ENCODING')) {
-			define('SITE_ENCODING', DEFAULT_ENCODING);
-		}
-		if (!defined('SITE_LOCALE')) {
-			define('SITE_LOCALE', DEFAULT_LOCALE);
-		}
-		// just set
+		// for deprecation test only, will be removed
 		if (!defined('BASE')) {
-			define('BASE', str_replace('/configs', '', __DIR__) . DIRECTORY_SEPARATOR);
+			define('BASE', str_replace(DIRECTORY_SEPARATOR . 'configs', '', __DIR__) . DIRECTORY_SEPARATOR);
 		}
 		if (!defined('INCLUDES')) {
 			define('INCLUDES', 'includes' . DIRECTORY_SEPARATOR);
 		}
-		if (!defined('LANG')) {
-			define('LANG', 'lang' . DIRECTORY_SEPARATOR);
-		}
 		if (!defined('LOCALE')) {
 			define('LOCALE', 'locale' . DIRECTORY_SEPARATOR);
-		}
-		if (!defined('CONTENT_PATH')) {
-			define('CONTENT_PATH', 'frontend' . DIRECTORY_SEPARATOR);
 		}
 	}
 
@@ -110,59 +89,90 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			// 3: path
 			// 4: locale expected
 			// 5: locale set expected
-			// 6: domain exepcted
-			// 7: context (null for none)
-			// 8: test string in
-			// 9: test translated
+			// 6: lang expected
+			// 7: encoding expected
+			// 8: domain exepcted
+			// 9: context (null for none)
+			// 10: test string in
+			// 11: test translated
+			// 12: deprecation message (until removed)
 			// new style load
 			'gettext load en' => [
 				'en_US.UTF-8',
 				'frontend',
-				__DIR__ . 'includes/locale/',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				//
 				'en_US.UTF-8',
 				'en_US',
+				'en_US',
+				'UTF-8',
 				'frontend',
 				null,
 				'Original',
 				'Translated frontend en_US',
+				null,
 			],
 			'gettext load en' => [
 				'en_US.UTF-8',
 				'frontend',
-				__DIR__ . 'includes/locale/',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				//
 				'en_US.UTF-8',
 				'en_US',
+				'en_US',
+				'UTF-8',
 				'frontend',
 				'context',
 				'Original',
 				'Original context frontend en_US',
+				null,
 			],
 			'gettext load ja' => [
 				'ja_JP.UTF-8',
 				'admin',
-				__DIR__ . 'includes/locale/',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				//
 				'ja_JP.UTF-8',
 				'ja_JP',
+				'ja_JP',
+				'UTF-8',
 				'admin',
 				null,
 				'Original',
 				'Translated admin ja_JP',
+				null,
 			],
-			// mixed path and domain
-			'mixed path and domain' => [
+			// mixed path and domain [DEPRECATED]
+			'mixed path and domain [DEPRECATED]' => [
 				'en_US.UTF-8',
-				__DIR__ . 'includes/locale/',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				'frontend',
 				//
 				'en_US.UTF-8',
 				'en_US',
+				'en_US',
+				'UTF-8',
 				'frontend',
 				'context',
 				'Original',
 				'Original context frontend en_US',
+				'L10n constructor parameter switch is no longer supported. domain is 2nd, path is 3rd parameter'
+			],
+			// unset path
+			'unset path with locale and domain [DEPRECATED]' => [
+				'ja_JP.UTF-8',
+				'admin',
+				null,
+				//
+				'ja_JP.UTF-8',
+				'ja_JP',
+				'ja_JP',
+				'UTF-8',
+				'admin',
+				null,
+				'Original',
+				'Translated admin ja_JP',
+				'Empty path parameter is no longer allowed if locale and domain are set',
 			],
 			// null set
 			'empty load new ' => [
@@ -173,9 +183,12 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				'',
 				'',
 				'',
+				'',
+				'',
 				null,
 				'Original',
 				'Original',
+				null,
 			]
 		];
 	}
@@ -192,10 +205,13 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * @param  string|null $path
 	 * @param  string      $locale_expected
 	 * @param  string      $locale_set_expected
+	 * @param  string      $lang_expected
+	 * @param  string      $encoding_expected
 	 * @param  string      $domain_expected
-	 * @param  ?string     $context
+	 * @param  string|null $context
 	 * @param  string      $original
 	 * @param  string      $translated
+	 * @param  string|null $deprecation_message
 	 * @return void
 	 */
 	public function testL10nObject(
@@ -204,20 +220,36 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		?string $path,
 		string $locale_expected,
 		string $locale_set_expected,
+		string $lang_expected,
+		string $encoding_expected,
 		string $domain_expected,
 		?string $context,
 		string $original,
-		string $translated
+		string $translated,
+		?string $deprecation_message
 	): void {
+		if ($deprecation_message !== null) {
+			set_error_handler(
+				static function (int $errno, string $errstr): never {
+					throw new \Exception($errstr, $errno);
+				},
+				E_USER_DEPRECATED
+			);
+			// catch this with the message
+			$this->expectExceptionMessage($deprecation_message);
+		}
 		if ($locale === null) {
 			$l10n = new \CoreLibs\Language\L10n();
 		} elseif ($domain === null) {
+			// same as if locale is null
 			$l10n = new \CoreLibs\Language\L10n($locale);
 		} elseif ($path === null) {
+			// deprecated, path must be set
 			$l10n = new \CoreLibs\Language\L10n($locale, $domain);
 		} else {
 			$l10n = new \CoreLibs\Language\L10n($locale, $domain, $path);
 		}
+		restore_error_handler();
 		// print "LOC: " . $locale . ", " . $l10n->getLocale() . ", " . $locale_expected . "\n";
 		// print "MO: " . $l10n->getMoFile() . "\n";
 		$this->assertEquals(
@@ -248,6 +280,19 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				'Translated string assert failed in context: ' . $context
 			);
 		}
+		// test get locel as array
+		$locale = $l10n->getLocaleAsArray();
+		$this->assertEquals(
+			[
+				'locale' => $locale_expected,
+				'lang' => $lang_expected,
+				'domain' => $domain_expected,
+				'encoding' => $encoding_expected,
+				'path' => $path
+			],
+			$locale,
+			'getLocaleAsArray mismatch'
+		);
 	}
 
 	// l10nReloadMOfile and getTranslator
@@ -283,7 +328,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				// set 0-2
 				'en_US.UTF-8',
 				'frontend',
-				__DIR__ . 'includes/locale/',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				// status 3
 				false,
 				// to translate 4
@@ -296,7 +341,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				// set new 8-10
 				'ja_JP.UTF-8',
 				'frontend',
-				__DIR__ . 'includes/locale/',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				// status new 11
 				false,
 				// check new setter 12-14
@@ -322,7 +367,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 				// set new 8-10
 				'en_US.UTF-8',
 				'frontend',
-				__DIR__ . 'includes/locale/',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				// status new 11
 				false,
 				// check new setter 12-14
@@ -387,12 +432,8 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		string $domain_expected_b,
 		string $translated_b
 	): void {
-		if ($locale === null) {
+		if ($locale === null || $domain === null || $path === null) {
 			$l10n = new \CoreLibs\Language\L10n();
-		} elseif ($domain === null) {
-			$l10n = new \CoreLibs\Language\L10n($locale);
-		} elseif ($path === null) {
-			$l10n = new \CoreLibs\Language\L10n($locale, $domain);
 		} else {
 			$l10n = new \CoreLibs\Language\L10n($locale, $domain, $path);
 		}
@@ -494,16 +535,16 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	{
 		return [
 			// 0: locale
-			// 1: path
-			// 2: domain
+			// 1: domain
+			// 2: path
 			// 3: context (null for none)
 			// 4: single string
 			// 5: plural string
 			// 6: array for each n value expected string
 			'plural text en' => [
 				'en_US',
-				__DIR__ . 'includes/locale/',
 				'admin',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				// context
 				null,
 				// text single/multi in
@@ -518,8 +559,8 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			],
 			'plural text context en' => [
 				'en_US',
-				__DIR__ . 'includes/locale/',
 				'admin',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				// context
 				'context',
 				// text single/multi in
@@ -544,8 +585,8 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * @testdox plural string test for locale $locale and domain $domain with $context [$_dataName]
 	 *
 	 * @param  string  $locale
-	 * @param  string  $path
 	 * @param  string  $domain
+	 * @param  string  $path
 	 * @param  ?string $context
 	 * @param  string  $original_single
 	 * @param  string  $original_plural
@@ -555,8 +596,8 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	public function testNgettext(
 		// config 0-3
 		string $locale,
-		string $path,
 		string $domain,
+		string $path,
 		// context string
 		?string $context,
 		// input strings
@@ -565,7 +606,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		// expected
 		array $expected_strings
 	): void {
-		$l10n = new \CoreLibs\Language\L10n($locale, $path, $domain, false);
+		$l10n = new \CoreLibs\Language\L10n($locale, $domain, $path);
 
 		foreach ($expected_strings as $n => $expected) {
 			if (empty($context)) {
@@ -981,7 +1022,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			'standard en' => [
 				'en_US.UTF-8',
 				'frontend',
-				__DIR__ . 'includes/locale/',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				'UTF-8',
 				'Original',
 				'Translated frontend en_US',
@@ -989,7 +1030,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 			'standard ja' => [
 				'ja_JP.UTF-8',
 				'admin',
-				__DIR__ . 'includes/locale/',
+				__DIR__ . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR,
 				'UTF-8',
 				'Original',
 				'Translated admin ja_JP',
@@ -1030,6 +1071,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		_textdomain($domain);
 		_bindtextdomain($domain, $path);
 		_bind_textdomain_codeset($domain, $encoding);
+
 		$this->assertEquals(
 			$translated,
 			__($original),

@@ -12,6 +12,7 @@ class Image
 {
 	/**
 	 * converts picture to a thumbnail with max x and max y size
+	 * TOOD: needs mandatory options for ImageMagic convert, paths, etc folders
 	 *
 	 * @param  string      $pic          source image file with or without path
 	 * @param  int         $size_x       maximum size width
@@ -158,25 +159,27 @@ class Image
 	 *   if both are set, those are the max sizes (aspect ration is always ekpt)
 	 * - if path is not given will cache folder for current path set
 	 *
-	 * @param  string      $filename       source file name with full path
-	 * @param  int         $thumb_width    thumbnail width
-	 * @param  int         $thumb_height   thumbnail height
-	 * @param  string|null $thumbnail_path altnerative path for thumbnails
-	 * @param  bool        $create_dummy   if we encounter an invalid file
-	 *                                     create a dummy image file and return it
-	 * @param  bool        $use_cache      default to true, set to false to skip
-	 *                                     creating new image if exists
-	 * @param  bool        $high_quality   default to true, uses sample version,
-	 *                                     set to false to not use (default true)
-	 *                                     to use quick but less nice version
-	 * @param  int         $jpeg_quality   default 80, set image quality for jpeg only
-	 * @return string|false                thumbnail with path
+	 * @param  string      $filename     source file name with full path
+	 * @param  int         $thumb_width  thumbnail width
+	 * @param  int         $thumb_height thumbnail height
+	 * @param  string|null $cache_folder path for thumbnail cache
+	 * @param  string|null $web_folder   frontend path for output
+	 * @param  bool        $create_dummy if we encounter an invalid file
+	 *                                   create a dummy image file and return it
+	 * @param  bool        $use_cache    default to true, set to false to skip
+	 *                                   creating new image if exists
+	 * @param  bool        $high_quality default to true, uses sample version,
+	 *                                   set to false to not use (default true)
+	 *                                   to use quick but less nice version
+	 * @param  int         $jpeg_quality default 80, set image quality for jpeg only
+	 * @return string|false              thumbnail with path
 	 */
 	public static function createThumbnailSimple(
 		string $filename,
 		int $thumb_width = 0,
 		int $thumb_height = 0,
-		?string $thumbnail_path = null,
+		?string $cache_folder = null, // will be not null in future
+		?string $web_folder = null,
 		bool $create_dummy = true,
 		bool $use_cache = true,
 		bool $high_quality = true,
@@ -185,233 +188,246 @@ class Image
 		$thumbnail = false;
 		// $this->debug('IMAGE PREPARE', "FILE: $filename (exists "
 		//	.(string)file_exists($filename)."), WIDTH: $thumb_width, HEIGHT: $thumb_height");
+		if (
+			$cache_folder === null ||
+			$web_folder === null
+		) {
+			/** @deprecated Do use cache folder and web folder parameters */
+			trigger_error(
+				'params $cache_folder and $web_folder must be set. Setting via constants is deprecated',
+				E_USER_DEPRECATED
+			);
+			// NOTE: we need to depracte this
+			$cache_folder = BASE . LAYOUT . CONTENT_PATH . CACHE . IMAGES;
+			$web_folder = LAYOUT . CACHE . IMAGES;
+			if (!is_dir($cache_folder)) {
+				if (false === mkdir($cache_folder)) {
+					$cache_folder = BASE . LAYOUT . CONTENT_PATH . CACHE;
+					$web_folder = LAYOUT . CACHE;
+				}
+			}
+		}
 		// check that input image exists and is either jpeg or png
 		// also fail if the basic CACHE folder does not exist at all
 		if (
-			file_exists($filename) &&
-			is_dir(BASE . LAYOUT . CONTENT_PATH . CACHE) &&
-			is_writable(BASE . LAYOUT . CONTENT_PATH . CACHE)
+			!file_exists($filename) ||
+			!is_dir($cache_folder) ||
+			!is_writable($cache_folder)
 		) {
-			// $this->debug('IMAGE PREPARE', "FILENAME OK, THUMB WIDTH/HEIGHT OK");
-			[$inc_width, $inc_height, $img_type] = getimagesize($filename) ?: [];
-			$thumbnail_write_path = null;
-			$thumbnail_web_path = null;
-			// path set first
-			if (
-				$img_type == IMAGETYPE_JPEG ||
-				$img_type == IMAGETYPE_PNG ||
-				$create_dummy === true
-			) {
-				// $this->debug('IMAGE PREPARE', "IMAGE TYPE OK: ".$inc_width.'x'.$inc_height);
-				// set thumbnail paths
-				$thumbnail_write_path = BASE . LAYOUT . CONTENT_PATH . CACHE . IMAGES;
-				$thumbnail_web_path = LAYOUT . CACHE . IMAGES;
-				// if images folder in cache does not exist create it, if failed, fall back to base cache folder
-				if (!is_dir($thumbnail_write_path)) {
-					if (false === mkdir($thumbnail_write_path)) {
-						$thumbnail_write_path = BASE . LAYOUT . CONTENT_PATH . CACHE;
-						$thumbnail_web_path = LAYOUT . CACHE;
-					}
-				}
+			return $thumbnail;
+		}
+		// $this->debug('IMAGE PREPARE', "FILENAME OK, THUMB WIDTH/HEIGHT OK");
+		[$inc_width, $inc_height, $img_type] = getimagesize($filename) ?: [];
+		$thumbnail_write_path = null;
+		$thumbnail_web_path = null;
+		// path set first
+		if (
+			$img_type == IMAGETYPE_JPEG ||
+			$img_type == IMAGETYPE_PNG ||
+			$create_dummy === true
+		) {
+			// $this->debug('IMAGE PREPARE', "IMAGE TYPE OK: ".$inc_width.'x'.$inc_height);
+			// set thumbnail paths
+			$thumbnail_write_path = $cache_folder;
+			$thumbnail_web_path = $web_folder;
+		}
+		// do resize or fall back on dummy run
+		if (
+			$img_type == IMAGETYPE_JPEG ||
+			$img_type == IMAGETYPE_PNG
+		) {
+			// if missing width or height in thumb, use the set one
+			if ($thumb_width == 0) {
+				$thumb_width = $inc_width;
 			}
-			// do resize or fall back on dummy run
-			if (
-				$img_type == IMAGETYPE_JPEG ||
-				$img_type == IMAGETYPE_PNG
-			) {
-				// if missing width or height in thumb, use the set one
-				if ($thumb_width == 0) {
-					$thumb_width = $inc_width;
-				}
-				if ($thumb_height == 0) {
-					$thumb_height = $inc_height;
-				}
-				// check resize parameters
-				if ($inc_width > $thumb_width || $inc_height > $thumb_height) {
-					$thumb_width_r = 0;
-					$thumb_height_r = 0;
-					// we need to keep the aspect ration on longest side
-					if (
-						($inc_height > $inc_width &&
-						// and the height is bigger than thumb set
-							$inc_height > $thumb_height) ||
-						// or the height is smaller or equal width
-						// but the width for the thumb is equal to the image height
-						($inc_height <= $inc_width &&
-							$inc_width == $thumb_width
-						)
-					) {
-						// $this->debug('IMAGE PREPARE', 'HEIGHT > WIDTH');
-						$ratio = $inc_height / $thumb_height;
-						$thumb_width_r = (int)ceil($inc_width / $ratio);
-						$thumb_height_r = $thumb_height;
-					} else {
-						// $this->debug('IMAGE PREPARE', 'WIDTH > HEIGHT');
-						$ratio = $inc_width / $thumb_width;
-						$thumb_width_r = $thumb_width;
-						$thumb_height_r = (int)ceil($inc_height / $ratio);
-					}
-					// $this->debug('IMAGE PREPARE', "Ratio: $ratio, Target size $thumb_width_r x $thumb_height_r");
-					// set output thumbnail name
-					$thumbnail = 'thumb-' . pathinfo($filename)['filename'] . '-'
-						. $thumb_width_r . 'x' . $thumb_height_r;
-					if (
-						$use_cache === false ||
-						!file_exists($thumbnail_write_path . $thumbnail)
-					) {
-						// image, copy source image, offset in image, source x/y, new size, source image size
-						$thumb = imagecreatetruecolor($thumb_width_r, $thumb_height_r);
-						if ($thumb === false) {
-							return false;
-						}
-						if ($img_type == IMAGETYPE_PNG) {
-							$imagecolorallocatealpha = imagecolorallocatealpha($thumb, 0, 0, 0, 127);
-							if ($imagecolorallocatealpha === false) {
-								return false;
-							}
-							// preservere transaprency
-							imagecolortransparent(
-								$thumb,
-								$imagecolorallocatealpha
-							);
-							imagealphablending($thumb, false);
-							imagesavealpha($thumb, true);
-						}
-						$source = null;
-						switch ($img_type) {
-							case IMAGETYPE_JPEG:
-								$source = imagecreatefromjpeg($filename);
-								break;
-							case IMAGETYPE_PNG:
-								$source = imagecreatefrompng($filename);
-								break;
-						}
-						// check that we have a source image resource
-						if ($source !== null && $source !== false) {
-							// resize no shift
-							if ($high_quality === true) {
-								imagecopyresized(
-									$thumb,
-									$source,
-									0,
-									0,
-									0,
-									0,
-									$thumb_width_r,
-									$thumb_height_r,
-									$inc_width,
-									$inc_height
-								);
-							} else {
-								imagecopyresampled(
-									$thumb,
-									$source,
-									0,
-									0,
-									0,
-									0,
-									$thumb_width_r,
-									$thumb_height_r,
-									$inc_width,
-									$inc_height
-								);
-							}
-							// write file
-							switch ($img_type) {
-								case IMAGETYPE_JPEG:
-									imagejpeg($thumb, $thumbnail_write_path . $thumbnail, $jpeg_quality);
-									break;
-								case IMAGETYPE_PNG:
-									imagepng($thumb, $thumbnail_write_path . $thumbnail);
-									break;
-							}
-							// free up resources (in case we are called in a loop)
-							imagedestroy($source);
-							imagedestroy($thumb);
-						} else {
-							$thumbnail = false;
-						}
-					}
+			if ($thumb_height == 0) {
+				$thumb_height = $inc_height;
+			}
+			// check resize parameters
+			if ($inc_width > $thumb_width || $inc_height > $thumb_height) {
+				$thumb_width_r = 0;
+				$thumb_height_r = 0;
+				// we need to keep the aspect ration on longest side
+				if (
+					($inc_height > $inc_width &&
+					// and the height is bigger than thumb set
+						$inc_height > $thumb_height) ||
+					// or the height is smaller or equal width
+					// but the width for the thumb is equal to the image height
+					($inc_height <= $inc_width &&
+						$inc_width == $thumb_width
+					)
+				) {
+					// $this->debug('IMAGE PREPARE', 'HEIGHT > WIDTH');
+					$ratio = $inc_height / $thumb_height;
+					$thumb_width_r = (int)ceil($inc_width / $ratio);
+					$thumb_height_r = $thumb_height;
 				} else {
-					// we just copy over the image as is, we never upscale
-					$thumbnail = 'thumb-' . pathinfo($filename)['filename'] . '-' . $inc_width . 'x' . $inc_height;
-					if (
-						$use_cache === false ||
-						!file_exists($thumbnail_write_path . $thumbnail)
-					) {
-						copy($filename, $thumbnail_write_path . $thumbnail);
-					}
+					// $this->debug('IMAGE PREPARE', 'WIDTH > HEIGHT');
+					$ratio = $inc_width / $thumb_width;
+					$thumb_width_r = $thumb_width;
+					$thumb_height_r = (int)ceil($inc_height / $ratio);
 				}
-				// add output path
-				if ($thumbnail !== false) {
-					$thumbnail = $thumbnail_web_path . $thumbnail;
-				}
-			} elseif ($create_dummy === true) {
-				// create dummy image in the thumbnail size
-				// if one side is missing, use the other side to create a square
-				if (!$thumb_width) {
-					$thumb_width = $thumb_height;
-				}
-				if (!$thumb_height) {
-					$thumb_height = $thumb_width;
-				}
-				// do we have an image already?
-				$thumbnail = 'thumb-' . pathinfo($filename)['filename'] . '-' . $thumb_width . 'x' . $thumb_height;
+				// $this->debug('IMAGE PREPARE', "Ratio: $ratio, Target size $thumb_width_r x $thumb_height_r");
+				// set output thumbnail name
+				$thumbnail = 'thumb-' . pathinfo($filename)['filename'] . '-'
+					. $thumb_width_r . 'x' . $thumb_height_r;
 				if (
 					$use_cache === false ||
 					!file_exists($thumbnail_write_path . $thumbnail)
 				) {
-					// if both are unset, set to 250
-					if ($thumb_height == 0) {
-						$thumb_height = 250;
-					}
-					if ($thumb_width == 0) {
-						$thumb_width = 250;
-					}
-					$thumb = imagecreatetruecolor($thumb_width, $thumb_height);
+					// image, copy source image, offset in image, source x/y, new size, source image size
+					$thumb = imagecreatetruecolor($thumb_width_r, $thumb_height_r);
 					if ($thumb === false) {
 						return false;
 					}
-					// add outside border px = 5% (rounded up)
-					// eg 50px -> 2.5px
-					$gray = imagecolorallocate($thumb, 200, 200, 200);
-					$white = imagecolorallocate($thumb, 255, 255, 255);
-					if ($gray === false || $white === false) {
-						return false;
+					if ($img_type == IMAGETYPE_PNG) {
+						$imagecolorallocatealpha = imagecolorallocatealpha($thumb, 0, 0, 0, 127);
+						if ($imagecolorallocatealpha === false) {
+							return false;
+						}
+						// preservere transaprency
+						imagecolortransparent(
+							$thumb,
+							$imagecolorallocatealpha
+						);
+						imagealphablending($thumb, false);
+						imagesavealpha($thumb, true);
 					}
-					// fill gray background
-					imagefill($thumb, 0, 0, $gray);
-					// now create rectangle
-					if (imagesx($thumb) < imagesy($thumb)) {
-						$width = (int)round(imagesx($thumb) / 100 * 5);
+					$source = null;
+					switch ($img_type) {
+						case IMAGETYPE_JPEG:
+							$source = imagecreatefromjpeg($filename);
+							break;
+						case IMAGETYPE_PNG:
+							$source = imagecreatefrompng($filename);
+							break;
+					}
+					// check that we have a source image resource
+					if ($source !== null && $source !== false) {
+						// resize no shift
+						if ($high_quality === true) {
+							imagecopyresized(
+								$thumb,
+								$source,
+								0,
+								0,
+								0,
+								0,
+								$thumb_width_r,
+								$thumb_height_r,
+								$inc_width,
+								$inc_height
+							);
+						} else {
+							imagecopyresampled(
+								$thumb,
+								$source,
+								0,
+								0,
+								0,
+								0,
+								$thumb_width_r,
+								$thumb_height_r,
+								$inc_width,
+								$inc_height
+							);
+						}
+						// write file
+						switch ($img_type) {
+							case IMAGETYPE_JPEG:
+								imagejpeg($thumb, $thumbnail_write_path . $thumbnail, $jpeg_quality);
+								break;
+							case IMAGETYPE_PNG:
+								imagepng($thumb, $thumbnail_write_path . $thumbnail);
+								break;
+						}
+						// free up resources (in case we are called in a loop)
+						imagedestroy($source);
+						imagedestroy($thumb);
 					} else {
-						$width = (int)round(imagesy($thumb) / 100 * 5);
+						$thumbnail = false;
 					}
-					imagefilledrectangle(
-						$thumb,
-						0 + $width,
-						0 + $width,
-						imagesx($thumb) - $width,
-						imagesy($thumb) - $width,
-						$white
-					);
-					// add "No valid images source"
-					// OR add circle
-					// * find center
-					// * width/height is 75% of size - border
-					// smaller size is taken
-					$base_width = imagesx($thumb) > imagesy($thumb) ? imagesy($thumb) : imagesx($thumb);
-					// get 75% width
-					$cross_width = (int)round((($base_width - ($width * 2)) / 100 * 75) / 2);
-					$center_x = (int)round(imagesx($thumb) / 2);
-					$center_y = (int)round(imagesy($thumb) / 2);
-					imagefilledellipse($thumb, $center_x, $center_y, $cross_width, $cross_width, $gray);
-					// find top left and bottom left for first line
-					imagepng($thumb, $thumbnail_write_path . $thumbnail);
 				}
-				// add web path
+			} else {
+				// we just copy over the image as is, we never upscale
+				$thumbnail = 'thumb-' . pathinfo($filename)['filename'] . '-' . $inc_width . 'x' . $inc_height;
+				if (
+					$use_cache === false ||
+					!file_exists($thumbnail_write_path . $thumbnail)
+				) {
+					copy($filename, $thumbnail_write_path . $thumbnail);
+				}
+			}
+			// add output path
+			if ($thumbnail !== false) {
 				$thumbnail = $thumbnail_web_path . $thumbnail;
 			}
+		} elseif ($create_dummy === true) {
+			// create dummy image in the thumbnail size
+			// if one side is missing, use the other side to create a square
+			if (!$thumb_width) {
+				$thumb_width = $thumb_height;
+			}
+			if (!$thumb_height) {
+				$thumb_height = $thumb_width;
+			}
+			// do we have an image already?
+			$thumbnail = 'thumb-' . pathinfo($filename)['filename'] . '-' . $thumb_width . 'x' . $thumb_height;
+			if (
+				$use_cache === false ||
+				!file_exists($thumbnail_write_path . $thumbnail)
+			) {
+				// if both are unset, set to 250
+				if ($thumb_height == 0) {
+					$thumb_height = 250;
+				}
+				if ($thumb_width == 0) {
+					$thumb_width = 250;
+				}
+				$thumb = imagecreatetruecolor($thumb_width, $thumb_height);
+				if ($thumb === false) {
+					return false;
+				}
+				// add outside border px = 5% (rounded up)
+				// eg 50px -> 2.5px
+				$gray = imagecolorallocate($thumb, 200, 200, 200);
+				$white = imagecolorallocate($thumb, 255, 255, 255);
+				if ($gray === false || $white === false) {
+					return false;
+				}
+				// fill gray background
+				imagefill($thumb, 0, 0, $gray);
+				// now create rectangle
+				if (imagesx($thumb) < imagesy($thumb)) {
+					$width = (int)round(imagesx($thumb) / 100 * 5);
+				} else {
+					$width = (int)round(imagesy($thumb) / 100 * 5);
+				}
+				imagefilledrectangle(
+					$thumb,
+					0 + $width,
+					0 + $width,
+					imagesx($thumb) - $width,
+					imagesy($thumb) - $width,
+					$white
+				);
+				// add "No valid images source"
+				// OR add circle
+				// * find center
+				// * width/height is 75% of size - border
+				// smaller size is taken
+				$base_width = imagesx($thumb) > imagesy($thumb) ? imagesy($thumb) : imagesx($thumb);
+				// get 75% width
+				$cross_width = (int)round((($base_width - ($width * 2)) / 100 * 75) / 2);
+				$center_x = (int)round(imagesx($thumb) / 2);
+				$center_y = (int)round(imagesy($thumb) / 2);
+				imagefilledellipse($thumb, $center_x, $center_y, $cross_width, $cross_width, $gray);
+				// find top left and bottom left for first line
+				imagepng($thumb, $thumbnail_write_path . $thumbnail);
+			}
+			// add web path
+			$thumbnail = $thumbnail_web_path . $thumbnail;
 		}
 		// either return false or the thumbnail name + output path web
 		return $thumbnail;

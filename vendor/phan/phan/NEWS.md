@@ -1,5 +1,20 @@
 Phan NEWS
 
+Mar 03 2023, Phan 5.4.2
+-----------------------
+
+Miscellaneous:
+- Fix wording in EmptyStatementListPlugin issue messages.
+- Add a few more functions where the return value should be used.
+- Fix signature of exif_read_data() #4759
+- Make allow_missing_properties setting aware of AllowDynamicProperties attribute for PHP 8.2
+
+Maintenance:
+- Require php-ast 1.1.0 or newer in PHP 8.2+ if php-ast is installed.
+  This release of php-ast makes the parsing of `AST_ARROW_FUNC` in php 8.2 match older php versions.
+- Support parsing of PHP 8.2 syntax such as disjunctive normal form types and `readonly` classes in the polyfill/fallback parser.
+- Fix bugs parsing `__halt_compiler()` in the polyfill/fallback parser.
+
 Aug 25 2022, Phan 5.4.1
 -----------------------
 
@@ -13,6 +28,11 @@ New Features(Analysis):
 
 Miscellaneous:
 - Allow `array_filter` `$callback` to be null (#4715)
+
+Bug fixes:
+- Fix false positive warning in PHP < 8.0 for inferring the method signature of `new SoapFault`. (#4724)
+  (The constructor was internally declared in reflection as `SoapFault::SoapFault` until php 8.0)
+  Adjust the method signature of `SoapFault::__construct` to match the documentation/implementation.
 
 Aug 08 2022, Phan 5.4.0
 -----------------------

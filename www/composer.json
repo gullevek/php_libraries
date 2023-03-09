@@ -25,6 +25,7 @@
     },
     "require": {
         "egrajp/smarty-extended": "^4.3",
-        "php": ">=8.1"
+        "php": ">=8.1",
+        "gullevek/dotenv": "^2.0"
     }
 }

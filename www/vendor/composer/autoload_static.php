@@ -12,6 +12,11 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
     );
 
     public static $prefixLengthsPsr4 = array (
+        'g' => 
+        array (
+            'gullevek\\dotenv\\' => 16,
+            'gullevek\\dotEnv\\' => 16,
+        ),
         'P' => 
         array (
             'PhpParser\\' => 10,
@@ -24,6 +29,14 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
     );
 
     public static $prefixDirsPsr4 = array (
+        'gullevek\\dotenv\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/gullevek/dotenv/src',
+        ),
+        'gullevek\\dotEnv\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/gullevek/dotenv/src',
+        ),
         'PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
@@ -49,7 +62,6 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Check\\Email' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/Email.php',
         'CoreLibs\\Check\\Encoding' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/Encoding.php',
         'CoreLibs\\Check\\File' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/File.php',
-        'CoreLibs\\Check\\Jason' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/Jason.php',
         'CoreLibs\\Check\\Password' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/Password.php',
         'CoreLibs\\Check\\PhpVersion' => __DIR__ . '/../..' . '/lib/CoreLibs/Check/PhpVersion.php',
         'CoreLibs\\Combined\\ArrayHandler' => __DIR__ . '/../..' . '/lib/CoreLibs/Combined/ArrayHandler.php',
@@ -81,14 +93,12 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Debug\\RunningTime' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/RunningTime.php',
         'CoreLibs\\Debug\\Support' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/Support.php',
         'CoreLibs\\Get\\DotEnv' => __DIR__ . '/../..' . '/lib/CoreLibs/Get/DotEnv.php',
-        'CoreLibs\\Get\\ReadEnvFile' => __DIR__ . '/../..' . '/lib/CoreLibs/Get/ReadEnvFile.php',
         'CoreLibs\\Get\\System' => __DIR__ . '/../..' . '/lib/CoreLibs/Get/System.php',
         'CoreLibs\\Language\\Core\\CachedFileReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/CachedFileReader.php',
         'CoreLibs\\Language\\Core\\FileReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/FileReader.php',
         'CoreLibs\\Language\\Core\\GetTextReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/GetTextReader.php',
         'CoreLibs\\Language\\Core\\StreamReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/StreamReader.php',
         'CoreLibs\\Language\\Core\\StringReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/StringReader.php',
-        'CoreLibs\\Language\\Encoding' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Encoding.php',
         'CoreLibs\\Language\\GetLocale' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/GetLocale.php',
         'CoreLibs\\Language\\L10n' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/L10n.php',
         'CoreLibs\\Output\\Form\\Elements' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/Elements.php',

@@ -989,7 +989,7 @@ class Basic
 		int $jpeg_quality = 80
 	) {
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Output\Image::createThumbnailSimple()', E_USER_DEPRECATED);
-		return \CoreLibs\Output\Image::createThumbnailSimple($filename, $thumb_width, $thumb_height, $thumbnail_path, $create_dummy, $use_cache, $high_quality, $jpeg_quality);
+		return \CoreLibs\Output\Image::createThumbnailSimple($filename, $thumb_width, $thumb_height, $thumbnail_path, null, $create_dummy, $use_cache, $high_quality, $jpeg_quality);
 	}
 
 	/**
