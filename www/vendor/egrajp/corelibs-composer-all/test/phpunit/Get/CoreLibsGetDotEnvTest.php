@@ -77,21 +77,24 @@ final class CoreLibsGetDotEnvTest extends TestCase
 				'file' => 'cannot_read.env',
 				'status' => 2,
 				'content' => [],
-				'chmod' => '000',
+				// 0000
+				'chmod' => '100000',
 			],
 			'empty file' => [
 				'folder' => __DIR__ . DIRECTORY_SEPARATOR . 'dotenv',
 				'file' => 'empty.env',
 				'status' => 1,
 				'content' => [],
-				'chmod' => null,
+				// 0664
+				'chmod' => '100664',
 			],
 			'override all' => [
 				'folder' => __DIR__ . DIRECTORY_SEPARATOR . 'dotenv',
 				'file' => 'test.env',
 				'status' => 0,
 				'content' => $dot_env_content,
-				'chmod' => null,
+				// 0664
+				'chmod' => '100664',
 			],
 			'override directory' => [
 				'folder' => __DIR__ . DIRECTORY_SEPARATOR . 'dotenv',
@@ -124,6 +127,16 @@ final class CoreLibsGetDotEnvTest extends TestCase
 		array $expected_env,
 		?string $chmod
 	): void {
+		if (
+			!empty($chmod) &&
+			$chmod == '100000' &&
+			getmyuid() == 0
+		) {
+			$this->markTestSkipped(
+				"Skip cannot read file test because run user is root"
+			);
+			return;
+		}
 		// if we have file + chmod set
 		$old_chmod = null;
 		if (
@@ -134,6 +147,20 @@ final class CoreLibsGetDotEnvTest extends TestCase
 			$old_chmod = fileperms($folder . DIRECTORY_SEPARATOR . $file);
 			chmod($folder . DIRECTORY_SEPARATOR . $file, octdec($chmod));
 		}
+		$message = '\CoreLibs\Get\DotEnv is deprecated in favor for '
+			. 'composer package gullevek\dotenv which is a copy of this';
+		// convert E_USER_DEPRECATED to a exception
+		set_error_handler(
+			static function (int $errno, string $errstr): never {
+				throw new \Exception($errstr, $errno);
+			},
+			E_USER_DEPRECATED
+		);
+		// tests are never run -> deprecated
+		if (is_file($folder . DIRECTORY_SEPARATOR . $file)) {
+			chmod($folder . DIRECTORY_SEPARATOR . $file, 0664);
+		}
+		$this->expectExceptionMessage($message);
 		if ($folder !== null && $file !== null) {
 			$status = DotEnv::readEnvFile($folder, $file);
 		} elseif ($folder !== null) {
@@ -141,6 +168,7 @@ final class CoreLibsGetDotEnvTest extends TestCase
 		} else {
 			$status = DotEnv::readEnvFile();
 		}
+		restore_error_handler();
 		$this->assertEquals(
 			$status,
 			$expected_status,
@@ -153,8 +181,9 @@ final class CoreLibsGetDotEnvTest extends TestCase
 			'Assert _ENV correct'
 		);
 		// if we have file and chmod unset
-		if ($old_chmod !== null) {
-			chmod($folder . DIRECTORY_SEPARATOR . $file, $old_chmod);
+		print "Write mode: $old_chmod\n";
+		if ($old_chmod !== null && $chmod == '100000') {
+			chmod($folder . DIRECTORY_SEPARATOR . $file, 0664);
 		}
 	}
 }

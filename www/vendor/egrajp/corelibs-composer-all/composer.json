@@ -19,10 +19,11 @@
         "php": ">=8.1"
     },
     "require-dev": {
-        "phpstan/phpstan": "1.10.x-dev",
+        "phpstan/phpstan": "^1.10",
         "phan/phan": "v5.x-dev",
         "phpunit/phpunit": "^9",
-        "egrajp/smarty-extended": "^4.3"
+        "egrajp/smarty-extended": "^4.3",
+        "vimeo/psalm": "^5.0@dev"
     },
     "repositories": {
         "git.egplusww.jp.Composer": {

@@ -2,12 +2,12 @@
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
-            "version": "dev-development",
-            "version_normalized": "dev-development",
+            "version": "dev-master",
+            "version_normalized": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "/storage/var/www/html/developers/clemens/core_data/composer-packages/CoreLibs-Composer-All",
-                "reference": "0a80abe8a4524188b42c5b4cffdd9a813ef407e6"
+                "reference": "d9b71a64b390b6fc048cb6de00bfcfc6d9a6344f"
             },
             "require": {
                 "php": ">=8.1"
@@ -15,8 +15,9 @@
             "require-dev": {
                 "egrajp/smarty-extended": "^4.3",
                 "phan/phan": "v5.x-dev",
-                "phpstan/phpstan": "1.10.x-dev",
-                "phpunit/phpunit": "^9"
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^9",
+                "vimeo/psalm": "^5.0@dev"
             },
             "type": "library",
             "installation-source": "dist",

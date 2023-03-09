@@ -82,10 +82,23 @@ class L10n
 		string $path = ''
 	) {
 		// auto load language only if at least locale and domain is set
-		if (!empty($locale) && !empty($domain)) {
+		// New: path must be set too, or we fall through
+		if (!empty($locale) && !empty($domain) && empty($path)) {
+			/** @deprecated if locale and domain are set, path must be set too */
+			trigger_error(
+				'Empty path parameter is no longer allowed if locale and domain are set',
+				E_USER_DEPRECATED
+			);
+		}
+		if (!empty($locale) && !empty($domain) && !empty($path)) {
 			// check hack if domain and path is switched
 			// Note this can be removed in future versions
 			if (strstr($domain, DIRECTORY_SEPARATOR) !== false) {
+				/** @deprecated domain must be 2nd and path must be third parameter */
+				trigger_error(
+					'L10n constructor parameter switch is no longer supported. domain is 2nd, path is 3rd parameter',
+					E_USER_DEPRECATED
+				);
 				$_domain = $path;
 				$path = $domain;
 				$domain = $_domain;
@@ -122,9 +135,9 @@ class L10n
 	/**
 	 * loads the mo file base on path, locale and domain set
 	 *
-	 * @param string $locale language name (optional), fallback is en
-	 * @param string $domain override CONTENT_PATH . $encoding name for mo file
-	 * @param string $path   path, if empty fallback on default internal path
+	 * @param string $locale language name, if not set, try previous set
+	 * @param string $domain set name for mo file, if not set, try previous set
+	 * @param string $path   path, if not set try to get from paths array, else self
 	 * @return GetTextReader the main gettext reader object
 	 */
 	public function getTranslator(
@@ -160,6 +173,11 @@ class L10n
 		} elseif (
 			defined('BASE') && defined('INCLUDES') && defined('LOCALE')
 		) {
+			/** @deprecated Do not use this anymore, define path on class load */
+			trigger_error(
+				'parameter $path must be set. Setting via BASE, INCLUDES and LOCALE constants is deprecated',
+				E_USER_DEPRECATED
+			);
 			// set fallback base path if constant set
 			$this->base_locale_path = BASE . INCLUDES . LOCALE;
 		} else {
@@ -238,6 +256,25 @@ class L10n
 			return new GetTextReader($this->input);
 		}
 		return $this->l10n;
+	}
+
+	/**
+	 * Get the local as array same to the GetLocale::setLocale return
+	 * This does not set from outside, but only what is set in the l10n class
+	 *
+	 * @return array{locale: string, lang: string|null, domain: string, encoding: string|null, path: string}
+	 */
+	public function getLocaleAsArray(): array
+	{
+		$locale = L10n::parseLocale($this->getLocale());
+		return [
+			'locale' => $this->getLocale(),
+			'lang' => $locale['lang']
+				. (!empty($locale['country']) ? '_' . $locale['country'] : ''),
+			'domain' => $this->getDomain(),
+			'encoding' => $locale['charset'],
+			'path' => $this->getBaseLocalePath(),
+		];
 	}
 
 	/**

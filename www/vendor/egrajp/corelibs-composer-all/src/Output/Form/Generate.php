@@ -305,37 +305,28 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	/**
 	 * construct form generator
 	 *
-	 * @param array<mixed>                 $db_config db config array, mandatory
-	 * @param \CoreLibs\Debug\Logging|null $log       Logging class, null auto set
-	 * @param \CoreLibs\Language\L10n|null $l10n      l10n language class, null auto set
-	 * @param array<string,string>|null    $locale    locale array from ::setLocale,
-	 *                                                null auto set
-	 * @param array<mixed>|null            $table_arrays Override table array data
-	 *                                                   instead of try to load from
-	 *                                                   include file
-	 * @throws \Exception                  1: No table_arrays set/no class found for my page name
+	 * @param array<mixed>            $db_config    db config array, mandatory
+	 * @param \CoreLibs\Debug\Logging $log          Logging class
+	 * @param \CoreLibs\Language\L10n $l10n         l10n language class
+	 * @param array<string,string>    $locale       locale array from ::setLocale
+	 * @param array<mixed>|null       $table_arrays Override table array data
+	 *                                              instead of try to load from
+	 *                                              include file
+	 * @throws \Exception             1: No table_arrays set/no class found for my page name
 	 */
 	public function __construct(
 		array $db_config,
-		?\CoreLibs\Debug\Logging $log = null,
-		?\CoreLibs\Language\L10n $l10n = null,
-		?array $locale = null,
+		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Language\L10n $l10n,
+		array $locale,
 		?array $table_arrays = null,
 	) {
 		// init logger if not set
-		$this->log = $log ?? new \CoreLibs\Debug\Logging();
+		$this->log = $log;
 		// don't log per class
 		$this->log->setLogPer('class', false);
-		// if pass on locale is null
-		if ($locale === null) {
-			$locale = \CoreLibs\Language\GetLocale::setLocale();
-		}
 		// init the language class
-		$this->l = $l10n ?? new \CoreLibs\Language\L10n(
-			$locale['locale'],
-			$locale['domain'],
-			$locale['path'],
-		);
+		$this->l = $l10n;
 		// legacy lang vars set
 		$this->encoding = $locale['encoding'];
 		$this->lang = $locale['lang'];

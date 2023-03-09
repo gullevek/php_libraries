@@ -228,10 +228,14 @@ class EditBase
 	/**
 	 * all edit pages
 	 *
+	 * @param string $set_root
+	 * @param string $set_content_path
 	 * @return void
 	 */
-	private function editPageFlow(): void
-	{
+	private function editPageFlow(
+		string $set_root,
+		string $set_content_path,
+	): void {
 		// set table width
 		$table_width = '100%';
 		// load call only if id is set
@@ -334,7 +338,7 @@ class EditBase
 				$menu_element['filename'] == \CoreLibs\Get\System::getPageName() &&
 				(!isset($menu_element['hostname']) || (
 					isset($menu_element['hostname']) &&
-						(!$menu_element['hostname'] || strstr($menu_element['hostname'], CONTENT_PATH) !== false)
+						(!$menu_element['hostname'] || strstr($menu_element['hostname'], $set_content_path) !== false)
 				))
 			) {
 				$position = $i;
@@ -431,7 +435,7 @@ class EditBase
 						$search_glob = [];
 						foreach ($folders as $folder) {
 							// make sure this folder actually exists
-							if (is_dir(ROOT . $folder)) {
+							if (is_dir($set_root . $folder)) {
 								foreach ($files as $file) {
 									$search_glob[] = $folder . $file;
 								}
@@ -534,31 +538,74 @@ class EditBase
 	 * @throws Exception
 	 * @throws SmartyException
 	 */
-	public function editBaseRun(): void
-	{
+	public function editBaseRun(
+		?string $template_dir = null,
+		?string $compile_dir = null,
+		?string $cache_dir = null,
+		?string $set_admin_stylesheet = null,
+		?string $set_default_encoding = null,
+		?string $set_css = null,
+		?string $set_js = null,
+		?string $set_root = null,
+		?string $set_content_path = null
+	): void {
+		// trigger deprecated warning
+		if (
+			$template_dir === null ||
+			$compile_dir === null ||
+			$cache_dir === null ||
+			$set_admin_stylesheet === null ||
+			$set_default_encoding === null ||
+			$set_css === null ||
+			$set_js === null ||
+			$set_root === null ||
+			$set_content_path === null
+		) {
+			/** @deprecated editBaseRun call without parameters */
+			trigger_error(
+				'Calling editBaseRun without paramters is deprecated',
+				E_USER_DEPRECATED
+			);
+		}
+		// set vars (to be deprecated)
+		$template_dir = $template_dir ?? BASE . INCLUDES . TEMPLATES . CONTENT_PATH;
+		$compile_dir = $compile_dir ?? BASE . TEMPLATES_C;
+		$cache_dir = $cache_dir ?? BASE . CACHE;
+		$set_admin_stylesheet = $set_admin_stylesheet ?? ADMIN_STYLESHEET;
+		$set_default_encoding = $set_default_encoding ?? DEFAULT_ENCODING;
+		$set_css = $set_css ?? LAYOUT . CSS;
+		$set_css = $set_js ?? LAYOUT . JS;
+		$set_root = $set_root ?? ROOT;
+		$set_content_path = $set_content_path ?? CONTENT_PATH;
+
 		// set the template dir
-		// WARNING: this has a special check for the mailing tool layout (old layout)
-		if (defined('LAYOUT')) {
-			$this->smarty->setTemplateDir(BASE . INCLUDES . TEMPLATES . CONTENT_PATH);
-			$this->DATA['css'] = LAYOUT . CSS;
-			$this->DATA['js'] = LAYOUT . JS;
-		} else {
+		// WARNING: this has a special check for the mailing tool layout (old no layout folder)
+		if (!defined('LAYOUT')) {
+			trigger_error(
+				'EditBase with unset LAYOUT is deprecated',
+				E_USER_DEPRECATED
+			);
 			$this->smarty->setTemplateDir(TEMPLATES);
 			$this->DATA['css'] = CSS;
 			$this->DATA['js'] = JS;
+		} else {
+			$this->smarty->setTemplateDir($template_dir);
+			$this->DATA['css'] = $set_css;
+			$this->DATA['js'] = $set_js;
 		}
-		$ADMIN_STYLESHEET = 'edit.css';
 		// define all needed smarty stuff for the general HTML/page building
-		$this->HEADER['CSS'] = CSS;
-		$this->HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
-		/** @phpstan-ignore-next-line because ADMIN_STYLESHEET can be null */
-		$this->HEADER['STYLESHEET'] = $ADMIN_STYLESHEET ?? ADMIN_STYLESHEET;
+		$this->HEADER['CSS'] = $set_css;
+		$this->HEADER['DEFAULT_ENCODING'] = $set_default_encoding;
+		$this->HEADER['STYLESHEET'] = $set_admin_stylesheet;
 
 		// main run
 		if ($this->form->my_page_name == 'edit_order') {
 			$this->editOrderPage();
 		} else {
-			$this->editPageFlow();
+			$this->editPageFlow(
+				$set_root,
+				$set_content_path
+			);
 		}
 
 		// debug data, if DEBUG flag is on, this data is print out
@@ -571,11 +618,11 @@ class EditBase
 		foreach ($CONTENT_DATA as $key => $value) {
 			$this->smarty->assign($key, $value);
 		}
-		if (is_dir(BASE . TEMPLATES_C)) {
-			$this->smarty->setCompileDir(BASE . TEMPLATES_C);
+		if (is_dir($compile_dir)) {
+			$this->smarty->setCompileDir($compile_dir);
 		}
-		if (is_dir(BASE . CACHE)) {
-			$this->smarty->setCacheDir(BASE . CACHE);
+		if (is_dir($cache_dir)) {
+			$this->smarty->setCacheDir($cache_dir);
 		}
 		$this->smarty->display(
 			$this->EDIT_TEMPLATE,
