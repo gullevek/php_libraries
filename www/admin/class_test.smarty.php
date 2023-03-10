@@ -144,7 +144,8 @@ $smarty->setSmartyVarsAdmin(
 	G_TITLE,
 	ADMIN_STYLESHEET,
 	ADMIN_JAVASCRIPT,
-	PAGE_WIDTH
+	PAGE_WIDTH,
+	$_SESSION['USER_NAME'] ?? ''
 );
 
 // error message

@@ -490,6 +490,7 @@ class SmartyExtend extends \Smarty
 			null,
 			null,
 			null,
+			null,
 			$set_stylesheet,
 			$set_javascript
 		);
@@ -508,6 +509,7 @@ class SmartyExtend extends \Smarty
 	 * @param  string|null $set_admin_stylesheet ADMIN_STYLESHEET
 	 * @param  string|null $set_admin_javascript ADMIN_JAVASCRIPT
 	 * @param  string|null $set_page_width       PAGE_WIDTH
+	 * @param  string|null $set_user_name        _SESSION['USER_NAME']
 	 * @param  \CoreLibs\Admin\Backend|null $cms Optinal Admin Backend for
 	 *                                           smarty variables merge
 	 * @return void
@@ -523,6 +525,7 @@ class SmartyExtend extends \Smarty
 		?string $set_admin_stylesheet = null,
 		?string $set_admin_javascript = null,
 		?string $set_page_width = null,
+		?string $set_user_name = null,
 		?\CoreLibs\Admin\Backend $cms = null
 	): void {
 		$this->setSmartyVars(
@@ -538,6 +541,7 @@ class SmartyExtend extends \Smarty
 			$set_admin_stylesheet,
 			$set_admin_javascript,
 			$set_page_width,
+			$set_user_name,
 			null,
 			null
 		);
@@ -579,9 +583,9 @@ class SmartyExtend extends \Smarty
 		?string $set_admin_stylesheet = null,
 		?string $set_admin_javascript = null,
 		?string $set_page_width = null,
+		?string $set_user_name = null,
 		?string $set_stylesheet = null,
 		?string $set_javascript = null,
-		?string $set_user_name = null,
 	): void {
 		// trigger deprecation
 		if (
