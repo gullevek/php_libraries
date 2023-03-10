@@ -43,24 +43,57 @@ $log = new CoreLibs\Debug\Logging([
 // db connection
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 // login page
-$login = new CoreLibs\ACL\Login($db, $log, $session);
+$login = new CoreLibs\ACL\Login(
+	$db,
+	$log,
+	$session,
+	[
+		'auto_login' => true,
+		'default_acl_level' => DEFAULT_ACL_LEVEL,
+		'logout_target' => '',
+		'site_locale' => SITE_LOCALE,
+		'site_domain' => SITE_DOMAIN,
+		'site_encoding' => SITE_ENCODING,
+		'locale_path' => BASE . INCLUDES . LOCALE,
+	]
+);
 // space for setting special debug flags
 // $login->log->setLogLevelAll('debug', true);
 // lang, path, domain
 // pre auto detect language after login
-$locale = \CoreLibs\Language\GetLocale::setLocale();
+$locale = $login->loginGetLocale();
 // set lang and pass to smarty/backend
 $l10n = new \CoreLibs\Language\L10n(
 	$locale['locale'],
 	$locale['domain'],
 	$locale['path'],
+	$locale['encoding']
 );
 // flush and start
 ob_end_flush();
 
 // init smarty and form class
-$edit_base = new CoreLibs\Admin\EditBase(DB_CONFIG, $log, $l10n, $locale);
+$edit_base = new CoreLibs\Admin\EditBase(
+	DB_CONFIG,
+	$log,
+	$l10n,
+	$login,
+	[
+		'cache_id' => CACHE_ID,
+		'compile_id' => COMPILE_ID
+	]
+);
 // creates edit pages and runs actions
-$edit_base->editBaseRun();
+$edit_base->editBaseRun(
+	BASE . INCLUDES . TEMPLATES . CONTENT_PATH,
+	BASE . TEMPLATES_C,
+	BASE . CACHE,
+	ADMIN_STYLESHEET,
+	DEFAULT_ENCODING,
+	LAYOUT . CSS,
+	LAYOUT . JS,
+	ROOT,
+	CONTENT_PATH
+);
 
 // __END__

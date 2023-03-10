@@ -6,5 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'gullevek\\dotenv\\' => array($vendorDir . '/gullevek/dotenv/src'),
+    'gullevek\\dotEnv\\' => array($vendorDir . '/gullevek/dotenv/src'),
     'CoreLibs\\' => array($vendorDir . '/egrajp/corelibs-composer-all/src'),
 );

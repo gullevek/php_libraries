@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'egrajp/corelibs-composer-all' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => 'd9b71a64b390b6fc048cb6de00bfcfc6d9a6344f',
+            'pretty_version' => 'dev-development',
+            'version' => 'dev-development',
+            'reference' => 'cf196d56ddcc38567112c7d933340349036ee3fa',
             'type' => 'library',
             'install_path' => __DIR__ . '/../egrajp/corelibs-composer-all',
             'aliases' => array(),
@@ -34,6 +34,15 @@
             'reference' => NULL,
             'type' => 'library',
             'install_path' => __DIR__ . '/../egrajp/smarty-extended',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'gullevek/dotenv' => array(
+            'pretty_version' => 'v2.0.8',
+            'version' => '2.0.8.0',
+            'reference' => 'e29f9fcd8853a09bb89b0eb8ee555b754ecee36e',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../gullevek/dotenv',
             'aliases' => array(),
             'dev_requirement' => false,
         ),

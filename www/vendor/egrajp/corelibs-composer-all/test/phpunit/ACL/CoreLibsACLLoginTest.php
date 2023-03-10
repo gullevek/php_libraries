@@ -7,6 +7,14 @@ namespace tests;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
+/*
+Not yet covered tests:
+- loginGetLocale
+- loginGetHeaderColor
+- loginGetPages
+- loginGetEuid
+*/
+
 /**
  * Test class for ACL\Login
  * @coversDefaultClass \CoreLibs\ACL\Login
@@ -1114,6 +1122,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,
@@ -1796,6 +1805,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,
@@ -1909,6 +1919,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,
@@ -1996,6 +2007,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,
@@ -2091,6 +2103,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,

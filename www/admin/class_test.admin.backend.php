@@ -11,9 +11,7 @@ $DEBUG_ALL = true;
 $PRINT_ALL = true;
 $DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -35,19 +33,26 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'debug_all' => $DEBUG_ALL,
+	'echo_all' => $ECHO_ALL,
+	'print_all' => $PRINT_ALL,
 ]);
 // db config with logger
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
-$locale = \CoreLibs\Language\GetLocale::setLocale();
 $l10n = new \CoreLibs\Language\L10n(
-	$locale['locale'],
-	$locale['domain'],
-	$locale['path'],
+	SITE_LOCALE,
+	SITE_DOMAIN,
+	BASE . INCLUDES . LOCALE,
+	SITE_ENCODING
 );
-$backend = new CoreLibs\Admin\Backend($db, $log, $session, $l10n, $locale);
+$backend = new CoreLibs\Admin\Backend(
+	$db,
+	$log,
+	$session,
+	$l10n,
+	DEFAULT_ACL_LEVEL
+);
+use CoreLibs\Debug\Support;
 
 $PAGE_NAME = 'TEST CLASS: ADMIN BACKEND';
 print "<!DOCTYPE html>";
@@ -57,11 +62,14 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 // set acl, from eg login acl
-print "SETACL[]: " . $backend->setACL(['EMPTY' => 'EMPTY']) . "<br>";
-print "ADBEDITLOG: " . $backend->adbEditLog('CLASSTEST-ADMIN', 'Some info stirng') . "<br>";
-print "ADBTOPMENU(0): " . \CoreLibs\Debug\Support::printAr($backend->adbTopMenu()) . "<br>";
-print "ADBMSG: " . $backend->adbMsg('info', 'Message: %1$d', [1]) . "<br>";
-print "Messaes: " . \CoreLibs\Debug\Support::printAr($backend->messages) . "<br>";
+print "SETACL[]: <br>";
+$backend->setACL(['EMPTY' => 'EMPTY']);
+print "ADBEDITLOG: <br>";
+$backend->adbEditLog('CLASSTEST-ADMIN', 'Some info string');
+print "ADBTOPMENU(0): " . Support::printAr($backend->adbTopMenu(CONTENT_PATH)) . "<br>";
+print "ADBMSG: <br>";
+$backend->adbMsg('info', 'Message: %1$d', [1]);
+print "Messaes: " . Support::printAr($backend->messages) . "<br>";
 print "ADBPRINTDATETIME:<br>" . $backend->adbPrintDateTime(2021, 6, 21, 6, 38, '_test') . "<br>";
 
 // error message

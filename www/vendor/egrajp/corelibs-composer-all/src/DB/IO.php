@@ -405,9 +405,9 @@ class IO
 			$db_debug_override ??
 			// from db config setting
 			$db_config['db_debug'] ??
-			// should be handled from outside
+			// [DEPRECATED] should be handled from outside
 			$_SESSION['DB_DEBUG'] ??
-			// globals should be deprecated
+			// [DEPRECATED] globals should be deprecated
 			$GLOBALS['DB_DEBUG'] ??
 			false
 		);

@@ -6,14 +6,12 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
+$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
+$DEBUG_ALL = true;
+$PRINT_ALL = true;
+$DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -33,31 +31,77 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 use CoreLibs\Language\L10n;
+use CoreLibs\Language;
 use CoreLibs\Debug\Support;
 
 echo "<br><b>LIST LOCALES</b><br>";
 
 $locale = 'en_US.UTF-8';
-$locales = CoreLibs\Language\L10n::listLocales($locale);
+$locales = L10n::listLocales($locale);
 print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
 $locale = 'en.UTF-8';
-$locales = CoreLibs\Language\L10n::listLocales($locale);
+$locales = L10n::listLocales($locale);
 print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
 
-echo "<br><b>LOCALE INFO</b><br>";
+echo "<br><b>PARSE LOCAL</b><br>";
 $locale = 'en_US.UTF-8';
-$locale_info = CoreLibs\Language\L10n::parseLocale($locale);
+$locale_info = L10n::parseLocale($locale);
 print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
 $locale = 'en.UTF-8';
-$locale_info = CoreLibs\Language\L10n::parseLocale($locale);
+$locale_info = L10n::parseLocale($locale);
 print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
 
 echo "<br><b>AUTO DETECT</b><br>";
 
-$get_locale = \CoreLibs\Language\GetLocale::setLocale();
-print "[AUTO]: " . Support::printAr($get_locale) . "<br>";
-$get_locale = \CoreLibs\Language\GetLocale::setLocale('en', 'foo', 'ISO-8895');
+// DEPRECATED
+// $get_locale = Language\GetLocale::setLocale();
+// print "[AUTO, DEPRECATED]: " . Support::printAr($get_locale) . "<br>";
+$get_locale = Language\GetLocale::setLocaleFromSession(
+	SITE_LOCALE,
+	str_replace('/', '', CONTENT_PATH),
+	'',
+	BASE . INCLUDES . LOCALE
+);
+print "[NAMED CONSTANTS OUTSIDE]: " . Support::printAr($get_locale) . "<br>";
+$get_locale = Language\GetLocale::setLocaleFromSession(
+	'en',
+	'foo',
+	'ISO-8895',
+	BASE . INCLUDES . LOCALE
+);
 print "[OVERRIDE]: " . Support::printAr($get_locale) . "<br>";
+// must set session vars for setLangFromSession
+// DEFAULT_LOCALE
+// DEFAULT_DOMAIN
+// DEFAULT_CHARSET (should be set from DEFAULT_LOCALE)
+// LOCALE_PATH
+$_SESSION['DEFAULT_LOCALE'] = 'ja_JP.UTF-8';
+$_SESSION['DEFAULT_CHARSET'] = 'UTF-8';
+$_SESSION['DEFAULT_DOMAIN'] = 'admin';
+$_SESSION['LOCALE_PATH'] = BASE . INCLUDES . LOCALE;
+$get_locale = Language\GetLocale::setLocaleFromSession(
+	SITE_LOCALE,
+	SITE_DOMAIN,
+	SITE_ENCODING,
+	BASE . INCLUDES . LOCALE
+);
+print "[SESSION SET]: " . Support::printAr($get_locale) . "<br>";
+// must set session vars for setLangFromSession
+// DEFAULT_LOCALE
+// DEFAULT_DOMAIN
+// DEFAULT_CHARSET (should be set from DEFAULT_LOCALE)
+// LOCALE_PATH
+$_SESSION['DEFAULT_LOCALE'] = '00000#####';
+$_SESSION['DEFAULT_CHARSET'] = '';
+$_SESSION['DEFAULT_DOMAIN'] = 'admin';
+$_SESSION['LOCALE_PATH'] = BASE . INCLUDES . LOCALE;
+$get_locale = Language\GetLocale::setLocaleFromSession(
+	SITE_LOCALE,
+	SITE_DOMAIN,
+	SITE_ENCODING,
+	BASE . INCLUDES . LOCALE
+);
+print "[SESSION SET INVALID]: " . Support::printAr($get_locale) . "<br>";
 
 // try to load non existing
 echo "<br><b>NEW TYPE</b><br>";
@@ -69,8 +113,8 @@ $domain = 'admin';
 $encoding = 'UTF-8';
 $path = BASE . INCLUDES . LOCALE;
 // load direct
-$l = new CoreLibs\Language\L10n($lang, $domain, $path);
-echo "*<br>";
+echo "* <b>NEW CLASS SET</b><br>";
+$l = new L10n($lang, $domain, $path, $encoding);
 echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
 echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";
 echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
@@ -95,10 +139,11 @@ for ($n = 0; $n <= 3; $n++) {
 	echo "CONTEXT MULTI TEST $n: " . $single_string . "/" . $multi_string . " => "
 		. $l->__np($context, $single_string, $multi_string, $n) . "<br>";
 }
+echo "LOCALE: " . Support::printAr($l->getLocaleAsArray()) . "<br>";
 // change domain
 $domain = 'frontend';
+echo "* <b>CHANGE DOMAIN $domain</b><br>";
 $l->getTranslator('', $domain, $path);
-echo "*<br>";
 echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
 echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";
 echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
@@ -108,11 +153,12 @@ echo "BASE PATH: " . $l->getBaseLocalePath() . "<br>";
 echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
 echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
 echo "TROUGH LOAD: " . $l->getTranslatorClass()->gettext($string) . "<br>";
+echo "LOCALE: " . Support::printAr($l->getLocaleAsArray()) . "<br>";
 // change language short type
 $lang = 'en';
 $domain = 'admin';
+echo "* <b>CHANGE LANG $lang AND DOMAIN $domain</b><br>";
 $l->getTranslator($lang, $domain, $path);
-echo "*<br>";
 echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
 echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";
 echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
@@ -122,10 +168,24 @@ echo "BASE PATH: " . $l->getBaseLocalePath() . "<br>";
 echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
 echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
 echo "TROUGH LOAD: " . $l->getTranslatorClass()->gettext($string) . "<br>";
+echo "LOCALE: " . Support::printAr($l->getLocaleAsArray()) . "<br>";
+$encoding = 'SJIS';
+echo "* <b>SET DIFFERENT CHARSET $encoding</b><br>";
+$l->getTranslator($lang, $domain, $path, $encoding);
+echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
+echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";
+echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
+echo "CONTENT PATH: " . $l->getBaseContentPath() . "<br>";
+echo "DOMAIN PATH: " . $l->getTextDomain($domain) . "<br>";
+echo "BASE PATH: " . $l->getBaseLocalePath() . "<br>";
+echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
+echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
+echo "TROUGH LOAD: " . $l->getTranslatorClass()->gettext($string) . "<br>";
+echo "LOCALE: " . Support::printAr($l->getLocaleAsArray()) . "<br>";
 // chang to wrong language
 $lang = 'tr';
+echo "* <b>CHANGE NOT FOUND LANG $lang</b><br>";
 $l->getTranslator($lang, $domain, $path);
-echo "*<br>";
 echo "LANGUAGE WANT/SET: " . $lang  . '/' . $l->getLocale() . "<br>";
 echo "DOMAIN WANT/SET: " . $domain  . '/' . $l->getDomain() . "<br>";
 echo "LANGUAGE FILE: " . $l->getMoFile() . "<br>";
@@ -135,6 +195,25 @@ echo "BASE PATH: " . $l->getBaseLocalePath() . "<br>";
 echo "LOAD ERROR: " . $l->getLoadError() . "<br>";
 echo "INPUT TEST: " . $string . " => " . $l->__($string) . "<br>";
 echo "TROUGH LOAD: " . $l->getTranslatorClass()->gettext($string) . "<br>";
+echo "LOCALE: " . Support::printAr($l->getLocaleAsArray()) . "<br>";
+// set different encoding
+$lang = 'ja';
+$domain = 'admin';
+$encoding = 'SJIS';
+echo "* <b>CLASS NEW LAUNCH: $lang / $encoding</b><br>";
+$path = BASE . INCLUDES . LOCALE;
+// load direct
+$l = new L10n($lang, $domain, $path, $encoding);
+echo "LOCALE: " . Support::printAr($l->getLocaleAsArray()) . "<br>";
+// lang with full set
+$lang = 'ja_JP.UTF-8';
+$domain = 'admin';
+$encoding = 'SJIS';
+echo "* <b>CLASS NEW LAUNCH: $lang / $encoding</b><br>";
+$path = BASE . INCLUDES . LOCALE;
+// load direct
+$l = new L10n($lang, $domain, $path, $encoding);
+echo "LOCALE: " . Support::printAr($l->getLocaleAsArray()) . "<br>";
 
 $lang = 'en';
 $domain = 'admin';
@@ -146,8 +225,10 @@ L10n::getInstance()->setDomain($domain);
 echo "SET DOMAIN: " . L10n::getInstance()->getDomain() . "<br>";
 L10n::getInstance()->setTextDomain($domain, $path);
 echo "SET TEXT DOMAIN: " . L10n::getInstance()->getTextDomain($domain) . "<br>";
+// L10n::getInstance()->setOverrideEncoding('SJIS');
 // null call __bind_textdomain_codeset
 echo "INPUT TEST: " . $string . " => " . L10n::getInstance()->getTranslator()->gettext($string) . "<br>";
+echo "LOCALE: " . Support::printAr(L10n::getInstance()->getLocaleAsArray()) . "<br>";
 
 echo "<br><b>FUNCTIONS</b><br>";
 // real statisc test

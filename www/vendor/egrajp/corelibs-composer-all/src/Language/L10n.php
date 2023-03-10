@@ -32,12 +32,18 @@ use CoreLibs\Language\Core\GetTextReader;
 
 class L10n
 {
+	/** @var string the default fallback encoding if nothing is set */
+	public const DEFAULT_CHARSET = 'UTF-8';
 	/** @var string the current locale */
 	private $locale = '';
 	/** @var string the SET locale as WHERE the domain file is */
 	private $locale_set = '';
 	/** @var string the default selected/active domain */
 	private $domain = '';
+	/** @var string encoding, as from locale or set from outside */
+	private $override_encoding = self::DEFAULT_CHARSET;
+	/** @var string encoding set during the parse Locale */
+	private $encoding = '';
 	/** @var array<string,array<string,GetTextReader>> locale > domain = translator */
 	private $domains = [];
 	/** @var array<string,string> bound paths for domains */
@@ -71,15 +77,18 @@ class L10n
 	 * if locale is not empty will load translation
 	 * else getTranslator needs to be called
 	 *
-	 * @param string $locale language name, default empty string
-	 *                       will return self instance
-	 * @param string $domain override CONTENT_PATH . $encoding name for mo file
-	 * @param string $path   path, if empty fallback on default internal path
+	 * @param string $locale   language name, default empty string
+	 *                         will return self instance
+	 * @param string $domain   override CONTENT_PATH . $encoding name for mo file
+	 * @param string $path     path, if empty fallback on default internal path
+	 * @param string $encoding Optional encoding, should be set if locale has
+	 *                         no encoding, defaults to UTF-8
 	 */
 	public function __construct(
 		string $locale = '',
 		string $domain = '',
-		string $path = ''
+		string $path = '',
+		string $encoding = ''
 	) {
 		// auto load language only if at least locale and domain is set
 		// New: path must be set too, or we fall through
@@ -103,7 +112,7 @@ class L10n
 				$path = $domain;
 				$domain = $_domain;
 			}
-			$this->getTranslator($locale, $domain, $path);
+			$this->getTranslator($locale, $domain, $path, $encoding);
 		}
 	}
 
@@ -137,13 +146,15 @@ class L10n
 	 *
 	 * @param string $locale language name, if not set, try previous set
 	 * @param string $domain set name for mo file, if not set, try previous set
-	 * @param string $path   path, if not set try to get from paths array, else self
+	 * @param string $path path, if not set try to get from paths array, else self
+	 * @param string $override_encoding if locale does not env encoding set, use this one
 	 * @return GetTextReader the main gettext reader object
 	 */
 	public function getTranslator(
 		string $locale = '',
 		string $domain = '',
-		string $path = ''
+		string $path = '',
+		string $override_encoding = '',
 	): GetTextReader {
 		// set local if not from parameter
 		if (empty($locale)) {
@@ -153,11 +164,16 @@ class L10n
 		if (empty($domain)) {
 			$domain = $this->domain;
 		}
+		// override encoding for unset
+		if (!empty($override_encoding)) {
+			$this->override_encoding = $override_encoding;
+		}
 		// store old settings
 		$old_mofile = $this->mofile;
 		$old_lang = $this->locale;
 		$old_lang_set = $this->locale_set;
 		$old_domain = $this->domain;
+		$old_encoding = $this->encoding;
 		$old_base_locale_path = $this->base_locale_path;
 		$old_base_content_path = $this->base_content_path;
 
@@ -186,6 +202,7 @@ class L10n
 		// now we loop over lang compositions to get the base path
 		// then we check
 		$locales = $this->listLocales($locale);
+		$encoding = $this->getEncodingFromLocale($locale);
 		foreach ($locales as $_locale) {
 			$this->base_content_path = $_locale . DIRECTORY_SEPARATOR
 				. 'LC_MESSAGES' . DIRECTORY_SEPARATOR;
@@ -202,6 +219,7 @@ class L10n
 		if (is_readable($this->mofile)) {
 			// locale and domain current wanted
 			$this->locale = $locale;
+			$this->encoding = $encoding;
 			$this->domain = $domain;
 			// set empty domains path with current locale
 			if (empty($this->domains[$locale])) {
@@ -225,6 +243,7 @@ class L10n
 			$this->mofile = $old_mofile;
 			$this->locale = $old_lang;
 			$this->locale_set = $old_lang_set;
+			$this->encoding = $old_encoding;
 			$this->domain = $old_domain;
 			$this->base_locale_path = $old_base_locale_path;
 			$this->base_content_path = $old_base_content_path;
@@ -259,20 +278,35 @@ class L10n
 	}
 
 	/**
+	 * Extract encoding from Locale, or fallback to override one if not set
+	 *
+	 * @param  string $locale
+	 * @return string
+	 */
+	private function getEncodingFromLocale(string $locale): string
+	{
+		// extract charset from $locale
+		// if not set get override encoding
+		preg_match('/(?:\\.(?P<charset>[-A-Za-z0-9_]+))/', $locale, $matches);
+		return $matches['charset'] ?? $this->override_encoding;
+	}
+
+	/**
 	 * Get the local as array same to the GetLocale::setLocale return
 	 * This does not set from outside, but only what is set in the l10n class
 	 *
-	 * @return array{locale: string, lang: string|null, domain: string, encoding: string|null, path: string}
+	 * @return array{locale: string, lang: string, lang_short: string, domain: string, encoding: string, path: string}
 	 */
 	public function getLocaleAsArray(): array
 	{
 		$locale = L10n::parseLocale($this->getLocale());
 		return [
 			'locale' => $this->getLocale(),
-			'lang' => $locale['lang']
+			'lang' => ($locale['lang'] ?? '')
 				. (!empty($locale['country']) ? '_' . $locale['country'] : ''),
+			'lang_short' => $locale['lang'] ?? '',
 			'domain' => $this->getDomain(),
-			'encoding' => $locale['charset'],
+			'encoding' => $this->getEncoding(),
 			'path' => $this->getBaseLocalePath(),
 		];
 	}
@@ -513,6 +547,37 @@ class L10n
 	public function getLocaleSet(): string
 	{
 		return $this->locale_set;
+	}
+
+	/**
+	 * Set override encoding
+	 *
+	 * @param  string $encoding
+	 * @return void
+	 */
+	public function setOverrideEncoding(string $encoding): void
+	{
+		$this->override_encoding = $encoding;
+	}
+
+	/**
+	 * return current set override encoding
+	 *
+	 * @return string
+	 */
+	public function getOverrideEncoding(): string
+	{
+		return $this->override_encoding;
+	}
+
+	/**
+	 * Current set encoding
+	 *
+	 * @return string
+	 */
+	public function getEncoding(): string
+	{
+		return $this->encoding;
 	}
 
 	/**

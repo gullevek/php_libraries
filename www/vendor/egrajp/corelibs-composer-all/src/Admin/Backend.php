@@ -121,14 +121,13 @@ class Backend
 	 * @param \CoreLibs\Debug\Logging  $log     Logging class
 	 * @param \CoreLibs\Create\Session $session Session interface class
 	 * @param \CoreLibs\Language\L10n  $l10n    l10n language class
-	 * @param array<string,string>     $locale  locale data read from setLocale
+	 * @param int|null                 $set_default_acl_level Default ACL level
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
 		\CoreLibs\Debug\Logging $log,
 		\CoreLibs\Create\Session $session,
 		\CoreLibs\Language\L10n $l10n,
-		array $locale,
 		?int $set_default_acl_level = null
 	) {
 		// attach db class
@@ -142,12 +141,12 @@ class Backend
 		// get the language sub class & init it
 		$this->l = $l10n;
 		// parse and read, legacy stuff
+		$locale = $this->l->getLocaleAsArray();
 		$this->encoding = $locale['encoding'];
 		$this->lang = $locale['lang'];
-		// get first part from lang
-		$this->lang_short = explode('_', $locale['lang'])[0];
-		$this->domain = $this->l->getDomain();
-		$this->lang_dir = $this->l->getBaseLocalePath();
+		$this->lang_short = $locale['lang_short'];
+		$this->domain = $locale['domain'];
+		$this->lang_dir = $locale['path'];
 
 		// set the page name
 		$this->page_name = \CoreLibs\Get\System::getPageName();

@@ -160,13 +160,11 @@ class SmartyExtend extends \Smarty
 	 * also registers the getvar caller plugin
 	 *
 	 * @param \CoreLibs\Language\L10n $l10n l10n language class
-	 * @param array<string,string>    $locale locale data read from setLocale
 	 * @param string|null             $cache_id
 	 * @param string|null             $compile_id
 	 */
 	public function __construct(
 		\CoreLibs\Language\L10n $l10n,
-		array $locale,
 		?string $cache_id = null,
 		?string $compile_id = null
 	) {
@@ -192,13 +190,12 @@ class SmartyExtend extends \Smarty
 		// iinit lang
 		$this->l10n = $l10n;
 		// parse and read, legacy stuff
+		$locale = $this->l10n->getLocaleAsArray();
 		$this->encoding = $locale['encoding'];
 		$this->lang = $locale['lang'];
-		// get first part from lang
-		$this->lang_short = explode('_', $locale['lang'])[0];
-		$this->domain = $this->l10n->getDomain();
-		$this->locale_set = $this->l10n->getLocaleSet();
-		$this->lang_dir = $this->l10n->getBaseLocalePath();
+		$this->lang_short = $locale['lang_short'];
+		$this->domain = $locale['domain'];
+		$this->lang_dir = $locale['path'];
 
 		// opt load functions so we can use legacy init for smarty run perhaps
 		\CoreLibs\Language\L10n::loadFunctions();
@@ -493,6 +490,7 @@ class SmartyExtend extends \Smarty
 			null,
 			null,
 			null,
+			null,
 			$set_stylesheet,
 			$set_javascript
 		);
@@ -511,6 +509,7 @@ class SmartyExtend extends \Smarty
 	 * @param  string|null $set_admin_stylesheet ADMIN_STYLESHEET
 	 * @param  string|null $set_admin_javascript ADMIN_JAVASCRIPT
 	 * @param  string|null $set_page_width       PAGE_WIDTH
+	 * @param  string|null $set_user_name        _SESSION['USER_NAME']
 	 * @param  \CoreLibs\Admin\Backend|null $cms Optinal Admin Backend for
 	 *                                           smarty variables merge
 	 * @return void
@@ -526,6 +525,7 @@ class SmartyExtend extends \Smarty
 		?string $set_admin_stylesheet = null,
 		?string $set_admin_javascript = null,
 		?string $set_page_width = null,
+		?string $set_user_name = null,
 		?\CoreLibs\Admin\Backend $cms = null
 	): void {
 		$this->setSmartyVars(
@@ -541,6 +541,7 @@ class SmartyExtend extends \Smarty
 			$set_admin_stylesheet,
 			$set_admin_javascript,
 			$set_page_width,
+			$set_user_name,
 			null,
 			null
 		);
@@ -566,6 +567,7 @@ class SmartyExtend extends \Smarty
 	 * @param  string|null $set_page_width       PAGE_WIDTH
 	 * @param  string|null $set_stylesheet       STYLESHEET
 	 * @param  string|null $set_javascript       JAVASCRIPT
+	 * @param  string|null $set_user_name        _SESSION['USER_NAME']
 	 * @return void
 	 */
 	private function setSmartyVars(
@@ -581,8 +583,9 @@ class SmartyExtend extends \Smarty
 		?string $set_admin_stylesheet = null,
 		?string $set_admin_javascript = null,
 		?string $set_page_width = null,
+		?string $set_user_name = null,
 		?string $set_stylesheet = null,
-		?string $set_javascript = null
+		?string $set_javascript = null,
 	): void {
 		// trigger deprecation
 		if (
@@ -597,7 +600,8 @@ class SmartyExtend extends \Smarty
 				$admin_call === true && (
 					$set_admin_stylesheet === null ||
 					$set_admin_javascript === null ||
-					$set_page_width === null
+					$set_page_width === null ||
+					$set_user_name === null
 				)
 			) ||
 			(
@@ -626,6 +630,7 @@ class SmartyExtend extends \Smarty
 		$set_page_width = $set_page_width ?? PAGE_WIDTH;
 		$set_stylesheet = $set_stylesheet ?? STYLESHEET;
 		$set_javascript = $set_javascript ?? JAVASCRIPT;
+		$set_user_name = $set_user_name ?? $_SESSION['USER_NAME'] ?? '';
 		// depreacte call globals cms on null 4mcs
 		if (
 			$cms === null &&
@@ -734,7 +739,7 @@ class SmartyExtend extends \Smarty
 		$this->DATA['JS_FLATPICKR'] = $this->JS_FLATPICKR;
 		$this->DATA['JS_FILE_UPLOADER'] = $this->JS_FILE_UPLOADER;
 		// user name
-		$this->DATA['USER_NAME'] = !empty($_SESSION['USER_NAME']) ? $_SESSION['USER_NAME'] : '';
+		$this->DATA['USER_NAME'] = $set_user_name;
 		// the template part to include into the body
 		$this->DATA['TEMPLATE_NAME'] = $this->TEMPLATE_NAME;
 		$this->DATA['CONTENT_INCLUDE'] = $this->CONTENT_INCLUDE;

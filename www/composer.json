@@ -11,7 +11,8 @@
     ],
 	"require": {
 		"egrajp/smarty-extended": "^4.3",
-        "egrajp/corelibs-composer-all": "@dev"
+        "egrajp/corelibs-composer-all": "@dev",
+        "gullevek/dotenv": "^2.0"
 	},
     "autoload": {
         "classmap": [

@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
+$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
+$DEBUG_ALL = true;
+$PRINT_ALL = true;
+$DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 /**
  * Undocumented function
@@ -53,9 +51,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
+	'debug_all' => $DEBUG_ALL,
 	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'print_all' => $PRINT_ALL,
 ]);
 use CoreLibs\Create\Session;
 $session = new Session();
@@ -128,11 +126,11 @@ $session->unsetS('setwrap');
 print "[READ WRAP] unset setwrap: " . $session->getS('setwrap') . "<br>";
 print "[READ WRAP] unset Isset: " . ($session->issetS('setwrap') ? 'Yes' : 'No') . "<br>";
 // test __get/__set
-$session->setwrap = 'YES, magic set _SESSION var';
-print "[READ MAGIC] A setwrap: " . $session->setwrap . "<br>";
+$session->setwrap = 'YES, magic set _SESSION var'; /** @phpstan-ignore-line GET/SETTER */
+print "[READ MAGIC] A setwrap: " . ($session->setwrap ?? '') . "<br>";
 print "[READ MAGIC] Isset: " . (isset($session->setwrap) ? 'Yes' : 'No') . "<br>";
 unset($session->setwrap);
-print "[READ MAGIC] unset setwrap: " . $session->setwrap . "<br>";
+print "[READ MAGIC] unset setwrap: " . ($session->setwrap ?? '') . "<br>";
 print "[READ MAGIC] unset Isset: " . (isset($session->setwrap) ? 'Yes' : 'No') . "<br>";
 
 // differnt session name

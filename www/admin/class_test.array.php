@@ -6,14 +6,12 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
+$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
+$DEBUG_ALL = true;
+$PRINT_ALL = true;
+$DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -27,6 +25,7 @@ ob_end_flush();
 
 use CoreLibs\Combined\ArrayHandler;
 use CoreLibs\Debug\Support as DgS;
+use CoreLibs\Convert\SetVarType;
 
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
@@ -34,9 +33,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
+	'debug_all' => $DEBUG_ALL,
 	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'print_all' => $PRINT_ALL,
 ]);
 // $_array = new CoreLibs\Combined\ArrayHandler();
 // $array_class = 'CoreLibs\Combination\ArrayHandler';
@@ -92,7 +91,9 @@ $array_3 = [
 	]
 ];
 // recusrice merge
-print "ARRAYMERGERECURSIVE: " . DgS::printAr(ArrayHandler::arrayMergeRecursive($array_1, $array_2, $array_3)) . "<br>";
+print "ARRAYMERGERECURSIVE: " . DgS::printAr(SetVarType::setArray(
+	ArrayHandler::arrayMergeRecursive($array_1, $array_2, $array_3)
+)) . "<br>";
 // array difference
 $array_left = [
 	'same' => 'data',
@@ -104,7 +105,9 @@ $array_right = [
 ];
 print "ARRAYDIFF: " . DgS::printAr(ArrayHandler::arrayDiff($array_left, $array_right)) . "<br>";
 // in array check
-print "INARRAYANY([1,3], [array]): " . DgS::printAr(ArrayHandler::inArrayAny([1, 3], $array_2)) . "<br>";
+print "INARRAYANY([1,3], [array]): " . DgS::printAr(SetVarType::setArray(
+	ArrayHandler::inArrayAny([1, 3], $array_2)
+)) . "<br>";
 // flatten array
 print "FLATTENARRAY: " . DgS::printAr(ArrayHandler::flattenArray($test_array)) . "<br>";
 print "FLATTENARRAYKEY: " . DgS::printAr(ArrayHandler::flattenArrayKey($test_array)) . "<br>";
@@ -114,10 +117,10 @@ print "ARRAYFLATFORKEY: " . DgS::printAr(ArrayHandler::arrayFlatForKey($test_arr
 /**
  * attach key/value to an array so it becomes nested
  *
- * @param string $pre  Attach to new (empty for new root node)
- * @param string $cur  New node
- * @param array  $node Previous created array
- * @return array       Updated array
+ * @param string       $pre  Attach to new (empty for new root node)
+ * @param string       $cur  New node
+ * @param array<mixed> $node Previous created array
+ * @return array<mixed>      Updated array
  */
 function rec(string $pre, string $cur, array $node = [])
 {

@@ -24,9 +24,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
+	'debug_all' => $DEBUG_ALL ?? true,
 	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'print_all' => $PRINT_ALL ?? true,
 ]);
 $ref_class = 'CoreLibs\Get\ReadEnvFile';
 

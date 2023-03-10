@@ -35,6 +35,8 @@ class EditBase
 	private $form;
 	/** @var \CoreLibs\Debug\Logging */
 	public $log;
+	/** @var \CoreLibs\ACL\Login */
+	public $login;
 
 	/**
 	 * construct form generator
@@ -42,18 +44,24 @@ class EditBase
 	 * @param array<mixed>            $db_config db config array, mandatory
 	 * @param \CoreLibs\Debug\Logging $log       Logging class, null auto set
 	 * @param \CoreLibs\Language\L10n $l10n      l10n language class, null auto set
-	 * @param array<string,string>    $locale    locale array from ::setLocale,
-	 *                                           null auto set
+	 * @param \CoreLibs\ACL\Login     $login     login class for ACL settings
+	 * @param array<string,mixed>     $options   Various settings options
 	 */
 	public function __construct(
 		array $db_config,
 		\CoreLibs\Debug\Logging $log,
 		\CoreLibs\Language\L10n $l10n,
-		array $locale
+		\CoreLibs\ACL\Login $login,
+		array $options
 	) {
 		$this->log = $log;
+		$this->login = $login;
 		// smarty template engine (extended Translation version)
-		$this->smarty = new \CoreLibs\Template\SmartyExtend($l10n, $locale);
+		$this->smarty = new \CoreLibs\Template\SmartyExtend(
+			$l10n,
+			$options['cache_id'] ?? '',
+			$options['compile_id'] ?? '',
+		);
 		// turn off set log per class
 		$log->setLogPer('class', false);
 
@@ -62,7 +70,7 @@ class EditBase
 			$db_config,
 			$log,
 			$l10n,
-			$locale
+			$this->login->loginGetAcl()
 		);
 		if ($this->form->mobile_phone) {
 			echo "I am sorry, but this page cannot be viewed by a mobile phone";
@@ -272,23 +280,16 @@ class EditBase
 
 		// MENU START
 		// request some session vars
-		if (empty($_SESSION['HEADER_COLOR'])) {
-			$this->DATA['HEADER_COLOR'] = '#E0E2FF';
-		} else {
-			$this->DATA['HEADER_COLOR'] = $_SESSION['HEADER_COLOR'];
-		}
-		$this->DATA['USER_NAME'] = $_SESSION['USER_NAME'];
-		$this->DATA['EUID'] = $_SESSION['EUID'];
-		$this->DATA['GROUP_NAME'] = $_SESSION['GROUP_NAME'];
-		$this->DATA['GROUP_LEVEL'] = $_SESSION['GROUP_ACL_LEVEL'];
-		$PAGES = $_SESSION['PAGES'];
+		$this->DATA['HEADER_COLOR'] = $this->login->loginGetHeaderColor() ?? '#E0E2FF';
+		$this->DATA['USER_NAME'] = $this->login->loginGetAcl()['user_name'] ?? '';
+		$this->DATA['EUID'] = $this->login->loginGetEuid();
+		$this->DATA['GROUP_NAME'] = $this->login->loginGetAcl()['group_name'] ?? '';
+		$this->DATA['ACCESS_LEVEL'] = $this->login->loginGetAcl()['base'] ?? '';
+		// below is old and to removed when edit_body.tpl is updates
+		$this->DATA['GROUP_LEVEL'] = $this->DATA['ACCESS_LEVEL'];
+		$PAGES = $this->login->loginGetPages();
 
 		//$this->form->log->debug('menu', $this->form->log->prAr($PAGES));
-
-		// build nav from $PAGES ...
-		if (!isset($PAGES) || !is_array($PAGES)) {
-			$PAGES = [];
-		}
 		$menuarray = [];
 		foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
 			if ($PAGE_DATA['menu'] && $PAGE_DATA['online']) {
@@ -574,7 +575,7 @@ class EditBase
 		$set_admin_stylesheet = $set_admin_stylesheet ?? ADMIN_STYLESHEET;
 		$set_default_encoding = $set_default_encoding ?? DEFAULT_ENCODING;
 		$set_css = $set_css ?? LAYOUT . CSS;
-		$set_css = $set_js ?? LAYOUT . JS;
+		$set_js = $set_js ?? LAYOUT . JS;
 		$set_root = $set_root ?? ROOT;
 		$set_content_path = $set_content_path ?? CONTENT_PATH;
 

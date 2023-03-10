@@ -6,14 +6,12 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
+$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
+$DEBUG_ALL = true;
+$PRINT_ALL = true;
+$DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -33,9 +31,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
+	'debug_all' => $DEBUG_ALL,
 	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'print_all' => $PRINT_ALL,
 ]);
 $_image = new CoreLibs\Output\Image();
 $image_class = 'CoreLibs\Output\Image';
@@ -54,12 +52,15 @@ $thumb_width = 250;
 $thumb_height = 300;
 // class
 $image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture_square.jpg';
+// folders
+$cache_folder = BASE . LAYOUT . CONTENT_PATH . CACHE . IMAGES;
+$web_folder = LAYOUT . CACHE . IMAGES;
 // rotate image first
 $_image->correctImageOrientation($image);
 // thumbnail tests
 echo "<div>CLASS->CREATETHUMBNAILSIMPLE: "
 	. basename($image) . ": WIDTH: $thumb_width<br><img src="
-	. $_image->createThumbnailSimple($image, $thumb_width) . "></div>";
+	. $_image->createThumbnailSimple($image, $thumb_width, 0, $cache_folder, $web_folder) . "></div>";
 // static
 $image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture.jpg';
 // rotate image first
@@ -67,7 +68,7 @@ $image_class::correctImageOrientation($image);
 // thumbnail tests
 echo "<div>S::CREATETHUMBNAILSIMPLE: "
 	. basename($image) . ": WIDTH: $thumb_width<br><img src="
-	. $image_class::createThumbnailSimple($image, $thumb_width) . "></div>";
+	. $image_class::createThumbnailSimple($image, $thumb_width, 0, $cache_folder, $web_folder) . "></div>";
 
 echo "U-STATIC VARIOUS:<br>";
 // image thumbnail
@@ -92,21 +93,29 @@ $images = array(
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 foreach ($images as $image) {
 	$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . $image;
-	list ($height, $width, $img_type) = getimagesize($image);
+	list ($height, $width, $img_type) = \CoreLibs\Convert\SetVarType::setArray(getimagesize($image));
 	echo "<div><b>IMAGE INFO</b>: " . $height . "x" . $width . ", TYPE: "
-		. $img_type . " [" . $finfo->file($image) . "]</div>";
+		. $log->prAr($img_type) . " [" . $finfo->file($image) . "]</div>";
 	// rotate image first
 	Image::correctImageOrientation($image);
 	// thumbnail tests
 	echo "<div>" . basename($image) . ": WIDTH: $thumb_width<br><img src="
-		. Image::createThumbnailSimple($image, $thumb_width) . "></div>";
+		. Image::createThumbnailSimple($image, $thumb_width, 0, $cache_folder, $web_folder) . "></div>";
 	echo "<div>" . basename($image) . ": HEIGHT: $thumb_height<br><img src="
-		. Image::createThumbnailSimple($image, 0, $thumb_height) . "></div>";
+		. Image::createThumbnailSimple($image, 0, $thumb_height, $cache_folder, $web_folder) . "></div>";
 	echo "<div>" . basename($image) . ": WIDTH/HEIGHT: $thumb_width x $thumb_height<br><img src="
-		. Image::createThumbnailSimple($image, $thumb_width, $thumb_height) . "></div>";
+		. Image::createThumbnailSimple($image, $thumb_width, $thumb_height, $cache_folder, $web_folder) . "></div>";
 	// test with dummy
 	echo "<div>" . basename($image) . ": WIDTH/HEIGHT: $thumb_width x $thumb_height (+DUMMY)<br><img src="
-		. Image::createThumbnailSimple($image, $thumb_width, $thumb_height, null, true, false) . "></div>";
+		. Image::createThumbnailSimple(
+			$image,
+			$thumb_width,
+			$thumb_height,
+			$cache_folder,
+			$web_folder,
+			true,
+			false
+		) . "></div>";
 	echo "<hr>";
 }
 

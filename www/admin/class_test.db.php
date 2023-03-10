@@ -24,6 +24,7 @@ ob_end_flush();
 use CoreLibs\Debug\Support as DgS;
 use CoreLibs\DB\IO as DbIo;
 use CoreLibs\Debug\Support;
+use CoreLibs\Convert\SetVarType;
 
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
@@ -31,9 +32,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'debug_all' => $DEBUG_ALL ?? true,
+	'echo_all' => $ECHO_ALL,
+	'print_all' => $PRINT_ALL ?? true,
 ]);
 // db connection and attach logger
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
@@ -62,7 +63,11 @@ print "VERSION LONG DB: " . $db->dbVersionInfo('server', false) . "<br>";
 print "VERSION NUMERIC DB: " . $db->dbVersionNumeric() . "<br>";
 print "SERVER ENCODING: " . $db->dbVersionInfo('server_encoding') . "<br>";
 print "ALL PG VERSION PARAMETERS: <pre>" . print_r($db->dbVersionInfoParameters(), true) . "</pre><br>";
-print "ALL OUTPUT [TEST]: <pre>" . print_r(pg_version($db->dbGetDbh()), true) . "</pre><br>";
+if (($dbh = $db->dbGetDbh()) instanceof \PgSql\Connection) {
+	print "ALL OUTPUT [TEST]: <pre>" . print_r(pg_version($dbh), true) . "</pre><br>";
+} else {
+	print "NO DB HANDLER<br>";
+}
 print "DB Version smaller $to_db_version: " . $db->dbCompareVersion('<' . $to_db_version) . "<br>";
 print "DB Version smaller than $to_db_version: " . $db->dbCompareVersion('<=' . $to_db_version) . "<br>";
 print "DB Version equal $to_db_version: " . $db->dbCompareVersion('=' . $to_db_version) . "<br>";
@@ -108,7 +113,11 @@ print "<br>";
 
 print "<pre>";
 
-print "SOCKET: " . pg_socket($db->dbGetDbh()) . "<br>";
+if (($dbh = $db->dbGetDbh()) instanceof \PgSql\Connection) {
+	print "SOCKET: " . pg_socket($dbh) . "<br>";
+} else {
+	print "NO SOCKET<br>";
+}
 
 // truncate test_foo table before testing
 print "<b>TRUNCATE test_foo</b><br>";
@@ -123,7 +132,7 @@ $status = $db->dbExec("INSERT INTO test_foo (test, number_a) VALUES "
 print "DIRECT INSERT STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "DB OBJECT: <pre>" . print_r($status, true) . "</pre>| "
-	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING EXT[test]: " . print_r($db->dbGetReturningExt('test'), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -144,7 +153,7 @@ $status = $db->dbExec($query);
 print "EOM STRING DIRECT INSERT STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "DB OBJECT: <pre>" . print_r($status, true) . "</pre>| "
-	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING EXT[test]: " . print_r($db->dbGetReturningExt('test'), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -156,12 +165,13 @@ var_dump($db->dbGetReturningExt());
 $last_insert_pk = $db->dbGetInsertPK();
 print "DIRECT INSERT PREVIOUS INSERTED: "
 	. print_r($db->dbReturnRow("SELECT test_foo_id, test FROM test_foo "
-		. "WHERE test_foo_id = " . $last_insert_pk), true) . "<br>";
+		. "WHERE test_foo_id = " . (int)$last_insert_pk), true) . "<br>";
+$__last_insert_pk = (int)$last_insert_pk;
 $q = <<<EOM
 	SELECT
 		test_foo_id, test
 	FROM test_foo
-	WHERE test_foo_id = $last_insert_pk;
+	WHERE test_foo_id = $__last_insert_pk;
 EOM;
 print "EOM READ OF PREVIOUS INSERTED: " . print_r($db->dbReturnRow($q), true) . "<br>";
 print "LAST ERROR: " . $db->dbGetLastError() . "<br>";
@@ -172,13 +182,13 @@ $db->dbPrepare("ins_test_foo", "INSERT INTO test_foo (test) VALUES ($1) RETURNIN
 $status = $db->dbExecute("ins_test_foo", ['BAR TEST ' . time()]);
 print "PREPARE INSERT[ins_test_foo] STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetPrepareCursorValue('ins_test_foo', 'query') . " |<br>"
-	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 print "PREPARE INSERT PREVIOUS INSERTED: "
 	. print_r($db->dbReturnRow("SELECT test_foo_id, test FROM test_foo "
-	. "WHERE test_foo_id = " . $db->dbGetInsertPK()), true) . "<br>";
+	. "WHERE test_foo_id = " . (int)$db->dbGetInsertPK()), true) . "<br>";
 
 print "PREPARE CURSOR RETURN:<br>";
 foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
@@ -197,7 +207,7 @@ $db->dbPrepare("ins_test_foo_eom", $query);
 $status = $db->dbExecute("ins_test_foo_eom", ['EOM BAR TEST ' . time()]);
 print "EOM STRING PREPARE INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetPrepareCursorValue('ins_test_foo_eom', 'query') . " |<br>"
-	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
@@ -247,21 +257,21 @@ print "EOM STRING DIRECT MULTIPLE INSERT WITH RETURN STATUS: " . Support::printT
 $status = $db->dbExec("INSERT INTO test_foo (test) VALUES ('FOO; TEST " . time() . "')");
 print "DIRECT INSERT NO RETURN STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
-	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 $last_insert_pk = $db->dbGetInsertPK();
 
 // is_array read test
-$q = "SELECT test_foo_id, test FROM test_foo WHERE test_foo_id = " . $last_insert_pk;
+$q = "SELECT test_foo_id, test FROM test_foo WHERE test_foo_id = " . (int)$last_insert_pk;
 if (is_array($s_res = $db->dbReturnRow($q)) && !empty($s_res['test'])) {
-	print "WE HAVE DATA FOR: " . $last_insert_pk . " WITH: " . $s_res['test'] . "<br>";
+	print "WE HAVE DATA FOR: " . Support::printToString($last_insert_pk) . " WITH: " . $s_res['test'] . "<br>";
 }
 
 // UPDATE WITH RETURNING
 $status = $db->dbExec("UPDATE test_foo SET test = 'SOMETHING DIFFERENT' "
-	. "WHERE test_foo_id = " . $last_insert_pk . " RETURNING test");
-print "UPDATE WITH PK " . $last_insert_pk
+	. "WHERE test_foo_id = " . (int)$last_insert_pk . " RETURNING test");
+print "UPDATE WITH PK " . Support::printToString($last_insert_pk)
 	. " RETURN STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
@@ -271,14 +281,14 @@ print "UPDATE WITH PK " . $last_insert_pk
 $status = $db->dbExec("INSERT INTO test_foobar (type, integer) VALUES ('WITHOUT DATA', 456)");
 print "INSERT WITH NO PRIMARY KEY NO RETURNING STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
-	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 $status = $db->dbExec("INSERT INTO test_foobar (type, integer) VALUES ('WITH DATA', 123) RETURNING type, integer");
 print "INSERT WITH NO PRIMARY KEY WITH RETURNING STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
-	. "PRIMARY KEY: " . $db->dbGetInsertPK() . " | "
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
@@ -331,7 +341,7 @@ echo "<hr>";
 
 // NOTE: try to replacate connection still exists if script is run a second time
 // open pg bouncer connection
-$db_pgb = new CoreLibs\DB\IO($DB_CONFIG['test_pgbouncer'], $log);
+$db_pgb = new CoreLibs\DB\IO($DB_CONFIG['test_pgbouncer'] ?? [], $log);
 print "[PGB] DBINFO: " . $db_pgb->dbInfo() . "<br>";
 if ($db->dbPrepare('pgb_sel_test_foo', $q_prep) === false) {
 	print "[PGB] [1] Error in pgb_sel_test_foo prepare<br>";
@@ -348,7 +358,9 @@ $db_pgb->dbClose();
 
 # db write class test
 $table = 'test_foo';
-print "TABLE META DATA: " . DgS::printAr($db->dbShowTableMetaData($table)) . "<br>";
+print "TABLE META DATA: " . DgS::printAr(SetVarType::setArray(
+	$db->dbShowTableMetaData($table)
+)) . "<br>";
 // insert first, then use primary key to update
 $primary_key = ''; # unset
 $db_write_table = ['test', 'string_a', 'number_a', 'some_bool'];
@@ -371,7 +383,7 @@ $data = [
 ];
 $primary_key = $db->dbWriteDataExt(
 	$db_write_table,
-	$primary_key,
+	(int)$primary_key,
 	$table,
 	$object_fields_not_touch,
 	$object_fields_not_update,
@@ -383,7 +395,7 @@ $data = [
 ];
 $primary_key = $db->dbWriteDataExt(
 	$db_write_table,
-	$primary_key,
+	(int)$primary_key,
 	$table,
 	$object_fields_not_touch,
 	$object_fields_not_update,
@@ -395,7 +407,7 @@ $data = [
 ];
 $primary_key = $db->dbWriteDataExt(
 	$db_write_table,
-	$primary_key,
+	(int)$primary_key,
 	$table,
 	$object_fields_not_touch,
 	$object_fields_not_update,
@@ -500,24 +512,24 @@ while (($ret = $db->dbCheckAsync()) === true)
 // search path check
 $q = "SHOW search_path";
 $cursor = $db->dbExec($q);
-$data = $db->dbFetchArray($cursor)['search_path'];
+$data = $db->dbFetchArray($cursor)['search_path'] ?? '';
 print "RETURN DATA FOR search_path: " . $data . "<br>";
 //	print "RETURN DATA FOR search_path: " . DgS::printAr($data) . "<br>";
 // insert something into test.schema_test and see if we get the PK back
 $status = $db->dbExec(
 	"INSERT INTO test.schema_test (contents, id) VALUES "
-	. "('TIME: " . time() . "', " . rand(1, 10) . ")"
+	. "('TIME: " . (string)time() . "', " . (string)rand(1, 10) . ")"
 );
 print "OTHER SCHEMA INSERT STATUS: "
 	. Support::printToString($status)
 	. " | PK NAME: " . $db->dbGetInsertPKName()
-	. ", PRIMARY KEY: " . $db->dbGetInsertPK() . "<br>";
+	. ", PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . "<br>";
 
 print "<b>NULL TEST DB READ</b><br>";
 $q = "SELECT uid, null_varchar, null_int FROM test_null_data WHERE uid = 'A'";
 $res = $db->dbReturnRow($q);
 var_dump($res);
-print "RES: " . DgS::printAr($res) . "<br>";
+print "RES: " . DgS::printAr(SetVarType::setArray($res)) . "<br>";
 print "ISSET: " . isset($res['null_varchar']) . "<br>";
 print "EMPTY: " . empty($res['null_varchar']) . "<br>";
 

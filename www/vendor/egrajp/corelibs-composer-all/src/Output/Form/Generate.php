@@ -277,6 +277,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	private $acl_admin = 0;
 	/** @var array<mixed> */
 	public $security_level;
+	/** @var array<string,mixed> Login ACL */
+	public $login_acl = [];
 	// layout publics
 	/** @var int */
 	public $table_width;
@@ -308,7 +310,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * @param array<mixed>            $db_config    db config array, mandatory
 	 * @param \CoreLibs\Debug\Logging $log          Logging class
 	 * @param \CoreLibs\Language\L10n $l10n         l10n language class
-	 * @param array<string,string>    $locale       locale array from ::setLocale
+	 * @param array<string,mixed>     $login_acl	Login ACL array,
+	 *                                              at least base/admin should be set
 	 * @param array<mixed>|null       $table_arrays Override table array data
 	 *                                              instead of try to load from
 	 *                                              include file
@@ -318,7 +321,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		array $db_config,
 		\CoreLibs\Debug\Logging $log,
 		\CoreLibs\Language\L10n $l10n,
-		array $locale,
+		array $login_acl,
 		?array $table_arrays = null,
 	) {
 		// init logger if not set
@@ -327,19 +330,19 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->log->setLogPer('class', false);
 		// init the language class
 		$this->l = $l10n;
-		// legacy lang vars set
+		// parse and read, legacy stuff
+		$locale = $this->l->getLocaleAsArray();
 		$this->encoding = $locale['encoding'];
 		$this->lang = $locale['lang'];
-		// get first part from lang
-		$this->lang_short = explode('_', $locale['lang'])[0];
-		$this->domain = $this->l->getDomain();
-		$this->lang_dir = $this->l->getBaseLocalePath();
+		$this->lang_short = $locale['lang_short'];
+		$this->domain = $locale['domain'];
+		$this->lang_dir = $locale['path'];
 		// load config array
 		// get table array definitions for current page name
-
+		$this->login_acl = $login_acl;
 		// security settings
-		$this->base_acl_level = (int)$_SESSION['BASE_ACL_LEVEL'];
-		$this->acl_admin = (int)$_SESSION['ADMIN'];
+		$this->base_acl_level = $this->login_acl['base'] ?? 0;
+		$this->acl_admin = $this->login_acl['admin'] ?? 0;
 
 		// replace any non valid variable names and set my page name
 		$this->my_page_name = str_replace(
@@ -377,7 +380,6 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$this->base_acl_level,
 			$this->acl_admin
 		);
-		// $this->log->debug('SESSION FORM', 'sessin: ' . $this->log->prAr($_SESSION));
 		// here should be a check if the config_array is correct ...
 		if (isset($config_array['show_fields']) && is_array($config_array['show_fields'])) {
 			$this->field_array = $config_array['show_fields'];

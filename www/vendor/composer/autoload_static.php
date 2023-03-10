@@ -7,6 +7,11 @@ namespace Composer\Autoload;
 class ComposerStaticInit1b7cd5bacf2590b458d7a94400b505d4
 {
     public static $prefixLengthsPsr4 = array (
+        'g' => 
+        array (
+            'gullevek\\dotenv\\' => 16,
+            'gullevek\\dotEnv\\' => 16,
+        ),
         'C' => 
         array (
             'CoreLibs\\' => 9,
@@ -14,6 +19,14 @@ class ComposerStaticInit1b7cd5bacf2590b458d7a94400b505d4
     );
 
     public static $prefixDirsPsr4 = array (
+        'gullevek\\dotenv\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/gullevek/dotenv/src',
+        ),
+        'gullevek\\dotEnv\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/gullevek/dotenv/src',
+        ),
         'CoreLibs\\' => 
         array (
             0 => __DIR__ . '/..' . '/egrajp/corelibs-composer-all/src',

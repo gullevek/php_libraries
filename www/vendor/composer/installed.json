@@ -2,12 +2,12 @@
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "dev-development",
+            "version_normalized": "dev-development",
             "dist": {
                 "type": "path",
                 "url": "/storage/var/www/html/developers/clemens/core_data/composer-packages/CoreLibs-Composer-All",
-                "reference": "d9b71a64b390b6fc048cb6de00bfcfc6d9a6344f"
+                "reference": "cf196d56ddcc38567112c7d933340349036ee3fa"
             },
             "require": {
                 "php": ">=8.1"
@@ -72,6 +72,63 @@
                 "templating"
             ],
             "install-path": "../egrajp/smarty-extended"
+        },
+        {
+            "name": "gullevek/dotenv",
+            "version": "v2.0.8",
+            "version_normalized": "2.0.8.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/gullevek/dotEnv.git",
+                "reference": "e29f9fcd8853a09bb89b0eb8ee555b754ecee36e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/gullevek/dotEnv/zipball/e29f9fcd8853a09bb89b0eb8ee555b754ecee36e",
+                "reference": "e29f9fcd8853a09bb89b0eb8ee555b754ecee36e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4.0"
+            },
+            "require-dev": {
+                "phan/phan": "^5.4",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^9"
+            },
+            "time": "2023-03-03T00:32:02+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "gullevek\\dotEnv\\": "src/",
+                    "gullevek\\dotenv\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Clemens Schwaighofer",
+                    "email": "gullevek@gullevek.org",
+                    "homepage": "http://gullevek.org"
+                }
+            ],
+            "description": "Simple .env file processing and storing in _ENV array",
+            "homepage": "https://github.com/gullevek/dotEnv",
+            "keywords": [
+                ".env",
+                "_ENV",
+                "dotenv",
+                "environment variables"
+            ],
+            "support": {
+                "issues": "https://github.com/gullevek/dotEnv/issues",
+                "source": "https://github.com/gullevek/dotEnv/tree/v2.0.8"
+            },
+            "install-path": "../gullevek/dotenv"
         }
     ],
     "dev": true,

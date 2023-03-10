@@ -23,6 +23,7 @@ ob_end_flush();
 
 use CoreLibs\Debug\Support;
 use CoreLibs\Debug\RunningTime;
+use CoreLibs\Convert\SetVarType;
 
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
@@ -30,9 +31,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'debug_all' => $DEBUG_ALL ?? true,
+	'echo_all' => $ECHO_ALL,
+	'print_all' => $PRINT_ALL ?? true,
 ]);
 // db connection and attach logger
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
@@ -78,7 +79,9 @@ for ($i = 1; $i <= 6; $i++) {
 			(is_array($res) ?
 				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
 		) . ", "
-		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
 	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
 }
 // reset all read data
@@ -95,7 +98,9 @@ for ($i = 1; $i <= 6; $i++) {
 			(is_array($res) ?
 				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
 		) . ", "
-		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
 	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
 }
 // reset all read data
@@ -112,7 +117,9 @@ for ($i = 1; $i <= 6; $i++) {
 			(is_array($res) ?
 				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
 		) . ", "
-		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
 	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
 }
 // reset all read data
@@ -129,7 +136,9 @@ for ($i = 1; $i <= 6; $i++) {
 			(is_array($res) ?
 				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
 		) . ", "
-		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
 	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
 }
 // reset all data
