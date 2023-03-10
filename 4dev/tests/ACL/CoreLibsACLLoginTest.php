@@ -1114,6 +1114,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,
@@ -1796,6 +1797,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,
@@ -1909,6 +1911,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,
@@ -1996,6 +1999,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,
@@ -2091,6 +2095,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'logout_target' => '',
 					'site_locale' => 'en_US.UTF-8',
 					'site_domain' => 'admin',
+					'site_encoding' => 'UTF-8',
 					'locale_path' => __DIR__ . DIRECTORY_SEPARATOR
 						. 'includes' . DIRECTORY_SEPARATOR
 						. 'locale' . DIRECTORY_SEPARATOR,

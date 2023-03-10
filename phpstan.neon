@@ -10,23 +10,15 @@ parameters:
 		- %currentWorkingDirectory%/www
 	bootstrapFiles:
 		- %currentWorkingDirectory%/phpstan-bootstrap.php
-		# - %currentWorkingDirectory%/www/lib/autoloader.php
 		- %currentWorkingDirectory%/www/vendor/autoload.php
 	scanDirectories:
 		- www/vendor
 	scanFiles:
 		- www/configs/config.php
 		- www/configs/config.master.php
-		# if composer.json autoloader defined, this is not needed
-		# - www/lib/autoloader.php
-		# - www/vendor/autoload.php
 	excludePaths:
 		# do not check old qq file uploader tests
 		- www/admin/qq_file_upload_*.php
-		# ignore all test files
-		# - www/admin/class_test*.php
-		# extra in sub folder
-		- www/admin/subfolder/class_test*.php
 		- www/admin/error_test.php
 		# admin synlink files
 		- www/admin/edit_*.php
@@ -37,10 +29,6 @@ parameters:
 		# ignore admin header stuff
 		# - www/includes/admin_header.php # ignore the admin include stuff
 		- www/includes/admin_footer.php # ignore the admin include stuff
-		# deprecated files
-		- www/includes/admin_set_paths.php # ignore the admin include stuff
-		- www/includes/admin_smarty.php # ignore the admin include stuff
-		- www/includes/edit_base.LEGACY.php # old style
 		# folders with data no check needed
 		- www/templates_c
 		- www/cache
@@ -51,13 +39,9 @@ parameters:
 		- www/vendor
 	# ignore errores with
 	ignoreErrors:
-		#- # this error is ignore because of the PHP 8.0 to 8.1 change for pg_*, only for 8.0 or lower
-			# message: "#^Parameter \\#1 \\$(result|connection) of function pg_\\w+ expects resource(\\|null)?, object\\|resource(\\|bool)? given\\.$#"
-			# path: %currentWorkingDirectory%/www/lib/CoreLibs/DB/SQL/PgSQL.php
-		# - # this is for 8.1 or newer
-		# 	message: "#^Parameter \\#1 \\$(result|connection) of function pg_\\w+ expects PgSql\\\\(Result|Connection(\\|string)?(\\|null)?), object\\|resource given\\.$#"
-		# 	path: %currentWorkingDirectory%/www/lib/CoreLibs/DB/SQL/PgSQL.php
-		# this is ignored for now
+		- # in the class_test tree we allow deprecated calls
+			message: "#^Call to deprecated method #"
+			path: %currentWorkingDirectory%/www/admin/class_test.*.php
 		# - '#Expression in empty\(\) is always falsy.#'
 		# -
 		# 	message: '#Reflection error: [a-zA-Z0-9\\_]+ not found.#'

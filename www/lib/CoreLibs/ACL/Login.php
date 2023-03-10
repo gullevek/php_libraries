@@ -196,7 +196,12 @@ class Login
 	/** @var array<string,mixed> options */
 	private $options = [];
 	/** @var array<string,string> locale options: locale, domain, encoding (opt), path */
-	private $locale = [];
+	private $locale = [
+		'locale' => '',
+		'domain' => '',
+		'encoding' => '',
+		'path' => '',
+	];
 
 	/** @var \CoreLibs\Debug\Logging logger */
 	public $log;
@@ -555,12 +560,12 @@ class Login
 			);
 			// set path
 			$options['locale_path'] = BASE . INCLUDES . LOCALE;
-			$_SESSION['LOCALE_PATH'] = $options['locale_path'];
 		}
+		$_SESSION['LOCALE_PATH'] = $options['locale_path'];
 		// LANG: LOCALE
 		if (empty($options['site_locale'])) {
 			trigger_error(
-				'loginMainCall: SITE_LOCALE or DEFAULT_LOCALE should not be used',
+				'loginMainCall: SITE_LOCALE should not be used',
 				E_USER_DEPRECATED
 			);
 			$options['site_locale'] = defined('SITE_LOCALE') && !empty(SITE_LOCALE) ?
@@ -580,7 +585,6 @@ class Login
 				);
 				// set domain
 				$options['site_domain'] = SITE_DOMAIN;
-				$_SESSION['DEFAULT_DOMAIN'] = $options['site_domain'];
 			} elseif (
 				defined('CONTENT_PATH')
 			) {
@@ -591,6 +595,16 @@ class Login
 				);
 				$options['set_domain'] = str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH);
 			}
+		}
+		$_SESSION['DEFAULT_DOMAIN'] = $options['site_domain'];
+		// LANG: ENCODING
+		if (empty($options['site_encoding'])) {
+			trigger_error(
+				'loginMainCall: SITE_ENCODING should not be used',
+				E_USER_DEPRECATED
+			);
+			$options['site_encoding'] = defined('SITE_ENCODING') && !empty(SITE_ENCODING) ?
+				SITE_ENCODING : 'UTF-8';
 		}
 
 		// write array to options
@@ -905,6 +919,7 @@ class Login
 				// rgb: nnn.n for each
 				// hsl: nnn.n for first, nnn.n% for 2nd, 3rd
 				// Check\Colors::validateColor()
+				// LANGUAGE/LOCALE/ENCODING:
 				$_SESSION['LANG'] = $res['locale'] ?? 'en';
 				$_SESSION['DEFAULT_CHARSET'] = $res['encoding'] ?? 'UTF-8';
 				$_SESSION['DEFAULT_LOCALE'] = $_SESSION['LANG']
@@ -1195,7 +1210,8 @@ class Login
 	}
 
 	/**
-	 * set locale and load mo translator
+	 * set locale
+	 * if invalid, set to empty string
 	 *
 	 * @return void
 	 */
@@ -1204,22 +1220,52 @@ class Login
 		// ** LANGUAGE SET AFTER LOGIN **
 		// set the locale
 		if (
-			!empty($_SESSION['DEFAULT_LOCALE'])
+			!empty($_SESSION['DEFAULT_LOCALE']) &&
+			preg_match("/^[-A-Za-z0-9_.@]+$/", $_SESSION['DEFAULT_LOCALE'])
 		) {
 			$locale = $_SESSION['DEFAULT_LOCALE'];
-		} else {
+		} elseif (
+			!preg_match("/^[-A-Za-z0-9_.@]+$/", $this->options['site_locale'])
+		) {
 			$locale = $this->options['site_locale'];
+		} else {
+			$locale = '';
 		}
+		// set the charset
+		preg_match('/(?:\\.(?P<charset>[-A-Za-z0-9_]+))/', $locale, $matches);
+		$locale_encoding = $matches['charset'] ?? '';
+		if (!empty($locale_encoding)) {
+			$encoding = strtoupper($locale_encoding);
+		} elseif (
+			!empty($_SESSION['DEFAULT_CHARSET']) &&
+			preg_match("/^[-A-Za-z0-9_]+$/", $_SESSION['DEFAULT_CHARSET'])
+		) {
+			$encoding = $_SESSION['DEFAULT_CHARSET'];
+		} elseif (
+			!preg_match("/^[-A-Za-z0-9_]+$/", $this->options['site_encoding'])
+		) {
+			$encoding = $this->options['site_encoding'];
+		} else {
+			$encoding = '';
+		}
+		// check domain
+		$domain = $this->options['site_domain'];
+		if (
+			!preg_match("/^\w+$/", $this->options['site_domain'])
+		) {
+			$domain = '';
+		}
+		$path = $this->options['locale_path'];
+		if (!is_dir($path)) {
+			$path = '';
+		}
+		// domain and path are a must set from class options
 		$this->locale = [
 			'locale' => $locale,
-			'domain' => $this->options['site_domain'],
-			'path' => $this->options['locale_path'],
+			'domain' => $domain,
+			'encoding' => $encoding,
+			'path' => $path,
 		];
-		$this->l = new \CoreLibs\Language\L10n(
-			$this->locale['locale'],
-			$this->locale['domain'],
-			$this->locale['path']
-		);
 	}
 
 	/**
@@ -1824,6 +1870,12 @@ EOM;
 		$this->loginLogoutUser();
 		// ** LANGUAGE SET AFTER LOGIN **
 		$this->loginSetLocale();
+		// load translator
+		$this->l = new \CoreLibs\Language\L10n(
+			$this->locale['locale'],
+			$this->locale['domain'],
+			$this->locale['path']
+		);
 		// if the password change flag is okay, run the password change method
 		if ($this->password_change) {
 			$this->loginPasswordChange();
@@ -2395,6 +2447,22 @@ EOM;
 		string|int $data_key
 	): bool|string {
 		return $this->loginGetEditAccessData($edit_access_id, $data_key);
+	}
+
+	/**
+	 * Return locale settings with
+	 * locale
+	 * domain
+	 * encoding
+	 * path
+	 *
+	 * empty string if not set
+	 *
+	 * @return array<string,string> Locale settings
+	 */
+	public function loginGetLocale(): array
+	{
+		return $this->locale;
 	}
 }
 

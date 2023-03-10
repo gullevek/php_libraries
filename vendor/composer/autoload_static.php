@@ -15,8 +15,8 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
         '76cd0796156622033397994f25b0d8fc' => __DIR__ . '/..' . '/amphp/amp/lib/Internal/functions.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
-        '6cd5651c4fef5ed6b63e8d8b8ffbf3cc' => __DIR__ . '/..' . '/amphp/byte-stream/lib/functions.php',
         '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
+        '6cd5651c4fef5ed6b63e8d8b8ffbf3cc' => __DIR__ . '/..' . '/amphp/byte-stream/lib/functions.php',
         '2b9d0f43f9552984cfa82fee95491826' => __DIR__ . '/..' . '/sabre/event/lib/coroutine.php',
         'd81bab31d3feb45bfe2f283ea3c8fdf7' => __DIR__ . '/..' . '/sabre/event/lib/Loop/functions.php',
         'a1cce3d26cc15c00fcd0b3354bd72c88' => __DIR__ . '/..' . '/sabre/event/lib/Promise/functions.php',
@@ -64,6 +64,7 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
             'Phan\\' => 5,
             'PackageVersions\\' => 16,
             'PHPStan\\ExtensionInstaller\\' => 27,
+            'PHPStan\\' => 8,
         ),
         'M' => 
         array (
@@ -181,6 +182,10 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
         'PHPStan\\ExtensionInstaller\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpstan/extension-installer/src',
+        ),
+        'PHPStan\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpstan/phpstan-deprecation-rules/src',
         ),
         'Microsoft\\PhpParser\\' => 
         array (

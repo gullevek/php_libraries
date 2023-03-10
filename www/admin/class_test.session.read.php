@@ -7,6 +7,8 @@ $DEBUG_ALL = true;
 $PRINT_ALL = true;
 $DB_DEBUG = true;
 
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+
 /**
  * Undocumented function
  *

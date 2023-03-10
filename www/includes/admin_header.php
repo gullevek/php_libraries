@@ -74,20 +74,35 @@ if (
 // db config with logger
 $db = new \CoreLibs\DB\IO(DB_CONFIG, $log);
 // login & page access check
-$login = new \CoreLibs\ACL\Login($db, $log, $session);
+$login = new \CoreLibs\ACL\Login(
+	$db,
+	$log,
+	$session,
+	[
+		'auto_login' => true,
+		'default_acl_level' => DEFAULT_ACL_LEVEL,
+		'logout_target' => '',
+		'site_locale' => SITE_LOCALE,
+		'site_domain' => SITE_DOMAIN,
+		'site_encoding' => SITE_ENCODING,
+		'locale_path' => BASE . INCLUDES . LOCALE,
+	]
+);
 // lang, path, domain
 // pre auto detect language after login
-$locale = \CoreLibs\Language\GetLocale::setLocale();
+$locale = $login->loginGetLocale();
 // set lang and pass to smarty/backend
 $l10n = new \CoreLibs\Language\L10n(
 	$locale['locale'],
 	$locale['domain'],
 	$locale['path'],
+	$locale['encoding']
 );
+
 // create smarty object
-$smarty = new \CoreLibs\Template\SmartyExtend($l10n, $locale);
+$smarty = new \CoreLibs\Template\SmartyExtend($l10n, CACHE_ID, COMPILE_ID);
 // create new Backend class with db and loger attached
-$cms = new \CoreLibs\Admin\Backend($db, $log, $session, $l10n, $locale);
+$cms = new \CoreLibs\Admin\Backend($db, $log, $session, $l10n, DEFAULT_ACL_LEVEL);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db info

@@ -11,6 +11,8 @@ $DEBUG_ALL = true;
 $PRINT_ALL = true;
 $DB_DEBUG = true;
 
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+
 ob_start();
 
 // basic class test file
@@ -63,22 +65,16 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL,
 	'print_all' => $PRINT_ALL,
 ]);
-$locale = CoreLibs\Language\GetLocale::setLocale(
-	SITE_LOCALE,
-	SITE_DOMAIN,
-	SITE_ENCODING,
-	BASE . INCLUDES . LOCALE
-);
 $l10n = new CoreLibs\Language\L10n(
 	SITE_LOCALE,
 	SITE_DOMAIN,
-	BASE . INCLUDES . LOCALE
+	BASE . INCLUDES . LOCALE,
+	SITE_ENCODING
 );
 $form = new CoreLibs\Output\Form\Generate(
 	DB_CONFIG,
 	$log,
 	$l10n,
-	$locale,
 	table_arrays: $table_arrays
 );
 

@@ -11,6 +11,7 @@ $DEBUG_ALL = true;
 $PRINT_ALL = true;
 $DB_DEBUG = true;
 
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -35,17 +36,6 @@ $log = new CoreLibs\Debug\Logging([
 	'print_all' => $PRINT_ALL,
 ]);
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
-$locale = \CoreLibs\Language\GetLocale::setLocale(
-	SITE_LOCALE,
-	SITE_DOMAIN,
-	SITE_ENCODING,
-	BASE . INCLUDES . LOCALE
-);
-$l10n = new \CoreLibs\Language\L10n(
-	$locale['locale'],
-	$locale['domain'],
-	$locale['path'],
-);
 $login = new CoreLibs\ACL\Login(
 	$db,
 	$log,
@@ -53,18 +43,26 @@ $login = new CoreLibs\ACL\Login(
 	[
 		'auto_login' => true,
 		'default_acl_level' => DEFAULT_ACL_LEVEL,
-		'logout_target' => LOGOUT_TARGET,
-		'site_locale' => $locale['locale'],
-		'site_domain' => $locale['domain'],
-		'locale_path' => $locale['path'],
+		'logout_target' => '',
+		'site_locale' => SITE_LOCALE,
+		'site_domain' => SITE_DOMAIN,
+		'site_encoding' => SITE_ENCODING,
+		'locale_path' => BASE . INCLUDES . LOCALE,
 	]
 );
+$locale = $login->loginGetLocale();
+$l10n = new \CoreLibs\Language\L10n(
+	$locale['locale'],
+	$locale['domain'],
+	$locale['path'],
+	$locale['encoding'],
+);
+
 $backend = new CoreLibs\Admin\Backend(
 	$db,
 	$log,
 	$session,
 	$l10n,
-	$locale,
 	DEFAULT_ACL_LEVEL
 );
 $backend->db->dbInfo(true);

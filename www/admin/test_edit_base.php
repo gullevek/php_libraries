@@ -9,9 +9,7 @@ $DEBUG_ALL = true;
 $PRINT_ALL = true;
 $DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -31,17 +29,31 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
+	'debug_all' => $DEBUG_ALL,
 	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'print_all' => $PRINT_ALL,
 ]);
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
-$login = new CoreLibs\ACL\Login($db, $log, $session);
-$locale = \CoreLibs\Language\GetLocale::setLocale();
+$login = new CoreLibs\ACL\Login(
+	$db,
+	$log,
+	$session,
+	[
+		'auto_login' => true,
+		'default_acl_level' => DEFAULT_ACL_LEVEL,
+		'logout_target' => '',
+		'site_locale' => SITE_LOCALE,
+		'site_domain' => SITE_DOMAIN,
+		'site_encoding' => SITE_ENCODING,
+		'locale_path' => BASE . INCLUDES . LOCALE,
+	]
+);
+$locale = $login->loginGetLocale();
 $l10n = new \CoreLibs\Language\L10n(
 	$locale['locale'],
 	$locale['domain'],
 	$locale['path'],
+	$locale['encoding']
 );
 
 print "<!DOCTYPE html>";

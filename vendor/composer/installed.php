@@ -196,6 +196,15 @@
             'aliases' => array(),
             'dev_requirement' => true,
         ),
+        'phpstan/phpstan-deprecation-rules' => array(
+            'pretty_version' => '1.1.2',
+            'version' => '1.1.2.0',
+            'reference' => 'bcc1e8cdf81c3da1a2ba9188ee94cd7e2a62e865',
+            'type' => 'phpstan-extension',
+            'install_path' => __DIR__ . '/../phpstan/phpstan-deprecation-rules',
+            'aliases' => array(),
+            'dev_requirement' => true,
+        ),
         'psalm/psalm' => array(
             'dev_requirement' => true,
             'provided' => array(

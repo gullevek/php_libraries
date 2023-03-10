@@ -21,6 +21,7 @@ class GetLocale
 	 * @param  string|null $encoding override encoding
 	 * @param  string|null $path     override path
 	 * @return array<string,string>  locale, domain, encoding, path
+	 * @deprecated use GetLocale::setLocaleSession(...) instead
 	 */
 	public static function setLocale(
 		?string $locale = null,
@@ -28,6 +29,10 @@ class GetLocale
 		?string $encoding = null,
 		?string $path = null
 	): array {
+		trigger_error(
+			'Use \CoreLibs\Language\GetLocale::setLocaleSession(...) instead',
+			E_USER_DEPRECATED
+		);
 		// locale must match at least basic rules
 		if (
 			empty($locale) ||
@@ -128,6 +133,113 @@ class GetLocale
 				. (!empty($matches['country']) ? '_' . $matches['country'] : '');
 		} else {
 			$lang = 'en';
+		}
+		return [
+			'locale' => $locale,
+			'lang' => $lang,
+			'domain' => $domain,
+			'encoding' => $encoding,
+			'path' => $path,
+		];
+	}
+
+	/**
+	 * NOTE: For getting the login info via login class use ->loginGetLocale()
+	 *
+	 * Set locale from session or from override parameters
+	 * This is the prefered version to setLocale
+	 * It usese the following SESSION VARIABLES
+	 * DEFAULT_LOCALE
+	 * DEFAULT_DOMAIN
+	 * DEFAULT_CHARSET (should be set from DEFAULT_LOCALE)
+	 * LOCALE_PATH
+	 * in the return array, null set invalid information
+	 *
+	 * @param  string $locale   override locale
+	 * @param  string $domain   override domain
+	 * @param  string $encoding override encoding
+	 * @param  string $path     override path
+	 * @return array<string,string>  locale, domain, encoding, path
+	 * @return array<string,string|null> Return list of set locale information
+	 * @deprecated This version will be removed in a future version use ACL\Login->loginGetLocale() instead
+	 */
+	public static function setLocaleFromSession(
+		string $locale,
+		string $domain,
+		string $encoding,
+		string $path
+	): array {
+		// locale must match at least basic rules
+		if (
+			!empty($_SESSION['DEFAULT_LOCALE']) &&
+			preg_match("/^[-A-Za-z0-9_.@]+$/", $_SESSION['DEFAULT_LOCALE'])
+		) {
+			// parse from session (logged in)
+			$locale = $_SESSION['DEFAULT_LOCALE'];
+		} elseif (
+			empty($locale) ||
+			!preg_match("/^[-A-Za-z0-9_.@]+$/", $locale)
+		) {
+			$locale = null;
+		}
+		// if domain is set, must be alphanumeric, if not unset
+		if (
+			!empty($_SESSION['DEFAULT_DOMAIN']) &&
+			preg_match("/^\w+$/", $_SESSION['DEFAULT_DOMAIN'])
+		) {
+			$domain = $_SESSION['DEFAULT_DOMAIN'];
+		} elseif (
+			empty($domain) ||
+			!preg_match("/^\w+$/", $domain)
+		) {
+			$domain = null;
+		}
+		// check that override encoding matches locale encoding
+		// if locale encoding is set
+		preg_match('/(?:\\.(?P<charset>[-A-Za-z0-9_]+))/', $locale ?? '', $matches);
+		$locale_encoding = $matches['charset'] ?? null;
+		if (!empty($locale_encoding)) {
+			$encoding = strtoupper($locale_encoding);
+		} elseif (
+			!empty($_SESSION['DEFAULT_CHARSET']) &&
+			preg_match("/^[-A-Za-z0-9_]+$/", $_SESSION['DEFAULT_CHARSET'])
+		) {
+			$encoding = $_SESSION['DEFAULT_CHARSET'];
+		} elseif (
+			empty($encoding) ||
+			// not valid encoding
+			!preg_match("/^[-A-Za-z0-9_]+$/", $encoding)
+		) {
+			$encoding = null;
+		}
+		// path checks if set, if not valid path unset to default BASE path
+		if (
+			!empty($_SESSION['LOCALE_PATH']) &&
+			is_dir($_SESSION['LOCALE_PATH'])
+		) {
+			$path = $_SESSION['LOCALE_PATH'];
+		} elseif (
+			empty($path) ||
+			!is_dir($path)
+		) {
+			$path = null;
+		}
+		// extract lang & country from locale string, else set to en
+		if (
+			preg_match(
+				// lang
+				'/^(?P<lang>[a-z]{2,3})'
+				// country code
+				. '(?:_(?P<country>[A-Z]{2}))?/',
+				$locale ?? '',
+				$matches
+			)
+		) {
+			$lang = ($matches['lang'] ?? 'en')
+				// add country only if set
+				. (!empty($matches['country']) ? '_' . $matches['country'] : '');
+		} else {
+			$lang = null;
 		}
 		return [
 			'locale' => $locale,

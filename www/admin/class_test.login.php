@@ -11,6 +11,8 @@ $DEBUG_ALL = true;
 $PRINT_ALL = true;
 $DB_DEBUG = true;
 
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+
 ob_start();
 
 // basic class test file
@@ -40,9 +42,10 @@ $login = new CoreLibs\ACL\Login(
 	[
 		'auto_login' => false,
 		'default_acl_level' => DEFAULT_ACL_LEVEL,
-		'logout_target' => LOGOUT_TARGET,
+		'logout_target' => '',
 		'site_locale' => SITE_LOCALE,
 		'site_domain' => SITE_DOMAIN,
+		'site_encoding' => SITE_ENCODING,
 		'locale_path' => BASE . INCLUDES . LOCALE,
 	]
 );
@@ -63,6 +66,7 @@ echo "MIN ACCESS PAGE: " . ($login->loginCheckAccessPage('admin') ? 'OK' : 'BAD'
 
 echo "ACL: " . \CoreLibs\Debug\Support::printAr($login->loginGetAcl()) . "<br>";
 echo "ACL (MIN): " . \CoreLibs\Debug\Support::printAr($login->loginGetAcl()['min'] ?? []) . "<br>";
+echo "LOCALE: " . \CoreLibs\Debug\Support::printAr($login->loginGetLocale()) . "<br>";
 
 // error message
 print $log->printErrorMsg();

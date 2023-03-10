@@ -11,6 +11,8 @@ $DEBUG_ALL = true;
 $PRINT_ALL = true;
 $DB_DEBUG = true;
 
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+
 ob_start();
 
 // basic class test file
@@ -37,18 +39,17 @@ $log = new CoreLibs\Debug\Logging([
 ]);
 // db config with logger
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
-$locale = \CoreLibs\Language\GetLocale::setLocale();
 $l10n = new \CoreLibs\Language\L10n(
-	$locale['locale'],
-	$locale['domain'],
-	$locale['path'],
+	SITE_LOCALE,
+	SITE_DOMAIN,
+	BASE . INCLUDES . LOCALE,
+	SITE_ENCODING
 );
 $backend = new CoreLibs\Admin\Backend(
 	$db,
 	$log,
 	$session,
 	$l10n,
-	$locale,
 	DEFAULT_ACL_LEVEL
 );
 use CoreLibs\Debug\Support;

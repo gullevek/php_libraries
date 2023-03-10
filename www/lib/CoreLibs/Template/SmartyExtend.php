@@ -160,13 +160,11 @@ class SmartyExtend extends \Smarty
 	 * also registers the getvar caller plugin
 	 *
 	 * @param \CoreLibs\Language\L10n $l10n l10n language class
-	 * @param array<string,string>    $locale locale data read from setLocale
 	 * @param string|null             $cache_id
 	 * @param string|null             $compile_id
 	 */
 	public function __construct(
 		\CoreLibs\Language\L10n $l10n,
-		array $locale,
 		?string $cache_id = null,
 		?string $compile_id = null
 	) {
@@ -192,13 +190,12 @@ class SmartyExtend extends \Smarty
 		// iinit lang
 		$this->l10n = $l10n;
 		// parse and read, legacy stuff
+		$locale = $this->l10n->getLocaleAsArray();
 		$this->encoding = $locale['encoding'];
 		$this->lang = $locale['lang'];
-		// get first part from lang
-		$this->lang_short = explode('_', $locale['lang'])[0];
-		$this->domain = $this->l10n->getDomain();
-		$this->locale_set = $this->l10n->getLocaleSet();
-		$this->lang_dir = $this->l10n->getBaseLocalePath();
+		$this->lang_short = $locale['lang_short'];
+		$this->domain = $locale['domain'];
+		$this->lang_dir = $locale['path'];
 
 		// opt load functions so we can use legacy init for smarty run perhaps
 		\CoreLibs\Language\L10n::loadFunctions();

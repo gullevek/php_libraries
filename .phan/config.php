@@ -96,8 +96,6 @@ return [
 	"exclude_analysis_directory_list" => [
 		'www/vendor',
 		'www/tests',
-		'www/lib/Smarty',
-		'www/lib/smarty-4.3.0',
 		'www/templates_c',
 		'www/log',
 		'www/tmp',
@@ -118,10 +116,6 @@ return [
 		// ignore the old qq tests
 		'www/admin/qq_file_upload_front.php',
 		'www/admin/qq_file_upload_ajax.php',
-		// symlink ignore
-		'www/lib/smarty-4.3.0/libs/Smarty.class.php',
-		// legacy edit base (until removal)
-		'www/includes/edit_base.LEGACY.php'
 	],
 
 	// what not to show as problem
