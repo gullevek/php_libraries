@@ -77,8 +77,8 @@ $edit_base = new CoreLibs\Admin\EditBase(
 	DB_CONFIG,
 	$log,
 	$l10n,
+	$login,
 	[
-		'default_acl_level' => DEFAULT_ACL_LEVEL,
 		'cache_id' => CACHE_ID,
 		'compile_id' => COMPILE_ID
 	]

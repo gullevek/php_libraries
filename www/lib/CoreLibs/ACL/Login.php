@@ -2464,6 +2464,37 @@ EOM;
 	{
 		return $this->locale;
 	}
+
+	/**
+	 * return header color or null for not set
+	 *
+	 * @return string|null Header color in RGB hex with leading sharp
+	 */
+	public function loginGetHeaderColor(): ?string
+	{
+		return $_SESSION['HEADER_COLOR'] ?? null;
+	}
+
+	/**
+	 * Return the current loaded list of pages the user can access
+	 *
+	 * @return array<mixed>
+	 */
+	public function loginGetPages(): array
+	{
+
+		return $_SESSION['PAGES'] ?? [];
+	}
+
+	/**
+	 * Get the current set EUID (edit user id)
+	 *
+	 * @return string EUID as string
+	 */
+	public function loginGetEuid(): string
+	{
+		return $this->euid;
+	}
 }
 
 // __END__

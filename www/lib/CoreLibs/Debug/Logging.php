@@ -251,22 +251,22 @@ class Logging
 			'debug',
 			$this->options['debug_all'] ??
 				// for user login, should be handled outside like globals
-				$_SESSION['DEBUG_ALL'] ??
-				$GLOBALS['DEBUG_ALL'] ??
+				$_SESSION['DEBUG_ALL'] ?? // DEPRECATED
+				$GLOBALS['DEBUG_ALL'] ?? // DEPRECATED
 				false
 		);
 		$this->setLogLevelAll(
 			'print',
 			$this->options['print_all'] ??
 				// for user login, should be handled outside like globals
-				$_SESSION['DEBUG_ALL'] ??
-				$GLOBALS['PRINT_ALL'] ??
+				$_SESSION['DEBUG_ALL'] ?? // DEPRECATED
+				$GLOBALS['PRINT_ALL'] ?? // DEPRECATED
 				false
 		);
 		$this->setLogLevelAll(
 			'echo',
 			$this->options['echo_all'] ??
-				$GLOBALS['ECHO_ALL'] ??
+				$GLOBALS['ECHO_ALL'] ?? // DEPRECATED
 				false
 		);
 
@@ -274,32 +274,32 @@ class Logging
 		// add file date is default on
 		$this->setGetLogPrintFileDate(
 			$this->options['print_file_date'] ??
-				$GLOBALS['LOG_PRINT_FILE_DATE'] ??
+				$GLOBALS['LOG_PRINT_FILE_DATE'] ?? // DEPRECATED
 				true
 		);
 		// all other logging file name flags are off
 		$this->setLogPer(
 			'level',
 			$this->options['per_level'] ??
-				$GLOBALS['LOG_PER_LEVEL'] ??
+				$GLOBALS['LOG_PER_LEVEL'] ?? // DEPRECATED
 				false
 		);
 		$this->setLogPer(
 			'class',
 			$this->options['per_class'] ??
-				$GLOBALS['LOG_PER_CLASS'] ??
+				$GLOBALS['LOG_PER_CLASS'] ?? // DEPRECATED
 				false
 		);
 		$this->setLogPer(
 			'page',
 			$this->options['per_page'] ??
-				$GLOBALS['LOG_PER_PAGE'] ??
+				$GLOBALS['LOG_PER_PAGE'] ?? // DEPRECATED
 				false
 		);
 		$this->setLogPer(
 			'run',
 			$this->options['per_run'] ??
-				$GLOBALS['LOG_PER_RUN'] ??
+				$GLOBALS['LOG_PER_RUN'] ?? // DEPRECATED
 				false
 		);
 		// set log per date

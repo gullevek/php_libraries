@@ -7,6 +7,14 @@ namespace tests;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
+/*
+Not yet covered tests:
+- loginGetLocale
+- loginGetHeaderColor
+- loginGetPages
+- loginGetEuid
+*/
+
 /**
  * Test class for ACL\Login
  * @coversDefaultClass \CoreLibs\ACL\Login

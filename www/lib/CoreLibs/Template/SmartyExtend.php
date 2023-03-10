@@ -563,6 +563,7 @@ class SmartyExtend extends \Smarty
 	 * @param  string|null $set_page_width       PAGE_WIDTH
 	 * @param  string|null $set_stylesheet       STYLESHEET
 	 * @param  string|null $set_javascript       JAVASCRIPT
+	 * @param  string|null $set_user_name        _SESSION['USER_NAME']
 	 * @return void
 	 */
 	private function setSmartyVars(
@@ -579,7 +580,8 @@ class SmartyExtend extends \Smarty
 		?string $set_admin_javascript = null,
 		?string $set_page_width = null,
 		?string $set_stylesheet = null,
-		?string $set_javascript = null
+		?string $set_javascript = null,
+		?string $set_user_name = null,
 	): void {
 		// trigger deprecation
 		if (
@@ -594,7 +596,8 @@ class SmartyExtend extends \Smarty
 				$admin_call === true && (
 					$set_admin_stylesheet === null ||
 					$set_admin_javascript === null ||
-					$set_page_width === null
+					$set_page_width === null ||
+					$set_user_name === null
 				)
 			) ||
 			(
@@ -623,6 +626,7 @@ class SmartyExtend extends \Smarty
 		$set_page_width = $set_page_width ?? PAGE_WIDTH;
 		$set_stylesheet = $set_stylesheet ?? STYLESHEET;
 		$set_javascript = $set_javascript ?? JAVASCRIPT;
+		$set_user_name = $set_user_name ?? $_SESSION['USER_NAME'] ?? '';
 		// depreacte call globals cms on null 4mcs
 		if (
 			$cms === null &&
@@ -731,7 +735,7 @@ class SmartyExtend extends \Smarty
 		$this->DATA['JS_FLATPICKR'] = $this->JS_FLATPICKR;
 		$this->DATA['JS_FILE_UPLOADER'] = $this->JS_FILE_UPLOADER;
 		// user name
-		$this->DATA['USER_NAME'] = !empty($_SESSION['USER_NAME']) ? $_SESSION['USER_NAME'] : '';
+		$this->DATA['USER_NAME'] = $set_user_name;
 		// the template part to include into the body
 		$this->DATA['TEMPLATE_NAME'] = $this->TEMPLATE_NAME;
 		$this->DATA['CONTENT_INCLUDE'] = $this->CONTENT_INCLUDE;

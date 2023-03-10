@@ -39,7 +39,7 @@ function pop(theURL, winName, features) {
 		<form method="post">
 		<tr>
 		<td bgcolor="{$HEADER_COLOR}" class="normal">
-			Hello <b>{$USER_NAME|upper}</b> [{$EUID}] from the group <b>{$GROUP_NAME}</b> with Access Level <b>{$GROUP_LEVEL}</b>
+			Hello <b>{$USER_NAME|upper}</b> [{$EUID}] from the group <b>{$GROUP_NAME}</b> with Access Level <b>{$ACCESS_LEVEL}</b>
 		</td>
 		<td bgcolor="{$HEADER_COLOR}" class="normal" align="right">
 			<input type="submit" name="login_logout" value="Logout">

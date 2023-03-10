@@ -75,6 +75,10 @@ $form = new CoreLibs\Output\Form\Generate(
 	DB_CONFIG,
 	$log,
 	$l10n,
+	[
+		'base' => 10,
+		'admin' => 0
+	],
 	table_arrays: $table_arrays
 );
 
