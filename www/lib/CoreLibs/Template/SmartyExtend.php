@@ -452,96 +452,80 @@ class SmartyExtend extends \Smarty
 	 * wrapper call for setSmartyVars
 	 * this is for frontend type and will not set any only admin needed variables
 	 *
-	 * @param  string|null $compile_dir          BASE . TEMPLATES_C
-	 * @param  string|null $cache_dir            BASE . CACHE
-	 * @param  string|null $set_js               JS
-	 * @param  string|null $set_css              CSS
-	 * @param  string|null $set_font             FONT
-	 * @param  string|null $set_default_encoding DEFAULT_ENCODING
-	 * @param  string|null $set_g_title          G_TITLE
-	 * @param  string|null $set_stylesheet       STYLESHEET
-	 * @param  string|null $set_javascript       JAVASCRIPT
+	 * @param  array<string,string> $options list with the following value:
+	 *                              compile_dir          :BASE . TEMPLATES_C
+	 *                              cache_dir            :BASE . CACHE
+	 *                              js               :JS
+	 *                              css              :CSS
+	 *                              font             :FONT
+	 *                              default_encoding :DEFAULT_ENCODING
+	 *                              g_title          :G_TITLE
+	 *                              stylesheet       :STYLESHEET
+	 *                              javascript       :JAVASCRIPT
 	 * @param  \CoreLibs\Admin\Backend|null $cms Optinal Admin Backend for
 	 *                                           smarty variables merge
 	 * @return void
 	 */
 	public function setSmartyVarsFrontend(
-		?string $compile_dir = null,
-		?string $cache_dir = null,
-		?string $set_js = null,
-		?string $set_css = null,
-		?string $set_font = null,
-		?string $set_default_encoding = null,
-		?string $set_g_title = null,
-		?string $set_stylesheet = null,
-		?string $set_javascript = null,
-		?\CoreLibs\Admin\Backend $cms = null
+		array $options,
+		?\CoreLibs\Admin\Backend $cms
 	): void {
 		$this->setSmartyVars(
 			false,
 			$cms,
-			$compile_dir,
-			$cache_dir,
-			$set_js,
-			$set_css,
-			$set_font,
-			$set_default_encoding,
-			$set_g_title,
+			$options['compile_dir'] ?? null,
+			$options['cache_dir'] ?? null,
+			$options['js'] ?? null,
+			$options['css'] ?? null,
+			$options['font'] ?? null,
+			$options['default_encoding'] ?? null,
+			$options['g_title'] ?? null,
 			null,
 			null,
 			null,
 			null,
-			$set_stylesheet,
-			$set_javascript
+			$options['stylesheet'] ?? null,
+			$options['javascript'] ?? null
 		);
 	}
 
 	/**
 	 * wrapper call for setSmartyVars
 	 * this is only for admin interface and will set additional variables
-	 * @param  string|null $compile_dir          BASE . TEMPLATES_C
-	 * @param  string|null $cache_dir            BASE . CACHE
-	 * @param  string|null $set_js               JS
-	 * @param  string|null $set_css              CSS
-	 * @param  string|null $set_font             FONT
-	 * @param  string|null $set_default_encoding DEFAULT_ENCODING
-	 * @param  string|null $set_g_title          G_TITLE
-	 * @param  string|null $set_admin_stylesheet ADMIN_STYLESHEET
-	 * @param  string|null $set_admin_javascript ADMIN_JAVASCRIPT
-	 * @param  string|null $set_page_width       PAGE_WIDTH
-	 * @param  string|null $set_user_name        _SESSION['USER_NAME']
+	 * @param  array<string,string> $options list with the following value:
+	 *                              compile_dir          :BASE . TEMPLATES_C
+	 *                              cache_dir            :BASE . CACHE
+	 *                              js               :JS
+	 *                              css              :CSS
+	 *                              font             :FONT
+	 *                              default_encoding :DEFAULT_ENCODING
+	 *                              g_title          :G_TITLE
+	 *                              admin_stylesheet :ADMIN_STYLESHEET
+	 *                              admin_javascript :ADMIN_JAVASCRIPT
+	 *                              page_width       :PAGE_WIDTH
+	 *                              user_name        :_SESSION['USER_NAME']
 	 * @param  \CoreLibs\Admin\Backend|null $cms Optinal Admin Backend for
 	 *                                           smarty variables merge
 	 * @return void
 	 */
 	public function setSmartyVarsAdmin(
-		?string $compile_dir = null,
-		?string $cache_dir = null,
-		?string $set_js = null,
-		?string $set_css = null,
-		?string $set_font = null,
-		?string $set_default_encoding = null,
-		?string $set_g_title = null,
-		?string $set_admin_stylesheet = null,
-		?string $set_admin_javascript = null,
-		?string $set_page_width = null,
-		?string $set_user_name = null,
+		array $options,
 		?\CoreLibs\Admin\Backend $cms = null
 	): void {
 		$this->setSmartyVars(
 			true,
 			$cms,
-			$compile_dir,
-			$cache_dir,
-			$set_js,
-			$set_css,
-			$set_font,
-			$set_g_title,
-			$set_default_encoding,
-			$set_admin_stylesheet,
-			$set_admin_javascript,
-			$set_page_width,
-			$set_user_name,
+			$options['compile_dir'] ?? null,
+			$options['cache_dir'] ?? null,
+			$options['js'] ?? null,
+			$options['css'] ?? null,
+			$options['font'] ?? null,
+			$options['g_title'] ?? null,
+			$options['default_encoding'] ?? null,
+			$options['admin_stylesheet'] ?? null,
+			$options['admin_javascript'] ?? null,
+			$options['page_width'] ?? null,
+			$options['user_name'] ?? null,
 			null,
 			null
 		);
