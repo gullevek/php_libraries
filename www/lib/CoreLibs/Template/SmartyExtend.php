@@ -549,9 +549,9 @@ class SmartyExtend extends \Smarty
 	 * @param  string|null $set_admin_stylesheet ADMIN_STYLESHEET
 	 * @param  string|null $set_admin_javascript ADMIN_JAVASCRIPT
 	 * @param  string|null $set_page_width       PAGE_WIDTH
+	 * @param  string|null $set_user_name        _SESSION['USER_NAME']
 	 * @param  string|null $set_stylesheet       STYLESHEET
 	 * @param  string|null $set_javascript       JAVASCRIPT
-	 * @param  string|null $set_user_name        _SESSION['USER_NAME']
 	 * @return void
 	 */
 	private function setSmartyVars(
