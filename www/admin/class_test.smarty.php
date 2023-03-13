@@ -135,17 +135,19 @@ $smarty->DATA['checkbox_test_pos_selected'] = ['0', '-1'];
 
 
 $smarty->setSmartyVarsAdmin(
-	BASE . TEMPLATES_C,
-	BASE . CACHE,
-	CSS,
-	FONT,
-	JS,
-	DEFAULT_ENCODING,
-	G_TITLE,
-	ADMIN_STYLESHEET,
-	ADMIN_JAVASCRIPT,
-	PAGE_WIDTH,
-	$_SESSION['USER_NAME'] ?? ''
+	[
+		'compile_dir' => BASE . TEMPLATES_C,
+		'cache_dir' => BASE . CACHE,
+		'js' => JS,
+		'css' => CSS,
+		'font' => FONT,
+		'g_title' => G_TITLE,
+		'default_encoding' => DEFAULT_ENCODING,
+		'admin_stylesheet' => ADMIN_STYLESHEET,
+		'admin_javascript' => ADMIN_JAVASCRIPT,
+		'page_width' => PAGE_WIDTH,
+		'user_name' => $_SESSION['USER_NAME'] ?? ''
+	]
 );
 
 // error message
