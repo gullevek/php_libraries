@@ -453,8 +453,8 @@ class SmartyExtend extends \Smarty
 	 * this is for frontend type and will not set any only admin needed variables
 	 *
 	 * @param  array<string,string> $options list with the following value:
-	 *                              compile_dir          :BASE . TEMPLATES_C
-	 *                              cache_dir            :BASE . CACHE
+	 *                              compile_dir      :BASE . TEMPLATES_C
+	 *                              cache_dir        :BASE . CACHE
 	 *                              js               :JS
 	 *                              css              :CSS
 	 *                              font             :FONT
@@ -468,7 +468,7 @@ class SmartyExtend extends \Smarty
 	 */
 	public function setSmartyVarsFrontend(
 		array $options,
-		?\CoreLibs\Admin\Backend $cms
+		?\CoreLibs\Admin\Backend $cms = null
 	): void {
 		$this->setSmartyVars(
 			false,
@@ -493,8 +493,8 @@ class SmartyExtend extends \Smarty
 	 * wrapper call for setSmartyVars
 	 * this is only for admin interface and will set additional variables
 	 * @param  array<string,string> $options list with the following value:
-	 *                              compile_dir          :BASE . TEMPLATES_C
-	 *                              cache_dir            :BASE . CACHE
+	 *                              compile_dir      :BASE . TEMPLATES_C
+	 *                              cache_dir        :BASE . CACHE
 	 *                              js               :JS
 	 *                              css              :CSS
 	 *                              font             :FONT
