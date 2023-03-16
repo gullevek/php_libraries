@@ -276,6 +276,7 @@ print "UPDATE WITH PK " . Support::printToString($last_insert_pk)
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+$db->dbExec("INSERT INTO test_foo (test) VALUES ('STAND ALONE')");
 
 // INSERT WITH NO RETURNING
 $status = $db->dbExec("INSERT INTO test_foobar (type, integer) VALUES ('WITHOUT DATA', 456)");
@@ -294,6 +295,7 @@ print "INSERT WITH NO PRIMARY KEY WITH RETURNING STATUS: " . Support::printToStr
 
 print "</pre>";
 
+print "<b>PREPARE QUERIES</b><br>";
 // READ PREPARE
 $q_prep = "SELECT test_foo_id, test, some_bool, string_a, number_a, "
 	. "number_a_numeric, some_time "
@@ -303,13 +305,12 @@ $q_prep = "SELECT test_foo_id, test, some_bool, string_a, number_a, "
 if ($db->dbPrepare('sel_test_foo', $q_prep) === false) {
 	print "Error in sel_test_foo prepare<br>";
 } else {
-	$max_rows = 6;
 	// do not run this in dbFetchArray directly as
 	// dbFetchArray(dbExecute(...))
 	// this will end in an endless loop
-	$cursor = $db->dbExecute('sel_test_foo', []);
 	$i = 1;
-	while (($res = $db->dbFetchArray($cursor, true)) !== false) {
+	$cursor = $db->dbExecute('sel_test_foo', ['SOMETHING DIFFERENT']);
+	while (is_array($res = $db->dbFetchArray($cursor, true))) {
 		print "DB PREP EXEC FETCH ARR: " . $i . ": <pre>" . print_r($res, true) . "</pre><br>";
 		$i++;
 	}
@@ -320,6 +321,37 @@ if ($db->dbPrepare('sel_test_foo', $q_prep) === false) {
 	print "ERROR (dbPrepare on same query): "
 	. $db->dbGetLastError() . "/" . $db->dbGetLastWarning() . "/"
 	. "<pre>" . print_r($db->dbGetCombinedErrorHistory(), true) . "</pre><br>";
+}
+
+// sel test with ANY () type
+$q_prep = "SELECT test_foo_id, test, some_bool, string_a, number_a, "
+	. "number_a_numeric, some_time "
+	. "FROM test_foo "
+	. "WHERE test = ANY($1) "
+	. "ORDER BY test_foo_id DESC LIMIT 5";
+if ($db->dbPrepare('sel_test_foo_any', $q_prep) === false) {
+		print "Error in sel_test_foo_any prepare<br>";
+} else {
+	// do not run this in dbFetchArray directly as
+	// dbFetchArray(dbExecute(...))
+	// this will end in an endless loop
+	$values = [
+		'SOMETHING DIFFERENT',
+		'STAND ALONE',
+		'I DO NOT EXIST'
+	];
+	$query_value = '{'
+		. join(',', $values)
+		. '}';
+	print "Read: $query_value<br>";
+	$cursor = $db->dbExecute('sel_test_foo_any', [
+		$query_value
+	]);
+	$i = 1;
+	while (($res = $db->dbFetchArray($cursor, true)) !== false) {
+		print "DB PREP EXEC FETCH ANY ARR: " . $i . ": <pre>" . print_r($res, true) . "</pre><br>";
+		$i++;
+	}
 }
 
 echo "<hr>";
