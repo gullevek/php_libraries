@@ -196,12 +196,14 @@ foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
 }
 
 $query = <<<EOM
-INSERT INTO test_foo (
-	test
-) VALUES (
-	$1
-)
-RETURNING test
+	INSERT INTO
+		test_foo
+	(
+		test
+	) VALUES (
+		$1
+	)
+	RETURNING test
 EOM;
 $db->dbPrepare("ins_test_foo_eom", $query);
 $status = $db->dbExecute("ins_test_foo_eom", ['EOM BAR TEST ' . time()]);

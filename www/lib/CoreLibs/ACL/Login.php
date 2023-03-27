@@ -428,7 +428,7 @@ class Login
 
 	/**
 	 * Set options
-	 * Current allowed
+	 * Current allowed:
 	 * target <string>: site target
 	 * debug <bool>
 	 * auto_login <bool>: self start login process
