@@ -42,11 +42,13 @@ use Psalm\Issue\ConstantDeclarationInTrait;
 use Psalm\Issue\DuplicateClass;
 use Psalm\Issue\DuplicateConstant;
 use Psalm\Issue\DuplicateEnumCase;
+use Psalm\Issue\InvalidAttribute;
 use Psalm\Issue\InvalidDocblock;
 use Psalm\Issue\InvalidEnumBackingType;
 use Psalm\Issue\InvalidEnumCaseValue;
 use Psalm\Issue\InvalidTypeImport;
 use Psalm\Issue\MissingDocblockType;
+use Psalm\Issue\MissingPropertyType;
 use Psalm\Issue\ParseError;
 use Psalm\IssueBuffer;
 use Psalm\Storage\AttributeStorage;
@@ -256,6 +258,7 @@ class ClassLikeNodeScanner
         if ($node instanceof PhpParser\Node\Stmt\Class_) {
             $storage->abstract = $node->isAbstract();
             $storage->final = $node->isFinal();
+            $storage->readonly = $node->isReadonly();
 
             $this->codebase->classlikes->addFullyQualifiedClassName($fq_classlike_name, $this->file_path);
 
@@ -704,10 +707,10 @@ class ClassLikeNodeScanner
             $name_types = [];
             $values_types = [];
             foreach ($storage->enum_cases as $name => $enumCaseStorage) {
-                $name_types[] = new Type\Atomic\TLiteralString($name);
+                $name_types[] = Type::getAtomicStringFromLiteral($name);
                 if ($storage->enum_type !== null) {
                     if (is_string($enumCaseStorage->value)) {
-                        $values_types[] = new Type\Atomic\TLiteralString($enumCaseStorage->value);
+                        $values_types[] = Type::getAtomicStringFromLiteral($enumCaseStorage->value);
                     } elseif (is_int($enumCaseStorage->value)) {
                         $values_types[] = new Type\Atomic\TLiteralInt($enumCaseStorage->value);
                     }
@@ -763,6 +766,14 @@ class ClassLikeNodeScanner
 
                 if ($attribute->fq_class_name === 'Psalm\\ExternalMutationFree') {
                     $storage->external_mutation_free = true;
+                }
+
+                if ($attribute->fq_class_name === 'AllowDynamicProperties' && $storage->readonly) {
+                    IssueBuffer::maybeAdd(new InvalidAttribute(
+                        'Readonly classes cannot have dynamic properties',
+                        new CodeLocation($this->file_scanner, $attr, null, true),
+                    ));
+                    continue;
                 }
 
                 $storage->attributes[] = $attribute;
@@ -1586,9 +1597,21 @@ class ClassLikeNodeScanner
             if (count($property_storage->internal) === 0 && $var_comment && $var_comment->internal) {
                 $property_storage->internal = [NamespaceAnalyzer::getNameSpaceRoot($fq_classlike_name)];
             }
-            $property_storage->readonly = $stmt->isReadonly() || ($var_comment && $var_comment->readonly);
+            $property_storage->readonly = $storage->readonly
+                || $stmt->isReadonly()
+                || ($var_comment && $var_comment->readonly);
             $property_storage->allow_private_mutation = $var_comment ? $var_comment->allow_private_mutation : false;
             $property_storage->description = $var_comment ? $var_comment->description : null;
+
+            if (!$signature_type && $storage->readonly) {
+                IssueBuffer::maybeAdd(
+                    new MissingPropertyType(
+                        'Properties of readonly classes must have a type',
+                        new CodeLocation($this->file_scanner, $stmt, null, true),
+                        $fq_classlike_name . '::$' . $property->name->name,
+                    ),
+                );
+            }
 
             if (!$signature_type && !$doc_var_group_type) {
                 if ($property->default) {
@@ -1883,8 +1906,8 @@ class ClassLikeNodeScanner
 
             $type_string = str_replace("\n", '', implode('', $var_line_parts));
 
-            $type_string = preg_replace('/>[^>^\}]*$/', '>', $type_string, 1);
-            $type_string = preg_replace('/\}[^>^\}]*$/', '}', $type_string, 1);
+            // Strip any remaining characters after the last grouping character >, } or )
+            $type_string = preg_replace('/(?<=[>})])[^>})]*$/', '', $type_string, 1);
 
             try {
                 $type_tokens = TypeTokenizer::getFullyQualifiedTokens(

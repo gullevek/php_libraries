@@ -62,7 +62,7 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
             'Psalm\\' => 6,
             'PhpParser\\' => 10,
             'Phan\\' => 5,
-            'PackageVersions\\' => 16,
+            'PHPStan\\PhpDocParser\\' => 21,
             'PHPStan\\ExtensionInstaller\\' => 27,
             'PHPStan\\' => 8,
         ),
@@ -77,6 +77,10 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
         'F' => 
         array (
             'Fidry\\CpuCoreCounter\\' => 21,
+        ),
+        'D' => 
+        array (
+            'Doctrine\\Deprecations\\' => 22,
         ),
         'C' => 
         array (
@@ -175,9 +179,9 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
         array (
             0 => __DIR__ . '/..' . '/phan/phan/src/Phan',
         ),
-        'PackageVersions\\' => 
+        'PHPStan\\PhpDocParser\\' => 
         array (
-            0 => __DIR__ . '/..' . '/composer/package-versions-deprecated/src/PackageVersions',
+            0 => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src',
         ),
         'PHPStan\\ExtensionInstaller\\' => 
         array (
@@ -198,6 +202,10 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
         'Fidry\\CpuCoreCounter\\' => 
         array (
             0 => __DIR__ . '/..' . '/fidry/cpu-core-counter/src',
+        ),
+        'Doctrine\\Deprecations\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/doctrine/deprecations/lib/Doctrine/Deprecations',
         ),
         'Composer\\XdebugHandler\\' => 
         array (
