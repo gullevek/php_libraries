@@ -892,7 +892,9 @@ class IO
 		for ($i = 0, $iMax = count($keys); $i < $iMax; $i++) {
 			$keys[$i] = '$' . ($keys[$i] + 1);
 			// prefix data set with parameter pos
-			$data[$i] = $keys[$i] . ':' . $data[$i];
+			$data[$i] = $keys[$i] . ':' . ($data[$i] === null ?
+				'"NULL"' : (string)$data[$i]
+			);
 		}
 		// simply replace the $1, $2, ... with the actual data and return it
 		return str_replace(
