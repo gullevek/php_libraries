@@ -57,7 +57,7 @@ echo "DB_CONFIG_SET constant: <pre>" . print_r(DB_CONFIG, true) . "</pre><br>";
 print "DB client encoding: " . $db->dbGetEncoding() . "<br>";
 print "DB search path: " . $db->dbGetSchema() . "<br>";
 
-$to_db_version = '13.6';
+$to_db_version = '15.2';
 print "VERSION DB: " . $db->dbVersion() . "<br>";
 print "VERSION LONG DB: " . $db->dbVersionInfo('server', false) . "<br>";
 print "VERSION NUMERIC DB: " . $db->dbVersionNumeric() . "<br>";
@@ -167,15 +167,28 @@ print "DIRECT INSERT PREVIOUS INSERTED: "
 	. print_r($db->dbReturnRow("SELECT test_foo_id, test FROM test_foo "
 		. "WHERE test_foo_id = " . (int)$last_insert_pk), true) . "<br>";
 $__last_insert_pk = (int)$last_insert_pk;
-$q = <<<EOM
+$query = <<<EOM
+SELECT
+	test_foo_id, test
+FROM test_foo
+WHERE test_foo_id = $__last_insert_pk;
+EOM;
+print "EOM READ OF PREVIOUS INSERTED: " . print_r($db->dbReturnRow($query), true) . "<br>";
+print "LAST ERROR: " . $db->dbGetLastError() . "<br>";
+print "<br>";
+$query = <<<EOM
 	SELECT
 		test_foo_id, test
 	FROM test_foo
-	WHERE test_foo_id = $__last_insert_pk;
+	WHERE test_foo_id = $1;
 EOM;
-print "EOM READ OF PREVIOUS INSERTED: " . print_r($db->dbReturnRow($q), true) . "<br>";
-print "LAST ERROR: " . $db->dbGetLastError() . "<br>";
-print "<br>";
+print "RETURN ROW PARAMS: " . print_r(
+	$db->dbReturnRowParams(
+		$query,
+		[$__last_insert_pk]
+	),
+	true
+) . "<br>";
 
 // PREPARED INSERT
 $db->dbPrepare("ins_test_foo", "INSERT INTO test_foo (test) VALUES ($1) RETURNING test");
@@ -196,14 +209,14 @@ foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
 }
 
 $query = <<<EOM
-	INSERT INTO
-		test_foo
-	(
-		test
-	) VALUES (
-		$1
-	)
-	RETURNING test
+INSERT INTO
+	test_foo
+(
+	test
+) VALUES (
+	$1
+)
+RETURNING test
 EOM;
 $db->dbPrepare("ins_test_foo_eom", $query);
 $status = $db->dbExecute("ins_test_foo_eom", ['EOM BAR TEST ' . time()]);
@@ -212,6 +225,55 @@ print "EOM STRING PREPARE INSERT[ins_test_foo_eom] STATUS: " . Support::printToS
 	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+
+$status = $db->dbExecParams($query, ['EOM BAR TEST PARAMS ' . time()]);
+print "EOM STRING EXEC PARAMS INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
+	. " |<br>"
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+
+$query = <<<EOM
+INSERT INTO
+	test_foo
+(
+	test, some_bool, string_a, number_a, number_a_numeric, some_time
+) VALUES (
+	$1, $2, $3, $4, $5, $6
+)
+RETURNING test
+EOM;
+$status = $db->dbExecParams(
+	$query,
+	[
+		'EOM BAR TEST PARAMS MULTI ' . time(),
+		true,
+		'string a',
+		1,
+		1.5,
+		'1h'
+	]
+);
+$__last_insert_id = $db->dbGetInsertPK();
+print "EOM STRING EXEC PARAMS MULTI INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
+	. " |<br>"
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+$query = <<<EOM
+SELECT
+	test, some_bool, string_a, number_a, number_a_numeric, some_time
+FROM
+	test_foo
+WHERE
+	test_foo_id = $1
+EOM;
+print "EOM STRING EXEC RETURN TEST: " . print_r(
+	$db->dbReturnRowParams(
+		$query,
+		[$__last_insert_id]
+	)
+) . "<br>";
 
 // returning test with multiple entries
 // $status = $db->db_exec(
@@ -372,6 +434,21 @@ while (is_array($res = $db->dbReturn($q))) {
 	print "ROW: <pre>" . print_r($res, true) . "</pre><br>";
 }
 echo "<hr>";
+print "DB RETURN PARAMS<br>";
+$q = <<<EOM
+SELECT test_foo_id, test, some_bool, string_a, number_a,
+-- comment
+number_a_numeric, some_time
+FROM test_foo
+WHERE test = $1
+ORDER BY test_foo_id DESC LIMIT 5
+EOM;
+while (
+	is_array($res = $db->dbReturnParams($q, ['SOMETHING DIFFERENT']))
+) {
+	print "ROW: <pre>" . print_r($res, true) . "</pre><br>";
+}
+echo "<hr>";
 
 // NOTE: try to replacate connection still exists if script is run a second time
 // open pg bouncer connection
@@ -452,7 +529,18 @@ print "Wrote to DB tabel $table with data " . print_r($data, true) . " and got p
 // return Array Test
 $query = "SELECT type, sdate, integer FROM foobar";
 $data = $db->dbReturnArray($query, true);
-print "Rows: " . $db->dbGetNumRows() . ", Full foobar list: <br><pre>" . print_r($data, true) . "</pre><br>";
+print "RETURN ARRAY: " . $db->dbGetNumRows() . ", Full foobar list: <br><pre>" . print_r($data, true) . "</pre><br>";
+$query = <<<EOM
+SELECT
+	type, sdate
+FROM
+	foobar
+WHERE
+	type = $1
+EOM;
+$data = $db->dbReturnArrayParams($query, ['schmalz'], true);
+print "RETURN ARRAY PARAMS: " . $db->dbGetNumRows() . ", Full foobar list: <br><pre>"
+	. print_r($data, true) . "</pre><br>";
 
 // trigger a warning
 print "<b>WARNING NEXT</b><br>";

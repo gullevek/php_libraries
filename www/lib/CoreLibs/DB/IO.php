@@ -69,12 +69,16 @@
 *     - sets the SQL query (will be set with the $query parameter from method)
 *       if u leave the parameter free the class will try to use this var, but this
 *       method is not so reccomended
+*   $params
+*     - array for query parameters, if not set, ignored
 *   $num_rows
 *     - the number of rows returned by a SELECT or alterd bei UPDATE/INSERT
 *   $num_fields
 *     - the number of fields from the SELECT, is usefull if you do a SELECT *
 *   $field_names
 *     - array of field names (in the order of the return)
+*   $field_types
+*     - array of field types
 *   $insert_id
 *     - for INSERT with auto_increment PK, the ID is stored here
 *   $error_msg
@@ -258,7 +262,6 @@ use CoreLibs\Create\Uids;
 
 // below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
 // as main system. Currently all @var sets are written as object
-/** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
 
 class IO
 {
@@ -286,10 +289,12 @@ class IO
 	private $to_encoding = '';
 	/** @var string */
 	private $query; // the query string at the moment
+	/** @var array<mixed> */
+	private $params; // current params for query
 	// only inside
 	// basic vars
 	/** @var \PgSql\Connection|false|null */ // replace object with PgSql\Connection|
-	private $dbh; // the dbh handler, if disconnected by command is null, bool:false/int:-1 on error,
+	private $dbh; // the dbh handler, if disconnected by command is null, bool:false on error,
 	/** @var bool */
 	private $db_debug = false; // DB_DEBUG ... (if set prints out debug msgs)
 	/** @var string */
@@ -321,8 +326,10 @@ class IO
 	private $num_rows; // how many rows have been found
 	/** @var int */
 	private $num_fields; // how many fields has the query
-	/** @var array<mixed> */
-	private $field_names = []; // array with the field names of the current query
+	/** @var array<string> array with the field names of the current query */
+	private $field_names = [];
+	/** @var array<string> field type names */
+	private $field_types = [];
 	/** @var array<mixed> */
 	private $insert_id_arr = []; // always return as array, even if only one
 	/** @var string */
@@ -648,17 +655,20 @@ class IO
 
 	/**
 	 * calls the basic class debug with strip command
-	 * @param  string $debug_id     group id for debug
-	 * @param  string $error_string error message or debug data
-	 * @param  string $id           db debug group
-	 * @param  string $type         query identifier (Q, I, etc)
-	 * @return void                 has no return
+	 * @param  string       $debug_id     group id for debug
+	 * @param  string       $error_string error message or debug data
+	 * @param  string       $id           db debug group
+	 * @param  string       $type         query identifier (Q, I, etc)
+	 * @param  array<mixed> $error_data   Optional error data as array
+	 *                                    Will be printed after main error string
+	 * @return void
 	 */
 	protected function __dbDebug(
 		string $debug_id,
 		string $error_string,
 		string $id = '',
-		string $type = ''
+		string $type = '',
+		array $error_data = []
 	): void {
 		// NOTE prefix allows html for echo output, will be stripped on file print
 		$prefix = '';
@@ -678,6 +688,11 @@ class IO
 		}
 		if ($prefix) {
 			$prefix .= '- ';
+		}
+		if ($error_data !== []) {
+			$error_string .= '<br>['
+				. $this->log->prAr($error_data)
+				. ']';
 		}
 		$this->log->debug($debug_id, $error_string, true, $prefix);
 	}
@@ -860,20 +875,31 @@ class IO
 
 	/**
 	 * for debug purpose replaces $1, $2, etc with actual data
-	 * @param  string       $stm_name prepared statement name
-	 * @param  array<mixed> $data     the data array
-	 * @return string                 string of query with data inside
+	 * @param  string       $query Query to replace values in
+	 * @param  array<mixed> $data  The data array
+	 * @return string              string of query with data inside
 	 */
-	private function __dbDebugPrepare(string $stm_name, array $data = []): string
+	private function __dbDebugPrepare(string $query, array $data = []): string
 	{
+		// skip anything if there is no data
+		if ($data === []) {
+			return $query;
+		}
 		// get the keys from data array
 		$keys = array_keys($data);
-		// because the placeholders start with $ and at 1, we need to increase each key and prefix it with a $ char
+		// because the placeholders start with $ and at 1,
+		// we need to increase each key and prefix it with a $ char
 		for ($i = 0, $iMax = count($keys); $i < $iMax; $i++) {
 			$keys[$i] = '$' . ($keys[$i] + 1);
+			// prefix data set with parameter pos
+			$data[$i] = $keys[$i] . ':' . $data[$i];
 		}
 		// simply replace the $1, $2, ... with the actual data and return it
-		return str_replace(array_reverse($keys), array_reverse($data), $this->prepare_cursor[$stm_name]['query']);
+		return str_replace(
+			array_reverse($keys),
+			array_reverse($data),
+			$query
+		);
 	}
 
 	/**
@@ -978,6 +1004,33 @@ class IO
 	}
 
 	/**
+	 * Checks if the placeholder count in the query matches the params given
+	 * on call
+	 *
+	 * @param  string $query        Query to check
+	 * @param  int    $params_count The parms count expected
+	 * @return bool                 True for params count ok, else false
+	 */
+	private function __dbCheckQueryParams(string $query, int $params_count): bool
+	{
+		// search for $1, $2, in the query and push it into the control array
+		// skip counts for same eg $1, $1, $2 = 2 and not 3
+		preg_match_all('/(\$[0-9]{1,})/', $query, $match);
+		$placeholder_count = count(array_unique($match[1]));
+		if ($params_count != $placeholder_count) {
+			$this->__dbError(
+				23,
+				false,
+				'Array data count does not match prepared fields. Need: '
+				. $placeholder_count . ', has: '
+				. $params_count
+			);
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * sub function for dbExec and dbExecAsync
 	 * - checks query is set
 	 * - checks there is a database handler
@@ -985,13 +1038,17 @@ class IO
 	 * - checks for insert if returning is set/pk name
 	 * - sets internal hash for query
 	 * - checks multiple call count
-	 * @param  string      $query   query string
-	 * @param  string      $pk_name primary key
-	 *                              [if set to NULL no returning will be added]
-	 * @return string|false         queryt hash OR bool false on error
+	 * @param  string       $query   Query string
+	 * @param  array<mixed> $params  Query params, needed for hash creation
+	 * @param  string       $pk_name primary key
+	 *                               [if set to NULL no returning will be added]
+	 * @return string|false          queryt hash OR bool false on error
 	 */
-	private function __dbPrepareExec(string $query, string $pk_name): string|false
-	{
+	private function __dbPrepareExec(
+		string $query,
+		array $params,
+		string $pk_name
+	): string|false {
 		// reset current cursor before exec
 		$this->cursor = false;
 		// clear matches for regex lookups
@@ -1001,6 +1058,8 @@ class IO
 		$this->returning_id = false;
 		// set the query
 		$this->query = $query;
+		// current params
+		$this->params = $params;
 		// no query set
 		if (empty($this->query)) {
 			$this->__dbError(11);
@@ -1066,10 +1125,18 @@ class IO
 		// $this->debug('DB IO', 'Q: '.$this->query.', RETURN: '.$this->returning_id);
 		// for DEBUG, only on first time ;)
 		if ($this->db_debug) {
-			$this->__dbDebug('db', $this->query, '__dbPrepareExec', 'Q');
+			$this->__dbDebug(
+				'db',
+				$this->__dbDebugPrepare(
+					$this->query,
+					$this->params
+				),
+				'__dbPrepareExec',
+				($this->params === [] ? 'Q' : 'Qp'),
+			);
 		}
 		// import protection, hash needed
-		$query_hash = $this->dbGetQueryHash($this->query);
+		$query_hash = $this->dbGetQueryHash($this->query, $this->params);
 		// if the array index does not exists set it 0
 		if (!array_key_exists($query_hash, $this->query_called)) {
 			$this->query_called[$query_hash] = 0;
@@ -1121,7 +1188,11 @@ class IO
 				// set field names
 				$this->field_names = [];
 				for ($i = 0; $i < $this->num_fields; $i++) {
-					$this->field_names[] = $this->db_functions->__dbFieldName($this->cursor, $i);
+					$this->field_names[] = $this->db_functions->__dbFieldName($this->cursor, $i) ?: '';
+				}
+				$this->field_types = [];
+				for ($i = 0; $i < $this->num_fields; $i++) {
+					$this->field_types[] = $this->db_functions->__dbFieldType($this->cursor, $i) ?: '';
 				}
 			} elseif ($this->__checkQueryForInsert($this->query)) {
 				// if not select do here
@@ -1745,6 +1816,8 @@ class IO
 	 *   the stored array will be deleted ...
 	 * - if set to 3, after EACH row, the data will be reset,
 	 *   no caching is done except for basic (count, etc)
+	 * Wrapper for dbReturnParams
+	 *
 	 * @param  string $query      Query string
 	 * @param  int    $cache      reset status: default: USE_CACHE
 	 *                            USE_CACHE/0: normal read from cache on second run
@@ -1761,13 +1834,48 @@ class IO
 		int $cache = self::USE_CACHE,
 		bool $assoc_only = false
 	): array|false {
+		return $this->dbReturnParams($query, [], $cache, $assoc_only);
+	}
+
+	/**
+	 * single running function, if called creates hash from
+	 * query string and so can itself call exec/return calls
+	 * caches data, so next time called with IDENTICAL (!!!!)
+	 * [this means 1:1 bit to bit identical query] returns cached
+	 * data, or with reset flag set calls data from DB again
+	 * NOTE on $cache param:
+	 * - if set to 0, if same query run again, will read from cache
+	 * - if set to 1, the data will be read new and cached, cache reset a new run
+	 *   (wheres 1 reads cache AND destroys at end of read)
+	 * - if set to 2, at the end of the query (last row returned),
+	 *   the stored array will be deleted ...
+	 * - if set to 3, after EACH row, the data will be reset,
+	 *   no caching is done except for basic (count, etc)
+	 *
+	 * @param  string       $query      Query string
+	 * @param  array<mixed> $params     Query parameters
+	 * @param  int          $cache      reset status: default: USE_CACHE
+	 *                                  USE_CACHE/0: normal read from cache on second run
+	 *                                  READ_NEW/1: write to cache, clean before new run
+	 *                                  CLEAR_CACHE/2: write cache, clean after finished
+	 *                                  NO_CACHE/3: don't write cache
+	 * @param  bool         $assoc_only True to only returned the named and not
+	 *                                  index position ones
+	 * @return array<mixed>|false       return array data or false on error/end
+	 */
+	public function dbReturnParams(
+		string $query,
+		array $params = [],
+		int $cache = self::USE_CACHE,
+		bool $assoc_only = false
+	): array|false {
 		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
 		}
 		// create hash from query ...
-		$query_hash = $this->dbGetQueryHash($query);
+		$query_hash = $this->dbGetQueryHash($query, $params);
 		// pre declare array
 		if (!isset($this->cursor_ext[$query_hash])) {
 			$this->cursor_ext[$query_hash] = [
@@ -1787,6 +1895,8 @@ class IO
 				'pos' => 0,
 				// the query used in this call
 				'query' => '',
+				// parameter
+				'params' => [],
 				// cache flag from method call
 				'cache_flag' => $cache,
 				// flag if we only have assoc data
@@ -1814,6 +1924,13 @@ class IO
 		// before doing ANYTHING check if query is "SELECT ..." everything else does not work
 		if (!$this->__checkQueryForSelect($this->cursor_ext[$query_hash]['query'])) {
 			$this->__dbError(17, false, $this->cursor_ext[$query_hash]['query']);
+			return false;
+		}
+		// set the query parameters
+		$this->cursor_ext[$query_hash]['params'] = $params;
+		// check if params count matches
+		// checks if the params count given matches the expected count
+		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
 			return false;
 		}
 		// set first call to false
@@ -1851,8 +1968,18 @@ class IO
 			if (!$this->__dbCheckConnectionOk()) {
 				return false;
 			}
-			$this->cursor_ext[$query_hash]['cursor'] =
-				$this->db_functions->__dbQuery($this->cursor_ext[$query_hash]['query']);
+			if ($this->cursor_ext[$query_hash]['params'] === []) {
+				$this->cursor_ext[$query_hash]['cursor'] =
+					$this->db_functions->__dbQuery(
+						$this->cursor_ext[$query_hash]['query']
+					);
+			} else {
+				$this->cursor_ext[$query_hash]['cursor'] =
+					$this->db_functions->__dbQueryParams(
+						$this->cursor_ext[$query_hash]['query'],
+						$this->cursor_ext[$query_hash]['params']
+					);
+			}
 			// if still no cursor ...
 			if (!$this->cursor_ext[$query_hash]['cursor']) {
 				if ($this->db_debug) {
@@ -1889,6 +2016,16 @@ class IO
 						);
 				}
 				$this->field_names = $this->cursor_ext[$query_hash]['field_names'];
+				// field types
+				$this->cursor_ext[$query_hash]['field_types'] = [];
+				for ($i = 0; $i < $this->cursor_ext[$query_hash]['num_fields']; $i++) {
+					$this->cursor_ext[$query_hash]['field_types'][] =
+						$this->db_functions->__dbFieldType(
+							$this->cursor_ext[$query_hash]['cursor'],
+							$i
+						);
+				}
+				$this->field_types = $this->cursor_ext[$query_hash]['field_types'];
 				// reset first call var
 				$first_call = false;
 				// reset the internal pos counter
@@ -2009,9 +2146,10 @@ class IO
 	 * like num_rows, num_fields, etc depending on query
 	 * for INSERT INTO queries it is highly recommended to set the pk_name to avoid an
 	 * additional read from the database for the PK NAME
+	 * Wrapper for dbExecParams without params
 	 * @param  string $query   the query, if not given,
 	 *                         the query class var will be used
-	 *                         if this was not set, method will quit with a 0 (failure)
+	 *                         if this was not set, method will quit with false
 	 * @param  string $pk_name optional primary key name, for insert id
 	 *                         return if the pk name is very different
 	 *                         if pk name is table name and _id, pk_name
@@ -2019,16 +2157,50 @@ class IO
 	 *                         if NULL is given here, no RETURNING will be auto added
 	 * @return \PgSql\Result|false    cursor for this query or false on error
 	 */
-	public function dbExec(string $query = '', string $pk_name = ''): \PgSql\Result|false
-	{
+	public function dbExec(
+		string $query = '',
+		string $pk_name = ''
+	): \PgSql\Result|false {
+		// just calls the same without any params
+		// which will trigger normal pg_query call
+		return $this->dbExecParams($query, [], $pk_name);
+	}
+
+	/**
+	 * Execute any query, but with the use of placeholders
+	 *
+	 * @param  string $query   Query, if not given, query class var will be used
+	 *                         if this was not set, method will quit with false
+	 * @param  array<mixed> $params  Parameters to be replaced.
+	 *         NOTE: bytea data cannot be used here (pg_query_params)
+	 * @param  string $pk_name Optional primary key name, for insert id
+	 *                         return if the pk name is very different
+	 *                         if pk name is table name and _id, pk_name
+	 *                         is not needed to be set
+	 *                         if NULL is given here, no RETURNING will be auto added
+	 * @return \PgSql\Result|false  cursor for this query or false on error
+	 */
+	public function dbExecParams(
+		string $query = '',
+		array $params = [],
+		string $pk_name = ''
+	): \PgSql\Result|false {
 		$this->__dbErrorReset();
 		// prepare and check if we can actually run it
-		if ($this->__dbPrepareExec($query, $pk_name) === false) {
+		if ($this->__dbPrepareExec($query, $params, $pk_name) === false) {
 			// bail if no query hash set
 			return false;
 		}
+		// checks if the params count given matches the expected count
+		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
+			return false;
+		}
 		// ** actual db exec call
-		$cursor = $this->db_functions->__dbQuery($this->query);
+		if ($params === []) {
+			$cursor = $this->db_functions->__dbQuery($this->query);
+		} else {
+			$cursor = $this->db_functions->__dbQueryParams($this->query, $params);
+		}
 		// if we faield, just set the master cursors to false too
 		$this->cursor = $cursor;
 		if ($cursor === false) {
@@ -2079,12 +2251,30 @@ class IO
 
 	/**
 	 * returns the FIRST row of the given query
+	 * wrapper for dbReturnRowParms
 	 * @param  string $query      the query to be executed
 	 * @param  bool   $assoc_only if true, only return assoc entry (default false)
 	 * @return array<mixed>|false row array or false on error
 	 */
 	public function dbReturnRow(string $query, bool $assoc_only = false): array|false
 	{
+		return $this->dbReturnRowParams($query, [], $assoc_only);
+	}
+
+	/**
+	 * Returns the first row only for the given query
+	 * Uses db_query_params
+	 *
+	 * @param  string       $query      the query to be executed
+	 * @param  array<mixed> $params     params to be used in query
+	 * @param  bool         $assoc_only if true, only return assoc entry (default false)
+	 * @return array<mixed>|false       row array or false on error
+	 */
+	public function dbReturnRowParams(
+		string $query,
+		array $params = [],
+		bool $assoc_only = false
+	): array|false {
 		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
@@ -2096,7 +2286,11 @@ class IO
 			$this->__dbError(17, false, $query);
 			return false;
 		}
-		$cursor = $this->dbExec($query);
+		// checks if the params count given matches the expected count
+		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
+			return false;
+		}
+		$cursor = $this->dbExecParams($query, $params);
 		if ($cursor === false) {
 			return false;
 		}
@@ -2105,13 +2299,31 @@ class IO
 	}
 
 	/**
-	 * createds an array of hashes of the query (all data)
+	 * creates an array of hashes of the query (all data)
+	 * Wrapper for dbReturnArrayParams
 	 * @param  string $query      the query to be executed
 	 * @param  bool   $assoc_only if true, only name ref are returned (default true)
 	 * @return array<mixed>|false array of hashes (row -> fields), false on error
 	 */
 	public function dbReturnArray(string $query, bool $assoc_only = true): array|false
 	{
+		return $this->dbReturnArrayParams($query, [], $assoc_only);
+	}
+
+	/**
+	 * Creates an array of hashes of all data returned from the query
+	 * uses db_query_param
+	 *
+	 * @param  string       $query      the query to be executed
+	 * @param  array<mixed> $params     params to be used in query
+	 * @param  bool         $assoc_only if true, only name ref are returned (default true)
+	 * @return array<mixed>|false       array of hashes (row -> fields), false on error
+	 */
+	public function dbReturnArrayParams(
+		string $query,
+		array $params = [],
+		bool $assoc_only = true
+	): array|false {
 		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
@@ -2122,17 +2334,16 @@ class IO
 			$this->__dbError(17, false, $query);
 			return false;
 		}
-		$cursor = $this->dbExec($query);
+		// checks if the params count given matches the expected count
+		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
+			return false;
+		}
+		$cursor = $this->dbExecParams($query, $params);
 		if ($cursor === false) {
 			return false;
 		}
 		$rows = [];
 		while (is_array($res = $this->dbFetchArray($cursor, $assoc_only))) {
-			// $data = [];
-			// for ($i = 0; $i < $this->num_fields; $i++) {
-			// 	$data[$this->field_names[$i]] = $res[$this->field_names[$i]] ?? null;
-			// }
-			// $rows[] = $data;
 			$rows[] = $res;
 		}
 		return $rows;
@@ -2144,13 +2355,15 @@ class IO
 
 	/**
 	 * resets all data stored to this query
-	 * @param  string $query The Query whose cache should be cleaned
-	 * @return bool          false if query not found, true if success
+	 * @param  string       $query  The Query whose cache should be cleaned
+	 * @param  array<mixed> $params If the query is params type we need params
+	 *                              data to create a unique call one, optional
+	 * @return bool                 False if query not found, true if success
 	 */
-	public function dbCacheReset(string $query): bool
+	public function dbCacheReset(string $query, array $params = []): bool
 	{
 		$this->__dbErrorReset();
-		$query_hash = $this->dbGetQueryHash($query);
+		$query_hash = $this->dbGetQueryHash($query, $params);
 		// clears cache for this query
 		if (empty($this->cursor_ext[$query_hash]['query'])) {
 			$this->__dbError(18);
@@ -2168,24 +2381,27 @@ class IO
 	 * returns the full array for cursor ext
 	 * or cursor for one query
 	 * or detail data fonr one query cursor data
-	 * @param  string|null $query       Query string, if not null convert to hash
-	 *                                  and return set cursor ext for only this
-	 *                                  if not found or null return null
-	 * @param  string      $query_field [=''] optional query field to get
+	 *
+	 * @param  string|null $query        Query string, if not null convert to hash
+	 *                                   and return set cursor ext for only this
+	 *                                   if not found or null return null
+	 * @param  array<mixed> $params      Optional params for query hash get
+	 * @param  string       $query_field [=''] optional query field to get
 	 * @return array<mixed>|string|int|\PgSql\Result|null
-	 *                                  Cursor Extended array full if no parameter
-	 *                                  Key is hash string from query run
-	 *                                  Or cursor data entry if query field is set
-	 *                                  If nothing found return null
+	 *                                   Cursor Extended array full if no parameter
+	 *                                   Key is hash string from query run
+	 *                                   Or cursor data entry if query field is set
+	 *                                   If nothing found return null
 	 */
 	public function dbGetCursorExt(
-		$query = null,
+		?string $query = null,
+		array $params = [],
 		string $query_field = ''
 	): array|string|int|\PgSql\Result|null {
 		if ($query === null) {
 			return $this->cursor_ext;
 		}
-		$query_hash = $this->dbGetQueryHash($query);
+		$query_hash = $this->dbGetQueryHash($query, $params);
 		if (
 			is_array($this->cursor_ext) &&
 			isset($this->cursor_ext[$query_hash])
@@ -2202,33 +2418,39 @@ class IO
 
 	/**
 	 * returns the current position the read out
-	 * @param  string   $query query to find in cursor_ext
-	 * @return int|false       query position (row pos), false on error
+	 *
+	 * @param  string       $query  Query to find in cursor_ext
+	 * @param  array<mixed> $params If the query is params type we need params
+	 *                              data to create a unique call one, optional
+	 * @return int|false            query position (row pos), false on error
 	 */
-	public function dbGetCursorPos(string $query): int|false
+	public function dbGetCursorPos(string $query, array $params = []): int|false
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
 		}
-		$query_hash = $this->dbGetQueryHash($query);
+		$query_hash = $this->dbGetQueryHash($query, $params);
 		return (int)$this->cursor_ext[$query_hash]['pos'];
 	}
 
 	/**
 	 * returns the number of rows for the current select query
-	 * @param  string   $query query to find in cursor_ext
-	 * @return int|false       query position (row pos), false on error
+	 *
+	 * @param  string       $query  Query to find in cursor_ext
+	 * @param  array<mixed> $params If the query is params type we need params
+	 *                              data to create a unique call one, optional
+	 * @return int|false            query position (row pos), false on error
 	 */
-	public function dbGetCursorNumRows(string $query): int|false
+	public function dbGetCursorNumRows(string $query, array $params = []): int|false
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
 			$this->__dbError(11);
 			return false;
 		}
-		$query_hash = $this->dbGetQueryHash($query);
+		$query_hash = $this->dbGetQueryHash($query, $params);
 		return (int)$this->cursor_ext[$query_hash]['num_rows'];
 	}
 
@@ -2239,22 +2461,27 @@ class IO
 	/**
 	 * resets the call times for the max query called to 0
 	 * USE CAREFULLY: rather make the query prepare -> execute
-	 * @param  string $query query string
-	 * @return void          has no return
+	 *
+	 * @param  string       $query  query string
+	 * @param  array<mixed> $params If the query is params type we need params
+	 *                              data to create a unique call one, optional
+	 * @return void
 	 */
-	public function dbResetQueryCalled(string $query): void
+	public function dbResetQueryCalled(string $query, array $params = []): void
 	{
-		$this->query_called[$this->dbGetQueryHash($query)] = 0;
+		$this->query_called[$this->dbGetQueryHash($query, $params)] = 0;
 	}
 
 	/**
 	 * gets how often a query was called already
-	 * @param  string $query query string
-	 * @return int           count of times the query was executed
+	 * @param  string       $query  query string
+	 * @param  array<mixed> $params If the query is params type we need params
+	 *                              data to create a unique call one, optional
+	 * @return int                  count of times the query was executed
 	 */
-	public function dbGetQueryCalled(string $query): int
+	public function dbGetQueryCalled(string $query, array $params = []): int
 	{
-		$query_hash = $this->dbGetQueryHash($query);
+		$query_hash = $this->dbGetQueryHash($query, $params);
 		if (!empty($this->query_called[$query_hash])) {
 			return $this->query_called[$query_hash];
 		} else {
@@ -2268,7 +2495,8 @@ class IO
 
 	/**
 	 * prepares a query
-	 * for INSERT INTO queries it is highly recommended to set the pk_name to avoid an additional
+	 * for INSERT INTO queries it is highly recommended
+	 * to set the pk_name to avoid an additional
 	 * read from the database for the PK NAME
 	 * @param  string        $stm_name statement name
 	 * @param  string        $query    queryt string to run
@@ -2432,7 +2660,15 @@ class IO
 			return false;
 		}
 		if ($this->db_debug) {
-			$this->__dbDebug('db', $this->__dbDebugPrepare($stm_name, $data), 'dbExecPrep', 'Q');
+			$this->__dbDebug(
+				'db',
+				$this->__dbDebugPrepare(
+					$this->prepare_cursor[$stm_name]['query'],
+					$data
+				),
+				'dbExecPrep',
+				'Qp'
+			);
 		}
 		$result = $this->db_functions->__dbExecute($stm_name, $data);
 		if ($result === false) {
@@ -2471,27 +2707,58 @@ class IO
 	// ***************************
 
 	/**
-	 * executres the query async so other methods can be run during this
-	 * for INSERT INTO queries it is highly recommended to set the pk_name
-	 * to avoid an additional read from the database for the PK NAME
+	 * executes the query async so other methods can be run at the same time
+	 * Wrapper for dbExecParamsAsync
 	 * NEEDS : dbCheckAsync
 	 * @param  string $query   query to run
 	 * @param  string $pk_name optional primary key name, only used with
 	 *                         insert for returning call
 	 * @return bool            true if async query was sent ok,
-	 *                         false if error happened
+	 *                         false on error
 	 */
 	public function dbExecAsync(string $query, string $pk_name = ''): bool
 	{
+		return $this->dbExecParamsAsync($query, [], $pk_name);
+	}
+
+	/**
+	 * eexecutes the query async so other methods can be run at the same time
+	 * Runs with db_send_query_params
+	 * NEEDS : dbCheckAsync
+	 *
+	 * @param  string $query query to run
+	 * @param  array<mixed> $params
+	 * @param  string $pk_name optional primary key name, only used with
+	 *                         insert for returning call
+	 * @return bool            true if async query was sent ok,
+	 *                         false on error
+	 */
+	public function dbExecParamsAsync(
+		string $query,
+		array $params = [],
+		string $pk_name = ''
+	): bool {
 		$this->__dbErrorReset();
 		// prepare and check if we can actually run the query
-		if (($query_hash = $this->__dbPrepareExec($query, $pk_name)) === false) {
+		if (
+			($query_hash = $this->__dbPrepareExec($query, $params, $pk_name)) === false
+		) {
 			// bail if no hash set
 			return false;
 		}
+		// checks if the params count given matches the expected count
+		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
+			return false;
+		}
+		// ** actual db exec call
+		if ($params === []) {
+			$status = $this->db_functions->__dbSendQuery($this->query);
+		} else {
+			$status = $this->db_functions->__dbSendQueryParams($this->query, $params);
+		}
 		// run the async query, this just returns true or false
 		// the actually result is in dbCheckAsync
-		if (!$this->db_functions->__dbSendQuery($this->query)) {
+		if (!$status) {
 			// if failed, process here
 			$this->__dbError(40);
 			return false;
@@ -2501,6 +2768,42 @@ class IO
 			// (as would be from the original send query function)
 			return true;
 		}
+	}
+
+	/**
+	 * TODO write dbPrepareAsync
+	 * Asnychronus prepare call
+	 * NEEDS : dbCheckAsync
+	 *
+	 * @param  string $stm_name
+	 * @param  string $query
+	 * @param  string $pk_name
+	 * @return bool
+	 */
+	public function dbPrepareAsync(
+		string $stm_name,
+		string $query,
+		string $pk_name = ''
+	): bool {
+		$status = $this->db_functions->__dbSendPrepare($stm_name, $query);
+		return $status;
+	}
+
+	/**
+	 * TODO write dbExecuteAsync
+	 * Asynchronus execute call
+	 * NEEDS : dbCheckAsync
+	 *
+	 * @param  string       $stm_name
+	 * @param  array<mixed> $data
+	 * @return bool
+	 */
+	public function dbExecuteAsync(
+		string $stm_name,
+		array $data = []
+	): bool {
+		$status = $this->db_functions->__dbSendExecute($stm_name, $data);
+		return $status;
 	}
 
 	/**
@@ -2953,6 +3256,7 @@ class IO
 
 	/**
 	 * Return current database handler
+	 *
 	 * @return \PgSql\Connection|false|null
 	 */
 	public function dbGetDbh(): \PgSql\Connection|false|null
@@ -2963,16 +3267,25 @@ class IO
 	/**
 	 * Returns hash for query
 	 * Hash is used in all internal storage systems for return data
-	 * @param  string $query The query to create the hash from
-	 * @return string        Hash, as set by hash lpng
+	 *
+	 * @param  string       $query  The query to create the hash from
+	 * @param  array<mixed> $params If the query is params type we need params
+	 *                              data to create a unique call one, optional
+	 * @return string               Hash, as set by hash long
 	 */
-	public function dbGetQueryHash(string $query): string
+	public function dbGetQueryHash(string $query, array $params = []): string
 	{
-		return Hash::__hashLong($query);
+		return Hash::__hashLong(
+			$query . (
+				$params !== [] ?
+					'#' . json_encode($params) : ''
+			)
+		);
 	}
 
 	/**
 	 * Get current set query
+	 *
 	 * @return string Current set query string
 	 */
 	public function dbGetQuery(): string
@@ -2982,11 +3295,32 @@ class IO
 
 	/**
 	 * Clear current query
+	 *
 	 * @return void
 	 */
 	public function dbResetQuery(): void
 	{
 		$this->query = '';
+	}
+
+	/**
+	 * Get current set params
+	 *
+	 * @return array<mixed>
+	 */
+	public function dbGetParams(): array
+	{
+		return $this->params;
+	}
+
+	/**
+	 * Rset current set params
+	 *
+	 * @return void
+	 */
+	public function dbResetParams(): void
+	{
+		$this->params = [];
 	}
 
 	// ***************************
@@ -3031,12 +3365,14 @@ class IO
 	 *
 	 * Replacement for insert_id_ext array access before
 	 *
-	 * @param  string|null  $key
-	 * @param  integer|null $pos
-	 * @return array<mixed>|string|int|null
+	 * @param  string|null  $key            Key to find in insert_id_arr
+	 * @param  integer|null $pos            Multiple in array, which row to search in
+	 * @return array<mixed>|string|int|null Return value, null for error/not found
 	 */
-	public function dbGetReturningExt(?string $key = null, ?int $pos = null): array|string|int|null
-	{
+	public function dbGetReturningExt(
+		?string $key = null,
+		?int $pos = null
+	): array|string|int|null {
 		// return as is if key is null
 		if ($key === null) {
 			if (count($this->insert_id_arr) == 1) {
@@ -3080,6 +3416,7 @@ class IO
 
 	/**
 	 * Always returns the returning block as an array
+	 *
 	 * @return array<mixed> All returning data as array. even if one row only
 	 */
 	public function dbGetReturningArray(): array
@@ -3091,6 +3428,7 @@ class IO
 	 * returns current number of rows that where
 	 * affected by UPDATE/SELECT, etc
 	 * null on empty
+	 *
 	 * @return int|null Number of rows or null if not set
 	 */
 	public function dbGetNumRows(): ?int
@@ -3100,6 +3438,7 @@ class IO
 
 	/**
 	 * Number of fields in select query
+	 *
 	 * @return integer|null Number of fields in select or null if not set
 	 */
 	public function dbGetNumFields(): ?int
@@ -3109,11 +3448,24 @@ class IO
 
 	/**
 	 * Return field names from query
-	 * @return array<mixed> Field names as array
+	 * Order based on order in query
+	 *
+	 * @return array<string> Field names as array
 	 */
 	public function dbGetFieldNames(): array
 	{
 		return $this->field_names;
+	}
+
+	/**
+	 * Return field types from query
+	 * Order based on order in query, use field names to get position
+	 *
+	 * @return array<string> Field types as array
+	 */
+	public function dbGetFieldTypes(): array
+	{
+		return $this->field_types;
 	}
 
 	/**
@@ -3129,8 +3481,10 @@ class IO
 	 *                          Not ethat returnin_id also can return false
 	 *                          but will not set an error entry
 	 */
-	public function dbGetPrepareCursorValue(string $stm_name, string $key): null|string|int|bool
-	{
+	public function dbGetPrepareCursorValue(
+		string $stm_name,
+		string $key
+	): null|string|int|bool {
 		// if no statement name
 		if (empty($stm_name)) {
 			$this->__dbError(

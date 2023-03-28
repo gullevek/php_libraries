@@ -1434,7 +1434,7 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	// - db exec test for insert/update/select/etc
-	//   dbExec, dbResetQueryCalled, dbGetQueryCalled
+	//   dbExec, dbExecParams, dbResetQueryCalled, dbGetQueryCalled
 
 	/**
 	 * provide queries with return results
@@ -1444,17 +1444,19 @@ final class CoreLibsDBIOTest extends TestCase
 	public function queryDbExecProvider(): array
 	{
 		// 0: query
-		// 1: optional primary key name, null for empty test
-		// 2: expectes result (bool, object (>=8.1)/resource (<8.1))
-		// 3: warning
-		// 4: error
-		// 5: run times, not set is once, true is max + 1
+		// 1: params, null for force dbEXec
+		// 2: optional primary key name, null for empty test
+		// 3: expectes result (bool, object)
+		// 4: warning
+		// 5: error
+		// 6: run times, not set is once, true is max + 1
 		return [
 			// insert
 			'table with pk insert' => [
 				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW())',
+				null,
 				'',
-				'resource/object',
+				'object',
 				'',
 				'',
 			],
@@ -1462,15 +1464,44 @@ final class CoreLibsDBIOTest extends TestCase
 			'table with pk insert null' => [
 				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW())',
 				null,
-				'resource/object',
+				null,
+				'object',
+				'',
+				'',
+			],
+			// insert with params
+			'table with pk insert params' => [
+				'INSERT INTO table_with_primary_key (row_varchar) VALUES ($1)',
+				['test'],
+				'',
+				'object',
+				'',
+				'',
+			],
+			// insert with params, null primary key
+			'table with pk insert params' => [
+				'INSERT INTO table_with_primary_key (row_varchar) VALUES ($1)',
+				['test'],
+				null,
+				'object',
 				'',
 				'',
 			],
 			// insert to table with no pk (31?)
 			'table with no pk insert' => [
 				'INSERT INTO table_without_primary_key (row_date) VALUES (NOW())',
+				null,
 				'',
-				'resource/object',
+				'object',
+				'',
+				'',
+			],
+			// insert to table with no pk (31?) with params
+			'table with no pk insert params' => [
+				'INSERT INTO table_without_primary_key (row_varchar) VALUES ($1)',
+				['test'],
+				null,
+				'object',
 				'',
 				'',
 			],
@@ -1481,49 +1512,72 @@ final class CoreLibsDBIOTest extends TestCase
 					. '(NOW()), '
 					. '(NOW()), '
 					. '(NOW())',
+					null,
 				'',
-				'resource/object',
+				'object',
 				'32',
 				'',
 			],
 			// Skip PK READING
 			'table with pk insert and NULL pk name' => [
 				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW())',
+				null,
 				'NULL',
-				'resource/object',
+				'object',
 				'',
 				'',
 			],
 			// insert with pk set
 			'table with pk insert and pk name' => [
 				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW())',
+				null,
 				'table_with_primary_key_id',
-				'resource/object',
+				'object',
 				'',
 				'',
 			],
 			// update
 			'table with pk update' => [
 				'UPDATE table_with_primary_key SET row_date = NOW()',
+				null,
 				'',
-				'resource/object',
+				'object',
 				'',
 				'',
 			],
 			'table with pk select' => [
 				'SELECT * FROM table_with_primary_key',
+				null,
 				'',
-				'resource/object',
+				'object',
 				'',
 				'',
 			],
 			// no query set, error 11
 			'no query set' => [
 				'',
+				null,
 				'',
 				false,
 				'',
 				'11',
+			],
+			// wrong params coutn for insert
+			'wrong params count' => [
+				'INSERT INTO table_with_primary_key (row_varchar) VALUES ($1, $2)',
+				['test'],
+				null,
+				false,
+				'',
+				'23'
+			],
+			'wrong params count, null params' => [
+				'INSERT INTO table_with_primary_key (row_varchar) VALUES ($1, $2)',
+				null,
+				null,
+				false,
+				'',
+				'23'
 			],
 			// no db connection setable (16) [needs Mocking]
 			// TODO failed db connection
@@ -1532,8 +1586,9 @@ final class CoreLibsDBIOTest extends TestCase
 			// same query run too many times (30)
 			'same query run too many times' => [
 				'SELECT row_date FROM table_with_primary_key',
+				null,
 				'',
-				'resource/object',
+				'object',
 				'',
 				'30',
 				true,
@@ -1541,6 +1596,7 @@ final class CoreLibsDBIOTest extends TestCase
 			// execution failed (13)
 			'invalid query' => [
 				'INVALID',
+				null,
 				'',
 				false,
 				'',
@@ -1555,6 +1611,7 @@ final class CoreLibsDBIOTest extends TestCase
 			//       FIX with socket check type
 			'invalid returning' => [
 				'INSERT INTO table_with_primary_key (row_date) VALUES (NOW()) RETURNING invalid',
+				null,
 				'',
 				false,
 				'',
@@ -1564,19 +1621,21 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
-	 * pure dbExec checker
+	 * pure dbExec/dbExecParams checker
 	 * does not check __dbPostExec run, this will be done in the dbGet* functions
 	 * tests (internal read data post exec group)
 	 *
 	 * @covers ::dbExec
+	 * @covers ::dbExecParams
 	 * @covers ::dbGetQueryCalled
 	 * @covers ::dbResetQueryCalled
 	 * @dataProvider queryDbExecProvider
 	 * @testdox dbExec $query and pk $pk_name with $expected_return (Warning: $warning/Error: $error) [$_dataName]
 	 *
 	 * @param string $query
+	 * @param array<mixed>|null $params
 	 * @param string|null $pk_name
-	 * @param object|resource|bool $expected_return
+	 * @param object|bool $expected_return
 	 * @param string $warning
 	 * @param string $error
 	 * @param bool $run_many_times
@@ -1584,6 +1643,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbExec(
 		string $query,
+		?array $params,
 		?string $pk_name,
 		$expected_return,
 		string $warning,
@@ -1608,50 +1668,69 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 
 		// if expected result is not a bool
-		// for PHP 8.1 or higher it has to be an object
-		// for anything before PHP 8.1 this has to be a resource
+		// it has to be an object type PgSql\Result
 
 		if (is_bool($expected_return)) {
+			// supress ANY errors here
+			if ($pk_name === null && $params === null) {
+				$result = @$db->dbExec($query);
+			} elseif ($params === null) {
+				$result = @$db->dbExec($query, $pk_name);
+			} elseif ($pk_name === null) {
+				$result = @$db->dbExecParams($query, $params);
+			} else {
+				$result = @$db->dbExecParams($query, $params, $pk_name);
+			}
 			$this->assertEquals(
 				$expected_return,
-				// supress ANY errors here
-				$pk_name === null ?
-					@$db->dbExec($query) :
-					@$db->dbExec($query, $pk_name)
+				$result
 			);
 		} else {
-			$result = $pk_name === null ?
-				$db->dbExec($query) :
-				$db->dbExec($query, $pk_name);
-			// if PHP or newer, must be Object PgSql\Result
-			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
-				$this->assertIsObject(
-					$result
-				);
-				// also check that this is correct instance type
-				$this->assertInstanceOf(
-					'PgSql\Result',
-					$result
-				);
+			if ($pk_name === null && $params === null) {
+				$result = $db->dbExec($query);
+			} elseif ($params === null) {
+				$result = $db->dbExec($query, $pk_name);
+			} elseif ($pk_name === null) {
+				$result = $db->dbExecParams($query, $params);
 			} else {
-				$this->assertIsResource(
-					$result
-				);
+				$result = $db->dbExecParams($query, $params, $pk_name);
 			}
+			// if PHP or newer, must be Object PgSql\Result
+			$this->assertIsObject(
+				$result
+			);
+			// also check that this is correct instance type
+			$this->assertInstanceOf(
+				'PgSql\Result',
+				$result
+			);
 		}
 		// if we have more than one run time
 		// re-run same query and then catch error
 		if ($run_many_times) {
 			for ($i = 1; $i <= $db->dbGetMaxQueryCall() + 1; $i++) {
-				$pk_name === null ?
-					$db->dbExec($query) :
+				if ($pk_name === null && $params === null) {
+					$db->dbExec($query);
+				} elseif ($params === null) {
 					$db->dbExec($query, $pk_name);
+				} elseif ($pk_name === null) {
+					$db->dbExecParams($query, $params);
+				} else {
+					$db->dbExecParams($query, $params, $pk_name);
+				}
+			}
+			if ($pk_name === null && $params === null) {
+				$result = $db->dbExec($query);
+			} elseif ($params === null) {
+				$result = $db->dbExec($query, $pk_name);
+			} elseif ($pk_name === null) {
+				$result = $db->dbExecParams($query, $params);
+			} else {
+				$result = $db->dbExecParams($query, $params, $pk_name);
 			}
 			// will fail now
 			$this->assertFalse(
-				$pk_name === null ?
-					$db->dbExec($query) :
-					$db->dbExec($query, $pk_name)
+				$result
 			);
 			// check query called matching
 			$current_count = $db->dbGetQueryCalled($query);
@@ -1688,15 +1767,18 @@ final class CoreLibsDBIOTest extends TestCase
 	{
 		$insert_query = "INSERT INTO table_with_primary_key (row_int, uid) VALUES (1, 'A')";
 		$read_query = "SELECT row_int, uid FROM table_with_primary_key WHERE uid = 'A'";
+		$read_query_params = "SELECT row_int, uid FROM table_with_primary_key WHERE uid = $1";
 		// 0: query
-		// 1: flag (assoc)
-		// 2: result
-		// 3: warning
-		// 4: error
-		// 5: insert query
+		// 1: params (null) for other
+		// 2: flag (assoc)
+		// 3: result
+		// 4: warning
+		// 5: error
+		// 6: insert query
 		return [
 			'valid select' => [
 				$read_query,
+				null,
 				null,
 				[
 					'row_int' => 1,
@@ -1710,6 +1792,7 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'valid select, assoc only false' => [
 				$read_query,
+				null,
 				false,
 				[
 					'row_int' => 1,
@@ -1723,6 +1806,7 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'valid select, assoc only true' => [
 				$read_query,
+				null,
 				true,
 				[
 					'row_int' => 1,
@@ -1732,8 +1816,35 @@ final class CoreLibsDBIOTest extends TestCase
 				'',
 				$insert_query,
 			],
+			// params read
+			'valid select, params' => [
+				$read_query_params,
+				[
+					'A'
+				],
+				true,
+				[
+					'row_int' => 1,
+					'uid' => 'A',
+				],
+				'',
+				'',
+				$insert_query
+			],
+			// errors
+			'wrong params count' => [
+				$read_query_params,
+				[],
+				true,
+				false,
+				'',
+				'23',
+				$insert_query
+			],
+			// params, wrong count
 			'empty select' => [
 				'',
+				null,
 				null,
 				false,
 				'',
@@ -1742,6 +1853,7 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'insert query' => [
 				$insert_query,
+				null,
 				null,
 				false,
 				'',
@@ -1756,10 +1868,12 @@ final class CoreLibsDBIOTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::dbReturnRow
+	 * @covers ::dbReturnRowParams
 	 * @dataProvider returnRowProvider
 	 * @testdox dbReturnRow $query and assoc $flag_assoc with $expected (Warning: $warning/Error: $error) [$_dataName]
 	 *
 	 * @param string $query
+	 * @param array<mixed>|null $params
 	 * @param bool|null $flag_assoc
 	 * @param array<mixed>|bool $expected
 	 * @param string $warning
@@ -1769,6 +1883,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbReturnRow(
 		string $query,
+		?array $params,
 		?bool $flag_assoc,
 		$expected,
 		string $warning,
@@ -1783,12 +1898,20 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 		// insert data before we can test, from expected array
 		$db->dbExec($insert_data);
+		// run
+		if ($flag_assoc === null && $params === null) {
+			$result = $db->dbReturnRow($query);
+		} elseif ($params === null) {
+			$result = $db->dbReturnRow($query, $flag_assoc);
+		} elseif ($flag_assoc === null) {
+			$result = $db->dbReturnRowParams($query, $params);
+		} else {
+			$result = $db->dbReturnRowParams($query, $params, $flag_assoc);
+		}
 		// compare
 		$this->assertEquals(
 			$expected,
-			$flag_assoc === null ?
-				$db->dbReturnRow($query) :
-				$db->dbReturnRow($query, $flag_assoc)
+			$result
 		);
 		// get last error/warnings
 		// if string for warning or error is not empty check
@@ -1814,15 +1937,18 @@ final class CoreLibsDBIOTest extends TestCase
 		$insert_query = "INSERT INTO table_with_primary_key (row_int, uid) VALUES "
 			. "(1, 'A'), (2, 'B')";
 		$read_query = "SELECT row_int, uid FROM table_with_primary_key";
+		$read_query_params = "SELECT row_int, uid FROM table_with_primary_key WHERE uid = $1";
 		// 0: query
-		// 1: flag (assoc)
-		// 2: result
-		// 3: warning
-		// 4: error
-		// 5: insert query
+		// 1: params (null) for other
+		// 2: flag (assoc)
+		// 3: result
+		// 4: warning
+		// 5: error
+		// 6: insert query
 		return [
 			'valid select' => [
 				$read_query,
+				null,
 				null,
 				[
 					[
@@ -1840,6 +1966,7 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'valid select, assoc ' => [
 				$read_query,
+				null,
 				false,
 				[
 					[
@@ -1859,8 +1986,36 @@ final class CoreLibsDBIOTest extends TestCase
 				'',
 				$insert_query,
 			],
+			// params read
+			'valid select, params' => [
+				$read_query_params,
+				[
+					'A'
+				],
+				true,
+				[
+					[
+						'row_int' => 1,
+						'uid' => 'A',
+					]
+				],
+				'',
+				'',
+				$insert_query
+			],
+			// errors
+			'wrong params count' => [
+				$read_query_params,
+				[],
+				true,
+				false,
+				'',
+				'23',
+				$insert_query
+			],
 			'empty select' => [
 				'',
+				null,
 				null,
 				false,
 				'',
@@ -1869,6 +2024,7 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'insert query' => [
 				$insert_query,
+				null,
 				null,
 				false,
 				'',
@@ -1887,6 +2043,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @testdox dbReturnArray $query and assoc $flag_assoc with $expected (Warning: $warning/Error: $error) [$_dataName]
 	 *
 	 * @param string $query
+	 * @param array<mixed>|null $params
 	 * @param boolean|null $flag_assoc
 	 * @param array<mixed>|bool $expected
 	 * @param string $warning
@@ -1894,8 +2051,9 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @param string $insert_data
 	 * @return void
 	 */
-	public function testDbReturnArrray(
+	public function testDbReturnArray(
 		string $query,
+		?array $params,
 		?bool $flag_assoc,
 		$expected,
 		string $warning,
@@ -1910,12 +2068,20 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 		// insert data before we can test, from expected array
 		$db->dbExec($insert_data);
+		// run
+		if ($flag_assoc === null && $params === null) {
+			$result = $db->dbReturnArray($query);
+		} elseif ($params === null) {
+			$result = $db->dbReturnArray($query, $flag_assoc);
+		} elseif ($flag_assoc === null) {
+			$result = $db->dbReturnArrayParams($query, $params);
+		} else {
+			$result = $db->dbReturnArrayParams($query, $params, $flag_assoc);
+		}
 		// compare
 		$this->assertEquals(
 			$expected,
-			$flag_assoc === null ?
-				$db->dbReturnArray($query) :
-				$db->dbReturnArray($query, $flag_assoc)
+			$result
 		);
 		// get last error/warnings
 		// if string for warning or error is not empty check
@@ -1941,6 +2107,7 @@ final class CoreLibsDBIOTest extends TestCase
 		$insert_query = "INSERT INTO table_with_primary_key (row_int, uid) VALUES "
 			. "(1, 'A'), (2, 'B')";
 		$read_query = "SELECT row_int, uid FROM table_with_primary_key";
+		$read_query_params = "SELECT row_int, uid FROM table_with_primary_key WHERE uid = $1";
 		$row_a = [
 			'row_int' => 1,
 			0 => 1,
@@ -1962,27 +2129,32 @@ final class CoreLibsDBIOTest extends TestCase
 			'uid' => 'B',
 		];
 		// 0: read query
-		// 1: reset flag, null for default
-		// 2: assoc flag, null for default
-		// 3: expected return (cursor_ext/data)
-		// 4: step through, or normal loop read
-		// 5: cursor ext compare array
-		// 6: first only, extended cursor (for each step)
-		// 7: warning
-		// 8: error
-		// 9: insert data
+		// 1: params, null for not used
+		// 2: reset flag, null for default
+		// 3: assoc flag, null for default
+		// 4: expected return (cursor_ext/data)
+		// 5: step through, or normal loop read
+		// 6: cursor ext compare array
+		// 7*: first only, extended cursor (for each step) [not implemented yet]
+		// 8: warning
+		// 9: error
+		// 10: insert data
 		return [
 			// *** READ STEP BY STEP
 			// default cache: USE_CACHE
 			'valid select, default cache settings' => [
+				// 0-3
 				$read_query,
 				null,
 				null,
+				null,
+				// 4
 				$row_a,
+				// 5
 				true,
+				// 6
 				// check cursor_ext
 				[
-					// if <8.1 check against resource
 					'cursor' => 'PgSql\Result',
 					'data' => [
 						0 => $row_a,
@@ -1991,10 +2163,15 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_int',
 						'uid'
 					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
 					'num_fields' => 2,
 					'num_rows' => 2,
 					'pos' => 1,
 					'query' => $read_query,
+					'params' => [],
 					'read_rows' => 1,
 					'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
 					'assoc_flag' => false,
@@ -2003,6 +2180,7 @@ final class CoreLibsDBIOTest extends TestCase
 					'read_finished' => false,
 					'db_read_finished' => false,
 				],
+				// 7
 				// extended cursor per step (first only true)
 				[
 					// second row
@@ -2020,10 +2198,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 2,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
 							'assoc_flag' => false,
@@ -2046,10 +2229,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 0,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
 							'assoc_flag' => false,
@@ -2060,12 +2248,15 @@ final class CoreLibsDBIOTest extends TestCase
 						]
 					]
 				],
+				// warn/error
 				'',
 				'',
+				// insert
 				$insert_query
 			],
 			'valid select, use cache, assoc only' => [
 				$read_query,
+				null,
 				\CoreLibs\DB\IO::USE_CACHE,
 				true,
 				$row_a_assoc,
@@ -2080,10 +2271,15 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_int',
 						'uid'
 					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
 					'num_fields' => 2,
 					'num_rows' => 2,
 					'pos' => 1,
 					'query' => $read_query,
+					'params' => [],
 					'read_rows' => 1,
 					'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
 					'assoc_flag' => true,
@@ -2108,10 +2304,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 2,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
 							'assoc_flag' => true,
@@ -2134,10 +2335,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 0,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
 							'assoc_flag' => true,
@@ -2154,6 +2360,7 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'valid select, read new, assoc only' => [
 				$read_query,
+				null,
 				\CoreLibs\DB\IO::READ_NEW,
 				true,
 				$row_a_assoc,
@@ -2167,10 +2374,15 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_int',
 						'uid'
 					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
 					'num_fields' => 2,
 					'num_rows' => 2,
 					'pos' => 1,
 					'query' => $read_query,
+					'params' => [],
 					'read_rows' => 1,
 					'cache_flag' => \CoreLibs\DB\IO::READ_NEW,
 					'assoc_flag' => true,
@@ -2195,10 +2407,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 2,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::READ_NEW,
 							'assoc_flag' => true,
@@ -2221,10 +2438,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 0,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::READ_NEW,
 							'assoc_flag' => true,
@@ -2241,6 +2463,7 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'valid select, clear cache, assoc only' => [
 				$read_query,
+				null,
 				\CoreLibs\DB\IO::CLEAR_CACHE,
 				true,
 				$row_a_assoc,
@@ -2254,10 +2477,15 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_int',
 						'uid'
 					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
 					'num_fields' => 2,
 					'num_rows' => 2,
 					'pos' => 1,
 					'query' => $read_query,
+					'params' => [],
 					'read_rows' => 1,
 					'cache_flag' => \CoreLibs\DB\IO::CLEAR_CACHE,
 					'assoc_flag' => true,
@@ -2282,10 +2510,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 2,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::CLEAR_CACHE,
 							'assoc_flag' => true,
@@ -2305,10 +2538,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 0,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::CLEAR_CACHE,
 							'assoc_flag' => true,
@@ -2325,6 +2563,7 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'valid select, no cache, assoc only' => [
 				$read_query,
+				null,
 				\CoreLibs\DB\IO::NO_CACHE,
 				true,
 				$row_a_assoc,
@@ -2336,10 +2575,15 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_int',
 						'uid'
 					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
 					'num_fields' => 2,
 					'num_rows' => 2,
 					'pos' => 1,
 					'query' => $read_query,
+					'params' => [],
 					'read_rows' => 1,
 					'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
 					'assoc_flag' => true,
@@ -2361,10 +2605,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 2,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
 							'assoc_flag' => true,
@@ -2384,10 +2633,15 @@ final class CoreLibsDBIOTest extends TestCase
 								'row_int',
 								'uid'
 							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
 							'num_fields' => 2,
 							'num_rows' => 2,
 							'pos' => 0,
 							'query' => $read_query,
+							'params' => [],
 							'read_rows' => 2,
 							'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
 							'assoc_flag' => true,
@@ -2402,21 +2656,149 @@ final class CoreLibsDBIOTest extends TestCase
 				'',
 				$insert_query
 			],
+			'valid select params, no cache, assoc only' => [
+				// 0-3
+				$read_query_params,
+				['A'],
+				\CoreLibs\DB\IO::NO_CACHE,
+				true,
+				// 4
+				$row_a_assoc,
+				// 5
+				true,
+				// 6 cursor
+				[
+					'cursor' => 'PgSql\Result',
+					'data' => [],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
+					'num_fields' => 2,
+					'num_rows' => 1,
+					'pos' => 1,
+					'query' => $read_query_params,
+					'params' => ['A'],
+					'read_rows' => 1,
+					'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
+					'assoc_flag' => true,
+					'cached' => false,
+					'finished' => false,
+					'read_finished' => true,
+					'db_read_finished' => true,
+				],
+				// 7 extended cursor
+				[
+					// second row/last row
+					[
+						'data' => [
+							0 => $row_b_assoc,
+						],
+						'cursor' => [
+							'cursor' => 'PgSql\Result',
+							'data' => [],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
+							'num_fields' => 2,
+							'num_rows' => 1,
+							'pos' => 2,
+							'query' => $read_query_params,
+							'params' => ['A'],
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
+							'assoc_flag' => true,
+							'cached' => false,
+							'finished' => true,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					],
+					// end row, false
+					[
+						'data' => false,
+						'cursor' => [
+							'cursor' => 1,
+							'data' => [],
+							'field_names' => [
+								'row_int',
+								'uid'
+							],
+							'field_types' => [
+								'int4',
+								'varchar'
+							],
+							'num_fields' => 2,
+							'num_rows' => 1,
+							'pos' => 0,
+							'query' => $read_query_params,
+							'params' => ['A'],
+							'read_rows' => 2,
+							'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
+							'assoc_flag' => true,
+							'cached' => false,
+							'finished' => true,
+							'read_finished' => true,
+							'db_read_finished' => true,
+						]
+					]
+				],
+				// 8-10
+				'',
+				'',
+				$insert_query
+			],
 			// *** READ STEP BY STEP, ERROR TRIGGER
 			'empty select error' => [
+				// 0-3
 				'',
 				null,
 				null,
+				null,
+				// 4
 				false,
+				// 5
 				true,
+				// 6
 				[],
+				// 7
 				[],
+				// 8-10
 				'',
 				'11',
 				$insert_query,
 			],
+			'params count wrong' => [
+				// 0-3
+				$read_query_params,
+				[],
+				null,
+				null,
+				// 4
+				false,
+				// 5
+				true,
+				// 6
+				[],
+				// 7
+				[],
+				// 8-10
+				'',
+				'23',
+				$insert_query,
+			],
 			'insert query error' => [
 				$insert_query,
+				null,
 				null,
 				null,
 				false,
@@ -2433,6 +2815,7 @@ final class CoreLibsDBIOTest extends TestCase
 				$read_query,
 				null,
 				null,
+				null,
 				[$row_a, $row_b,],
 				false,
 				[
@@ -2445,10 +2828,15 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_int',
 						'uid'
 					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
 					'num_fields' => 2,
 					'num_rows' => 2,
 					'pos' => 0,
 					'query' => $read_query,
+					'params' => [],
 					'read_rows' => 2,
 					'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
 					'assoc_flag' => false,
@@ -2465,6 +2853,7 @@ final class CoreLibsDBIOTest extends TestCase
 			// READ_NEW
 			'valid select, full read READ NEW' => [
 				$read_query,
+				null,
 				\CoreLibs\DB\IO::READ_NEW,
 				null,
 				[$row_a, $row_b,],
@@ -2479,10 +2868,15 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_int',
 						'uid'
 					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
 					'num_fields' => 2,
 					'num_rows' => 2,
 					'pos' => 0,
 					'query' => $read_query,
+					'params' => [],
 					'read_rows' => 2,
 					'cache_flag' => \CoreLibs\DB\IO::READ_NEW,
 					'assoc_flag' => false,
@@ -2499,6 +2893,7 @@ final class CoreLibsDBIOTest extends TestCase
 			// CLEAR_CACHE
 			'valid select, full read CLEAR CACHE' => [
 				$read_query,
+				null,
 				\CoreLibs\DB\IO::CLEAR_CACHE,
 				null,
 				[$row_a, $row_b,],
@@ -2511,10 +2906,15 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_int',
 						'uid'
 					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
 					'num_fields' => 2,
 					'num_rows' => 2,
 					'pos' => 0,
 					'query' => $read_query,
+					'params' => [],
 					'read_rows' => 2,
 					'cache_flag' => \CoreLibs\DB\IO::CLEAR_CACHE,
 					'assoc_flag' => false,
@@ -2530,6 +2930,7 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			'valid select, full read NO CACHE' => [
 				$read_query,
+				null,
 				\CoreLibs\DB\IO::NO_CACHE,
 				null,
 				[$row_a, $row_b,],
@@ -2542,10 +2943,15 @@ final class CoreLibsDBIOTest extends TestCase
 						'row_int',
 						'uid'
 					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
 					'num_fields' => 2,
 					'num_rows' => 2,
 					'pos' => 0,
 					'query' => $read_query,
+					'params' => [],
 					'read_rows' => 2,
 					'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
 					'assoc_flag' => false,
@@ -2565,14 +2971,16 @@ final class CoreLibsDBIOTest extends TestCase
 	/**
 	 * dbReturn cursor extended checks
 	 *
-	 * @param  \CoreLibs\DB\IO $db
-	 * @param  string          $query
-	 * @param  array           $cursor_ext_checks
+	 * @param  \CoreLibs\DB\IO   $db
+	 * @param  string            $query
+	 * @param  array<mixed>|null $params
+	 * @param  array             $cursor_ext_checks
 	 * @return void
 	 */
 	private function subAssertCursorExtTestDbReturnFunction(
 		\CoreLibs\DB\IO $db,
 		string $query,
+		?array $params,
 		array $cursor_ext_checks
 	): void {
 		// cursor check
@@ -2581,7 +2989,11 @@ final class CoreLibsDBIOTest extends TestCase
 			empty($db->dbGetLastError()) &&
 			count($cursor_ext_checks)
 		) {
-			$cursor_ext = $db->dbGetCursorExt($query);
+			if ($params === null) {
+				$cursor_ext = $db->dbGetCursorExt($query);
+			} else {
+				$cursor_ext = $db->dbGetCursorExt($query, $params);
+			}
 			foreach ($cursor_ext_checks as $key => $expected) {
 				if ($key != 'cursor') {
 					$this->assertEquals(
@@ -2598,7 +3010,7 @@ final class CoreLibsDBIOTest extends TestCase
 							$cursor_ext[$key],
 							'assert equal cursor ext cursor int 1'
 						);
-					} elseif (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
+					} else {
 						$this->assertIsObject(
 							$cursor_ext[$key],
 							'assert is object cursor ext cursor'
@@ -2609,11 +3021,6 @@ final class CoreLibsDBIOTest extends TestCase
 							$cursor_ext[$key],
 							'assert is instance of cursor ext cursor'
 						);
-					} else {
-						$this->assertIsResource(
-							$cursor_ext[$key],
-							'assert is resource cursor ext cursor'
-						);
 					}
 				}
 			}
@@ -2621,9 +3028,43 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
+	 * Undocumented function
+	 *
+	 * @param  \CoreLibs\DB\IO    $db
+	 * @param  string             $query
+	 * @param  array<mixed>|null  $params
+	 * @param  int|null           $flag_cache
+	 * @param  bool|null          $flag_assoc
+	 * @return array<mixed>|false
+	 */
+	private function subDbReturnCall(
+		\CoreLibs\DB\IO $db,
+		string $query,
+		?array $params,
+		?int $flag_cache,
+		?bool $flag_assoc,
+	): array|false {
+		if ($flag_cache === null && $flag_assoc === null && $params === null) {
+			$result = $db->dbReturn($query);
+		} elseif ($flag_assoc === null && $params === null) {
+			$result = $db->dbReturn($query, $flag_cache);
+		} elseif ($params === null) {
+			$result = $db->dbReturn($query, $flag_cache, $flag_assoc);
+		} elseif ($flag_cache === null && $flag_assoc === null) {
+			$result = $db->dbReturnParams($query, $params);
+		} elseif ($flag_assoc === null) {
+			$result = $db->dbReturnParams($query, $params, $flag_cache);
+		} else {
+			$result = $db->dbReturnParams($query, $params, $flag_cache, $flag_assoc);
+		}
+		return $result;
+	}
+
+	/**
 	 * dbReturn Function Test
 	 *
 	 * @covers ::dbReturn
+	 * @covers ::dbReturnParams
 	 * @covers ::dbCacheReset
 	 * @covers ::dbGetCursorExt
 	 * @covers ::dbCursorPos
@@ -2632,6 +3073,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @testdox dbReturn Read Frist $read_first_only only and cache $flag_cache and assoc $flag_assoc with (Warning: $warning/Error: $error) [$_dataName]
 	 *
 	 * @param string $query
+	 * @param array<mixed>|null $params
 	 * @param integer|null $flag_cache
 	 * @param boolean|null $flag_assoc
 	 * @param array<mixed>|bool $expected
@@ -2645,6 +3087,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbReturnFunction(
 		string $query,
+		?array $params,
 		?int $flag_cache,
 		?bool $flag_assoc,
 		$expected,
@@ -2666,20 +3109,28 @@ final class CoreLibsDBIOTest extends TestCase
 
 		// all checks below
 		if ($read_first_only === true) {
+			// run query
+			$result = $this->subDbReturnCall(
+				$db,
+				$query,
+				$params,
+				$flag_cache,
+				$flag_assoc
+			);
 			// simple assert first read, then discard result
 			// compare data
 			$this->assertEquals(
 				$expected,
-				$flag_cache === null && $flag_assoc === null ?
-					$db->dbReturn($query) :
-					($flag_assoc === null ?
-						$db->dbReturn($query, $flag_cache) :
-						$db->dbReturn($query, $flag_cache, $flag_assoc)
-					),
+				$result,
 				'Assert dbReturn first only equal'
 			);
 			$this->subAssertErrorTest($db, $warning, $error);
-			$this->subAssertCursorExtTestDbReturnFunction($db, $query, $cursor_ext_checks);
+			$this->subAssertCursorExtTestDbReturnFunction(
+				$db,
+				$query,
+				$params,
+				$cursor_ext_checks
+			);
 			// extended checks. read until end of data and check per steck cursor data
 			foreach ($cursor_ext_checks_step as $_cursor_ext_checks) {
 				// each step matches a read step
@@ -2691,12 +3142,13 @@ final class CoreLibsDBIOTest extends TestCase
 			$pos = 0;
 			while (
 				is_array(
-					$res = $flag_cache === null && $flag_assoc === null ?
-						$db->dbReturn($query) :
-						($flag_assoc === null ?
-							$db->dbReturn($query, $flag_cache) :
-							$db->dbReturn($query, $flag_cache, $flag_assoc)
-						)
+					$res = $this->subDbReturnCall(
+						$db,
+						$query,
+						$params,
+						$flag_cache,
+						$flag_assoc
+					)
 				)
 			) {
 				$data[] = $res;
@@ -2704,27 +3156,45 @@ final class CoreLibsDBIOTest extends TestCase
 				// check cursor pos
 				$this->assertEquals(
 					$pos,
-					$db->dbGetCursorPos($query),
+					($params === null ?
+						$db->dbGetCursorPos($query) :
+						$db->dbGetCursorPos($query, $params)
+					),
 					'Assert dbReturn pos'
 				);
 			}
 			// does count match for returned data and the cursor num rows
 			$this->assertEquals(
 				count($data),
-				$db->dbGetCursorNumRows($query),
+				($params === null ?
+					$db->dbGetCursorNumRows($query) :
+					$db->dbGetCursorNumRows($query, $params)
+				),
 				'Assert dbReturn num rows'
 			);
 			// run cursor ext checks after first run
-			$this->subAssertCursorExtTestDbReturnFunction($db, $query, $cursor_ext_checks);
+			$this->subAssertCursorExtTestDbReturnFunction(
+				$db,
+				$query,
+				$params,
+				$cursor_ext_checks
+			);
 			// does data match
 			// try get cursor data for non existing, must be null
 			$this->assertNull(
-				$db->dbGetCursorExt($query, 'nonexistingfield')
+				$db->dbGetCursorExt($query, [], 'nonexistingfield')
 			);
 			// does reset data work, query cursor must be null
-			$db->dbCacheReset($query);
+			if ($params === null) {
+				$db->dbCacheReset($query);
+			} else {
+				$db->dbCacheReset($query, $params);
+			}
 			$this->assertNull(
-				$db->dbGetCursorExt($query),
+				($params === null ?
+					$db->dbGetCursorExt($query) :
+					$db->dbGetCursorExt($query, $params)
+				),
 				'Assert dbReturn reset cache'
 			);
 			// New run after reset
@@ -2733,12 +3203,13 @@ final class CoreLibsDBIOTest extends TestCase
 			$pos = 0;
 			while (
 				is_array(
-					$res = $flag_cache === null && $flag_assoc === null ?
-						$db->dbReturn($query) :
-						($flag_assoc === null ?
-							$db->dbReturn($query, $flag_cache) :
-							$db->dbReturn($query, $flag_cache, $flag_assoc)
-						)
+					$res = $this->subDbReturnCall(
+						$db,
+						$query,
+						$params,
+						$flag_cache,
+						$flag_assoc
+					)
 				)
 			) {
 				$data[] = $res;
@@ -2746,21 +3217,30 @@ final class CoreLibsDBIOTest extends TestCase
 				// check cursor pos
 				$this->assertEquals(
 					$pos,
-					$db->dbGetCursorPos($query),
+					($params === null ?
+						$db->dbGetCursorPos($query) :
+						$db->dbGetCursorPos($query, $params)
+					),
 					'Assert dbReturn double read 1 pos: ' . $flag_cache
 				);
 			}
-			$this->subAssertCursorExtTestDbReturnFunction($db, $query, $cursor_ext_checks);
+			$this->subAssertCursorExtTestDbReturnFunction(
+				$db,
+				$query,
+				$params,
+				$cursor_ext_checks
+			);
 			$data_second = [];
 			$pos_second = 0;
 			while (
 				is_array(
-					$res = $flag_cache === null && $flag_assoc === null ?
-						$db->dbReturn($query) :
-						($flag_assoc === null ?
-							$db->dbReturn($query, $flag_cache) :
-							$db->dbReturn($query, $flag_cache, $flag_assoc)
-						)
+					$res = $this->subDbReturnCall(
+						$db,
+						$query,
+						$params,
+						$flag_cache,
+						$flag_assoc
+					)
 				)
 			) {
 				$data_second[] = $res;
@@ -2768,7 +3248,10 @@ final class CoreLibsDBIOTest extends TestCase
 				// check cursor pos
 				$this->assertEquals(
 					$pos_second,
-					$db->dbGetCursorPos($query),
+					($params === null ?
+						$db->dbGetCursorPos($query) :
+						$db->dbGetCursorPos($query, $params)
+					),
 					'Assert dbReturn double read 2 pos: ' . $flag_cache
 				);
 			}
@@ -2783,7 +3266,12 @@ final class CoreLibsDBIOTest extends TestCase
 				'Assert first and second run are equal: count'
 			);
 			// run cursor ext checks after second run
-			$this->subAssertCursorExtTestDbReturnFunction($db, $query, $cursor_ext_checks);
+			$this->subAssertCursorExtTestDbReturnFunction(
+				$db,
+				$query,
+				$params,
+				$cursor_ext_checks
+			);
 		}
 
 		// reset all data
@@ -3119,20 +3607,14 @@ final class CoreLibsDBIOTest extends TestCase
 		// if result type, or if forced bool
 		if (is_string($expected_prepare) && $expected_prepare == 'result') {
 			// if PHP or newer, must be Object PgSql\Result
-			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
-				$this->assertIsObject(
-					$prepare_result
-				);
-				// also check that this is correct instance type
-				$this->assertInstanceOf(
-					'PgSql\Result',
-					$prepare_result
-				);
-			} else {
-				$this->assertIsResource(
-					$prepare_result
-				);
-			}
+			$this->assertIsObject(
+				$prepare_result
+			);
+			// also check that this is correct instance type
+			$this->assertInstanceOf(
+				'PgSql\Result',
+				$prepare_result
+			);
 		} else {
 			$this->assertEquals(
 				$expected_prepare,
@@ -3149,21 +3631,15 @@ final class CoreLibsDBIOTest extends TestCase
 			$db->dbExecute($stm_name, $query_data);
 		if ($expected_execute == 'result') {
 			// if PHP or newer, must be Object PgSql\Result
-			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
-				$this->assertIsObject(
-					$execute_result
-				);
-				// also check that this is correct instance type
-				$this->assertInstanceOf(
-					'PgSql\Result',
-					$execute_result
-				);
-				// if this is an select use dbFetchArray to get data and test
-			} else {
-				$this->assertIsResource(
-					$execute_result
-				);
-			}
+			$this->assertIsObject(
+				$execute_result
+			);
+			// also check that this is correct instance type
+			$this->assertInstanceOf(
+				'PgSql\Result',
+				$execute_result
+			);
+			// if this is an select use dbFetchArray to get data and test
 		} else {
 			$this->assertEquals(
 				$expected_execute,
@@ -3881,8 +4357,10 @@ final class CoreLibsDBIOTest extends TestCase
 		// NOTE that query can have multiple inserts
 		// NOTE if there are different INSERTS before the primary keys
 		// will not match anymore. Must be updated by hand
-		$table_with_primary_key_id = 55;
+		// IMPORTANT: if this is stand alone the primary key will not match and fail
+		$table_with_primary_key_id = 66;
 		// 0: query + returning
+		// 1: params
 		// 1: pk name for db exec
 		// 2: key name/value or null (dbGetReturningExt)
 		// 3: pos or null (dbGetReturningExt)
@@ -3895,6 +4373,7 @@ final class CoreLibsDBIOTest extends TestCase
 					. "VALUES "
 					. "('Text', 'Other', 123, '2022-03-01') "
 					. "RETURNING row_varchar, row_varchar_literal, row_int, row_date",
+				null,
 				null,
 				null,
 				null,
@@ -3930,6 +4409,7 @@ final class CoreLibsDBIOTest extends TestCase
 				null,
 				null,
 				null,
+				null,
 				[
 					'row_varchar' => 'Text',
 					'row_varchar_literal' => 'Other',
@@ -3957,6 +4437,7 @@ final class CoreLibsDBIOTest extends TestCase
 					. "('Text', 'Other', 123, '2022-03-01'), "
 					. "('Foxtrott', 'Tango', 789, '1982-10-15') "
 					. "RETURNING row_varchar, row_varchar_literal, row_int, row_date",
+				null,
 				null,
 				null,
 				null,
@@ -4003,6 +4484,7 @@ final class CoreLibsDBIOTest extends TestCase
 				null,
 				null,
 				null,
+				null,
 				[
 					'row_varchar' => 'Text',
 					'row_varchar_literal' => 'Other',
@@ -4028,6 +4510,7 @@ final class CoreLibsDBIOTest extends TestCase
 				)
 				RETURNING row_varchar, row_varchar_literal, row_int, row_date
 				EOM,
+				null,
 				null,
 				null,
 				null,
@@ -4058,6 +4541,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @testdox Check returning cursor using $pk_name with $key and $pos [$_dataName]
 	 *
 	 * @param string $query
+	 * @param array<mixed<|null $params
 	 * @param string|null $pk_name
 	 * @param string|null $key
 	 * @param integer|null $pos
@@ -4067,10 +4551,11 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbReturning(
 		string $query,
+		?array $params,
 		?string $pk_name,
 		?string $key,
 		?int $pos,
-		$expected_ret_ext,
+		array|string|int|null $expected_ret_ext,
 		array $expected_ret_arr
 	): void {
 		// self::$log->setLogLevelAll('debug', true);
@@ -4081,9 +4566,15 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 
 		// insert data
-		$pk_name === null ?
-			$db->dbExec($query) :
+		if ($pk_name === null && $params === null) {
+			$db->dbExec($query);
+		} elseif ($params === null) {
 			$db->dbExec($query, $pk_name);
+		} elseif ($pk_name === null) {
+			$db->dbExecParams($query, $params);
+		} else {
+			$db->dbExecParams($query, $params, $pk_name);
+		}
 
 		// get the last value for PK and match that somehow
 
@@ -4123,15 +4614,18 @@ final class CoreLibsDBIOTest extends TestCase
 	public function getMethodsProvider(): array
 	{
 		// 0: run query
-		// 1: optional insert query (if select or needed)
-		// 2: optional compare query, if not set 0 is used
-		// 3: num rows
-		// 4: column count
-		// 5: column names
+		// 1: query params
+		// 2: optional insert query (if select or needed)
+		// 3: optional compare query, if not set 0 is used
+		// 4: num rows
+		// 5: column count
+		// 6: column names
+		// 7: column types
 		return [
 			'select data' => [
 				"SELECT row_varchar, row_varchar_literal, row_int, row_date "
 					. "FROM table_with_primary_key",
+				null,
 				"INSERT INTO table_with_primary_key "
 					. "(row_varchar, row_varchar_literal, row_int, row_date) "
 					. "VALUES "
@@ -4142,6 +4636,7 @@ final class CoreLibsDBIOTest extends TestCase
 				2,
 				4,
 				['row_varchar', 'row_varchar_literal', 'row_int', 'row_date'],
+				['varchar', 'varchar', 'int4', 'date'],
 			],
 			// insert
 			'insert data' => [
@@ -4151,6 +4646,7 @@ final class CoreLibsDBIOTest extends TestCase
 					. "('Text', 'Other', 123, 1.0, '2022-03-01'), "
 					. "('Foxtrott', 'Tango', 789, 2.2, '1982-10-15'), "
 					. "('Schlamm', 'Beizinger', 100, 3.14, '1990-1-1') ",
+				null,
 				null,
 				"INSERT INTO table_with_primary_key "
 					. "(row_varchar, row_varchar_literal, row_int, row_numeric, row_date) "
@@ -4163,12 +4659,14 @@ final class CoreLibsDBIOTest extends TestCase
 				3,
 				0,
 				[],
+				[],
 			],
 			// update
 			'update data' => [
 				"UPDATE table_with_primary_key SET "
 					. "row_varchar = 'CHANGE A', row_int = 999 "
 					. "WHERE uid = 'A'",
+					null,
 				"INSERT INTO table_with_primary_key "
 					. "(uid, row_varchar, row_varchar_literal, row_int, row_date) "
 					. "VALUES "
@@ -4179,7 +4677,26 @@ final class CoreLibsDBIOTest extends TestCase
 				1,
 				0,
 				[],
-			]
+				[],
+			],
+			// select with params and proper query hashing
+			'select data, params' => [
+				"SELECT row_varchar, row_varchar_literal, row_int, row_date "
+					. "FROM table_with_primary_key "
+					. "WHERE row_varchar = $1",
+				['Text'],
+				"INSERT INTO table_with_primary_key "
+					. "(row_varchar, row_varchar_literal, row_int, row_date) "
+					. "VALUES "
+					. "('Text', 'Other', 123, '2022-03-01'), "
+					. "('Foxtrott', 'Tango', 789, '1982-10-15') ",
+				null,
+				//
+				1,
+				4,
+				['row_varchar', 'row_varchar_literal', 'row_int', 'row_date'],
+				['varchar', 'varchar', 'int4', 'date'],
+			],
 			// something other (schema change?)
 		];
 	}
@@ -4197,20 +4714,24 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @testdox Check check rows: $expected_rows and cols: $expected_cols [$_dataName]
 	 *
 	 * @param string $query
+	 * @param array<mixed>|null $params,
 	 * @param string|null $insert_query
 	 * @param string|null $compare_query
 	 * @param integer $expected_rows
 	 * @param integer $expected_cols
-	 * @param array $expected_col_names
+	 * @param array<mixed> $expected_col_names
+	 * @param array<mixed> $expected_col_types
 	 * @return void
 	 */
 	public function testDbGetMethods(
 		string $query,
+		?array $params,
 		?string $insert_query,
 		?string $compare_query,
 		int $expected_rows,
 		int $expected_cols,
-		array $expected_col_names
+		array $expected_col_names,
+		array $expected_col_types
 	): void {
 		// self::$log->setLogLevelAll('debug', true);
 		// self::$log->setLogLevelAll('print', true);
@@ -4223,7 +4744,11 @@ final class CoreLibsDBIOTest extends TestCase
 			$db->dbExec($insert_query);
 		}
 
-		$db->dbExec($query);
+		if ($params === null) {
+			$db->dbExec($query);
+		} else {
+			$db->dbExecParams($query, $params);
+		}
 
 		$this->assertEquals(
 			$compare_query ?? $query,
@@ -4231,36 +4756,46 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 		$this->assertEquals(
 			// perhaps move that somewhere else?
-			\CoreLibs\Create\Hash::__hashLong($query),
-			$db->dbGetQueryHash($query)
+			\CoreLibs\Create\Hash::__hashLong(
+				$query . (
+					$params !== null && $params !== [] ?
+						'#' . json_encode($params) : ''
+				)
+			),
+			($params === null ?
+				$db->dbGetQueryHash($query) :
+				$db->dbGetQueryHash($query, $params)
+			)
 		);
 		$this->assertEquals(
 			$expected_rows,
-			$db->dbGetNumRows()
+			$db->dbGetNumRows(),
+			'Failed assert dbGetNumRows'
 		);
 		$this->assertEquals(
 			$expected_cols,
-			$db->dbGetNumFields()
+			$db->dbGetNumFields(),
+			'Failed assert dbGetNumFields'
 		);
 		$this->assertEquals(
 			$expected_col_names,
-			$db->dbGetFieldNames()
+			$db->dbGetFieldNames(),
+			'Failed assert dbGetFieldNames'
+		);
+		$this->assertEquals(
+			$expected_col_types,
+			$db->dbGetFieldTypes(),
+			'Failed assert dbGetFieldTypes'
 		);
 		$dbh = $db->dbGetDbh();
-		if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
-			$this->assertIsObject(
-				$dbh
-			);
-			// also check that this is correct instance type
-			$this->assertInstanceOf(
-				'PgSql\Connection',
-				$dbh
-			);
-		} else {
-			$this->assertIsResource(
-				$dbh
-			);
-		}
+		$this->assertIsObject(
+			$dbh
+		);
+		// also check that this is correct instance type
+		$this->assertInstanceOf(
+			'PgSql\Connection',
+			$dbh
+		);
 
 		// if this is a select query, db dbReturn, dbReturnRow, dbReturnArray too
 		if (preg_match("/^(select|show|with) /i", $query)) {
@@ -4334,17 +4869,19 @@ final class CoreLibsDBIOTest extends TestCase
 	public function asyncProvider(): array
 	{
 		// 0: query
-		// 1: primary key
-		// 2: exepected exec return
-		// 3: warning
-		// 4: error
-		// 5: exepcted check return 1st
-		// 6: final result
-		// 7: warning
-		// 8: error
+		// 1: params
+		// 2: primary key
+		// 3: exepected exec return
+		// 4: warning
+		// 5: error
+		// 6: exepcted check return 1st
+		// 7: final result
+		// 8: warning
+		// 9: error
 		return [
 			'run simple async query' => [
 				"SELECT pg_sleep(1)",
+				null,
 				null,
 				// exec result
 				true,
@@ -4357,11 +4894,43 @@ final class CoreLibsDBIOTest extends TestCase
 				'',
 				''
 			],
+			'run simple async query, params' => [
+				"SELECT pg_sleep($1)",
+				[1],
+				null,
+				// exec result
+				true,
+				'',
+				'',
+				// check first
+				true,
+				// check final
+				'result',
+				'',
+				''
+			],
+			// error on wrong params
+			'wrong params count' => [
+				"SELECT pg_sleep($1)",
+				[],
+				null,
+				// exec result
+				false,
+				'',
+				'23',
+				// check first
+				false,
+				// check final
+				false,
+				'',
+				'42'
+			],
 			// send query failed (E40)
 			// result failed (E43)
 			// no query running (E42)
 			'no async query running' => [
 				'',
+				null,
 				null,
 				//
 				false,
@@ -4381,11 +4950,13 @@ final class CoreLibsDBIOTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::dbExecAsync
+	 * @covers ::dbExecParamsAsync
 	 * @covers ::dbCheckAsync
 	 * @dataProvider asyncProvider
 	 * @testdox async query $query with $expected_exec (warning $warning_exec/error $error_exec) and $expected_check/$expected_final (warning $warning_final/error $error_final) [$_dataName]
 	 *
 	 * @param string $query
+	 * @param array<mixed>|null $params
 	 * @param string|null $pk_name
 	 * @param boolean $expected_exec
 	 * @param string $warning_exec
@@ -4398,6 +4969,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbExecAsync(
 		string $query,
+		?array $params,
 		?string $pk_name,
 		bool $expected_exec,
 		string $warning_exec,
@@ -4415,9 +4987,15 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 
 		// exec the query
-		$result_exec = $pk_name === null ?
-			$db->dbExecAsync($query) :
-			$db->dbExecAsync($query, $pk_name);
+		if ($pk_name === null && $params === null) {
+			$result_exec = $db->dbExecAsync($query);
+		} elseif ($params === null) {
+			$result_exec = $db->dbExecAsync($query, $pk_name);
+		} elseif ($pk_name === null) {
+			$result_exec = $db->dbExecParamsAsync($query, $params);
+		} else {
+			$result_exec = $db->dbExecParamsAsync($query, $params, $pk_name);
+		}
 		$this->assertEquals(
 			$expected_exec,
 			$result_exec
@@ -4439,20 +5017,14 @@ final class CoreLibsDBIOTest extends TestCase
 		// check after final
 		if ($expected_final == 'result') {
 			// post end check
-			if (\CoreLibs\Check\PhpVersion::checkPHPVersion('8.1')) {
-				$this->assertIsObject(
-					$result_check
-				);
-				// also check that this is correct instance type
-				$this->assertInstanceOf(
-					'PgSql\Result',
-					$result_check
-				);
-			} else {
-				$this->assertIsResource(
-					$result_check
-				);
-			}
+			$this->assertIsObject(
+				$result_check
+			);
+			// also check that this is correct instance type
+			$this->assertInstanceOf(
+				'PgSql\Result',
+				$result_check
+			);
 		} else {
 			// else compar check
 			$this->assertEquals(
