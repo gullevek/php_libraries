@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "/storage/var/www/html/developers/clemens/core_data/composer-packages/CoreLibs-Composer-All",
-                "reference": "583edbfe0a2220c2257017379139eb6b40fd1cf1"
+                "reference": "9616d956cb2e2e672125f16d7832e4aa36702197"
             },
             "require": {
                 "php": ">=8.1"

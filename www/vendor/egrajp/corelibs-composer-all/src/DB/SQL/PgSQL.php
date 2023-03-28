@@ -33,7 +33,11 @@
 * pg_affected_rows (*)
 * pg_fetch_array
 * pg_query
+* pg_query_params
 * pg_send_query
+* pg_send_query_params
+* pg_send_prepare
+* pg_send_execute
 * pg_get_result
 * pg_connection_busy
 * pg_close
@@ -50,6 +54,7 @@ namespace CoreLibs\DB\SQL;
 // below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
 // as main system. Currently all @var sets are written as object
 /** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
+/** @phan-file-suppress PhanTypeMismatchArgumentInternal, PhanTypeMismatchReturn */
 
 class PgSQL implements Interface\SqlFunctions
 {
@@ -93,8 +98,7 @@ class PgSQL implements Interface\SqlFunctions
 	}
 
 	/**
-	 * Proposed
-	 * wrapperf or pg_query_params for queries in the style of
+	 * wrapper for pg_query_params for queries in the style of
 	 * SELECT foo FROM bar WHERE foobar = $1
 	 *
 	 * @param  string       $query  Query string with placeholders $1, ..
@@ -129,6 +133,22 @@ class PgSQL implements Interface\SqlFunctions
 			return false;
 		}
 		$result = pg_send_query($this->dbh, $query);
+		return $result ? true : false;
+	}
+
+	/**
+	 * sends an async query to the server with params
+	 *
+	 * @param  string       $query  Query string with placeholders $1, ..
+	 * @param  array<mixed> $params Matching parameters for each placerhold
+	 * @return bool         true/false Query sent successful status
+	 */
+	public function __dbSendQueryParams(string $query, array $params): bool
+	{
+		if (is_bool($this->dbh)) {
+			return false;
+		}
+		$result = pg_send_query_params($this->dbh, $query, $params);
 		return $result ? true : false;
 	}
 
@@ -209,6 +229,38 @@ class PgSQL implements Interface\SqlFunctions
 	}
 
 	/**
+	 * Asnyc send for a prepared statement
+	 *
+	 * @param  string $name
+	 * @param  string $query
+	 * @return bool
+	 */
+	public function __dbSendPrepare(string $name, string $query): bool
+	{
+		if (is_bool($this->dbh)) {
+			return false;
+		}
+		$result = pg_send_prepare($this->dbh, $name, $query);
+		return $result ? true : false;
+	}
+
+	/**
+	 * Asnyc ssend for a prepared statement execution
+	 *
+	 * @param  string $name
+	 * @param  array<mixed> $params
+	 * @return bool
+	 */
+	public function __dbSendExecute(string $name, array $params): bool
+	{
+		if (is_bool($this->dbh)) {
+			return false;
+		}
+		$result = pg_send_execute($this->dbh, $name, $params);
+		return $result ? true : false;
+	}
+
+	/**
 	 * wrapper for pg_num_rows
 	 *
 	 * @param  \PgSql\Result|false $cursor cursor
@@ -249,6 +301,21 @@ class PgSQL implements Interface\SqlFunctions
 			return false;
 		}
 		return pg_field_name($cursor, $i);
+	}
+
+	/**
+	 * wrapper for pg_field_name
+	 *
+	 * @param  \PgSql\Result|false $cursor cursor
+	 * @param  int                 $i      field position
+	 * @return string|false                field type name or false
+	 */
+	public function __dbFieldType(\PgSql\Result|false $cursor, int $i): string|false
+	{
+		if (is_bool($cursor)) {
+			return false;
+		}
+		return pg_field_type($cursor, $i);
 	}
 
 	/**

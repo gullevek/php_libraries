@@ -6,14 +6,12 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
+$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
+$DEBUG_ALL = true;
+$PRINT_ALL = true;
+$DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -25,8 +23,8 @@ require 'config.php';
 $LOG_FILE_ID = 'classTest-VarIsType';
 ob_end_flush();
 
-use CoreLibs\Convert\VarSetType;
-use CoreLibs\Convert\VarSetTypeNull;
+use CoreLibs\Convert\SetVarType;
+use CoreLibs\Convert\SetVarTypeNull;
 use CoreLibs\Debug\Support;
 
 $log = new CoreLibs\Debug\Logging([
@@ -35,9 +33,9 @@ $log = new CoreLibs\Debug\Logging([
 	// add file date
 	'print_file_date' => true,
 	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
+	'debug_all' => $DEBUG_ALL,
 	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'print_all' => $PRINT_ALL,
 ]);
 
 $PAGE_NAME = 'TEST CLASS: CONVERT\VARISTYPE';
@@ -48,28 +46,28 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 
-print "Test A str set: " . VarSetType::setStr(5, 'set int') . "<br>";
-print "Test A str make int: " . VarSetType::makeStr(5, 'make int') . "<br>";
-print "Test A str make object: " . VarSetType::makeStr($log, 'Object') . "<br>";
-print "Test A str make null: " . VarSetType::makeStr(null, 'null') . "<br>";
-print "Test B int set: " . VarSetType::setInt("5", -1) . "<br>";
-print "Test B int make string: " . VarSetType::makeInt("5", -1) . "<br>";
-print "Test B' int make float: " . VarSetType::makeInt("5.5", -1) . "<br>";
-print "Test B'' int make class: " . VarSetType::makeInt($log, -1) . "<br>";
-print "Test B''' int make hex: " . VarSetType::makeInt("0x55", -1) . "<br>";
-print "Test B''' int make hex: " . VarSetType::makeInt(0x55, -1) . "<br>";
-print "Test C float make: " . VarSetType::makeFloat("13,232.95", -1) . "<br>";
+print "Test A str set: " . SetVarType::setStr(5, 'set int') . "<br>";
+print "Test A str make int: " . SetVarType::makeStr(5, 'make int') . "<br>";
+print "Test A str make object: " . SetVarType::makeStr($log, 'Object') . "<br>";
+print "Test A str make null: " . SetVarType::makeStr(null, 'null') . "<br>";
+print "Test B int set: " . SetVarType::setInt("5", -1) . "<br>";
+print "Test B int make string: " . SetVarType::makeInt("5", -1) . "<br>";
+print "Test B' int make float: " . SetVarType::makeInt("5.5", -1) . "<br>";
+print "Test B'' int make class: " . SetVarType::makeInt($log, -1) . "<br>";
+print "Test B''' int make hex: " . SetVarType::makeInt("0x55", -1) . "<br>";
+print "Test B''' int make hex: " . SetVarType::makeInt(0x55, -1) . "<br>";
+print "Test C float make: " . SetVarType::makeFloat("13,232.95", -1) . "<br>";
 print "Test D floatval: " . floatval("13,232.95") . "<br>";
 print "Test E filter_var: "
 	. filter_var("13,232.95", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) . "<br>";
 print "Test F filter_var: "
 	. filter_var("string", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) . "<br>";
 
-print "Test G make bool: " . VarSetType::makeBool("on") . "<br>";
-print "Test G make bool: " . VarSetType::makeBool(null) . "<br>";
-print "Test G make bool: " . VarSetType::makeBool("null") . "<br>";
-print "Test G make bool: " . VarSetType::makeBool($log) . "<br>";
-print "Test G make bool: " . VarSetTypeNull::makeBool($log) . "<br>";
+print "Test G make bool: " . SetVarType::makeBool("on") . "<br>";
+print "Test G make bool: " . SetVarType::makeBool(null) . "<br>";
+print "Test G make bool: " . SetVarType::makeBool("null") . "<br>";
+print "Test G make bool: " . SetVarType::makeBool($log) . "<br>";
+print "Test G make bool: " . SetVarTypeNull::makeBool($log) . "<br>";
 
 print "<hr>";
 
@@ -84,30 +82,30 @@ $checks = [
 foreach ($checks as $string) {
 	print "** SET NOT NULL: (" . gettype($string) . ")<br>";
 	print "Str: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetType::setStr($string)) . "-<br>";
+		. Support::printToString(SetVarType::setStr($string)) . "-<br>";
 	print "Int: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetType::setInt($string)) . "-<br>";
+		. Support::printToString(SetVarType::setInt($string)) . "-<br>";
 	print "Float: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetType::setFloat($string)) . "-<br>";
+		. Support::printToString(SetVarType::setFloat($string)) . "-<br>";
 	print "Bool: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetType::setBool($string)) . "-<br>";
+		. Support::printToString(SetVarType::setBool($string)) . "-<br>";
 	print "Array: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetType::setArray($string)) . "-<br>";
+		. Support::printToString(SetVarType::setArray($string)) . "-<br>";
 	print "<hr>";
 }
 
 foreach ($checks as $string) {
 	print "** SET NULL: (" . gettype($string) . ")<br>";
 	print "Str: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetTypeNull::setStr($string)) . "-<br>";
+		. Support::printToString(SetVarTypeNull::setStr($string)) . "-<br>";
 	print "Int: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetTypeNull::setInt($string)) . "-<br>";
+		. Support::printToString(SetVarTypeNull::setInt($string)) . "-<br>";
 	print "Float: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetTypeNull::setFloat($string)) . "-<br>";
+		. Support::printToString(SetVarTypeNull::setFloat($string)) . "-<br>";
 	print "Bool: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetTypeNull::setBool($string)) . "-<br>";
+		. Support::printToString(SetVarTypeNull::setBool($string)) . "-<br>";
 	print "Array: " . Support::printToString($string) . ": -"
-		. Support::printToString(VarSetTypeNull::setArray($string)) . "-<br>";
+		. Support::printToString(SetVarTypeNull::setArray($string)) . "-<br>";
 	print "<hr>";
 }
 

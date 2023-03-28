@@ -45,6 +45,15 @@ interface SqlFunctions
 	/**
 	 * Undocumented function
 	 *
+	 * @param  string $query
+	 * @param  array<mixed> $params
+	 * @return bool
+	 */
+	public function __dbSendQueryParams(string $query, array $params): bool;
+
+	/**
+	 * Undocumented function
+	 *
 	 * @return \PgSql\Result|false
 	 */
 	public function __dbGetResult(): \PgSql\Result|false;
@@ -77,6 +86,24 @@ interface SqlFunctions
 	/**
 	 * Undocumented function
 	 *
+	 * @param  string $name
+	 * @param  string $query
+	 * @return bool
+	 */
+	public function __dbSendPrepare(string $name, string $query): bool;
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string $name
+	 * @param  array<mixed> $params
+	 * @return bool
+	 */
+	public function __dbSendExecute(string $name, array $params): bool;
+
+	/**
+	 * Undocumented function
+	 *
 	 * @param \PgSql\Result|false $cursor
 	 * @return int
 	 */
@@ -98,6 +125,15 @@ interface SqlFunctions
 	 * @return string|false
 	 */
 	public function __dbFieldName(\PgSql\Result|false $cursor, int $i): string|false;
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  \PgSql\Result|false $cursor
+	 * @param  int $i
+	 * @return string|false
+	 */
+	public function __dbFieldType(\PgSql\Result|false $cursor, int $i): string|false;
 
 	/**
 	 * Undocumented function

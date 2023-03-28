@@ -453,8 +453,8 @@ class SmartyExtend extends \Smarty
 	 * this is for frontend type and will not set any only admin needed variables
 	 *
 	 * @param  array<string,string> $options list with the following value:
-	 *                              compile_dir          :BASE . TEMPLATES_C
-	 *                              cache_dir            :BASE . CACHE
+	 *                              compile_dir      :BASE . TEMPLATES_C
+	 *                              cache_dir        :BASE . CACHE
 	 *                              js               :JS
 	 *                              css              :CSS
 	 *                              font             :FONT
@@ -462,17 +462,19 @@ class SmartyExtend extends \Smarty
 	 *                              g_title          :G_TITLE
 	 *                              stylesheet       :STYLESHEET
 	 *                              javascript       :JAVASCRIPT
-	 * @param  \CoreLibs\Admin\Backend|null $cms Optinal Admin Backend for
-	 *                                           smarty variables merge
+	 * @param  array<string,mixed>  $smarty_data     array of three keys
+	 *                                               that hold smarty set strings
+	 *                                               HEADER, DATA, DEBUG_DATA
 	 * @return void
 	 */
 	public function setSmartyVarsFrontend(
 		array $options,
-		?\CoreLibs\Admin\Backend $cms
+		array $smarty_data
 	): void {
 		$this->setSmartyVars(
 			false,
-			$cms,
+			$smarty_data,
+			null,
 			$options['compile_dir'] ?? null,
 			$options['cache_dir'] ?? null,
 			$options['js'] ?? null,
@@ -480,6 +482,7 @@ class SmartyExtend extends \Smarty
 			$options['font'] ?? null,
 			$options['default_encoding'] ?? null,
 			$options['g_title'] ?? null,
+			null,
 			null,
 			null,
 			null,
@@ -493,8 +496,8 @@ class SmartyExtend extends \Smarty
 	 * wrapper call for setSmartyVars
 	 * this is only for admin interface and will set additional variables
 	 * @param  array<string,string> $options list with the following value:
-	 *                              compile_dir          :BASE . TEMPLATES_C
-	 *                              cache_dir            :BASE . CACHE
+	 *                              compile_dir      :BASE . TEMPLATES_C
+	 *                              cache_dir        :BASE . CACHE
 	 *                              js               :JS
 	 *                              css              :CSS
 	 *                              font             :FONT
@@ -503,6 +506,7 @@ class SmartyExtend extends \Smarty
 	 *                              admin_stylesheet :ADMIN_STYLESHEET
 	 *                              admin_javascript :ADMIN_JAVASCRIPT
 	 *                              page_width       :PAGE_WIDTH
+	 *                              content_path     :CONTENT_PATH
 	 *                              user_name        :_SESSION['USER_NAME']
 	 * @param  \CoreLibs\Admin\Backend|null $cms Optinal Admin Backend for
 	 *                                           smarty variables merge
@@ -512,8 +516,18 @@ class SmartyExtend extends \Smarty
 		array $options,
 		?\CoreLibs\Admin\Backend $cms = null
 	): void {
+		// if we have cms data, check for array blocks and build
+		$smarty_data = [];
+		if ($cms !== null) {
+			$smarty_data = [
+				'HEADER' => $cms->HEADER,
+				'DATA' => $cms->DATA,
+				'DEBUG_DATA' => $cms->DEBUG_DATA
+			];
+		}
 		$this->setSmartyVars(
 			true,
+			$smarty_data,
 			$cms,
 			$options['compile_dir'] ?? null,
 			$options['cache_dir'] ?? null,
@@ -525,6 +539,7 @@ class SmartyExtend extends \Smarty
 			$options['admin_stylesheet'] ?? null,
 			$options['admin_javascript'] ?? null,
 			$options['page_width'] ?? null,
+			$options['content_path'] ?? null,
 			$options['user_name'] ?? null,
 			null,
 			null
@@ -537,6 +552,7 @@ class SmartyExtend extends \Smarty
 	 *
 	 * @param  bool        $admin_call           default false
 	 *                                           will set admin only variables
+	 * @param  array<string,mixed> $smarty_data  smarty data to merge
 	 * @param  \CoreLibs\Admin\Backend|null $cms Optinal Admin Backend for
 	 *                                           smarty variables merge
 	 * @param  string|null $compile_dir          BASE . TEMPLATES_C
@@ -549,6 +565,7 @@ class SmartyExtend extends \Smarty
 	 * @param  string|null $set_admin_stylesheet ADMIN_STYLESHEET
 	 * @param  string|null $set_admin_javascript ADMIN_JAVASCRIPT
 	 * @param  string|null $set_page_width       PAGE_WIDTH
+	 * @param  string|null $set_content_path     CONTENT_PATH  (only if $cms set and admin)
 	 * @param  string|null $set_user_name        _SESSION['USER_NAME']
 	 * @param  string|null $set_stylesheet       STYLESHEET
 	 * @param  string|null $set_javascript       JAVASCRIPT
@@ -556,6 +573,7 @@ class SmartyExtend extends \Smarty
 	 */
 	private function setSmartyVars(
 		bool $admin_call,
+		array $smarty_data = [],
 		?\CoreLibs\Admin\Backend $cms = null,
 		?string $compile_dir = null,
 		?string $cache_dir = null,
@@ -567,6 +585,7 @@ class SmartyExtend extends \Smarty
 		?string $set_admin_stylesheet = null,
 		?string $set_admin_javascript = null,
 		?string $set_page_width = null,
+		?string $set_content_path = null,
 		?string $set_user_name = null,
 		?string $set_stylesheet = null,
 		?string $set_javascript = null,
@@ -593,6 +612,9 @@ class SmartyExtend extends \Smarty
 					$set_stylesheet === null ||
 					$set_javascript === null
 				)
+			) ||
+			(
+				$admin_call === true && $cms !== null && $set_content_path === null
 			)
 		) {
 			/** @deprecated setSmartyVars call without parameters */
@@ -612,25 +634,12 @@ class SmartyExtend extends \Smarty
 		$set_admin_stylesheet = $set_admin_stylesheet ?? ADMIN_STYLESHEET;
 		$set_admin_javascript = $set_admin_javascript ?? ADMIN_JAVASCRIPT;
 		$set_page_width = $set_page_width ?? PAGE_WIDTH;
+		$set_content_path = $set_content_path ?? CONTENT_PATH;
 		$set_stylesheet = $set_stylesheet ?? STYLESHEET;
 		$set_javascript = $set_javascript ?? JAVASCRIPT;
 		$set_user_name = $set_user_name ?? $_SESSION['USER_NAME'] ?? '';
-		// depreacte call globals cms on null 4mcs
-		if (
-			$cms === null &&
-			isset($GLOBALS['cms'])
-		) {
-			/** @deprecated setSmartyVars globals cms is deprecated */
-			trigger_error(
-				'Calling setSmartyVars without cms parameter when needed is deprecated',
-				E_USER_DEPRECATED
-			);
-		}
-		// this is ugly
-		$cms = $cms ?? $GLOBALS['cms'] ?? null;
-		if ($cms instanceof \CoreLibs\Admin\Backend) {
-			$this->mergeCmsSmartyVars($cms);
-		}
+		// merge additional smarty data
+		$this->mergeCmsSmartyVars($smarty_data);
 
 		// trigger flags
 		$this->HEADER['USE_PROTOTYPE'] = $this->USE_PROTOTYPE;
@@ -672,12 +681,27 @@ class SmartyExtend extends \Smarty
 		$this->DATA['FORM_ACTION'] = $this->FORM_ACTION;
 		// special for admin
 		if ($admin_call === true) {
+			// depreacte call globals cms on null 4mcs
+			if (
+				$cms === null &&
+				isset($GLOBALS['cms'])
+			) {
+				/** @deprecated setSmartyVars globals cms is deprecated */
+				trigger_error(
+					'Calling setSmartyVars without cms parameter when needed is deprecated',
+					E_USER_DEPRECATED
+				);
+			}
+			// this is ugly
+			$cms = $cms ?? $GLOBALS['cms'] ?? null;
 			// set ACL extra show
 			if ($cms instanceof \CoreLibs\Admin\Backend) {
 				$this->DATA['show_ea_extra'] = $cms->acl['show_ea_extra'] ?? false;
 				$this->DATA['ADMIN'] = $cms->acl['admin'] ?? 0;
 				// top menu
-				$this->DATA['nav_menu'] = $cms->adbTopMenu();
+				$this->DATA['nav_menu'] = $cms->adbTopMenu(
+					$set_content_path
+				);
 				$this->DATA['nav_menu_count'] = count($this->DATA['nav_menu']);
 				// messages = ['msg' =>, 'class' => 'error/warning/...']
 				$this->DATA['messages'] = $cms->messages;
@@ -737,18 +761,18 @@ class SmartyExtend extends \Smarty
 	/**
 	 * merge outside object HEADER/DATA/DEBUG_DATA vars into the smarty class
 	 *
-	 * @param  \CoreLibs\Admin\Backend $cms object that has header/data/debug_data
+	 * @param  array<string,mixed> $smarty_data array that has header/data/debug_data
 	 * @return void
 	 */
-	public function mergeCmsSmartyVars(\CoreLibs\Admin\Backend $cms): void
+	public function mergeCmsSmartyVars(array $smarty_data): void
 	{
 		// array merge HEADER, DATA, DEBUG DATA
 		foreach (['HEADER', 'DATA', 'DEBUG_DATA'] as $ext_smarty) {
 			if (
-				isset($cms->{$ext_smarty}) &&
-				is_array($cms->{$ext_smarty})
+				isset($smarty_data[$ext_smarty]) &&
+				is_array($smarty_data[$ext_smarty])
 			) {
-				$this->{$ext_smarty} = array_merge($this->{$ext_smarty}, $cms->{$ext_smarty});
+				$this->{$ext_smarty} = array_merge($this->{$ext_smarty}, $smarty_data[$ext_smarty]);
 			}
 		}
 	}

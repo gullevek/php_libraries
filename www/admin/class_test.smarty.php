@@ -46,6 +46,14 @@ $smarty = new CoreLibs\Template\SmartyExtend(
 	CACHE_ID,
 	COMPILE_ID,
 );
+$adm = new CoreLibs\Admin\Backend(
+	new CoreLibs\DB\IO(DB_CONFIG, $log),
+	$log,
+	new CoreLibs\Create\Session(EDIT_SESSION_NAME),
+	$l10n,
+	80
+);
+$adm->DATA['adm_set'] = 'SET from admin class';
 
 $PAGE_NAME = 'TEST CLASS: SMARTY';
 print "<!DOCTYPE html>";
@@ -146,8 +154,10 @@ $smarty->setSmartyVarsAdmin(
 		'admin_stylesheet' => ADMIN_STYLESHEET,
 		'admin_javascript' => ADMIN_JAVASCRIPT,
 		'page_width' => PAGE_WIDTH,
+		'content_path' => CONTENT_PATH,
 		'user_name' => $_SESSION['USER_NAME'] ?? ''
-	]
+	],
+	$adm
 );
 
 // error message
