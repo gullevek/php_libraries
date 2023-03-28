@@ -226,54 +226,94 @@ print "EOM STRING PREPARE INSERT[ins_test_foo_eom] STATUS: " . Support::printToS
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
+echo "<b>*</b><br>";
 $status = $db->dbExecParams($query, ['EOM BAR TEST PARAMS ' . time()]);
-print "EOM STRING EXEC PARAMS INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
+print "EOM STRING EXEC PARAMS INSERT STATUS: " . Support::printToString($status) . " |<br>"
 	. " |<br>"
 	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
-$query = <<<EOM
+// I/S Query
+$query_insert = <<<EOM
 INSERT INTO
 	test_foo
 (
-	test, some_bool, string_a, number_a, number_a_numeric, some_time
+	test, some_bool, string_a, number_a, number_a_numeric,
+	some_time, some_timestamp, json_string
 ) VALUES (
-	$1, $2, $3, $4, $5, $6
+	$1, $2, $3, $4, $5,
+	$6, $7, $8
 )
 RETURNING test
 EOM;
+$query_select = <<<EOM
+SELECT
+	test, some_bool, string_a, number_a, number_a_numeric,
+	some_time, some_time, some_timestamp, json_string
+FROM
+	test_foo
+WHERE
+	test_foo_id = $1
+EOM;
+// A
 $status = $db->dbExecParams(
-	$query,
+	$query_insert,
 	[
 		'EOM BAR TEST PARAMS MULTI ' . time(),
 		true,
 		'string a',
 		1,
 		1.5,
-		'1h'
+		'1h',
+		'2023-01-01 12:12:12',
+		json_encode(['a' => 'b', 'c' => 1])
 	]
 );
 $__last_insert_id = $db->dbGetInsertPK();
-print "EOM STRING EXEC PARAMS MULTI INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
+echo "<b>*</b><br>";
+print "EOM STRING EXEC PARAMS MULTI INSERT STATUS: " . Support::printToString($status) . " |<br>"
 	. " |<br>"
 	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
-$query = <<<EOM
-SELECT
-	test, some_bool, string_a, number_a, number_a_numeric, some_time
-FROM
-	test_foo
-WHERE
-	test_foo_id = $1
-EOM;
+
 print "EOM STRING EXEC RETURN TEST: " . print_r(
 	$db->dbReturnRowParams(
-		$query,
+		$query_select,
 		[$__last_insert_id]
 	)
 ) . "<br>";
+// B
+$status = $db->dbExecParams(
+	$query_insert,
+	[
+		'EOM BAR TEST PARAMS MULTI NULL ' . time(),
+		true,
+		'string a',
+		null,
+		null,
+		'1h',
+		null,
+		null
+	]
+);
+$__last_insert_id = $db->dbGetInsertPK();
+echo "<b>*</b><br>";
+print "EOM STRING EXEC PARAMS MULTI NULL INSERT STATUS: "
+	. Support::printToString($status) . " |<br>"
+	. " |<br>"
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true)
+	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
+print "EOM STRING EXEC RETURN TEST: " . print_r(
+	$db->dbReturnRowParams(
+		$query_select,
+		[$__last_insert_id]
+	)
+) . "<br>";
+echo "<hr>";
 
 // returning test with multiple entries
 // $status = $db->db_exec(
