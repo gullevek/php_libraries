@@ -317,7 +317,7 @@ echo "<hr>";
 // binary insert tests
 $filename = $db->dbEscapeLiteral('class_test.db.php');
 $rand_bin_uid = $db->dbEscapeLiteral(\CoreLibs\Create\Uids::uniqIdShort());
-$binary_data = $db->dbEscapeBytea(file_get_contents('class_test.db.php'));
+$binary_data = $db->dbEscapeBytea(file_get_contents('class_test.db.php') ?:  '');
 $query = <<<EOM
 INSERT INTO binary_test (
 	filename, uid, binary_data
