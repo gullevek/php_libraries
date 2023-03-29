@@ -67,12 +67,30 @@ $q_db_ret = "SELECT * FROM test_db_return ORDER BY uid";
 
 RunningTime::hrRunningTime();
 
+$cache_flag = '[DEFAULT] NO_CACHE (0)';
+print "dbReturn '" . $cache_flag . "'/Default: " . $q_db_ret . "<br>";
+// Do twice
+for ($i = 1; $i <= 6; $i++) {
+	$res = $db->dbReturn($q_db_ret);
+	print $i . ") " . $cache_flag . ": "
+		. "res: " . (is_bool($res) ?
+			"<b>Bool:</b> " . $db->log->prBl($res) :
+			(is_array($res) ?
+				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
+		) . ", "
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
+	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
+}
+print "<hr>";
+
 $cache_flag = 'USE_CACHE (0)';
 print "dbReturn '" . $cache_flag . "'/Default: " . $q_db_ret . "<br>";
 // SINGLE read on multi row return
 // Do twice
 for ($i = 1; $i <= 6; $i++) {
-	$res = $db->dbReturn($q_db_ret);
+	$res = $db->dbReturn($q_db_ret, $db::USE_CACHE);
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
 			"<b>Bool:</b> " . $db->log->prBl($res) :

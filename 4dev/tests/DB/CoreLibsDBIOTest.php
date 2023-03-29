@@ -2142,7 +2142,7 @@ final class CoreLibsDBIOTest extends TestCase
 		return [
 			// *** READ STEP BY STEP
 			// default cache: USE_CACHE
-			'valid select, default cache settings' => [
+			'valid select, default cache settings (NO_CACHE)' => [
 				// 0-3
 				$read_query,
 				null,
@@ -2156,9 +2156,7 @@ final class CoreLibsDBIOTest extends TestCase
 				// check cursor_ext
 				[
 					'cursor' => 'PgSql\Result',
-					'data' => [
-						0 => $row_a,
-					],
+					'data' => [],
 					'field_names' => [
 						'row_int',
 						'uid'
@@ -2173,9 +2171,9 @@ final class CoreLibsDBIOTest extends TestCase
 					'query' => $read_query,
 					'params' => [],
 					'read_rows' => 1,
-					'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+					'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
 					'assoc_flag' => false,
-					'cached' => true,
+					'cached' => false,
 					'finished' => false,
 					'read_finished' => false,
 					'db_read_finished' => false,
@@ -2190,10 +2188,7 @@ final class CoreLibsDBIOTest extends TestCase
 						],
 						'cursor' => [
 							'cursor' => 'PgSql\Result',
-							'data' => [
-								0 => $row_a,
-								1 => $row_b,
-							],
+							'data' => [],
 							'field_names' => [
 								'row_int',
 								'uid'
@@ -2208,9 +2203,9 @@ final class CoreLibsDBIOTest extends TestCase
 							'query' => $read_query,
 							'params' => [],
 							'read_rows' => 2,
-							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+							'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
 							'assoc_flag' => false,
-							'cached' => true,
+							'cached' => false,
 							'finished' => false,
 							'read_finished' => true,
 							'db_read_finished' => true,
@@ -2221,10 +2216,7 @@ final class CoreLibsDBIOTest extends TestCase
 						'data' => false,
 						'cursor' => [
 							'cursor' => 1,
-							'data' => [
-								0 => $row_a,
-								1 => $row_b,
-							],
+							'data' => [],
 							'field_names' => [
 								'row_int',
 								'uid'
@@ -2239,9 +2231,9 @@ final class CoreLibsDBIOTest extends TestCase
 							'query' => $read_query,
 							'params' => [],
 							'read_rows' => 2,
-							'cache_flag' => \CoreLibs\DB\IO::USE_CACHE,
+							'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
 							'assoc_flag' => false,
-							'cached' => true,
+							'cached' => false,
 							'finished' => true,
 							'read_finished' => true,
 							'db_read_finished' => true,
@@ -2811,10 +2803,47 @@ final class CoreLibsDBIOTest extends TestCase
 			],
 			// *** READ AS LOOP
 			// from here on a complex read all full tests
-			'valid select, full read DEFAULT CACHE' => [
+			'valid select, full read, default cache settings (NO CACHE)' => [
 				$read_query,
 				null,
 				null,
+				null,
+				[$row_a, $row_b,],
+				false,
+				[
+					'cursor' => 1,
+					'data' => [],
+					'field_names' => [
+						'row_int',
+						'uid'
+					],
+					'field_types' => [
+						'int4',
+						'varchar'
+					],
+					'num_fields' => 2,
+					'num_rows' => 2,
+					'pos' => 0,
+					'query' => $read_query,
+					'params' => [],
+					'read_rows' => 2,
+					'cache_flag' => \CoreLibs\DB\IO::NO_CACHE,
+					'assoc_flag' => false,
+					'cached' => false,
+					'finished' => true,
+					'read_finished' => true,
+					'db_read_finished' => true,
+				],
+				[],
+				'',
+				'',
+				$insert_query
+			],
+			// USE CACHE
+			'valid select, full read, USE CACHE' => [
+				$read_query,
+				null,
+				\CoreLibs\DB\IO::USE_CACHE,
 				null,
 				[$row_a, $row_b,],
 				false,
@@ -2851,7 +2880,7 @@ final class CoreLibsDBIOTest extends TestCase
 				$insert_query
 			],
 			// READ_NEW
-			'valid select, full read READ NEW' => [
+			'valid select, full read, READ NEW' => [
 				$read_query,
 				null,
 				\CoreLibs\DB\IO::READ_NEW,
@@ -2891,7 +2920,7 @@ final class CoreLibsDBIOTest extends TestCase
 				$insert_query
 			],
 			// CLEAR_CACHE
-			'valid select, full read CLEAR CACHE' => [
+			'valid select, full read, CLEAR CACHE' => [
 				$read_query,
 				null,
 				\CoreLibs\DB\IO::CLEAR_CACHE,
@@ -2928,7 +2957,7 @@ final class CoreLibsDBIOTest extends TestCase
 				'',
 				$insert_query
 			],
-			'valid select, full read NO CACHE' => [
+			'valid select, full read, NO CACHE' => [
 				$read_query,
 				null,
 				\CoreLibs\DB\IO::NO_CACHE,
@@ -3070,7 +3099,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @covers ::dbCursorPos
 	 * @covers ::dbCursorNumRows
 	 * @dataProvider dbReturnProvider
-	 * @testdox dbReturn Read Frist $read_first_only only and cache $flag_cache and assoc $flag_assoc with (Warning: $warning/Error: $error) [$_dataName]
+	 * @testdox dbReturn Read First $read_first_only only and cache $flag_cache and assoc $flag_assoc with (Warning: $warning/Error: $error) [$_dataName]
 	 *
 	 * @param string $query
 	 * @param array<mixed>|null $params
@@ -4358,7 +4387,7 @@ final class CoreLibsDBIOTest extends TestCase
 		// NOTE if there are different INSERTS before the primary keys
 		// will not match anymore. Must be updated by hand
 		// IMPORTANT: if this is stand alone the primary key will not match and fail
-		$table_with_primary_key_id = 66;
+		$table_with_primary_key_id = 68;
 		// 0: query + returning
 		// 1: params
 		// 1: pk name for db exec
