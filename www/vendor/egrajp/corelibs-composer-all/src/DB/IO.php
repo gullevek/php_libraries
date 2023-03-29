@@ -1821,7 +1821,7 @@ class IO
 	 * Wrapper for dbReturnParams
 	 *
 	 * @param  string $query      Query string
-	 * @param  int    $cache      reset status: default: USE_CACHE
+	 * @param  int    $cache      reset status: default: NO_CACHE
 	 *                            USE_CACHE/0: normal read from cache on second run
 	 *                            READ_NEW/1: write to cache, clean before new run
 	 *                            CLEAR_CACHE/2: write cache, clean after finished
@@ -1833,7 +1833,7 @@ class IO
 	 */
 	public function dbReturn(
 		string $query,
-		int $cache = self::USE_CACHE,
+		int $cache = self::NO_CACHE,
 		bool $assoc_only = false
 	): array|false {
 		return $this->dbReturnParams($query, [], $cache, $assoc_only);
@@ -1856,7 +1856,7 @@ class IO
 	 *
 	 * @param  string       $query      Query string
 	 * @param  array<mixed> $params     Query parameters
-	 * @param  int          $cache      reset status: default: USE_CACHE
+	 * @param  int          $cache      reset status: default: NO_CACHE
 	 *                                  USE_CACHE/0: normal read from cache on second run
 	 *                                  READ_NEW/1: write to cache, clean before new run
 	 *                                  CLEAR_CACHE/2: write cache, clean after finished
@@ -1868,7 +1868,7 @@ class IO
 	public function dbReturnParams(
 		string $query,
 		array $params = [],
-		int $cache = self::USE_CACHE,
+		int $cache = self::NO_CACHE,
 		bool $assoc_only = false
 	): array|false {
 		$this->__dbErrorReset();

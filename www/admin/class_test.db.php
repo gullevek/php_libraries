@@ -314,6 +314,46 @@ print "EOM STRING EXEC RETURN TEST: " . print_r(
 	)
 ) . "<br>";
 echo "<hr>";
+// binary insert tests
+$filename = $db->dbEscapeLiteral('class_test.db.php');
+$rand_bin_uid = $db->dbEscapeLiteral(\CoreLibs\Create\Uids::uniqIdShort());
+$binary_data = $db->dbEscapeBytea(file_get_contents('class_test.db.php') ?:  '');
+$query = <<<EOM
+INSERT INTO binary_test (
+	filename, uid, binary_data
+) VALUES (
+	$filename, $rand_bin_uid, '$binary_data'
+)
+EOM;
+$status = $db->dbExec($query);
+$__last_insert_id = $db->dbGetInsertPK();
+print "BINARY DATA INSERT: "
+	. Support::printToString($status) . " |<br>"
+	. " |<br>"
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true)
+	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
+
+echo "<b>*</b><br>";
+$query = <<<EOM
+INSERT INTO binary_test (
+	filename, uid, binary_data
+) VALUES (
+	$1, $2, $3
+)
+EOM;
+$status = $db->dbExecParams($query, [$filename, $rand_bin_uid, $binary_data]);
+$__last_insert_id = $db->dbGetInsertPK();
+print "BINARY DATA INSERT PARAMS: "
+	. Support::printToString($status) . " |<br>"
+	. " |<br>"
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true)
+	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
+
+echo "<hr>";
 
 // returning test with multiple entries
 // $status = $db->db_exec(
