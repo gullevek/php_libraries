@@ -413,13 +413,35 @@ if (is_array($s_res = $db->dbReturnRow($q)) && !empty($s_res['test'])) {
 }
 
 // UPDATE WITH RETURNING
-$status = $db->dbExec("UPDATE test_foo SET test = 'SOMETHING DIFFERENT' "
-	. "WHERE test_foo_id = " . (int)$last_insert_pk . " RETURNING test");
+$status = $db->dbExec("UPDATE test_foo SET test = 'SOMETHING DIFFERENT', string_a = '" . (string)rand(1, 100) . "' "
+	. "WHERE test_foo_id = " . (int)$last_insert_pk . " RETURNING test_foo.test, string_a");
 print "UPDATE WITH PK " . Support::printToString($last_insert_pk)
 	. " RETURN STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+// UPDATE BUT EOM STYLE
+$status = $db->dbExecParams(
+	<<<EOM
+	UPDATE
+		test_foo
+	SET
+		test = ?,
+		string_a = ?
+	WHERE
+		tset_foo_id = ?
+	RETURNING
+		test_foo.test, string_a
+	EOM,
+	['SOMETHING DIFFERENT EOM', (string)rand(1, 100)]
+);
+print "UPDATE EOM WITH PK " . Support::printToString($last_insert_pk)
+	. " RETURN STATUS: " . Support::printToString($status) . " |<br>"
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
+
+// a stand alone insert?
 $db->dbExec("INSERT INTO test_foo (test) VALUES ('STAND ALONE')");
 
 // INSERT WITH NO RETURNING
