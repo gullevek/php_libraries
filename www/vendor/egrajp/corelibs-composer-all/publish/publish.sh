@@ -31,6 +31,7 @@ source .env.deploy;
 cd -;
 set +o allexport;
 
+echo "[START]";
 # gitea
 if [ ! -z "${GITEA_USER}" ] && [ ! -z "${GITEA_TOKEN}" ]; then
      curl -LJO \
@@ -56,5 +57,7 @@ if [ ! -z  "${GITLAB_DEPLOY_TOKEN}" ]; then
 else
      echo "Missing GITLAB_DEPLOY_TOKEN environment variable";
 fi;
+echo "";
+echo "[DONE]";
 
 # __END__

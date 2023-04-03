@@ -280,7 +280,7 @@ class IO
 	/** @var string default hash type */
 	public const ERROR_HASH_TYPE = 'adler32';
 	/** @var string regex to get returning with matches at position 1 */
-	public const REGEX_RETURNING = '/\s+returning\s+(.+?);?$/i';
+	public const REGEX_RETURNING = '/\s+returning\s+(.+\s*(?:.+\s*)+);?$/i';
 
 	// recommend to set private/protected and only allow setting via method
 	// can bet set from outside
