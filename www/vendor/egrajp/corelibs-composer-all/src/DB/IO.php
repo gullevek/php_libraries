@@ -279,8 +279,20 @@ class IO
 	public const NO_CACHE = 3;
 	/** @var string default hash type */
 	public const ERROR_HASH_TYPE = 'adler32';
+	/**
+	 * @var string regex for params: only stand alone $number allowed
+	 *             never allowed to start with '
+	 *             must be after space/tab, =, (
+	*/
+	public const REGEX_PARAMS = '/[^\'][\s(=](\$[0-9]{1,})/';
 	/** @var string regex to get returning with matches at position 1 */
 	public const REGEX_RETURNING = '/\s+returning\s+(.+\s*(?:.+\s*)+);?$/i';
+	// REGEX_SELECT
+	// REGEX_UPDATE
+	// REGEX INSERT
+	// REGEX_INSERT_UPDATE_DELETE
+	// REGEX_FROM_TABLE
+	// REGEX_INSERT_UPDATE_DELETE_TABLE
 
 	// recommend to set private/protected and only allow setting via method
 	// can bet set from outside
@@ -1017,7 +1029,7 @@ class IO
 	{
 		// search for $1, $2, in the query and push it into the control array
 		// skip counts for same eg $1, $1, $2 = 2 and not 3
-		preg_match_all('/(\$[0-9]{1,})/', $query, $match);
+		preg_match_all(self::REGEX_PARAMS, $query, $match);
 		$placeholder_count = count(array_unique($match[1]));
 		if ($params_count != $placeholder_count) {
 			$this->__dbError(
@@ -2588,7 +2600,7 @@ class IO
 			$match = [];
 			// search for $1, $2, in the query and push it into the control array
 			// skip counts for same eg $1, $1, $2 = 2 and not 3
-			preg_match_all('/(\$[0-9]{1,})/', $query, $match);
+			preg_match_all(self::REGEX_PARAMS, $query, $match);
 			$this->prepare_cursor[$stm_name]['count'] = count(array_unique($match[1]));
 			$this->prepare_cursor[$stm_name]['query'] = $query;
 			$result = $this->db_functions->__dbPrepare($stm_name, $query);

@@ -69,6 +69,7 @@ declare(strict_types=1);
 namespace CoreLibs\ACL;
 
 use CoreLibs\Check\Password;
+use CoreLibs\Convert\Json;
 
 class Login
 {
@@ -753,7 +754,10 @@ class Login
 		// we have to get the themes in here too
 		$q = "SELECT eu.edit_user_id, eu.username, eu.password, "
 			. "eu.edit_group_id, "
-			. "eg.name AS edit_group_name, admin, "
+			. "eg.name AS edit_group_name, eu.admin, "
+			// additinal acl lists
+			. "eu.additional_acl AS user_additional_acl, "
+			. "eg.additional_acl AS group_additional_acl, "
 			// login error + locked
 			. "eu.login_error_count, eu.login_error_date_last, "
 			. "eu.login_error_date_first, eu.strict, eu.locked, "
@@ -901,8 +905,10 @@ class Login
 				$_SESSION['GROUP_NAME'] = $res['edit_group_name'];
 				$_SESSION['USER_ACL_LEVEL'] = $res['user_level'];
 				$_SESSION['USER_ACL_TYPE'] = $res['user_type'];
+				$_SESSION['USER_ADDITIONAL_ACL'] = Json::jsonConvertToArray($res['user_additional_acl']);
 				$_SESSION['GROUP_ACL_LEVEL'] = $res['group_level'];
 				$_SESSION['GROUP_ACL_TYPE'] = $res['group_type'];
+				$_SESSION['GROUP_ADDITIONAL_ACL'] = Json::jsonConvertToArray($res['group_additional_acl']);
 				// deprecated TEMPLATE setting
 				$_SESSION['TEMPLATE'] = $res['template'] ? $res['template'] : '';
 				$_SESSION['HEADER_COLOR'] = !empty($res['second_header_color']) ?
@@ -1021,7 +1027,8 @@ class Login
 				$_SESSION['PAGES'] = $pages;
 				$_SESSION['PAGES_ACL_LEVEL'] = $pages_acl;
 				// load the edit_access user rights
-				$q = "SELECT ea.edit_access_id, level, type, ea.name, ea.color, ea.uid, edit_default "
+				$q = "SELECT ea.edit_access_id, level, type, ea.name, "
+					. "ea.color, ea.uid, edit_default, ea.additional_acl "
 					. "FROM edit_access_user eau, edit_access_right ear, edit_access ea "
 					. "WHERE eau.edit_access_id = ea.edit_access_id "
 					. "AND eau.edit_access_right_id = ear.edit_access_right_id "
@@ -1048,6 +1055,7 @@ class Login
 						'uid' => $res['uid'],
 						'color' => $res['color'],
 						'default' => $res['edit_default'],
+						'additional_acl' => Json::jsonConvertToArray($res['additional_acl']),
 						'data' => $ea_data
 					];
 					// set the default unit
@@ -1122,6 +1130,11 @@ class Login
 		// username (login), group name
 		$this->acl['user_name'] = $_SESSION['USER_NAME'];
 		$this->acl['group_name'] = $_SESSION['GROUP_NAME'];
+		// set additional acl
+		$this->acl['additional_acl'] = [
+			'user' => $_SESSION['USER_ADDITIONAL_ACL'],
+			'group' => $_SESSION['GROUP_ADDITIONAL_ACL'],
+		];
 		// we start with the default acl
 		$this->acl['base'] = $this->default_acl_level;
 
@@ -1184,7 +1197,8 @@ class Login
 				'uid' => $unit['uid'],
 				'level' => $this->default_acl_list[$this->acl['unit'][$ea_id]]['name'] ?? -1,
 				'default' => $unit['default'],
-				'data' => $unit['data']
+				'data' => $unit['data'],
+				'additional_acl' => $unit['additional_acl']
 			];
 			// set default
 			if (!empty($unit['default'])) {

@@ -267,6 +267,8 @@ final class CoreLibsACLLoginTest extends TestCase
 					'GROUP_ACL_LEVEL' => -1,
 					'PAGES_ACL_LEVEL' => [],
 					'USER_ACL_LEVEL' => -1,
+					'USER_ADDITIONAL_ACL' => [],
+					'GROUP_ADDITIONAL_ACL' => [],
 					'UNIT_UID' => [
 						'AdminAccess' => 1,
 					],
@@ -280,6 +282,7 @@ final class CoreLibsACLLoginTest extends TestCase
 							'data' => [
 								'test' => 'value',
 							],
+							'additional_acl' => []
 						],
 					],
 					// 'UNIT_DEFAULT' => '',

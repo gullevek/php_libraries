@@ -13,7 +13,7 @@
         'egrajp/corelibs-composer-all' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '1189aecae90bea76fb15893e20571910596f2b8b',
+            'reference' => '187a012284ba8000b2d472da6a707b830bb3c0a8',
             'type' => 'library',
             'install_path' => __DIR__ . '/../egrajp/corelibs-composer-all',
             'aliases' => array(),
