@@ -212,11 +212,11 @@ $query = <<<EOM
 INSERT INTO
 	test_foo
 (
-	test
+	test, string_a
 ) VALUES (
-	$1
+	$1, '$2'
 )
-RETURNING test
+RETURNING test, string_a
 EOM;
 $db->dbPrepare("ins_test_foo_eom", $query);
 $status = $db->dbExecute("ins_test_foo_eom", ['EOM BAR TEST ' . time()]);
