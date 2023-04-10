@@ -1146,7 +1146,7 @@ class IO
 					$this->params
 				),
 				'__dbPrepareExec',
-				($this->params === [] ? 'Q' : 'Qp'),
+				($this->params === [] ? 'Q' : 'Qp')
 			);
 		}
 		// import protection, hash needed
@@ -1166,7 +1166,15 @@ class IO
 			$this->query_called[$query_hash] > $this->MAX_QUERY_CALL
 		) {
 				$this->__dbError(30, false, $this->query);
-				$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
+				$this->__dbDebug(
+					'db',
+					$this->__dbDebugPrepare(
+						$this->query,
+						$this->params
+					),
+					'dbExec',
+					($this->params === [] ? 'Q[nc]' : 'Qp[nc]')
+				);
 				return false;
 		}
 		$this->query_called[$query_hash] ++;
@@ -1968,7 +1976,15 @@ class IO
 			$this->cursor_ext[$query_hash]['log'][] = 'No cursor';
 			// for DEBUG, print out each query executed
 			if ($this->db_debug) {
-				$this->__dbDebug('db', $this->cursor_ext[$query_hash]['query'], 'dbReturn', 'Q');
+				$this->__dbDebug(
+					'db',
+					$this->__dbDebugPrepare(
+						$this->cursor_ext[$query_hash]['query'],
+						$this->cursor_ext[$query_hash]['params']
+					),
+					'dbReturn',
+					($this->cursor_ext[$query_hash]['params'] === [] ? 'Q' : 'Qp'),
+				);
 			}
 			// if no DB Handler try to reconnect
 			if (!$this->dbh) {
@@ -1997,7 +2013,15 @@ class IO
 			// if still no cursor ...
 			if (!$this->cursor_ext[$query_hash]['cursor']) {
 				if ($this->db_debug) {
-					$this->__dbDebug('db', $this->cursor_ext[$query_hash]['query'], 'dbReturn', 'Q');
+					$this->__dbDebug(
+						'db',
+						$this->__dbDebugPrepare(
+							$this->cursor_ext[$query_hash]['query'],
+							$this->cursor_ext[$query_hash]['params']
+						),
+						'dbReturn',
+						($this->cursor_ext[$query_hash]['params'] === [] ? 'Q[e]' : 'Qp[e]'),
+					);
 				}
 				// internal error handling
 				$this->__dbError(13, $this->cursor_ext[$query_hash]['cursor']);
