@@ -1953,6 +1953,18 @@ class IO
 		// check if params count matches
 		// checks if the params count given matches the expected count
 		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
+			// in case we got an error print out query
+			if ($this->db_debug) {
+				$this->__dbDebug(
+					'db',
+					$this->__dbDebugPrepare(
+						$this->query,
+						$this->params
+					),
+					'dbReturn',
+					($this->params === [] ? 'Q[e]' : 'Qp[e]')
+				);
+			}
 			return false;
 		}
 		// set first call to false
@@ -2324,10 +2336,6 @@ class IO
 			$this->__dbError(17, false, $query);
 			return false;
 		}
-		// checks if the params count given matches the expected count
-		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
-			return false;
-		}
 		$cursor = $this->dbExecParams($query, $params);
 		if ($cursor === false) {
 			return false;
@@ -2370,10 +2378,6 @@ class IO
 		// before doing ANYTHING check if query is "SELECT ..." everything else does not work
 		if (!$this->__checkQueryForSelect($query)) {
 			$this->__dbError(17, false, $query);
-			return false;
-		}
-		// checks if the params count given matches the expected count
-		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
 			return false;
 		}
 		$cursor = $this->dbExecParams($query, $params);
@@ -2685,6 +2689,17 @@ class IO
 			);
 			return false;
 		}
+		if ($this->db_debug) {
+			$this->__dbDebug(
+				'db',
+				$this->__dbDebugPrepare(
+					$this->prepare_cursor[$stm_name]['query'],
+					$data
+				),
+				'dbExecPrep',
+				'Qpe'
+			);
+		}
 		// if the count does not match
 		if ($this->prepare_cursor[$stm_name]['count'] != count($data)) {
 			$this->__dbError(
@@ -2696,17 +2711,6 @@ class IO
 				. count($data)
 			);
 			return false;
-		}
-		if ($this->db_debug) {
-			$this->__dbDebug(
-				'db',
-				$this->__dbDebugPrepare(
-					$this->prepare_cursor[$stm_name]['query'],
-					$data
-				),
-				'dbExecPrep',
-				'Qp'
-			);
 		}
 		$result = $this->db_functions->__dbExecute($stm_name, $data);
 		if ($result === false) {
