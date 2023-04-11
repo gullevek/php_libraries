@@ -2,12 +2,12 @@
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "dev-development",
+            "version_normalized": "dev-development",
             "dist": {
                 "type": "path",
                 "url": "/storage/var/www/html/developers/clemens/core_data/composer-packages/CoreLibs-Composer-All",
-                "reference": "187a012284ba8000b2d472da6a707b830bb3c0a8"
+                "reference": "14a5250cd7dc019107a346a4000b9e419047d55e"
             },
             "require": {
                 "php": ">=8.1"

@@ -1146,7 +1146,7 @@ class IO
 					$this->params
 				),
 				'__dbPrepareExec',
-				($this->params === [] ? 'Q' : 'Qp'),
+				($this->params === [] ? 'Q' : 'Qp')
 			);
 		}
 		// import protection, hash needed
@@ -1166,7 +1166,15 @@ class IO
 			$this->query_called[$query_hash] > $this->MAX_QUERY_CALL
 		) {
 				$this->__dbError(30, false, $this->query);
-				$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
+				$this->__dbDebug(
+					'db',
+					$this->__dbDebugPrepare(
+						$this->query,
+						$this->params
+					),
+					'dbExec',
+					($this->params === [] ? 'Q[nc]' : 'Qp[nc]')
+				);
 				return false;
 		}
 		$this->query_called[$query_hash] ++;
@@ -1945,6 +1953,18 @@ class IO
 		// check if params count matches
 		// checks if the params count given matches the expected count
 		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
+			// in case we got an error print out query
+			if ($this->db_debug) {
+				$this->__dbDebug(
+					'db',
+					$this->__dbDebugPrepare(
+						$this->query,
+						$this->params
+					),
+					'dbReturn',
+					($this->params === [] ? 'Q[e]' : 'Qp[e]')
+				);
+			}
 			return false;
 		}
 		// set first call to false
@@ -1968,7 +1988,15 @@ class IO
 			$this->cursor_ext[$query_hash]['log'][] = 'No cursor';
 			// for DEBUG, print out each query executed
 			if ($this->db_debug) {
-				$this->__dbDebug('db', $this->cursor_ext[$query_hash]['query'], 'dbReturn', 'Q');
+				$this->__dbDebug(
+					'db',
+					$this->__dbDebugPrepare(
+						$this->cursor_ext[$query_hash]['query'],
+						$this->cursor_ext[$query_hash]['params']
+					),
+					'dbReturn',
+					($this->cursor_ext[$query_hash]['params'] === [] ? 'Q' : 'Qp'),
+				);
 			}
 			// if no DB Handler try to reconnect
 			if (!$this->dbh) {
@@ -1997,7 +2025,15 @@ class IO
 			// if still no cursor ...
 			if (!$this->cursor_ext[$query_hash]['cursor']) {
 				if ($this->db_debug) {
-					$this->__dbDebug('db', $this->cursor_ext[$query_hash]['query'], 'dbReturn', 'Q');
+					$this->__dbDebug(
+						'db',
+						$this->__dbDebugPrepare(
+							$this->cursor_ext[$query_hash]['query'],
+							$this->cursor_ext[$query_hash]['params']
+						),
+						'dbReturn',
+						($this->cursor_ext[$query_hash]['params'] === [] ? 'Q[e]' : 'Qp[e]'),
+					);
 				}
 				// internal error handling
 				$this->__dbError(13, $this->cursor_ext[$query_hash]['cursor']);
@@ -2300,10 +2336,6 @@ class IO
 			$this->__dbError(17, false, $query);
 			return false;
 		}
-		// checks if the params count given matches the expected count
-		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
-			return false;
-		}
 		$cursor = $this->dbExecParams($query, $params);
 		if ($cursor === false) {
 			return false;
@@ -2346,10 +2378,6 @@ class IO
 		// before doing ANYTHING check if query is "SELECT ..." everything else does not work
 		if (!$this->__checkQueryForSelect($query)) {
 			$this->__dbError(17, false, $query);
-			return false;
-		}
-		// checks if the params count given matches the expected count
-		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
 			return false;
 		}
 		$cursor = $this->dbExecParams($query, $params);
@@ -2661,6 +2689,17 @@ class IO
 			);
 			return false;
 		}
+		if ($this->db_debug) {
+			$this->__dbDebug(
+				'db',
+				$this->__dbDebugPrepare(
+					$this->prepare_cursor[$stm_name]['query'],
+					$data
+				),
+				'dbExecPrep',
+				'Qpe'
+			);
+		}
 		// if the count does not match
 		if ($this->prepare_cursor[$stm_name]['count'] != count($data)) {
 			$this->__dbError(
@@ -2672,17 +2711,6 @@ class IO
 				. count($data)
 			);
 			return false;
-		}
-		if ($this->db_debug) {
-			$this->__dbDebug(
-				'db',
-				$this->__dbDebugPrepare(
-					$this->prepare_cursor[$stm_name]['query'],
-					$data
-				),
-				'dbExecPrep',
-				'Qp'
-			);
 		}
 		$result = $this->db_functions->__dbExecute($stm_name, $data);
 		if ($result === false) {
