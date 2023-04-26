@@ -20,7 +20,11 @@ fi;
 # read in the .env.deploy file and we must have
 # GITLAB_USER
 # GITLAB_TOKEN
+# GITLAB_URL
+# GITEA_USER
 # GITEA_DEPLOY_TOKEN
+# GITEA_URL_DL
+# GITEA_URL_PUSH
 if [ ! -f "${BASE_FOLDER}.env.deploy" ]; then
      echo "Deploy enviroment file .env.deploy is missing";
      exit;
@@ -33,26 +37,27 @@ set +o allexport;
 
 echo "[START]";
 # gitea
-if [ ! -z "${GITEA_USER}" ] && [ ! -z "${GITEA_TOKEN}" ]; then
+if [ ! -z "${GITEA_URL_DL}" ] && [ ! -z "${GITEA_URL_PUSH}" ] &&
+     [ ! -z "${GITEA_USER}" ] && [ ! -z "${GITEA_TOKEN}" ]; then
      curl -LJO \
           --output-dir "${BASE_FOLDER}" \
-          https://git.egplusww.jp/Composer/CoreLibs-Composer-All/archive/v${VERSION}.zip;
+          ${GITEA_URL_DL}/v${VERSION}.zip;
      curl --user ${GITEA_USER}:${GITEA_TOKEN} \
           --upload-file "${BASE_FOLDER}/CoreLibs-Composer-All-v${VERSION}.zip" \
-          https://git.egplusww.jp/api/packages/Composer/composer?version=${VERSION};
+          ${GITEA_URL_PUSH}?version=${VERSION};
      echo "${VERSION}" > "${file_last_published}";
 else
      echo "Missing either GITEA_USER or GITEA_TOKEN environment variable";
 fi;
 
 # gitlab
-if [ ! -z  "${GITLAB_DEPLOY_TOKEN}" ]; then
+if [ ! -z "${GITLAB_URL}" ] && [ ! -z  "${GITLAB_DEPLOY_TOKEN}" ]; then
      curl --data tag=v${VERSION} \
           --header "Deploy-Token: ${GITLAB_DEPLOY_TOKEN}" \
-          "https://gitlab-na.factory.tools/api/v4/projects/950/packages/composer";
+          "${GITLAB_URL}";
      curl --data branch=master \
           --header "Deploy-Token: ${GITLAB_DEPLOY_TOKEN}" \
-          "https://gitlab-na.factory.tools/api/v4/projects/950/packages/composer";
+          "${GITLAB_URL}";
      echo "${VERSION}" > "${file_last_published}";
 else
      echo "Missing GITLAB_DEPLOY_TOKEN environment variable";

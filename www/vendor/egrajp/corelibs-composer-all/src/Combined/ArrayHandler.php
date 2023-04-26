@@ -208,7 +208,9 @@ class ArrayHandler
 		$prev_depth = 0;
 		foreach ($recursive as $key => $value) {
 			if ($prev_depth > $recursive->getDepth()) {
-				$key_path = [];
+				// remove all trailing to ne depth
+				$diff = $prev_depth - $recursive->getDepth();
+				array_splice($key_path, -$diff, $diff);
 			}
 			$prev_depth = $recursive->getDepth();
 			if ($flat === false) {
