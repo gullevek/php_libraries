@@ -178,6 +178,63 @@ class ArrayHandler
 	}
 
 	/**
+	 * search for one or many keys in array and return matching values
+	 * If flat is set to true, return flat array with found values only
+	 * If prefix is turned on each found group will be prefixed with the
+	 * search key
+	 *
+	 * @param  array<mixed> $array   array to search in
+	 * @param  array<mixed> $needles keys to find in array
+	 * @param  bool         $flat    [false] Turn on flat output
+	 * @param  bool         $prefix  [false] Prefix found with needle key
+	 * @return array<mixed>          Found values
+	 */
+	public static function arraySearchKey(
+		array $array,
+		array $needles,
+		bool $flat = false,
+		bool $prefix = false
+	): array {
+		$iterator  = new \RecursiveArrayIterator($array);
+		$recursive = new \RecursiveIteratorIterator(
+			$iterator,
+			\RecursiveIteratorIterator::SELF_FIRST
+		);
+		$hit_list = [];
+		if ($prefix === true) {
+			$hit_list = array_fill_keys($needles, []);
+		}
+		$key_path = [];
+		$prev_depth = 0;
+		foreach ($recursive as $key => $value) {
+			if ($prev_depth > $recursive->getDepth()) {
+				$key_path = [];
+			}
+			$prev_depth = $recursive->getDepth();
+			if ($flat === false) {
+				$key_path[$recursive->getDepth()] = $key;
+			}
+			if (in_array($key, $needles, true)) {
+				ksort($key_path);
+				if ($flat === true) {
+					$hit = $value;
+				} else {
+					$hit = [
+						'value' => $value,
+						'path' => $key_path
+					];
+				}
+				if ($prefix === true) {
+					$hit_list[$key][] = $hit;
+				} else {
+					$hit_list[] = $hit;
+				}
+			}
+		}
+		return $hit_list;
+	}
+
+	/**
 	 * correctly recursive merges as an array as array_merge_recursive
 	 * just glues things together
 	 *         array first array to merge

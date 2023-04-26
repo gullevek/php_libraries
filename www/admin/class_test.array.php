@@ -149,6 +149,38 @@ function rec(string $pre, string $cur, array $node = [])
 	return $node;
 }
 
+$data = [
+	'image' => 'foo',
+	'element' => 'w-1',
+	'rotate' => 360,
+	'html' => [
+		'image' => 'bar',
+		'result_image' => 'baz',
+		'rule' => 'wrong'
+	],
+	[
+		'image' => 'large'
+	],
+	[
+		'nothing' => 'wrong'
+	],
+	'nest' => [
+		'nust' => [
+			'nist' =>  [
+				'foo' => 'bar',
+				'image' => 'long, long'
+			]
+		]
+	],
+	's' => [
+		'image' => 'path?'
+	],
+];
+
+$search = ['image', 'result_image', 'nothing', 'EMPTY'];
+$result = ArrayHandler::arraySearchKey($data, $search);
+print "ARRAYSEARCHKEY: Search: " . DgS::printAr($search) . ", Found: " . DgS::printAr($result) . "<br>";
+
 // $test = [
 // 	'A' => [
 // 		'B' => [],
