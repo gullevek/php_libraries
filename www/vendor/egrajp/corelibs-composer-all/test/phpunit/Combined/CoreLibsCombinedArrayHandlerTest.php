@@ -31,6 +31,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		4,
 		'b',
 		'c' => 'test',
+		'single' => 'single',
 		'same' => 'same',
 		'deep' => [
 			'sub' => [
@@ -284,6 +285,188 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 				2 => 'true',
 				3 => true,
 				4 => false,
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function arraySearchKeyProvider(): array
+	{
+		/*
+		0: search in array
+		1: search keys
+		2: flat flag
+		3: prefix flag
+		4: expected array
+		*/
+		return [
+			// single
+			'find single, standard' => [
+				0 => self::$array,
+				1 => ['single'],
+				2 => null,
+				3 => null,
+				4 => [
+					0 => [
+						'value' => 'single',
+						'path' => ['single'],
+					],
+				],
+			],
+			'find single, prefix' => [
+				0 => self::$array,
+				1 => ['single'],
+				2 => null,
+				3 => true,
+				4 => [
+					'single' => [
+						0 => [
+							'value' => 'single',
+							'path' => ['single'],
+						],
+					],
+				],
+			],
+			'find single, flat' => [
+				0 => self::$array,
+				1 => ['single'],
+				2 => true,
+				3 => null,
+				4 => [
+					'single',
+				],
+			],
+			'find single, flat, prefix' => [
+				0 => self::$array,
+				1 => ['single'],
+				2 => true,
+				3 => true,
+				4 => [
+					'single' => [
+						'single',
+					],
+				],
+			],
+			// not found
+			'not found, standard' => [
+				0 => self::$array,
+				1 => ['NOT FOUND'],
+				2 => null,
+				3 => null,
+				4 => [],
+			],
+			'not found, standard, prefix' => [
+				0 => self::$array,
+				1 => ['NOT FOUND'],
+				2 => null,
+				3 => true,
+				4 => [
+					'NOT FOUND' => [],
+				],
+			],
+			'not found, flat' => [
+				0 => self::$array,
+				1 => ['NOT FOUND'],
+				2 => true,
+				3 => null,
+				4 => [],
+			],
+			'not found, flat, prefix' => [
+				0 => self::$array,
+				1 => ['NOT FOUND'],
+				2 => true,
+				3 => true,
+				4 => [
+					'NOT FOUND' => [],
+				],
+			],
+			// multi
+			'multiple found, standard' => [
+				0 => self::$array,
+				1 => ['same'],
+				2 => null,
+				3 => null,
+				4 => [
+					[
+						'value' => 'same',
+						'path' => ['a', 'same', ],
+					],
+					[
+						'value' => 'same',
+						'path' => ['same', ],
+					],
+					[
+						'value' => 'same',
+						'path' => ['deep', 'sub', 'same', ],
+					],
+				]
+			],
+			'multiple found, flat' => [
+				0 => self::$array,
+				1 => ['same'],
+				2 => true,
+				3 => null,
+				4 => ['same', 'same', 'same', ],
+			],
+			// search with multiple
+			'search multiple, standard' => [
+				0 => self::$array,
+				1 => ['single', 'nested'],
+				2 => null,
+				3 => null,
+				4 => [
+					[
+						'value' => 'single',
+						'path' => ['single'],
+					],
+					[
+						'value' => 'bar',
+						'path' => ['deep', 'sub', 'nested', ],
+					],
+				],
+			],
+			'search multiple, prefix' => [
+				0 => self::$array,
+				1 => ['single', 'nested'],
+				2 => null,
+				3 => true,
+				4 => [
+					'single' => [
+						[
+							'value' => 'single',
+							'path' => ['single'],
+						],
+					],
+					'nested' => [
+						[
+							'value' => 'bar',
+							'path' => ['deep', 'sub', 'nested', ],
+						],
+					],
+				],
+			],
+			'search multiple, flat' => [
+				0 => self::$array,
+				1 => ['single', 'nested'],
+				2 => true,
+				3 => null,
+				4 => [
+					'single', 'bar',
+				],
+			],
+			'search multiple, flat, prefix' => [
+				0 => self::$array,
+				1 => ['single', 'nested'],
+				2 => true,
+				3 => true,
+				4 => [
+					'single' => ['single', ],
+					'nested' => ['bar', ],
+				],
 			],
 		];
 	}
@@ -688,6 +871,44 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Combined\ArrayHandler::arraySearchSimple($input, $key, $value, $flag)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers::arraySearchKey
+	 * @dataProvider arraySearchKeyProvider
+	 * @testdox arraySearchKey Search array with keys and flat: $flat, prefix: $prefix [$_dataName]
+	 *
+	 * @param  array $input
+	 * @param  array $needles
+	 * @param  bool|null $flat
+	 * @param  bool|null $prefix
+	 * @param  array $expected
+	 * @return void
+	 */
+	public function testArraySearchKey(
+		array $input,
+		array $needles,
+		?bool $flat,
+		?bool $prefix,
+		array $expected
+	): void {
+		if ($flat === null && $prefix === null) {
+			$result = \CoreLibs\Combined\ArrayHandler::arraySearchKey($input, $needles);
+		} elseif ($flat === null) {
+			$result = \CoreLibs\Combined\ArrayHandler::arraySearchKey($input, $needles, prefix: $prefix);
+		} elseif ($prefix === null) {
+			$result = \CoreLibs\Combined\ArrayHandler::arraySearchKey($input, $needles, flat: $flat);
+		} else {
+			$result = \CoreLibs\Combined\ArrayHandler::arraySearchKey($input, $needles, $flat, $prefix);
+		}
+		// print "E: " . print_r($expected, true) . "\n";
+		// print "R: " . print_r($result, true) . "\n";
+		$this->assertEquals(
+			$expected,
+			$result
 		);
 	}
 
