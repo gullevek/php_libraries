@@ -32,7 +32,7 @@ function pop(theURL, winName, features) // eslint-disable-line no-unused-vars
 
 /**
  * automatically resize a text area based on the amount of lines in it
- * @param {[string} ta_id element id
+ * @param {string} ta_id element id
  */
 function expandTA(ta_id) // eslint-disable-line no-unused-vars
 {
