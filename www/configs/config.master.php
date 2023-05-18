@@ -185,7 +185,7 @@ if (file_exists(BASE . CONFIGS . 'config.path.php')) {
 // live frontend pages
 // ** missing live domains **
 // get the name without the port
-list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
+[$HOST_NAME] = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 // set HOST name
 define('HOST_NAME', $HOST_NAME);
 // BAIL ON MISSING MASTER SITE CONFIG

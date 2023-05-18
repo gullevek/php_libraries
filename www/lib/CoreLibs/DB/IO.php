@@ -735,7 +735,10 @@ class IO
 	 */
 	private function __dbErrorPreprocessor(\PgSql\Result|false $cursor = false): array
 	{
-		$pg_error_string = '';
+		$db_prefix = '';
+		$db_error_string = '';
+		$db_prefix_last = '';
+		$db_error_string_last = '';
 		// 1 = self/__dbErrorPreprocessor, 2 = __dbError, __dbWarning,
 		// 3+ == actual source
 		// loop until we get a null, build where called chain
@@ -749,16 +752,31 @@ class IO
 		if ($where_called === null) {
 			$where_called = '[Unknown Method]';
 		}
+		[$db_prefix_last, $db_error_string_last] = $this->db_functions->__dbPrintLastError();
 		if ($cursor !== false) {
-			$pg_error_string = $this->db_functions->__dbPrintError($cursor);
+			[$db_prefix, $db_error_string] = $this->db_functions->__dbPrintError($cursor);
 		}
 		if ($cursor === false && method_exists($this->db_functions, '__dbPrintError')) {
-			$pg_error_string = $this->db_functions->__dbPrintError();
+			[$db_prefix, $db_error_string] = $this->db_functions->__dbPrintError();
 		}
-		if ($pg_error_string) {
-			$this->__dbDebug('db', $pg_error_string, 'DB_ERROR', $where_called);
+		// prefix the master if not the same
+		if (
+			!empty($db_error_string_last) &&
+			trim($db_error_string) != trim($db_error_string_last)
+		) {
+			$db_error_string =
+				$db_prefix_last . ' ' . $db_error_string_last . ';'
+				. $db_prefix . ' ' . $db_error_string;
+		} elseif (!empty($db_error_string)) {
+			$db_error_string = $db_prefix . ' ' . $db_error_string;
 		}
-		return [$where_called, $pg_error_string];
+		if ($db_error_string) {
+			$this->__dbDebug('db', $db_error_string, 'DB_ERROR', $where_called);
+		}
+		return [
+			$where_called,
+			$db_error_string
+		];
 	}
 
 	/**
@@ -902,11 +920,14 @@ class IO
 		// because the placeholders start with $ and at 1,
 		// we need to increase each key and prefix it with a $ char
 		for ($i = 0, $iMax = count($keys); $i < $iMax; $i++) {
-			$keys[$i] = '$' . ($keys[$i] + 1);
+			// note: if I use $ here, the str_replace will
+			//       replace it again. eg $11 '$1'1would be replaced with $1 again
 			// prefix data set with parameter pos
-			$data[$i] = $keys[$i] . ':' . ($data[$i] === null ?
+			$data[$i] = '#' . ($keys[$i] + 1) . ':' . ($data[$i] === null ?
 				'"NULL"' : (string)$data[$i]
 			);
+			// search part
+			$keys[$i] = '$' . ($keys[$i] + 1);
 		}
 		// simply replace the $1, $2, ... with the actual data and return it
 		return str_replace(

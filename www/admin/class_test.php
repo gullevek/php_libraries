@@ -73,6 +73,7 @@ print "<html><head><title>TEST CLASS</title><head>";
 print "<body>";
 
 print '<div><a href="class_test.db.php">Class Test: DB</a></div>';
+print '<div><a href="class_test.db.single.php">Class Test: DB SINGLE</a></div>';
 print '<div><a href="class_test.db.dbReturn.php">Class Test: DB dbReturn</a></div>';
 print '<div><a href="class_test.convert.colors.php">Class Test: CONVERT COLORS</a></div>';
 print '<div><a href="class_test.check.colors.php">Class Test: CHECK COLORS</a></div>';

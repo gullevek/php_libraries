@@ -156,7 +156,7 @@ final class CoreLibsDBIOTest extends TestCase
 			$db->dbExec("DROP TABLE test_meta");
 		}
 		// uid is for internal reference tests
-		$base_table = <<<EOM
+		$base_table = <<<SQL
 			uid VARCHAR,
 			row_int INT,
 			row_numeric NUMERIC,
@@ -172,36 +172,36 @@ final class CoreLibsDBIOTest extends TestCase
 			row_array_varchar VARCHAR ARRAY
 		)
 		WITHOUT OIDS
-		EOM;
+		SQL;
 		// create the tables
 		$db->dbExec(
 			// primary key name is table + '_id'
-			<<<EOM
+			<<<SQL
 			CREATE TABLE table_with_primary_key (
 				table_with_primary_key_id SERIAL PRIMARY KEY,
 				$base_table
-			EOM
+			SQL
 			/* "CREATE TABLE table_with_primary_key ("
 			// primary key name is table + '_id'
 			. "table_with_primary_key_id SERIAL PRIMARY KEY, "
 			. $base_table */
 		);
 		$db->dbExec(
-			<<<EOM
+			<<<SQL
 			CREATE TABLE table_without_primary_key (
 				$base_table
-			EOM
+			SQL
 			/* "CREATE TABLE table_without_primary_key ("
 			. $base_table */
 		);
 		// create simple table for meta test
 		$db->dbExec(
-			<<<EOM
+			<<<SQL
 			CREATE TABLE test_meta (
 				row_1 VARCHAR,
 				row_2 INT
 			) WITHOUT OIDS
-			EOM
+			SQL
 			/* "CREATE TABLE test_meta ("
 			. "row_1 VARCHAR, "
 			. "row_2 INT"
@@ -1342,10 +1342,10 @@ final class CoreLibsDBIOTest extends TestCase
 						'has default' => false,
 						'array dims' => 0,
 						'is enum' => false,
-						'is base' => 1,
+						'is base' => true,
 						'is composite' => false,
-						'is pesudo' => false,
 						'description' => '',
+						'is pseudo' => false
 					],
 					'row_2' => [
 						'num' => 2,
@@ -1355,10 +1355,10 @@ final class CoreLibsDBIOTest extends TestCase
 						'has default' => false,
 						'array dims' => 0,
 						'is enum' => false,
-						'is base' => 1,
+						'is base' => true,
 						'is composite' => false,
-						'is pesudo' => false,
 						'description' => '',
+						'is pseudo' => false
 					]
 				]
 			],
@@ -1374,10 +1374,10 @@ final class CoreLibsDBIOTest extends TestCase
 						'has default' => false,
 						'array dims' => 0,
 						'is enum' => false,
-						'is base' => 1,
+						'is base' => true,
 						'is composite' => false,
-						'is pesudo' => false,
 						'description' => '',
+						'is pseudo' => false
 					],
 					'row_2' => [
 						'num' => 2,
@@ -1387,10 +1387,10 @@ final class CoreLibsDBIOTest extends TestCase
 						'has default' => false,
 						'array dims' => 0,
 						'is enum' => false,
-						'is base' => 1,
+						'is base' => true,
 						'is composite' => false,
-						'is pesudo' => false,
 						'description' => '',
+						'is pseudo' => false
 					]
 				]
 			],
@@ -4425,16 +4425,16 @@ final class CoreLibsDBIOTest extends TestCase
 					]
 				]
 			],
-			// same but as EOM
-			'single insert (PK), EOM string' => [
-				<<<EOM
+			// same but as heredoc
+			'single insert (PK), heredoc string' => [
+				<<<SQL
 				INSERT INTO table_with_primary_key (
 					row_varchar, row_varchar_literal, row_int, row_date
 				) VALUES (
 					'Text', 'Other', 123, '2022-03-01'
 				)
 				RETURNING row_varchar, row_varchar_literal, row_int, row_date
-				EOM,
+				SQL,
 				null,
 				null,
 				null,
@@ -4529,16 +4529,16 @@ final class CoreLibsDBIOTest extends TestCase
 					]
 				]
 			],
-			// same as above but as EOM string
-			'single insert (No PK), EOM string' => [
-				<<<EOM
+			// same as above but as heredoc string
+			'single insert (No PK), heredoc string' => [
+				<<<SQL
 				INSERT INTO table_without_primary_key (
 					row_varchar, row_varchar_literal, row_int, row_date
 				) VALUES (
 					'Text', 'Other', 123, '2022-03-01'
 				)
 				RETURNING row_varchar, row_varchar_literal, row_int, row_date
-				EOM,
+				SQL,
 				null,
 				null,
 				null,
