@@ -141,14 +141,14 @@ var_dump($db->dbGetReturningExt());
 
 // same as above but use an EOM string
 $some_time = time();
-$query = <<<EOM
+$query = <<<SQL
 INSERT INTO test_foo (
 	test, number_a
 ) VALUES (
 	'EOM FOO TEST $some_time', 1
 )
 RETURNING test, number_a
-EOM;
+SQL;
 $status = $db->dbExec($query);
 print "EOM STRING DIRECT INSERT STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
@@ -167,21 +167,21 @@ print "DIRECT INSERT PREVIOUS INSERTED: "
 	. print_r($db->dbReturnRow("SELECT test_foo_id, test FROM test_foo "
 		. "WHERE test_foo_id = " . (int)$last_insert_pk), true) . "<br>";
 $__last_insert_pk = (int)$last_insert_pk;
-$query = <<<EOM
+$query = <<<SQL
 SELECT
 	test_foo_id, test
 FROM test_foo
 WHERE test_foo_id = $__last_insert_pk;
-EOM;
+SQL;
 print "EOM READ OF PREVIOUS INSERTED: " . print_r($db->dbReturnRow($query), true) . "<br>";
 print "LAST ERROR: " . $db->dbGetLastError() . "<br>";
 print "<br>";
-$query = <<<EOM
+$query = <<<SQL
 	SELECT
 		test_foo_id, test
 	FROM test_foo
 	WHERE test_foo_id = $1;
-EOM;
+SQL;
 print "RETURN ROW PARAMS: " . print_r(
 	$db->dbReturnRowParams(
 		$query,
@@ -208,7 +208,7 @@ foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
 	print "KEY: " . $key . ': ' . $db->dbGetPrepareCursorValue('ins_test_foo', $key) . "<br>";
 }
 
-$query = <<<EOM
+$query = <<<SQL
 INSERT INTO
 	test_foo
 (
@@ -217,7 +217,7 @@ INSERT INTO
 	$1, '$2'
 )
 RETURNING test, string_a
-EOM;
+SQL;
 $db->dbPrepare("ins_test_foo_eom", $query);
 $status = $db->dbExecute("ins_test_foo_eom", ['EOM BAR TEST ' . time()]);
 print "EOM STRING PREPARE INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
@@ -235,7 +235,7 @@ print "EOM STRING EXEC PARAMS INSERT STATUS: " . Support::printToString($status)
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 
 // I/S Query
-$query_insert = <<<EOM
+$query_insert = <<<SQL
 INSERT INTO
 	test_foo
 (
@@ -246,8 +246,8 @@ INSERT INTO
 	$6, $7, $8
 )
 RETURNING test
-EOM;
-$query_select = <<<EOM
+SQL;
+$query_select = <<<SQL
 SELECT
 	test, some_bool, string_a, number_a, number_a_numeric,
 	some_time, some_time, some_timestamp, json_string
@@ -255,7 +255,7 @@ FROM
 	test_foo
 WHERE
 	test_foo_id = $1
-EOM;
+SQL;
 // A
 $status = $db->dbExecParams(
 	$query_insert,
@@ -313,18 +313,51 @@ print "EOM STRING EXEC RETURN TEST: " . print_r(
 		[$__last_insert_id]
 	)
 ) . "<br>";
+// params > 10 for debug
+// error catcher
+$query_insert = <<<SQL
+INSERT INTO many_columns (
+	col_01_int,
+	col_01, col_02, col_03, col_04, col_05, col_06, col_07, col_08, col_09,
+    col_10, col_11, col_12, col_02_int
+) VALUES (
+	1,
+	$1, $2, $3, $4, $5, $6, $7, $8, $9,
+	$10, $11, $12, $13
+)
+RETURNING
+	many_columns_id,
+	col_01_int,
+	col_01, col_02, col_03, col_04, col_05, col_06, col_07, col_08, col_09,
+    col_10, col_11, col_12, col_02_int
+SQL;
+// will fail with "NULL" string on int
+$query_params = [
+	'col 1', 'col 2', 'col 3', 'col 4', 'col 5', 'col 6', 'col 7', 'col 8',
+	'col 9',
+	'col 10', 'col 11', 'col 12', "NULL"
+];
+$status = $db->dbExecParams($query_insert, $query_params);
+echo "<b>*</b><br>";
+echo "EOM STRING WITH MORE THAN 10 PARAMETERS: "
+	. Support::printToString($query_params) . " |<br>"
+	. " |<br>"
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
+	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
+	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true)
+	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
 echo "<hr>";
 // binary insert tests
 $filename = $db->dbEscapeLiteral('class_test.db.php');
 $rand_bin_uid = $db->dbEscapeLiteral(\CoreLibs\Create\Uids::uniqIdShort());
 $binary_data = $db->dbEscapeBytea(file_get_contents('class_test.db.php') ?:  '');
-$query = <<<EOM
+$query = <<<SQL
 INSERT INTO binary_test (
 	filename, uid, binary_data
 ) VALUES (
 	$filename, $rand_bin_uid, '$binary_data'
 )
-EOM;
+SQL;
 $status = $db->dbExec($query);
 $__last_insert_id = $db->dbGetInsertPK();
 print "BINARY DATA INSERT: "
@@ -336,13 +369,13 @@ print "BINARY DATA INSERT: "
 	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
 
 echo "<b>*</b><br>";
-$query = <<<EOM
+$query = <<<SQL
 INSERT INTO binary_test (
 	filename, uid, binary_data
 ) VALUES (
 	$1, $2, $3
 )
-EOM;
+SQL;
 $status = $db->dbExecParams($query, [$filename, $rand_bin_uid, $binary_data]);
 $__last_insert_id = $db->dbGetInsertPK();
 print "BINARY DATA INSERT PARAMS: "
@@ -380,7 +413,7 @@ print "DIRECT MULTIPLE INSERT WITH RETURN STATUS: " . Support::printToString($st
 $t_1 = time();
 $t_2 = time();
 $t_3 = time();
-$query = <<<EOM
+$query = <<<SQL
 INSERT INTO test_foo (
 	test
 ) VALUES
@@ -388,7 +421,7 @@ INSERT INTO test_foo (
 ('EOM BAR 2 $t_2'),
 ('EOM BAR 3 $t_3')
 RETURNING test_foo_id, test
-EOM;
+SQL;
 $status = $db->dbExec($query);
 print "EOM STRING DIRECT MULTIPLE INSERT WITH RETURN STATUS: " . Support::printToString($status) . " |<br>"
 	. "QUERY: " . $db->dbGetQuery() . " |<br>"
@@ -422,7 +455,7 @@ print "UPDATE WITH PK " . Support::printToString($last_insert_pk)
 	. "RETURNING ARRAY: " . print_r($db->dbGetReturningArray(), true) . "<br>";
 // UPDATE BUT EOM STYLE
 $status = $db->dbExecParams(
-	<<<EOM
+	<<<SQL
 	UPDATE
 		test_foo
 	SET
@@ -432,7 +465,7 @@ $status = $db->dbExecParams(
 		tset_foo_id = ?
 	RETURNING
 		test_foo.test, string_a
-	EOM,
+	SQL,
 	['SOMETHING DIFFERENT EOM', (string)rand(1, 100)]
 );
 print "UPDATE EOM WITH PK " . Support::printToString($last_insert_pk)
@@ -524,27 +557,27 @@ echo "<hr>";
 print "EOM STYLE STRINGS<br>";
 $test_bar = $db->dbEscapeLiteral('SOMETHING DIFFERENT');
 // Test EOM block
-$q = <<<EOM
+$q = <<<SQL
 SELECT test_foo_id, test, some_bool, string_a, number_a,
 -- comment
 number_a_numeric, some_time
 FROM test_foo
 WHERE test = $test_bar
 ORDER BY test_foo_id DESC LIMIT 5
-EOM;
+SQL;
 while (is_array($res = $db->dbReturn($q))) {
 	print "ROW: <pre>" . print_r($res, true) . "</pre><br>";
 }
 echo "<hr>";
 print "DB RETURN PARAMS<br>";
-$q = <<<EOM
+$q = <<<SQL
 SELECT test_foo_id, test, some_bool, string_a, number_a,
 -- comment
 number_a_numeric, some_time
 FROM test_foo
 WHERE test = $1
 ORDER BY test_foo_id DESC LIMIT 5
-EOM;
+SQL;
 while (
 	is_array($res = $db->dbReturnParams($q, ['SOMETHING DIFFERENT']))
 ) {
@@ -632,14 +665,14 @@ print "Wrote to DB tabel $table with data " . print_r($data, true) . " and got p
 $query = "SELECT type, sdate, integer FROM foobar";
 $data = $db->dbReturnArray($query, true);
 print "RETURN ARRAY: " . $db->dbGetNumRows() . ", Full foobar list: <br><pre>" . print_r($data, true) . "</pre><br>";
-$query = <<<EOM
+$query = <<<SQL
 SELECT
 	type, sdate
 FROM
 	foobar
 WHERE
 	type = $1
-EOM;
+SQL;
 $data = $db->dbReturnArrayParams($query, ['schmalz'], true);
 print "RETURN ARRAY PARAMS: " . $db->dbGetNumRows() . ", Full foobar list: <br><pre>"
 	. print_r($data, true) . "</pre><br>";
