@@ -20,10 +20,10 @@ define('USE_DATABASE', false);
 // sample config
 require 'config.php';
 // define log file id
-$LOG_FILE_ID = 'classTest-pass';
+$LOG_FILE_ID = 'classTest-password';
 ob_end_flush();
 
-use CoreLibs\Check\Password as PwdChk;
+use CoreLibs\Security\Password as PwdChk;
 
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
@@ -35,8 +35,8 @@ $log = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL ?? false,
 	'print_all' => $PRINT_ALL,
 ]);
-$_password = new CoreLibs\Check\Password();
-$password_class = 'CoreLibs\Check\Password';
+$_password = new CoreLibs\Security\Password();
+$password_class = 'CoreLibs\Security\Password';
 
 // define a list of from to color sets for conversion test
 

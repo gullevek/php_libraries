@@ -61,7 +61,7 @@ class PgSQL implements Interface\SqlFunctions
 	/** @var string */
 	private $last_error_query;
 	/** @var \PgSql\Connection|false */
-	private $dbh;
+	private $dbh = false;
 
 	/**
 	 * queries last error query and returns true or false if error was set
@@ -533,17 +533,36 @@ class PgSQL implements Interface\SqlFunctions
 	}
 
 	/**
+	 * Returns last error for active cursor
+	 *
+	 * @return array{0:string,1:string} prefix, error string
+	 */
+	public function __dbPrintLastError(): array
+	{
+		if (is_bool($this->dbh)) {
+			return ['', ''];
+		}
+		if (!empty($error_message = pg_last_error($this->dbh))) {
+			return [
+				'-PostgreSQL-Error-Last-',
+				$error_message
+			];
+		}
+		return ['', ''];
+	}
+
+	/**
 	 * reads the last error for this cursor and returns
 	 * html formatted string with error name
 	 *
 	 * @param  \PgSql\Result|false $cursor cursor
-	 *                              or null
-	 * @return string               error string
+	 *                                     or null
+	 * @return array{0:string,1:string} prefix, error string
 	 */
-	public function __dbPrintError(\PgSql\Result|false $cursor = false): string
+	public function __dbPrintError(\PgSql\Result|false $cursor = false): array
 	{
 		if (is_bool($this->dbh)) {
-			return '';
+			return ['', ''];
 		}
 		// run the query again for the error result here
 		if ((is_bool($cursor)) && $this->last_error_query) {
@@ -552,10 +571,12 @@ class PgSQL implements Interface\SqlFunctions
 			$cursor = pg_get_result($this->dbh);
 		}
 		if ($cursor && $error_str = pg_result_error($cursor)) {
-			return '-PostgreSQL-Error- '
-				. $error_str;
+			return [
+				'-PostgreSQL-Error-',
+				$error_str
+			];
 		} else {
-			return '';
+			return ['', ''];
 		}
 	}
 

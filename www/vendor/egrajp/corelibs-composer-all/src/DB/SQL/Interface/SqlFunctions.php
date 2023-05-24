@@ -209,10 +209,17 @@ interface SqlFunctions
 	/**
 	 * Undocumented function
 	 *
-	 * @param \PgSql\Result|false $cursor
-	 * @return string
+	 * @return array{0:string,1:string}
 	 */
-	public function __dbPrintError(\PgSql\Result|false $cursor = false): string;
+	public function __dbPrintLastError(): array;
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param \PgSql\Result|false $cursor
+	 * @return array{0:string,1:string}
+	 */
+	public function __dbPrintError(\PgSql\Result|false $cursor = false): array;
 
 	/**
 	 * Undocumented function

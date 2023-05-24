@@ -1164,7 +1164,7 @@ class Basic
 	public function passwordSet(string $password): string
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Password::passwordSet()', E_USER_DEPRECATED);
-		return \CoreLibs\Check\Password::passwordSet($password);
+		return \CoreLibs\Security\Password::passwordSet($password);
 	}
 
 	/**
@@ -1177,7 +1177,7 @@ class Basic
 	public function passwordVerify(string $password, string $hash): bool
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Password::passwordVerify()', E_USER_DEPRECATED);
-		return \CoreLibs\Check\Password::passwordVerify($password, $hash);
+		return \CoreLibs\Security\Password::passwordVerify($password, $hash);
 	}
 
 	/**
@@ -1189,7 +1189,7 @@ class Basic
 	public function passwordRehashCheck(string $hash): bool
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Check\Password::passwordRehashCheck()', E_USER_DEPRECATED);
-		return \CoreLibs\Check\Password::passwordRehashCheck($hash);
+		return \CoreLibs\Security\Password::passwordRehashCheck($hash);
 	}
 
 	// *** BETTER PASSWORD OPTIONS END ***

@@ -7,9 +7,9 @@ namespace tests;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test class for Check\Password
- * @coversDefaultClass \CoreLibs\Check\Password
- * @testdox \CoreLibs\Check\Password method tests
+ * Test class for Security\Password
+ * @coversDefaultClass \CoreLibs\Security\Password
+ * @testdox \CoreLibs\Security\Password method tests
  */
 final class CoreLibsCheckPasswordTest extends TestCase
 {
@@ -46,7 +46,7 @@ final class CoreLibsCheckPasswordTest extends TestCase
 	{
 		$this->assertEquals(
 			$expected,
-			\CoreLibs\Check\Password::passwordVerify($input, \CoreLibs\Check\Password::passwordSet($input_hash))
+			\CoreLibs\Security\Password::passwordVerify($input, \CoreLibs\Security\Password::passwordSet($input_hash))
 		);
 	}
 
@@ -65,7 +65,7 @@ final class CoreLibsCheckPasswordTest extends TestCase
 	{
 		$this->assertEquals(
 			$expected,
-			\CoreLibs\Check\Password::passwordRehashCheck($input)
+			\CoreLibs\Security\Password::passwordRehashCheck($input)
 		);
 	}
 }

@@ -68,7 +68,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\ACL;
 
-use CoreLibs\Check\Password;
+use CoreLibs\Security\Password;
 use CoreLibs\Convert\Json;
 
 class Login
@@ -1608,7 +1608,7 @@ class Login
 			// TODO: submit or JS to set target page as ajax call
 			// NOTE: for the HTML block I ignore line lengths
 			// phpcs:disable
-			$this->login_template['password_change'] = <<<EOM
+			$this->login_template['password_change'] = <<<HTML
 <div id="pw_change_div" class="hidden" style="position: absolute; top: 30px; left: 50px; width: 400px; height: 220px; background-color: white; border: 1px solid black; padding: 25px;">
 <table>
 <tr><td class="norm" align="center" colspan="2"><h3>{TITLE_PASSWORD_CHANGE}</h3></td></tr>
@@ -1626,7 +1626,7 @@ class Login
 </table>
 </div>
 {PASSWORD_CHANGE_SHOW}
-EOM;
+HTML;
 			// phpcs:enable
 		}
 		if ($this->password_forgot) {
@@ -1650,7 +1650,7 @@ EOM;
 		// now check templates
 		// TODO: submit or JS to set target page as ajax call
 		if (!$this->login_template['template']) {
-			$this->login_template['template'] = <<<EOM
+			$this->login_template['template'] = <<<HTML
 <!DOCTYPE html>
 <html lang="{LANGUAGE}">
 <head>
@@ -1712,7 +1712,7 @@ h3 { font-size: 18px; }
 </form>
 </body>
 </html>
-EOM;
+HTML;
 		}
 	}
 
