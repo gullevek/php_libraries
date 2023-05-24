@@ -68,7 +68,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\ACL;
 
-use CoreLibs\Check\Password;
+use CoreLibs\Security\Password;
 use CoreLibs\Convert\Json;
 
 class Login

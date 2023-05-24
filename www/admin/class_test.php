@@ -81,6 +81,7 @@ print '<div><a href="class_test.mime.php">Class Test: MIME</a></div>';
 print '<div><a href="class_test.json.php">Class Test: JSON</a></div>';
 print '<div><a href="class_test.token.php">Class Test: FORM TOKEN</a></div>';
 print '<div><a href="class_test.password.php">Class Test: PASSWORD</a></div>';
+print '<div><a href="class_test.encryption.php">Class Test: ENCRYPTION</a></div>';
 print '<div><a href="class_test.math.php">Class Test: MATH</a></div>';
 print '<div><a href="class_test.html.php">Class Test: HTML/ELEMENTS</a></div>';
 print '<div><a href="class_test.email.php">Class Test: EMAIL</a></div>';

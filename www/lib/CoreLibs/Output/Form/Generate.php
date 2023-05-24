@@ -1954,7 +1954,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				if ($this->table_array[$key]['value']) {
 					// use the better new passwordSet instead of crypt based
 					$this->table_array[$key]['value'] =
-						\CoreLibs\Check\Password::passwordSet($this->table_array[$key]['value']);
+						\CoreLibs\Security\Password::passwordSet($this->table_array[$key]['value']);
 					$this->table_array[$key]['HIDDEN_value'] = $this->table_array[$key]['value'];
 				} else {
 					// $this->table_array[$key]['HIDDEN_value'] =

@@ -21,10 +21,7 @@ $ECHO_ALL = true;
 $LOG_FILE_ID = 'classTest-db-single';
 ob_end_flush();
 
-use CoreLibs\Debug\Support as DgS;
-use CoreLibs\DB\IO as DbIo;
 use CoreLibs\Debug\Support;
-use CoreLibs\Convert\SetVarType;
 
 $log = new CoreLibs\Debug\Logging([
 	'log_folder' => BASE . LOG,
