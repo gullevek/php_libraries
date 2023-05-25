@@ -77,7 +77,7 @@ class FileWriter
 		) {
 			/** @deprecated Do not use this anymore, define path with fsetFolder */
 			trigger_error(
-				'fsetFolder must be set first. Setting via LOG_FILE_ID and LOg constants is deprecated',
+				'fsetFolder must be set first. Setting via LOG_FILE_ID and LOG constants is deprecated',
 				E_USER_DEPRECATED
 			);
 			self::$debug_folder = BASE . LOG;

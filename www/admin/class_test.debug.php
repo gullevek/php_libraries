@@ -129,7 +129,10 @@ class TestL
 	public $log;
 	public function __construct()
 	{
-		$this->log = new CoreLibs\Debug\Logging();
+		$this->log = new CoreLibs\Debug\Logging([
+			'log_folder' => '../log/',
+			'file_id' => 'DebugTestTestLLogger',
+		]);
 	}
 	/**
 	 * Undocumented function
@@ -206,6 +209,7 @@ print "AO-CLASS: DEBUG: " . $ao->test() . "<br>";
 print "GETCALLERCLASS(NON CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
 
 // fdebug
+print "S::FSETFILENAME: " . FileWriter::fsetFolder(BASE . LOG) . "<br>";
 print "S::FSETFILENAME: " . FileWriter::fsetFilename('class_test_debug_file.log') . "<br>";
 print "S::FDEBUG: " . FileWriter::fdebug('CLASS TEST DEBUG FILE: ' . date('Y-m-d H:i:s')) . "<br>";
 
