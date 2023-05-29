@@ -4,6 +4,8 @@ namespace Psalm\Storage;
 
 use Psalm\Aliases;
 use Psalm\CodeLocation;
+use Psalm\Codebase;
+use Psalm\Config;
 use Psalm\Internal\Analyzer\ClassLikeAnalyzer;
 use Psalm\Internal\MethodIdentifier;
 use Psalm\Internal\Type\TypeAlias\ClassTypeAlias;
@@ -66,14 +68,14 @@ final class ClassLikeStorage implements HasAttributesInterface
     public $mixin_declaring_fqcln;
 
     /**
-     * @var bool
+     * @var ?bool
      */
-    public $sealed_properties = false;
+    public $sealed_properties = null;
 
     /**
-     * @var bool
+     * @var ?bool
      */
-    public $sealed_methods = false;
+    public $sealed_methods = null;
 
     /**
      * @var bool
@@ -314,6 +316,11 @@ final class ClassLikeStorage implements HasAttributesInterface
     public $appearing_property_ids = [];
 
     /**
+     * @var ?Union
+     */
+    public $inheritors = null;
+
+    /**
      * @var array<string, string>
      */
     public $inheritable_property_ids = [];
@@ -485,6 +492,24 @@ final class ClassLikeStorage implements HasAttributesInterface
         return $this->attributes;
     }
 
+    public function hasAttributeIncludingParents(
+        string $fq_class_name,
+        Codebase $codebase
+    ): bool {
+        if ($this->hasAttribute($fq_class_name)) {
+            return true;
+        }
+
+        foreach ($this->parent_classes as $parent_class) {
+            $parent_class_storage = $codebase->classlike_storage_provider->get($parent_class);
+            if ($parent_class_storage->hasAttribute($fq_class_name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Get the template constraint types for the class.
      *
@@ -499,5 +524,26 @@ final class ClassLikeStorage implements HasAttributesInterface
         }
 
         return $type_params;
+    }
+
+    public function hasSealedProperties(Config $config): bool
+    {
+        return $this->sealed_properties ?? $config->seal_all_properties;
+    }
+
+    public function hasSealedMethods(Config $config): bool
+    {
+        return $this->sealed_methods ?? $config->seal_all_methods;
+    }
+
+    private function hasAttribute(string $fq_class_name): bool
+    {
+        foreach ($this->attributes as $attribute) {
+            if ($fq_class_name === $attribute->fq_class_name) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

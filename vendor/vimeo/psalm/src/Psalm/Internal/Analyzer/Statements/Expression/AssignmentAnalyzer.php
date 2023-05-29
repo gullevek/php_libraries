@@ -56,6 +56,7 @@ use Psalm\Issue\PossiblyUndefinedIntArrayOffset;
 use Psalm\Issue\ReferenceConstraintViolation;
 use Psalm\Issue\ReferenceReusedFromConfusingScope;
 use Psalm\Issue\UnnecessaryVarAnnotation;
+use Psalm\Issue\UnsupportedPropertyReferenceUsage;
 use Psalm\IssueBuffer;
 use Psalm\Node\Expr\BinaryOp\VirtualBitwiseAnd;
 use Psalm\Node\Expr\BinaryOp\VirtualBitwiseOr;
@@ -270,7 +271,7 @@ class AssignmentAnalyzer
                 && $extended_var_id
                 && (!$not_ignored_docblock_var_ids || isset($not_ignored_docblock_var_ids[$extended_var_id]))
                 && $temp_assign_value_type->getId() === $comment_type->getId()
-                && !$comment_type->isMixed()
+                && !$comment_type->isMixed(true)
             ) {
                 if ($codebase->alter_code
                     && isset($statements_analyzer->getProjectAnalyzer()->getIssuesToFix()['UnnecessaryVarAnnotation'])
@@ -980,9 +981,17 @@ class AssignmentAnalyzer
             $context->references_to_external_scope[$lhs_var_id] = true;
         }
         if (strpos($rhs_var_id, '->') !== false) {
+            IssueBuffer::maybeAdd(new UnsupportedPropertyReferenceUsage(
+                new CodeLocation($statements_analyzer->getSource(), $stmt),
+            ));
             // Reference to object property, we always consider object properties to be an external scope for references
             // TODO handle differently so it's detected as unused if the object is unused?
             $context->references_to_external_scope[$lhs_var_id] = true;
+        }
+        if (strpos($rhs_var_id, '::') !== false) {
+            IssueBuffer::maybeAdd(new UnsupportedPropertyReferenceUsage(
+                new CodeLocation($statements_analyzer->getSource(), $stmt),
+            ));
         }
 
         $lhs_location = new CodeLocation($statements_analyzer->getSource(), $stmt->var);

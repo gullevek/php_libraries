@@ -362,16 +362,6 @@ class ClassAnalyzer extends ClassLikeAnalyzer
             return;
         }
 
-        if ($this->leftover_stmts) {
-            (new StatementsAnalyzer(
-                $this,
-                new NodeDataProvider(),
-            ))->analyze(
-                $this->leftover_stmts,
-                $class_context,
-            );
-        }
-
         if (!$storage->abstract) {
             foreach ($storage->declaring_method_ids as $declaring_method_id) {
                 $method_storage = $codebase->methods->getStorage($declaring_method_id);
@@ -712,7 +702,7 @@ class ClassAnalyzer extends ClassLikeAnalyzer
                             new OverriddenPropertyAccess(
                                 'Property ' . $fq_class_name . '::$' . $property_name
                                     . ' has different access level than '
-                                    . $storage->name . '::$' . $property_name,
+                                    . $guide_class_name . '::$' . $property_name,
                                 $property_storage->location,
                             ),
                         );
@@ -1781,8 +1771,6 @@ class ClassAnalyzer extends ClassLikeAnalyzer
         $method_context = clone $class_context;
 
         foreach ($method_context->vars_in_scope as $context_var_id => $context_type) {
-            $method_context->vars_in_scope[$context_var_id] = $context_type;
-
             if ($context_type->from_property && $stmt->name->name !== '__construct') {
                 $method_context->vars_in_scope[$context_var_id] =
                     $method_context->vars_in_scope[$context_var_id]->setProperties(['initialized' => true]);

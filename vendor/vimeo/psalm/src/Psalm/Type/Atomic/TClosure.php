@@ -26,7 +26,7 @@ final class TClosure extends TNamedObject
     /**
      * @param list<FunctionLikeParameter> $params
      * @param array<string, bool> $byref_uses
-     * @param array<string, TNamedObject|TTemplateParam|TIterable|TObjectWithProperties> $extra_types
+     * @param array<string, TNamedObject|TTemplateParam|TIterable|TObjectWithProperties|TCallableObject> $extra_types
      */
     public function __construct(
         string $value = 'callable',
@@ -37,13 +37,17 @@ final class TClosure extends TNamedObject
         array $extra_types = [],
         bool $from_docblock = false
     ) {
-        $this->value = $value;
         $this->params = $params;
         $this->return_type = $return_type;
         $this->is_pure = $is_pure;
         $this->byref_uses = $byref_uses;
-        $this->extra_types = $extra_types;
-        $this->from_docblock = $from_docblock;
+        parent::__construct(
+            $value,
+            false,
+            false,
+            $extra_types,
+            $from_docblock,
+        );
     }
 
     public function canBeFullyExpressedInPhp(int $analysis_php_version_id): bool

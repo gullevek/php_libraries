@@ -143,6 +143,7 @@ class ClassLikeNodeScanner
 
     /**
      * @return false|null
+     * @psalm-suppress ComplexMethod
      */
     public function start(PhpParser\Node\Stmt\ClassLike $node): ?bool
     {
@@ -420,10 +421,19 @@ class ClassLikeNodeScanner
 
                     if ($template_map[1] !== null && $template_map[2] !== null) {
                         if (trim($template_map[2])) {
+                            $type_string = $template_map[2];
+                            try {
+                                $type_string = CommentAnalyzer::splitDocLine($type_string)[0];
+                            } catch (DocblockParseException $e) {
+                                throw new DocblockParseException(
+                                    $type_string . ' is not a valid type: ' . $e->getMessage(),
+                                );
+                            }
+                            $type_string = CommentAnalyzer::sanitizeDocblockType($type_string);
                             try {
                                 $template_type = TypeParser::parseTokens(
                                     TypeTokenizer::getFullyQualifiedTokens(
-                                        $template_map[2],
+                                        $type_string,
                                         $this->aliases,
                                         $storage->template_types,
                                         $this->type_aliases,
@@ -529,6 +539,31 @@ class ClassLikeNodeScanner
             $storage->sealed_properties = $docblock_info->sealed_properties;
             $storage->sealed_methods = $docblock_info->sealed_methods;
 
+
+            if ($docblock_info->inheritors) {
+                try {
+                    $storage->inheritors = TypeParser::parseTokens(
+                        TypeTokenizer::getFullyQualifiedTokens(
+                            $docblock_info->inheritors,
+                            $storage->aliases,
+                            $storage->template_types ?? [],
+                            $storage->type_aliases,
+                            $fq_classlike_name,
+                        ),
+                        null,
+                        $storage->template_types ?? [],
+                        $storage->type_aliases,
+                        true,
+                    );
+                } catch (TypeParseTreeException $e) {
+                    $storage->docblock_issues[] = new InvalidDocblock(
+                        '@psalm-inheritors contains invalid reference:' . $e->getMessage(),
+                        $name_location ?? $class_location,
+                    );
+                }
+            }
+
+
             if ($docblock_info->properties) {
                 foreach ($docblock_info->properties as $property) {
                     $pseudo_property_type_tokens = TypeTokenizer::getFullyQualifiedTokens(
@@ -567,8 +602,6 @@ class ClassLikeNodeScanner
                         );
                     }
                 }
-
-                $storage->sealed_properties = true;
             }
 
             foreach ($docblock_info->methods as $method) {
@@ -595,8 +628,6 @@ class ClassLikeNodeScanner
                         $lc_method_name,
                     );
                 }
-
-                $storage->sealed_methods = true;
             }
 
 
@@ -1173,7 +1204,7 @@ class ClassLikeNodeScanner
             $storage->template_type_uses_count[$generic_class_lc] = count($atomic_type->type_params);
 
             foreach ($atomic_type->type_params as $type_param) {
-                $used_type_parameters[] = $type_param;
+                $used_type_parameters[] = $type_param->replaceClassLike('self', $storage->name);
             }
 
             $storage->template_extended_offsets[$atomic_type->value] = $used_type_parameters;
@@ -1905,9 +1936,12 @@ class ClassLikeNodeScanner
             }
 
             $type_string = str_replace("\n", '', implode('', $var_line_parts));
-
-            // Strip any remaining characters after the last grouping character >, } or )
-            $type_string = preg_replace('/(?<=[>})])[^>})]*$/', '', $type_string, 1);
+            try {
+                $type_string = CommentAnalyzer::splitDocLine($type_string)[0];
+            } catch (DocblockParseException $e) {
+                throw new DocblockParseException($type_string . ' is not a valid type: '.$e->getMessage());
+            }
+            $type_string = CommentAnalyzer::sanitizeDocblockType($type_string);
 
             try {
                 $type_tokens = TypeTokenizer::getFullyQualifiedTokens(

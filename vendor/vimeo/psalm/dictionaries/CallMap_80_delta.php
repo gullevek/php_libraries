@@ -28,6 +28,13 @@ return [
     'ReflectionParameter::getAttributes' => ['list<ReflectionAttribute>', 'name='=>'?string', 'flags='=>'int'],
     'ReflectionProperty::getAttributes' => ['list<ReflectionAttribute>', 'name='=>'?string', 'flags='=>'int'],
     'ReflectionUnionType::getTypes' => ['list<ReflectionNamedType>'],
+    'SplFixedArray::getIterator' => ['Iterator'],
+    'WeakMap::count' => ['int'],
+    'WeakMap::getIterator' => ['Iterator'],
+    'WeakMap::offsetExists' => ['bool', 'object'=>'object'],
+    'WeakMap::offsetGet' => ['mixed', 'object'=>'object'],
+    'WeakMap::offsetSet' => ['void', 'object'=>'object', 'value'=>'mixed'],
+    'WeakMap::offsetUnset' => ['void', 'object'=>'object'],
     'fdiv' => ['float', 'num1'=>'float', 'num2'=>'float'],
     'get_debug_type' => ['string', 'value'=>'mixed'],
     'get_resource_id' => ['int', 'resource'=>'resource'],
@@ -217,6 +224,10 @@ return [
       'old' => ['string', 'locale'=>'string', 'displayLocale='=>'string'],
       'new' => ['string', 'locale'=>'string', 'displayLocale='=>'?string'],
     ],
+    'mysqli_stmt::__construct' => [
+      'old' => ['void', 'mysql'=>'mysqli', 'query='=>'string'],
+      'new' => ['void', 'mysql'=>'mysqli', 'query='=>'?string'],
+    ],
     'NumberFormatter::__construct' => [
       'old' => ['void', 'locale'=>'string', 'style'=>'int', 'pattern='=>'string'],
       'new' => ['void', 'locale'=>'string', 'style'=>'int', 'pattern='=>'?string'],
@@ -373,6 +384,14 @@ return [
       'old' => ['?Closure', 'object='=>'object'],
       'new' => ['Closure', 'object='=>'?object'],
     ],
+    'ReflectionObject::getConstants' => [
+      'old' => ['array<string,mixed>'],
+      'new' => ['array<string,mixed>', 'filter='=>'?int'],
+    ],
+    'ReflectionObject::getReflectionConstants' => [
+      'old' => ['list<\ReflectionClassConstant>'],
+      'new' => ['list<\ReflectionClassConstant>', 'filter='=>'?int'],
+    ],
     'ReflectionObject::newInstanceArgs' => [
       'old' => ['object', 'args='=>'list<mixed>'],
       'new' => ['object', 'args='=>'list<mixed>|array<string, mixed>'],
@@ -461,6 +480,10 @@ return [
       'old' => ['string|false'],
       'new' => ['string'],
     ],
+    'XMLReader::next' => [
+      'old' => ['bool', 'name='=>'string'],
+      'new' => ['bool', 'name='=>'?string'],
+    ],
     'XMLWriter::startAttributeNs' => [
       'old' => ['bool', 'prefix'=>'string', 'name'=>'string', 'namespace'=>'?string'],
       'new' => ['bool', 'prefix'=>'?string', 'name'=>'string', 'namespace'=>'?string'],
@@ -478,8 +501,8 @@ return [
       'new' => ['string'],
     ],
     'ZipArchive::setEncryptionIndex' => [
-      'old' => ['bool', 'index'=>'int', 'method'=>'string', 'password='=>'string'],
-      'new' => ['bool', 'index'=>'int', 'method'=>'string', 'password='=>'?string'],
+      'old' => ['bool', 'index'=>'int', 'method'=>'int', 'password='=>'string'],
+      'new' => ['bool', 'index'=>'int', 'method'=>'int', 'password='=>'?string'],
     ],
     'ZipArchive::setEncryptionName' => [
       'old' => ['bool', 'name'=>'string', 'method'=>'int', 'password='=>'string'],
@@ -618,8 +641,8 @@ return [
       'new' => ['void', 'handle'=>'CurlHandle'],
     ],
     'curl_copy_handle' => [
-      'old' => ['resource', 'ch'=>'resource'],
-      'new' => ['CurlHandle', 'handle'=>'CurlHandle'],
+      'old' => ['resource|false', 'ch'=>'resource'],
+      'new' => ['CurlHandle|false', 'handle'=>'CurlHandle'],
     ],
     'curl_errno' => [
       'old' => ['int', 'ch'=>'resource'],
@@ -798,8 +821,8 @@ return [
       'new' => ['DOMElement', 'node'=>'SimpleXMLElement'],
     ],
     'easter_date' => [
-      'old' => ['int', 'year='=>'int'],
-      'new' => ['int', 'year='=>'?int'],
+      'old' => ['int', 'year='=>'int', 'mode='=>'int'],
+      'new' => ['int', 'year='=>'?int', 'mode='=>'int'],
     ],
     'easter_days' => [
       'old' => ['int', 'year='=>'int', 'mode='=>'int'],
@@ -934,8 +957,8 @@ return [
       'new' => ['int|false', 'stream'=>'resource', 'data'=>'string', 'length='=>'?int'],
     ],
     'get_class_methods' => [
-      'old' => ['list<string>|null', 'object_or_class'=>'mixed'],
-      'new' => ['list<string>', 'object_or_class'=>'object|class-string'],
+      'old' => ['list<non-falsy-string>|null', 'object_or_class'=>'mixed'],
+      'new' => ['list<non-falsy-string>', 'object_or_class'=>'object|class-string'],
     ],
     'get_headers' => [
       'old' => ['array|false', 'url'=>'string', 'associative='=>'int', 'context='=>'?resource'],
@@ -982,12 +1005,12 @@ return [
       'new' => ['string|false', 'stream'=>'resource', 'length='=>'?int'],
     ],
     'gzputs' => [
-      'old' => ['int', 'stream'=>'resource', 'data'=>'string', 'length='=>'int'],
-      'new' => ['int', 'stream'=>'resource', 'data'=>'string', 'length='=>'?int'],
+      'old' => ['int|false', 'stream'=>'resource', 'data'=>'string', 'length='=>'int'],
+      'new' => ['int|false', 'stream'=>'resource', 'data'=>'string', 'length='=>'?int'],
     ],
     'gzwrite' => [
-      'old' => ['int', 'stream'=>'resource', 'data'=>'string', 'length='=>'int'],
-      'new' => ['int', 'stream'=>'resource', 'data'=>'string', 'length='=>'?int'],
+      'old' => ['int|false', 'stream'=>'resource', 'data'=>'string', 'length='=>'int'],
+      'new' => ['int|false', 'stream'=>'resource', 'data'=>'string', 'length='=>'?int'],
     ],
     'hash' => [
       'old' => ['string|false', 'algo'=>'string', 'data'=>'string', 'binary='=>'bool'],
@@ -1506,8 +1529,8 @@ return [
       'new' => ['bool|string', 'ldap'=>'resource', 'user='=>'string', 'old_password='=>'string', 'new_password='=>'string', '&w_controls='=>'array|null'],
     ],
     'ldap_list' => [
-      'old' => ['resource|false', 'ldap'=>'resource|array', 'base'=>'string', 'filter'=>'string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'array'],
-      'new' => ['resource|false', 'ldap'=>'resource|array', 'base'=>'string', 'filter'=>'string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'?array'],
+      'old' => ['resource|false', 'ldap'=>'resource|array', 'base'=>'array|string', 'filter'=>'array|string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'array'],
+      'new' => ['resource|false', 'ldap'=>'resource|array', 'base'=>'array|string', 'filter'=>'array|string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'?array'],
     ],
     'ldap_rename_ext' => [
       'old' => ['resource|false', 'ldap'=>'resource', 'dn'=>'string', 'new_rdn'=>'string', 'new_parent'=>'string', 'delete_old_rdn'=>'bool', 'controls='=>'array'],
@@ -1546,16 +1569,16 @@ return [
       'new' => ['bool', 'ldap'=>'resource', 'dn'=>'string', 'modifications_info'=>'array', 'controls='=>'?array'],
     ],
     'ldap_read' => [
-      'old' => ['resource|false', 'ldap'=>'resource|array', 'base'=>'string', 'filter'=>'string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'array'],
-      'new' => ['resource|false', 'ldap'=>'resource|array', 'base'=>'string', 'filter'=>'string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'?array'],
+      'old' => ['resource|false', 'ldap'=>'resource|array', 'base'=>'array|string', 'filter'=>'array|string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'array'],
+      'new' => ['resource|false', 'ldap'=>'resource|array', 'base'=>'array|string', 'filter'=>'array|string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'?array'],
     ],
     'ldap_rename' => [
       'old' => ['bool', 'ldap'=>'resource', 'dn'=>'string', 'new_rdn'=>'string', 'new_parent'=>'string', 'delete_old_rdn'=>'bool', 'controls='=>'array'],
       'new' => ['bool', 'ldap'=>'resource', 'dn'=>'string', 'new_rdn'=>'string', 'new_parent'=>'string', 'delete_old_rdn'=>'bool', 'controls='=>'?array'],
     ],
     'ldap_search' => [
-      'old' => ['resource|false', 'ldap'=>'resource|resource[]', 'base'=>'string', 'filter'=>'string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'array'],
-      'new' => ['resource|false', 'ldap'=>'resource|resource[]', 'base'=>'string', 'filter'=>'string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'?array'],
+      'old' => ['resource[]|resource|false', 'ldap'=>'resource|resource[]', 'base'=>'array|string', 'filter'=>'array|string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'array'],
+      'new' => ['resource[]|resource|false', 'ldap'=>'resource|resource[]', 'base'=>'array|string', 'filter'=>'array|string', 'attributes='=>'array', 'attributes_only='=>'int', 'sizelimit='=>'int', 'timelimit='=>'int', 'deref='=>'int', 'controls='=>'?array'],
     ],
     'ldap_set_rebind_proc' => [
       'old' => ['bool', 'ldap'=>'resource', 'callback'=>'callable'],
@@ -1866,8 +1889,8 @@ return [
       'new' => ['bool', 'mysql'=>'mysqli', 'flags='=>'int', 'name='=>'?string'],
     ],
     'number_format' => [
-      'old' => ['string', 'num'=>'float|int', 'decimals='=>'int'],
-      'new' => ['string', 'num'=>'float|int', 'decimals='=>'int', 'decimal_separator='=>'?string', 'thousands_separator='=>'?string'],
+      'old' => ['string', 'num'=>'float', 'decimals='=>'int'],
+      'new' => ['string', 'num'=>'float', 'decimals='=>'int', 'decimal_separator='=>'?string', 'thousands_separator='=>'?string'],
     ],
     'numfmt_create' => [
       'old' => ['NumberFormatter|null', 'locale'=>'string', 'style'=>'int', 'pattern='=>'string'],
@@ -2186,28 +2209,28 @@ return [
       'new' => ['bool', 'semaphore'=>'SysvSemaphore'],
     ],
     'session_cache_expire' => [
-      'old' => ['int', 'value='=>'int'],
-      'new' => ['int', 'value='=>'?int'],
+      'old' => ['int|false', 'value='=>'int'],
+      'new' => ['int|false', 'value='=>'?int'],
     ],
     'session_cache_limiter' => [
-      'old' => ['string', 'value='=>'string'],
-      'new' => ['string', 'value='=>'?string'],
+      'old' => ['string|false', 'value='=>'string'],
+      'new' => ['string|false', 'value='=>'?string'],
     ],
     'session_id' => [
       'old' => ['string|false', 'id='=>'string'],
       'new' => ['string|false', 'id='=>'?string'],
     ],
     'session_module_name' => [
-      'old' => ['string', 'module='=>'string'],
-      'new' => ['string', 'module='=>'?string'],
+      'old' => ['string|false', 'module='=>'string'],
+      'new' => ['string|false', 'module='=>'?string'],
     ],
     'session_name' => [
       'old' => ['string|false', 'name='=>'string'],
       'new' => ['string|false', 'name='=>'?string'],
     ],
     'session_save_path' => [
-      'old' => ['string', 'path='=>'string'],
-      'new' => ['string', 'path='=>'?string'],
+      'old' => ['string|false', 'path='=>'string'],
+      'new' => ['string|false', 'path='=>'?string'],
     ],
     'session_set_cookie_params' => [
       'old' => ['bool', 'lifetime'=>'int', 'path='=>'string', 'domain='=>'string', 'secure='=>'bool', 'httponly='=>'bool'],
@@ -2578,8 +2601,8 @@ return [
       'new' => ['int', 'mask='=>'?int'],
     ],
     'unixtojd' => [
-      'old' => ['int', 'timestamp='=>'int'],
-      'new' => ['int', 'timestamp='=>'?int'],
+      'old' => ['int|false', 'timestamp='=>'int'],
+      'new' => ['int|false', 'timestamp='=>'?int'],
     ],
     'xml_get_current_byte_index' => [
       'old' => ['int|false', 'parser'=>'resource'],
@@ -2618,8 +2641,8 @@ return [
       'new' => ['bool', 'parser'=>'XMLParser'],
     ],
     'xml_parser_get_option' => [
-      'old' => ['string|false', 'parser'=>'resource', 'option'=>'int'],
-      'new' => ['string', 'parser'=>'XMLParser', 'option'=>'int'],
+      'old' => ['string|int', 'parser'=>'resource', 'option'=>'int'],
+      'new' => ['string|int', 'parser'=>'XMLParser', 'option'=>'int'],
     ],
     'xml_parser_set_option' => [
       'old' => ['bool', 'parser'=>'resource', 'option'=>'int', 'value'=>'mixed'],
@@ -2862,7 +2885,7 @@ return [
     'ldap_control_paged_result' => ['bool', 'link_identifier'=>'resource', 'pagesize'=>'int', 'iscritical='=>'bool', 'cookie='=>'string'],
     'ldap_control_paged_result_response' => ['bool', 'link_identifier'=>'resource', 'result_identifier'=>'resource', '&w_cookie'=>'string', '&w_estimated'=>'int'],
     'ldap_sort' => ['bool', 'link_identifier'=>'resource', 'result_identifier'=>'resource', 'sortfilter'=>'string'],
-    'number_format\'1' => ['string', 'num'=>'float|int', 'decimals'=>'int', 'decimal_separator'=>'?string', 'thousands_separator'=>'?string'],
+    'number_format\'1' => ['string', 'num'=>'float', 'decimals'=>'int', 'decimal_separator'=>'?string', 'thousands_separator'=>'?string'],
     'png2wbmp' => ['bool', 'pngname'=>'string', 'wbmpname'=>'string', 'dest_height'=>'int', 'dest_width'=>'int', 'threshold'=>'int'],
     'read_exif_data' => ['array', 'filename'=>'string', 'sections_needed='=>'string', 'sub_arrays='=>'bool', 'read_thumbnail='=>'bool'],
     'Reflection::export' => ['?string', 'r'=>'reflector', 'return='=>'bool'],
@@ -2883,6 +2906,11 @@ return [
     'SimpleXMLIterator::next' => ['void'],
     'SimpleXMLIterator::hasChildren' => ['bool'],
     'SimpleXMLIterator::getChildren' => ['?SimpleXMLIterator'],
+    'SplFixedArray::current' => ['mixed'],
+    'SplFixedArray::key' => ['int'],
+    'SplFixedArray::next' => ['void'],
+    'SplFixedArray::rewind' => ['void'],
+    'SplFixedArray::valid' => ['bool'],
     'SplTempFileObject::fgetss' => ['string', 'allowable_tags='=>'string'],
     'xmlrpc_decode' => ['mixed', 'xml'=>'string', 'encoding='=>'string'],
     'xmlrpc_decode_request' => ['?array', 'xml'=>'string', '&w_method'=>'string', 'encoding='=>'string'],

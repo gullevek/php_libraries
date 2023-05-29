@@ -42,6 +42,7 @@ use Psalm\Type;
 use Psalm\Type\Atomic;
 use Psalm\Type\Atomic\Scalar;
 use Psalm\Type\Atomic\TArray;
+use Psalm\Type\Atomic\TCallableObject;
 use Psalm\Type\Atomic\TFalse;
 use Psalm\Type\Atomic\TGenericObject;
 use Psalm\Type\Atomic\TIterable;
@@ -190,7 +191,7 @@ class ForeachAnalyzer
                     && $type_location
                     && isset($context->vars_in_scope[$var_comment->var_id])
                     && $context->vars_in_scope[$var_comment->var_id]->getId() === $comment_type->getId()
-                    && !$comment_type->isMixed()
+                    && !$comment_type->isMixed(true)
                 ) {
                     $project_analyzer = $statements_analyzer->getProjectAnalyzer();
 
@@ -265,10 +266,6 @@ class ForeachAnalyzer
         }
 
         $foreach_context = clone $context;
-
-        foreach ($foreach_context->vars_in_scope as $context_var_id => $context_type) {
-            $foreach_context->vars_in_scope[$context_var_id] = $context_type;
-        }
 
         if ($var_id && $foreach_context->hasVariable($var_id)) {
             // refine the type of the array variable we iterate over
@@ -750,6 +747,7 @@ class ForeachAnalyzer
         foreach ($iterator_atomic_types as $iterator_atomic_type) {
             if ($iterator_atomic_type instanceof TTemplateParam
                 || $iterator_atomic_type instanceof TObjectWithProperties
+                || $iterator_atomic_type instanceof TCallableObject
             ) {
                 throw new UnexpectedValueException('Shouldn’t get a generic param here');
             }

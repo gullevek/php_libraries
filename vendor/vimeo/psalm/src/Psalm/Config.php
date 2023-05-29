@@ -195,6 +195,13 @@ class Config
     public $use_docblock_property_types = false;
 
     /**
+     * Whether using property annotations in docblocks should implicitly seal properties
+     *
+     * @var bool
+     */
+    public $docblock_property_types_seal_properties = true;
+
+    /**
      * Whether or not to throw an exception on first error
      *
      * @var bool
@@ -1049,6 +1056,7 @@ class Config
         $booleanAttributes = [
             'useDocblockTypes' => 'use_docblock_types',
             'useDocblockPropertyTypes' => 'use_docblock_property_types',
+            'docblockPropertyTypesSealProperties' => 'docblock_property_types_seal_properties',
             'throwExceptionOnError' => 'throw_exception',
             'hideExternalErrors' => 'hide_external_errors',
             'hideAllErrorsExceptPassedFiles' => 'hide_all_errors_except_passed_files',
@@ -1727,7 +1735,8 @@ class Config
 
     public function reportIssueInFile(string $issue_type, string $file_path): bool
     {
-        if (($this->show_mixed_issues === false || $this->level > 2)
+        if ((($this->level < 3 && $this->show_mixed_issues === false)
+            || ($this->level > 2 && $this->show_mixed_issues !== true))
             && in_array($issue_type, self::MIXED_ISSUES, true)
         ) {
             return false;

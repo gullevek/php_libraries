@@ -19,6 +19,7 @@ use function is_file;
 use function ksort;
 use function md5;
 use function md5_file;
+use function sort;
 use function sprintf;
 use function strpos;
 use function var_export;
@@ -97,9 +98,18 @@ PHP;
 		}
 		$notInstalledPackages = [];
 		$installedPackages = [];
+		$ignoredPackages = [];
 
 		$data = [];
 		$fs = new Filesystem();
+		$ignore = [];
+
+		$packageExtra = $composer->getPackage()->getExtra();
+
+		if (isset($packageExtra['phpstan/extension-installer']['ignore'])) {
+			$ignore = $packageExtra['phpstan/extension-installer']['ignore'];
+		}
+
 		foreach ($composer->getRepositoryManager()->getLocalRepository()->getPackages() as $package) {
 			if (
 				$package->getType() !== 'phpstan-extension'
@@ -119,7 +129,15 @@ PHP;
 				continue;
 			}
 
+			if (in_array($package->getName(), $ignore, true)) {
+				$ignoredPackages[] = $package->getName();
+				continue;
+			}
+
 			$installPath = $installationManager->getInstallPath($package);
+			if ($installPath === null) {
+				continue;
+			}
 
 			$absoluteInstallPath = $fs->isAbsolutePath($installPath)
 				? $installPath
@@ -138,6 +156,7 @@ PHP;
 		ksort($data);
 		ksort($installedPackages);
 		ksort($notInstalledPackages);
+		sort($ignoredPackages);
 
 		$generatedConfigFileContents = sprintf(self::$generatedFileTemplate, var_export($data, true), var_export($notInstalledPackages, true));
 		file_put_contents($generatedConfigFilePath, $generatedConfigFileContents);
@@ -153,6 +172,10 @@ PHP;
 
 		foreach (array_keys($notInstalledPackages) as $name) {
 			$io->write(sprintf('> <comment>%s:</comment> not supported', $name));
+		}
+
+		foreach ($ignoredPackages as $name) {
+			$io->write(sprintf('> <comment>%s:</comment> ignored', $name));
 		}
 	}
 

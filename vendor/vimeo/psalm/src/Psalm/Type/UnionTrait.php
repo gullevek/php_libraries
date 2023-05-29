@@ -34,6 +34,7 @@ use Psalm\Type\Atomic\TMixed;
 use Psalm\Type\Atomic\TNamedObject;
 use Psalm\Type\Atomic\TNever;
 use Psalm\Type\Atomic\TNonEmptyLowercaseString;
+use Psalm\Type\Atomic\TNonEmptyString;
 use Psalm\Type\Atomic\TNonspecificLiteralInt;
 use Psalm\Type\Atomic\TNonspecificLiteralString;
 use Psalm\Type\Atomic\TString;
@@ -51,6 +52,8 @@ use function ksort;
 use function reset;
 use function sort;
 use function strpos;
+
+use const ARRAY_FILTER_USE_BOTH;
 
 /**
  * @psalm-immutable
@@ -795,9 +798,20 @@ trait UnionTrait
     /**
      * @psalm-mutation-free
      */
-    public function isMixed(): bool
+    public function isMixed(bool $check_templates = false): bool
     {
-        return isset($this->types['mixed']) && count($this->types) === 1;
+        return count(
+            array_filter(
+                $this->types,
+                static fn($type, $key): bool => $key === 'mixed'
+                    || $type instanceof TMixed
+                    || ($check_templates
+                        && $type instanceof TTemplateParam
+                        && $type->as->isMixed()
+                    ),
+                ARRAY_FILTER_USE_BOTH,
+            ),
+        ) === count($this->types);
     }
 
     /**
@@ -1011,6 +1025,25 @@ trait UnionTrait
                     || ($check_templates
                         && $type instanceof TTemplateParam
                         && $type->as->isString()
+                    )
+            ),
+        ) === count($this->types);
+    }
+
+    /**
+     * @psalm-mutation-free
+     * @return bool true if this is a string
+     */
+    public function isNonEmptyString(bool $check_templates = false): bool
+    {
+        return count(
+            array_filter(
+                $this->types,
+                static fn($type): bool => $type instanceof TNonEmptyString
+                    || ($type instanceof TLiteralString && $type->value !== '')
+                    || ($check_templates
+                        && $type instanceof TTemplateParam
+                        && $type->as->isNonEmptyString()
                     )
             ),
         ) === count($this->types);

@@ -19,6 +19,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         ),
         'P' => 
         array (
+            'Psr\\Log\\' => 8,
             'PhpParser\\' => 10,
         ),
         'D' => 
@@ -36,6 +37,10 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'gullevek\\dotEnv\\' => 
         array (
             0 => __DIR__ . '/..' . '/gullevek/dotenv/src',
+        ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/src',
         ),
         'PhpParser\\' => 
         array (
@@ -89,6 +94,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\DB\\SQL\\PgSQL' => __DIR__ . '/../..' . '/lib/CoreLibs/DB/SQL/PgSQL.php',
         'CoreLibs\\Debug\\FileWriter' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/FileWriter.php',
         'CoreLibs\\Debug\\Logging' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/Logging.php',
+        'CoreLibs\\Debug\\LoggingLegacy' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/LoggingLegacy.php',
         'CoreLibs\\Debug\\MemoryUsage' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/MemoryUsage.php',
         'CoreLibs\\Debug\\RunningTime' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/RunningTime.php',
         'CoreLibs\\Debug\\Support' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/Support.php',
@@ -101,6 +107,9 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Language\\Core\\StringReader' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/Core/StringReader.php',
         'CoreLibs\\Language\\GetLocale' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/GetLocale.php',
         'CoreLibs\\Language\\L10n' => __DIR__ . '/../..' . '/lib/CoreLibs/Language/L10n.php',
+        'CoreLibs\\Logging\\Logger\\Flag' => __DIR__ . '/../..' . '/lib/CoreLibs/Logging/Logger/Flag.php',
+        'CoreLibs\\Logging\\Logger\\Level' => __DIR__ . '/../..' . '/lib/CoreLibs/Logging/Logger/Level.php',
+        'CoreLibs\\Logging\\Logging' => __DIR__ . '/../..' . '/lib/CoreLibs/Logging/Logging.php',
         'CoreLibs\\Output\\Form\\Elements' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/Elements.php',
         'CoreLibs\\Output\\Form\\Generate' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/Generate.php',
         'CoreLibs\\Output\\Form\\TableArrays\\EditAccess' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/TableArrays/EditAccess.php',

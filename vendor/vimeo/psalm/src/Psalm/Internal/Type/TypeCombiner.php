@@ -551,6 +551,8 @@ class TypeCombiner
             }
 
             foreach ($type->type_params as $i => $type_param) {
+                // See https://github.com/vimeo/psalm/pull/9439#issuecomment-1464563015
+                /** @psalm-suppress PropertyTypeCoercion */
                 $combination->array_type_params[$i] = Type::combineUnionTypes(
                     $combination->array_type_params[$i] ?? null,
                     $type_param,
@@ -599,6 +601,8 @@ class TypeCombiner
 
         if ($type instanceof TClassStringMap) {
             foreach ([$type->getStandinKeyParam(), $type->value_param] as $i => $type_param) {
+                // See https://github.com/vimeo/psalm/pull/9439#issuecomment-1464563015
+                /** @psalm-suppress PropertyTypeCoercion */
                 $combination->array_type_params[$i] = Type::combineUnionTypes(
                     $combination->array_type_params[$i] ?? null,
                     $type_param,
@@ -1047,19 +1051,25 @@ class TypeCombiner
             if (!isset($combination->value_types['string'])) {
                 if ($combination->strings) {
                     if ($type instanceof TNumericString) {
-                        $has_non_numeric_string = false;
+                        $has_only_numeric_strings = true;
+                        $has_only_non_empty_strings = true;
 
                         foreach ($combination->strings as $string_type) {
                             if (!is_numeric($string_type->value)) {
-                                $has_non_numeric_string = true;
-                                break;
+                                $has_only_numeric_strings = false;
+                            }
+
+                            if ($string_type->value === '') {
+                                $has_only_non_empty_strings = false;
                             }
                         }
 
-                        if ($has_non_numeric_string) {
-                            $combination->value_types['string'] = new TString();
-                        } else {
+                        if ($has_only_numeric_strings) {
                             $combination->value_types['string'] = $type;
+                        } elseif ($has_only_non_empty_strings) {
+                            $combination->value_types['string'] = new TNonEmptyString();
+                        } else {
+                            $combination->value_types['string'] = new TString();
                         }
                     } elseif ($type instanceof TLowercaseString) {
                         $has_non_lowercase_string = false;

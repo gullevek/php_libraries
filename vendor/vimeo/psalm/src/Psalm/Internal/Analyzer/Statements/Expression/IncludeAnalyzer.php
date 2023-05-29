@@ -158,7 +158,8 @@ class IncludeAnalyzer
 
             $current_file_analyzer = $statements_analyzer->getFileAnalyzer();
 
-            if ($current_file_analyzer->project_analyzer->fileExists($path_to_file)) {
+            if ($current_file_analyzer->project_analyzer->fileExists($path_to_file)
+                && !$current_file_analyzer->project_analyzer->isDirectory($path_to_file)) {
                 if ($statements_analyzer->hasParentFilePath($path_to_file)
                     || !$codebase->file_storage_provider->has($path_to_file)
                     || ($statements_analyzer->hasAlreadyRequiredFilePath($path_to_file)
@@ -393,6 +394,18 @@ class IncludeAnalyzer
     {
         if (!$current_directory) {
             return $file_name;
+        }
+
+        if ((substr($file_name, 0, 2) === '.' . DIRECTORY_SEPARATOR)
+            || (substr($file_name, 0, 3) === '..' . DIRECTORY_SEPARATOR)
+        ) {
+            $file = $current_directory . DIRECTORY_SEPARATOR . $file_name;
+
+            if (file_exists($file)) {
+                return $file;
+            }
+
+            return null;
         }
 
         $paths = PATH_SEPARATOR === ':'

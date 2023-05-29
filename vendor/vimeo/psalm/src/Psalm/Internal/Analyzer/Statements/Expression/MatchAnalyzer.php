@@ -110,10 +110,16 @@ class MatchAnalyzer
                         $stmt->cond->getAttributes(),
                     );
                 }
-            } elseif ($stmt->cond instanceof PhpParser\Node\Expr\FuncCall
-                || $stmt->cond instanceof PhpParser\Node\Expr\MethodCall
-                || $stmt->cond instanceof PhpParser\Node\Expr\StaticCall
+            } elseif ($stmt->cond instanceof PhpParser\Node\Expr\ClassConstFetch
+                && $stmt->cond->name instanceof PhpParser\Node\Identifier
+                && $stmt->cond->name->toString() === 'class'
             ) {
+                // do nothing
+            } elseif ($stmt->cond instanceof PhpParser\Node\Expr\ConstFetch
+                && $stmt->cond->name->toString() === 'true'
+            ) {
+                // do nothing
+            } else {
                 $switch_var_id = '$__tmp_switch__' . (int) $stmt->cond->getAttribute('startFilePos');
 
                 $condition_type = $statements_analyzer->node_data->getType($stmt->cond) ?? Type::getMixed();
@@ -128,18 +134,27 @@ class MatchAnalyzer
         }
 
         $arms = $stmt->arms;
+        $flattened_arms = [];
+        $last_arm = null;
 
-        foreach ($arms as $i => $arm) {
-            // move default to the end
+        foreach ($arms as $arm) {
             if ($arm->conds === null) {
-                unset($arms[$i]);
-                $arms[] = $arm;
+                $last_arm = $arm;
+                continue;
+            }
+
+            foreach ($arm->conds as $cond) {
+                $flattened_arms[] = new PhpParser\Node\MatchArm(
+                    [$cond],
+                    $arm->body,
+                    $arm->getAttributes(),
+                );
             }
         }
 
+        $arms = $flattened_arms;
         $arms = array_reverse($arms);
-
-        $last_arm = array_shift($arms);
+        $last_arm ??= array_shift($arms);
 
         if (!$last_arm) {
             IssueBuffer::maybeAdd(

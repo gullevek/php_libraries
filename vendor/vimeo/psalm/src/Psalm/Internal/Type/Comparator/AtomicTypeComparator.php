@@ -4,6 +4,7 @@ namespace Psalm\Internal\Type\Comparator;
 
 use Psalm\Codebase;
 use Psalm\Internal\MethodIdentifier;
+use Psalm\Type;
 use Psalm\Type\Atomic;
 use Psalm\Type\Atomic\Scalar;
 use Psalm\Type\Atomic\TArray;
@@ -17,15 +18,18 @@ use Psalm\Type\Atomic\TConditional;
 use Psalm\Type\Atomic\TEmptyMixed;
 use Psalm\Type\Atomic\TEnumCase;
 use Psalm\Type\Atomic\TGenericObject;
+use Psalm\Type\Atomic\TInt;
 use Psalm\Type\Atomic\TIterable;
 use Psalm\Type\Atomic\TKeyOf;
 use Psalm\Type\Atomic\TKeyedArray;
 use Psalm\Type\Atomic\TList;
+use Psalm\Type\Atomic\TLiteralInt;
 use Psalm\Type\Atomic\TLiteralString;
 use Psalm\Type\Atomic\TMixed;
 use Psalm\Type\Atomic\TNamedObject;
 use Psalm\Type\Atomic\TNever;
 use Psalm\Type\Atomic\TNonEmptyArray;
+use Psalm\Type\Atomic\TNonEmptyMixed;
 use Psalm\Type\Atomic\TNull;
 use Psalm\Type\Atomic\TObject;
 use Psalm\Type\Atomic\TObjectWithProperties;
@@ -35,12 +39,14 @@ use Psalm\Type\Atomic\TTemplateKeyOf;
 use Psalm\Type\Atomic\TTemplateParam;
 use Psalm\Type\Atomic\TTemplateValueOf;
 use Psalm\Type\Atomic\TValueOf;
+use Psalm\Type\Union;
 
 use function array_merge;
 use function array_values;
 use function assert;
 use function count;
 use function get_class;
+use function is_int;
 use function strtolower;
 
 /**
@@ -81,14 +87,43 @@ class AtomicTypeComparator
             );
         }
 
+        if ($input_type_part instanceof TValueOf) {
+            if ($container_type_part instanceof TValueOf) {
+                return UnionTypeComparator::isContainedBy(
+                    $codebase,
+                    $input_type_part->type,
+                    $container_type_part->type,
+                    false,
+                    false,
+                    null,
+                    false,
+                    false,
+                );
+            } elseif ($container_type_part instanceof Scalar) {
+                return UnionTypeComparator::isContainedBy(
+                    $codebase,
+                    TValueOf::getValueType($input_type_part->type, $codebase) ?? $input_type_part->type,
+                    new Union([$container_type_part]),
+                    false,
+                    false,
+                    null,
+                    false,
+                    false,
+                );
+            }
+        }
+
         if ($container_type_part instanceof TMixed
             || ($container_type_part instanceof TTemplateParam
                 && $container_type_part->as->isMixed()
                 && !$container_type_part->extra_types
                 && $input_type_part instanceof TMixed)
         ) {
-            if (get_class($container_type_part) === TEmptyMixed::class
-                && get_class($input_type_part) === TMixed::class
+            if (get_class($input_type_part) === TMixed::class
+                && (
+                    get_class($container_type_part) === TEmptyMixed::class
+                    || get_class($container_type_part) === TNonEmptyMixed::class
+                )
             ) {
                 if ($atomic_comparison_result) {
                     $atomic_comparison_result->type_coerced = true;
@@ -298,7 +333,7 @@ class AtomicTypeComparator
                 $atomic_comparison_result->type_coerced = true;
             }
 
-            return false;
+            return true;
         }
 
         if ($container_type_part instanceof TEnumCase
@@ -597,6 +632,40 @@ class AtomicTypeComparator
 
             if ($input_type_part->hasTraversableInterface($codebase)) {
                 return true;
+            }
+        }
+
+        if ($input_type_part instanceof TEnumCase
+            && $codebase->classlike_storage_provider->has($input_type_part->value)
+        ) {
+            if ($container_type_part instanceof TString || $container_type_part instanceof TInt) {
+                $input_type_classlike_storage = $codebase->classlike_storage_provider->get($input_type_part->value);
+                if ($input_type_classlike_storage->enum_type === null
+                    || !isset($input_type_classlike_storage->enum_cases[$input_type_part->case_name])
+                ) {
+                    // Not a backed enum or non-existent enum case
+                    return false;
+                }
+
+                $input_type_enum_case_storage = $input_type_classlike_storage->enum_cases[$input_type_part->case_name];
+                assert(
+                    $input_type_enum_case_storage->value !== null,
+                    'Backed enums cannot have values without a value.',
+                );
+
+                if (is_int($input_type_enum_case_storage->value)) {
+                    return self::isContainedBy(
+                        $codebase,
+                        new TLiteralInt($input_type_enum_case_storage->value),
+                        $container_type_part,
+                    );
+                }
+
+                return self::isContainedBy(
+                    $codebase,
+                    Type::getAtomicStringFromLiteral($input_type_enum_case_storage->value),
+                    $container_type_part,
+                );
             }
         }
 

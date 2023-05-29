@@ -28,6 +28,7 @@ use Psalm\Storage\Assertion\NonEmpty;
 use Psalm\Storage\Assertion\NonEmptyCountable;
 use Psalm\Storage\Assertion\Truthy;
 use Psalm\Type;
+use Psalm\Type\Atomic;
 use Psalm\Type\Atomic\Scalar;
 use Psalm\Type\Atomic\TArray;
 use Psalm\Type\Atomic\TArrayKey;
@@ -71,11 +72,13 @@ use Psalm\Type\Atomic\TScalar;
 use Psalm\Type\Atomic\TString;
 use Psalm\Type\Atomic\TTemplateParam;
 use Psalm\Type\Atomic\TTrue;
+use Psalm\Type\Atomic\TValueOf;
 use Psalm\Type\Reconciler;
 use Psalm\Type\Union;
 
 use function array_map;
 use function array_merge;
+use function array_values;
 use function assert;
 use function count;
 use function explode;
@@ -290,7 +293,9 @@ class SimpleAssertionReconciler extends Reconciler
 
         if ($assertion_type instanceof TObject) {
             return self::reconcileObject(
+                $codebase,
                 $assertion,
+                $assertion_type,
                 $existing_var_type,
                 $key,
                 $negated,
@@ -525,6 +530,10 @@ class SimpleAssertionReconciler extends Reconciler
                     }
                 }
             }
+        }
+
+        if ($assertion_type instanceof TValueOf) {
+            return $assertion_type->type;
         }
 
         return null;
@@ -1574,7 +1583,9 @@ class SimpleAssertionReconciler extends Reconciler
      * @param Reconciler::RECONCILIATION_* $failed_reconciliation
      */
     private static function reconcileObject(
+        Codebase $codebase,
         Assertion $assertion,
+        TObject $assertion_type,
         Union $existing_var_type,
         ?string $key,
         bool $negated,
@@ -1593,11 +1604,25 @@ class SimpleAssertionReconciler extends Reconciler
         $object_types = [];
         $redundant = true;
 
+        $assertion_type_is_intersectable_type = Type::isIntersectionType($assertion_type);
         foreach ($existing_var_atomic_types as $type) {
-            if ($type->isObjectType()) {
-                $object_types[] = $type;
+            if ($assertion_type_is_intersectable_type
+                && self::areIntersectionTypesAllowed($codebase, $type)
+            ) {
+                /** @var TNamedObject|TTemplateParam|TIterable|TObjectWithProperties|TCallableObject $assertion_type */
+                $object_types[] = $type->addIntersectionType($assertion_type);
+                $redundant = false;
+            } elseif ($type->isObjectType()) {
+                if ($assertion_type_is_intersectable_type
+                    && !self::areIntersectionTypesAllowed($codebase, $type)
+                ) {
+                    $redundant = false;
+                } else {
+                    $object_types[] = $type;
+                }
             } elseif ($type instanceof TCallable) {
-                $object_types[] = new TCallableObject();
+                $callable_object = new TCallableObject($type->from_docblock, $type);
+                $object_types[] = $callable_object;
                 $redundant = false;
             } elseif ($type instanceof TTemplateParam
                 && $type->as->isMixed()
@@ -1607,8 +1632,17 @@ class SimpleAssertionReconciler extends Reconciler
                 $redundant = false;
             } elseif ($type instanceof TTemplateParam) {
                 if ($type->as->hasObject() || $type->as->hasMixed()) {
-                    $type = $type->replaceAs(self::reconcileObject(
+                    /**
+                     * @psalm-suppress PossiblyInvalidArgument This looks wrong, psalm assumes that $assertion_type
+                     *                                         can contain TNamedObject due to the reconciliation above
+                     *                                         regarding {@see Type::isIntersectionType}. Due to the
+                     *                                         native argument type `TObject`, the variable object will
+                     *                                         never be `TNamedObject`.
+                     */
+                    $reconciled_type = self::reconcileObject(
+                        $codebase,
                         $assertion,
+                        $assertion_type,
                         $type->as,
                         null,
                         false,
@@ -1616,7 +1650,8 @@ class SimpleAssertionReconciler extends Reconciler
                         $suppressed_issues,
                         $failed_reconciliation,
                         $is_equality,
-                    ));
+                    );
+                    $type = $type->replaceAs($reconciled_type);
 
                     $object_types[] = $type;
                 }
@@ -2894,19 +2929,41 @@ class SimpleAssertionReconciler extends Reconciler
         int &$failed_reconciliation
     ): Union {
         $class_name = $class_constant_expression->fq_classlike_name;
-        $constant_pattern = $class_constant_expression->const_name;
-
-        $resolver = new ClassConstantByWildcardResolver($codebase);
-        $matched_class_constant_types = $resolver->resolve($class_name, $constant_pattern);
-        if ($matched_class_constant_types === null) {
+        if (!$codebase->classlike_storage_provider->has($class_name)) {
             return $existing_type;
         }
 
-        if ($matched_class_constant_types === []) {
+        $constant_pattern = $class_constant_expression->const_name;
+
+        $resolver = new ClassConstantByWildcardResolver($codebase);
+        $matched_class_constant_types = $resolver->resolve(
+            $class_name,
+            $constant_pattern,
+        );
+
+        if ($matched_class_constant_types === null) {
             $failed_reconciliation = Reconciler::RECONCILIATION_EMPTY;
             return Type::getNever();
         }
 
-        return TypeCombiner::combine($matched_class_constant_types, $codebase);
+        return TypeCombiner::combine(array_values($matched_class_constant_types), $codebase);
+    }
+
+    /**
+     * @psalm-assert-if-true TCallableObject|TObjectWithProperties|TNamedObject $type
+     */
+    private static function areIntersectionTypesAllowed(Codebase $codebase, Atomic $type): bool
+    {
+        if ($type instanceof TObjectWithProperties || $type instanceof TCallableObject) {
+            return true;
+        }
+
+        if (!$type instanceof TNamedObject || !$codebase->classlike_storage_provider->has($type->value)) {
+            return false;
+        }
+
+        $class_storage = $codebase->classlike_storage_provider->get($type->value);
+
+        return !$class_storage->final;
     }
 }

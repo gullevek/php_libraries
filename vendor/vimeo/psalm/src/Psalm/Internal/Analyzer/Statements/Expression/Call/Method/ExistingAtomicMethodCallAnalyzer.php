@@ -42,10 +42,13 @@ use Psalm\Type\Atomic\TTemplateParam;
 use Psalm\Type\Union;
 use UnexpectedValueException;
 
+use function array_filter;
 use function array_map;
 use function count;
 use function explode;
 use function in_array;
+use function is_string;
+use function strpos;
 use function strtolower;
 
 /**
@@ -224,6 +227,9 @@ class ExistingAtomicMethodCallAnalyzer extends CallAnalyzer
 
         if ($inferred_template_result) {
             $template_result->lower_bounds += $inferred_template_result->lower_bounds;
+        }
+        if ($method_storage && $method_storage->template_types) {
+            $template_result->template_types += $method_storage->template_types;
         }
 
         if ($codebase->store_node_types
@@ -422,30 +428,48 @@ class ExistingAtomicMethodCallAnalyzer extends CallAnalyzer
             }
 
             if ($method_storage->if_true_assertions) {
+                $possibilities = array_map(
+                    static fn(Possibilities $assertion): Possibilities => $assertion->getUntemplatedCopy(
+                        $template_result,
+                        $lhs_var_id,
+                        $codebase,
+                    ),
+                    $method_storage->if_true_assertions,
+                );
+                if ($lhs_var_id === null) {
+                    $possibilities = array_filter(
+                        $possibilities,
+                        static fn(Possibilities $assertion): bool => !(is_string($assertion->var_id)
+                            && strpos($assertion->var_id, '$this->') === 0
+                        )
+                    );
+                }
                 $statements_analyzer->node_data->setIfTrueAssertions(
                     $stmt,
-                    array_map(
-                        static fn(Possibilities $assertion): Possibilities => $assertion->getUntemplatedCopy(
-                            $template_result,
-                            $lhs_var_id,
-                            $codebase,
-                        ),
-                        $method_storage->if_true_assertions,
-                    ),
+                    $possibilities,
                 );
             }
 
             if ($method_storage->if_false_assertions) {
+                $possibilities = array_map(
+                    static fn(Possibilities $assertion): Possibilities => $assertion->getUntemplatedCopy(
+                        $template_result,
+                        $lhs_var_id,
+                        $codebase,
+                    ),
+                    $method_storage->if_false_assertions,
+                );
+                if ($lhs_var_id === null) {
+                    $possibilities = array_filter(
+                        $possibilities,
+                        static fn(Possibilities $assertion): bool => !(is_string($assertion->var_id)
+                            && strpos($assertion->var_id, '$this->') === 0
+                        )
+                    );
+                }
                 $statements_analyzer->node_data->setIfFalseAssertions(
                     $stmt,
-                    array_map(
-                        static fn(Possibilities $assertion): Possibilities => $assertion->getUntemplatedCopy(
-                            $template_result,
-                            $lhs_var_id,
-                            $codebase,
-                        ),
-                        $method_storage->if_false_assertions,
-                    ),
+                    $possibilities,
                 );
             }
         }
@@ -546,7 +570,7 @@ class ExistingAtomicMethodCallAnalyzer extends CallAnalyzer
             case '__set':
                 // If `@psalm-seal-properties` is set, the property must be defined with
                 // a `@property` annotation
-                if (($class_storage->sealed_properties || $codebase->config->seal_all_properties)
+                if (($class_storage->hasSealedProperties($codebase->config))
                     && !isset($class_storage->pseudo_property_set_types['$' . $prop_name])
                 ) {
                     IssueBuffer::maybeAdd(
@@ -644,7 +668,7 @@ class ExistingAtomicMethodCallAnalyzer extends CallAnalyzer
             case '__get':
                 // If `@psalm-seal-properties` is set, the property must be defined with
                 // a `@property` annotation
-                if (($class_storage->sealed_properties || $codebase->config->seal_all_properties)
+                if (($class_storage->hasSealedProperties($codebase->config))
                     && !isset($class_storage->pseudo_property_get_types['$' . $prop_name])
                 ) {
                     IssueBuffer::maybeAdd(
