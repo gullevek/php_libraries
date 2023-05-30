@@ -6,13 +6,6 @@
 
 declare(strict_types=1);
 
-// will be overwritten in config.master.php depending on location
-$DEBUG_ALL_OVERRIDE = true; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = true;
-$PRINT_ALL = true;
-$ECHO_ALL = true;
-$DB_DEBUG = true;
-
 error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
@@ -30,15 +23,10 @@ $ECHO_ALL = true;
 use CoreLibs\Create\Email;
 use CoreLibs\Convert\Html;
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL,
-	'echo_all' => $ECHO_ALL,
-	'print_all' => $PRINT_ALL,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 
 // define a list of from to color sets for conversion test
@@ -133,9 +121,6 @@ $status = Email::sendEmail(
 	$log
 );
 print "SENDING D: " . $status . "<br>";
-
-// error message
-print $log->printErrorMsg();
 
 print "</body></html>";
 

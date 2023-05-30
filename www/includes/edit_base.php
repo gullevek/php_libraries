@@ -31,14 +31,11 @@ header("Content-type: text/html; charset=" . DEFAULT_ENCODING);
 // start session
 $session = new \CoreLibs\Create\Session(EDIT_SESSION_NAME);
 // init logger
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => LOG_FILE_ID . 'EditBase',
-	'print_file_date' => true,
-	'per_class' => true,
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'log_file_id' => BASE_NAME . 'EditBase',
+	'log_per_date' => true,
+	'log_per_class' => true,
 ]);
 // db connection
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);

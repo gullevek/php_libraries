@@ -391,18 +391,18 @@ class IO
 	/** @var string */
 	private $async_running;
 	// logging class, must be public so settings can be changed
-	/** @var \CoreLibs\Debug\Logging */
+	/** @var \CoreLibs\Logging\Logging */
 	public $log;
 
 	/**
 	 * main DB concstructor with auto connection to DB and failure set on failed connection
 	 * @param array<mixed> $db_config DB configuration array
-	 * @param \CoreLibs\Debug\Logging $log Logging class
+	 * @param \CoreLibs\Logging\Logging $log Logging class
 	 * @param bool|null $db_debug_override Overrides debug settings in db_config
 	 */
 	public function __construct(
 		array $db_config,
-		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Logging\Logging $log,
 		?bool $db_debug_override = null
 	) {
 		// attach logger
@@ -703,10 +703,10 @@ class IO
 		}
 		if ($error_data !== []) {
 			$error_string .= '<br>['
-				. $this->log->prAr($error_data)
+				. \CoreLibs\Debug\Support::prAr($error_data)
 				. ']';
 		}
-		$this->log->debug($debug_id, $error_string, true, $prefix);
+		$this->log->debug($debug_id, $error_string, $prefix);
 	}
 
 	/**
@@ -2737,7 +2737,7 @@ class IO
 		if ($result === false) {
 			$this->log->debug('ExecuteData', 'ERROR in STM[' . $stm_name . '|'
 				. $this->prepare_cursor[$stm_name]['result'] . ']: '
-				. $this->log->prAr($data));
+				. \CoreLibs\Debug\Support::prAr($data));
 			$this->__dbError(
 				22,
 				$this->prepare_cursor[$stm_name]['result'],

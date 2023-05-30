@@ -204,7 +204,7 @@ class Login
 		'path' => '',
 	];
 
-	/** @var \CoreLibs\Debug\Logging logger */
+	/** @var \CoreLibs\Logging\Logging logger */
 	public $log;
 	/** @var \CoreLibs\DB\IO database */
 	public $db;
@@ -218,21 +218,21 @@ class Login
 	 * finishes itself
 	 *
 	 * @param \CoreLibs\DB\IO          $db      Database connection class
-	 * @param \CoreLibs\Debug\Logging  $log     Logging class
+	 * @param \CoreLibs\Logging\Logging  $log     Logging class
 	 * @param \CoreLibs\Create\Session $session Session interface class
 	 * @param array<string,mixed>      $options Login ACL settings
 	 * $auto_login [default true]   DEPRECATED, moved into options
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
-		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Logging\Logging $log,
 		\CoreLibs\Create\Session $session,
 		array $options = []
 	) {
 		// attach db class
 		$this->db = $db;
 		// log login data for this class only
-		$log->setLogPer('class', true);
+		$log->setLogFlag(\CoreLibs\Logging\Logger\Flag::per_class);
 		// attach logger
 		$this->log = $log;
 		// attach session class
@@ -1179,6 +1179,12 @@ class Login
 			$this->acl['page'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
 		}
 
+		$this->acl['unit_id'] = null;
+		$this->acl['unit_name'] = null;
+		$this->acl['unit_uid'] = null;
+		$this->acl['unit'] = [];
+		$this->acl['unit_detail'] = [];
+
 		// PER ACCOUNT (UNIT/edit access)->
 		foreach ($_SESSION['UNIT'] as $ea_id => $unit) {
 			// if admin flag is set, all units are set to 100
@@ -1910,21 +1916,6 @@ HTML;
 				if ($this->login_html !== null) {
 					// echo $this->login_html;
 					$this->loginPrintLogin();
-				}
-				// do not go anywhere, quit processing here
-				// do something with possible debug data?
-				if (
-					in_array($this->options['target'], ['live', 'remove'])
-				) {
-					// login
-					$this->log->setLogLevelAll('debug', $this->options['debug']);
-					$this->log->setLogLevelAll('echo', false);
-					$this->log->setLogLevelAll('print', $this->options['debug']);
-				}
-				$status_msg = $this->log->printErrorMsg();
-				// if ($this->echo_output_all) {
-				if ($this->log->getLogLevelAll('echo')) {
-					echo $status_msg;
 				}
 				// exit so we don't process anything further, at all
 				$this->loginTerminate(3000);

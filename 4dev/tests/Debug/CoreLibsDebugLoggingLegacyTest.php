@@ -10,12 +10,13 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test class for Debug\Logging
- * @coversDefaultClass \CoreLibs\Debug\Logging
- * @testdox \CoreLibs\Debug\Logging method tests
+ * @coversDefaultClass \CoreLibs\Debug\LoggingLegacy
+ * @testdox \CoreLibs\Debug\LoggingLegacy method tests
  */
-final class CoreLibsDebugLoggingTest extends TestCase
+final class CoreLibsDebugLoggingLegacyTest extends TestCase
 {
 	private const LOG_FOLDER = __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR;
+
 	/**
 	 * test set for options BASIC
 	 *
@@ -24,7 +25,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	 * 1: expected
 	 * 2: override
 	 * override:
-	 * - constant for COSNTANTS
+	 * - constant for CONSTANTS
 	 * - global for _GLOBALS
 	 *
 	 * @return array
@@ -138,7 +139,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			// catch this with the message
 			$this->expectExceptionMessage($deprecation_message);
 		}
-		$log = new \CoreLibs\Debug\Logging($options);
+		$log = new \CoreLibs\Debug\LoggingLegacy($options);
 		// reset error handler
 		restore_error_handler();
 		// check that settings match
@@ -308,7 +309,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 			// catch this with the message
 			$this->expectExceptionMessage($deprecation_message);
 		}
-		$log = new \CoreLibs\Debug\Logging($options);
+		$log = new \CoreLibs\Debug\LoggingLegacy($options);
 		// reset error handler
 		restore_error_handler();
 		// check current
@@ -385,7 +386,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		bool $expected_get
 	): void {
 		// neutral start with default
-		$log = new \CoreLibs\Debug\Logging([
+		$log = new \CoreLibs\Debug\LoggingLegacy([
 			'file_id' => 'testSetGetLogLevelAll',
 			'log_folder' => self::LOG_FOLDER
 		]);
@@ -510,7 +511,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		$expected_get
 	): void {
 		// neutral start with default
-		$log = new \CoreLibs\Debug\Logging([
+		$log = new \CoreLibs\Debug\LoggingLegacy([
 			'file_id' => 'testSetGetLogLevel',
 			'log_folder' => self::LOG_FOLDER
 		]);
@@ -592,7 +593,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		bool $expected_get
 	): void {
 		// neutral start with default
-		$log = new \CoreLibs\Debug\Logging([
+		$log = new \CoreLibs\Debug\LoggingLegacy([
 			'file_id' => 'testSetGetLogPer',
 			'log_folder' => self::LOG_FOLDER
 		]);
@@ -624,7 +625,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	public function testSetGetLogPrintFileDate(bool $input, bool $expected_set, bool $expected_get): void
 	{
 		// neutral start with default
-		$log = new \CoreLibs\Debug\Logging([
+		$log = new \CoreLibs\Debug\LoggingLegacy([
 			'file_id' => 'testSetGetLogPrintFileDate',
 			'log_folder' => self::LOG_FOLDER
 		]);
@@ -693,7 +694,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	 */
 	public function testPrAr(array $input, string $expected): void
 	{
-		$log = new \CoreLibs\Debug\Logging([
+		$log = new \CoreLibs\Debug\LoggingLegacy([
 			'file_id' => 'testPrAr',
 			'log_folder' => self::LOG_FOLDER
 		]);
@@ -757,7 +758,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	 */
 	public function testPrBl(bool $input, ?string $true, ?string $false, string $expected): void
 	{
-		$log = new \CoreLibs\Debug\Logging([
+		$log = new \CoreLibs\Debug\LoggingLegacy([
 			'file_id' => 'testPrBl',
 			'log_folder' => self::LOG_FOLDER
 		]);
@@ -932,7 +933,7 @@ final class CoreLibsDebugLoggingTest extends TestCase
 		// remove any files named /tmp/error_log_TestDebug*.log
 		array_map('unlink', glob($options['log_folder'] . 'error_msg_' . $options['file_id'] . '*.log'));
 		// init logger
-		$log = new \CoreLibs\Debug\Logging($options);
+		$log = new \CoreLibs\Debug\LoggingLegacy($options);
 		// * debug (A/B)
 		// NULL check for strip/prefix
 		$this->assertEquals(
@@ -1046,13 +1047,13 @@ final class CoreLibsDebugLoggingTest extends TestCase
 	public function testLogUniqueId(bool $option, bool $override): void
 	{
 		if ($option === true) {
-			$log = new \CoreLibs\Debug\Logging([
+			$log = new \CoreLibs\Debug\LoggingLegacy([
 				'file_id' => 'testLogUniqueId',
 				'log_folder' => self::LOG_FOLDER,
 				'per_run' => $option
 			]);
 		} else {
-			$log = new \CoreLibs\Debug\Logging([
+			$log = new \CoreLibs\Debug\LoggingLegacy([
 				'file_id' => 'testLogUniqueId',
 				'log_folder' => self::LOG_FOLDER
 			]);

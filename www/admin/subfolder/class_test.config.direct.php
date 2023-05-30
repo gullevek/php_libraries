@@ -6,11 +6,6 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
-
 error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
@@ -23,15 +18,10 @@ require '../../configs/config.php';
 $LOG_FILE_ID = 'classTest-config-direct';
 ob_end_flush();
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 
 $PAGE_NAME = 'TEST CLASS: CONFIG DIRECT SUB';
@@ -48,9 +38,6 @@ print "BASE NAME: " . BASE_NAME . "<br>";
 echo "Config path prefix: " . ($CONFIG_PATH_PREFIX ?? '') . "<br>";
 print "DB Name: " . DB_CONFIG_NAME . "<br>";
 print "DB Config: " . \CoreLibs\Debug\Support::printAr(DB_CONFIG) . "<br>";
-
-// error message
-print $log->printErrorMsg();
 
 print "</body></html>";
 

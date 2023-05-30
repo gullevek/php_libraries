@@ -137,7 +137,7 @@ class Email
 	 * @param  bool                 $kv_folding      If set to true and a valid encoding,
 	 *                                               do KV folding
 	 * @param  bool                 $test            test flag, default off
-	 * @param  \CoreLibs\Debug\Logging|null $log     Logging class,
+	 * @param  \CoreLibs\Logging\Logging|null $log     Logging class,
 	 *                                               only used if test flag is true
 	 * @return int                  2 test only, no sent
 	 *                              1 for ok,
@@ -156,7 +156,7 @@ class Email
 		string $encoding = 'UTF-8',
 		bool $kv_folding = false,
 		bool $test = false,
-		?\CoreLibs\Debug\Logging $log = null
+		?\CoreLibs\Logging\Logging $log = null
 	): int {
 		/** @var array<string> */
 		$to_emails = [];
@@ -259,11 +259,11 @@ class Email
 				$mail_delivery_status = 2;
 			}
 			// log if an log instance exists
-			if ($log instanceof \CoreLibs\Debug\Logging) {
+			if ($log instanceof \CoreLibs\Logging\Logging) {
 				// build debug strings: convert to UTF-8 if not utf-8
-				$log->debug('SEND EMAIL', 'HEADERS: ' . $log->prAr($headers) . ', '
+				$log->debug('SEND EMAIL', 'HEADERS: ' . \CoreLibs\Debug\Support::prAr($headers) . ', '
 					. 'ENCODING: ' . $encoding . ',  '
-					. 'KV FOLDING: ' . $log->prBl($kv_folding) . ',  '
+					. 'KV FOLDING: ' . \CoreLibs\Debug\Support::prBl($kv_folding) . ',  '
 					. 'TO: ' . $to_email . ', '
 					. 'SUBJECT: ' . $out_subject . ', '
 					. 'BODY: ' . ($encoding == 'UTF-8' ?

@@ -24,7 +24,7 @@ class Test
 	private $test_db;
 
 	public function __construct(
-		\CoreLibs\Debug\Logging $log
+		\CoreLibs\Logging\Logging $log
 	) {
 		// calls all tests
 		$this->testPrivate();

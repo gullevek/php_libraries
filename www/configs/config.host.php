@@ -26,7 +26,7 @@ declare(strict_types=1);
 $__LOCAL_CONFIG = [
 	'db_host' => 'test',
 	'location' => 'test',
-	'debug_flag' => true,
+	'debug_level' => 'debug',
 	'site_locale' => 'en_US.UTF-8',
 	'site_encoding' => 'UTF-8',
 	'login_enabled' => true
@@ -44,7 +44,7 @@ $SITE_CONFIG = [
 		// location flagging (test/dev/live) for debug output
 		'location' => 'test',
 		// show DEBUG override
-		'debug_flag' => true,
+		'debug_level' => 'debug',
 		// site locale
 		'site_locale' => 'en_US.UTF-8',
 		// site encoding

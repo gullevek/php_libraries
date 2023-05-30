@@ -219,6 +219,7 @@ declare(strict_types=1);
 namespace CoreLibs\Output\Form;
 
 use CoreLibs\Get\System;
+use CoreLibs\Debug\Support;
 
 class Generate extends \CoreLibs\DB\Extended\ArrayIO
 {
@@ -297,7 +298,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	/** @var \CoreLibs\Language\L10n */
 	public $l;
 	// log
-	/** @var \CoreLibs\Debug\Logging */
+	/** @var \CoreLibs\Logging\Logging */
 	public $log;
 
 	// now some default error msgs (english)
@@ -308,7 +309,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 * construct form generator
 	 *
 	 * @param array<mixed>            $db_config    db config array, mandatory
-	 * @param \CoreLibs\Debug\Logging $log          Logging class
+	 * @param \CoreLibs\Logging\Logging $log          Logging class
 	 * @param \CoreLibs\Language\L10n $l10n         l10n language class
 	 * @param array<string,mixed>     $login_acl	Login ACL array,
 	 *                                              at least base/admin should be set
@@ -319,7 +320,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function __construct(
 		array $db_config,
-		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Logging\Logging $log,
 		\CoreLibs\Language\L10n $l10n,
 		array $login_acl,
 		?array $table_arrays = null,
@@ -327,7 +328,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// init logger if not set
 		$this->log = $log;
 		// don't log per class
-		$this->log->setLogPer('class', false);
+		$this->log->unsetLogFlag(\CoreLibs\Logging\Logger\Flag::per_class);
 		// init the language class
 		$this->l = $l10n;
 		// parse and read, legacy stuff
@@ -2618,7 +2619,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		// add lost error ones
 		$this->log->debug('ERROR', 'P: ' . $data['prefix'] . ', '
-			. $this->log->prAr($_POST['ERROR'][$data['prefix']] ?? []));
+			. Support::prAr($_POST['ERROR'][$data['prefix']] ?? []));
 		if ($this->error && !empty($_POST['ERROR'][$data['prefix']])) {
 			$prfx = $data['prefix']; // short
 			$_post_data = [];

@@ -140,13 +140,6 @@ define('DEFAULT_LOCALE', 'en_US.UTF-8');
 // default web page encoding setting
 define('DEFAULT_ENCODING', 'UTF-8');
 
-/************* LOGGING *******************/
-// below two can be defined here, but they should be
-// defined in either the header file or the file itself
-// as $LOG_FILE_ID which takes presence over LOG_FILE_ID
-// see Basic class constructor
-define('LOG_FILE_ID', BASE_NAME);
-
 /************* QUEUE TABLE *************/
 // if we have a dev/live system
 // set_live is a per page/per item
@@ -241,7 +234,7 @@ $GLOBALS['DB_CONFIG_SET'] = DB_CONFIG;
 // define('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA);
 // debug settings, site lang, etc
 define('TARGET', $SITE_CONFIG[HOST_NAME]['location'] ?? 'test');
-define('DEBUG', $SITE_CONFIG[HOST_NAME]['debug_flag'] ?? false);
+define('DEBUG_LEVEL', $SITE_CONFIG[HOST_NAME]['debug_level'] ?? 'debug');
 define('SITE_LOCALE', $SITE_CONFIG[HOST_NAME]['site_locale'] ?? DEFAULT_LOCALE);
 define('SITE_DOMAIN', str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH));
 define('SITE_ENCODING', $SITE_CONFIG[HOST_NAME]['site_encoding'] ?? DEFAULT_ENCODING);
@@ -251,9 +244,6 @@ define('AUTH', $SITE_CONFIG[HOST_NAME]['auth'] ?? false);
 // define('CSV_PATH', $PATHS[TARGET]['csv_path'] ?? '');
 // define('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin'] ?? '');
 // define('REDIRECT_URL', $PATHS[TARGET]['redirect_url'] ?? '');
-
-// show all errors if debug_all & show_error_handling are enabled
-define('SHOW_ALL_ERRORS', true);
 
 /************* GENERAL PAGE TITLE ********/
 define('G_TITLE', $_ENV['G_TITLE'] ?? '');
@@ -269,24 +259,6 @@ define('JAVASCRIPT', $_ENV['JAVASCRIPT'] ?? 'frontend.js');
 // any other global definitons in the config.other.php
 if (file_exists(BASE . CONFIGS . 'config.other.php')) {
 	require BASE . CONFIGS . 'config.other.php';
-}
-
-/************* DEBUG *******************/
-// turn off debug if debug flag is OFF
-if (defined('DEBUG') && DEBUG == false) {
-	$ECHO_ALL = false;
-	$DEBUG_ALL = false;
-	$PRINT_ALL = false;
-	$DB_DEBUG = false;
-	$ENABLE_ERROR_HANDLING = false;
-	$DEBUG_ALL_OVERRIDE = false;
-} else {
-	$ECHO_ALL = false;
-	$DEBUG_ALL = true;
-	$PRINT_ALL = true;
-	$DB_DEBUG = true;
-	$ENABLE_ERROR_HANDLING = false;
-	$DEBUG_ALL_OVERRIDE = false;
 }
 
 // __END__

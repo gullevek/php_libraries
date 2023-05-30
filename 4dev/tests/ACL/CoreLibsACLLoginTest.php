@@ -68,13 +68,10 @@ final class CoreLibsACLLoginTest extends TestCase
 
 		// logger is always needed
 		// define basic connection set valid and one invalid
-		self::$log = new \CoreLibs\Debug\Logging([
+		self::$log = new \CoreLibs\Logging\Logging([
 			// 'log_folder' => __DIR__ . DIRECTORY_SEPARATOR . 'log',
 			'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
-			'file_id' => 'CoreLibs-ACL-Login-Test',
-			'debug_all' => true,
-			'echo_all' => false,
-			'print_all' => true,
+			'log_file_id' => 'CoreLibs-ACL-Login-Test',
 		]);
 		// test database we need to connect do, if not possible this test is skipped
 		self::$db = new \CoreLibs\DB\IO(

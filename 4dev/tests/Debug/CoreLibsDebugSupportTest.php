@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace tests;
 
 use PHPUnit\Framework\TestCase;
+use CoreLibs\Debug\Support;
 
 /**
  * Test class for Debug\Support
@@ -43,6 +44,32 @@ final class CoreLibsDebugSupportTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @cover ::printTime
+	 * @dataProvider printTimeProvider
+	 * @testdox printTime test with $microtime and match to regex [$_dataName]
+	 *
+	 * @param int|null $mircrotime
+	 * @param string $expected
+	 * @return void
+	 */
+	public function testPrintTime(?int $microtime, string $regex): void
+	{
+		if ($microtime === null) {
+			$this->assertMatchesRegularExpression(
+				$regex,
+				Support::printTime()
+			);
+		} else {
+			$this->assertMatchesRegularExpression(
+				$regex,
+				Support::printTime($microtime)
+			);
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
 	 * @return array
 	 */
 	public function printArrayProvider(): array
@@ -50,16 +77,53 @@ final class CoreLibsDebugSupportTest extends TestCase
 		return [
 			'empty array' => [
 				0 => [],
-				1 => "<pre>Array\n(\n)\n</pre>"
+				1 => "<pre>Array\n(\n)\n</pre>",
+				2 => "Array\n(\n)\n",
 			],
 			'simple array' => [
 				0 => ['a', 'b'],
 				1 => "<pre>Array\n(\n"
 					. "    [0] => a\n"
 					. "    [1] => b\n"
-					. ")\n</pre>"
+					. ")\n</pre>",
+				2 => "Array\n(\n"
+					. "    [0] => a\n"
+					. "    [1] => b\n"
+					. ")\n",
 			],
 		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::printAr
+	 * @cover ::printArray
+	 * @dataProvider printArrayProvider
+	 * @testdox printAr/printArray $input will be $expected [$_dataName]
+	 *
+	 * @param array $input
+	 * @param string $expected
+	 * @param string $expected_strip
+	 * @return void
+	 */
+	public function testPrintAr(array $input, string $expected, string $expected_strip): void
+	{
+		$this->assertEquals(
+			$expected,
+			Support::printAr($input),
+			'assert printAr'
+		);
+		$this->assertEquals(
+			$expected,
+			Support::printArray($input),
+			'assert printArray'
+		);
+		$this->assertEquals(
+			$expected_strip,
+			Support::prAr($input),
+			'assert prAr'
+		);
 	}
 
 	/**
@@ -73,27 +137,31 @@ final class CoreLibsDebugSupportTest extends TestCase
 			'true input default' => [
 				0 => true,
 				1 => [],
-				2 => 'true'
+				2 => 'true',
+				3 => 'true',
 			],
 			'false input default' => [
 				0 => false,
 				1 => [],
-				2 => 'false'
+				2 => 'false',
+				3 => 'false'
 			],
 			'false input param name' => [
 				0 => false,
 				1 => [
 					'name' => 'param test'
 				],
-				2 => '<b>param test</b>: false'
+				2 => '<b>param test</b>: false',
+				3 => 'false'
 			],
 			'true input param name, true override' => [
 				0 => true,
 				1 => [
 					'name' => 'param test',
-					'true' => 'ok'
+					'true' => 'ok',
 				],
-				2 => '<b>param test</b>: ok'
+				2 => '<b>param test</b>: ok',
+				3 => 'ok',
 			],
 			'false input param name, true override, false override' => [
 				0 => false,
@@ -102,9 +170,75 @@ final class CoreLibsDebugSupportTest extends TestCase
 					'true' => 'ok',
 					'false' => 'not',
 				],
-				2 => '<b>param test</b>: not'
+				2 => '<b>param test</b>: not',
+				3 => 'not'
 			],
 		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::printBool
+	 * @dataProvider printBoolProvider
+	 * @testdox printBool $input will be $expected [$_dataName]
+	 *
+	 * @param  bool   $input
+	 * @param  array  $params
+	 * @param  string $expected
+	 * @param  string $expected_strip
+	 * @return void
+	 */
+	public function testPrintBool(bool $input, array $params, string $expected, string $expected_strip): void
+	{
+		if (
+			isset($params['name']) &&
+			isset($params['true']) &&
+			isset($params['false'])
+		) {
+			$string = Support::printBool(
+				$input,
+				$params['name'],
+				$params['true'],
+				$params['false']
+			);
+			$string_strip = Support::prBl(
+				$input,
+				$params['true'],
+				$params['false']
+			);
+		} elseif (isset($params['name']) && isset($params['true'])) {
+			$string = Support::printBool(
+				$input,
+				$params['name'],
+				$params['true']
+			);
+			$string_strip = Support::prBl(
+				$input,
+				$params['true'],
+			);
+		} elseif (isset($params['name'])) {
+			$string = Support::printBool(
+				$input,
+				$params['name']
+			);
+			$string_strip = Support::prBl(
+				$input
+			);
+		} else {
+			$string = Support::printBool($input);
+			$string_strip = Support::prBl($input);
+		}
+		$this->assertEquals(
+			$expected,
+			$string,
+			'assert printBool'
+		);
+		$this->assertEquals(
+			$expected_strip,
+			$string_strip,
+			'assert prBl'
+		);
 	}
 
 	/**
@@ -169,12 +303,10 @@ final class CoreLibsDebugSupportTest extends TestCase
 			'an array, no html' => [
 				['a', 'b'],
 				true,
-				"##HTMLPRE##"
-					. "Array\n(\n"
+				"Array\n(\n"
 					. "    [0] => a\n"
 					. "    [1] => b\n"
-					. ")\n"
-					. "##/HTMLPRE##",
+					. ")\n",
 			],
 			// resource
 			'a resource' => [
@@ -189,6 +321,253 @@ final class CoreLibsDebugSupportTest extends TestCase
 				'CoreLibs\Debug\Support',
 			]
 		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::printToString
+	 * @dataProvider printToStringProvider
+	 * @testdox printToString $input with $flag will be $expected [$_dataName]
+	 *
+	 * @param mixed $input anything
+	 * @param boolean|null $flag html flag, only for string and array
+	 * @param string $expected always string
+	 * @return void
+	 */
+	public function testPrintToString(mixed $input, ?bool $flag, string $expected): void
+	{
+		if ($flag === null) {
+			// if expected starts with / and ends with / then this is a regex compare
+			if (
+				substr($expected, 0, 1) == '/' &&
+				substr($expected, -1, 1) == '/'
+			) {
+				$this->assertMatchesRegularExpression(
+					$expected,
+					Support::printToString($input)
+				);
+			} else {
+				$this->assertEquals(
+					$expected,
+					Support::printToString($input)
+				);
+			}
+		} else {
+			$this->assertEquals(
+				$expected,
+				Support::printToString($input, $flag)
+			);
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerDumpExportVar(): array
+	{
+		return [
+			'string' => [
+				'input' => 'string',
+				'flag' => null,
+				'expected_dump' => 'string(6) "string"' . "\n",
+				'expected_export' => "<pre>'string'</pre>",
+			],
+			'string, no html' => [
+				'input' => 'string',
+				'flag' => true,
+				'expected_dump' => 'string(6) "string"' . "\n",
+				'expected_export' => "'string'",
+			],
+			// int
+			'int' => [
+				'input' => 6,
+				'flag' => null,
+				'expected_dump' => 'int(6)' . "\n",
+				'expected_export' => "<pre>6</pre>",
+			],
+			// float
+			'float' => [
+				'input' => 1.6,
+				'flag' => null,
+				'expected_dump' => 'float(1.6)' . "\n",
+				'expected_export' => "<pre>1.6</pre>",
+			],
+			// bool
+			'bool' => [
+				'input' => true,
+				'flag' => null,
+				'expected_dump' => 'bool(true)' . "\n",
+				'expected_export' => "<pre>true</pre>",
+			],
+			// array
+			'array' => [
+				'input' => ['string', true],
+				'flag' => null,
+				'expected_dump' => "array(2) {\n"
+					. "  [0]=>\n"
+					. "  string(6) \"string\"\n"
+					. "  [1]=>\n"
+					. "  bool(true)\n"
+					. "}\n",
+				'expected_export' => "<pre>array (\n"
+					. "  0 => 'string',\n"
+					. "  1 => true,\n"
+					. ")</pre>",
+			],
+			// more
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::dumpVar
+	 * @cover ::exportVar
+	 * @dataProvider providerDumpExportVar
+	 * @testdox dump/exportVar $input with $flag will be $expected_dump / $expected_export [$_dataName]
+	 *
+	 * @param  mixed     $input
+	 * @param  bool|null $flag
+	 * @param  string    $expected_dump
+	 * @param  string    $expected_export
+	 * @return void
+	 */
+	public function testDumpExportVar(mixed $input, ?bool $flag, string $expected_dump, string $expected_export): void
+	{
+		if ($flag === null) {
+			$dump = Support::dumpVar($input);
+			$export = Support::exportVar($input);
+		} else {
+			$dump = Support::dumpVar($input, $flag);
+			$export = Support::exportVar($input, $flag);
+		}
+		$this->assertEquals(
+			$expected_dump,
+			$dump,
+			'assert dumpVar'
+		);
+		$this->assertEquals(
+			$expected_export,
+			$export,
+			'assert dumpVar'
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::getCallerFileLine
+	 * @testWith ["/storage/var/www/html/developers/clemens/core_data/php_libraries/trunk/www/vendor/phpunit/phpunit/src/Framework/TestCase.php:1608"]
+	 * @testdox getCallerFileLine check if it returns $expected [$_dataName]
+	 *
+	 * @param  string $expected
+	 * @return void
+	 */
+	public function testGetCallerFileLine(string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			Support::getCallerFileLine()
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::getCallerMethod
+	 * @testWith ["testGetCallerMethod"]
+	 * @testdox getCallerMethod check if it returns $expected [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testGetCallerMethod(string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			Support::getCallerMethod()
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::getCallerMethodList
+	 * @testWith [["main", "run", "run", "run", "run", "run", "run", "runBare", "runTest", "testGetCallerMethodList"]]
+	 * @testdox getCallerMethodList check if it returns $expected [$_dataName]
+	 *
+	 * @param array $expected
+	 * @return void
+	 */
+	public function testGetCallerMethodList(array $expected): void
+	{
+		$compare = Support::getCallerMethodList();
+		// 10: legact
+		// 11: direct
+		// 12: full call
+		switch (count($compare)) {
+			case 10:
+				// add nothing
+				$this->assertEquals(
+					$expected,
+					Support::getCallerMethodList(),
+					'assert expected 10'
+				);
+				break;
+			case 11:
+				// add one "run" before "runBare"
+				array_splice(
+					$expected,
+					7,
+					0,
+					['run']
+				);
+				$this->assertEquals(
+					$expected,
+					Support::getCallerMethodList(),
+					'assert expected 11'
+				);
+				break;
+			case 12:
+				// add two "run" before "runBare"
+				array_splice(
+					$expected,
+					7,
+					0,
+					['run']
+				);
+				array_splice(
+					$expected,
+					0,
+					0,
+					['include']
+				);
+				$this->assertEquals(
+					$expected,
+					Support::getCallerMethodList(),
+					'assert expected 12'
+				);
+				break;
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::getCallerClass
+	 * @testWith ["PHPUnit\\TextUI\\Command"]
+	 * @testdox getCallerClass check if it returns $expected [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testGetCallerClass(string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			Support::getCallerClass()
+		);
 	}
 
 	/**
@@ -239,205 +618,6 @@ final class CoreLibsDebugSupportTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @cover ::printTime
-	 * @dataProvider printTimeProvider
-	 * @testdox printTime test with $microtime and match to regex [$_dataName]
-	 *
-	 * @param int|null $mircrotime
-	 * @param string $expected
-	 * @return void
-	 */
-	public function testPrintTime(?int $microtime, string $regex): void
-	{
-		if ($microtime === null) {
-			$this->assertMatchesRegularExpression(
-				$regex,
-				\CoreLibs\Debug\Support::printTime()
-			);
-		} else {
-			$this->assertMatchesRegularExpression(
-				$regex,
-				\CoreLibs\Debug\Support::printTime($microtime)
-			);
-		}
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @cover ::printAr
-	 * @cover ::printArray
-	 * @dataProvider printArrayProvider
-	 * @testdox printAr/printArray $input will be $expected [$_dataName]
-	 *
-	 * @param array $input
-	 * @param string $expected
-	 * @return void
-	 */
-	public function testPrintAr(array $input, string $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Debug\Support::printAr($input),
-			'assert printAr'
-		);
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Debug\Support::printArray($input),
-			'assert printArray'
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @cover ::printBool
-	 * @dataProvider printBoolProvider
-	 * @testdox printBool $input will be $expected [$_dataName]
-	 *
-	 * @param  bool   $input
-	 * @param  array  $params
-	 * @param  string $expected
-	 * @return void
-	 */
-	public function testPrintBool(bool $input, array $params, string $expected): void
-	{
-		if (
-			isset($params['name']) &&
-			isset($params['true']) &&
-			isset($params['false'])
-		) {
-			$string = \CoreLibs\Debug\Support::printBool(
-				$input,
-				$params['name'],
-				$params['true'],
-				$params['false']
-			);
-		} elseif (isset($params['name']) && isset($params['true'])) {
-			$string = \CoreLibs\Debug\Support::printBool(
-				$input,
-				$params['name'],
-				$params['true']
-			);
-		} elseif (isset($params['name'])) {
-			$string = \CoreLibs\Debug\Support::printBool(
-				$input,
-				$params['name']
-			);
-		} else {
-			$string = \CoreLibs\Debug\Support::printBool($input);
-		}
-		$this->assertEquals(
-			$expected,
-			$string,
-			'assert printBool'
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @cover ::printToString
-	 * @dataProvider printToStringProvider
-	 * @testdox printToString $input with $flag will be $expected [$_dataName]
-	 *
-	 * @param mixed $input anything
-	 * @param boolean|null $flag html flag, only for string and array
-	 * @param string $expected always string
-	 * @return void
-	 */
-	public function testPrintToString(mixed $input, ?bool $flag, string $expected): void
-	{
-		if ($flag === null) {
-			// if expected starts with / and ends with / then this is a regex compare
-			if (
-				substr($expected, 0, 1) == '/' &&
-				substr($expected, -1, 1) == '/'
-			) {
-				$this->assertMatchesRegularExpression(
-					$expected,
-					\CoreLibs\Debug\Support::printToString($input)
-				);
-			} else {
-				$this->assertEquals(
-					$expected,
-					\CoreLibs\Debug\Support::printToString($input)
-				);
-			}
-		} else {
-			$this->assertEquals(
-				$expected,
-				\CoreLibs\Debug\Support::printToString($input, $flag)
-			);
-		}
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @cover ::getCallerMethod
-	 * @testWith ["testGetCallerMethod"]
-	 * @testdox getCallerMethod check if it returns $expected [$_dataName]
-	 *
-	 * @return void
-	 */
-	public function testGetCallerMethod(string $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Debug\Support::getCallerMethod()
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @cover ::getCallerMethodList
-	 * @testWith [["main", "run", "run", "run", "run", "run", "run", "runBare", "runTest", "testGetCallerMethodList"],["include", "main", "run", "run", "run", "run", "run", "run", "run", "runBare", "runTest", "testGetCallerMethodList"]]
-	 * @testdox getCallerMethodList check if it returns $expected [$_dataName]
-	 *
-	 * @param array $expected
-	 * @return void
-	 */
-	public function testGetCallerMethodList(array $expected, array $expected_group): void
-	{
-		$compare = \CoreLibs\Debug\Support::getCallerMethodList();
-		// if we direct call we have 10, if we call as folder we get 11
-		if (count($compare) == 10) {
-			$this->assertEquals(
-				$expected,
-				\CoreLibs\Debug\Support::getCallerMethodList(),
-				'assert expected 10'
-			);
-		} else {
-			$this->assertEquals(
-				$expected_group,
-				\CoreLibs\Debug\Support::getCallerMethodList(),
-				'assert expected group'
-			);
-		}
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @cover ::getCallerClass
-	 * @testWith ["PHPUnit\\TextUI\\Command"]
-	 * @testdox getCallerClass check if it returns $expected [$_dataName]
-	 *
-	 * @return void
-	 */
-	public function testGetCallerClass(string $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Debug\Support::getCallerClass()
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
 	 * @cover ::debugString
 	 * @dataProvider debugStringProvider
 	 * @testdox debugString $input with replace $replace and html $flag will be $expected [$_dataName]
@@ -453,19 +633,19 @@ final class CoreLibsDebugSupportTest extends TestCase
 		if ($replace === null && $flag === null) {
 			$this->assertEquals(
 				$expected,
-				\CoreLibs\Debug\Support::debugString($input),
+				Support::debugString($input),
 				'assert all default'
 			);
 		} elseif ($flag === null) {
 			$this->assertEquals(
 				$expected,
-				\CoreLibs\Debug\Support::debugString($input, $replace),
+				Support::debugString($input, $replace),
 				'assert flag default'
 			);
 		} else {
 			$this->assertEquals(
 				$expected,
-				\CoreLibs\Debug\Support::debugString($input, $replace, $flag),
+				Support::debugString($input, $replace, $flag),
 				'assert all set'
 			);
 		}

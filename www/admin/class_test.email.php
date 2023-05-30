@@ -6,11 +6,6 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = true;
-$PRINT_ALL = true;
-$DB_DEBUG = true;
-
 error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
@@ -26,15 +21,10 @@ ob_end_flush();
 use CoreLibs\Check\Email;
 use CoreLibs\Debug\Support as DgS;
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 
 $PAGE_NAME = 'TEST CLASS: HTML/ELEMENTS';
@@ -77,9 +67,6 @@ foreach ($email as $s_email) {
 	print "S::CHECKEMAILFULL: " . $s_email . ": " . Dgs::printAr(Email::checkEmailFull($s_email)) . "<br>";
 	print "S::CHECKEMAILFULL(true): " . $s_email . ": " . Dgs::printAr(Email::checkEmailFull($s_email, true)) . "<br>";
 }
-
-// error message
-print $log->printErrorMsg();
 
 print "</body></html>";
 

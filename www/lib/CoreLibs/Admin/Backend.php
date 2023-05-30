@@ -95,7 +95,7 @@ class Backend
 	public $domain;
 	/** @var string */
 	public $encoding;
-	/** @var \CoreLibs\Debug\Logging logger */
+	/** @var \CoreLibs\Logging\Logging logger */
 	public $log;
 	/** @var \CoreLibs\DB\IO database */
 	public $db;
@@ -118,14 +118,14 @@ class Backend
 	 * main class constructor
 	 *
 	 * @param \CoreLibs\DB\IO          $db      Database connection class
-	 * @param \CoreLibs\Debug\Logging  $log     Logging class
+	 * @param \CoreLibs\Logging\Logging  $log     Logging class
 	 * @param \CoreLibs\Create\Session $session Session interface class
 	 * @param \CoreLibs\Language\L10n  $l10n    l10n language class
 	 * @param int|null                 $set_default_acl_level Default ACL level
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
-		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Logging\Logging $log,
 		\CoreLibs\Create\Session $session,
 		\CoreLibs\Language\L10n $l10n,
 		?int $set_default_acl_level = null
@@ -133,7 +133,7 @@ class Backend
 		// attach db class
 		$this->db = $db;
 		// set to log not per class
-		$log->setLogPer('class', false);
+		$log->unsetLogFlag(\CoreLibs\Logging\Logger\Flag::per_class);
 		// attach logger
 		$this->log = $log;
 		// attach session class

@@ -18,10 +18,10 @@ class TestDB
 	/**
 	 * Undocumented function
 	 *
-	 * @param \CoreLibs\Debug\Logging $log
+	 * @param \CoreLibs\Logging\Logging $log
 	 */
 	public function __construct(
-		\CoreLibs\Debug\Logging $log
+		\CoreLibs\Logging\Logging $log
 	) {
 		$this->config = [
 			'db_name' => $_ENV['DB_NAME_TEST'] ?? '',
