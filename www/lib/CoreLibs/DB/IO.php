@@ -706,7 +706,17 @@ class IO
 				. \CoreLibs\Debug\Support::prAr($error_data)
 				. ']';
 		}
-		$this->log->debug($debug_id, $error_string, $prefix);
+		switch ($id) {
+			case 'DB_ERROR':
+				$this->log->error($debug_id . ' :' . $prefix . $error_string);
+				break;
+			case 'DB_WARNING':
+				$this->log->warning($debug_id . ' :' . $prefix . $error_string);
+				break;
+			default:
+				$this->log->debug($debug_id, $error_string, $prefix);
+				break;
+		}
 	}
 
 	/**
@@ -2735,7 +2745,7 @@ class IO
 		}
 		$result = $this->db_functions->__dbExecute($stm_name, $data);
 		if ($result === false) {
-			$this->log->debug('ExecuteData', 'ERROR in STM[' . $stm_name . '|'
+			$this->log->error('ExecuteData: ERROR in STM[' . $stm_name . '|'
 				. $this->prepare_cursor[$stm_name]['result'] . ']: '
 				. \CoreLibs\Debug\Support::prAr($data));
 			$this->__dbError(

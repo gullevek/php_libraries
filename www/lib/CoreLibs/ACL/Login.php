@@ -1855,7 +1855,7 @@ HTML;
 			if ($login_user_id_changed > 0) {
 				$this->login_user_id_unclear = true;
 				// error for invalid user id?
-				$this->log->debug('LOGIN USER ID', 'Invalid characters: '
+				$this->log->error('LOGIN USER ID: Invalid characters: '
 					. $login_user_id_changed . ' in loginUserId: '
 					. $this->login_user_id . ' (' . $this->login_user_id_source . ')');
 			}

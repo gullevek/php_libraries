@@ -389,7 +389,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$this->load_query = $config_array['load_query'];
 		}
 		if (empty($this->load_query)) {
-			$this->log->debug('INIT ERROR', 'Missing Load Query for: ' . $this->my_page_name);
+			$this->log->error('Missing Load Query for: ' . $this->my_page_name);
 		}
 		$this->archive_pk_name = 'a_' . $this->pk_name;
 		$this->col_name = str_replace('_id', '', $this->pk_name);
@@ -486,7 +486,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			/** @var TableArrays\Interface\TableArraysInterface|false $class */
 			$class = new $class_string($this);
 		} catch (\Throwable $t) {
-			$this->log->debug('CLASS LOAD', 'Failed loading: ' . $class_string . ' => ' . $t->getMessage());
+			$this->log->critical('CLASS LOADING: Failed loading: ' . $class_string . ' => ' . $t->getMessage());
 			return false;
 		}
 		if (is_object($class)) {
@@ -828,7 +828,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			return $return_array;
 		}
 		if (empty($this->load_query)) {
-			$this->log->debug('LOAD LIST ERROR', 'Missing load list query');
+			$this->log->error('Missing load list query');
 			return $return_array;
 		}
 
@@ -2618,7 +2618,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 		}
 		// add lost error ones
-		$this->log->debug('ERROR', 'P: ' . $data['prefix'] . ', '
+		$this->log->error('P: ' . $data['prefix'] . ', '
 			. Support::prAr($_POST['ERROR'][$data['prefix']] ?? []));
 		if ($this->error && !empty($_POST['ERROR'][$data['prefix']])) {
 			$prfx = $data['prefix']; // short

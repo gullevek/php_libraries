@@ -243,7 +243,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			return $this->table_array;
 		}
 		if ($acl_limit === true && $this->base_acl_level < 100) {
-			$this->log->debug('DB DELETE ERROR', 'ACL Limit on, Delete, '
+			$this->log->error('DB DELETE ERROR: ACL Limit on, Delete, '
 				. 'but base ACL level of 100 not met: ' . $this->base_acl_level);
 			return $this->table_array;
 		}
@@ -406,7 +406,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// early abort for new write with not enough ACL level
 		if ($insert && $acl_limit === true && $this->base_acl_level < 100) {
-			$this->log->debug('DB WRITE ERROR', 'ACL Limit on, Insert, '
+			$this->log->error('DB WRITE ERROR: ACL Limit on, Insert, '
 				. 'but base ACL level of 100 not met: ' . $this->base_acl_level);
 			return $this->table_array;
 		}
@@ -579,7 +579,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		} // while ...
 
 		if (empty($q_data)) {
-			$this->log->debug('DB WRITE ERROR', 'No data to write, possible through ACL');
+			$this->log->error('DB WRITE ERROR: No data to write, possible through ACL');
 			return $this->table_array;
 		}
 

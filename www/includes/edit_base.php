@@ -34,6 +34,7 @@ $session = new \CoreLibs\Create\Session(EDIT_SESSION_NAME);
 $log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
 	'log_file_id' => BASE_NAME . 'EditBase',
+	'log_level' => \CoreLibs\Logging\Logging::processLogLevel(DEBUG_LEVEL),
 	'log_per_date' => true,
 	'log_per_class' => true,
 ]);
