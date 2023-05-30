@@ -6,11 +6,6 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = true;
-$PRINT_ALL = true;
-$DB_DEBUG = true;
-
 error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();

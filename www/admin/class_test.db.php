@@ -15,8 +15,6 @@ ob_start();
 define('USE_DATABASE', true);
 // sample config
 require 'config.php';
-// override ECHO ALL FALSE
-$ECHO_ALL = true;
 // define log file id
 $LOG_FILE_ID = 'classTest-db';
 ob_end_flush();
@@ -26,15 +24,10 @@ use CoreLibs\DB\IO as DbIo;
 use CoreLibs\Debug\Support;
 use CoreLibs\Convert\SetVarType;
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? true,
-	'echo_all' => $ECHO_ALL,
-	'print_all' => $PRINT_ALL ?? true,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 // db connection and attach logger
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
@@ -48,8 +41,8 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><a href="class_test.db.dbReturn.php">Class Test DB dbReturn</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
-print "LOGFILE NAME: " . $db->log->getSetting('log_file_name') . "<br>";
-print "LOGFILE ID: " . $db->log->getSetting('log_file_id') . "<br>";
+print "LOGFILE NAME: " . $db->log->getLogFile() . "<br>";
+print "LOGFILE ID: " . $db->log->getLogFileId() . "<br>";
 print "DBINFO: " . $db->dbInfo() . "<br>";
 echo "DB_CONFIG_SET constant: <pre>" . print_r(DB_CONFIG, true) . "</pre><br>";
 
@@ -789,9 +782,6 @@ var_dump($res);
 print "RES: " . DgS::printAr(SetVarType::setArray($res)) . "<br>";
 print "ISSET: " . isset($res['null_varchar']) . "<br>";
 print "EMPTY: " . empty($res['null_varchar']) . "<br>";
-
-// error message
-print $log->printErrorMsg();
 
 print "</body></html>";
 

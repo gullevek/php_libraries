@@ -6,11 +6,6 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = true;
-$PRINT_ALL = true;
-$DB_DEBUG = true;
-
 error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
@@ -55,15 +50,10 @@ $table_arrays[\CoreLibs\Get\System::getPageName(1)] = [
 	]
 ];
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL,
-	'echo_all' => $ECHO_ALL,
-	'print_all' => $PRINT_ALL,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 $l10n = new CoreLibs\Language\L10n(
 	SITE_LOCALE,
@@ -92,9 +82,6 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 print "MOBILE PHONE: " . $form->mobile_phone . "<br>";
 // sets table array to include
 print "MY PAGE NAME: " . $form->my_page_name . "<br>";
-
-// error message
-print $log->printErrorMsg();
 
 print "</body></html>";
 

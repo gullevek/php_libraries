@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  * @coversDefaultClass \CoreLibs\Security\Password
  * @testdox \CoreLibs\Security\Password method tests
  */
-final class CoreLibsCheckPasswordTest extends TestCase
+final class CoreLibsSecurityPasswordTest extends TestCase
 {
 	public function passwordProvider(): array
 	{

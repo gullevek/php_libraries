@@ -6,11 +6,6 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = false; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = true;
-$PRINT_ALL = true;
-$DB_DEBUG = true;
-
 error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
@@ -27,15 +22,10 @@ use CoreLibs\Convert\Colors;
 use CoreLibs\Debug\Support as DgS;
 use CoreLibs\Convert\SetVarType;
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 $color_class = 'CoreLibs\Convert\Colors';
 
@@ -103,9 +93,6 @@ print "RANDOM hsb->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsb2r
 print "RANDOM hsl->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsl2rgb($h, $s, $l))) . "</pre><br>";
 
 // TODO: run compare check input must match output
-
-// error message
-print $log->printErrorMsg();
 
 print "</body></html>";
 
