@@ -177,7 +177,6 @@ class Support
 		$caller_level = 1;
 		$caller_list = self::getCallerMethodList();
 		if ($caller_list[0] == 'dV') {
-			echo "Raise caller level<br>: " . $caller_list[0] . "<br>";
 			$caller_level = 2;
 		}
 		// we need to strip the string in <small></small that is

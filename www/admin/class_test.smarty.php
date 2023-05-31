@@ -52,7 +52,7 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
-$smarty->DATA['JS_DEBUG'] = $log->getJsDebug();
+$smarty->DATA['JS_DEBUG'] = $log->loggingLevelIsDebug();
 $smarty->MASTER_TEMPLATE_NAME = 'main_body.tpl';
 $smarty->TEMPLATE_NAME = 'smarty_test.tpl';
 $smarty->CSS_SPECIAL_TEMPLATE_NAME = 'smart_test.css';

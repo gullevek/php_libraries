@@ -217,14 +217,14 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 
 	// setLoggingLevel
 	// getLoggingLevel
-	// getJsDebug
+	// loggingLevelIsDebug
 
 	/**
 	 * Undocumented function
 	 *
 	 * @covers ::setLoggingLevel
 	 * @covers ::getLoggingLevel
-	 * @covers ::getJsDebug
+	 * @covers ::loggingLevelIsDebug
 	 * @testdox setLoggingLevel set/get checks
 	 *
 	 * @return void
@@ -242,7 +242,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 			$log->getLoggingLevel()
 		);
 		$this->assertFalse(
-			$log->getJsDebug()
+			$log->loggingLevelIsDebug()
 		);
 		// not set, should be debug]
 		$log = new \CoreLibs\Logging\Logging([
@@ -254,7 +254,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 			$log->getLoggingLevel()
 		);
 		$this->assertTrue(
-			$log->getJsDebug()
+			$log->loggingLevelIsDebug()
 		);
 		// invalid, should be debug, will throw excpetion too
 		$this->expectException(\InvalidArgumentException::class);
@@ -269,7 +269,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 			$log->getLoggingLevel()
 		);
 		$this->assertTrue(
-			$log->getJsDebug()
+			$log->loggingLevelIsDebug()
 		);
 		// set valid, then change
 		$log = new \CoreLibs\Logging\Logging([

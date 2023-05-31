@@ -23,6 +23,8 @@ ob_end_flush();
 $ECHO_ALL = true;
 
 // use CoreLibs\Debug\Support;
+
+use CoreLibs\Debug\Support;
 use CoreLibs\Logging\Logger\Level;
 use CoreLibs\Logging\Logger\Flag;
 // use CoreLibs\Debug\Support;
@@ -51,7 +53,18 @@ print "Flag: per_run ->value: " . Flag::per_class->value . "<br>";
 $log->setLogUniqueId();
 print "LogUniqId: " . $log->getLogUniqueId() . "<br>";
 
-print "DUMP: " . $log->dV(['something' => 'error']) . "<br>";
+print "Is Debug (check): " . Support::printBool($log->getLoggingLevel()->includes(
+	Level::Debug
+)) . "<br>";
+print "Is Debug (fk): " . Support::printBool($log->loggingLevelIsDebug()) . "<br>";
+$log->setLoggingLevel(Level::Notice);
+print "Is Debug (check): " . Support::printBool($log->getLoggingLevel()->includes(
+	Level::Debug
+)) . "<br>";
+print "Is Debug (fk): " . Support::printBool($log->loggingLevelIsDebug()) . "<br>";
+$log->setLoggingLevel(Level::Debug);
+
+print "DUMP: <pre>" . $log->dV(['something' => 'error']) . "</pre><br>";
 
 $log->debug('LEGACY', 'Some legacy shit here');
 $log->debug('ARRAY', 'Dump some data: ' . $log->dV(['something' => 'error']));

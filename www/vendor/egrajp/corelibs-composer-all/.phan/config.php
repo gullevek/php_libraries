@@ -109,7 +109,10 @@ return [
 		'PhanWriteOnlyPublicProperty',
 		'PhanUnreferencedConstant',
 		'PhanWriteOnlyPublicProperty',
-		'PhanReadOnlyPublicProperty'
+		'PhanReadOnlyPublicProperty',
+		// start ignore annotations
+		'PhanUnextractableAnnotationElementName',
+		'PhanUnextractableAnnotationSuffix',
 	],
 
 	// Override to hardcode existence and types of (non-builtin) globals in the global scope.
