@@ -85,7 +85,7 @@ foreach ($images as $image) {
 	$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . $image;
 	list ($height, $width, $img_type) = \CoreLibs\Convert\SetVarType::setArray(getimagesize($image));
 	echo "<div><b>IMAGE INFO</b>: " . $height . "x" . $width . ", TYPE: "
-		. \CoreLibs\Debug\Support::printArray($img_type) . " [" . $finfo->file($image) . "]</div>";
+		. \CoreLibs\Debug\Support::dumpVar($img_type) . " [" . $finfo->file($image) . "]</div>";
 	// rotate image first
 	Image::correctImageOrientation($image);
 	// thumbnail tests

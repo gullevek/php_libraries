@@ -1,4 +1,4 @@
-<?php // phpcs:ignore warning
+<?php // phpcs:ignore PSR1.Files.SideEffects
 
 /**
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
@@ -48,6 +48,8 @@ print "Flag: per_run (from int): " . Flag::fromValue(2)->getName() . "<br>";
 print "Flag: per_run getName(): " . Flag::per_class->getName() . "<br>";
 print "Flag: per_run ->name: " . Flag::per_class->name . "<br>";
 print "Flag: per_run ->value: " . Flag::per_class->value . "<br>";
+$log->setLogUniqueId();
+print "LogUniqId: " . $log->getLogUniqueId() . "<br>";
 
 print "DUMP: " . $log->dV(['something' => 'error']) . "<br>";
 
@@ -81,6 +83,26 @@ try {
 	'log_file_id' => 'a',
 	'log_file_id' => 'a',
 ]); */
+
+// @codingStandardsIgnoreLine
+Class TestP
+{
+	/** @var \CoreLibs\Logging\Logging */
+	public $log;
+	public function __construct(
+		\CoreLibs\Logging\Logging $log
+	) {
+		$this->log = $log;
+	}
+
+	public function test(): void
+	{
+		$this->log->info('TestL::test call');
+	}
+}
+
+$tl = new TestP($log);
+$tl->test();
 
 print '<hr>'
 	. '<div style="width:100%; font-family: monospace;">'

@@ -54,6 +54,7 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
             'Psr\\Container\\' => 14,
             'PhpParser\\' => 10,
             'Phan\\' => 5,
+            'PHPStan\\PhpDocParser\\' => 21,
         ),
         'M' => 
         array (
@@ -62,6 +63,7 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
         'D' => 
         array (
             'Doctrine\\Instantiator\\' => 22,
+            'Doctrine\\Deprecations\\' => 22,
             'DeepCopy\\' => 9,
         ),
         'C' => 
@@ -143,6 +145,10 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
         array (
             0 => __DIR__ . '/..' . '/phan/phan/src/Phan',
         ),
+        'PHPStan\\PhpDocParser\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src',
+        ),
         'Microsoft\\PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/microsoft/tolerant-php-parser/src',
@@ -150,6 +156,10 @@ class ComposerStaticInitdd705c6e8ab22e0d642372dec7767718
         'Doctrine\\Instantiator\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
+        ),
+        'Doctrine\\Deprecations\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/doctrine/deprecations/lib/Doctrine/Deprecations',
         ),
         'DeepCopy\\' => 
         array (
