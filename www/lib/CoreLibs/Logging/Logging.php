@@ -213,7 +213,7 @@ class Logging
 				$settings['mandatory'] && !isset($options[$name]) &&
 				empty($settings['alias'])
 			) {
-				throw new \InvalidArgumentException(
+				throw new InvalidArgumentException(
 					'Missing mandatory option: "' . $name . '"',
 					E_USER_WARNING
 				);
@@ -230,7 +230,7 @@ class Logging
 			switch ($settings['type']) {
 				case 'bool':
 					if (!is_bool($this->options[$name])) {
-						throw new \InvalidArgumentException(
+						throw new InvalidArgumentException(
 							'Option: "' . $name . '" is not of type bool',
 							E_USER_ERROR
 						);
@@ -238,7 +238,7 @@ class Logging
 					break;
 				case 'string':
 					if (!is_string($this->options[$name])) {
-						throw new \InvalidArgumentException(
+						throw new InvalidArgumentException(
 							'Option: "' . $name . '" is not of type string',
 							E_USER_ERROR
 						);
@@ -249,7 +249,7 @@ class Logging
 						empty($settings['type_info']) ||
 						!$this->options[$name] instanceof $settings['type_info']
 					) {
-						throw new \InvalidArgumentException(
+						throw new InvalidArgumentException(
 							'Option: "' . $name . '" is not of instance '
 								. ($settings['type_info'] ?? 'NO INSTANCE DEFINED'),
 							E_USER_ERROR
