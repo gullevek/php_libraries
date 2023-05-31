@@ -22,12 +22,9 @@ final class CoreLibsCreateEmailTest extends TestCase
 	 */
 	public static function setUpBeforeClass(): void
 	{
-		self::$log = new \CoreLibs\Debug\Logging([
+		self::$log = new \CoreLibs\Logging\Logging([
 			'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
-			'file_id' => 'CoreLibs-Create-Email-Test',
-			'debug_all' => true,
-			'echo_all' => false,
-			'print_all' => true,
+			'log_file_id' => 'CoreLibs-Create-Email-Test',
 		]);
 	}
 
@@ -624,7 +621,7 @@ final class CoreLibsCreateEmailTest extends TestCase
 		// force new set for each run
 		self::$log->setLogUniqueId(true);
 		// set on of unique log id
-		self::$log->setLogPer('run', true);
+		self::$log->setLogFlag(\CoreLibs\Logging\Logger\Flag::per_run);
 		// init logger
 		$status = \CoreLibs\Create\Email::sendEmail(
 			$subject,
@@ -646,7 +643,9 @@ final class CoreLibsCreateEmailTest extends TestCase
 		// assert content: must load JSON from log file
 		if ($status == 2) {
 			// open file, get last entry with 'SEND EMAIL JSON' key
-			$file = file_get_contents(self::$log->getLogFileName());
+			$file = file_get_contents(
+				self::$log->getLogFolder() . self::$log->getLogFile()
+			);
 			if ($file !== false) {
 				// extract SEND EMAIL JSON line
 				$found = preg_match_all("/^.* <SEND EMAIL JSON> - (.*)$/m", $file, $matches);

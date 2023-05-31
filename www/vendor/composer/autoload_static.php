@@ -12,6 +12,10 @@ class ComposerStaticInit1b7cd5bacf2590b458d7a94400b505d4
             'gullevek\\dotenv\\' => 16,
             'gullevek\\dotEnv\\' => 16,
         ),
+        'P' => 
+        array (
+            'Psr\\Log\\' => 8,
+        ),
         'C' => 
         array (
             'CoreLibs\\' => 9,
@@ -26,6 +30,10 @@ class ComposerStaticInit1b7cd5bacf2590b458d7a94400b505d4
         'gullevek\\dotEnv\\' => 
         array (
             0 => __DIR__ . '/..' . '/gullevek/dotenv/src',
+        ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/src',
         ),
         'CoreLibs\\' => 
         array (

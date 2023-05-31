@@ -10,6 +10,7 @@ namespace CoreLibs\Create;
 
 class Hash
 {
+	public const DEFAULT_HASH = 'adler32';
 	public const STANDARD_HASH_LONG = 'ripemd160';
 	public const STANDARD_HASH_SHORT = 'adler32';
 
@@ -58,7 +59,7 @@ class Hash
 	/**
 	 * replacemend for __crc32b call (alternate)
 	 * defaults to adler 32
-	 * allowed crc32b, adler32, fnv132, fnv1a32, joaat
+	 * allowed: any in hash algos list, default to adler 32
 	 * all that create 8 char long hashes
 	 *
 	 * @param  string $string    string to hash
@@ -67,15 +68,15 @@ class Hash
 	 */
 	public static function __hash(
 		string $string,
-		string $hash_type = self::STANDARD_HASH_SHORT
+		string $hash_type = self::DEFAULT_HASH
 	): string {
+		// if not empty, check if in valid list
 		if (
-			!in_array(
-				$hash_type,
-				['crc32b', 'adler32', 'fnv132', 'fnv1a32', 'joaat']
-			)
+			empty($hash_type) ||
+			!in_array($hash_type, hash_algos())
 		) {
-			$hash_type = 'adler32';
+			// fallback to default hash type if none set or invalid
+			$hash_type = self::DEFAULT_HASH;
 		}
 		return hash($hash_type, $string);
 	}

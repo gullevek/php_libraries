@@ -132,13 +132,10 @@ final class CoreLibsDBIOTest extends TestCase
 			);
 		}
 		// define basic connection set valid and one invalid
-		self::$log = new \CoreLibs\Debug\Logging([
+		self::$log = new \CoreLibs\Logging\Logging([
 			// 'log_folder' => __DIR__ . DIRECTORY_SEPARATOR . 'log',
 			'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
-			'file_id' => 'CoreLibs-DB-IO-Test',
-			'debug_all' => false,
-			'echo_all' => false,
-			'print_all' => false,
+			'log_file_id' => 'CoreLibs-DB-IO-Test',
 		]);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],

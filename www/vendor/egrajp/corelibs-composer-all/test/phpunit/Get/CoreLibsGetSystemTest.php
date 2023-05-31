@@ -67,17 +67,17 @@ final class CoreLibsGetSystemTest extends TestCase
 			'original set' => [
 				0 => null,
 				1 => 'NOHOST',
-				2 => 'NOPORT',
+				2 => 0,
 			],
 			'override set no port' => [
 				0 => 'foo.org',
 				1 => 'foo.org',
-				2 => '80'
+				2 => 80
 			],
 			'override set with port' => [
 				0 => 'foo.org:443',
 				1 => 'foo.org',
-				2 => '443'
+				2 => 443
 			]
 		];
 	}
@@ -138,10 +138,10 @@ final class CoreLibsGetSystemTest extends TestCase
 	 *
 	 * @param string|null $input
 	 * @param string $expected_host
-	 * @param string $expected_port
+	 * @param int $expected_port
 	 * @return void
 	 */
-	public function testGetHostNanme(?string $input, string $expected_host, string $expected_port): void
+	public function testGetHostNanme(?string $input, string $expected_host, int $expected_port): void
 	{
 		// print "HOSTNAME: " . $_SERVER['HTTP_HOST'] . "<br>";
 		// print "SERVER: " . print_r($_SERVER, true) . "\n";

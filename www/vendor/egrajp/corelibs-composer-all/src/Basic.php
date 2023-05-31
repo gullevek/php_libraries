@@ -58,39 +58,39 @@ class Basic
 {
 	// page and host name
 	/** @var string */
-	public $page_name;
+	public string $page_name;
 	/** @var string */
-	public $host_name;
+	public string $host_name;
 	/** @var int */
-	public $host_port;
+	public int $host_port;
 	// logging interface, Debug\Logging class
-	/** @var \CoreLibs\Debug\Logging */
-	public $log;
+	/** @var \CoreLibs\Logging\Logging */
+	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\Create\Session */
-	public $session;
+	public \CoreLibs\Create\Session $session;
 
 	// email valid checks
 	/** @var array<mixed> */
-	public $email_regex_check = [];
+	public array $email_regex_check = [];
 	/** @var string */
-	public $email_regex; // regex var for email check
+	public string $email_regex; // regex var for email check
 
 	// data path for files
 	/** @var array<mixed> */
-	public $data_path = [];
+	public array $data_path = [];
 
 	// ajax flag
 	/** @var bool */
-	protected $ajax_page_flag = false;
+	protected bool $ajax_page_flag = false;
 
 	/**
 	 * main Basic constructor to init and check base settings
-	 * @param \CoreLibs\Debug\Logging|null $log Logging class
+	 * @param \CoreLibs\Logging\Logging|null $log Logging class
 	 * @param string|null $session_name Set session name
 	 * @deprecated DO NOT USE Class\Basic anymore. Use dedicated logger and sub classes
 	 */
 	public function __construct(
-		\CoreLibs\Debug\Logging $log = null,
+		\CoreLibs\Logging\Logging $log = null,
 		?string $session_name = null
 	) {
 		trigger_error('Class \CoreLibs\Basic is deprected', E_USER_DEPRECATED);
@@ -120,7 +120,10 @@ class Basic
 		}
 
 		// logging interface moved here (->debug is now ->log->debug)
-		$this->log = $log ?? new \CoreLibs\Debug\Logging();
+		$this->log = $log ?? new \CoreLibs\Logging\Logging([
+			'log_folder' => BASE . LOG,
+			'log_file_id' => 'ClassBasic-DEPRECATED',
+		]);
 
 		// set ajax page flag based on the AJAX_PAGE varaibles
 		// convert to true/false so if AJAX_PAGE is 0 or false it is
@@ -176,8 +179,9 @@ class Basic
 	 */
 	public function basicSetLogId(string $string): string
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->basicSetLogId() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
-		return $this->log->setLogId($string);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use log->setLogId() or use \CoreLibs\Logging\Logging() class', E_USER_DEPRECATED);
+		$this->log->setLogFileId($string);
+		return $this->log->getLogFileId();
 	}
 
 	// ****** DEBUG/ERROR FUNCTIONS ******
@@ -252,7 +256,7 @@ class Basic
 	}
 
 	// ****** DEBUG LOGGING FUNCTIONS ******
-	// Moved to \CoreLibs\Debug\Logging
+	// Moved to \CoreLibs\Logging\Logging
 
 	/**
 	 * passes list of level names, to turn on debug
@@ -265,67 +269,8 @@ class Basic
 	 */
 	public function debugFor(string $type, string $flag): void
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->debugFor() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
-		/** @phan-suppress-next-line PhanTypeMismatchArgumentReal, PhanParamTooFew @phpstan-ignore-next-line */
-		$this->log->setLogLevel(...[func_get_args()]);
+		trigger_error('Method ' . __METHOD__ . ' functionaility is fully deprecated', E_USER_DEPRECATED);
 	}
-
-	/**
-	 * checks if we have a need to work on certain debug output
-	 * Needs debug/echo/print ad target for which of the debug flag groups we check
-	 * also needs level string to check in the per level output flag check.
-	 * In case we have invalid target it will return false
-	 * @param  string $target target group to check debug/echo/print
-	 * @param  string $level  level to check in detailed level flag
-	 * @return bool           true on access allowed or false on no access
-	 */
-	/* private function doDebugTrigger(string $target, string $level): bool
-	{
-		$access = false;
-		// check if we do debug, echo or print
-		switch ($target) {
-			case 'debug':
-				if ((
-						(isset($this->debug_output[$level]) && $this->debug_output[$level]) ||
-						$this->debug_output_all
-					) &&
-					(!isset($this->debug_output_not[$level]) ||
-						(isset($this->debug_output_not[$level]) && !$this->debug_output_not[$level])
-					)
-				) {
-					$access = true;
-				}
-				break;
-			case 'echo':
-				if ((
-						(isset($this->echo_output[$level]) && $this->echo_output[$level]) ||
-						$this->echo_output_all
-					) &&
-					(!isset($this->echo_output_not[$level]) ||
-						(isset($this->echo_output_not[$level]) && !$this->echo_output_not[$level])
-					)
-				) {
-					$access = true;
-				}
-				break;
-			case 'print':
-				if ((
-						(isset($this->print_output[$level]) && $this->print_output[$level]) ||
-						$this->print_output_all
-					) &&
-					(!isset($this->print_output_not[$level]) ||
-						(isset($this->print_output_not[$level]) && !$this->print_output_not[$level])
-					)
-				) {
-					$access = true;
-				}
-				break;
-			default:
-				// fall through with access false
-				break;
-		}
-		return $access;
-	} */
 
 	/**
 	 * write debug data to error_msg array
@@ -335,11 +280,12 @@ class Basic
 	 *                              all html tags will be stripped and <br> changed to \n
 	 *                              this is only used for debug output
 	 * @return void                 has no return
-	 * @deprecated Use $basic->log->debug() instead
+	 * @deprecated Use Logger\Logger->debug() instead
 	 */
 	public function debug(string $level, string $string, bool $strip = false): void
 	{
-		$this->log->debug($level, $string, $strip);
+		trigger_error('Method ' . __METHOD__ . ' has moved to Logger\Logger->debug()', E_USER_DEPRECATED);
+		$this->log->debug($level, $string);
 	}
 
 	/**
@@ -351,8 +297,7 @@ class Basic
 	 */
 	public function mergeErrors(array $error_msg = []): void
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->mergeErrors() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
-		$this->log->mergeErrors($error_msg);
+		trigger_error('Method ' . __METHOD__ . ' is fully deprecated', E_USER_DEPRECATED);
 	}
 
 	/**
@@ -363,7 +308,8 @@ class Basic
 	 */
 	public function printErrorMsg(string $string = ''): string
 	{
-		return $this->log->printErrorMsg($string);
+		trigger_error('Method ' . __METHOD__ . ' is fully deprecated', E_USER_DEPRECATED);
+		return '';
 	}
 
 	/**
@@ -376,8 +322,7 @@ class Basic
 	 */
 	public function resetErrorMsg(string $level = ''): void
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use $basic->log->resetErrorMsg() or use \CoreLibs\Debug\Logging() class', E_USER_DEPRECATED);
-		$this->log->resetErrorMsg($level);
+		trigger_error('Method ' . __METHOD__ . ' is fully deprecated', E_USER_DEPRECATED);
 	}
 
 	// ****** DEBUG SUPPORT FUNCTIONS ******
@@ -388,11 +333,11 @@ class Basic
 	 * prints a html formatted (pre) array
 	 * @param  array<mixed> $array any array
 	 * @return string              formatted array for output with <pre> tag added
-	 * @deprecated Use $this->log->prAr() instead
+	 * @deprecated Use \CoreLibs\Debug\Support::prAr() instead
 	 */
 	public function printAr(array $array): string
 	{
-		return $this->log->prAr($array);
+		return \CoreLibs\Debug\Support::prAr($array);
 	}
 
 	/**

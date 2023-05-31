@@ -27,9 +27,9 @@ namespace CoreLibs\Language\Core;
 class StringReader
 {
 	/** @var int */
-	public $sr_pos;
+	public int $sr_pos;
 	/** @var string */
-	public $sr_str;
+	public string $sr_str;
 
 	/**
 	 * constructor for string reader

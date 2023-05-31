@@ -59,9 +59,9 @@ namespace CoreLibs\DB\SQL;
 class PgSQL implements Interface\SqlFunctions
 {
 	/** @var string */
-	private $last_error_query;
+	private string $last_error_query;
 	/** @var \PgSql\Connection|false */
-	private $dbh = false;
+	private \PgSql\Connection|false $dbh = false;
 
 	/**
 	 * queries last error query and returns true or false if error was set

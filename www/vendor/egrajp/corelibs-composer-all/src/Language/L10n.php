@@ -35,42 +35,42 @@ class L10n
 	/** @var string the default fallback encoding if nothing is set */
 	public const DEFAULT_CHARSET = 'UTF-8';
 	/** @var string the current locale */
-	private $locale = '';
+	private string $locale = '';
 	/** @var string the SET locale as WHERE the domain file is */
-	private $locale_set = '';
+	private string $locale_set = '';
 	/** @var string the default selected/active domain */
-	private $domain = '';
+	private string $domain = '';
 	/** @var string encoding, as from locale or set from outside */
-	private $override_encoding = self::DEFAULT_CHARSET;
+	private string $override_encoding = self::DEFAULT_CHARSET;
 	/** @var string encoding set during the parse Locale */
-	private $encoding = '';
+	private string $encoding = '';
 	/** @var array<string,array<string,GetTextReader>> locale > domain = translator */
-	private $domains = [];
+	private array $domains = [];
 	/** @var array<string,string> bound paths for domains */
-	private $paths = ['' => './'];
+	private array $paths = ['' => './'];
 
 	// files
 	/** @var string the full path to the mo file to loaded */
-	private $mofile = '';
+	private string $mofile = '';
 	/** @var string base path to search level */
-	private $base_locale_path = '';
+	private string $base_locale_path = '';
 	/** @var string dynamic set path to where the mo file is actually */
-	private $base_content_path = '';
+	private string $base_content_path = '';
 
 	// errors
 	/** @var bool if load of mo file was unsuccessful */
-	private $load_failure = false;
+	private bool $load_failure = false;
 
 	// object holders
 	/** @var FileReader|bool reader class for file reading, false for short circuit */
-	private $input = false;
+	private FileReader|bool $input = false;
 	/** @var GetTextReader reader class for MO data */
-	private $l10n;
+	private GetTextReader|null $l10n = null;
 	/**
 	 * @static
 	 * @var L10n self class
 	 */
-	private static $instance;
+	private static L10n $instance;
 
 	/**
 	 * class constructor call for language getstring
@@ -124,7 +124,6 @@ class L10n
 	 */
 	public static function getInstance(): L10n
 	{
-		/** @phpstan-ignore-next-line */
 		if (empty(self::$instance)) {
 			self::$instance = new self();
 		}
@@ -252,6 +251,13 @@ class L10n
 			$this->load_failure = true;
 			// dummy
 			$this->l10n = new GetTextReader($this->input);
+		}
+		// if this is still null here, we abort
+		if ($this->l10n === null) {
+			throw new \Exception(
+				"Could not create CoreLibs\Language\Core\GetTextReader object",
+				E_USER_ERROR
+			);
 		}
 		return $this->l10n;
 	}
@@ -673,6 +679,7 @@ class L10n
 		// fallback passthrough
 		if ($this->l10n === null) {
 			echo $text;
+			return;
 		}
 		echo $this->l10n->translate($text);
 	}

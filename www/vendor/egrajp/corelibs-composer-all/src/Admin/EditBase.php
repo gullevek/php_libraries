@@ -20,36 +20,36 @@ use SmartyException;
 class EditBase
 {
 	/** @var array<mixed> */
-	private $HEADER = [];
+	private array $HEADER = [];
 	/** @var array<mixed> */
-	private $DATA = [];
+	private array $DATA = [];
 	/** @var array<mixed> */
-	private $DEBUG_DATA = [];
+	private array $DEBUG_DATA = [];
 
 	/** @var string the template name */
-	private $EDIT_TEMPLATE = '';
+	private string $EDIT_TEMPLATE = '';
 
 	/** @var \CoreLibs\Template\SmartyExtend smarty system */
-	private $smarty;
+	private \CoreLibs\Template\SmartyExtend $smarty;
 	/** @var \CoreLibs\Output\Form\Generate form generate system */
-	private $form;
-	/** @var \CoreLibs\Debug\Logging */
-	public $log;
+	private \CoreLibs\Output\Form\Generate $form;
+	/** @var \CoreLibs\Logging\Logging */
+	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\ACL\Login */
-	public $login;
+	public \CoreLibs\ACL\Login $login;
 
 	/**
 	 * construct form generator
 	 *
 	 * @param array<mixed>            $db_config db config array, mandatory
-	 * @param \CoreLibs\Debug\Logging $log       Logging class, null auto set
+	 * @param \CoreLibs\Logging\Logging $log       Logging class, null auto set
 	 * @param \CoreLibs\Language\L10n $l10n      l10n language class, null auto set
 	 * @param \CoreLibs\ACL\Login     $login     login class for ACL settings
 	 * @param array<string,mixed>     $options   Various settings options
 	 */
 	public function __construct(
 		array $db_config,
-		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Logging\Logging $log,
 		\CoreLibs\Language\L10n $l10n,
 		\CoreLibs\ACL\Login $login,
 		array $options
@@ -63,7 +63,7 @@ class EditBase
 			$options['compile_id'] ?? '',
 		);
 		// turn off set log per class
-		$log->setLogPer('class', false);
+		$log->unsetLogFlag(\CoreLibs\Logging\Logger\Flag::per_class);
 
 		// create form class
 		$this->form = new \CoreLibs\Output\Form\Generate(

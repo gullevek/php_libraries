@@ -39,16 +39,16 @@ class ArrayIO extends \CoreLibs\DB\IO
 {
 	// main calss variables
 	/** @var array<mixed> */
-	public $table_array; // the array from the table to work on
+	public array $table_array; // the array from the table to work on
 	/** @var string */
-	public $table_name; // the table_name
+	public string $table_name; // the table_name
 	/** @var string */
-	public $pk_name = ''; // the primary key from this table
+	public string $pk_name = ''; // the primary key from this table
 	/** @var int|string|null */
-	public $pk_id; // the PK id
+	public int|string|null $pk_id; // the PK id
 	// security values
 	/** @var int base acl for current page */
-	private $base_acl_level = 0;
+	private int $base_acl_level = 0;
 
 	/**
 	 * constructor for the array io class, set the
@@ -57,7 +57,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param array<mixed> $db_config      db connection config
 	 * @param array<mixed> $table_array    table array config
 	 * @param string       $table_name     table name string
-	 * @param \CoreLibs\Debug\Logging $log Logging class
+	 * @param \CoreLibs\Logging\Logging $log Logging class
 	 * @param int          $base_acl_level Set base acl level, if needed
 	 * @param int          $acl_admin      Flag if this is an admin ACL access level
 	 */
@@ -65,7 +65,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		array $db_config,
 		array $table_array,
 		string $table_name,
-		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Logging\Logging $log,
 		int $base_acl_level = 0,
 		int $acl_admin = 0
 	) {
@@ -243,7 +243,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			return $this->table_array;
 		}
 		if ($acl_limit === true && $this->base_acl_level < 100) {
-			$this->log->debug('DB DELETE ERROR', 'ACL Limit on, Delete, '
+			$this->log->error('DB DELETE ERROR: ACL Limit on, Delete, '
 				. 'but base ACL level of 100 not met: ' . $this->base_acl_level);
 			return $this->table_array;
 		}
@@ -406,7 +406,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// early abort for new write with not enough ACL level
 		if ($insert && $acl_limit === true && $this->base_acl_level < 100) {
-			$this->log->debug('DB WRITE ERROR', 'ACL Limit on, Insert, '
+			$this->log->error('DB WRITE ERROR: ACL Limit on, Insert, '
 				. 'but base ACL level of 100 not met: ' . $this->base_acl_level);
 			return $this->table_array;
 		}
@@ -579,7 +579,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		} // while ...
 
 		if (empty($q_data)) {
-			$this->log->debug('DB WRITE ERROR', 'No data to write, possible through ACL');
+			$this->log->error('DB WRITE ERROR: No data to write, possible through ACL');
 			return $this->table_array;
 		}
 

@@ -21,45 +21,83 @@ final class CoreLibsCreateUidsTest extends TestCase
 	public function uniqIdProvider(): array
 	{
 		return [
+			// number length
+			'too short' => [
+				0 => 1,
+				1 => 4,
+				2 => null
+			],
+			'valid length: 10' => [
+				0 => 10,
+				1 => 10,
+				2 => null
+			],
+			'valid length: 9, auto length' => [
+				0 => 9,
+				1 => 8,
+				2 => null
+			],
+			'valid length: 9, force length' => [
+				0 => 9,
+				1 => 9,
+				2 => true,
+			],
+			'very long: 512' => [
+				0 => 512,
+				1 => 512,
+				2 => null
+			],
+			// below is all legacy
 			'md5 hash' => [
 				0 => 'md5',
 				1 => 32,
+				2 => null
 			],
 			'sha256 hash' => [
 				0 => 'sha256',
-				1 => 64
+				1 => 64,
+				2 => null
 			],
 			'ripemd160 hash' => [
 				0 => 'ripemd160',
-				1 => 40
+				1 => 40,
+				2 => null
 			],
 			'adler32 hash' => [
 				0 => 'adler32',
-				1 => 8
+				1 => 8,
+				2 => null
 			],
-			'not in list hash but valid' => [
+			'not in list, set default length' => [
 				0 => 'sha3-512',
-				1 => strlen(hash('sha3-512', 'A'))
+				1 => 64,
+				2 => null
 			],
 			'default hash not set' => [
 				0 => null,
 				1 => 64,
+				2 => null
 			],
 			'invalid name' => [
 				0 => 'iamnotavalidhash',
 				1 => 64,
+				2 => null
 			],
-			'auto: ' . \CoreLibs\Create\Uids::DEFAULT_HASH => [
-				0 => \CoreLibs\Create\Uids::DEFAULT_HASH,
-				1 => strlen(hash(\CoreLibs\Create\Uids::DEFAULT_HASH, 'A'))
+			// auto calls
+			'auto: ' . \CoreLibs\Create\Uids::DEFAULT_UNNIQ_ID_LENGTH => [
+				0 => \CoreLibs\Create\Uids::DEFAULT_UNNIQ_ID_LENGTH,
+				1 => 64,
+				2 => null
 			],
 			'auto: ' . \CoreLibs\Create\Uids::STANDARD_HASH_LONG => [
 				0 => \CoreLibs\Create\Uids::STANDARD_HASH_LONG,
-				1 => strlen(hash(\CoreLibs\Create\Uids::STANDARD_HASH_LONG, 'A'))
+				1 => strlen(hash(\CoreLibs\Create\Uids::STANDARD_HASH_LONG, 'A')),
+				2 => null
 			],
 			'auto: ' . \CoreLibs\Create\Uids::STANDARD_HASH_SHORT => [
 				0 => \CoreLibs\Create\Uids::STANDARD_HASH_SHORT,
-				1 => strlen(hash(\CoreLibs\Create\Uids::STANDARD_HASH_SHORT, 'A'))
+				1 => strlen(hash(\CoreLibs\Create\Uids::STANDARD_HASH_SHORT, 'A')),
+				2 => null
 			],
 		];
 	}
@@ -105,25 +143,26 @@ final class CoreLibsCreateUidsTest extends TestCase
 	 *
 	 * @covers ::uniqId
 	 * @dataProvider uniqIdProvider
-	 * @testdox uniqId $input will be length $expected [$_dataName]
+	 * @testdox uniqId $input will be length $expected (Force $flag) [$_dataName]
 	 *
-	 * @param string|null $input
+	 * @param int|string|null $input
 	 * @param string $expected
+	 * @param bool|null $flag
 	 * @return void
 	 */
-	public function testUniqId(?string $input, int $expected): void
+	public function testUniqId(int|string|null $input, int $expected, ?bool $flag): void
 	{
 		if ($input === null) {
-			$this->assertEquals(
-				$expected,
-				strlen(\CoreLibs\Create\Uids::uniqId())
-			);
+			$uniq_id_length = strlen(\CoreLibs\Create\Uids::uniqId());
+		} elseif ($flag === null) {
+			$uniq_id_length = strlen(\CoreLibs\Create\Uids::uniqId($input));
 		} else {
-			$this->assertEquals(
-				$expected,
-				strlen(\CoreLibs\Create\Uids::uniqId($input))
-			);
+			$uniq_id_length = strlen(\CoreLibs\Create\Uids::uniqId($input, $flag));
 		}
+		$this->assertEquals(
+			$expected,
+			$uniq_id_length
+		);
 	}
 
 	/**

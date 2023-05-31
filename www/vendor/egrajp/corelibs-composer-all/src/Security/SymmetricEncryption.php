@@ -2,7 +2,9 @@
 
 /**
  * very simple symmetric encryption
- * Better use: https://paragonie.com/project/halite
+ * Better use:
+ * https://paragonie.com/project/halite
+ * https://github.com/paragonie/halite
  *
  * current code is just to encrypt and decrypt
  *

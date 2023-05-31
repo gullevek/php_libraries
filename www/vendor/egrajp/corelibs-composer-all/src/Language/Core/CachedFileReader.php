@@ -29,9 +29,9 @@ namespace CoreLibs\Language\Core;
 class CachedFileReader extends \CoreLibs\Language\Core\StringReader
 {
 	/** @var int */
-	public $error = 0;
+	public int $error = 0;
 	/** @var string */
-	public $fd_str = '';
+	public string $fd_str = '';
 
 	/**
 	 * Undocumented function
