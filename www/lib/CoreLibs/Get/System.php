@@ -54,14 +54,15 @@ class System
 
 	/**
 	 * get the host name without the port as given by the SELF var
+	 * if no host name found will set to NOHOST:0
 	 *
-	 * @return array<mixed> host name/port name
+	 * @return array{string,int} host name/port number
 	 */
 	public static function getHostName(): array
 	{
-		$host = $_SERVER['HTTP_HOST'] ?? 'NOHOST:NOPORT';
-		list($host_name, $port) = array_pad(explode(':', $host), 2, self::DEFAULT_PORT);
-		return [$host_name, $port];
+		$host = $_SERVER['HTTP_HOST'] ?? 'NOHOST:0';
+		[$host_name, $port] = array_pad(explode(':', $host), 2, self::DEFAULT_PORT);
+		return [$host_name, (int)$port];
 	}
 
 	/**

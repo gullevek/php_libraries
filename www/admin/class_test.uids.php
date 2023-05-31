@@ -39,11 +39,16 @@ print "UUIDV4: " . $_uids->uuidv4() . "<br>";
 print "UNIQID (d): " . $_uids->uniqId() . "<br>";
 print "UNIQID (md5): " . $_uids->uniqId('md5') . "<br>";
 print "UNIQID (sha256): " . $_uids->uniqId('sha256') . "<br>";
-// statc
+// static
 print "S::UUIDV4: " . $uids_class::uuidv4() . "<br>";
 print "S::UNIQID (d): " . $uids_class::uniqId() . "<br>";
 print "S::UNIQID (md5): " . $uids_class::uniqId('md5') . "<br>";
 print "S::UNIQID (sha256): " . $uids_class::uniqId('sha256') . "<br>";
+// with direct length
+print "S:UNIQID (0->4): " . Uids::uniqId(0) . "<br>";
+print "S:UNIQID (9->8): " . Uids::uniqId(9) . "<br>";
+print "S:UNIQID (9,true): " . Uids::uniqId(9, true) . "<br>";
+print "S:UNIQID (512): " . Uids::uniqId(512) . "<br>";
 // uniq ids
 print "UNIQU ID SHORT : " . Uids::uniqIdShort() . "<br>";
 print "UNIQU ID LONG : " . Uids::uniqIdLong() . "<br>";

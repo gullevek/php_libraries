@@ -7,7 +7,7 @@ namespace CoreLibs\Output\Form\TableArrays;
 class EditGroups implements Interface\TableArraysInterface
 {
 	/** @var \CoreLibs\Output\Form\Generate */
-	private $form;
+	private \CoreLibs\Output\Form\Generate $form;
 
 	/**
 	 * constructor

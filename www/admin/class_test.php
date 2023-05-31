@@ -66,49 +66,58 @@ print "<!DOCTYPE html>";
 print "<html><head><title>TEST CLASS</title><head>";
 print "<body>";
 
-print '<div><a href="class_test.db.php">Class Test: DB</a></div>';
-print '<div><a href="class_test.db.single.php">Class Test: DB SINGLE</a></div>';
-print '<div><a href="class_test.db.dbReturn.php">Class Test: DB dbReturn</a></div>';
-print '<div><a href="class_test.convert.colors.php">Class Test: CONVERT COLORS</a></div>';
-print '<div><a href="class_test.check.colors.php">Class Test: CHECK COLORS</a></div>';
-print '<div><a href="class_test.mime.php">Class Test: MIME</a></div>';
-print '<div><a href="class_test.json.php">Class Test: JSON</a></div>';
-print '<div><a href="class_test.token.php">Class Test: FORM TOKEN</a></div>';
-print '<div><a href="class_test.password.php">Class Test: PASSWORD</a></div>';
-print '<div><a href="class_test.encryption.php">Class Test: ENCRYPTION</a></div>';
-print '<div><a href="class_test.math.php">Class Test: MATH</a></div>';
-print '<div><a href="class_test.html.php">Class Test: HTML/ELEMENTS</a></div>';
-print '<div><a href="class_test.email.php">Class Test: EMAIL</a></div>';
-print '<div><a href="class_test.create_email.php">Class Test: CREATE EMAIL</a></div>';
-print '<div><a href="class_test.uids.php">Class Test: UIDS</a></div>';
-print '<div><a href="class_test.phpv.php">Class Test: PHP VERSION</a></div>';
-print '<div><a href="class_test.hash.php">Class Test: HASH</a></div>';
-print '<div><a href="class_test.encoding.php">Class Test: ENCODING (CHECK/CONVERT/MIME)</a></div>';
-print '<div><a href="class_test.image.php">Class Test: IMAGE</a></div>';
-print '<div><a href="class_test.byte.php">Class Test: BYTE CONVERT</a></div>';
-print '<div><a href="class_test.strings.php">Class Test: STRING CONVERT</a></div>';
-print '<div><a href="class_test.datetime.php">Class Test: DATE/TIME</a></div>';
-print '<div><a href="class_test.array.php">Class Test: ARRAY HANDLER</a></div>';
-print '<div><a href="class_test.file.php">Class Test: FILE</a></div>';
-print '<div><a href="class_test.randomkey.php">Class Test: RANDOM KEY</a></div>';
-print '<div><a href="class_test.system.php">Class Test: SYSTEM</a></div>';
-print '<div><a href="class_test.readenvfile.php">Class Test: READ ENV FILE</a></div>';
-print '<div><a href="class_test.runningtime.php">Class Test: RUNNING TIME</a></div>';
-print '<div><a href="class_test.memoryusage.php">Class Test: MEMORY USAGE</a></div>';
-print '<div><a href="class_test.debug.php">Class Test: DEBUG</a></div>';
-print '<div><a href="class_test.logging.php">Class Test: LOGGING</a></div>';
-print '<div><a href="class_test.output.form.php">Class Test: OUTPUT FORM</a></div>';
-print '<div><a href="class_test.admin.backend.php">Class Test: BACKEND ADMIN CLASS</a></div>';
-print '<div><a href="class_test.lang.php">Class Test: LANG/L10n</a></div>';
-print '<div><a href="class_test.varistype.php">Class Test: SET VAR TYPE</a></div>';
-print '<div><a href="class_test.session.php">Class Test: SESSION</a></div>';
-print '<div><a href="class_test.session.read.php">Class Test: SESSION: READ</a></div>';
-print '<div><a href="class_test.smarty.php">Class Test: SMARTY</a></div>';
-print '<div><a href="class_test.login.php">Class Test: LOGIN</a></div>';
-print '<div><a href="class_test.autoloader.php">Class Test: AUTOLOADER</a></div>';
-print '<div><a href="class_test.config.link.php">Class Test: CONFIG LINK</a></div>';
-print '<div><a href="class_test.config.direct.php">Class Test: CONFIG DIRECT</a></div>';
-print '<div><a href="subfolder/class_test.config.direct.php">Class Test: CONFIG DIRECT SUB</a></div>';
+// key: file name, value; name
+$test_files = [
+	'class_test.db.php' => 'Class Test: DB',
+	'class_test.db.single.php' => 'Class Test: DB SINGLE',
+	'class_test.db.dbReturn.php' => 'Class Test: DB dbReturn',
+	'class_test.convert.colors.php' => 'Class Test: CONVERT COLORS',
+	'class_test.check.colors.php' => 'Class Test: CHECK COLORS',
+	'class_test.mime.php' => 'Class Test: MIME',
+	'class_test.json.php' => 'Class Test: JSON',
+	'class_test.token.php' => 'Class Test: FORM TOKEN',
+	'class_test.password.php' => 'Class Test: PASSWORD',
+	'class_test.encryption.php' => 'Class Test: ENCRYPTION',
+	'class_test.math.php' => 'Class Test: MATH',
+	'class_test.html.php' => 'Class Test: HTML/ELEMENTS',
+	'class_test.email.php' => 'Class Test: EMAIL',
+	'class_test.create_email.php' => 'Class Test: CREATE EMAIL',
+	'class_test.uids.php' => 'Class Test: UIDS',
+	'class_test.phpv.php' => 'Class Test: PHP VERSION',
+	'class_test.hash.php' => 'Class Test: HASH',
+	'class_test.encoding.php' => 'Class Test: ENCODING (CHECK/CONVERT/MIME)',
+	'class_test.image.php' => 'Class Test: IMAGE',
+	'class_test.byte.php' => 'Class Test: BYTE CONVERT',
+	'class_test.strings.php' => 'Class Test: STRING CONVERT',
+	'class_test.datetime.php' => 'Class Test: DATE/TIME',
+	'class_test.array.php' => 'Class Test: ARRAY HANDLER',
+	'class_test.file.php' => 'Class Test: FILE',
+	'class_test.randomkey.php' => 'Class Test: RANDOM KEY',
+	'class_test.system.php' => 'Class Test: SYSTEM',
+	'class_test.readenvfile.php' => 'Class Test: READ ENV FILE',
+	'class_test.runningtime.php' => 'Class Test: RUNNING TIME',
+	'class_test.memoryusage.php' => 'Class Test: MEMORY USAGE',
+	'class_test.debug.php' => 'Class Test: DEBUG',
+	'class_test.logging.php' => 'Class Test: LOGGING',
+	'class_test.output.form.php' => 'Class Test: OUTPUT FORM',
+	'class_test.admin.backend.php' => 'Class Test: BACKEND ADMIN CLASS',
+	'class_test.lang.php' => 'Class Test: LANG/L10n',
+	'class_test.varistype.php' => 'Class Test: SET VAR TYPE',
+	'class_test.session.php' => 'Class Test: SESSION',
+	'class_test.session.read.php' => 'Class Test: SESSION: READ',
+	'class_test.smarty.php' => 'Class Test: SMARTY',
+	'class_test.login.php' => 'Class Test: LOGIN',
+	'class_test.autoloader.php' => 'Class Test: AUTOLOADER',
+	'class_test.config.link.php' => 'Class Test: CONFIG LINK',
+	'class_test.config.direct.php' => 'Class Test: CONFIG DIRECT',
+	'subfolder/class_test.config.direct.php' => 'Class Test: CONFIG DIRECT SUB',
+];
+
+asort($test_files);
+
+foreach ($test_files as $file => $name) {
+	print '<div><a href="' . $file . '">' . $name . '</a></div>';
+}
 
 print "<hr>";
 print "L: " . Support::dumpVar($locale) . "<br>";

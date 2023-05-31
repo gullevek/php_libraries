@@ -92,15 +92,15 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 				'override' => [],
 			],
 			// no log file id set -> error,
-			/* 'nothing set' => [
+			'nothing set' => [
 				'options' => [],
 				'expected' => [
 					'log_folder' => getcwd() . DIRECTORY_SEPARATOR,
 					'log_level' => Level::Debug,
-					'log_file_id' => 'NOHOST-NOPORT_PHPUnit-TextUI-Command',
+					'log_file_id' => 'NOHOST-0_PHPUnit-TextUI-Command',
 				],
 				'override' => []
-			] */
+			]
 		];
 	}
 
@@ -674,7 +674,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 			$log->getLogFolder() . $log->getLogFile()
 		) ?: '';
 		$log_level = $log->getLoggingLevel()->getName();
-		// [2023-05-30 15:51:39.36128800] [NOHOST:NOPORT]
+		// [2023-05-30 15:51:39.36128800] [NOHOST:0]
 		// [www/vendor/bin/phpunit] [7b9d0747] {PHPUnit\TextUI\Command}
 		// <DEBUG:G> D
 		$this->assertMatchesRegularExpression(

@@ -21,7 +21,7 @@ class Support
 	 */
 	public static function printTime(int $set_microtime = -1): string
 	{
-		list($microtime, $timestamp) = explode(' ', microtime());
+		[$microtime, $timestamp] = explode(' ', microtime());
 		$string = date("Y-m-d H:i:s", (int)$timestamp);
 		// if microtime flag is -1 no round, if 0, no microtime, if >= 1, round that size
 		if ($set_microtime == -1) {
@@ -158,19 +158,32 @@ class Support
 	 * var_dump based
 	 * Recommended debug output
 	 *
-	 * @param  mixed  $data    Anything
-	 * @param  bool   $no_html If true strip all html tags (for text print)
-	 * @return string          A text string
+	 * @param  mixed  $data         Anything
+	 * @param  bool   $no_html      [default=false] If true strip all html tags
+	 *                              (for text print)
+	 * @return string               A text string
 	 */
-	public static function dumpVar(mixed $data, bool $no_html = false): string
-	{
+	public static function dumpVar(
+		mixed $data,
+		bool $no_html = false,
+	): string {
+		// dump data
 		ob_start();
 		var_dump($data);
 		$debug_dump = ob_get_clean() ?: '[FAILED TO GET var_dump() data]';
+		// check if the original caller is dV, if yes, up the caller level for
+		// the file line get by 1, so we get file + pos from the dV call and
+		// not this call
+		$caller_level = 1;
+		$caller_list = self::getCallerMethodList();
+		if ($caller_list[0] == 'dV') {
+			echo "Raise caller level<br>: " . $caller_list[0] . "<br>";
+			$caller_level = 2;
+		}
 		// we need to strip the string in <small></small that is
 		// "path ... CoreLibs/Debug/Support.php:<number>:
 		// and replace it with the caller methods and location
-		$caller_file_number = self::getCallerFileLine();
+		$caller_file_number = self::getCallerFileLine($caller_level);
 		$debug_dump = preg_replace(
 			'|<small>(/.*:\d+:)</small>|',
 			'<small>' . $caller_file_number . ':</small>',

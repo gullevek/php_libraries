@@ -12,18 +12,18 @@ class RunningTime
 {
 	// hr
 	/** @var float */
-	private static $hr_start_time;
+	private static float $hr_start_time;
 	/** @var float */
-	private static $hr_end_time;
+	private static float $hr_end_time;
 	/** @var float */
-	private static $hr_last_time;
+	private static float $hr_last_time;
 	// normal
 	/** @var float */
-	private static $start_time;
+	private static float $start_time;
 	/** @var float */
-	private static $end_time;
+	private static float $end_time;
 	/** @var string */
-	private static $running_time_string;
+	private static string $running_time_string;
 
 	/**
 	 * sub calculation for running time based on out time.
@@ -79,7 +79,7 @@ class RunningTime
 	public static function hrRunningTime(string $out_time = 'ms'): float
 	{
 		// if start time not set, set start time
-		if (!self::$hr_start_time) {
+		if (empty(self::$hr_start_time)) {
 			self::$hr_start_time = hrtime(true);
 			self::$hr_last_time = self::$hr_start_time;
 			$run_time = 0;
@@ -137,7 +137,7 @@ class RunningTime
 		list($micro, $timestamp) = explode(' ', microtime());
 		$running_time = 0;
 		// set start & end time
-		if (!self::$start_time) {
+		if (empty(self::$start_time)) {
 			// always reset running time string on first call
 			self::$running_time_string = '';
 			self::$start_time = ((float)$micro + (float)$timestamp);
@@ -149,7 +149,7 @@ class RunningTime
 		self::$running_time_string .= date('Y-m-d H:i:s', (int)$timestamp);
 		self::$running_time_string .= ' ' . $micro . ($simple ? ', ' : '<br>');
 		// if both are set
-		if (self::$start_time && self::$end_time) {
+		if (!empty(self::$start_time) && !empty(self::$end_time)) {
 			$running_time = self::$end_time - self::$start_time;
 			self::$running_time_string .= ($simple ? 'Run: ' : "<b>Script running time</b>: ") . $running_time . " s";
 			// reset start & end time after run

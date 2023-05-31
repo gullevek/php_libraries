@@ -58,30 +58,30 @@ class Basic
 {
 	// page and host name
 	/** @var string */
-	public $page_name;
+	public string $page_name;
 	/** @var string */
-	public $host_name;
+	public string $host_name;
 	/** @var int */
-	public $host_port;
+	public int $host_port;
 	// logging interface, Debug\Logging class
 	/** @var \CoreLibs\Logging\Logging */
-	public $log;
+	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\Create\Session */
-	public $session;
+	public \CoreLibs\Create\Session $session;
 
 	// email valid checks
 	/** @var array<mixed> */
-	public $email_regex_check = [];
+	public array $email_regex_check = [];
 	/** @var string */
-	public $email_regex; // regex var for email check
+	public string $email_regex; // regex var for email check
 
 	// data path for files
 	/** @var array<mixed> */
-	public $data_path = [];
+	public array $data_path = [];
 
 	// ajax flag
 	/** @var bool */
-	protected $ajax_page_flag = false;
+	protected bool $ajax_page_flag = false;
 
 	/**
 	 * main Basic constructor to init and check base settings

@@ -11,7 +11,7 @@ namespace CoreLibs\Check;
 class Encoding
 {
 	/** @var int<min, -1>|int<1, max>|string */
-	private static $mb_error_char = '';
+	private static int|string $mb_error_char = '';
 
 	/**
 	 * set error char

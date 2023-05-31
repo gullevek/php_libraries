@@ -43,12 +43,19 @@ print "S::__SHA1SHORT(off): $to_crc: " . $hash_class::__sha1short($to_crc) . "<b
 print "S::__SHA1SHORT(on): $to_crc: " . $hash_class::__sha1short($to_crc, true) . "<br>";
 print "S::__hash(d): " . $to_crc . "/"
 	. Hash::STANDARD_HASH_SHORT . ": " . $hash_class::__hash($to_crc) . "<br>";
-foreach (['adler32', 'fnv132', 'fnv1a32', 'joaat'] as $__hash_c) {
+foreach (['adler32', 'fnv132', 'fnv1a32', 'joaat', 'sha512'] as $__hash_c) {
 	print "S::__hash($__hash_c): $to_crc: " . $hash_class::__hash($to_crc, $__hash_c) . "<br>";
 }
 // static use
 print "U-S::__CRC32B: $to_crc: " . Hash::__crc32b($to_crc) . "<br>";
 
+echo "<hr>";
+$text = 'Some String Text';
+$type = 'crc32b';
+print "Hash: " . $type . ": " . hash($type, $text) . "<br>";
+print "Class: " . $type . ": " . Hash::__hash($text, $type) . "<br>";
+
+echo "<hr>";
 print "<br>CURRENT STANDARD_HASH_SHORT: " . Hash::STANDARD_HASH_SHORT . "<br>";
 print "<br>CURRENT STANDARD_HASH_LONG: " . Hash::STANDARD_HASH_LONG . "<br>";
 print "HASH SHORT: " . $to_crc . ": " . Hash::__hash($to_crc) . "<br>";

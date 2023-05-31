@@ -39,16 +39,16 @@ class ArrayIO extends \CoreLibs\DB\IO
 {
 	// main calss variables
 	/** @var array<mixed> */
-	public $table_array; // the array from the table to work on
+	public array $table_array; // the array from the table to work on
 	/** @var string */
-	public $table_name; // the table_name
+	public string $table_name; // the table_name
 	/** @var string */
-	public $pk_name = ''; // the primary key from this table
+	public string $pk_name = ''; // the primary key from this table
 	/** @var int|string|null */
-	public $pk_id; // the PK id
+	public int|string|null $pk_id; // the PK id
 	// security values
 	/** @var int base acl for current page */
-	private $base_acl_level = 0;
+	private int $base_acl_level = 0;
 
 	/**
 	 * constructor for the array io class, set the

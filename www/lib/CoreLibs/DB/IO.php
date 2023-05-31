@@ -298,101 +298,98 @@ class IO
 	// can bet set from outside
 	// encoding to
 	/** @var string */
-	private $to_encoding = '';
-	/** @var string */
-	private $query; // the query string at the moment
-	/** @var array<mixed> */
-	private $params; // current params for query
+	private string $to_encoding = '';
+	/** @var string the query string at the moment */
+	private string $query;
+	/** @var array<mixed> current params for query */
+	private array $params;
 	// only inside
 	// basic vars
-	/** @var \PgSql\Connection|false|null */ // replace object with PgSql\Connection|
-	private $dbh; // the dbh handler, if disconnected by command is null, bool:false on error,
-	/** @var bool */
-	private $db_debug = false; // DB_DEBUG ... (if set prints out debug msgs)
-	/** @var string */
-	private $db_name; // the DB connected to
-	/** @var string */
-	private $db_user; // the username used
-	/** @var string */
-	private $db_pwd; // the password used
-	/** @var string */
-	private $db_host; // the hostname
-	/** @var int */
-	private $db_port; // default db port
-	/** @var string */
-	private $db_schema; // optional DB schema, if not set uses public
-	/** @var string */
-	private $db_encoding; // optional auto encoding convert, not used if not set
-	/** @var string */
-	private $db_type; // type of db (mysql,postgres,...)
-	/** @var string */
-	private $db_ssl; // ssl flag (for postgres only), disable, allow, prefer, require
+	// the dbh handler, if disconnected by command is null, bool:false on error,
+	/** @var \PgSql\Connection|false|null */
+	private \PgSql\Connection|false|null $dbh;
+	/** @var bool DB_DEBUG ... (if set prints out debug msgs) */
+	private bool $db_debug = false;
+	/** @var string the DB connected to */
+	private string $db_name;
+	/** @var string the username used */
+	private string $db_user;
+	/** @var string the password used*/
+	private string $db_pwd;
+	/** @var string the hostname */
+	private string $db_host;
+	/** @var int default db port */
+	private int $db_port;
+	/** @var string optional DB schema, if not set uses public*/
+	private string $db_schema;
+	/** @var string optional auto encoding convert, not used if not set */
+	private string $db_encoding;
+	/** @var string type of db (mysql,postgres,...) */
+	private string $db_type;
+	/** @var string ssl flag (for postgres only), disable, allow, prefer, require */
+	private string $db_ssl;
 	// FOR BELOW: (This should be private and only readable through some method)
 	// cursor array for cached readings
-	/** @var array<mixed,mixed> */
-	private $cursor_ext; // hash of hashes
+	/** @var array<string,mixed> extended cursoers string index with content */
+	private array $cursor_ext;
 	// per query vars
-	/** @var \PgSql\Result|false */ // replace object with PgSql\Result
-	private $cursor; // actual cursor (DBH)
-	/** @var int */
-	private $num_rows; // how many rows have been found
-	/** @var int */
-	private $num_fields; // how many fields has the query
+	/** @var \PgSql\Result|false actual cursor (DBH) */
+	private \PgSql\Result|false $cursor;
+	/** @var int how many rows have been found */
+	private int $num_rows;
+	/** @var int how many fields has the query */
+	private int $num_fields;
 	/** @var array<string> array with the field names of the current query */
-	private $field_names = [];
+	private array $field_names = [];
 	/** @var array<string> field type names */
-	private $field_types = [];
-	/** @var array<mixed> */
-	private $insert_id_arr = []; // always return as array, even if only one
-	/** @var string */
-	private $insert_id_pk_name; // primary key name for insert recovery from insert_id_arr
+	private array $field_types = [];
+	/** @var array<mixed> always return as array, even if only one */
+	private array $insert_id_arr = [];
+	/** @var string primary key name for insert recovery from insert_id_arr */
+	private string $insert_id_pk_name;
 	// other vars
-	/** @var string */
-	private $nbsp = ''; // used by print_array recursion function
+	/** @var string used by print_array recursion function */
+	private string $nbsp = '';
 	// error & warning id
 	/** @var string */
-	private $error_id;
+	private string $error_id;
 	/** @var string */
-	private $warning_id;
+	private string $warning_id;
 	/** @var string */
-	private $error_history_id;
+	private string $error_history_id;
 	/** @var array<mixed> Stores warning and errors combinded with detail info */
-	private $error_history_long = [];
-	// error thrown on class init if we cannot connect to db
-	/** @var bool */
-	protected $db_connection_closed = false;
+	private array $error_history_long = [];
+	/** @var bool error thrown on class init if we cannot connect to db */
+	protected bool $db_connection_closed = false;
 	// sub include with the database functions
 	/** @var \CoreLibs\DB\SQL\PgSQL if we have other DB types we need to add them here */
-	private $db_functions;
+	private \CoreLibs\DB\SQL\PgSQL $db_functions;
 	// endless loop protection
 	/** @var int */
-	private $MAX_QUERY_CALL;
-	/** @var int */
-	public const DEFAULT_MAX_QUERY_CALL = 20; // default
+	private int $MAX_QUERY_CALL;
+	/** @var int maxium query calls allowed in a dbReturnRow loop before we error out */
+	public const DEFAULT_MAX_QUERY_CALL = 20;
 	/** @var array<mixed> */
-	private $query_called = [];
+	private array $query_called = [];
 	// error string
 	/** @var array<mixed> */
-	protected $error_string = [];
+	protected array $error_string = [];
 	// prepared list
 	/** @var array<mixed> */
-	private $prepare_cursor = [];
+	private array $prepare_cursor = [];
 	// primary key per table list
 	// format is 'table' => 'pk_name'
 	/** @var array<mixed> */
-	private $pk_name_table = [];
-	// internal primary key name, for cross calls in async
-	/** @var string */
-	private $pk_name;
-	// if we use RETURNING in the INSERT call
-	/** @var bool */
-	private $returning_id = false;
-	// if a sync is running holds the hash key of the query
-	/** @var string */
-	private $async_running;
+	private array $pk_name_table = [];
+	/** @var string internal primary key name, for cross calls in async */
+	private string $pk_name;
+	/** @var bool if we use RETURNING in the INSERT call */
+	private bool $returning_id = false;
+	/** @var string if a sync is running holds the hash key of the query */
+	private string $async_running;
 	// logging class, must be public so settings can be changed
 	/** @var \CoreLibs\Logging\Logging */
-	public $log;
+	public \CoreLibs\Logging\Logging $log;
 
 	/**
 	 * main DB concstructor with auto connection to DB and failure set on failed connection

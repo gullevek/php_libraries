@@ -23,13 +23,13 @@ class ProgressBar
 	// private vars
 
 	/** @var string */
-	public $code;	// unique code
+	public string $code;	// unique code
 	/** @var string */
-	public $status = 'new';	// current status (new,show,hide)
+	public string $status = 'new';	// current status (new,show,hide)
 	/** @var float|int */
-	public $step = 0;	// current step
+	public float|int $step = 0;	// current step
 	/** @var array<string,null|int|float> */
-	public $position = [ // current bar position
+	public array $position = [ // current bar position
 		'left' => null,
 		'top' => null,
 		'width' => null,
@@ -37,43 +37,43 @@ class ProgressBar
 	];
 
 	/** @var int */
-	public $clear_buffer_size = 1; // we need to send this before the lfush to get browser output
+	public int $clear_buffer_size = 1; // we need to send this before the lfush to get browser output
 	/** @var int */
-	public $clear_buffer_size_init = 1024 * 1024; // if I don't send that junk, it won't send anything
+	public int $clear_buffer_size_init = 1024 * 1024; // if I don't send that junk, it won't send anything
 
 	// public vars
 
 	/** @var int */
-	public $min = 0;	// minimal steps
+	public int $min = 0;	// minimal steps
 	/** @var int */
-	public $max = 100;	// maximal steps
+	public int $max = 100;	// maximal steps
 
 	/** @var int */
-	public $left = 5;	// bar position from left
+	public int $left = 5;	// bar position from left
 	/** @var int */
-	public $top = 5;	// bar position from top
+	public int $top = 5;	// bar position from top
 	/** @var int */
-	public $width = 300;	// bar width
+	public int $width = 300;	// bar width
 	/** @var int */
-	public $height = 25;	// bar height
+	public int $height = 25;	// bar height
 	/** @var int */
-	public $pedding = 0;	// bar pedding
+	public int $pedding = 0;	// bar pedding
 	/** @var string */
-	public $color = '#0033ff';	// bar color
+	public string $color = '#0033ff';	// bar color
 	/** @var string */
-	public $bgr_color = '#c0c0c0';	// bar background color
+	public string $bgr_color = '#c0c0c0';	// bar background color
 	/** @var string */
-	public $bgr_color_master = '#ffffff';	// master div background color
+	public string $bgr_color_master = '#ffffff';	// master div background color
 	/** @var int */
-	public $border = 1;			// bar border width
+	public int $border = 1;			// bar border width
 	/** @var string */
-	public $brd_color = '#000000';	// bar border color
+	public string $brd_color = '#000000';	// bar border color
 
 	/** @var string */
-	public $direction = 'right';	// direction of motion (right,left,up,down)
+	public string $direction = 'right';	// direction of motion (right,left,up,down)
 
 	/** @var array<string,string|bool|int> */
-	public $frame = ['show' => false];	// ProgressBar Frame
+	public array $frame = ['show' => false];	// ProgressBar Frame
 	/*	'show' => false,	# frame show (true/false)
 		'left' => 200,	# frame position from left
 		'top' => 100,	# frame position from top
@@ -86,7 +86,7 @@ class ProgressBar
 
 	/** @#var array{string}{string: string|int} */
 	/** @var mixed[][] */
-	public $label = [];	// ProgressBar Labels
+	public array $label = [];	// ProgressBar Labels
 	/*	'name' => [	# label name
 			'type' => 'text',	# label type (text,button,step,percent,crossbar)
 			'value' => 'Please wait ...',	# label value
@@ -105,7 +105,7 @@ class ProgressBar
 
 	/** @var string */
 	// output strings
-	public $prefix_message = '';
+	public string $prefix_message = '';
 
 	/**
 	 * progress bar constructor

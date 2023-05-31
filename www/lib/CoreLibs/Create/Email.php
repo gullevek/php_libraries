@@ -14,7 +14,7 @@ namespace CoreLibs\Create;
 class Email
 {
 	/** @var array<string> allowed list for encodings that can do KV folding */
-	private static $encoding_kv_allowed = [
+	private static array $encoding_kv_allowed = [
 		'UTF-8',
 		'EUC-JP',
 		'SJIS',
@@ -25,7 +25,7 @@ class Email
 		'JIS-ms',
 	];
 	/** @var string normaly this does not need to be changed */
-	private static $mb_convert_kana_mode = 'KV';
+	private static string $mb_convert_kana_mode = 'KV';
 
 	/**
 	 * create mime encoded email part for to/from emails.

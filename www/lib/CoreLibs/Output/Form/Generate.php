@@ -226,84 +226,84 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// for the load statetment describes which elements from
 	// the load query should be shown and i which format
 	/** @var array<mixed> */
-	public $field_array = [];
+	public array $field_array = [];
 	/** @var string */
-	public $load_query; // the query needed for loading a data set (one row in the table)
+	public string $load_query; // the query needed for loading a data set (one row in the table)
 	/** @var string */
-	public $col_name; // the name of the columen (before _<type>) [used for order button]
+	public string $col_name; // the name of the columen (before _<type>) [used for order button]
 	/** @var int */
-	public $yes; // the yes flag that triggers the template to show ALL and not only new/load
+	public int $yes; // the yes flag that triggers the template to show ALL and not only new/load
 	/** @var string */
-	public $msg; // the error msg
+	public string $msg; // the error msg
 	/** @var int */
-	public $error; // the error flag set for printing red error msg
+	public int $error; // the error flag set for printing red error msg
 	/** @var int */
-	public $warning; // warning flag, for information (saved, loaded, etc)
+	public int $warning; // warning flag, for information (saved, loaded, etc)
 	/** @var string */
-	public $archive_pk_name; // the pk name for the load select form
+	public string $archive_pk_name; // the pk name for the load select form
 	/** @var string */
-	private $int_pk_name; // primary key, only internal usage
+	private string $int_pk_name; // primary key, only internal usage
 	/** @var array<mixed> */
-	public $reference_array = []; // reference arrays -> stored in $this->reference_array[$table_name] => [];
+	public array $reference_array = []; // reference arrays -> stored in $this->reference_array[$table_name] => [];
 	// NOTE: should be changed to this @var mixed[]
 	/** @var array<mixed> */
-	public $element_list; // element list for elements next to each other as a special sub group
+	public array $element_list; // element list for elements next to each other as a special sub group
 	/** @var array<mixed> */
-	public $table_array = [];
+	public array $table_array = [];
 	/** @var string */
-	public $my_page_name; // the name of the page without .php extension
+	public string $my_page_name; // the name of the page without .php extension
 	/** @var bool */
-	public $mobile_phone = false;
+	public bool $mobile_phone = false;
 	/** @var string */
-	public $email_regex;
+	public string $email_regex;
 	// buttons and checkboxes
 	/** @var string */
-	public $archive;
+	public string $archive;
 	/** @var string */
-	public $new;
+	public string $new;
 	/** @var string */
-	public $really_new;
+	public string $really_new;
 	/** @var string */
-	public $delete;
+	public string $delete;
 	/** @var string */
-	public $really_delete;
+	public string $really_delete;
 	/** @var string */
-	public $save;
+	public string $save;
 	/** @var string */
-	public $remove_button;
+	public string $remove_button;
 	// security values
 	/** @var int base acl for current page */
-	private $base_acl_level = 0;
+	private int $base_acl_level = 0;
 	/** @var int admin master flag (1/0) */
-	private $acl_admin = 0;
+	private int $acl_admin = 0;
 	/** @var array<mixed> */
-	public $security_level;
+	public array $security_level;
 	/** @var array<string,mixed> Login ACL */
-	public $login_acl = [];
+	public array $login_acl = [];
 	// layout publics
 	/** @var int */
-	public $table_width;
+	public int $table_width;
 	// internal lang & encoding vars
 	/** @var string */
-	public $lang_dir = '';
+	public string $lang_dir = '';
 	/** @var string */
-	public $lang;
+	public string $lang;
 	/** @var string */
-	public $lang_short;
+	public string $lang_short;
 	/** @var string */
-	public $domain;
+	public string $domain;
 	/** @var string */
-	public $encoding;
+	public string $encoding;
 	// language
 	/** @var \CoreLibs\Language\L10n */
-	public $l;
+	public \CoreLibs\Language\L10n $l;
 	// log
 	/** @var \CoreLibs\Logging\Logging */
-	public $log;
+	public \CoreLibs\Logging\Logging $log;
 
 	// now some default error msgs (english)
 	/** @var array<mixed> */
-	public $language_array = [];
+	public array $language_array = [];
 
 	/**
 	 * construct form generator

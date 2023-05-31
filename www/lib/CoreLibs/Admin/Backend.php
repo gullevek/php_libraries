@@ -35,83 +35,83 @@ class Backend
 {
 	// page name
 	/** @var array<mixed> */
-	public $menu = [];
+	public array $menu = [];
 	/** @var int|string */
-	public $menu_show_flag = 0; // top menu flag (mostly string)
+	public int|string $menu_show_flag = 0; // top menu flag (mostly string)
 	// action ids
 	/** @var array<string> */
-	public $action_list = [
+	public array $action_list = [
 		'action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag',
 		'action_menu', 'action_value', 'action_error', 'action_loaded'
 	];
 	/** @var string */
-	public $action;
+	public string $action;
 	/** @var string|int */
-	public $action_id;
+	public string|int $action_id;
 	/** @var string|int */
-	public $action_sub_id;
+	public string|int $action_sub_id;
 	/** @var string|int|bool */
-	public $action_yes;
+	public string|int|bool $action_yes;
 	/** @var string */
-	public $action_flag;
+	public string $action_flag;
 	/** @var string */
-	public $action_menu;
+	public string $action_menu;
 	/** @var string */
-	public $action_loaded;
+	public string $action_loaded;
 	/** @var string */
-	public $action_value;
+	public string $action_value;
 	/** @var string */
-	public $action_error;
+	public string $action_error;
 	// ACL array variable if we want to set acl data from outisde
 	/** @var array<mixed> */
-	public $acl = [];
+	public array $acl = [];
 	/** @var int */
-	public $default_acl;
+	public int $default_acl;
 	// queue key
 	/** @var string */
-	public $queue_key;
+	public string $queue_key;
 	// the current active edit access id
-	/** @var int */
-	public $edit_access_id;
+	/** @var int|null */
+	public int|null $edit_access_id;
 	/** @var string */
-	public $page_name;
+	public string $page_name;
 	// error/warning/info messages
 	/** @var array<mixed> */
-	public $messages = [];
+	public array $messages = [];
 	/** @var bool */
-	public $error = false;
+	public bool $error = false;
 	/** @var bool */
-	public $warning = false;
+	public bool $warning = false;
 	/** @var bool */
-	public $info = false;
+	public bool $info = false;
 	// internal lang & encoding vars
 	/** @var string */
-	public $lang_dir = '';
+	public string $lang_dir = '';
 	/** @var string */
-	public $lang;
+	public string $lang;
 	/** @var string */
-	public $lang_short;
+	public string $lang_short;
 	/** @var string */
-	public $domain;
+	public string $domain;
 	/** @var string */
-	public $encoding;
+	public string $encoding;
 	/** @var \CoreLibs\Logging\Logging logger */
-	public $log;
+	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\DB\IO database */
-	public $db;
+	public \CoreLibs\DB\IO $db;
 	/** @var \CoreLibs\Language\L10n language */
-	public $l;
+	public \CoreLibs\Language\L10n $l;
 	/** @var \CoreLibs\Create\Session session class */
-	public $session;
+	public \CoreLibs\Create\Session $session;
 	// smarty publics [end processing in smarty class]
 	/** @var array<mixed> */
-	public $DATA;
+	public array $DATA = [];
 	/** @var array<mixed> */
-	public $HEADER;
+	public array $HEADER = [];
 	/** @var array<mixed> */
-	public $DEBUG_DATA;
+	public array $DEBUG_DATA = [];
 	/** @var array<mixed> */
-	public $CONTENT_DATA;
+	public array $CONTENT_DATA = [];
 
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**

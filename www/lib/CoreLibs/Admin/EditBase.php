@@ -20,23 +20,23 @@ use SmartyException;
 class EditBase
 {
 	/** @var array<mixed> */
-	private $HEADER = [];
+	private array $HEADER = [];
 	/** @var array<mixed> */
-	private $DATA = [];
+	private array $DATA = [];
 	/** @var array<mixed> */
-	private $DEBUG_DATA = [];
+	private array $DEBUG_DATA = [];
 
 	/** @var string the template name */
-	private $EDIT_TEMPLATE = '';
+	private string $EDIT_TEMPLATE = '';
 
 	/** @var \CoreLibs\Template\SmartyExtend smarty system */
-	private $smarty;
+	private \CoreLibs\Template\SmartyExtend $smarty;
 	/** @var \CoreLibs\Output\Form\Generate form generate system */
-	private $form;
+	private \CoreLibs\Output\Form\Generate $form;
 	/** @var \CoreLibs\Logging\Logging */
-	public $log;
+	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\ACL\Login */
-	public $login;
+	public \CoreLibs\ACL\Login $login;
 
 	/**
 	 * construct form generator

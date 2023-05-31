@@ -12,9 +12,9 @@ namespace CoreLibs\Debug;
 class FileWriter
 {
 	/** @var string */
-	private static $debug_filename = 'debug_file.log'; // where to write output
+	private static string $debug_filename = 'debug_file.log'; // where to write output
 	/** @var string */
-	private static $debug_folder;
+	private static string $debug_folder;
 
 	/**
 	 * Set a debug log folder, if not set BASE+LOG folders are set

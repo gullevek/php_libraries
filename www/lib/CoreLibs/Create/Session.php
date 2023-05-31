@@ -16,7 +16,7 @@ namespace CoreLibs\Create;
 class Session
 {
 	/** @var string list for errors */
-	private $session_intern_error_str = '';
+	private string $session_intern_error_str = '';
 
 	/**
 	 * init a session, if array is empty or array does not have session_name set

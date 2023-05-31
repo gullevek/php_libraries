@@ -8,7 +8,7 @@ class Email
 {
 	// this is for error check parts in where the email regex failed
 	/** @var array<int,string> */
-	private static $email_regex_check = [
+	private static array $email_regex_check = [
 		0 => "^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@"
 			. "[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$", // MASTER
 		1 => "@(.*)@(.*)", // double @
@@ -21,7 +21,7 @@ class Email
 	];
 	// for above position, description string below
 	/** @var array<int,string> */
-	private static $email_regex_check_message = [
+	private static array $email_regex_check_message = [
 		0 => 'Invalid email address',
 		1 => 'Double @ mark in email address',
 		2 => 'Invalid email part before @ sign',
@@ -33,7 +33,7 @@ class Email
 	];
 	// the array with the mobile types that are valid
 	/** @var array<string,string> */
-	private static $mobile_email_type = [
+	private static array $mobile_email_type = [
 		'.*@docomo\.ne\.jp$' => 'keitai_docomo',
 		// correct are a[2-4], b2, c[1-9], e[2-9], h[2-4], t[1-9]
 		'.*@([a-z0-9]{2}\.)?ezweb\.ne\.jp$' => 'keitai_kddi_ezweb',
@@ -72,7 +72,7 @@ class Email
 	];
 	// short list for mobile email types
 	/** @var array<string,string> */
-	private static $mobile_email_type_short = [
+	private static array $mobile_email_type_short = [
 		'keitai_docomo' => 'docomo',
 		'keitai_kddi_ezweb' => 'kddi',
 		'keitai_kddi' => 'kddi',

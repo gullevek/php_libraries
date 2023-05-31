@@ -73,65 +73,65 @@ use CoreLibs\Convert\Json;
 
 class Login
 {
-	/** @var string the user id var*/
-	private $euid;
+	/** @var ?int the user id var*/
+	private ?int $euid;
 	/** @var string _GET/_POST loginUserId parameter for non password login */
-	private $login_user_id = '';
+	private string $login_user_id = '';
 	/** @var string source, either _GET or _POST or empty */
-	private $login_user_id_source = '';
+	private string $login_user_id_source = '';
 	/** @var bool set to true if illegal characters where found in the login user id string */
-	private $login_user_id_unclear = false;
+	private bool $login_user_id_unclear = false;
 	// is set to one if login okay, or EUID is set and user is okay to access this page
 	/** @var bool */
-	private $permission_okay = false;
+	private bool $permission_okay = false;
 	/** @var string pressed login */
-	private $login = '';
+	private string $login = '';
 	/** @var string master action command */
-	private $action;
+	private string $action;
 	/** @var string login name */
-	private $username;
+	private string $username;
 	/** @var string login password */
-	private $password;
+	private string $password;
 	/** @var string logout button */
-	private $logout;
+	private string $logout;
 	/** @var bool if this is set to true, the user can change passwords */
-	private $password_change = false;
+	private bool $password_change = false;
 	/** @var bool password change was successful */
-	private $password_change_ok = false;
+	private bool $password_change_ok = false;
 	// can we reset password and mail to user with new password set screen
 	/** @var bool */
-	private $password_forgot = false;
+	private bool $password_forgot = false;
 	/** @var bool password forgot mail send ok */
 	// private $password_forgot_ok = false;
 	/** @var string */
-	private $change_password;
+	private string $change_password;
 	/** @var string */
-	private $pw_username;
+	private string $pw_username;
 	/** @var string */
-	private $pw_old_password;
+	private string $pw_old_password;
 	/** @var string */
-	private $pw_new_password;
+	private string $pw_new_password;
 	/** @var string */
-	private $pw_new_password_confirm;
+	private string $pw_new_password_confirm;
 	/** @var array<string> array of users for which the password change is forbidden */
-	private $pw_change_deny_users = [];
+	private array $pw_change_deny_users = [];
 	/** @var string */
-	private $logout_target = '';
+	private string $logout_target = '';
 	/** @var int */
-	private $max_login_error_count = -1;
+	private int $max_login_error_count = -1;
 	/** @var array<string> */
-	private $lock_deny_users = [];
+	private array $lock_deny_users = [];
 	/** @var string */
-	private $page_name = '';
+	private string $page_name = '';
 
 	/** @var int if we have password change we need to define some rules */
-	private $password_min_length = 9;
+	private int $password_min_length = 9;
 	/** @var int an true maxium min, can never be set below this */
-	private $password_min_length_max = 9;
+	private int $password_min_length_max = 9;
 	// max length is fixed as 255 (for input type max), if set highter
 	// it will be set back to 255
 	/** @var int */
-	private $password_max_length = 255;
+	private int $password_max_length = 255;
 
 	/** @var int minum password length */
 	public const PASSWORD_MIN_LENGTH = 9;
@@ -158,7 +158,7 @@ class Login
 		. "$/";
 
 	/** @var array<string> can have several regexes, if nothing set, all is ok */
-	private $password_valid_chars = [
+	private array $password_valid_chars = [
 		// '^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$',
 		// '^(?.*(\pL)u)(?=.*(\pN)u)(?=.*([^\pL\pN])u).{8,}',
 	];
@@ -166,13 +166,13 @@ class Login
 	// login error code, can be matched to the array login_error_msg,
 	// which holds the string
 	/** @var int */
-	private $login_error = 0;
+	private int $login_error = 0;
 	/** @var array<mixed> all possible login error conditions */
-	private $login_error_msg = [];
+	private array $login_error_msg = [];
 	// this is an array holding all strings & templates passed
 	// rom the outside (translation)
 	/** @var array<mixed> */
-	private $login_template = [
+	private array $login_template = [
 		'strings' => [],
 		'password_change' => '',
 		'template' => ''
@@ -180,24 +180,24 @@ class Login
 
 	// acl vars
 	/** @var array<mixed> */
-	private $acl = [];
+	private array $acl = [];
 	/** @var array<mixed> */
-	private $default_acl_list = [];
+	private array $default_acl_list = [];
 	/** @var array<string,int> Reverse list to lookup level from type */
-	private $default_acl_list_type = [];
+	private array $default_acl_list_type = [];
 	/** @var int default ACL level to be based on if nothing set */
-	private $default_acl_level = 0;
+	private int $default_acl_level = 0;
 	// login html, if we are on an ajax page
 	/** @var string|null */
-	private $login_html = '';
+	private ?string $login_html = '';
 	/** @var bool */
-	private $login_is_ajax_page = false;
+	private bool $login_is_ajax_page = false;
 
 	// settings
 	/** @var array<string,mixed> options */
-	private $options = [];
+	private array $options = [];
 	/** @var array<string,string> locale options: locale, domain, encoding (opt), path */
-	private $locale = [
+	private array $locale = [
 		'locale' => '',
 		'domain' => '',
 		'encoding' => '',
@@ -205,13 +205,13 @@ class Login
 	];
 
 	/** @var \CoreLibs\Logging\Logging logger */
-	public $log;
+	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\DB\IO database */
-	public $db;
+	public \CoreLibs\DB\IO $db;
 	/** @var \CoreLibs\Language\L10n language */
-	public $l;
+	public \CoreLibs\Language\L10n $l;
 	/** @var \CoreLibs\Create\Session session class */
-	public $session;
+	public \CoreLibs\Create\Session $session;
 
 	/**
 	 * constructor, does ALL, opens db, works through connection checks,
@@ -883,7 +883,7 @@ class Login
 			}
 			// normal user processing
 			// set class var and session var
-			$_SESSION['EUID'] = $this->euid = $res['edit_user_id'];
+			$_SESSION['EUID'] = $this->euid = (int)$res['edit_user_id'];
 			// check if user is okay
 			$this->loginCheckPermissions();
 			if ($this->login_error == 0) {
@@ -1048,7 +1048,7 @@ class Login
 					}
 					// build master unit array
 					$unit_access[$res['edit_access_id']] = [
-						'id' => $res['edit_access_id'],
+						'id' => (int)$res['edit_access_id'],
 						'acl_level' => $res['level'],
 						'acl_type' => $res['type'],
 						'name' => $res['name'],
@@ -2110,7 +2110,7 @@ HTML;
 		// unset session vars set/used in this login
 		$this->session->sessionDestroy();
 		// unset euid
-		$this->euid = '';
+		$this->euid = null;
 		// then prints the login screen again
 		$this->permission_okay = false;
 	}
@@ -2498,7 +2498,7 @@ HTML;
 	 */
 	public function loginGetEuid(): string
 	{
-		return $this->euid;
+		return (string)$this->euid;
 	}
 }
 

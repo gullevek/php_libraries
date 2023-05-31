@@ -6,7 +6,12 @@
  * DESCRIPTION:
  * Logging class
  *
- * NOTE: This is Logging2 for testing simpler build
+ * Build on the old logging class but can no longer print to screen
+ * Adds all standard logging levels
+ *
+ * Will be superseeded or will be inbetween to Monolog:
+ * https://github.com/Seldaek/monolog
+ * CoreLibs\Logging\Logger\Level is a direct copy from Monolog
 */
 
 declare(strict_types=1);
@@ -81,38 +86,38 @@ class Logging
 
 	// options
 	/** @var array<mixed> */
-	private $options = [];
+	private array $options = [];
 
 	/** @var Level set level */
-	private $log_level;
+	private Level $log_level;
 
 	// page and host name
 	/** @var string */
-	private $host_name;
+	private string $host_name;
 	/** @var int */
-	private $host_port;
+	private int $host_port;
 	/** @var string unique ID set on class init and used in logging as prefix */
-	private $running_uid = '';
+	private string $running_uid = '';
 
 	// log file name
 	/** @var string */
-	private $log_folder = '';
+	private string $log_folder = '';
 	/** @var string a alphanumeric name that has to be set as global definition */
-	private $log_file_id = '';
+	private string $log_file_id = '';
 	/** @var string log file name extension */
-	private $log_file_name_ext = 'log';
+	private string $log_file_name_ext = 'log';
 	/** @var string log file name with folder, for actual writing */
-	private $log_file_name = '';
+	private string $log_file_name = '';
 	/** @var int set in bytes */
-	private $log_max_filesize = 0;
+	private int $log_max_filesize = 0;
 	/** @var string used if no log id set or found */
-	private $log_file_prefix = 'error_msg';
+	private string $log_file_prefix = 'error_msg';
 	/** @var string */
-	private $log_print_file = '{LOGID}{LEVEL}{GROUP}{CLASS}{PAGENAME}{DATE_RUNID}';
+	private string $log_print_file = '{LOGID}{LEVEL}{GROUP}{CLASS}{PAGENAME}{DATE_RUNID}';
 	/** @var string  a unique ID set only once for call derived from this class */
-	private $log_file_unique_id = '';
+	private string $log_file_unique_id = '';
 	/** @var string Y-m-d file in file name */
-	private $log_file_date = '';
+	private string $log_file_date = '';
 
 	/**
 	 *  1: create a new log file per run (time stamp + unique ID)
@@ -123,9 +128,9 @@ class Logging
 	 * 32: split log per set log level
 	 */
 	/** @var int bitwise set for log flags */
-	private $log_flags = 0;
+	private int $log_flags = 0;
 	/** @var array<string,Flag> valid log flag names */
-	private $log_valid_flags = [
+	private array $log_valid_flags = [
 		'log_per_run' => Flag::per_run,
 		'log_per_date' => Flag::per_date,
 		'log_per_group' => Flag::per_group,
@@ -323,10 +328,10 @@ class Logging
 	private function initHostName(): void
 	{
 		// set host name
-		list($this->host_name , $this->host_port) = System::getHostName();
+		[$this->host_name, $this->host_port] = System::getHostName();
 		// add port to host name if not port 80
 		if ($this->host_port != 80) {
-			$this->host_name .= ':' . $this->host_port;
+			$this->host_name .= ':' . (string)$this->host_port;
 		}
 	}
 
@@ -543,8 +548,16 @@ class Logging
 		array $context = [],
 		string $group_id = '',
 	): string {
+		// file + line: call not this but one before (the one that calls this)
+		$file_line = Support::getCallerFileLine(2) ??
+			System::getPageName(System::FULL_PATH);
 		// get the last class entry and wrie that
 		$class = Support::getCallerClass();
+		// method/function: prepareLog->(debug|info|...)->[THIS]
+		$method = Support::getCallerMethod(3);
+		if ($method !== null) {
+			$class .= '::' . $method;
+		}
 		// get timestamp
 		$timestamp = Support::printTime();
 
@@ -562,7 +575,7 @@ class Logging
 		// build log string
 		return '[' . $timestamp . '] '
 			. '[' . $this->host_name . '] '
-			. '[' . System::getPageName(System::FULL_PATH) . '] '
+			. '[' . $file_line . '] '
 			. '[' . $this->running_uid . '] '
 			. '{' . $class . '} '
 			. '<' . strtoupper($group_str) . '> '
@@ -598,7 +611,6 @@ class Logging
 							. implode(', ', Level::NAMES + Level::VALUES)
 					);
 				}
-
 				return $levelEnum;
 			}
 
@@ -710,7 +722,10 @@ class Logging
 		if (empty($this->log_file_unique_id) || $override == true) {
 			$this->log_file_unique_id =
 				date('Y-m-d_His') . '_U_'
-					. substr(hash('sha1', uniqid((string)mt_rand(), true)), 0, 8);
+					. substr(hash(
+						'sha1',
+						random_bytes(63)
+					), 0, 8);
 		}
 	}
 

@@ -41,31 +41,31 @@ class GetTextReader
 {
 	// public:
 	/** @var int */
-	public $error = 0; // public variable that holds error code (0 if no error)
+	public int $error = 0; // public variable that holds error code (0 if no error)
 
 	// private:
 	/** @var int */
-	private $BYTEORDER = 0;        // 0: low endian, 1: big endian
+	private int $BYTEORDER = 0;        // 0: low endian, 1: big endian
 	/** @var FileReader */
-	private $STREAM;
+	private FileReader $STREAM;
 	/** @var bool */
-	private $short_circuit = false;
+	private bool $short_circuit = false;
 	/** @var bool */
-	private $enable_cache = false;
+	private bool $enable_cache = false;
 	/** @var int */
-	private $originals = 0;      // offset of original table
+	private int $originals = 0;      // offset of original table
 	/** @var int */
-	private $translations = 0;    // offset of translation table
+	private int $translations = 0;    // offset of translation table
 	/** @var string */
-	private $pluralheader = '';    // cache header field for plural forms
+	private string $pluralheader = '';    // cache header field for plural forms
 	/** @var int */
-	private $total = 0;          // total string count
+	private int $total = 0;          // total string count
 	/** @var array<mixed>|null */
-	private $table_originals = null;  // table for original strings (offsets)
+	private array|null $table_originals = null;  // table for original strings (offsets)
 	/** @var array<mixed>|null */
-	private $table_translations = null;  // table for translated strings (offsets)
+	private array|null $table_translations = null;  // table for translated strings (offsets)
 	/** @var array<mixed> */
-	private $cache_translations = [];  // original -> translation mapping
+	private array $cache_translations = [];  // original -> translation mapping
 
 	/* Methods */
 

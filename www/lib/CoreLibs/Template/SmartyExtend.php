@@ -24,134 +24,132 @@ class SmartyExtend extends \Smarty
 {
 	// internal translation engine
 	/** @var \CoreLibs\Language\L10n */
-	public $l10n;
+	public \CoreLibs\Language\L10n $l10n;
 
 	// lang & encoding
 	/** @var string */
-	public $lang_dir = '';
+	public string $lang_dir = '';
 	/** @var string */
-	public $lang;
+	public string $lang;
 	/** @var string */
-	public $locale_set;
+	public string $lang_short;
 	/** @var string */
-	public $lang_short;
+	public string $domain;
 	/** @var string */
-	public $domain;
-	/** @var string */
-	public $encoding;
+	public string $encoding;
 	// page name
 	/** @var string */
-	public $page_name;
+	public string $page_name;
 
 	// array for data parsing
 	/** @var array<mixed> */
-	public $HEADER = [];
+	public array $HEADER = [];
 	/** @var array<mixed> */
-	public $DATA = [];
+	public array $DATA = [];
 	/** @var array<mixed> */
-	public $DEBUG_DATA = [];
+	public array $DEBUG_DATA = [];
 	/** @var array<mixed> */
-	private $CONTENT_DATA = [];
+	private array $CONTENT_DATA = [];
 	// control vars
 	/** @var bool */
-	public $USE_PROTOTYPE = USE_PROTOTYPE;
+	public bool $USE_PROTOTYPE = USE_PROTOTYPE;
 	/** @var bool */
-	public $USE_JQUERY = USE_JQUERY;
+	public bool $USE_JQUERY = USE_JQUERY;
 	/** @var bool */
-	public $USE_SCRIPTACULOUS = USE_SCRIPTACULOUS;
+	public bool $USE_SCRIPTACULOUS = USE_SCRIPTACULOUS;
 	// sub content input vars
 	/** @var bool */
-	public $USE_TINY_MCE = false;
+	public bool $USE_TINY_MCE = false;
 	/** @var bool */
-	public $JS_DATEPICKR = false;
+	public bool $JS_DATEPICKR = false;
 	/** @var bool */
-	public $JS_FLATPICKR = false;
+	public bool $JS_FLATPICKR = false;
 	/** @var bool */
-	public $JS_FILE_UPLOADER = false;
+	public bool $JS_FILE_UPLOADER = false;
 	/** @var bool */
-	public $DEBUG_TMPL = false;
+	public bool $DEBUG_TMPL = false;
 	/** @var bool */
-	public $USE_INCLUDE_TEMPLATE = false;
+	public bool $USE_INCLUDE_TEMPLATE = false;
 	// cache & compile
 	/** @var string */
-	public $CACHE_ID = '';
+	public string $CACHE_ID = '';
 	/** @var string */
-	public $COMPILE_ID = '';
+	public string $COMPILE_ID = '';
 	// template vars
 	/** @var string */
-	public $MASTER_TEMPLATE_NAME;
+	public string $MASTER_TEMPLATE_NAME;
 	/** @var string */
-	public $PAGE_FILE_NAME;
+	public string $PAGE_FILE_NAME;
 	/** @var string */
-	public $CONTENT_INCLUDE;
+	public string $CONTENT_INCLUDE;
 	/** @var string */
-	public $FORM_NAME;
+	public string $FORM_NAME;
 	/** @var string */
-	public $FORM_ACTION;
+	public string $FORM_ACTION;
 	/** @var string */
-	public $L_TITLE;
+	public string $L_TITLE;
 	/** @var string|int */
-	public $PAGE_WIDTH;
+	public string|int $PAGE_WIDTH;
 	// smarty include/set var
 	/** @var string */
-	public $TEMPLATE_PATH;
+	public string $TEMPLATE_PATH;
 	/** @var string */
-	public $TEMPLATE_NAME;
+	public string $TEMPLATE_NAME;
 	/** @var string */
-	public $INC_TEMPLATE_NAME;
+	public string $INC_TEMPLATE_NAME;
 	/** @var string */
-	public $JS_TEMPLATE_NAME;
+	public string $JS_TEMPLATE_NAME;
 	/** @var string */
-	public $CSS_TEMPLATE_NAME;
+	public string $CSS_TEMPLATE_NAME;
 	/** @var string|null */
-	public $TEMPLATE_TRANSLATE;
+	public string|null $TEMPLATE_TRANSLATE;
 	/** @var string|null */
-	public $JS_TRANSLATE;
+	public string|null $JS_TRANSLATE;
 	// core group
 	/** @var string */
-	public $JS_CORE_TEMPLATE_NAME;
+	public string $JS_CORE_TEMPLATE_NAME;
 	/** @var string */
-	public $CSS_CORE_TEMPLATE_NAME;
+	public string $CSS_CORE_TEMPLATE_NAME;
 	/** @var string */
-	public $JS_CORE_INCLUDE;
+	public string $JS_CORE_INCLUDE;
 	/** @var string */
-	public $CSS_CORE_INCLUDE;
+	public string $CSS_CORE_INCLUDE;
 	// local names
 	/** @var string */
-	public $JS_SPECIAL_TEMPLATE_NAME = '';
+	public string $JS_SPECIAL_TEMPLATE_NAME = '';
 	/** @var string */
-	public $CSS_SPECIAL_TEMPLATE_NAME = '';
+	public string $CSS_SPECIAL_TEMPLATE_NAME = '';
 	/** @var string */
-	public $JS_INCLUDE;
+	public string $JS_INCLUDE;
 	/** @var string */
-	public $CSS_INCLUDE;
+	public string $CSS_INCLUDE;
 	/** @var string */
-	public $JS_SPECIAL_INCLUDE;
+	public string $JS_SPECIAL_INCLUDE;
 	/** @var string */
-	public $CSS_SPECIAL_INCLUDE;
+	public string $CSS_SPECIAL_INCLUDE;
 	/** @var string */
-	public $ADMIN_JAVASCRIPT;
+	public string $ADMIN_JAVASCRIPT;
 	/** @var string */
-	public $ADMIN_STYLESHEET;
+	public string $ADMIN_STYLESHEET;
 	/** @var string */
-	public $FRONTEND_JAVASCRIPT;
+	public string $FRONTEND_JAVASCRIPT;
 	/** @var string */
-	public $FRONTEND_STYLESHEET;
+	public string $FRONTEND_STYLESHEET;
 	// other smarty folder vars
 	/** @var string */
-	public $INCLUDES;
+	public string $INCLUDES;
 	/** @var string */
-	public $JAVASCRIPT;
+	public string $JAVASCRIPT;
 	/** @var string */
-	public $CSS;
+	public string $CSS;
 	/** @var string */
-	public $FONT;
+	public string $FONT;
 	/** @var string */
-	public $PICTURES;
+	public string $PICTURES;
 	/** @var string */
-	public $CACHE_PICTURES;
+	public string $CACHE_PICTURES;
 	/** @var string */
-	public $CACHE_PICTURES_ROOT;
+	public string $CACHE_PICTURES_ROOT;
 
 	// constructor class, just sets the language stuff
 	/**
@@ -222,6 +220,7 @@ class SmartyExtend extends \Smarty
 		// core CS
 		$this->CSS_CORE_INCLUDE = '';
 		if (
+			!empty($this->CSS_CORE_TEMPLATE_NAME) &&
 			file_exists($this->CSS . $this->CSS_CORE_TEMPLATE_NAME) &&
 			is_file($this->CSS . $this->CSS_CORE_TEMPLATE_NAME)
 		) {
@@ -230,6 +229,7 @@ class SmartyExtend extends \Smarty
 		// core JS
 		$this->JS_CORE_INCLUDE = '';
 		if (
+			!empty($this->JS_CORE_TEMPLATE_NAME) &&
 			file_exists($this->JAVASCRIPT . $this->JS_CORE_TEMPLATE_NAME) &&
 			is_file($this->JAVASCRIPT . $this->JS_CORE_TEMPLATE_NAME)
 		) {
@@ -398,7 +398,7 @@ class SmartyExtend extends \Smarty
 		// javascript translate data as template for auto translate
 		if (empty($this->TEMPLATE_TRANSLATE)) {
 			$this->TEMPLATE_TRANSLATE = 'jsTranslate-'
-				. $this->locale_set . '.' . $this->encoding
+				. $this->l10n->getLocaleSet() . '.' . $this->encoding
 				. '.tpl';
 		} else {
 			// we assume we have some fixed set
@@ -408,12 +408,12 @@ class SmartyExtend extends \Smarty
 			if (strpos($this->TEMPLATE_TRANSLATE, '.tpl')) {
 				$this->TEMPLATE_TRANSLATE = str_replace(
 					'.tpl',
-					'-' . $this->locale_set . '.' . $this->encoding . '.tpl',
+					'-' . $this->l10n->getLocaleSet() . '.' . $this->encoding . '.tpl',
 					$this->TEMPLATE_TRANSLATE
 				);
 			} else {
 				$this->TEMPLATE_TRANSLATE .= '-'
-					. $this->locale_set . '.' . $this->encoding
+					. $this->l10n->getLocaleSet() . '.' . $this->encoding
 					. '.tpl';
 			}
 		}
@@ -423,7 +423,7 @@ class SmartyExtend extends \Smarty
 		}
 		if (empty($this->JS_TRANSLATE)) {
 			$this->JS_TRANSLATE = 'translate-'
-				. $this->locale_set . '.' . $this->encoding . '.js';
+				. $this->l10n->getLocaleSet() . '.' . $this->encoding . '.js';
 		} else {
 			// we assume we have some fixed set
 			// we must add _<locale>.<encoding>
@@ -432,12 +432,12 @@ class SmartyExtend extends \Smarty
 			if (strpos($this->JS_TRANSLATE, '.js')) {
 				$this->JS_TRANSLATE = str_replace(
 					'.js',
-					'-' . $this->locale_set . '.' . $this->encoding . '.js',
+					'-' . $this->l10n->getLocaleSet() . '.' . $this->encoding . '.js',
 					$this->JS_TRANSLATE
 				);
 			} else {
 				$this->JS_TRANSLATE .= '-'
-					. $this->locale_set . '.' . $this->encoding
+					. $this->l10n->getLocaleSet() . '.' . $this->encoding
 					. '.js';
 			}
 		}
@@ -675,10 +675,12 @@ class SmartyExtend extends \Smarty
 		$this->HEADER['DEFAULT_ENCODING'] = $set_default_encoding;
 
 		// form name
-		$this->DATA['FORM_NAME'] = !$this->FORM_NAME ?
+		$this->DATA['FORM_NAME'] = empty($this->FORM_NAME) ?
 			str_replace('.php', '', $this->page_name) :
 			$this->FORM_NAME;
-		$this->DATA['FORM_ACTION'] = $this->FORM_ACTION;
+		$this->DATA['FORM_ACTION'] = empty($this->FORM_ACTION) ?
+			'' :
+			$this->FORM_ACTION;
 		// special for admin
 		if ($admin_call === true) {
 			// depreacte call globals cms on null 4mcs
@@ -735,7 +737,7 @@ class SmartyExtend extends \Smarty
 		}
 		// html title
 		// set local page title
-		$this->HEADER['HTML_TITLE'] = !$this->L_TITLE ?
+		$this->HEADER['HTML_TITLE'] = empty($this->L_TITLE) ?
 			ucfirst(str_replace('_', ' ', \CoreLibs\Get\System::getPageName(1)))
 				. (!empty($set_g_title) ? '-' . $this->l10n->__($set_g_title) : '') :
 			$this->l10n->__($this->L_TITLE);
