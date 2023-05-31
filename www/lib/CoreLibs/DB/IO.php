@@ -395,12 +395,10 @@ class IO
 	 * main DB concstructor with auto connection to DB and failure set on failed connection
 	 * @param array<mixed> $db_config DB configuration array
 	 * @param \CoreLibs\Logging\Logging $log Logging class
-	 * @param bool|null $db_debug_override Overrides debug settings in db_config
 	 */
 	public function __construct(
 		array $db_config,
-		\CoreLibs\Logging\Logging $log,
-		?bool $db_debug_override = null
+		\CoreLibs\Logging\Logging $log
 	) {
 		// attach logger
 		$this->log = $log;
@@ -417,15 +415,10 @@ class IO
 		$this->db_ssl = !empty($db_config['db_ssl']) ? $db_config['db_ssl'] : 'allow';
 		// set debug, either via global var, or from config, else set to false
 		$this->dbSetDebug(
-			// override
-			$db_debug_override ??
-			// from db config setting
-			$db_config['db_debug'] ??
-			// [DEPRECATED] should be handled from outside
-			$_SESSION['DB_DEBUG'] ??
-			// [DEPRECATED] globals should be deprecated
-			$GLOBALS['DB_DEBUG'] ??
-			false
+			// set if logging level is Debug
+			$this->log->getLoggingLevel()->includes(
+				\CoreLibs\Logging\Logger\Level::Debug
+			)
 		);
 
 		// set loop protection max count
@@ -664,6 +657,8 @@ class IO
 
 	/**
 	 * calls the basic class debug with strip command
+	 * for internal calls, will always create a message
+	 *
 	 * @param  string       $debug_id     group id for debug
 	 * @param  string       $error_string error message or debug data
 	 * @param  string       $id           db debug group
@@ -672,7 +667,7 @@ class IO
 	 *                                    Will be printed after main error string
 	 * @return void
 	 */
-	protected function __dbDebug(
+	private function __dbDebugMessage(
 		string $debug_id,
 		string $error_string,
 		string $id = '',
@@ -682,24 +677,24 @@ class IO
 		// NOTE prefix allows html for echo output, will be stripped on file print
 		$prefix = '';
 		if ($id) {
-			$prefix .= '[<span style="color: #920069;">' . $id . '</span>] ';
+			$prefix .= '[' . $id . '] ';
 		}
 		if ($type) {
-			$prefix .= '{<span style="font-style: italic; color: #3f0092;">' . $type . '</span>} ';
+			$prefix .= '{' . $type . '} ';
 		}
 		switch ($id) {
 			case 'DB_ERROR':
-				$prefix .= '<span style="color: red;"><b>DB-Error</b>:</span>';
+				$prefix .= 'DB-Error:';
 				break;
 			case 'DB_WARNING':
-				$prefix .= '<span style="color: orange;"><b>DB-Warning</b>:</span>';
+				$prefix .= 'DB-Warning:';
 				break;
 		}
 		if ($prefix) {
 			$prefix .= '- ';
 		}
 		if ($error_data !== []) {
-			$error_string .= '<br>['
+			$error_string .= "\n" . '['
 				. \CoreLibs\Debug\Support::prAr($error_data)
 				. ']';
 		}
@@ -714,6 +709,30 @@ class IO
 				$this->log->debug($debug_id, $error_string, $prefix);
 				break;
 		}
+	}
+
+	/**
+	 * main call from anywhere in all classes for launching debug messages
+	 * will abort if dbDebug not set
+	 *
+	 * @param  string       $debug_id     group id for debug
+	 * @param  string       $error_string error message or debug data
+	 * @param  string       $id           db debug group
+	 * @param  string       $type         query identifier (Q, I, etc)
+	 * @param  array<mixed> $error_data   Optional error data as array
+	 * @return void
+	 */
+	protected function __dbDebug(
+		string $debug_id,
+		string $error_string,
+		string $id = '',
+		string $type = '',
+		array $error_data = []
+	): void {
+		if (!$this->dbGetDebug()) {
+			return;
+		}
+		$this->__dbDebugMessage($debug_id, $error_string, $id, $type, $error_data);
 	}
 
 	/**
@@ -778,7 +797,7 @@ class IO
 			$db_error_string = $db_prefix . ' ' . $db_error_string;
 		}
 		if ($db_error_string) {
-			$this->__dbDebug('db', $db_error_string, 'DB_ERROR', $where_called);
+			$this->__dbDebugMessage('db', $db_error_string, 'DB_ERROR', $where_called);
 		}
 		return [
 			$where_called,
@@ -835,7 +854,7 @@ class IO
 		$error_id = (string)$error_id;
 		[$where_called, $pg_error_string] = $this->__dbErrorPreprocessor($cursor);
 		// write error msg ...
-		$this->__dbDebug(
+		$this->__dbDebugMessage(
 			'db',
 			$error_id . ': ' . ($this->error_string[$error_id] ?? '[UNKNOWN ERROR]')
 				. ($msg ? ', ' . $msg : ''),
@@ -861,7 +880,7 @@ class IO
 	): void {
 		$warning_id = (string)$warning_id;
 		[$where_called, $pg_error_string] = $this->__dbErrorPreprocessor($cursor);
-		$this->__dbDebug(
+		$this->__dbDebugMessage(
 			'db',
 			$warning_id . ': ' . ($this->error_string[$warning_id] ?? '[UNKNOWN WARNING')
 				. ($msg ? ', ' . $msg : ''),
@@ -1166,17 +1185,15 @@ class IO
 		}
 		// $this->debug('DB IO', 'Q: '.$this->query.', RETURN: '.$this->returning_id);
 		// for DEBUG, only on first time ;)
-		if ($this->db_debug) {
-			$this->__dbDebug(
-				'db',
-				$this->__dbDebugPrepare(
-					$this->query,
-					$this->params
-				),
-				'__dbPrepareExec',
-				($this->params === [] ? 'Q' : 'Qp')
-			);
-		}
+		$this->__dbDebug(
+			'db',
+			$this->__dbDebugPrepare(
+				$this->query,
+				$this->params
+			),
+			'__dbPrepareExec',
+			($this->params === [] ? 'Q' : 'Qp')
+		);
 		// import protection, hash needed
 		$query_hash = $this->dbGetQueryHash($this->query, $this->params);
 		// if the array index does not exists set it 0
@@ -1194,7 +1211,7 @@ class IO
 			$this->query_called[$query_hash] > $this->MAX_QUERY_CALL
 		) {
 				$this->__dbError(30, false, $this->query);
-				$this->__dbDebug(
+				$this->__dbDebugMessage(
 					'db',
 					$this->__dbDebugPrepare(
 						$this->query,
@@ -1222,9 +1239,7 @@ class IO
 		// if either the cursor is false
 		if ($this->cursor === false || $this->db_functions->__dbLastErrorQuery()) {
 			// printout Query if debug is turned on
-			if ($this->db_debug) {
-				$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
-			}
+			$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
 			// internal error handling
 			$this->__dbError(13, $this->cursor);
 			return false;
@@ -1460,10 +1475,11 @@ class IO
 		$string .= 'at host {b}\'' . $this->db_host . '\'{/b} ';
 		$string .= 'on port {b}\'' . $this->db_port . '\'{/b} ';
 		$string .= 'with ssl mode {b}\'' . $this->db_ssl . '\'{/b}{br}';
-		$string .= '{b}-DB-info->{/b} DB IO Class debug output: {b}' . ($this->db_debug ? 'Yes' : 'No') . '{/b}';
+		$string .= '{b}-DB-info->{/b} DB IO Class debug output: {b}'
+			. ($this->dbGetDebug() ? 'Yes' : 'No') . '{/b}';
 		if ($log === true) {
 			// if debug, remove / change b
-			$this->__dbDebug('db', str_replace(
+			$this->__dbDebugMessage('db', str_replace(
 				$html_tags,
 				$replace_text,
 				$string
@@ -1605,7 +1621,7 @@ class IO
 		if (is_array($array)) {
 			$this->nbsp = '';
 			$string .= $this->__printArray($array);
-			$this->__dbDebug('db', $string, 'dbDumpData');
+			$this->__dbDebugMessage('db', $string, 'dbDumpData');
 		}
 		return $string;
 	}
@@ -1985,17 +2001,15 @@ class IO
 		// checks if the params count given matches the expected count
 		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
 			// in case we got an error print out query
-			if ($this->db_debug) {
-				$this->__dbDebug(
-					'db',
-					$this->__dbDebugPrepare(
-						$this->query,
-						$this->params
-					),
-					'dbReturn',
-					($this->params === [] ? 'Q[e]' : 'Qp[e]')
-				);
-			}
+			$this->__dbDebug(
+				'db',
+				$this->__dbDebugPrepare(
+					$this->query,
+					$this->params
+				),
+				'dbReturn',
+				($this->params === [] ? 'Q[e]' : 'Qp[e]')
+			);
 			return false;
 		}
 		// set first call to false
@@ -2018,17 +2032,15 @@ class IO
 		if (!$this->cursor_ext[$query_hash]['cursor']) {
 			$this->cursor_ext[$query_hash]['log'][] = 'No cursor';
 			// for DEBUG, print out each query executed
-			if ($this->db_debug) {
-				$this->__dbDebug(
-					'db',
-					$this->__dbDebugPrepare(
-						$this->cursor_ext[$query_hash]['query'],
-						$this->cursor_ext[$query_hash]['params']
-					),
-					'dbReturn',
-					($this->cursor_ext[$query_hash]['params'] === [] ? 'Q' : 'Qp'),
-				);
-			}
+			$this->__dbDebug(
+				'db',
+				$this->__dbDebugPrepare(
+					$this->cursor_ext[$query_hash]['query'],
+					$this->cursor_ext[$query_hash]['params']
+				),
+				'dbReturn',
+				($this->cursor_ext[$query_hash]['params'] === [] ? 'Q' : 'Qp'),
+			);
 			// if no DB Handler try to reconnect
 			if (!$this->dbh) {
 				// if reconnect fails drop out
@@ -2055,17 +2067,15 @@ class IO
 			}
 			// if still no cursor ...
 			if (!$this->cursor_ext[$query_hash]['cursor']) {
-				if ($this->db_debug) {
-					$this->__dbDebug(
-						'db',
-						$this->__dbDebugPrepare(
-							$this->cursor_ext[$query_hash]['query'],
-							$this->cursor_ext[$query_hash]['params']
-						),
-						'dbReturn',
-						($this->cursor_ext[$query_hash]['params'] === [] ? 'Q[e]' : 'Qp[e]'),
-					);
-				}
+				$this->__dbDebug(
+					'db',
+					$this->__dbDebugPrepare(
+						$this->cursor_ext[$query_hash]['query'],
+						$this->cursor_ext[$query_hash]['params']
+					),
+					'dbReturn',
+					($this->cursor_ext[$query_hash]['params'] === [] ? 'Q[e]' : 'Qp[e]'),
+				);
 				// internal error handling
 				$this->__dbError(13, $this->cursor_ext[$query_hash]['cursor']);
 				return false;
@@ -2720,17 +2730,15 @@ class IO
 			);
 			return false;
 		}
-		if ($this->db_debug) {
-			$this->__dbDebug(
-				'db',
-				$this->__dbDebugPrepare(
-					$this->prepare_cursor[$stm_name]['query'],
-					$data
-				),
-				'dbExecPrep',
-				'Qpe'
-			);
-		}
+		$this->__dbDebug(
+			'db',
+			$this->__dbDebugPrepare(
+				$this->prepare_cursor[$stm_name]['query'],
+				$data
+			),
+			'dbExecPrep',
+			'Qpe'
+		);
 		// if the count does not match
 		if ($this->prepare_cursor[$stm_name]['count'] != count($data)) {
 			$this->__dbError(

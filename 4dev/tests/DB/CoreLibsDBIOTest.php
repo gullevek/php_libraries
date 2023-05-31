@@ -37,6 +37,7 @@ namespace tests;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use CoreLibs\Logging\Logger\Level;
 
 /**
  * Test class for DB\IO + DB\SQL\PgSQL
@@ -59,20 +60,6 @@ final class CoreLibsDBIOTest extends TestCase
 			'db_type' => 'pgsql',
 			'db_encoding' => '',
 			'db_ssl' => 'allow', // allow, disable, require, prefer
-			'db_debug' => true,
-		],
-		// same as valid, but db debug is off
-		'valid_debug_false' => [
-			'db_name' => 'corelibs_db_io_test',
-			'db_user' => 'corelibs_db_io_test',
-			'db_pass' => 'corelibs_db_io_test',
-			'db_host' => 'localhost',
-			'db_port' => 5432,
-			'db_schema' => 'public',
-			'db_type' => 'pgsql',
-			'db_encoding' => '',
-			'db_ssl' => 'allow', // allow, disable, require, prefer
-			'db_debug' => false,
 		],
 		// same as valid, but encoding is set
 		'valid_with_encoding_utf8' => [
@@ -85,7 +72,6 @@ final class CoreLibsDBIOTest extends TestCase
 			'db_type' => 'pgsql',
 			'db_encoding' => 'UTF-8',
 			'db_ssl' => 'allow', // allow, disable, require, prefer
-			'db_debug' => true,
 		],
 		// valid with no schema set
 		'valid_no_schema' => [
@@ -98,7 +84,6 @@ final class CoreLibsDBIOTest extends TestCase
 			'db_type' => 'pgsql',
 			'db_encoding' => '',
 			'db_ssl' => 'allow', // allow, disable, require, prefer
-			'db_debug' => true,
 		],
 		// invalid (missing db name)
 		'invalid' => [
@@ -111,10 +96,10 @@ final class CoreLibsDBIOTest extends TestCase
 			'db_type' => 'pgsql',
 			'db_encoding' => '',
 			'db_ssl' => 'allow', // allow, disable, require, prefer
-			'db_debug' => true,
 		],
 	];
 	private static $log;
+	private static bool $db_debug = false;
 
 	/**
 	 * Test if pgsql module loaded
@@ -137,6 +122,8 @@ final class CoreLibsDBIOTest extends TestCase
 			'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
 			'log_file_id' => 'CoreLibs-DB-IO-Test',
 		]);
+		// will be true, default logging is true
+		self::$db_debug = self::$log->getLoggingLevel()->includes(Level::Debug);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -541,11 +528,6 @@ final class CoreLibsDBIOTest extends TestCase
 				// actions (set)
 				null,
 				// set exepected
-				self::$db_config['valid']['db_debug'],
-			],
-			'set debug to true' => [
-				'valid_debug_false',
-				true,
 				true,
 			],
 			'set debug to false' => [
@@ -570,12 +552,7 @@ final class CoreLibsDBIOTest extends TestCase
 				// actions
 				null,
 				// toggle is inverse
-				self::$db_config['valid']['db_debug'] ? false : true,
-			],
-			'toggle debug to true' => [
-				'valid_debug_false',
-				true,
-				true,
+				self::$db_debug ? true : false,
 			],
 			'toggle debug to false' => [
 				'valid',
@@ -604,6 +581,7 @@ final class CoreLibsDBIOTest extends TestCase
 			self::$db_config[$connection],
 			self::$log
 		);
+		echo "Expected: " . self::$db_debug . "\n";
 		$this->assertEquals(
 			$expected,
 			$set === null ?
@@ -806,7 +784,6 @@ final class CoreLibsDBIOTest extends TestCase
 				'host' => 'db_host',
 				'port' => 'db_port',
 				'ssl' => 'db_ssl',
-				'debug' => 'db_debug',
 				'password' => '***',
 			] as $read => $compare
 		) {

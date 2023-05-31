@@ -22,7 +22,6 @@ $DB_CONFIG = [
 		'db_type' => 'pgsql',
 		'db_encoding' => '',
 		'db_ssl' => 'allow', // allow, disable, require, prefer
-		'db_debug' => true, // turn on logging or not
 	],
 	// same as above, but uses pg bouncer
 	'test_pgbouncer' => [
@@ -35,7 +34,6 @@ $DB_CONFIG = [
 		'db_type' => 'pgsql',
 		'db_encoding' => '',
 		'db_ssl' => 'allow', // allow, disable, require, prefer
-		'db_debug' => true, // turn on logging or not
 	],
 ];
 
