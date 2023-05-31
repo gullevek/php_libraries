@@ -19,10 +19,10 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 {
 	private const LOG_FOLDER = __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR;
 	private const REGEX_BASE = "\[[\d\-\s\.:]+\]\s{1}" // date
-		. "\[[\w\.]+:\w+\]\s{1}" // host:port
-		. "\[[\w+\.\/]+\]\s{1}" // folder/file
+		. "\[[\w\.]+(:\d+)?\]\s{1}" // host:port
+		. "\[[\w+\.\/]+:\d+\]\s{1}" // folder/file
 		. "\[\w+\]\s{1}" // run id
-		. "{[\w\\\\]+}\s{1}"; // class
+		. "{[\w\\\\]+(::\w+)?}\s{1}"; // class
 
 	/**
 	 * test set for options BASIC

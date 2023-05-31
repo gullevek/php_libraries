@@ -1373,7 +1373,10 @@ class IO
 	 */
 	public function dbClose(): void
 	{
-		if ($this->dbh) {
+		if (
+			!empty($this->dbh) &&
+			$this->dbh instanceof \PgSql\Connection
+		) {
 			// reset any client encodings set
 			$this->dbResetEncoding();
 			// calls db close
@@ -3405,6 +3408,9 @@ class IO
 	 */
 	public function dbGetInsertPKName(): string
 	{
+		if (!isset($this->insert_id_pk_name)) {
+			return '';
+		}
 		return (string)$this->insert_id_pk_name;
 	}
 
@@ -3513,6 +3519,9 @@ class IO
 	 */
 	public function dbGetNumFields(): ?int
 	{
+		if (!isset($this->num_fields)) {
+			return null;
+		}
 		return $this->num_fields;
 	}
 
