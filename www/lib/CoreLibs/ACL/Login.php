@@ -1861,7 +1861,7 @@ HTML;
 			}
 		}
 		// if there is none, there is none, saves me POST/GET check
-		$this->euid = array_key_exists('EUID', $_SESSION) ? $_SESSION['EUID'] : 0;
+		$this->euid = array_key_exists('EUID', $_SESSION) ? (int)$_SESSION['EUID'] : 0;
 		// get login vars, are so, can't be changed
 		// prepare
 		// pass on vars to Object vars
