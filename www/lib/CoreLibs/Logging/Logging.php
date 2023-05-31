@@ -675,9 +675,11 @@ class Logging
 	 *
 	 * @return bool True, we are at debug level
 	 */
-	public function getJsDebug(): bool
+	public function loggingLevelIsDebug(): bool
 	{
-		return $this->log_level === Level::Debug ? true : false;
+		return $this->getLoggingLevel()->includes(
+			Level::Debug
+		);
 	}
 
 	// log file id set (file name prefix)

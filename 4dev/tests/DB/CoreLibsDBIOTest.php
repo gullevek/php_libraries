@@ -99,7 +99,6 @@ final class CoreLibsDBIOTest extends TestCase
 		],
 	];
 	private static $log;
-	private static bool $db_debug = false;
 
 	/**
 	 * Test if pgsql module loaded
@@ -123,7 +122,6 @@ final class CoreLibsDBIOTest extends TestCase
 			'log_file_id' => 'CoreLibs-DB-IO-Test',
 		]);
 		// will be true, default logging is true
-		self::$db_debug = self::$log->getLoggingLevel()->includes(Level::Debug);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -521,6 +519,9 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function debugSetProvider(): array
 	{
+		// 0: db connecdtion
+		// 1: override log flag, null for default
+		// 2: set flag
 		return [
 			'default debug set' => [
 				// what base connection
@@ -539,94 +540,45 @@ final class CoreLibsDBIOTest extends TestCase
 	}
 
 	/**
-	 * test set for toggleDEbug
-	 *
-	 * @return array
-	 */
-	public function debugToggleProvider(): array
-	{
-		return [
-			'default debug set' => [
-				// what base connection
-				'valid',
-				// actions
-				null,
-				// toggle is inverse
-				self::$db_debug ? true : false,
-			],
-			'toggle debug to false' => [
-				'valid',
-				false,
-				false,
-			]
-		];
-	}
-
-	/**
 	 * Test dbSetDbug, dbGetDebug
 	 *
 	 * @covers ::dbGetDbug
 	 * @covers ::dbSetDebug
-	 * @dataProvider debugSetProvider
-	 * @testdox Setting debug $set will be $expected [$_dataName]
+	 * @testdox Set and Get Debug flag
 	 *
 	 * @return void
 	 */
-	public function testDbSetDebug(
-		string $connection,
-		?bool $set,
-		bool $expected
-	): void {
+	public function testDbSetDebug(): void
+	{
+		$connection = 'valid';
+		// default set, expect true
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config[$connection],
 			self::$log
 		);
-		echo "Expected: " . self::$db_debug . "\n";
-		$this->assertEquals(
-			$expected,
-			$set === null ?
-				$db->dbSetDebug() :
-				$db->dbSetDebug($set)
+		$this->assertTrue(
+			$db->dbGetDebug()
 		);
-		// must always match
-		$this->assertEquals(
-			$expected,
+		// switch off
+		$db->dbSetDebug(false);
+		$this->assertFalse(
 			$db->dbGetDebug()
 		);
 		$db->dbClose();
-	}
-
-	/**
-	 * Test dbToggleDebug, dbGetDebug
-	 *
-	 * @covers ::dbGetDbug
-	 * @covers ::dbSetDebug
-	 * @dataProvider debugToggleProvider
-	 * @testdox Toggle debug $toggle will be $expected [$_dataName]
-	 *
-	 * @return void
-	 */
-	public function testDbToggleDebug(
-		string $connection,
-		?bool $toggle,
-		bool $expected
-	): void {
+		// second conenction with log set NOT debug
+		$log = new \CoreLibs\Logging\Logging([
+			// 'log_folder' => __DIR__ . DIRECTORY_SEPARATOR . 'log',
+			'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
+			'log_file_id' => 'CoreLibs-DB-IO-Test',
+			'log_level' => \CoreLibs\Logging\Logger\Level::Notice,
+		]);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config[$connection],
-			self::$log
+			$log
 		);
-		$this->assertEquals(
-			$expected,
-			$toggle === null ?
-				$db->dbToggleDebug() :
-				$db->dbToggleDebug($toggle)
-		);
-		// must always match
-		$this->assertEquals(
-			$expected,
+		$this->assertFalse(
 			$db->dbGetDebug()
 		);
-		$db->dbClose();
 	}
 
 	// - set max query call sets

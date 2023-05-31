@@ -3123,16 +3123,13 @@ class IO
 
 	/**
 	 * switches the debug flag on or off
-	 * if none given, then return current set only
-	 * @param  bool|null $debug true/false or null for just getting current set
-	 * @return bool             Current debug flag as set
+	 *
+	 * @param  bool $debug True/False to turn debugging in this calss on or off
+	 * @return void
 	 */
-	public function dbSetDebug(?bool $debug = null): bool
+	public function dbSetDebug(bool $debug): void
 	{
-		if ($debug !== null) {
-			$this->db_debug = $debug;
-		}
-		return $this->db_debug;
+		$this->db_debug = $debug;
 	}
 
 	/**
@@ -3140,9 +3137,11 @@ class IO
 	 * OR
 	 * with the optional parameter fix sets debug
 	 * returns current set stats
+	 *
 	 * @param  bool|null $debug Flag to turn debug on off or null for toggle
 	 * @return bool             Current debug status
 	 *                          True for debug is on, False for off
+	 * @deprecated Use dbSetDebug and dbGetDebug
 	 */
 	public function dbToggleDebug(?bool $debug = null): bool
 	{
@@ -3156,6 +3155,7 @@ class IO
 
 	/**
 	 * Return current set db debug flag status
+	 *
 	 * @return bool Current debug status
 	 */
 	public function dbGetDebug(): bool

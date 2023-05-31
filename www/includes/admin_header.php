@@ -121,6 +121,6 @@ if (!$login->loginActionRun()) {
 //------------------------------ logging end
 
 // pass on DEBUG flag to JS via smarty variable
-$smarty->DATA['JS_DEBUG'] = $log->getJsDebug();
+$smarty->DATA['JS_DEBUG'] = $log->loggingLevelIsDebug();
 
 // __END__
