@@ -24,6 +24,11 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 		. "\[\w+\]\s{1}" // run id
 		. "{[\w\\\\]+(::\w+)?}\s{1}"; // class
 
+	public static function tearDownAfterClass(): void
+	{
+		array_map('unlink', glob(self::LOG_FOLDER . '*.log'));
+	}
+
 	/**
 	 * test set for options BASIC
 	 *
