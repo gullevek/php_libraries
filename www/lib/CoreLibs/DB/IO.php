@@ -382,7 +382,7 @@ class IO
 	/** @var array<mixed> */
 	private array $pk_name_table = [];
 	/** @var string internal primary key name, for cross calls in async */
-	private string $pk_name;
+	private string $pk_name = '';
 	/** @var bool if we use RETURNING in the INSERT call */
 	private bool $returning_id = false;
 	/** @var string if a sync is running holds the hash key of the query */
@@ -1267,7 +1267,7 @@ class IO
 					// ONLY insert with set pk name
 					($this->__checkQueryForInsert($this->query, true) && $this->pk_name != 'NULL') ||
 					// insert or update with returning add
-					($this->__checkQueryForInsert($this->query) &&  $this->returning_id)
+					($this->__checkQueryForInsert($this->query) && $this->returning_id)
 				) {
 					$this->__dbSetInsertId(
 						$this->returning_id,
