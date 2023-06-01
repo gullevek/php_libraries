@@ -77,79 +77,79 @@ class SmartyExtend extends \Smarty
 	public string $COMPILE_ID = '';
 	// template vars
 	/** @var string */
-	public string $MASTER_TEMPLATE_NAME;
+	public string $MASTER_TEMPLATE_NAME = '';
 	/** @var string */
-	public string $PAGE_FILE_NAME;
+	public string $PAGE_FILE_NAME = '';
 	/** @var string */
-	public string $CONTENT_INCLUDE;
+	public string $CONTENT_INCLUDE = '';
 	/** @var string */
-	public string $FORM_NAME;
+	public string $FORM_NAME = '';
 	/** @var string */
-	public string $FORM_ACTION;
+	public string $FORM_ACTION = '';
 	/** @var string */
-	public string $L_TITLE;
+	public string $L_TITLE = '';
 	/** @var string|int */
 	public string|int $PAGE_WIDTH;
 	// smarty include/set var
 	/** @var string */
-	public string $TEMPLATE_PATH;
+	public string $TEMPLATE_PATH = '';
 	/** @var string */
-	public string $TEMPLATE_NAME;
+	public string $TEMPLATE_NAME = '';
 	/** @var string */
-	public string $INC_TEMPLATE_NAME;
+	public string $INC_TEMPLATE_NAME = '';
 	/** @var string */
-	public string $JS_TEMPLATE_NAME;
+	public string $JS_TEMPLATE_NAME = '';
 	/** @var string */
-	public string $CSS_TEMPLATE_NAME;
+	public string $CSS_TEMPLATE_NAME = '';
 	/** @var string|null */
 	public string|null $TEMPLATE_TRANSLATE;
 	/** @var string|null */
 	public string|null $JS_TRANSLATE;
 	// core group
 	/** @var string */
-	public string $JS_CORE_TEMPLATE_NAME;
+	public string $JS_CORE_TEMPLATE_NAME = '';
 	/** @var string */
-	public string $CSS_CORE_TEMPLATE_NAME;
+	public string $CSS_CORE_TEMPLATE_NAME = '';
 	/** @var string */
-	public string $JS_CORE_INCLUDE;
+	public string $JS_CORE_INCLUDE = '';
 	/** @var string */
-	public string $CSS_CORE_INCLUDE;
+	public string $CSS_CORE_INCLUDE = '';
 	// local names
 	/** @var string */
 	public string $JS_SPECIAL_TEMPLATE_NAME = '';
 	/** @var string */
 	public string $CSS_SPECIAL_TEMPLATE_NAME = '';
 	/** @var string */
-	public string $JS_INCLUDE;
+	public string $JS_INCLUDE = '';
 	/** @var string */
-	public string $CSS_INCLUDE;
+	public string $CSS_INCLUDE = '';
 	/** @var string */
-	public string $JS_SPECIAL_INCLUDE;
+	public string $JS_SPECIAL_INCLUDE = '';
 	/** @var string */
-	public string $CSS_SPECIAL_INCLUDE;
+	public string $CSS_SPECIAL_INCLUDE = '';
 	/** @var string */
-	public string $ADMIN_JAVASCRIPT;
+	public string $ADMIN_JAVASCRIPT = '';
 	/** @var string */
-	public string $ADMIN_STYLESHEET;
+	public string $ADMIN_STYLESHEET = '';
 	/** @var string */
-	public string $FRONTEND_JAVASCRIPT;
+	public string $FRONTEND_JAVASCRIPT = '';
 	/** @var string */
-	public string $FRONTEND_STYLESHEET;
+	public string $FRONTEND_STYLESHEET = '';
 	// other smarty folder vars
 	/** @var string */
-	public string $INCLUDES;
+	public string $INCLUDES = '';
 	/** @var string */
-	public string $JAVASCRIPT;
+	public string $JAVASCRIPT = '';
 	/** @var string */
-	public string $CSS;
+	public string $CSS = '';
 	/** @var string */
-	public string $FONT;
+	public string $FONT = '';
 	/** @var string */
-	public string $PICTURES;
+	public string $PICTURES = '';
 	/** @var string */
-	public string $CACHE_PICTURES;
+	public string $CACHE_PICTURES = '';
 	/** @var string */
-	public string $CACHE_PICTURES_ROOT;
+	public string $CACHE_PICTURES_ROOT = '';
 
 	// constructor class, just sets the language stuff
 	/**
@@ -373,7 +373,7 @@ class SmartyExtend extends \Smarty
 		// check for template include
 		if (
 			$this->USE_INCLUDE_TEMPLATE === true &&
-			!$this->TEMPLATE_NAME
+			empty($this->TEMPLATE_NAME)
 		) {
 			$this->TEMPLATE_NAME = $this->CONTENT_INCLUDE;
 			// add to cache & compile id
@@ -390,7 +390,7 @@ class SmartyExtend extends \Smarty
 			exit('MASTER TEMPLATE: ' . $this->MASTER_TEMPLATE_NAME . ' could not be found');
 		}
 		if (
-			$this->TEMPLATE_NAME &&
+			!empty($this->TEMPLATE_NAME) &&
 			!file_exists($this->getTemplateDir()[0] . DIRECTORY_SEPARATOR . $this->TEMPLATE_NAME)
 		) {
 			exit('INCLUDE TEMPLATE: ' . $this->TEMPLATE_NAME . ' could not be found');
@@ -418,7 +418,12 @@ class SmartyExtend extends \Smarty
 			}
 		}
 		// if we can't find it, dump it
-		if (!file_exists($this->getTemplateDir()[0] . DIRECTORY_SEPARATOR . $this->TEMPLATE_TRANSLATE)) {
+		if (
+			!file_exists(
+				$this->getTemplateDir()[0] . DIRECTORY_SEPARATOR
+					. $this->TEMPLATE_TRANSLATE
+			)
+		) {
 			$this->TEMPLATE_TRANSLATE = null;
 		}
 		if (empty($this->JS_TRANSLATE)) {
