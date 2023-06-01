@@ -1082,12 +1082,12 @@ class Logging
 	 * But this does not wrap it in <pre></pre>
 	 * Do not use this without using it in a string in debug function
 	 *
-	 * @param  array<mixed> $a Array to format
-	 * @return string          print_r formated
+	 * @param  mixed  $data Data to format
+	 * @return string       print_r formated
 	 */
-	public function prAr(array $a): string
+	public function prAr(mixed $data): string
 	{
-		return Support::printArray($a, true);
+		return Support::printArray($data, true);
 	}
 
 	/**
