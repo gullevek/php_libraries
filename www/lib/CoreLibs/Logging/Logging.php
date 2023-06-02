@@ -407,13 +407,6 @@ class Logging
 			}
 			$this->setLogFlag($log_flag_key);
 		}
-		// init per run uid
-		if ($this->getLogFlag(Flag::per_run)) {
-			$this->setLogUniqueId();
-		} elseif ($this->getLogFlag(Flag::per_date)) {
-			// init file date
-			$this->log_file_date = date('Y-m-d');
-		}
 	}
 
 	/**
@@ -776,6 +769,13 @@ class Logging
 	public function setLogFlag(Flag $flag): void
 	{
 		$this->log_flags |= $flag->value;
+		// init per run uid
+		if ($this->getLogFlag(Flag::per_run)) {
+			$this->setLogUniqueId();
+		} elseif ($this->getLogFlag(Flag::per_date)) {
+			// init file date
+			$this->setLogDate();
+		}
 	}
 
 	/**

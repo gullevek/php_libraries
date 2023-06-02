@@ -36,7 +36,7 @@ $log = new CoreLibs\Logging\Logging([
 	'log_per_date' => true,
 ]);
 
-$PAGE_NAME = 'TEST CLASS: DEBUG LOGGING';
+$PAGE_NAME = 'TEST CLASS: LOGGING';
 print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
@@ -44,12 +44,12 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $log->logger2Debug();
-
+echo "<hr>";
 print "Level 250: " . Level::fromValue(250)->getName() . "<br>";
-print "Flag: per_run (from int): " . Flag::fromValue(2)->getName() . "<br>";
-print "Flag: per_run getName(): " . Flag::per_class->getName() . "<br>";
-print "Flag: per_run ->name: " . Flag::per_class->name . "<br>";
-print "Flag: per_run ->value: " . Flag::per_class->value . "<br>";
+print "Flag: per_class (16) (from int): " . Flag::fromValue(16)->getName() . "<br>";
+print "Flag: per_class getName(): " . Flag::per_class->getName() . "<br>";
+print "Flag: per_class ->name: " . Flag::per_class->name . "<br>";
+print "Flag: per_class ->value: " . Flag::per_class->value . "<br>";
 $log->setLogUniqueId();
 print "LogUniqId: " . $log->getLogUniqueId() . "<br>";
 
@@ -77,8 +77,12 @@ and > and <
 EOM));
 $log->info('Info message', ['info' => 'log']);
 $log->error('Cannot process data', ['error' => 'log']);
-
 print "Log File: " . $log->getLogFile() . "<br>";
+
+$log->setLogFlag(Flag::per_run);
+$log->debug('PER RUN', 'per run logging');
+print "Log File: " . $log->getLogFile() . "<br>";
+$log->unsetLogFlag(Flag::per_run);
 
 // init empty
 unset($LOG_FILE_ID);
