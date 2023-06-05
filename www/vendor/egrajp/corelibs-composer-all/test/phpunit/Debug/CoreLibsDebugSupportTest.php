@@ -460,16 +460,18 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @cover ::getCallerFileLine
-	 * @testWith ["/storage/var/www/html/developers/clemens/core_data/php_libraries/trunk/www/vendor/phpunit/phpunit/src/Framework/TestCase.php:1608"]
-	 * @testdox getCallerFileLine check if it returns $expected [$_dataName]
+	 * @testWith ["vendor/phpunit/phpunit/src/Framework/TestCase.php:"]
+	 * @testdox getCallerFileLine check based on regex /[\w\-\/]/vendor/phpunit/phpunit/src/Framework/TestCase.php:\d+ [$_dataName]
 	 *
 	 * @param  string $expected
 	 * @return void
 	 */
-	public function testGetCallerFileLine(string $expected): void
+	public function testGetCallerFileLine(): void
 	{
-		$this->assertEquals(
-			$expected,
+		// regex prefix with path "/../" and then fixed vendor + \d+
+		$regex = "/^\/[\w\-\/]+\/vendor\/phpunit\/phpunit\/src\/Framework\/TestCase.php:\d+$/";
+		$this->assertMatchesRegularExpression(
+			$regex,
 			Support::getCallerFileLine()
 		);
 	}
@@ -518,11 +520,17 @@ final class CoreLibsDebugSupportTest extends TestCase
 				break;
 			case 11:
 				// add one "run" before "runBare"
+				// array_splice(
+				// 	$expected,
+				// 	7,
+				// 	0,
+				// 	['run']
+				// );
 				array_splice(
 					$expected,
-					7,
 					0,
-					['run']
+					0,
+					['include']
 				);
 				$this->assertEquals(
 					$expected,

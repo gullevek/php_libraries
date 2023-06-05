@@ -20,9 +20,14 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 	private const LOG_FOLDER = __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR;
 	private const REGEX_BASE = "\[[\d\-\s\.:]+\]\s{1}" // date
 		. "\[[\w\.]+(:\d+)?\]\s{1}" // host:port
-		. "\[[\w+\.\/]+:\d+\]\s{1}" // folder/file
+		. "\[[\w\-\.\/]+:\d+\]\s{1}" // folder/file
 		. "\[\w+\]\s{1}" // run id
 		. "{[\w\\\\]+(::\w+)?}\s{1}"; // class
+
+	public static function tearDownAfterClass(): void
+	{
+		array_map('unlink', glob(self::LOG_FOLDER . '*.log'));
+	}
 
 	/**
 	 * test set for options BASIC
@@ -790,6 +795,13 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 			'log message regex'
 		);
 	}
+
+	// must test flow:
+	// init normal
+	// log -> check file name
+	// set per date
+	// log -> check file name
+	// and same for per_run
 
 	// deprecated calls check?
 }

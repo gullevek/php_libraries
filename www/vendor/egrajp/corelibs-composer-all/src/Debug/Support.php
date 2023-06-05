@@ -34,29 +34,29 @@ class Support
 	}
 
 	/**
-	 * prints a html formatted (pre) array
+	 * prints a html formatted (pre) data
 	 *
-	 * @param  array<mixed> $array   any array
-	 * @param  bool         $no_html default add <pre>
-	 * @return string                formatted array for output with <pre> tag added
+	 * @param  mixed  $data    any data
+	 * @param  bool   $no_html default add <pre>
+	 * @return string          formatted array for output with <pre> tag added
 	 */
-	public static function printAr(array $array, bool $no_html = false): string
+	public static function printAr(mixed $data, bool $no_html = false): string
 	{
 		return $no_html ?
-			print_r($array, true) :
-			'<pre>' . print_r($array, true) . '</pre>';
+			print_r($data, true) :
+			'<pre>' . print_r($data, true) . '</pre>';
 	}
 
 	/**
 	 * alternate name for printAr function
 	 *
-	 * @param  array<mixed> $array   any array
-	 * @param  bool         $no_html default add <pre>
-	 * @return string                formatted array for output with <pre> tag added
+	 * @param  mixed  $data    any array
+	 * @param  bool   $no_html default add <pre>
+	 * @return string          formatted array for output with <pre> tag added
 	 */
-	public static function printArray(array $array, bool $no_html = false): string
+	public static function printArray(mixed $data, bool $no_html = false): string
 	{
-		return self::printAr($array, $no_html);
+		return self::printAr($data, $no_html);
 	}
 
 	/**
@@ -65,12 +65,12 @@ class Support
 	 * Do not use this without using it in a string in debug function
 	 * Note: for full data debug dumps use Support::dumpVar()
 	 *
-	 * @param  array<mixed> $a Array to format
-	 * @return string          print_r formated
+	 * @param  mixed  $data Data to print
+	 * @return string       print_r formated
 	 */
-	public static function prAr(array $a): string
+	public static function prAr(mixed $data): string
 	{
-		return self::printAr($a, true);
+		return self::printAr($data, true);
 	}
 
 	/**

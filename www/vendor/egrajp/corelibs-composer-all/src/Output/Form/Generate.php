@@ -232,13 +232,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	/** @var string */
 	public string $col_name; // the name of the columen (before _<type>) [used for order button]
 	/** @var int */
-	public int $yes; // the yes flag that triggers the template to show ALL and not only new/load
+	public int $yes = 0; // the yes flag that triggers the template to show ALL and not only new/load
 	/** @var string */
-	public string $msg; // the error msg
+	public string $msg = ''; // the error msg
 	/** @var int */
-	public int $error; // the error flag set for printing red error msg
+	public int $error = 0; // the error flag set for printing red error msg
 	/** @var int */
-	public int $warning; // warning flag, for information (saved, loaded, etc)
+	public int $warning = 0; // warning flag, for information (saved, loaded, etc)
 	/** @var string */
 	public string $archive_pk_name; // the pk name for the load select form
 	/** @var string */
@@ -282,7 +282,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public array $login_acl = [];
 	// layout publics
 	/** @var int */
-	public int $table_width;
+	public int $table_width = 0;
 	// internal lang & encoding vars
 	/** @var string */
 	public string $lang_dir = '';

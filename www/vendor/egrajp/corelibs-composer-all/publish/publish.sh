@@ -3,6 +3,7 @@
 BASE_FOLDER=$(dirname $(readlink -f $0))"/";
 VERSION=$(git tag --list | sort -V | tail -n1 | sed -e "s/^v//");
 file_last_published="${BASE_FOLDER}last.published";
+go_flag="$1";
 
 if [ -z "${VERSION}" ]; then
      echo "Version must be set in the form x.y.z without any leading characters";
@@ -34,6 +35,13 @@ cd ${BASE_FOLDER};
 source .env.deploy;
 cd -;
 set +o allexport;
+
+if [ "${go_flag}" != "go" ]; then
+     echo "No go flag given";
+     echo "Would publish ${VERSION}";
+     echo "[END]";
+     exit;
+fi;
 
 echo "[START]";
 # gitea

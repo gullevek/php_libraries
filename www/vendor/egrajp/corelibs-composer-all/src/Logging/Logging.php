@@ -407,13 +407,6 @@ class Logging
 			}
 			$this->setLogFlag($log_flag_key);
 		}
-		// init per run uid
-		if ($this->getLogFlag(Flag::per_run)) {
-			$this->setLogUniqueId();
-		} elseif ($this->getLogFlag(Flag::per_date)) {
-			// init file date
-			$this->log_file_date = date('Y-m-d');
-		}
 	}
 
 	/**
@@ -535,7 +528,7 @@ class Logging
 	 * Prepare the log message with all needed info blocks:
 	 * [timestamp] [host name] [file path + file] [running uid] {class} <debug level/group id> - message
 	 *
-	 * @param  string  $level_str    Log level we will write to
+	 * @param  Level $level    Log level we will write to
 	 * @param  string|Stringable $message  The message to write
 	 * @param  mixed[] $context Any additional info we want to attach in any format
 	 * @param  string $group_id A group id, only used in DEBUG level,
@@ -543,11 +536,15 @@ class Logging
 	 * @return string
 	 */
 	private function prepareLog(
-		string $level_str,
+		Level $level,
 		string|\Stringable $message,
 		array $context = [],
 		string $group_id = '',
 	): string {
+		// only prepare if to write log level is in set log level
+		if (!$this->checkLogLevel($level)) {
+			return '';
+		}
 		// file + line: call not this but one before (the one that calls this)
 		$file_line = Support::getCallerFileLine(2) ??
 			System::getPageName(System::FULL_PATH);
@@ -562,7 +559,7 @@ class Logging
 		$timestamp = Support::printTime();
 
 		// if group id is empty replace it with current level
-		$group_str = $level_str;
+		$group_str = $level->getName();
 		if (!empty($group_id)) {
 			$group_str .= ':' . $group_id;
 		}
@@ -776,6 +773,13 @@ class Logging
 	public function setLogFlag(Flag $flag): void
 	{
 		$this->log_flags |= $flag->value;
+		// init per run uid
+		if ($this->getLogFlag(Flag::per_run)) {
+			$this->setLogUniqueId();
+		} elseif ($this->getLogFlag(Flag::per_date)) {
+			// init file date
+			$this->setLogDate();
+		}
 	}
 
 	/**
@@ -927,9 +931,9 @@ class Logging
 		array $context = []
 	): bool {
 		return $this->writeErrorMsg(
-			$this->log_level,
+			Level::Debug,
 			$this->prepareLog(
-				Level::Debug->getName(),
+				Level::Debug,
 				$prefix . $message,
 				$context,
 				$group_id
@@ -950,7 +954,7 @@ class Logging
 		return $this->writeErrorMsg(
 			Level::Info,
 			$this->prepareLog(
-				Level::Info->getName(),
+				Level::Info,
 				$message,
 				$context,
 			)
@@ -969,7 +973,7 @@ class Logging
 		return $this->writeErrorMsg(
 			Level::Notice,
 			$this->prepareLog(
-				Level::Notice->getName(),
+				Level::Notice,
 				$message,
 				$context,
 			)
@@ -988,7 +992,7 @@ class Logging
 		return $this->writeErrorMsg(
 			Level::Warning,
 			$this->prepareLog(
-				Level::Warning->getName(),
+				Level::Warning,
 				$message,
 				$context,
 			)
@@ -1007,7 +1011,7 @@ class Logging
 		return $this->writeErrorMsg(
 			Level::Error,
 			$this->prepareLog(
-				Level::Error->getName(),
+				Level::Error,
 				$message,
 				$context,
 			)
@@ -1026,7 +1030,7 @@ class Logging
 		return $this->writeErrorMsg(
 			Level::Critical,
 			$this->prepareLog(
-				Level::Critical->getName(),
+				Level::Critical,
 				$message,
 				$context,
 			)
@@ -1045,7 +1049,7 @@ class Logging
 		return $this->writeErrorMsg(
 			Level::Alert,
 			$this->prepareLog(
-				Level::Alert->getName(),
+				Level::Alert,
 				$message,
 				$context,
 			)
@@ -1064,7 +1068,7 @@ class Logging
 		return $this->writeErrorMsg(
 			Level::Emergency,
 			$this->prepareLog(
-				Level::Emergency->getName(),
+				Level::Emergency,
 				$message,
 				$context,
 			)
@@ -1082,12 +1086,12 @@ class Logging
 	 * But this does not wrap it in <pre></pre>
 	 * Do not use this without using it in a string in debug function
 	 *
-	 * @param  array<mixed> $a Array to format
-	 * @return string          print_r formated
+	 * @param  mixed  $data Data to format
+	 * @return string       print_r formated
 	 */
-	public function prAr(array $a): string
+	public function prAr(mixed $data): string
 	{
-		return Support::printArray($a, true);
+		return Support::printArray($data, true);
 	}
 
 	/**
