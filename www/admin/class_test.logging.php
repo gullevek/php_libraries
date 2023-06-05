@@ -76,7 +76,12 @@ with
 and > and <
 EOM));
 $log->info('Info message', ['info' => 'log']);
+$log->notice('Notice message', ['notice' => 'log']);
+$log->warning('Warning message', ['warning' => 'log']);
 $log->error('Cannot process data', ['error' => 'log']);
+$log->critical('Critical message', ['critical' => 'log']);
+$log->alert('Alert message', ['Alert' => 'log']);
+$log->emergency('Emergency message', ['Emergency' => 'log']);
 print "Log File: " . $log->getLogFile() . "<br>";
 
 $log->setLogFlag(Flag::per_run);

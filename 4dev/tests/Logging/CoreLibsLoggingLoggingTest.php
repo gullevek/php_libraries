@@ -796,6 +796,13 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 		);
 	}
 
+	// must test flow:
+	// init normal
+	// log -> check file name
+	// set per date
+	// log -> check file name
+	// and same for per_run
+
 	// deprecated calls check?
 }
 
