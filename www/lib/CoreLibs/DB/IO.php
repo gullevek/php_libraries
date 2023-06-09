@@ -339,7 +339,7 @@ class IO
 	// 2: convert json/jsonb to array (CONVERT_JSON)
 	// 4: convert numeric/floatN to float (CONVERT_NUMERIC)
 	// 8: convert bytea to string data (CONVERT_BYTEA)
-	/** @var int convert type settings as bit mask, 0 for off, anything >2 will aways set 1 too */
+	/** @var int type settings as bit mask, 0 for off, anything >2 will aways set 1 too */
 	private int $convert_type = Convert::off->value;
 	// FOR BELOW: (This should be private and only readable through some method)
 	// cursor array for cached readings
@@ -410,7 +410,8 @@ class IO
 	 * main DB concstructor with auto connection to DB
 	 * and failure set on failed connection
 	 *
-	 * @param array<mixed> $db_config DB configuration array
+	 * phpcs:ignore
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[]} $db_config DB configuration array
 	 * @param \CoreLibs\Logging\Logging $log Logging class
 	 */
 	public function __construct(
@@ -508,7 +509,8 @@ class IO
 	/**
 	 * Setup DB config and options
 	 *
-	 * @param  array<string,string|int|array<string>> $db_config
+	 * phpcs:ignore
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[]} $db_config
 	 * @return bool
 	 */
 	private function __setConfigOptions(array $db_config): bool
@@ -548,27 +550,38 @@ class IO
 				continue;
 			}
 			$this->db_convert_type[] = $db_convert_type;
-			switch ($db_convert_type) {
-				case 'on':
-					$this->convert_type |= Convert::on->value;
-					break;
-				case 'json':
-					$this->convert_type |= Convert::on->value;
-					$this->convert_type |= Convert::json->value;
-					break;
-				case 'numeric':
-					$this->convert_type |= Convert::on->value;
-					$this->convert_type |= Convert::numeric->value;
-					break;
-				case 'bytea':
-					$this->convert_type |= Convert::on->value;
-					$this->convert_type |= Convert::bytea->value;
-					break;
-			}
+			$this->__setConvertType($db_convert_type);
 		}
 
 		// return status true: ok, false: options error
 		return true;
+	}
+
+	/**
+	 * Set the convert bit flags
+	 *
+	 * @param  string $db_convert_type One of 'on', 'json', 'numeric', 'bytea'
+	 * @return void
+	 */
+	private function __setConvertType(string $db_convert_type): void
+	{
+		switch ($db_convert_type) {
+			case 'on':
+				$this->convert_type |= Convert::on->value;
+				break;
+			case 'json':
+				$this->convert_type |= Convert::on->value;
+				$this->convert_type |= Convert::json->value;
+				break;
+			case 'numeric':
+				$this->convert_type |= Convert::on->value;
+				$this->convert_type |= Convert::numeric->value;
+				break;
+			case 'bytea':
+				$this->convert_type |= Convert::on->value;
+				$this->convert_type |= Convert::bytea->value;
+				break;
+		}
 	}
 
 	/**
@@ -1046,7 +1059,7 @@ class IO
 			// always bool/int
 			if (
 				$this->dbGetFieldType($key) != 'interval' &&
-				str_starts_with($this->dbGetFieldType($key), 'int')
+				str_starts_with($this->dbGetFieldType($key) ?: '', 'int')
 			) {
 				$row[$key] = (int)$value;
 			}
@@ -1055,15 +1068,15 @@ class IO
 			}
 			if (
 				$this->convert_type & Convert::json->value &&
-				str_starts_with($this->dbGetFieldType($key), 'json')
+				str_starts_with($this->dbGetFieldType($key) ?: '', 'json')
 			) {
 				$row[$key] = Json::jsonConvertToArray($value);
 			}
 			if (
 				$this->convert_type & Convert::numeric->value &&
 				(
-					str_starts_with($this->dbGetFieldType($key), 'numeric') ||
-					str_starts_with($this->dbGetFieldType($key), 'float')
+					str_starts_with($this->dbGetFieldType($key) ?: '', 'numeric') ||
+					str_starts_with($this->dbGetFieldType($key) ?: '', 'float')
 					// $this->dbGetFieldType($key) == 'real'
 				)
 			) {
@@ -3405,6 +3418,18 @@ class IO
 	public function dbUnsetConvertFlag(Convert $convert): void
 	{
 		$this->convert_type &= ~$convert->value;
+	}
+
+	/**
+	 * Reset to origincal config file set
+	 *
+	 * @return void
+	 */
+	public function dbResetConvertFlag(): void
+	{
+		foreach ($this->db_convert_type as $db_convert_type) {
+			$this->__setConvertType($db_convert_type);
+		}
 	}
 
 	/**

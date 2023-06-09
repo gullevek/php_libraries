@@ -36,6 +36,7 @@ class Image
 	): string|false {
 		// get image type flags
 		$image_types = [
+			0 => 'UNKOWN-IMAGE',
 			1 => 'gif',
 			2 => 'jpg',
 			3 => 'png'
@@ -69,7 +70,7 @@ class Image
 		}
 		// does this picture exist and is it a picture
 		if (file_exists($filename) && is_file($filename)) {
-			[$width, $height, $type] = getimagesize($filename) ?: [0, 0, null];
+			[$width, $height, $type] = getimagesize($filename) ?: [0, 0, 0];
 			$convert_prefix = '';
 			$create_file = false;
 			$delete_filename = '';
@@ -98,7 +99,7 @@ class Image
 				if (!is_file($filename)) {
 					$filename .= '-0';
 				}
-				[$width, $height, $type] = getimagesize($filename) ?: [0, 0, null];
+				[$width, $height, $type] = getimagesize($filename) ?: [0, 0, 0];
 			}
 			// if no size given, set size to original
 			if (!$size_x || $size_x < 1) {
@@ -117,7 +118,7 @@ class Image
 					$status = exec($convert_string, $output, $return);
 					// get the size of the converted data, if converted
 					if (is_file($thumbnail)) {
-						[$width, $height, $type] = getimagesize($thumbnail) ?: [0, 0, null];
+						[$width, $height, $type] = getimagesize($thumbnail) ?: [0, 0, 0];
 					}
 				}
 				if ($height > $size_y) {

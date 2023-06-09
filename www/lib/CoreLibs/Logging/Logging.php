@@ -953,11 +953,11 @@ class Logging
 	 *
 	 * @param  string $group_id id for error message, groups messages together
 	 * @param  string|Stringable $message  the actual error message
+	 * @param  mixed[] $context
 	 * @param  string $prefix   Attach some block before $string.
 	 *                          Will not be stripped even
 	 *                          when strip is true
 	 *                          if strip is false, recommended to add that to $string
-	 * @param  mixed[] $context
 	 * @return bool             True if logged, false if not logged
 	 */
 	public function debug(
