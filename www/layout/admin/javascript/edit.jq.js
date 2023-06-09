@@ -575,7 +575,7 @@ function actionIndicator(loc, overlay = true) // eslint-disable-line no-unused-v
  */
 function actionIndicatorShow(loc, overlay = true)
 {
-	// console.log('Indicator: SHOW [%s]', loc);
+	// console.log('{Indicator}: SHOW [%s]', loc);
 	if (!$('#indicator').is(':visible')) {
 		if (!$('#indicator').hasClass('progress')) {
 			$('#indicator').addClass('progress');
@@ -597,7 +597,7 @@ function actionIndicatorShow(loc, overlay = true)
  */
 function actionIndicatorHide(loc, overlay = true)
 {
-	// console.log('Indicator: HIDE [%s]', loc);
+	// console.log('{Indicator}: HIDE [%s]', loc);
 	$('#indicator').hide();
 	if (overlay === true) {
 		overlayBoxHide();
@@ -677,7 +677,7 @@ function ClearCall() // eslint-disable-line no-unused-vars
  */
 function showActionIndicator(loc) // eslint-disable-line no-unused-vars
 {
-	// console.log('Indicator: SHOW [%s]', loc);
+	// console.log('{Indicator}: SHOW [%s]', loc);
 	// check if indicator element exists
 	if ($('#indicator').length == 0) {
 		var el = document.createElement('div');
@@ -715,7 +715,7 @@ function showActionIndicator(loc) // eslint-disable-line no-unused-vars
  */
 function hideActionIndicator(loc) // eslint-disable-line no-unused-vars
 {
-	// console.log('Indicator: HIDE [%s]', loc);
+	// console.log('{Indicator}: HIDE [%s]', loc);
 	// check if indicator is visible
 	if ($('#indicator').is(':visible')) {
 		// hide indicator

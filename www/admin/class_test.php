@@ -69,6 +69,7 @@ print "<body>";
 // key: file name, value; name
 $test_files = [
 	'class_test.db.php' => 'Class Test: DB',
+	'class_test.db.types.php' => 'Class Test: DB COLUMN TYPES',
 	'class_test.db.single.php' => 'Class Test: DB SINGLE',
 	'class_test.db.dbReturn.php' => 'Class Test: DB dbReturn',
 	'class_test.convert.colors.php' => 'Class Test: CONVERT COLORS',

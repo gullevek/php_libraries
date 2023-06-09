@@ -259,6 +259,8 @@ namespace CoreLibs\DB;
 use CoreLibs\Create\Hash;
 use CoreLibs\Debug\Support;
 use CoreLibs\Create\Uids;
+use CoreLibs\Convert\Json;
+use CoreLibs\DB\Options\Convert;
 
 // below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
 // as main system. Currently all @var sets are written as object
@@ -328,6 +330,17 @@ class IO
 	private string $db_type;
 	/** @var string ssl flag (for postgres only), disable, allow, prefer, require */
 	private string $db_ssl;
+	/** @var array<string> flag for converting types from settings */
+	private array $db_convert_type = [];
+	// convert type settings
+	// 0: OFF (CONVERT_OFF)
+	// >0: ON
+	// 1: convert intN/bool (CONVERT_ON)
+	// 2: convert json/jsonb to array (CONVERT_JSON)
+	// 4: convert numeric/floatN to float (CONVERT_NUMERIC)
+	// 8: convert bytea to string data (CONVERT_BYTEA)
+	/** @var int convert type settings as bit mask, 0 for off, anything >2 will aways set 1 too */
+	private int $convert_type = Convert::off->value;
 	// FOR BELOW: (This should be private and only readable through some method)
 	// cursor array for cached readings
 	/** @var array<string,mixed> extended cursoers string index with content */
@@ -343,6 +356,8 @@ class IO
 	private array $field_names = [];
 	/** @var array<string> field type names */
 	private array $field_types = [];
+	/** @var array<string,string> field name to type */
+	private array $field_name_types = [];
 	/** @var array<mixed> always return as array, even if only one */
 	private array $insert_id_arr = [];
 	/** @var string primary key name for insert recovery from insert_id_arr */
@@ -404,17 +419,8 @@ class IO
 	) {
 		// attach logger
 		$this->log = $log;
-		// sets the names (for connect/reconnect)
-		$this->db_name = $db_config['db_name'] ?? '';
-		$this->db_user = $db_config['db_user'] ?? '';
-		$this->db_pwd = $db_config['db_pass'] ?? '';
-		$this->db_host = $db_config['db_host'] ?? '';
-		$this->db_port = !empty($db_config['db_port']) ? (int)$db_config['db_port'] : 5432;
-		// do not set to 'public' if not set, because the default is already public
-		$this->db_schema = !empty($db_config['db_schema']) ? $db_config['db_schema'] : '';
-		$this->db_encoding = !empty($db_config['db_encoding']) ? $db_config['db_encoding'] : '';
-		$this->db_type = $db_config['db_type'] ?? '';
-		$this->db_ssl = !empty($db_config['db_ssl']) ? $db_config['db_ssl'] : 'allow';
+		// set the config options
+		$this->__setConfigOptions($db_config);
 		// set debug, either via global var, or from config, else set to false
 		$this->dbSetDebug(
 			// set if logging level is Debug
@@ -498,6 +504,72 @@ class IO
 	// *************************************************************
 	// PRIVATE METHODS
 	// *************************************************************
+
+	/**
+	 * Setup DB config and options
+	 *
+	 * @param  array<string,string|int|array<string>> $db_config
+	 * @return bool
+	 */
+	private function __setConfigOptions(array $db_config): bool
+	{
+		// sets the names (for connect/reconnect)
+		$this->db_name = $db_config['db_name'] ?? '';
+		$this->db_user = $db_config['db_user'] ?? '';
+		$this->db_pwd = $db_config['db_pass'] ?? '';
+		$this->db_host = $db_config['db_host'] ?? '';
+		// port
+		$this->db_port = !empty($db_config['db_port']) ?
+			(int)$db_config['db_port'] : 5432;
+		if ($this->db_port < 0 || $this->db_port > 65535) {
+			$this->db_port = 5432;
+		}
+		// do not set to 'public' if not set, because the default is already public
+		$this->db_schema = !empty($db_config['db_schema']) ?
+			$db_config['db_schema'] : '';
+		$this->db_encoding = !empty($db_config['db_encoding']) ?
+			$db_config['db_encoding'] : '';
+		// db type
+		$this->db_type = $db_config['db_type'] ?? '';
+		if (!in_array($this->db_type, ['pgsql'])) {
+			$this->db_type = 'pgsql';
+		}
+		// ssl setting
+		$this->db_ssl = !empty($db_config['db_ssl']) ?
+			$db_config['db_ssl'] : 'allow';
+		if (!in_array($this->db_ssl, ['allow', 'disable', 'require', 'prefer'])) {
+			$this->db_ssl = 'allow';
+		}
+		// trigger convert type
+		// ['on', 'json', 'numeric', 'bytea'] allowed
+		// if on is not set but other valid than on is assumed
+		foreach ($db_config['db_convert_type'] ?? [] as $db_convert_type) {
+			if (!in_array($db_convert_type, ['on', 'json', 'numeric', 'bytea'])) {
+				continue;
+			}
+			$this->db_convert_type[] = $db_convert_type;
+			switch ($db_convert_type) {
+				case 'on':
+					$this->convert_type |= Convert::on->value;
+					break;
+				case 'json':
+					$this->convert_type |= Convert::on->value;
+					$this->convert_type |= Convert::json->value;
+					break;
+				case 'numeric':
+					$this->convert_type |= Convert::on->value;
+					$this->convert_type |= Convert::numeric->value;
+					break;
+				case 'bytea':
+					$this->convert_type |= Convert::on->value;
+					$this->convert_type |= Convert::bytea->value;
+					break;
+			}
+		}
+
+		// return status true: ok, false: options error
+		return true;
+	}
 
 	/**
 	 * based on $this->db_type
@@ -715,7 +787,12 @@ class IO
 				$this->log->warning($debug_id . ' :' . $prefix . $error_string);
 				break;
 			default:
-				$this->log->debug($debug_id, $error_string, $prefix);
+			// used named arguments so we can easy change the order of debug
+				$this->log->debug(
+					group_id: $debug_id,
+					message: $error_string,
+					prefix: $prefix
+				);
 				break;
 		}
 	}
@@ -918,11 +995,8 @@ class IO
 		if (is_bool($row)) {
 			return false;
 		}
-		// only do if array, else pass through row (can be false)
-		if (
-			!is_array($row) ||
-			empty($this->to_encoding)
-		) {
+		// do not do anything if no to encoding is set
+		if (empty($this->to_encoding)) {
 			return $row;
 		}
 		// go through each row and convert the encoding if needed
@@ -939,6 +1013,67 @@ class IO
 					$this->to_encoding,
 					$from_encoding
 				);
+			}
+		}
+		return $row;
+	}
+
+	/**
+	 * Convert column content to the type in the name/pos field
+	 * Note that on default it will only convert types that 100% map to PHP
+	 * - intN
+	 * - bool
+	 * everything else will stay string.
+	 * Fruther flags in the conert_type allow to convert:
+	 * - json/jsonb to array
+	 * - bytea to string
+	 * Dangerous convert:
+	 * - numeric/float to float (precision can be lost)
+	 *
+	 * @param  array<mixed>|false $row
+	 * @return array<mixed>|false
+	 */
+	private function __dbConvertType(array|false $row): array|false
+	{
+		if (is_bool($row)) {
+			return false;
+		}
+		// if convert type is not turned on
+		if (!$this->convert_type) {
+			return $row;
+		}
+		foreach ($row as $key => $value) {
+			// always bool/int
+			if (
+				$this->dbGetFieldType($key) != 'interval' &&
+				str_starts_with($this->dbGetFieldType($key), 'int')
+			) {
+				$row[$key] = (int)$value;
+			}
+			if ($this->dbGetFieldType($key) == 'bool') {
+				$row[$key] = $this->dbBoolean($value);
+			}
+			if (
+				$this->convert_type & Convert::json->value &&
+				str_starts_with($this->dbGetFieldType($key), 'json')
+			) {
+				$row[$key] = Json::jsonConvertToArray($value);
+			}
+			if (
+				$this->convert_type & Convert::numeric->value &&
+				(
+					str_starts_with($this->dbGetFieldType($key), 'numeric') ||
+					str_starts_with($this->dbGetFieldType($key), 'float')
+					// $this->dbGetFieldType($key) == 'real'
+				)
+			) {
+				$row[$key] = (float)$value;
+			}
+			if (
+				$this->convert_type & Convert::bytea->value &&
+				$this->dbGetFieldType($key) == 'bytea'
+			) {
+				$row[$key] = $this->dbUnescapeBytea($value);
 			}
 		}
 		return $row;
@@ -1204,7 +1339,7 @@ class IO
 		) {
 			$this->returning_id = true;
 		}
-		// $this->debug('DB IO', 'Q: '.$this->query.', RETURN: '.$this->returning_id);
+		// $this->debug('DB IO', 'Q: ' . $this->query . ', RETURN: ' . $this->returning_id);
 		// for DEBUG, only on first time ;)
 		$this->__dbDebug(
 			'db',
@@ -1250,6 +1385,7 @@ class IO
 
 	/**
 	 * runs post execute for rows affected, field names, inserted primary key, etc
+	 *
 	 * @return bool true on success or false if an error occured
 	 */
 	private function __dbPostExec(): bool
@@ -1275,11 +1411,18 @@ class IO
 				$this->field_names = [];
 				for ($i = 0; $i < $this->num_fields; $i++) {
 					$this->field_names[] = $this->db_functions->__dbFieldName($this->cursor, $i) ?: '';
+					// if (!empty($this->field_names[$i]))
+					// $this->field_name_types[$this->field_names[$i]] = null;
 				}
 				$this->field_types = [];
 				for ($i = 0; $i < $this->num_fields; $i++) {
 					$this->field_types[] = $this->db_functions->__dbFieldType($this->cursor, $i) ?: '';
 				}
+				// combined array
+				$this->field_name_types = array_combine(
+					$this->field_names,
+					$this->field_types
+				);
 			} elseif ($this->__checkQueryForInsert($this->query)) {
 				// if not select do here
 				// count affected rows
@@ -1790,8 +1933,8 @@ class IO
 	 *
 	 * @param  string|bool|int $string 't' / 'f' or any string, or bool true/false
 	 * @param  bool            $rev    do reverse (bool to string)
-	 * @return bool|string             correct php bool true/false
-	 *                                 or postgresql 't'/'f'
+	 * @return bool|string             [default=false]: corretc postgresql -> php,
+	 *                                 true: convert php to postgresql
 	 */
 	public function dbBoolean(string|bool|int $string, bool $rev = false): bool|string
 	{
@@ -1996,6 +2139,10 @@ class IO
 				'data' => [],
 				// field names as array
 				'field_names' => [],
+				// field types as array (pos in field names is pos here)
+				'field_types' => [],
+				// name to type assoc array (from field names and field types)
+				'field_name_types' => [],
 				// number of fields (field names)
 				'num_fields' => 0,
 				// number of rows that will be maximum returned
@@ -2159,6 +2306,12 @@ class IO
 						);
 				}
 				$this->field_types = $this->cursor_ext[$query_hash]['field_types'];
+				// combined name => type
+				$this->cursor_ext[$query_hash]['field_name_types'] = array_combine(
+					$this->field_names,
+					$this->field_types
+				);
+				$this->field_name_types = $this->cursor_ext[$query_hash]['field_name_types'];
 				// reset first call var
 				$first_call = false;
 				// reset the internal pos counter
@@ -2181,9 +2334,11 @@ class IO
 				!is_int($this->cursor_ext[$query_hash]['cursor'])
 			) {
 				$return = $this->__dbConvertEncoding(
-					$this->db_functions->__dbFetchArray(
-						$this->cursor_ext[$query_hash]['cursor'],
-						$this->db_functions->__dbResultType($assoc_only)
+					$this->__dbConvertType(
+						$this->db_functions->__dbFetchArray(
+							$this->cursor_ext[$query_hash]['cursor'],
+							$this->db_functions->__dbResultType($assoc_only)
+						)
 					)
 				);
 				$this->cursor_ext[$query_hash]['log'][] = 'DB Reading data: '
@@ -2375,9 +2530,11 @@ class IO
 			return false;
 		}
 		return $this->__dbConvertEncoding(
-			$this->db_functions->__dbFetchArray(
-				$cursor,
-				$this->db_functions->__dbResultType($assoc_only)
+			$this->__dbConvertType(
+				$this->db_functions->__dbFetchArray(
+					$cursor,
+					$this->db_functions->__dbResultType($assoc_only)
+				)
 			)
 		);
 	}
@@ -2474,6 +2631,20 @@ class IO
 			$rows[] = $res;
 		}
 		return $rows;
+	}
+
+	// ***************************
+	// CURSOR RETURN
+	// ***************************
+
+	/**
+	 * Get current set cursor or false if not set or error
+	 *
+	 * @return \PgSql\Result|false
+	 */
+	public function dbGetCursor(): \PgSql\Result|false
+	{
+		return $this->cursor;
 	}
 
 	// ***************************
@@ -3215,6 +3386,42 @@ class IO
 	}
 
 	/**
+	 * Undocumented function
+	 *
+	 * @param  Convert $convert
+	 * @return void
+	 */
+	public function dbSetConvertFlag(Convert $convert): void
+	{
+		$this->convert_type |= $convert->value;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  Convert $convert
+	 * @return void
+	 */
+	public function dbUnsetConvertFlag(Convert $convert): void
+	{
+		$this->convert_type &= ~$convert->value;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  Convert $convert
+	 * @return bool
+	 */
+	public function dbGetConvertFlag(Convert $convert): bool
+	{
+		if ($this->convert_type & $convert->value) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * set max query calls, set to -1 to disable loop
 	 * protection. this will generate a warning
 	 * empty call (null) will reset to default
@@ -3365,12 +3572,11 @@ class IO
 	 * Alternative use dbSetEcnoding to trigger encoding change on the DB side
 	 * Set to empty string to turn off
 	 * @param  string $encoding PHP Valid encoding to set
-	 * @return string           Current set encoding
+	 * @return void
 	 */
-	public function dbSetToEncoding(string $encoding): string
+	public function dbSetToEncoding(string $encoding): void
 	{
 		$this->to_encoding = $encoding;
-		return $this->to_encoding;
 	}
 
 	/**
@@ -3604,6 +3810,45 @@ class IO
 	public function dbGetFieldTypes(): array
 	{
 		return $this->field_types;
+	}
+
+	/**
+	 * Get the field name to type connection list
+	 *
+	 * @return array<string,string>
+	 */
+	public function dbGetFieldNameTypes(): array
+	{
+		return $this->field_name_types;
+	}
+
+	/**
+	 * Get the field name for a position
+	 *
+	 * @param  int          $pos Position number in query
+	 * @return false|string      Field name or false for not found
+	 */
+	public function dbGetFieldName(int $pos): false|string
+	{
+		return $this->field_names[$pos] ?? false;
+	}
+
+	/**
+	 * Return a field type for a field name or pos,
+	 * will return false if field is not found in list
+	 *
+	 * @param  string|int   $name_pos Field name or pos to get the type for
+	 * @return false|string           Either the field type or
+	 *                                false for not found in list
+	 */
+	public function dbGetFieldType(int|string $name_pos): false|string
+	{
+		if (is_numeric($name_pos)) {
+			$field_type = $this->field_types[$name_pos] ?? false;
+		} else {
+			$field_type = $this->field_name_types[$name_pos] ?? false;
+		}
+		return $field_type;
 	}
 
 	/**

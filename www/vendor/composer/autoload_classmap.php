@@ -39,6 +39,7 @@ return array(
     'CoreLibs\\Create\\Uids' => $baseDir . '/lib/CoreLibs/Create/Uids.php',
     'CoreLibs\\DB\\Extended\\ArrayIO' => $baseDir . '/lib/CoreLibs/DB/Extended/ArrayIO.php',
     'CoreLibs\\DB\\IO' => $baseDir . '/lib/CoreLibs/DB/IO.php',
+    'CoreLibs\\DB\\Options\\Convert' => $baseDir . '/lib/CoreLibs/DB/Options/Convert.php',
     'CoreLibs\\DB\\SQL\\Interface\\SqlFunctions' => $baseDir . '/lib/CoreLibs/DB/SQL/Interface/SqlFunctions.php',
     'CoreLibs\\DB\\SQL\\PgSQL' => $baseDir . '/lib/CoreLibs/DB/SQL/PgSQL.php',
     'CoreLibs\\Debug\\FileWriter' => $baseDir . '/lib/CoreLibs/Debug/FileWriter.php',
