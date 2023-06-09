@@ -911,6 +911,42 @@ class Logging
 	// *********************************************************************
 
 	/**
+	 * Commong log interface
+	 *
+	 * extended with group_id, prefix that are ONLY used for debug level
+	 *
+	 * @param  Level              $level
+	 * @param  string|\Stringable $message
+	 * @param  mixed[]            $context
+	 * @param  string             $group_id
+	 * @param  string             $prefix
+	 * @return bool
+	 */
+	public function log(
+		Level $level,
+		string|\Stringable $message,
+		array $context = [],
+		string $group_id = '',
+		string $prefix = '',
+	): bool {
+		// if we are not debug, ignore group_id and prefix
+		if ($level != Level::Debug) {
+			$group_id = '';
+			$prefix = '';
+		}
+		return $this->writeErrorMsg(
+			$level,
+			$this->prepareLog(
+				$level,
+				$prefix . $message,
+				$context,
+				$group_id
+			),
+			$group_id
+		);
+	}
+
+	/**
 	 * DEBUG: 100
 	 *
 	 * write debug data to error_msg array
@@ -927,8 +963,8 @@ class Logging
 	public function debug(
 		string $group_id,
 		string|\Stringable $message,
-		string $prefix = '',
-		array $context = []
+		array $context = [],
+		string $prefix = ''
 	): bool {
 		return $this->writeErrorMsg(
 			Level::Debug,
