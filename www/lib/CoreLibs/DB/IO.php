@@ -392,7 +392,9 @@ class IO
 	public \CoreLibs\Logging\Logging $log;
 
 	/**
-	 * main DB concstructor with auto connection to DB and failure set on failed connection
+	 * main DB concstructor with auto connection to DB
+	 * and failure set on failed connection
+	 *
 	 * @param array<mixed> $db_config DB configuration array
 	 * @param \CoreLibs\Logging\Logging $log Logging class
 	 */
