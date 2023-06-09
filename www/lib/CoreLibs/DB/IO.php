@@ -525,8 +525,10 @@ class IO
 	}
 
 	/**
-	 * internal connection function. Used to connect to the DB if there is no connection done yet.
+	 * internal connection function.
+	 * Used to connect to the DB if there is no connection done yet.
 	 * Called before any execute
+	 *
 	 * @return bool true on successfull connect, false if failed
 	 */
 	private function __connectToDB(): bool
@@ -571,6 +573,7 @@ class IO
 	/**
 	 * close db connection
 	 * only used by the deconstructor
+	 *
 	 * @return void has no return
 	 */
 	private function __closeDB(): void
@@ -585,6 +588,7 @@ class IO
 	 * checks if query is a SELECT, SHOW or WITH, if not error, 0 return
 	 * NOTE:
 	 * Query needs to start with SELECT, SHOW or WITH
+	 *
 	 * @param  string $query query to check
 	 * @return bool          true if matching, false if not
 	 */
@@ -602,6 +606,7 @@ class IO
 	 * if pure is set to true, only when INSERT is set will return true
 	 * NOTE:
 	 * Queries need to start with INSERT, UPDATE, DELETE. Anything else is ignored
+	 *
 	 * @param  string $query query to check
 	 * @param  bool   $pure  pure check (only insert), default false
 	 * @return bool          true if matching, false if not
@@ -620,6 +625,7 @@ class IO
 	/**
 	 * returns true if the query starts with UPDATE
 	 * query NEEDS to start with UPDATE
+	 *
 	 * @param  string $query query to check
 	 * @return bool          returns true if the query starts with UPDATE
 	 */
@@ -635,6 +641,7 @@ class IO
 	 * internal funktion that creates the array
 	 * NOTE:
 	 * used in db_dump_data only
+	 *
 	 * @param  array<mixed> $array array to print
 	 * @return string              string with printed and formated array
 	 */
@@ -740,6 +747,7 @@ class IO
 	 * Is called on base queries to reset error before each run
 	 * Recent error history can be checked with
 	 * dbGetErrorHistory or dbGetWarningHistory
+	 *
 	 * @return void
 	 */
 	private function __dbErrorReset(): void
@@ -751,6 +759,7 @@ class IO
 
 	/**
 	 * Check if there is a cursor and write this cursors error info
+	 *
 	 * @param \PgSql\Result|false $cursor current cursor for pg_result_error,
 	 *                             pg_last_error too, but pg_result_error
 	 *                             is more accurate (PgSql\Result)
@@ -811,6 +820,7 @@ class IO
 	 * error level, source as :: separated string
 	 * additional pg error message if exists and optional msg given on error call
 	 * all error messages are grouped by error_history_id set when errors are reset
+	 *
 	 * @param string $level
 	 * @param string $error_id
 	 * @param string $where_called
@@ -841,6 +851,7 @@ class IO
 
 	/**
 	 * write an error
+	 *
 	 * @param integer $error_id            Any Error ID, used in debug message string
 	 * @param \PgSql\Result|false $cursor Optional cursor, passed on to preprocessor
 	 * @param string $msg                  optional message added to debug
@@ -868,6 +879,7 @@ class IO
 
 	/**
 	 * write a warning
+	 *
 	 * @param integer $warning_id          Integer warning id added to debug
 	 * @param \PgSql\Result|false $cursor Optional cursor, passed on to preprocessor
 	 * @param string $msg                  optional message added to debug
@@ -895,6 +907,7 @@ class IO
 	/**
 	 * if there is the 'to_encoding' var set,
 	 * and the field is in the wrong encoding converts it to the target
+	 *
 	 * @param  array<mixed>|false $row Array from fetch_row
 	 * @return array<mixed>|false      Convert fetch_row array, or false
 	 */
@@ -931,6 +944,7 @@ class IO
 
 	/**
 	 * for debug purpose replaces $1, $2, etc with actual data
+	 *
 	 * @param  string       $query Query to replace values in
 	 * @param  array<mixed> $data  The data array
 	 * @return string              string of query with data inside
@@ -964,7 +978,9 @@ class IO
 	}
 
 	/**
-	 * extracts schema and table from the query, if no schema returns just empty string
+	 * extracts schema and table from the query,
+	 * if no schema returns just empty string
+	 *
 	 * @param  string       $query insert/select/update/delete query
 	 * @return array<mixed>        array with schema and table
 	 */
@@ -1003,6 +1019,7 @@ class IO
 	/**
 	 * check if there is another query running, or do we hang after a
 	 * PHP error
+	 *
 	 * @param  integer $timeout_seconds For complex timeout waits, default 3 seconds
 	 * @return bool                  True for connection OK, else false
 	 */
@@ -1021,6 +1038,7 @@ class IO
 	/**
 	 * dbReturn
 	 * Read data from previous written data cache
+	 *
 	 * @param  string  $query_hash The hash for the current query
 	 * @param  bool $assoc_only Only return assoc value (key named)
 	 * @return array<mixed>        Current position query data from cache
@@ -1099,6 +1117,7 @@ class IO
 	 * - checks for insert if returning is set/pk name
 	 * - sets internal hash for query
 	 * - checks multiple call count
+	 *
 	 * @param  string       $query   Query string
 	 * @param  array<mixed> $params  Query params, needed for hash creation
 	 * @param  string       $pk_name primary key
@@ -1292,6 +1311,7 @@ class IO
 	 * insert_id_ext [DEPRECATED, all in insert_id_arr]
 	 * - holds all returning as array
 	 * TODO: Only use insert_id_arr and use functions to get ok array or single
+	 *
 	 * @param bool         $returning_id
 	 * @param string          $query
 	 * @param string|null     $pk_name
@@ -1384,6 +1404,7 @@ class IO
 	 * closes the db_connection
 	 * normally this is not used, as the class deconstructor closes
 	 * the connection down
+	 *
 	 * @return void has no return
 	 */
 	public function dbClose(): void
@@ -1405,6 +1426,7 @@ class IO
 	 * returns the db init error
 	 * if failed to connect it is set to false
 	 * else true
+	 *
 	 * @return bool Connection status
 	 */
 	public function dbGetConnectionStatus(): bool
@@ -1414,6 +1436,7 @@ class IO
 
 	/**
 	 * get certain settings like username, db name
+	 *
 	 * @param  string          $name what setting to query
 	 * @return int|string|bool       setting value, if not allowed name return false
 	 */
@@ -1458,6 +1481,7 @@ class IO
 
 	/**
 	 * prints out status info from the connected DB (might be usefull for debug stuff)
+	 *
 	 * @param  bool   $log   Show db connection info, default true
 	 *                       if set to false won't write to error_msg var
 	 * @param  bool   $strip Strip all HTML
@@ -1497,6 +1521,7 @@ class IO
 
 	/**
 	 * Server version as integer value
+	 *
 	 * @return integer Version as integer
 	 */
 	public function dbVersionNumeric(): int
@@ -1506,6 +1531,7 @@ class IO
 
 	/**
 	 * return current database version (server side) as string
+	 *
 	 * @return string database version as string
 	 */
 	public function dbVersion(): string
@@ -1515,6 +1541,7 @@ class IO
 
 	/**
 	 * extended version info, can access all additional information data
+	 *
 	 * @param  string  $parameter Array parameter name, if not valid returns
 	 *                            empty string
 	 * @param  bool $strip     Strip extended server info string, default true
@@ -1528,6 +1555,7 @@ class IO
 
 	/**
 	 * All possible parameter names for dbVersionInfo
+	 *
 	 * @return array<mixed> List of all parameter names
 	 */
 	public function dbVersionInfoParameters(): array
@@ -1537,6 +1565,7 @@ class IO
 
 	/**
 	 * returns bool true or false if the string matches the database version
+	 *
 	 * @param  string $compare string to match in type =X.Y, >X.Y, <X.Y, <=X.Y, >=X.Y
 	 * @return bool            true for ok, false on not ok
 	 */
@@ -1605,6 +1634,7 @@ class IO
 
 	/**
 	 * dumps ALL data for this query, OR if no query given all in cursor_ext array
+	 *
 	 * @param  string $query Query, if given, only from this quey (if found)
 	 *                       else current cursor
 	 * @return string        Formated string with all the data in the array
@@ -1632,6 +1662,7 @@ class IO
 
 	/**
 	 * neutral function to escape a string for DB writing
+	 *
 	 * @param  string|int|float|bool $string string to escape
 	 * @return string                        escaped string
 	 */
@@ -1643,6 +1674,7 @@ class IO
 	/**
 	 * neutral function to escape a string for DB writing
 	 * this one adds '' quotes around the string
+	 *
 	 * @param  string|int|float|bool $string string to escape
 	 * @return string                        escaped string
 	 */
@@ -1653,6 +1685,7 @@ class IO
 
 	/**
 	 * string escape for column and table names
+	 *
 	 * @param  string $string string to escape
 	 * @return string         escaped string
 	 */
@@ -1663,6 +1696,7 @@ class IO
 
 	/**
 	 * escape data for writing to bytea type column field
+	 *
 	 * @param  string $data data to escape to bytea
 	 * @return string       escaped bytea string
 	 */
@@ -1673,6 +1707,7 @@ class IO
 
 	/**
 	 * unescape bytea data back to normal binrary data
+	 *
 	 * @param  string $bytea bytea data stream
 	 * @return string        binary data string
 	 */
@@ -1683,6 +1718,7 @@ class IO
 
 	/**
 	 * clear up any data for valid DB insert
+	 *
 	 * @param  int|float|string|bool|null $value to escape data
 	 * @param  string                     $kbn   escape trigger type
 	 * @return string                            escaped value
@@ -1749,6 +1785,7 @@ class IO
 	 * if the input is a single char 't' or 'f
 	 * it will return the bool value instead
 	 * also converts smallint 1/0 to true false
+	 *
 	 * @param  string|bool|int $string 't' / 'f' or any string, or bool true/false
 	 * @param  bool            $rev    do reverse (bool to string)
 	 * @return bool|string             correct php bool true/false
@@ -1784,6 +1821,7 @@ class IO
 
 	/**
 	 * only for postgres. pretty formats an age or datetime difference string
+	 *
 	 * @param  string  $interval   Age or interval/datetime difference
 	 * @param  bool    $show_micro micro on off (default false)
 	 * @return string              Y/M/D/h/m/s formatted string (like timeStringFormat)
@@ -1835,6 +1873,7 @@ class IO
 	/**
 	 * this is only needed for Postgresql. Converts postgresql arrays to PHP
 	 * Recommended to rather user 'array_to_json' instead and convet JSON in PHP
+	 *
 	 * @param  string $text input text to parse to an array
 	 * @return array<mixed> PHP array of the parsed data
 	 * @deprecated Recommended to use 'array_to_json' in PostgreSQL instead
@@ -1851,6 +1890,7 @@ class IO
 
 	/**
 	 * returns an array of the table with columns and values. FALSE on no table found
+	 *
 	 * @param  string     $table  table name
 	 * @param  string     $schema optional schema name
 	 * @return array<mixed>|false array of table data, false on error (table not found)
@@ -2238,6 +2278,7 @@ class IO
 	 * for INSERT INTO queries it is highly recommended to set the pk_name to avoid an
 	 * additional read from the database for the PK NAME
 	 * Wrapper for dbExecParams without params
+	 *
 	 * @param  string $query   the query, if not given,
 	 *                         the query class var will be used
 	 *                         if this was not set, method will quit with false
@@ -2307,10 +2348,9 @@ class IO
 		}
 	}
 
-	// add adbExecParams(string $query = '', array $params = [], string $pk_name = ')
-
 	/**
 	 * executes a cursor and returns the data, if no more data 0 will be returned
+	 *
 	 * @param  \PgSql\Result|false $cursor the cursor from db_exec or
 	 *                                       pg_query/pg_exec/mysql_query
 	 *                                       if not set will use internal cursor,
@@ -2343,6 +2383,7 @@ class IO
 	/**
 	 * returns the FIRST row of the given query
 	 * wrapper for dbReturnRowParms
+	 *
 	 * @param  string $query      the query to be executed
 	 * @param  bool   $assoc_only if true, only return assoc entry (default false)
 	 * @return array<mixed>|false row array or false on error
@@ -2388,6 +2429,7 @@ class IO
 	/**
 	 * creates an array of hashes of the query (all data)
 	 * Wrapper for dbReturnArrayParams
+	 *
 	 * @param  string $query      the query to be executed
 	 * @param  bool   $assoc_only if true, only name ref are returned (default true)
 	 * @return array<mixed>|false array of hashes (row -> fields), false on error
@@ -2557,6 +2599,7 @@ class IO
 
 	/**
 	 * gets how often a query was called already
+	 *
 	 * @param  string       $query  query string
 	 * @param  array<mixed> $params If the query is params type we need params
 	 *                              data to create a unique call one, optional
@@ -2581,6 +2624,7 @@ class IO
 	 * for INSERT INTO queries it is highly recommended
 	 * to set the pk_name to avoid an additional
 	 * read from the database for the PK NAME
+	 *
 	 * @param  string        $stm_name statement name
 	 * @param  string        $query    queryt string to run
 	 * @param  string        $pk_name  optional primary key
@@ -2693,6 +2737,7 @@ class IO
 
 	/**
 	 * runs a prepare query
+	 *
 	 * @param  string       $stm_name statement name for the query to run
 	 * @param  array<mixed> $data     data to run for this query, empty array for none
 	 * @return \PgSql\Result|false     false on error, or result on OK
@@ -2791,6 +2836,7 @@ class IO
 	 * executes the query async so other methods can be run at the same time
 	 * Wrapper for dbExecParamsAsync
 	 * NEEDS : dbCheckAsync
+	 *
 	 * @param  string $query   query to run
 	 * @param  string $pk_name optional primary key name, only used with
 	 *                         insert for returning call
@@ -2890,6 +2936,7 @@ class IO
 	/**
 	 * checks a previous async query and returns data if finished
 	 * NEEDS : dbExecAsync
+	 *
 	 * @return \PgSql\Result|bool cursor resource if the query is still running,
 	 *                            false if an error occured or cursor of that query
 	 */
@@ -2930,6 +2977,7 @@ class IO
 
 	/**
 	 * Returns the current async running query hash
+	 *
 	 * @return string Current async running query hash
 	 */
 	public function dbGetAsyncRunning(): string
@@ -2948,6 +2996,7 @@ class IO
 
 	/**
 	 * writes into one table based on array of table columns
+	 *
 	 * @param  array<mixed> $write_array     list of elements to write
 	 * @param  array<mixed> $not_write_array list of elements not to write
 	 * @param  int          $primary_key     id key to decide if we write insert or update
