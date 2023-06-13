@@ -19,10 +19,15 @@ namespace CoreLibs\DB\Options;
 
 enum Convert: int
 {
+	/** do not convert */
 	case off = 0;
+	/** convert only int/bool */
 	case on = 1;
+	/** also convert json to php array */
 	case json = 2;
+	/** also convert any float/real/numeric to php float */
 	case numeric = 4;
+	/** also decode bytea string to php string */
 	case bytea = 8;
 
 	/**
