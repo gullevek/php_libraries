@@ -38,7 +38,9 @@ print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
+print '<div><a href="class_test.db.type.php">Class Test DB Types</a></div>';
 print '<div><a href="class_test.db.dbReturn.php">Class Test DB dbReturn</a></div>';
+print '<div><a href="class_test.db.single.php">Class Test DB Single Aciont</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 print "LOGFILE NAME: " . $db->log->getLogFile() . "<br>";
@@ -170,10 +172,10 @@ print "EOM READ OF PREVIOUS INSERTED: " . print_r($db->dbReturnRow($query), true
 print "LAST ERROR: " . $db->dbGetLastError() . "<br>";
 print "<br>";
 $query = <<<SQL
-	SELECT
-		test_foo_id, test
-	FROM test_foo
-	WHERE test_foo_id = $1;
+SELECT
+	test_foo_id, test
+FROM test_foo
+WHERE test_foo_id = $1;
 SQL;
 print "RETURN ROW PARAMS: " . print_r(
 	$db->dbReturnRowParams(
@@ -334,10 +336,10 @@ $status = $db->dbExecParams($query_insert, $query_params);
 echo "<b>*</b><br>";
 echo "EOM STRING WITH MORE THAN 10 PARAMETERS: "
 	. Support::printToString($query_params) . " |<br>"
-	. " |<br>"
-	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
-	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
-	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true)
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " |<br>"
+	. "RETURNING EXT: <pre>" . print_r($db->dbGetReturningExt(), true) . "</pre> |<br>"
+	. "RETURNING RETURN: <pre>" . print_r($db->dbGetReturningArray(), true) . "</pre> |<br>"
 	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
 echo "<hr>";
 // binary insert tests
@@ -355,10 +357,10 @@ $status = $db->dbExec($query);
 $__last_insert_id = $db->dbGetInsertPK();
 print "BINARY DATA INSERT: "
 	. Support::printToString($status) . " |<br>"
-	. " |<br>"
-	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
-	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
-	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true)
+	. "QUERY: " . $db->dbGetQuery() . " |<br>"
+	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " |<br>"
+	. "RETURNING EXT: <pre>" . print_r($db->dbGetReturningExt(), true) . "</pre> |<br>"
+	. "RETURNING RETURN: <pre>" . print_r($db->dbGetReturningArray(), true) . "</pre> |<br>"
 	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
 
 echo "<b>*</b><br>";
@@ -369,7 +371,11 @@ INSERT INTO binary_test (
 	$1, $2, $3
 )
 SQL;
-$status = $db->dbExecParams($query, [$filename, $rand_bin_uid, $binary_data]);
+// $binary_data is dbEscapedBytea!
+$uniqid = \CoreLibs\Create\Uids::uniqIdShort();
+$status = $db->dbExecParams($query, [
+	'class_test.db.php', $uniqid, $binary_data
+]);
 $__last_insert_id = $db->dbGetInsertPK();
 print "BINARY DATA INSERT PARAMS: "
 	. Support::printToString($status) . " |<br>"
@@ -378,7 +384,23 @@ print "BINARY DATA INSERT PARAMS: "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true)
 	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
-
+print "BINARY READER: ";
+$query = <<<SQL
+SELECT
+	filename, uid, binary_data
+FROM
+	binary_test
+WHERE
+	uid = $1
+SQL;
+$res = $db->dbReturnRowParams($query, [$uniqid]);
+if (is_array($res)) {
+	var_dump($res);
+	$file = $db->dbUnescapeBytea($res['binary_data']);
+	// var_dump($file);
+} else {
+	print "Execute error";
+}
 echo "<hr>";
 
 // returning test with multiple entries
@@ -576,6 +598,44 @@ while (
 ) {
 	print "ROW: <pre>" . print_r($res, true) . "</pre><br>";
 }
+echo "<hr>";
+
+print "DB RETURN PARAMS LIKE<br>";
+$q = <<<SQL
+SELECT
+	test_foo_id, test, some_bool, string_a, number_a, number_a_numeric
+FROM test_foo
+WHERE string_a LIKE $1;
+SQL;
+while (
+	is_array($res = $db->dbReturnParams($q, ['%string%']))
+) {
+	print "ROW: <pre>" . print_r($res, true) . "</pre><br>";
+}
+echo "<hr>";
+
+print "DB RETURN PARAMS ANY<br>";
+$q = <<<SQL
+SELECT
+	test_foo_id, test, some_bool, string_a, number_a, number_a_numeric
+FROM test_foo
+WHERE string_a = ANY($1);
+SQL;
+$query_value = '{'
+	. join(',', ['string a'])
+. '}';
+while (
+	is_array($res = $db->dbReturnParams($q, [$query_value]))
+) {
+	print "ROW: <pre>" . print_r($res, true) . "</pre><br>";
+}
+echo "<hr>";
+
+print "COMPOSITE ELEMENT READ<br>";
+$res = $db->dbReturnRow("SELECT item, count, (item).name, (item).price, (item).supplier_id FROM on_hand");
+print "ROW: <pre>" . print_r($res) . "</pre>";
+var_dump($res);
+print "Field Name/Types: <pre>" . print_r($db->dbGetFieldNameTypes(), true) . "</pre>";
 echo "<hr>";
 
 // NOTE: try to replacate connection still exists if script is run a second time
