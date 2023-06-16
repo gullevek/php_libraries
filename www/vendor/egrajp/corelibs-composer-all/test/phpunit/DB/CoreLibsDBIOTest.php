@@ -38,6 +38,7 @@ namespace tests;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use CoreLibs\Logging\Logger\Level;
+use CoreLibs\DB\Options\Convert;
 
 /**
  * Test class for DB\IO + DB\SQL\PgSQL
@@ -4557,6 +4558,176 @@ final class CoreLibsDBIOTest extends TestCase
 		$db->dbClose();
 	}
 
+	// testing auto convert
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dbSetConvertFlag
+	 * @testdox Check convert type works
+	 *
+	 * @return void
+	 */
+	public function testConvertType(): void
+	{
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		$bytea_data = $db->dbEscapeBytea(
+			file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'CoreLibsDBIOTest.php') ?: ''
+		);
+		$query_insert = <<<SQL
+		INSERT INTO table_with_primary_key (
+			uid,
+			row_int, row_numeric, row_varchar, row_varchar_literal,
+			row_json, row_jsonb, row_bytea, row_timestamp,
+			row_date, row_interval, row_array_int, row_array_varchar
+		) VALUES (
+			$1,
+			$2, $3, $4, $5,
+			$6, $7, $8, $9,
+			$10, $11, $12, $13
+		)
+		SQL;
+		$db->dbExecParams(
+			$query_insert,
+			[
+				'CONVERT_TYPE_TEST',
+				1, 1.5, 'varchar', 'varchar literla',
+				json_encode(['json', 'a', 1, true, 'sub' => ['b', 'c']]),
+				json_encode(['jsonb', 'a', 1, true, 'sub' => ['b', 'c']]),
+				$bytea_data, date('Y-m-d H:i:s'), date('Y-m-d'), date('H:m:s'),
+				'{1,2,3}', '{"a","b","c"}'
+			]
+		);
+		$type_layout = [
+			'uid' => 'string',
+			'row_int' => 'int',
+			'row_numeric' => 'float',
+			'row_varchar' => 'string',
+			'row_varchar_literal' => 'string',
+			'row_json' => 'json',
+			'row_jsonb' => 'json',
+			'row_bytea' => 'bytea',
+			'row_timestamp' => 'string',
+			'row_date' => 'string',
+			'row_interval' => 'string',
+			'row_array_int' => 'string',
+			'row_array_varchar' => 'string'
+		];
+		$query_select = <<<SQL
+		SELECT
+			uid,
+			row_int, row_numeric, row_varchar, row_varchar_literal,
+			row_json, row_jsonb, row_bytea, row_timestamp,
+			row_date, row_interval, row_array_int, row_array_varchar
+		FROM
+			table_with_primary_key
+		WHERE
+			uid = $1
+		SQL;
+		$res = $db->dbReturnRowParams($query_select, ['CONVERT_TYPE_TEST']);
+		// all hast to be string
+		foreach ($res as $key => $value) {
+			$this->assertIsString($value, 'Aseert string for column: ' . $key);
+		}
+		// convert base only
+		$db->dbSetConvertFlag(Convert::on);
+		$res = $db->dbReturnRowParams($query_select, ['CONVERT_TYPE_TEST']);
+		foreach ($res as $key => $value) {
+			if (is_numeric($key)) {
+				$name = $db->dbGetFieldName($key);
+			} else {
+				$name = $key;
+			}
+			switch ($type_layout[$name]) {
+				case 'int':
+					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					break;
+				default:
+					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					break;
+			}
+		}
+		$db->dbSetConvertFlag(Convert::numeric);
+		$res = $db->dbReturnRowParams($query_select, ['CONVERT_TYPE_TEST']);
+		foreach ($res as $key => $value) {
+			if (is_numeric($key)) {
+				$name = $db->dbGetFieldName($key);
+			} else {
+				$name = $key;
+			}
+			switch ($type_layout[$name]) {
+				case 'int':
+					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					break;
+				case 'float':
+					$this->assertIsFloat($value, 'Aseert float for column: ' . $key . '/' . $name);
+					break;
+				default:
+					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					break;
+			}
+		}
+		$db->dbSetConvertFlag(Convert::json);
+		$res = $db->dbReturnRowParams($query_select, ['CONVERT_TYPE_TEST']);
+		foreach ($res as $key => $value) {
+			if (is_numeric($key)) {
+				$name = $db->dbGetFieldName($key);
+			} else {
+				$name = $key;
+			}
+			switch ($type_layout[$name]) {
+				case 'int':
+					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					break;
+				case 'float':
+					$this->assertIsFloat($value, 'Aseert float for column: ' . $key . '/' . $name);
+					break;
+				case 'json':
+				case 'jsonb':
+					$this->assertIsArray($value, 'Aseert array for column: ' . $key . '/' . $name);
+					break;
+				default:
+					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					break;
+			}
+		}
+		$db->dbSetConvertFlag(Convert::bytea);
+		$res = $db->dbReturnRowParams($query_select, ['CONVERT_TYPE_TEST']);
+		foreach ($res as $key => $value) {
+			if (is_numeric($key)) {
+				$name = $db->dbGetFieldName($key);
+			} else {
+				$name = $key;
+			}
+			switch ($type_layout[$name]) {
+				case 'int':
+					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					break;
+				case 'float':
+					$this->assertIsFloat($value, 'Aseert float for column: ' . $key . '/' . $name);
+					break;
+				case 'json':
+				case 'jsonb':
+					$this->assertIsArray($value, 'Aseert array for column: ' . $key . '/' . $name);
+					break;
+				case 'bytea':
+					// for hex types it must not start with \x
+					$this->assertStringStartsNotWith(
+						'\x',
+						$value,
+						'Aseert bytes not starts with \x for column: ' . $key . '/' . $name
+					);
+					break;
+				default:
+					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					break;
+			}
+		}
+	}
+
 	// - internal read data (post exec)
 	//   dbGetNumRows, dbGetNumFields, dbGetFieldNames,
 	//   dbGetQuery, dbGetQueryHash, dbGetDbh
@@ -4588,7 +4759,7 @@ final class CoreLibsDBIOTest extends TestCase
 					. "('Foxtrott', 'Tango', 789, '1982-10-15') ",
 				null,
 				//
-				2,
+				3,
 				4,
 				['row_varchar', 'row_varchar_literal', 'row_int', 'row_date'],
 				['varchar', 'varchar', 'int4', 'date'],
@@ -4705,9 +4876,16 @@ final class CoreLibsDBIOTest extends TestCase
 			$db->dbExecParams($query, $params);
 		}
 
+		$this->assertInstanceOf(
+			'PgSql\Result',
+			$db->dbGetCursor(),
+			'Failed assert dbGetCursor'
+		);
+
 		$this->assertEquals(
 			$compare_query ?? $query,
-			$db->dbGetQuery()
+			$db->dbGetQuery(),
+			'Failed assert dbGetQuery'
 		);
 		$this->assertEquals(
 			// perhaps move that somewhere else?
@@ -4720,7 +4898,8 @@ final class CoreLibsDBIOTest extends TestCase
 			($params === null ?
 				$db->dbGetQueryHash($query) :
 				$db->dbGetQueryHash($query, $params)
-			)
+			),
+			'Failed assertdbGetQueryHash '
 		);
 		$this->assertEquals(
 			$expected_rows,
@@ -4742,6 +4921,35 @@ final class CoreLibsDBIOTest extends TestCase
 			$db->dbGetFieldTypes(),
 			'Failed assert dbGetFieldTypes'
 		);
+		// check FieldNameTypes matches
+		$this->assertEquals(
+			array_combine(
+				$expected_col_names,
+				$expected_col_types
+			),
+			$db->dbGetFieldNameTypes(),
+			'Failed assert dbGetFieldNameTypes'
+		);
+		// check pos matches name
+		// name matches type
+		// pos matches type
+		foreach ($expected_col_names as $pos => $name) {
+			$this->assertEquals(
+				$name,
+				$db->dbGetFieldName($pos),
+				'Failed assert dbGetFieldName: ' . $pos . ' => ' . $name
+			);
+			$this->assertEquals(
+				$expected_col_types[$pos],
+				$db->dbGetFieldType($name),
+				'Failed assert dbGetFieldType: ' . $name . ' => ' . $expected_col_types[$pos]
+			);
+			$this->assertEquals(
+				$expected_col_types[$pos],
+				$db->dbGetFieldType($pos),
+				'Failed assert dbGetFieldType: ' . $pos . ' => ' . $expected_col_types[$pos]
+			);
+		}
 		$dbh = $db->dbGetDbh();
 		$this->assertIsObject(
 			$dbh

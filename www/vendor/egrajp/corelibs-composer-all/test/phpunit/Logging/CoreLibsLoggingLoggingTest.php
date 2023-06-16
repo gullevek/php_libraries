@@ -691,6 +691,11 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 		);
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function providerLoggingLevelWrite(): array
 	{
 		return [
@@ -793,6 +798,39 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 				. "/",
 			$file_content,
 			'log message regex'
+		);
+	}
+
+	// check log level that writer writes in correct level
+	// also that non debug ignores prefix/group
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::log
+	 * @testdox log() general call test
+	 *
+	 * @return void
+	 */
+	public function testLoggingLog(): void
+	{
+		// init logger
+		$log = new \CoreLibs\Logging\Logging([
+			'log_file_id' => 'testLoggingLog',
+			'log_folder' => self::LOG_FOLDER,
+			'log_per_level' => true,
+		]);
+		$log_ok = $log->log(Level::Debug, 'DEBUG', group_id: 'GROUP_ID', prefix: 'PREFIX:');
+		$this->assertTrue($log_ok, 'assert ::log (debug) OK');
+		$this->assertEquals(
+			$log->getLogFile(),
+			$log->getLogFileId() . '_DEBUG.log'
+		);
+		$log_ok = $log->log(Level::Info, 'INFO', group_id: 'GROUP_ID', prefix: 'PREFIX:');
+		$this->assertTrue($log_ok, 'assert ::log (info) OK');
+		$this->assertEquals(
+			$log->getLogFile(),
+			$log->getLogFileId() . '_INFO.log'
 		);
 	}
 

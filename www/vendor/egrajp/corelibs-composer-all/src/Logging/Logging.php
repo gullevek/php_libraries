@@ -567,7 +567,7 @@ class Logging
 		$context_str = '';
 		if ($context != []) {
 			// TODO this here has to be changed to something better
-			$context_str = ' ' . print_r($context, true);
+			$context_str = ' :' . print_r($context, true);
 		}
 		// build log string
 		return '[' . $timestamp . '] '
@@ -911,24 +911,60 @@ class Logging
 	// *********************************************************************
 
 	/**
+	 * Commong log interface
+	 *
+	 * extended with group_id, prefix that are ONLY used for debug level
+	 *
+	 * @param  Level              $level
+	 * @param  string|\Stringable $message
+	 * @param  mixed[]            $context
+	 * @param  string             $group_id
+	 * @param  string             $prefix
+	 * @return bool
+	 */
+	public function log(
+		Level $level,
+		string|\Stringable $message,
+		array $context = [],
+		string $group_id = '',
+		string $prefix = '',
+	): bool {
+		// if we are not debug, ignore group_id and prefix
+		if ($level != Level::Debug) {
+			$group_id = '';
+			$prefix = '';
+		}
+		return $this->writeErrorMsg(
+			$level,
+			$this->prepareLog(
+				$level,
+				$prefix . $message,
+				$context,
+				$group_id
+			),
+			$group_id
+		);
+	}
+
+	/**
 	 * DEBUG: 100
 	 *
 	 * write debug data to error_msg array
 	 *
 	 * @param  string $group_id id for error message, groups messages together
 	 * @param  string|Stringable $message  the actual error message
+	 * @param  mixed[] $context
 	 * @param  string $prefix   Attach some block before $string.
 	 *                          Will not be stripped even
 	 *                          when strip is true
 	 *                          if strip is false, recommended to add that to $string
-	 * @param  mixed[] $context
 	 * @return bool             True if logged, false if not logged
 	 */
 	public function debug(
 		string $group_id,
 		string|\Stringable $message,
-		string $prefix = '',
-		array $context = []
+		array $context = [],
+		string $prefix = ''
 	): bool {
 		return $this->writeErrorMsg(
 			Level::Debug,

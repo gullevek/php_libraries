@@ -259,6 +259,8 @@ namespace CoreLibs\DB;
 use CoreLibs\Create\Hash;
 use CoreLibs\Debug\Support;
 use CoreLibs\Create\Uids;
+use CoreLibs\Convert\Json;
+use CoreLibs\DB\Options\Convert;
 
 // below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
 // as main system. Currently all @var sets are written as object
@@ -328,6 +330,17 @@ class IO
 	private string $db_type;
 	/** @var string ssl flag (for postgres only), disable, allow, prefer, require */
 	private string $db_ssl;
+	/** @var array<string> flag for converting types from settings */
+	private array $db_convert_type = [];
+	// convert type settings
+	// 0: OFF (CONVERT_OFF)
+	// >0: ON
+	// 1: convert intN/bool (CONVERT_ON)
+	// 2: convert json/jsonb to array (CONVERT_JSON)
+	// 4: convert numeric/floatN to float (CONVERT_NUMERIC)
+	// 8: convert bytea to string data (CONVERT_BYTEA)
+	/** @var int type settings as bit mask, 0 for off, anything >2 will aways set 1 too */
+	private int $convert_type = Convert::off->value;
 	// FOR BELOW: (This should be private and only readable through some method)
 	// cursor array for cached readings
 	/** @var array<string,mixed> extended cursoers string index with content */
@@ -343,6 +356,8 @@ class IO
 	private array $field_names = [];
 	/** @var array<string> field type names */
 	private array $field_types = [];
+	/** @var array<string,string> field name to type */
+	private array $field_name_types = [];
 	/** @var array<mixed> always return as array, even if only one */
 	private array $insert_id_arr = [];
 	/** @var string primary key name for insert recovery from insert_id_arr */
@@ -392,8 +407,11 @@ class IO
 	public \CoreLibs\Logging\Logging $log;
 
 	/**
-	 * main DB concstructor with auto connection to DB and failure set on failed connection
-	 * @param array<mixed> $db_config DB configuration array
+	 * main DB concstructor with auto connection to DB
+	 * and failure set on failed connection
+	 *
+	 * phpcs:ignore
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[]} $db_config DB configuration array
 	 * @param \CoreLibs\Logging\Logging $log Logging class
 	 */
 	public function __construct(
@@ -402,17 +420,8 @@ class IO
 	) {
 		// attach logger
 		$this->log = $log;
-		// sets the names (for connect/reconnect)
-		$this->db_name = $db_config['db_name'] ?? '';
-		$this->db_user = $db_config['db_user'] ?? '';
-		$this->db_pwd = $db_config['db_pass'] ?? '';
-		$this->db_host = $db_config['db_host'] ?? '';
-		$this->db_port = !empty($db_config['db_port']) ? (int)$db_config['db_port'] : 5432;
-		// do not set to 'public' if not set, because the default is already public
-		$this->db_schema = !empty($db_config['db_schema']) ? $db_config['db_schema'] : '';
-		$this->db_encoding = !empty($db_config['db_encoding']) ? $db_config['db_encoding'] : '';
-		$this->db_type = $db_config['db_type'] ?? '';
-		$this->db_ssl = !empty($db_config['db_ssl']) ? $db_config['db_ssl'] : 'allow';
+		// set the config options
+		$this->__setConfigOptions($db_config);
 		// set debug, either via global var, or from config, else set to false
 		$this->dbSetDebug(
 			// set if logging level is Debug
@@ -498,6 +507,84 @@ class IO
 	// *************************************************************
 
 	/**
+	 * Setup DB config and options
+	 *
+	 * phpcs:ignore
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[]} $db_config
+	 * @return bool
+	 */
+	private function __setConfigOptions(array $db_config): bool
+	{
+		// sets the names (for connect/reconnect)
+		$this->db_name = $db_config['db_name'] ?? '';
+		$this->db_user = $db_config['db_user'] ?? '';
+		$this->db_pwd = $db_config['db_pass'] ?? '';
+		$this->db_host = $db_config['db_host'] ?? '';
+		// port
+		$this->db_port = !empty($db_config['db_port']) ?
+			(int)$db_config['db_port'] : 5432;
+		if ($this->db_port < 0 || $this->db_port > 65535) {
+			$this->db_port = 5432;
+		}
+		// do not set to 'public' if not set, because the default is already public
+		$this->db_schema = !empty($db_config['db_schema']) ?
+			$db_config['db_schema'] : '';
+		$this->db_encoding = !empty($db_config['db_encoding']) ?
+			$db_config['db_encoding'] : '';
+		// db type
+		$this->db_type = $db_config['db_type'] ?? '';
+		if (!in_array($this->db_type, ['pgsql'])) {
+			$this->db_type = 'pgsql';
+		}
+		// ssl setting
+		$this->db_ssl = !empty($db_config['db_ssl']) ?
+			$db_config['db_ssl'] : 'allow';
+		if (!in_array($this->db_ssl, ['allow', 'disable', 'require', 'prefer'])) {
+			$this->db_ssl = 'allow';
+		}
+		// trigger convert type
+		// ['on', 'json', 'numeric', 'bytea'] allowed
+		// if on is not set but other valid than on is assumed
+		foreach ($db_config['db_convert_type'] ?? [] as $db_convert_type) {
+			if (!in_array($db_convert_type, ['on', 'json', 'numeric', 'bytea'])) {
+				continue;
+			}
+			$this->db_convert_type[] = $db_convert_type;
+			$this->__setConvertType($db_convert_type);
+		}
+
+		// return status true: ok, false: options error
+		return true;
+	}
+
+	/**
+	 * Set the convert bit flags
+	 *
+	 * @param  string $db_convert_type One of 'on', 'json', 'numeric', 'bytea'
+	 * @return void
+	 */
+	private function __setConvertType(string $db_convert_type): void
+	{
+		switch ($db_convert_type) {
+			case 'on':
+				$this->convert_type |= Convert::on->value;
+				break;
+			case 'json':
+				$this->convert_type |= Convert::on->value;
+				$this->convert_type |= Convert::json->value;
+				break;
+			case 'numeric':
+				$this->convert_type |= Convert::on->value;
+				$this->convert_type |= Convert::numeric->value;
+				break;
+			case 'bytea':
+				$this->convert_type |= Convert::on->value;
+				$this->convert_type |= Convert::bytea->value;
+				break;
+		}
+	}
+
+	/**
 	 * based on $this->db_type
 	 * here we need to load the db pgsql include one
 	 * How can we do this dynamic? eg for non PgSQL
@@ -525,8 +612,10 @@ class IO
 	}
 
 	/**
-	 * internal connection function. Used to connect to the DB if there is no connection done yet.
+	 * internal connection function.
+	 * Used to connect to the DB if there is no connection done yet.
 	 * Called before any execute
+	 *
 	 * @return bool true on successfull connect, false if failed
 	 */
 	private function __connectToDB(): bool
@@ -571,6 +660,7 @@ class IO
 	/**
 	 * close db connection
 	 * only used by the deconstructor
+	 *
 	 * @return void has no return
 	 */
 	private function __closeDB(): void
@@ -585,6 +675,7 @@ class IO
 	 * checks if query is a SELECT, SHOW or WITH, if not error, 0 return
 	 * NOTE:
 	 * Query needs to start with SELECT, SHOW or WITH
+	 *
 	 * @param  string $query query to check
 	 * @return bool          true if matching, false if not
 	 */
@@ -602,6 +693,7 @@ class IO
 	 * if pure is set to true, only when INSERT is set will return true
 	 * NOTE:
 	 * Queries need to start with INSERT, UPDATE, DELETE. Anything else is ignored
+	 *
 	 * @param  string $query query to check
 	 * @param  bool   $pure  pure check (only insert), default false
 	 * @return bool          true if matching, false if not
@@ -620,6 +712,7 @@ class IO
 	/**
 	 * returns true if the query starts with UPDATE
 	 * query NEEDS to start with UPDATE
+	 *
 	 * @param  string $query query to check
 	 * @return bool          returns true if the query starts with UPDATE
 	 */
@@ -635,6 +728,7 @@ class IO
 	 * internal funktion that creates the array
 	 * NOTE:
 	 * used in db_dump_data only
+	 *
 	 * @param  array<mixed> $array array to print
 	 * @return string              string with printed and formated array
 	 */
@@ -698,15 +792,46 @@ class IO
 				. \CoreLibs\Debug\Support::prAr($error_data)
 				. ']';
 		}
+		// we need to trace back where the first non class call was done
+		// add this stack trace to the context
+		$call_stack = [];
+		foreach (array_reverse(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)) as $call_trace) {
+			if (
+				!empty($call_trace['file']) &&
+				str_ends_with($call_trace['file'], '/DB/IO.php')
+			) {
+				break;
+			}
+			$call_stack[] =
+				($call_trace['file'] ?? 'n/f') . ':'
+				. ($call_trace['line'] ?? '-') . ':'
+				. (!empty($call_trace['class']) ? $call_trace['class'] . '->' : '')
+				. $call_trace['function'];
+		}
+		$context = [
+			'call_trace' => array_reverse($call_stack)
+		];
 		switch ($id) {
 			case 'DB_ERROR':
-				$this->log->error($debug_id . ' :' . $prefix . $error_string);
+				$this->log->error(
+					$debug_id . ' :' . $prefix . $error_string,
+					$context
+				);
 				break;
 			case 'DB_WARNING':
-				$this->log->warning($debug_id . ' :' . $prefix . $error_string);
+				$this->log->warning(
+					$debug_id . ' :' . $prefix . $error_string,
+					$context
+				);
 				break;
 			default:
-				$this->log->debug($debug_id, $error_string, $prefix);
+			// used named arguments so we can easy change the order of debug
+				$this->log->debug(
+					group_id: $debug_id,
+					message: $error_string,
+					prefix: $prefix,
+					context: $context
+				);
 				break;
 		}
 	}
@@ -740,6 +865,7 @@ class IO
 	 * Is called on base queries to reset error before each run
 	 * Recent error history can be checked with
 	 * dbGetErrorHistory or dbGetWarningHistory
+	 *
 	 * @return void
 	 */
 	private function __dbErrorReset(): void
@@ -751,6 +877,7 @@ class IO
 
 	/**
 	 * Check if there is a cursor and write this cursors error info
+	 *
 	 * @param \PgSql\Result|false $cursor current cursor for pg_result_error,
 	 *                             pg_last_error too, but pg_result_error
 	 *                             is more accurate (PgSql\Result)
@@ -811,6 +938,7 @@ class IO
 	 * error level, source as :: separated string
 	 * additional pg error message if exists and optional msg given on error call
 	 * all error messages are grouped by error_history_id set when errors are reset
+	 *
 	 * @param string $level
 	 * @param string $error_id
 	 * @param string $where_called
@@ -841,6 +969,7 @@ class IO
 
 	/**
 	 * write an error
+	 *
 	 * @param integer $error_id            Any Error ID, used in debug message string
 	 * @param \PgSql\Result|false $cursor Optional cursor, passed on to preprocessor
 	 * @param string $msg                  optional message added to debug
@@ -868,6 +997,7 @@ class IO
 
 	/**
 	 * write a warning
+	 *
 	 * @param integer $warning_id          Integer warning id added to debug
 	 * @param \PgSql\Result|false $cursor Optional cursor, passed on to preprocessor
 	 * @param string $msg                  optional message added to debug
@@ -895,6 +1025,7 @@ class IO
 	/**
 	 * if there is the 'to_encoding' var set,
 	 * and the field is in the wrong encoding converts it to the target
+	 *
 	 * @param  array<mixed>|false $row Array from fetch_row
 	 * @return array<mixed>|false      Convert fetch_row array, or false
 	 */
@@ -903,11 +1034,8 @@ class IO
 		if (is_bool($row)) {
 			return false;
 		}
-		// only do if array, else pass through row (can be false)
-		if (
-			!is_array($row) ||
-			empty($this->to_encoding)
-		) {
+		// do not do anything if no to encoding is set
+		if (empty($this->to_encoding)) {
 			return $row;
 		}
 		// go through each row and convert the encoding if needed
@@ -930,7 +1058,69 @@ class IO
 	}
 
 	/**
+	 * Convert column content to the type in the name/pos field
+	 * Note that on default it will only convert types that 100% map to PHP
+	 * - intN
+	 * - bool
+	 * everything else will stay string.
+	 * Fruther flags in the conert_type allow to convert:
+	 * - json/jsonb to array
+	 * - bytea to string
+	 * Dangerous convert:
+	 * - numeric/float to float (precision can be lost)
+	 *
+	 * @param  array<mixed>|false $row
+	 * @return array<mixed>|false
+	 */
+	private function __dbConvertType(array|false $row): array|false
+	{
+		if (is_bool($row)) {
+			return false;
+		}
+		// if convert type is not turned on
+		if (!$this->convert_type) {
+			return $row;
+		}
+		foreach ($row as $key => $value) {
+			// always bool/int
+			if (
+				$this->dbGetFieldType($key) != 'interval' &&
+				str_starts_with($this->dbGetFieldType($key) ?: '', 'int')
+			) {
+				$row[$key] = (int)$value;
+			}
+			if ($this->dbGetFieldType($key) == 'bool') {
+				$row[$key] = $this->dbBoolean($value);
+			}
+			if (
+				$this->convert_type & Convert::json->value &&
+				str_starts_with($this->dbGetFieldType($key) ?: '', 'json')
+			) {
+				$row[$key] = Json::jsonConvertToArray($value);
+			}
+			if (
+				$this->convert_type & Convert::numeric->value &&
+				(
+					str_starts_with($this->dbGetFieldType($key) ?: '', 'numeric') ||
+					str_starts_with($this->dbGetFieldType($key) ?: '', 'float')
+					// $this->dbGetFieldType($key) == 'real'
+				)
+			) {
+				$row[$key] = (float)$value;
+			}
+			if (
+				$this->convert_type & Convert::bytea->value &&
+				$this->dbGetFieldType($key) == 'bytea'
+			) {
+				$row[$key] = $this->dbUnescapeBytea($value);
+			}
+		}
+		return $row;
+	}
+
+	/**
 	 * for debug purpose replaces $1, $2, etc with actual data
+	 *
 	 * @param  string       $query Query to replace values in
 	 * @param  array<mixed> $data  The data array
 	 * @return string              string of query with data inside
@@ -964,7 +1154,9 @@ class IO
 	}
 
 	/**
-	 * extracts schema and table from the query, if no schema returns just empty string
+	 * extracts schema and table from the query,
+	 * if no schema returns just empty string
+	 *
 	 * @param  string       $query insert/select/update/delete query
 	 * @return array<mixed>        array with schema and table
 	 */
@@ -1003,6 +1195,7 @@ class IO
 	/**
 	 * check if there is another query running, or do we hang after a
 	 * PHP error
+	 *
 	 * @param  integer $timeout_seconds For complex timeout waits, default 3 seconds
 	 * @return bool                  True for connection OK, else false
 	 */
@@ -1021,6 +1214,7 @@ class IO
 	/**
 	 * dbReturn
 	 * Read data from previous written data cache
+	 *
 	 * @param  string  $query_hash The hash for the current query
 	 * @param  bool $assoc_only Only return assoc value (key named)
 	 * @return array<mixed>        Current position query data from cache
@@ -1099,6 +1293,7 @@ class IO
 	 * - checks for insert if returning is set/pk name
 	 * - sets internal hash for query
 	 * - checks multiple call count
+	 *
 	 * @param  string       $query   Query string
 	 * @param  array<mixed> $params  Query params, needed for hash creation
 	 * @param  string       $pk_name primary key
@@ -1183,7 +1378,7 @@ class IO
 		) {
 			$this->returning_id = true;
 		}
-		// $this->debug('DB IO', 'Q: '.$this->query.', RETURN: '.$this->returning_id);
+		// $this->debug('DB IO', 'Q: ' . $this->query . ', RETURN: ' . $this->returning_id);
 		// for DEBUG, only on first time ;)
 		$this->__dbDebug(
 			'db',
@@ -1229,6 +1424,7 @@ class IO
 
 	/**
 	 * runs post execute for rows affected, field names, inserted primary key, etc
+	 *
 	 * @return bool true on success or false if an error occured
 	 */
 	private function __dbPostExec(): bool
@@ -1254,11 +1450,18 @@ class IO
 				$this->field_names = [];
 				for ($i = 0; $i < $this->num_fields; $i++) {
 					$this->field_names[] = $this->db_functions->__dbFieldName($this->cursor, $i) ?: '';
+					// if (!empty($this->field_names[$i]))
+					// $this->field_name_types[$this->field_names[$i]] = null;
 				}
 				$this->field_types = [];
 				for ($i = 0; $i < $this->num_fields; $i++) {
 					$this->field_types[] = $this->db_functions->__dbFieldType($this->cursor, $i) ?: '';
 				}
+				// combined array
+				$this->field_name_types = array_combine(
+					$this->field_names,
+					$this->field_types
+				);
 			} elseif ($this->__checkQueryForInsert($this->query)) {
 				// if not select do here
 				// count affected rows
@@ -1292,6 +1495,7 @@ class IO
 	 * insert_id_ext [DEPRECATED, all in insert_id_arr]
 	 * - holds all returning as array
 	 * TODO: Only use insert_id_arr and use functions to get ok array or single
+	 *
 	 * @param bool         $returning_id
 	 * @param string          $query
 	 * @param string|null     $pk_name
@@ -1384,6 +1588,7 @@ class IO
 	 * closes the db_connection
 	 * normally this is not used, as the class deconstructor closes
 	 * the connection down
+	 *
 	 * @return void has no return
 	 */
 	public function dbClose(): void
@@ -1405,6 +1610,7 @@ class IO
 	 * returns the db init error
 	 * if failed to connect it is set to false
 	 * else true
+	 *
 	 * @return bool Connection status
 	 */
 	public function dbGetConnectionStatus(): bool
@@ -1414,6 +1620,7 @@ class IO
 
 	/**
 	 * get certain settings like username, db name
+	 *
 	 * @param  string          $name what setting to query
 	 * @return int|string|bool       setting value, if not allowed name return false
 	 */
@@ -1458,6 +1665,7 @@ class IO
 
 	/**
 	 * prints out status info from the connected DB (might be usefull for debug stuff)
+	 *
 	 * @param  bool   $log   Show db connection info, default true
 	 *                       if set to false won't write to error_msg var
 	 * @param  bool   $strip Strip all HTML
@@ -1497,6 +1705,7 @@ class IO
 
 	/**
 	 * Server version as integer value
+	 *
 	 * @return integer Version as integer
 	 */
 	public function dbVersionNumeric(): int
@@ -1506,6 +1715,7 @@ class IO
 
 	/**
 	 * return current database version (server side) as string
+	 *
 	 * @return string database version as string
 	 */
 	public function dbVersion(): string
@@ -1515,6 +1725,7 @@ class IO
 
 	/**
 	 * extended version info, can access all additional information data
+	 *
 	 * @param  string  $parameter Array parameter name, if not valid returns
 	 *                            empty string
 	 * @param  bool $strip     Strip extended server info string, default true
@@ -1528,6 +1739,7 @@ class IO
 
 	/**
 	 * All possible parameter names for dbVersionInfo
+	 *
 	 * @return array<mixed> List of all parameter names
 	 */
 	public function dbVersionInfoParameters(): array
@@ -1537,6 +1749,7 @@ class IO
 
 	/**
 	 * returns bool true or false if the string matches the database version
+	 *
 	 * @param  string $compare string to match in type =X.Y, >X.Y, <X.Y, <=X.Y, >=X.Y
 	 * @return bool            true for ok, false on not ok
 	 */
@@ -1605,6 +1818,7 @@ class IO
 
 	/**
 	 * dumps ALL data for this query, OR if no query given all in cursor_ext array
+	 *
 	 * @param  string $query Query, if given, only from this quey (if found)
 	 *                       else current cursor
 	 * @return string        Formated string with all the data in the array
@@ -1632,6 +1846,7 @@ class IO
 
 	/**
 	 * neutral function to escape a string for DB writing
+	 *
 	 * @param  string|int|float|bool $string string to escape
 	 * @return string                        escaped string
 	 */
@@ -1643,6 +1858,7 @@ class IO
 	/**
 	 * neutral function to escape a string for DB writing
 	 * this one adds '' quotes around the string
+	 *
 	 * @param  string|int|float|bool $string string to escape
 	 * @return string                        escaped string
 	 */
@@ -1653,6 +1869,7 @@ class IO
 
 	/**
 	 * string escape for column and table names
+	 *
 	 * @param  string $string string to escape
 	 * @return string         escaped string
 	 */
@@ -1663,6 +1880,7 @@ class IO
 
 	/**
 	 * escape data for writing to bytea type column field
+	 *
 	 * @param  string $data data to escape to bytea
 	 * @return string       escaped bytea string
 	 */
@@ -1673,6 +1891,7 @@ class IO
 
 	/**
 	 * unescape bytea data back to normal binrary data
+	 *
 	 * @param  string $bytea bytea data stream
 	 * @return string        binary data string
 	 */
@@ -1683,6 +1902,7 @@ class IO
 
 	/**
 	 * clear up any data for valid DB insert
+	 *
 	 * @param  int|float|string|bool|null $value to escape data
 	 * @param  string                     $kbn   escape trigger type
 	 * @return string                            escaped value
@@ -1749,10 +1969,11 @@ class IO
 	 * if the input is a single char 't' or 'f
 	 * it will return the bool value instead
 	 * also converts smallint 1/0 to true false
+	 *
 	 * @param  string|bool|int $string 't' / 'f' or any string, or bool true/false
 	 * @param  bool            $rev    do reverse (bool to string)
-	 * @return bool|string             correct php bool true/false
-	 *                                 or postgresql 't'/'f'
+	 * @return bool|string             [default=false]: corretc postgresql -> php,
+	 *                                 true: convert php to postgresql
 	 */
 	public function dbBoolean(string|bool|int $string, bool $rev = false): bool|string
 	{
@@ -1784,6 +2005,7 @@ class IO
 
 	/**
 	 * only for postgres. pretty formats an age or datetime difference string
+	 *
 	 * @param  string  $interval   Age or interval/datetime difference
 	 * @param  bool    $show_micro micro on off (default false)
 	 * @return string              Y/M/D/h/m/s formatted string (like timeStringFormat)
@@ -1835,6 +2057,7 @@ class IO
 	/**
 	 * this is only needed for Postgresql. Converts postgresql arrays to PHP
 	 * Recommended to rather user 'array_to_json' instead and convet JSON in PHP
+	 *
 	 * @param  string $text input text to parse to an array
 	 * @return array<mixed> PHP array of the parsed data
 	 * @deprecated Recommended to use 'array_to_json' in PostgreSQL instead
@@ -1851,6 +2074,7 @@ class IO
 
 	/**
 	 * returns an array of the table with columns and values. FALSE on no table found
+	 *
 	 * @param  string     $table  table name
 	 * @param  string     $schema optional schema name
 	 * @return array<mixed>|false array of table data, false on error (table not found)
@@ -1954,6 +2178,10 @@ class IO
 				'data' => [],
 				// field names as array
 				'field_names' => [],
+				// field types as array (pos in field names is pos here)
+				'field_types' => [],
+				// name to type assoc array (from field names and field types)
+				'field_name_types' => [],
 				// number of fields (field names)
 				'num_fields' => 0,
 				// number of rows that will be maximum returned
@@ -2117,6 +2345,12 @@ class IO
 						);
 				}
 				$this->field_types = $this->cursor_ext[$query_hash]['field_types'];
+				// combined name => type
+				$this->cursor_ext[$query_hash]['field_name_types'] = array_combine(
+					$this->field_names,
+					$this->field_types
+				);
+				$this->field_name_types = $this->cursor_ext[$query_hash]['field_name_types'];
 				// reset first call var
 				$first_call = false;
 				// reset the internal pos counter
@@ -2139,9 +2373,11 @@ class IO
 				!is_int($this->cursor_ext[$query_hash]['cursor'])
 			) {
 				$return = $this->__dbConvertEncoding(
-					$this->db_functions->__dbFetchArray(
-						$this->cursor_ext[$query_hash]['cursor'],
-						$this->db_functions->__dbResultType($assoc_only)
+					$this->__dbConvertType(
+						$this->db_functions->__dbFetchArray(
+							$this->cursor_ext[$query_hash]['cursor'],
+							$this->db_functions->__dbResultType($assoc_only)
+						)
 					)
 				);
 				$this->cursor_ext[$query_hash]['log'][] = 'DB Reading data: '
@@ -2238,6 +2474,7 @@ class IO
 	 * for INSERT INTO queries it is highly recommended to set the pk_name to avoid an
 	 * additional read from the database for the PK NAME
 	 * Wrapper for dbExecParams without params
+	 *
 	 * @param  string $query   the query, if not given,
 	 *                         the query class var will be used
 	 *                         if this was not set, method will quit with false
@@ -2307,10 +2544,9 @@ class IO
 		}
 	}
 
-	// add adbExecParams(string $query = '', array $params = [], string $pk_name = ')
-
 	/**
 	 * executes a cursor and returns the data, if no more data 0 will be returned
+	 *
 	 * @param  \PgSql\Result|false $cursor the cursor from db_exec or
 	 *                                       pg_query/pg_exec/mysql_query
 	 *                                       if not set will use internal cursor,
@@ -2333,9 +2569,11 @@ class IO
 			return false;
 		}
 		return $this->__dbConvertEncoding(
-			$this->db_functions->__dbFetchArray(
-				$cursor,
-				$this->db_functions->__dbResultType($assoc_only)
+			$this->__dbConvertType(
+				$this->db_functions->__dbFetchArray(
+					$cursor,
+					$this->db_functions->__dbResultType($assoc_only)
+				)
 			)
 		);
 	}
@@ -2343,6 +2581,7 @@ class IO
 	/**
 	 * returns the FIRST row of the given query
 	 * wrapper for dbReturnRowParms
+	 *
 	 * @param  string $query      the query to be executed
 	 * @param  bool   $assoc_only if true, only return assoc entry (default false)
 	 * @return array<mixed>|false row array or false on error
@@ -2388,6 +2627,7 @@ class IO
 	/**
 	 * creates an array of hashes of the query (all data)
 	 * Wrapper for dbReturnArrayParams
+	 *
 	 * @param  string $query      the query to be executed
 	 * @param  bool   $assoc_only if true, only name ref are returned (default true)
 	 * @return array<mixed>|false array of hashes (row -> fields), false on error
@@ -2430,6 +2670,20 @@ class IO
 			$rows[] = $res;
 		}
 		return $rows;
+	}
+
+	// ***************************
+	// CURSOR RETURN
+	// ***************************
+
+	/**
+	 * Get current set cursor or false if not set or error
+	 *
+	 * @return \PgSql\Result|false
+	 */
+	public function dbGetCursor(): \PgSql\Result|false
+	{
+		return $this->cursor;
 	}
 
 	// ***************************
@@ -2557,6 +2811,7 @@ class IO
 
 	/**
 	 * gets how often a query was called already
+	 *
 	 * @param  string       $query  query string
 	 * @param  array<mixed> $params If the query is params type we need params
 	 *                              data to create a unique call one, optional
@@ -2581,6 +2836,7 @@ class IO
 	 * for INSERT INTO queries it is highly recommended
 	 * to set the pk_name to avoid an additional
 	 * read from the database for the PK NAME
+	 *
 	 * @param  string        $stm_name statement name
 	 * @param  string        $query    queryt string to run
 	 * @param  string        $pk_name  optional primary key
@@ -2693,6 +2949,7 @@ class IO
 
 	/**
 	 * runs a prepare query
+	 *
 	 * @param  string       $stm_name statement name for the query to run
 	 * @param  array<mixed> $data     data to run for this query, empty array for none
 	 * @return \PgSql\Result|false     false on error, or result on OK
@@ -2791,6 +3048,7 @@ class IO
 	 * executes the query async so other methods can be run at the same time
 	 * Wrapper for dbExecParamsAsync
 	 * NEEDS : dbCheckAsync
+	 *
 	 * @param  string $query   query to run
 	 * @param  string $pk_name optional primary key name, only used with
 	 *                         insert for returning call
@@ -2890,6 +3148,7 @@ class IO
 	/**
 	 * checks a previous async query and returns data if finished
 	 * NEEDS : dbExecAsync
+	 *
 	 * @return \PgSql\Result|bool cursor resource if the query is still running,
 	 *                            false if an error occured or cursor of that query
 	 */
@@ -2930,6 +3189,7 @@ class IO
 
 	/**
 	 * Returns the current async running query hash
+	 *
 	 * @return string Current async running query hash
 	 */
 	public function dbGetAsyncRunning(): string
@@ -2948,6 +3208,7 @@ class IO
 
 	/**
 	 * writes into one table based on array of table columns
+	 *
 	 * @param  array<mixed> $write_array     list of elements to write
 	 * @param  array<mixed> $not_write_array list of elements not to write
 	 * @param  int          $primary_key     id key to decide if we write insert or update
@@ -3164,6 +3425,54 @@ class IO
 	}
 
 	/**
+	 * Undocumented function
+	 *
+	 * @param  Convert $convert
+	 * @return void
+	 */
+	public function dbSetConvertFlag(Convert $convert): void
+	{
+		$this->convert_type |= $convert->value;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  Convert $convert
+	 * @return void
+	 */
+	public function dbUnsetConvertFlag(Convert $convert): void
+	{
+		$this->convert_type &= ~$convert->value;
+	}
+
+	/**
+	 * Reset to origincal config file set
+	 *
+	 * @return void
+	 */
+	public function dbResetConvertFlag(): void
+	{
+		foreach ($this->db_convert_type as $db_convert_type) {
+			$this->__setConvertType($db_convert_type);
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  Convert $convert
+	 * @return bool
+	 */
+	public function dbGetConvertFlag(Convert $convert): bool
+	{
+		if ($this->convert_type & $convert->value) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * set max query calls, set to -1 to disable loop
 	 * protection. this will generate a warning
 	 * empty call (null) will reset to default
@@ -3314,12 +3623,11 @@ class IO
 	 * Alternative use dbSetEcnoding to trigger encoding change on the DB side
 	 * Set to empty string to turn off
 	 * @param  string $encoding PHP Valid encoding to set
-	 * @return string           Current set encoding
+	 * @return void
 	 */
-	public function dbSetToEncoding(string $encoding): string
+	public function dbSetToEncoding(string $encoding): void
 	{
 		$this->to_encoding = $encoding;
-		return $this->to_encoding;
 	}
 
 	/**
@@ -3553,6 +3861,45 @@ class IO
 	public function dbGetFieldTypes(): array
 	{
 		return $this->field_types;
+	}
+
+	/**
+	 * Get the field name to type connection list
+	 *
+	 * @return array<string,string>
+	 */
+	public function dbGetFieldNameTypes(): array
+	{
+		return $this->field_name_types;
+	}
+
+	/**
+	 * Get the field name for a position
+	 *
+	 * @param  int          $pos Position number in query
+	 * @return false|string      Field name or false for not found
+	 */
+	public function dbGetFieldName(int $pos): false|string
+	{
+		return $this->field_names[$pos] ?? false;
+	}
+
+	/**
+	 * Return a field type for a field name or pos,
+	 * will return false if field is not found in list
+	 *
+	 * @param  string|int   $name_pos Field name or pos to get the type for
+	 * @return false|string           Either the field type or
+	 *                                false for not found in list
+	 */
+	public function dbGetFieldType(int|string $name_pos): false|string
+	{
+		if (is_numeric($name_pos)) {
+			$field_type = $this->field_types[$name_pos] ?? false;
+		} else {
+			$field_type = $this->field_name_types[$name_pos] ?? false;
+		}
+		return $field_type;
 	}
 
 	/**

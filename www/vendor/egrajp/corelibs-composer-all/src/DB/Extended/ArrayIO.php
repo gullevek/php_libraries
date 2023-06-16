@@ -54,7 +54,8 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * constructor for the array io class, set the
 	 * primary key name automatically (from array)
 	 *
-	 * @param array<mixed> $db_config      db connection config
+	 * phpcs:ignore
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[]} $db_config db connection config
 	 * @param array<mixed> $table_array    table array config
 	 * @param string       $table_name     table name string
 	 * @param \CoreLibs\Logging\Logging $log Logging class
@@ -587,7 +588,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// get it at the end, cause now we can be more sure of no double IDs, etc
 		reset($this->table_array);
 		// create select part & addition FK part
-		foreach ($this->table_array as $column => $data_array) {
+		foreach (array_keys($this->table_array) as $column) {
 			// check FK ...
 			if (
 				isset($this->table_array[$column]['fk']) &&
