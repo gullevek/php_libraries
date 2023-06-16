@@ -792,19 +792,45 @@ class IO
 				. \CoreLibs\Debug\Support::prAr($error_data)
 				. ']';
 		}
+		// we need to trace back where the first non class call was done
+		// add this stack trace to the context
+		$call_stack = [];
+		foreach (array_reverse(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)) as $call_trace) {
+			if (
+				!empty($call_trace['file']) &&
+				str_ends_with($call_trace['file'], '/DB/IO.php')
+			) {
+				break;
+			}
+			$call_stack[] =
+				($call_trace['file'] ?? 'n/f') . ':'
+				. ($call_trace['line'] ?? '-') . ':'
+				. (!empty($call_trace['class']) ? $call_trace['class'] . '->' : '')
+				. $call_trace['function'];
+		}
+		$context = [
+			'call_trace' => array_reverse($call_stack)
+		];
 		switch ($id) {
 			case 'DB_ERROR':
-				$this->log->error($debug_id . ' :' . $prefix . $error_string);
+				$this->log->error(
+					$debug_id . ' :' . $prefix . $error_string,
+					$context
+				);
 				break;
 			case 'DB_WARNING':
-				$this->log->warning($debug_id . ' :' . $prefix . $error_string);
+				$this->log->warning(
+					$debug_id . ' :' . $prefix . $error_string,
+					$context
+				);
 				break;
 			default:
 			// used named arguments so we can easy change the order of debug
 				$this->log->debug(
 					group_id: $debug_id,
 					message: $error_string,
-					prefix: $prefix
+					prefix: $prefix,
+					context: $context
 				);
 				break;
 		}

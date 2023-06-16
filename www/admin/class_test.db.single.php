@@ -53,6 +53,18 @@ if (($dbh = $db->dbGetDbh()) instanceof \PgSql\Connection) {
 	print "NO DB HANDLER<br>";
 }
 
+/**
+ * Undocumented function
+ *
+ * @param  \CoreLibs\DB\IO $dbc
+ * @return void
+ */
+function testDBS(\CoreLibs\DB\IO $dbc): void
+{
+	echo "Int call<br>";
+	$dbc->dbReturnRow("SELECT test FROM test_foo LIMIT 1");
+}
+
 $uniqid = \CoreLibs\Create\Uids::uniqIdShort();
 $binary_data = $db->dbEscapeBytea(file_get_contents('class_test.db.php') ?:  '');
 $query_params = [
@@ -109,6 +121,8 @@ $res = $db->dbReturnRowParams($query_select, [$uniqid]);
 if (is_array($res)) {
 	var_dump($res);
 }
+
+testDBS($db);
 
 print "</body></html>";
 

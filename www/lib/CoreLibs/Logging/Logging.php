@@ -567,7 +567,7 @@ class Logging
 		$context_str = '';
 		if ($context != []) {
 			// TODO this here has to be changed to something better
-			$context_str = ' ' . print_r($context, true);
+			$context_str = ' :' . print_r($context, true);
 		}
 		// build log string
 		return '[' . $timestamp . '] '

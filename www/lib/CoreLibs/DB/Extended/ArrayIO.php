@@ -588,7 +588,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// get it at the end, cause now we can be more sure of no double IDs, etc
 		reset($this->table_array);
 		// create select part & addition FK part
-		foreach ($this->table_array as $column => $data_array) {
+		foreach (array_keys($this->table_array) as $column) {
 			// check FK ...
 			if (
 				isset($this->table_array[$column]['fk']) &&
