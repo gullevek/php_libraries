@@ -13,7 +13,7 @@ use CoreLibs\Security\SymmetricEncryption;
  * @coversDefaultClass \CoreLibs\Security\SymmetricEncryption
  * @testdox \CoreLibs\Security\SymmetricEncryption method tests
  */
-final class CoreLibsSecuritySymmetricEncryption extends TestCase
+final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 {
 	/**
 	 * Undocumented function
