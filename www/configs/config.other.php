@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+// style sheet for the edit base interface
+define('EDIT_BASE_STYLESHEET', 'edit.css');
+
 // define('SOME_ID', <SOME VALUE>);
 
 /************* CONVERT *******************/
