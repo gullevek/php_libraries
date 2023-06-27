@@ -965,6 +965,44 @@ function scssel(_element, rcss, acss) // eslint-disable-line no-unused-vars
  */
 function phfo(tree)
 {
+	let name_elements = [
+		'button',
+		'fieldset',
+		'form',
+		'iframe',
+		'input',
+		'map',
+		'meta',
+		'object',
+		'output',
+		'param',
+		'select',
+		'textarea',
+	];
+	let skip_options = [
+		'id',
+		'name',
+		'class',
+	];
+	let no_close = [
+		'input',
+		'br',
+		'img',
+		'hr',
+		'area',
+		'col',
+		'keygen',
+		'wbr',
+		'track',
+		'source',
+		'param',
+		'command',
+		// only in header
+		'base',
+		'meta',
+		'link',
+		'embed',
+	];
 	// holds the elements
 	var content = [];
 	// main part line
@@ -974,7 +1012,7 @@ function phfo(tree)
 	if (tree.id) {
 		line += ' id="' + tree.id + '"';
 		// if anything input (input, textarea, select then add name too)
-		if (['input', 'textarea', 'select', 'button'].includes(tree.tag)) {
+		if (name_elements.includes(tree.tag)) {
 			line += ' name="' + (tree.name ? tree.name : tree.id) + '"';
 		}
 	}
@@ -992,7 +1030,7 @@ function phfo(tree)
 	if (isObject(tree.options)) {
 		// ignores id, name, class as key
 		for (const [key, item] of Object.entries(tree.options)) {
-			if (!['id', 'name', 'class'].includes(key)) {
+			if (!skip_options.includes(key)) {
 				line += ' ' + key + '="' + item + '"';
 			}
 		}
@@ -1016,9 +1054,7 @@ function phfo(tree)
 	}
 	// if not input, image or br, then close
 	if (
-		tree.tag != 'input' ||
-		tree.tag != 'img' ||
-		tree.tag != 'br'
+		!no_close.includes(tree.tag)
 	) {
 		content.push('</' + tree.tag + '>');
 	}
