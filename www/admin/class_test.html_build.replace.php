@@ -15,10 +15,10 @@ define('USE_DATABASE', false);
 // sample config
 require 'config.php';
 // define log file id
-$LOG_FILE_ID = 'classTest-html_build-replace';
+$LOG_FILE_ID = 'classTest-html_build-string-replace';
 ob_end_flush();
 
-use CoreLibs\Template\HtmlBuilder\Replace;
+use CoreLibs\Template\HtmlBuilder\StringReplace;
 
 $log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
@@ -28,7 +28,7 @@ $log = new CoreLibs\Logging\Logging([
 
 // define a list of from to color sets for conversion test
 
-$PAGE_NAME = 'TEST CLASS: HTML BUILD: REPLACE';
+$PAGE_NAME = 'TEST CLASS: HTML BUILD: STRING REPLACE';
 print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
@@ -41,7 +41,7 @@ $html_block = <<<HTML
 </div>
 HTML;
 
-print "<pre>" . htmlentities(Replace::replaceData(
+print "<pre>" . htmlentities(StringReplace::replaceData(
 	$html_block,
 	[
 		'ID', 'CSS', '{CONTENT}'
@@ -52,29 +52,29 @@ print "<pre>" . htmlentities(Replace::replaceData(
 	]
 )) . "</pre>";
 
-Replace::loadElements(
+StringReplace::loadElements(
 	['foo', $html_block],
 	['bar', <<<HTML
 <span id="{ID}">{CONTENT}</span>
 HTML]
 );
 
-print "Get: <pre>" . htmlentities(Replace::getElement('bar') ?: '') . '</pre>';
+print "Get: <pre>" . htmlentities(StringReplace::getElement('bar') ?: '') . '</pre>';
 
-print "Build element: <pre>" . htmlentities(Replace::buildElement(
+print "Build element: <pre>" . htmlentities(StringReplace::buildElement(
 	'bar',
 	['ID}', '{CONTENT'],
 	['new-id', 'Test cow 日本語']
 )) . '</pre>' ;
 
-print "Build element as replace: <pre>" . htmlentities(Replace::buildElement(
+print "Build element as replace: <pre>" . htmlentities(StringReplace::buildElement(
 	'bar',
 	['ID}', '{CONTENT'],
 	['diff-id', 'Test cow 日本語. More text plus'],
 	'rpl-1'
 )) . '</pre>' ;
 
-print "Get replacement: <pre>" . htmlentities(Replace::getReplaceBlock('rpl-1')) . "</pre>";
+print "Get replacement: <pre>" . htmlentities(StringReplace::getReplaceBlock('rpl-1')) . "</pre>";
 
 print "</body></html>";
 

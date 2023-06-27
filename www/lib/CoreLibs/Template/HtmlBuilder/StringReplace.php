@@ -13,7 +13,7 @@ namespace CoreLibs\Template\HtmlBuilder;
 
 use CoreLibs\Template\HtmlBuilder\General\Error;
 
-class Replace
+class StringReplace
 {
 	/** @var array<string,string> */
 	private static array $elements = [];

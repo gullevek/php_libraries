@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace tests;
 
 use PHPUnit\Framework\TestCase;
-use CoreLibs\Template\HtmlBuilder\Replace;
+use CoreLibs\Template\HtmlBuilder\StringReplace;
 
 /**
- * Test class for Template\HtmlBuilder\Replace
- * @coversDefaultClass \CoreLibs\Template\HtmlBuilder\Replace
- * @testdox \CoreLibs\Template\HtmlBuilder\Replace method tests
+ * Test class for Template\HtmlBuilder\StringReplace
+ * @coversDefaultClass \CoreLibs\Template\HtmlBuilder\StringReplace
+ * @testdox \CoreLibs\Template\HtmlBuilder\StringReplace method tests
  */
-final class CoreLibsTemplateHtmlBuilderReplaceTest extends TestCase
+final class CoreLibsTemplateHtmlBuilderStringReplaceTest extends TestCase
 {
 	/**
 	 * Undocumented function
@@ -36,7 +36,7 @@ HTML;
 	Some content here<br>with bla bla inside
 </div>
 HTML,
-			Replace::replaceData(
+			StringReplace::replaceData(
 				$html_block,
 				[
 					'ID', 'CSS', '{CONTENT}'
