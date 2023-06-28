@@ -13,7 +13,7 @@ namespace CoreLibs\Template\HtmlBuilder\General;
 
 class Error
 {
-	/** @var array{level:string,id:string,message:string,context:array<mixed>} */
+	/** @var array<array{level:string,id:string,message:string,context:array<mixed>}> */
 	private static array $messages = [];
 
 	/**
@@ -22,7 +22,7 @@ class Error
 	 * @param  string $level
 	 * @param  string $id
 	 * @param  string $message
-	 * @param  array  $context
+	 * @param  array<mixed> $context
 	 * @return void
 	 */
 	private static function writeContent(
@@ -98,7 +98,7 @@ class Error
 		return array_filter(
 			self::$messages,
 			function ($var) use ($level) {
-				return ($var['level'] ?? '') == $level ? true : false;
+				return $var['level'] == $level ? true : false;
 			}
 		) === [] ? false : true;
 	}

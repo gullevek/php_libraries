@@ -85,7 +85,7 @@ class Element
 				'invalid or empty tag',
 				['tag' => $tag]
 			);
-			throw new HtmlBuilderExcpetion('Invalid or empty tag');
+			throw new HtmlBuilderExcpetion('Invalid or empty tag: ' . $tag);
 		}
 		$this->tag = $tag;
 	}
@@ -297,7 +297,9 @@ class Element
 		}
 		// only on first level
 		foreach ($this->sub as $pos => $el) {
-			if ($el['id'] === $id) {
+			if (
+				$el->getId() === $id
+			) {
 				unset($this->sub[$pos]);
 				return;
 			}
@@ -525,10 +527,10 @@ class Element
 	 * not recommended to be used, rather use "Element->buildHtml()"
 	 * wrapper for buildHtml
 	 *
-	 * @param  Element $element                Element tree to build
-	 *                                         if not set returns empty string
-	 * @param  bool    $add_nl [default=false] Optional output string line break
-	 * @return string                          build html as string
+	 * @param  ?Element $tree                   Element tree to build
+	 *                                          if not set returns empty string
+	 * @param  bool     $add_nl [default=false] Optional output string line break
+	 * @return string                           build html as string
 	 * @deprecated Do not use, use Element->buildHtml() instead
 	 */
 	public static function printHtmlFromObject(Element $tree = null, bool $add_nl = false): string

@@ -117,7 +117,9 @@ try {
 	$el_er = new Element('');
 } catch (HtmlBuilderExcpetion $e) {
 	print "E: " . $e->getMessage() . " | " . $e->getTraceAsString() . "<br>";
-	print "E: " . $e->getPrevious()->getMessage() . " | " . $e->getPrevious()->getTraceAsString() . "<br>";
+	if ($e->getPrevious() !== null) {
+		print "E: " . $e->getPrevious()->getMessage() . " | " . $e->getPrevious()->getTraceAsString() . "<br>";
+	}
 }
 print "Errors: <pre>" . print_r(Error::getMessages(), true) . "</pre>";
 print "Warning: " . Support::printToString(Error::hasWarning()) . "<br>";
@@ -127,7 +129,9 @@ try {
 	$el_er = new Element('123123');
 } catch (HtmlBuilderExcpetion $e) {
 	print "E: " . $e->getMessage() . " | " . $e->getTraceAsString() . "<br>";
-	print "E: " . $e->getPrevious()->getMessage() . " | " . $e->getPrevious()->getTraceAsString() . "<br>";
+	if ($e->getPrevious() !== null) {
+		print "E: " . $e->getPrevious()->getMessage() . " | " . $e->getPrevious()->getTraceAsString() . "<br>";
+	}
 }
 print "Errors: <pre>" . print_r(Error::getMessages(), true) . "</pre>";
 print "Warning: " . Support::printToString(Error::hasWarning()) . "<br>";

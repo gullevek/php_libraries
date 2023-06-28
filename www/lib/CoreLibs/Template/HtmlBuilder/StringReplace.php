@@ -28,7 +28,7 @@ class StringReplace
 	 * index must be non empty (but has no fixed format)
 	 * if same index is tried twice it will set an error and skip
 	 *
-	 * @param  array<string,string> ...$element Elements to load
+	 * @param  array{0:string,1:string} ...$element Elements to load
 	 * @return void
 	 * @throws HtmlBuilderExcpetion
 	 */
@@ -138,32 +138,27 @@ class StringReplace
 	 *
 	 * @param  string        $index   index of set element
 	 * @param  array<string,string> $replace array of text to search (key) and replace (value) for
-	 * @return string|false
+	 * @return string
+	 * @throws HtmlBuilderExcpetion
 	 */
 	public static function buildElement(
 		string $index,
 		array $replace,
 		string $replace_index = ''
-	): string|bool {
-		if (self::getElement($index) === false) {
-			return false;
+	): string {
+		try {
+			self::getElement($index);
+		} catch (HtmlBuilderExcpetion $e) {
+			throw new HtmlBuilderExcpetion('Cannot fetch element with index: ' . $index, 0, $e);
 		}
 		if ($replace_index) {
 			self::setReplaceBlock(
 				$replace_index,
-				self::replaceData(
-					self::$elements[$index],
-					array_keys($replace),
-					array_values($replace)
-				)
+				self::replaceData(self::$elements[$index], $replace)
 			);
 			return self::getReplaceBlock($replace_index);
 		} else {
-			return self::replaceData(
-				self::$elements[$index],
-				array_keys($replace),
-				array_values($replace)
-			);
+			return self::replaceData(self::$elements[$index], $replace);
 		}
 	}
 
@@ -180,9 +175,9 @@ class StringReplace
 	 */
 	public static function replaceData(string $data, array $replace): string
 	{
-		$replace = array_keys($replace);
+		$to_replace = array_keys($replace);
 		// all replace data must have {} around
-		array_walk($replace, function (&$entry) {
+		array_walk($to_replace, function (&$entry) {
 			if (!str_starts_with($entry, '{')) {
 				$entry = '{' . $entry;
 			}
@@ -192,7 +187,7 @@ class StringReplace
 			// do some validation?
 		});
 		// replace content
-		return str_replace($replace, array_values($replace), $data);
+		return str_replace($to_replace, array_values($replace), $data);
 	}
 }
 

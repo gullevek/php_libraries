@@ -483,7 +483,8 @@ final class CoreLibsTemplateHtmlBuilderElementTest extends TestCase
 		// if we set invalid tag
 		$el = new Element('div');
 		$this->expectException(HtmlBuilderExcpetion::class);
-		$this->expectExceptionMessage("Invalid or empty tag");
+		$this->expectExceptionMessageMatches("/^Invalid or empty tag: /");
+		$this->expectExceptionMessage("Invalid or empty tag: 123123");
 		$el->setTag('123123');
 		$this->assertTrue(
 			Error::hasError(),

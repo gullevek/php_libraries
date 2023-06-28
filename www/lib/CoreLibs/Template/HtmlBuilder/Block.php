@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable Generic.Files.LineLength
 
 /**
  * AUTOR: Clemens Schwaighofer
@@ -26,6 +26,7 @@ class Block
 	 * @param  string $content
 	 * @param  array<string> $css,
 	 * @param  array<string,string>  $options
+	 * @return array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}
 	 * @throws HtmlBuilderExcpetion
 	 */
 	public static function cel(
@@ -58,10 +59,10 @@ class Block
 	 * Search element tree for id and add
 	 * if id is empty add at current
 	 *
-	 * @param  array<mixed> $base
-	 * @param  array<mixed> $attach
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $base
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $attach
 	 * @param  string  $id
-	 * @return array<mixed>
+	 * @return array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}
 	 */
 	public static function ael(
 		array $base,
@@ -87,9 +88,9 @@ class Block
 	/**
 	 * Undocumented function
 	 *
-	 * @param  array<mixed> $base
-	 * @param  array<mixed> ...$attach
-	 * @return array<mixed>
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $base
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} ...$attach
+	 * @return array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}
 	 */
 	public static function aelx(
 		array $base,
@@ -102,9 +103,9 @@ class Block
 	/**
 	 * Undocumented function
 	 *
-	 * @param  array<mixed> $element
-	 * @param  array<mixed> $sub
-	 * @return array<mixed>
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $element
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $sub
+	 * @return array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}
 	 */
 	public static function addSub(array $element, array ...$sub): array
 	{
@@ -118,10 +119,10 @@ class Block
 	/**
 	 * Undocumented function
 	 *
-	 * @param  array<mixed> $element
-	 * @return array<mixed>
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $element
+	 * @return array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}
 	 */
-	public static function resetSub(array $elment): array
+	public static function resetSub(array $element): array
 	{
 		$element['sub'] = [];
 		return $element;
@@ -132,9 +133,9 @@ class Block
 	/**
 	 * Undocumented function
 	 *
-	 * @param  array<mixed> $element
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $element
 	 * @param  string ...$css
-	 * @return array<mixed>
+	 * @return array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}
 	 */
 	public static function acssel(array $element, string ...$css): array
 	{
@@ -145,8 +146,9 @@ class Block
 	/**
 	 * Undocumented function
 	 *
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $element
 	 * @param  string ...$css
-	 * @return array<mixed>
+	 * @return array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}
 	 */
 	public static function rcssel(array $element, string ...$css): array
 	{
@@ -159,10 +161,10 @@ class Block
 	 * scssel (switch) is not supported
 	 * use rcssel -> acssel
 	 *
-	 * @param  array $element
-	 * @param  array $rcss
-	 * @param  array $acss
-	 * @return array
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $element
+	 * @param  array<string> $rcss
+	 * @param  array<string> $acss
+	 * @return array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}
 	 */
 	public static function scssel(array $element, array $rcss, array $acss): array
 	{
@@ -176,7 +178,7 @@ class Block
 	 * Undocumented function
 	 * alias phfo
 	 *
-	 * @param  array<mixed> $tree
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $tree
 	 * @param  bool         $add_nl [default=false]
 	 * @return string
 	 */
@@ -232,14 +234,15 @@ class Block
 	 * Undocumented function
 	 * alias phfa
 	 *
-	 * @param  array<mixed> $list
+	 * @param  array<array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}> $list
+	 * @param  bool         $add_nl [default=false]
 	 * @return string
 	 */
-	public static function buildHtmlFromList(array $list): string
+	public static function buildHtmlFromList(array $list, bool $add_nl = false): string
 	{
 		$output = '';
 		foreach ($list as $el) {
-			$output .= self::buildHtml($el);
+			$output .= self::buildHtml($el, $add_nl);
 		}
 		return $output;
 	}
@@ -248,7 +251,7 @@ class Block
 	 * Undocumented function
 	 * wrapper for buildHtmlFromList
 	 *
-	 * @param  array<Element> $list                   array of Elements to build string from
+	 * @param  array<array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}> $list                   array of Elements to build string from
 	 * @param  bool           $add_nl [default=false] Optional output string line break
 	 * @return string         build html as string
 	 */

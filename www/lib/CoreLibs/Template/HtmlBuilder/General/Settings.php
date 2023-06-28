@@ -13,7 +13,7 @@ namespace CoreLibs\Template\HtmlBuilder\General;
 
 class Settings
 {
-	/** @var array>string> list of html elements that can have the name tag */
+	/** @var array<string> list of html elements that can have the name tag */
 	public const NAME_ELEMENTS = [
 		'button',
 		'fieldset',
