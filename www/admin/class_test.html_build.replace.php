@@ -44,11 +44,9 @@ HTML;
 print "<pre>" . htmlentities(StringReplace::replaceData(
 	$html_block,
 	[
-		'ID', 'CSS', '{CONTENT}'
-	],
-	[
-		'block-id', join(',', ['blue', 'red']),
-		'Some content here<br>with bla bla inside'
+		'ID' => 'block-id',
+		'CSS' => join(',', ['blue', 'red']),
+		'{CONTENT}' => 'Some content here<br>with bla bla inside'
 	]
 )) . "</pre>";
 
@@ -63,14 +61,18 @@ print "Get: <pre>" . htmlentities(StringReplace::getElement('bar') ?: '') . '</p
 
 print "Build element: <pre>" . htmlentities(StringReplace::buildElement(
 	'bar',
-	['ID}', '{CONTENT'],
-	['new-id', 'Test cow 日本語']
+	[
+		'ID}' => 'new-id',
+		'{CONTENT' => 'Test cow 日本語'
+	]
 )) . '</pre>' ;
 
 print "Build element as replace: <pre>" . htmlentities(StringReplace::buildElement(
 	'bar',
-	['ID}', '{CONTENT'],
-	['diff-id', 'Test cow 日本語. More text plus'],
+	['
+		ID}' => 'diff-id',
+		'{CONTENT' => 'Test cow 日本語. More text plus'
+	],
 	'rpl-1'
 )) . '</pre>' ;
 

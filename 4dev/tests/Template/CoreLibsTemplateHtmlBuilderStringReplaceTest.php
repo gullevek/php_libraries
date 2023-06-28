@@ -39,15 +39,27 @@ HTML,
 			StringReplace::replaceData(
 				$html_block,
 				[
-					'ID', 'CSS', '{CONTENT}'
-				],
-				[
-					'block-id', join(',', ['blue', 'red']),
-					'Some content here<br>with bla bla inside'
+					'ID' => 'block-id',
+					'CSS' => join(',', ['blue', 'red']),
+					'{CONTENT}' => 'Some content here<br>with bla bla inside',
 				]
 			)
 		);
 	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @testdox replaceData error
+	 *
+	 * @return void
+	 */
+	/* public function testReplaceDataErrors(): void
+	{
+		$this->expectException(HtmlBuilderExcpetion::class);
+		$this->expectExceptionMessage("Replace and content array count differ");
+		StringReplace::replaceData('<span>{FOO}</span>', ['{FOO}', '{BAR}'], ['foo']);
+	} */
 }
 
 // __END__

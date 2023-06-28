@@ -6,11 +6,15 @@
  * DESCRIPTION:
  * html builder: array
  * static build for array lists (not objects)
+ *
+ * Recommended to use the Object one or for speed the String Replace
 */
 
 namespace CoreLibs\Template\HtmlBuilder;
 
 use CoreLibs\Template\HtmlBuilder\General\Settings;
+use CoreLibs\Template\HtmlBuilder\General\Error;
+use CoreLibs\Template\HtmlBuilder\General\HtmlBuilderExcpetion;
 
 class Block
 {
@@ -22,6 +26,7 @@ class Block
 	 * @param  string $content
 	 * @param  array<string> $css,
 	 * @param  array<string,string>  $options
+	 * @throws HtmlBuilderExcpetion
 	 */
 	public static function cel(
 		string $tag,
@@ -30,6 +35,14 @@ class Block
 		array $css = [],
 		array $options = []
 	): array {
+		if (!preg_match("/^[A-Za-z]+$/", $tag)) {
+			Error::setError(
+				'201',
+				'invalid or empty tag',
+				['tag' => $tag]
+			);
+			throw new HtmlBuilderExcpetion('Invalid or empty tag');
+		}
 		return [
 			'tag' => $tag,
 			'id' => $id,

@@ -7,6 +7,7 @@ namespace tests;
 use PHPUnit\Framework\TestCase;
 use CoreLibs\Template\HtmlBuilder\Element;
 use CoreLibs\Template\HtmlBuilder\General\Error;
+use CoreLibs\Template\HtmlBuilder\General\HtmlBuilderExcpetion;
 
 /**
  * Test class for Template\HtmlBuilder\Element
@@ -204,6 +205,8 @@ final class CoreLibsTemplateHtmlBuilderElementTest extends TestCase
 			'nested build failed'
 		);
 		// this would create a loop, throws error
+		$this->expectException(HtmlBuilderExcpetion::class);
+		$this->expectExceptionMessage("Cannot assign Element to itself, this would create an infinite loop");
 		$el_sub->addSub($el_sub);
 		$this->assertEquals(
 			'<div id="sub-1"></div>',
@@ -218,7 +221,7 @@ final class CoreLibsTemplateHtmlBuilderElementTest extends TestCase
 			[[
 				'level' => 'Error',
 				'id' => '100',
-				'message' => 'Cannot assign Element, this would create a loop',
+				'message' => 'Cannot assign Element to itself, this would create an infinite loop',
 				'context' => ['tag' => 'div', 'id' => 'sub-1']
 			]],
 			Error::getMessages(),
@@ -287,11 +290,11 @@ final class CoreLibsTemplateHtmlBuilderElementTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @testdox test change content
+	 * @testdox test change tag/id/content
 	 *
 	 * @return void
 	 */
-	public function testChangeContent(): void
+	public function testChangeElementData(): void
 	{
 		$el = new Element('div', 'id', 'Content');
 		// content change
@@ -305,6 +308,30 @@ final class CoreLibsTemplateHtmlBuilderElementTest extends TestCase
 			'New Content',
 			$el->getContent(),
 			'changed content'
+		);
+
+		$this->assertEquals(
+			'div',
+			$el->getTag(),
+			'set tag'
+		);
+		$el->setTag('span');
+		$this->assertEquals(
+			'span',
+			$el->getTag(),
+			'changed tag'
+		);
+
+		$this->assertEquals(
+			'id',
+			$el->getId(),
+			'set id'
+		);
+		$el->setId('id-2');
+		$this->assertEquals(
+			'id-2',
+			$el->getId(),
+			'changed id'
 		);
 	}
 
@@ -349,7 +376,15 @@ final class CoreLibsTemplateHtmlBuilderElementTest extends TestCase
 
 	// build output
 	// build from array list
-	public function testBuildHtml(): void
+
+	/**
+	 * Undocumented function
+	 *
+	 * @testdox build element tree from object
+	 *
+	 * @return void
+	 */
+	public function testBuildHtmlObject(): void
 	{
 		// build a simple block
 		// div -> div -> button
@@ -399,13 +434,36 @@ final class CoreLibsTemplateHtmlBuilderElementTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @testdox check for invalid tag detection
+	 * @testdox build elements from array list
+	 *
+	 * @return void
+	 */
+	public function testbuildHtmlArray(): void
+	{
+		$this->assertEquals(
+			'<div id="id-1">A</div>'
+			. '<div id="id-2">B</div>'
+			. '<div id="id-3">C</div>',
+			Element::buildHtmlFromList([
+				new Element('div', 'id-1', 'A'),
+				new Element('div', 'id-2', 'B'),
+				new Element('div', 'id-3', 'C'),
+			])
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @testdox check for invalid tag detection, possible invalid id, possible invalid css
 	 *
 	 * @return void
 	 */
 	public function testInvalidElement(): void
 	{
 		Error::resetMessages();
+		$this->expectException(HtmlBuilderExcpetion::class);
+		$this->expectExceptionMessage("Could not create Element");
 		$el = new Element('');
 		$this->assertTrue(
 			Error::hasError(),
@@ -421,6 +479,27 @@ final class CoreLibsTemplateHtmlBuilderElementTest extends TestCase
 			Error::getMessages(),
 			'check error message failed'
 		);
+
+		// if we set invalid tag
+		$el = new Element('div');
+		$this->expectException(HtmlBuilderExcpetion::class);
+		$this->expectExceptionMessage("Invalid or empty tag");
+		$el->setTag('123123');
+		$this->assertTrue(
+			Error::hasError(),
+			'failed to set error invalid tag detection'
+		);
+		$this->assertEquals(
+			[[
+				'level' => 'Error',
+				'id' => '201',
+				'message' => 'invalid or empty tag',
+				'context' => ['tag' => '']
+			]],
+			Error::getMessages(),
+			'check error message failed'
+		);
+
 
 		// invalid id (warning)
 		Error::resetMessages();

@@ -20,6 +20,7 @@ ob_end_flush();
 
 use CoreLibs\Template\HtmlBuilder\Element;
 use CoreLibs\Template\HtmlBuilder\General\Error;
+use CoreLibs\Template\HtmlBuilder\General\HtmlBuilderExcpetion;
 use CoreLibs\Debug\Support;
 
 $log = new CoreLibs\Logging\Logging([
@@ -83,7 +84,11 @@ echo "<hr>";
 // self loop
 
 $el_s = new Element('div', 'id-s', 'Self');
-$el_s->addSub($el_s, new Element('span', '', 'Span'));
+try {
+	$el_s->addSub($el_s, new Element('span', '', 'Span'));
+} catch (HtmlBuilderExcpetion $e) {
+	print "E: " . $e->getMessage() . " | " . $e->getTraceAsString() . "<br>";
+}
 
 // var_dump($el_s);
 print "el_s, buildHtml(): <pre>" . htmlentities($el_s->buildHtml()) . "</pre>";
@@ -95,8 +100,12 @@ $el_s_2->addSub(
 );
 
 $el_s_3 = new Element('div', 'id-3', 'ID 3');
-$el_s_3->addSub($el_s_2);
-$el_s_2->addSub($el_s_2);
+try {
+	$el_s_3->addSub($el_s_2);
+	$el_s_2->addSub($el_s_2);
+} catch (HtmlBuilderExcpetion $e) {
+	print "E: " . $e->getMessage() . " | " . $e->getTraceAsString() . "<br>";
+}
 
 // print "<pre>" . var_export($el_s_3, true) . "</pre>";
 
@@ -104,12 +113,22 @@ print "el_s_3, buildHtml(): <pre>" . htmlentities($el_s_3->buildHtml()) . "</pre
 
 echo "<hr>";
 Error::resetMessages();
-$el_er = new Element('');
+try {
+	$el_er = new Element('');
+} catch (HtmlBuilderExcpetion $e) {
+	print "E: " . $e->getMessage() . " | " . $e->getTraceAsString() . "<br>";
+	print "E: " . $e->getPrevious()->getMessage() . " | " . $e->getPrevious()->getTraceAsString() . "<br>";
+}
 print "Errors: <pre>" . print_r(Error::getMessages(), true) . "</pre>";
 print "Warning: " . Support::printToString(Error::hasWarning()) . "<br>";
 print "Error: " . Support::printToString(Error::hasError()) . "<br>";
 Error::resetMessages();
-$el_er = new Element('123123');
+try {
+	$el_er = new Element('123123');
+} catch (HtmlBuilderExcpetion $e) {
+	print "E: " . $e->getMessage() . " | " . $e->getTraceAsString() . "<br>";
+	print "E: " . $e->getPrevious()->getMessage() . " | " . $e->getPrevious()->getTraceAsString() . "<br>";
+}
 print "Errors: <pre>" . print_r(Error::getMessages(), true) . "</pre>";
 print "Warning: " . Support::printToString(Error::hasWarning()) . "<br>";
 print "Error: " . Support::printToString(Error::hasError()) . "<br>";

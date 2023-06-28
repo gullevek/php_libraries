@@ -14,6 +14,7 @@ namespace CoreLibs\Template\HtmlBuilder;
 
 use CoreLibs\Template\HtmlBuilder\General\Settings;
 use CoreLibs\Template\HtmlBuilder\General\Error;
+use CoreLibs\Template\HtmlBuilder\General\HtmlBuilderExcpetion;
 
 class Element
 {
@@ -46,6 +47,7 @@ class Element
 	 *                                       eg: onClick => 'something();'
 	 *                                       id, css are skipped
 	 *                                       name only set on input/button
+	 * @throws HtmlBuilderExcpetion
 	 */
 	public function __construct(
 		string $tag,
@@ -54,6 +56,28 @@ class Element
 		array $css = [],
 		array $options = []
 	) {
+		// exit if not valid tag
+		try {
+			$this->setTag($tag);
+		} catch (HtmlBuilderExcpetion $e) {
+			throw new HtmlBuilderExcpetion('Could not create Element', 0, $e);
+		}
+		$this->setId($id);
+		$this->setName($options['name'] ?? '');
+		$this->setContent($content);
+		$this->addCss(...$css);
+		$this->setOptions($options);
+	}
+
+	/**
+	 * set tag
+	 *
+	 * @param  string $tag
+	 * @return void
+	 * @throws HtmlBuilderExcpetion
+	 */
+	public function setTag(string $tag): void
+	{
 		// tag must be letters only
 		if (!preg_match("/^[A-Za-z]+$/", $tag)) {
 			Error::setError(
@@ -61,9 +85,29 @@ class Element
 				'invalid or empty tag',
 				['tag' => $tag]
 			);
-			return;
+			throw new HtmlBuilderExcpetion('Invalid or empty tag');
 		}
 		$this->tag = $tag;
+	}
+
+	/**
+	 * get the tag name
+	 *
+	 * @return string HTML element tag
+	 */
+	public function getTag(): string
+	{
+		return $this->tag;
+	}
+
+	/**
+	 * set the element id
+	 *
+	 * @param  string $id
+	 * @return void
+	 */
+	public function setId(string $id): void
+	{
 		// invalid id and name check too
 		// be strict: [a-zA-Z0-9], -, _
 		// cannot start with digit, two hyphens or a hyphen with a digit:
@@ -77,63 +121,11 @@ class Element
 			Error::setWarning(
 				'202',
 				'possible invalid id',
-				['id' => $id, 'tag' => $this->tag]
+				['id' => $id, 'tag' => $this->getTag()]
 			);
+			// TODO: shoud throw error
 		}
 		$this->id = $id;
-		if (
-			!empty($options['name']) &&
-			!preg_match("/^[A-Za-z][\w-]*$/", $options['name'])
-		) {
-			Error::setWarning(
-				'203',
-				'possible invalid name',
-				['name' => $options['name'], 'id' => $this->id, 'tag' => $this->tag]
-			);
-		}
-		// same as id
-		$this->name = $options['name'] ?? '';
-		// anything allowed
-		$this->content = $content;
-		// should do check for empty/invalid css
-		foreach ($css as $_css) {
-			if (empty($_css)) {
-				Error::setError(
-					'204',
-					'cannot have empty css string',
-				);
-				continue;
-			}
-			// -?[_A-Za-z][_A-Za-z0-9-]*
-			if (!preg_match("/^-?[_A-Za-z][_A-Za-z0-9-]*$/", $_css)) {
-				Error::setWarning(
-					'205',
-					'possible invalid css string',
-					['css' => $_css, 'id' => $this->id, 'tag' => $this->tag]
-				);
-			}
-			$this->css[] = $_css;
-		}
-		// some basic options check
-		foreach ($options as $key => $value) {
-			if (empty($key)) {
-				Error::setError(
-					'110',
-					'Cannot set option with empty key',
-					['id' => $this->id, 'tag' => $this->tag]
-				);
-				continue;
-			}
-			if ($value === null) {
-				Error::setError(
-					'210',
-					'Cannot set option with null value',
-					['id' => $this->id, 'tag' => $this->tag]
-				);
-				continue;
-			}
-			$this->options[$key] = $value;
-		}
 	}
 
 	/**
@@ -147,13 +139,26 @@ class Element
 	}
 
 	/**
-	 * get the tag name
+	 * Set name for elements
+	 * only for elements that need it (input/button/form)
 	 *
-	 * @return string HTML element tag
+	 * @param  string $name
+	 * @return void
 	 */
-	public function getTag(): string
+	public function setName(string $name): void
 	{
-		return $this->tag;
+		if (
+			!empty($name) &&
+			!preg_match("/^[A-Za-z][\w-]*$/", $name)
+		) {
+			Error::setWarning(
+				'203',
+				'possible invalid name',
+				['name' => $name, 'id' => $this->getId(), 'tag' => $this->getTag()]
+			);
+			// TODO: shoud throw error
+		}
+		$this->name = $name;
 	}
 
 	/**
@@ -202,11 +207,21 @@ class Element
 					'Cannot set option with empty key',
 					['id' => $this->getId(), 'tag' => $this->getTag()]
 				);
+				// TODO: shoud throw error
 				continue;
 			}
 			// if data is null
 			if ($value === null) {
-				unset($this->options[$key]);
+				if (isset($this->options[$key])) {
+					unset($this->options[$key]);
+				} else {
+					Error::setError(
+						'210',
+						'Cannot set option with null value',
+						['id' => $this->getId(), 'tag' => $this->getTag()]
+					);
+				}
+				// TODO: shoud throw error
 				continue;
 			}
 			$this->options[$key] = $value;
@@ -243,6 +258,7 @@ class Element
 	 *
 	 * @param  Element $sub One or many elements to add
 	 * @return void
+	 * @throws HtmlBuilderExcpetion
 	 */
 	public function addSub(Element ...$sub): void
 	{
@@ -252,10 +268,10 @@ class Element
 			if ($_sub == $this) {
 				Error::setError(
 					'100',
-					'Cannot assign Element, this would create a loop',
+					'Cannot assign Element to itself, this would create an infinite loop',
 					['id' => $this->getId(), 'tag' => $this->getTag()]
 				);
-				continue;
+				throw new HtmlBuilderExcpetion('Cannot assign Element to itself, this would create an infinite loop');
 			}
 			array_push($this->sub, $_sub);
 		}
@@ -319,7 +335,29 @@ class Element
 	 */
 	public function addCss(string ...$css): Element
 	{
-		$this->css = array_unique(array_merge($this->css, $css));
+		// should do check for empty/invalid css
+		$_set_css = [];
+		foreach ($css as $_css) {
+			if (empty($_css)) {
+				Error::setError(
+					'204',
+					'cannot have empty css string',
+				);
+				// TODO: shoud throw error
+				continue;
+			}
+			// -?[_A-Za-z][_A-Za-z0-9-]*
+			if (!preg_match("/^-?[_A-Za-z][_A-Za-z0-9-]*$/", $_css)) {
+				Error::setWarning(
+					'205',
+					'possible invalid css string',
+					['css' => $_css, 'id' => $this->id, 'tag' => $this->tag]
+				);
+				// TODO: shoud throw error
+			}
+			$_set_css[] = $_css;
+		}
+		$this->css = array_unique(array_merge($this->css, $_set_css));
 		return $this;
 	}
 
