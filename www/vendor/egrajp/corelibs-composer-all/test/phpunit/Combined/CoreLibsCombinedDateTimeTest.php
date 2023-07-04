@@ -459,6 +459,47 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	}
 
 	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function dateRangeHasWeekendProvider(): array
+	{
+		return [
+			'no weekend' => [
+				'2023-07-03',
+				'2023-07-04',
+				false
+			],
+			'start weekend sat' => [
+				'2023-07-01',
+				'2023-07-04',
+				true
+			],
+			'start weekend sun' => [
+				'2023-07-02',
+				'2023-07-04',
+				true
+			],
+			'end weekend sat' => [
+				'2023-07-03',
+				'2023-07-08',
+				true
+			],
+			'end weekend sun' => [
+				'2023-07-03',
+				'2023-07-09',
+				true
+			],
+			'long period > 6 days' => [
+				'2023-07-03',
+				'2023-07-27',
+				true
+			]
+		];
+	}
+
+	/**
 	 * date string convert test
 	 *
 	 * @covers ::dateStringFormat
@@ -778,6 +819,29 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			$output
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::dateRangeHasWeekend
+	 * @dataProvider dateRangeHasWeekendProvider
+	 * @testdox dateRangeHasWeekend $start_date and $end_date are expected weekend $expected [$_dataName]
+	 *
+	 * @param  string $start_date
+	 * @param  string $end_date
+	 * @param  bool   $expected
+	 * @return void
+	 */
+	public function testDateRangeHasWeekend(
+		string $start_date,
+		string $end_date,
+		bool $expected
+	): void {
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::dateRangeHasWeekend($start_date, $end_date)
 		);
 	}
 }

@@ -143,6 +143,26 @@ print "DATE-dow[$date];invalid: " . DateTime::setWeekdayNameFromDate($date) . "<
 print "DATE-dow[$date],long;invalid: " . DateTime::setWeekdayNameFromDate($date, true) . "<br>";
 print "DOW-date[$date];invalid: " . DateTime::setWeekdayNumberFromDate($date) . "<br>";
 
+// check date range includes a weekend
+// does not:
+$start_date = '2023-07-03';
+$end_date = '2023-07-05';
+print "Has Weekend: " . $start_date . " ~ " . $end_date . ": "
+	. Dgs::prBl(DateTime::dateRangeHasWeekend($start_date, $end_date)) . "<br>";
+$start_date = '2023-07-03';
+$end_date = '2023-07-10';
+print "Has Weekend: " . $start_date . " ~ " . $end_date . ": "
+	. Dgs::prBl(DateTime::dateRangeHasWeekend($start_date, $end_date)) . "<br>";
+$start_date = '2023-07-03';
+$end_date = '2023-07-31';
+print "Has Weekend: " . $start_date . " ~ " . $end_date . ": "
+	. Dgs::prBl(DateTime::dateRangeHasWeekend($start_date, $end_date)) . "<br>";
+$start_date = '2023-07-01';
+$end_date = '2023-07-03';
+print "Has Weekend: " . $start_date . " ~ " . $end_date . ": "
+	. Dgs::prBl(DateTime::dateRangeHasWeekend($start_date, $end_date)) . "<br>";
+
+
 print "</body></html>";
 
 // __END__

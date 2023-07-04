@@ -452,6 +452,31 @@ class DateTime
 			return $days;
 		}
 	}
+
+	/**
+	 * check if a weekend day (sat/sun) is in the given date range
+	 * Can have time too, but is not needed
+	 *
+	 * @param  string $start_date Y-m-d
+	 * @param  string $end_date   Y-m-d
+	 * @return bool               True for has weekend, False for has not
+	 */
+	public static function dateRangeHasWeekend(
+		string $start_date,
+		string $end_date,
+	): bool {
+		$dd_start = new \DateTime($start_date);
+		$dd_end = new \DateTime($end_date);
+		if (
+			// starts with a weekend
+			$dd_start->format('N') >= 6 ||
+			// start day plus diff will be 6 and so fall into a weekend
+			((int)$dd_start->format('w') + $dd_start->diff($dd_end)->days) >= 6
+		) {
+			return true;
+		}
+		return false;
+	}
 }
 
 // __END__
