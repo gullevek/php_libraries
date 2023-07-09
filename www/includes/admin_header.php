@@ -87,7 +87,7 @@ $l10n = new \CoreLibs\Language\L10n(
 	$locale['locale'],
 	$locale['domain'],
 	$locale['path'],
-	$locale['encoding']
+	$locale['encoding'],
 );
 
 // create smarty object

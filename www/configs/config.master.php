@@ -222,7 +222,17 @@ if ($is_secure) {
 }
 // define the db config set name, the db config and the db schema
 define('DB_CONFIG_NAME', $SITE_CONFIG[HOST_NAME]['db_host'] ?? '');
-define('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME] ?? []);
+define('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME] ?? [
+	'db_name' => '',
+	'db_user' => '',
+	'db_pass' => '',
+	'db_host' => '',
+	'db_port' => 5432,
+	'db_schema' => '',
+	'db_encoding' => '',
+	'db_type' => '',
+	'db_ssl' => ''
+]);
 // because we can't change constant, but we want to for db debug flag
 $GLOBALS['DB_CONFIG_SET'] = DB_CONFIG;
 // define('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
