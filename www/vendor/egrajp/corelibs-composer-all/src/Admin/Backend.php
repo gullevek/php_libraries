@@ -164,6 +164,10 @@ class Backend
 			);
 		}
 		$this->default_acl = $set_default_acl_level ?? DEFAULT_ACL_LEVEL;
+		// if negative or larger than 100, reset to 0
+		if ($this->default_acl < 0 || $this->default_acl > 100) {
+			$this->default_acl = 0;
+		}
 
 		// queue key
 		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action)) {

@@ -814,13 +814,13 @@ class IO
 		switch ($id) {
 			case 'DB_ERROR':
 				$this->log->error(
-					$debug_id . ' :' . $prefix . $error_string,
+					$prefix . $error_string,
 					$context
 				);
 				break;
 			case 'DB_WARNING':
 				$this->log->warning(
-					$debug_id . ' :' . $prefix . $error_string,
+					$prefix . $error_string,
 					$context
 				);
 				break;
