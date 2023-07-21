@@ -231,8 +231,6 @@ class Login
 	) {
 		// attach db class
 		$this->db = $db;
-		// log login data for this class only
-		$log->setLogFlag(\CoreLibs\Logging\Logger\Flag::per_class);
 		// attach logger
 		$this->log = $log;
 		// attach session class
