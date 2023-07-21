@@ -309,7 +309,7 @@ class IO
 	// basic vars
 	// the dbh handler, if disconnected by command is null, bool:false on error,
 	/** @var \PgSql\Connection|false|null */
-	private \PgSql\Connection|false|null $dbh;
+	private \PgSql\Connection|false|null $dbh = null;
 	/** @var bool DB_DEBUG ... (if set prints out debug msgs) */
 	private bool $db_debug = false;
 	/** @var string the DB connected to */
