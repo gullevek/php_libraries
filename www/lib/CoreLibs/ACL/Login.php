@@ -1058,9 +1058,9 @@ class Login
 					];
 					// set the default unit
 					if ($res['edit_default']) {
-						$_SESSION['UNIT_DEFAULT'] = $res['edit_access_id'];
+						$_SESSION['UNIT_DEFAULT'] = (int)$res['edit_access_id'];
 					}
-					$_SESSION['UNIT_UID'][$res['uid']] = $res['edit_access_id'];
+					$_SESSION['UNIT_UID'][$res['uid']] = (int)$res['edit_access_id'];
 					// sub arrays for simple access
 					array_push($eauid, $res['edit_access_id']);
 					$unit_acl[$res['edit_access_id']] = $res['level'];
@@ -2345,7 +2345,10 @@ HTML;
 			is_array($_SESSION['UNIT']) &&
 			!array_key_exists($edit_access_id, $_SESSION['UNIT'])
 		) {
-			return $_SESSION['UNIT_DEFAULT'] ?? null;
+			$edit_access_id = null;
+			if (is_numeric($_SESSION['UNIT_DEFAULT'])) {
+				$edit_access_id = (int)$_SESSION['UNIT_DEFAULT'];
+			}
 		}
 		return $edit_access_id;
 	}
