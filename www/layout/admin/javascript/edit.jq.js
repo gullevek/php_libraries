@@ -86,6 +86,21 @@ function getScrollOffset()
 }
 
 /**
+ * wrapper to get the correct scroll offset for opener page (from popup)
+ * @return {Object} object with x/y px
+ */
+function getScrollOffsetOpener() // eslint-disable-line no-unused-vars
+{
+	var left, top;
+	left = opener.window.pageXOffset || (opener.document.documentElement.scrollLeft || opener.document.body.scrollLeft);
+	top = opener.window.pageYOffset || (opener.document.documentElement.scrollTop || opener.document.body.scrollTop);
+	return {
+		left: left,
+		top: top
+	};
+}
+
+/**
  * centers div to current window size middle
  * @param {String}  id   element to center
  * @param {Boolean} left if true centers to the middle from the left

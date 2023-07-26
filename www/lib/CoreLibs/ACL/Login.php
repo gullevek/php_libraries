@@ -1146,18 +1146,18 @@ class Login
 			// user > page > group
 			// group ACL 0
 			if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = $_SESSION['GROUP_ACL_LEVEL'];
+				$this->acl['base'] = (int)$_SESSION['GROUP_ACL_LEVEL'];
 			}
 			// page ACL 1
 			if (
 				isset($_SESSION['PAGES_ACL_LEVEL'][$this->page_name]) &&
 				$_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1
 			) {
-				$this->acl['base'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
+				$this->acl['base'] = (int)$_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
 			}
 			// user ACL 2
 			if ($_SESSION['USER_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = $_SESSION['USER_ACL_LEVEL'];
+				$this->acl['base'] = (int)$_SESSION['USER_ACL_LEVEL'];
 			}
 		}
 		$_SESSION['BASE_ACL_LEVEL'] = $this->acl['base'];

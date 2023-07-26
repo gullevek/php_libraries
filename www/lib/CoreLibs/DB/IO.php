@@ -2057,10 +2057,11 @@ class IO
 	/**
 	 * this is only needed for Postgresql. Converts postgresql arrays to PHP
 	 * Recommended to rather user 'array_to_json' instead and convet JSON in PHP
+	 * or if ARRAY_AGG -> JSONB_AGG
 	 *
 	 * @param  string $text input text to parse to an array
 	 * @return array<mixed> PHP array of the parsed data
-	 * @deprecated Recommended to use 'array_to_json' in PostgreSQL instead
+	 * @deprecated Recommended to use 'array_to_json/jsonb_agg' in PostgreSQL instead
 	 */
 	public function dbArrayParse(string $text): array
 	{
