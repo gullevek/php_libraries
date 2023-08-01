@@ -2779,7 +2779,7 @@ class IO
 	 * @param  string       $query  Query to find in cursor_ext
 	 * @param  array<mixed> $params If the query is params type we need params
 	 *                              data to create a unique call one, optional
-	 * @return int|false            query position (row pos), false on error
+	 * @return int|false            numer of rows returned, false on error
 	 */
 	public function dbGetCursorNumRows(string $query, array $params = []): int|false
 	{
