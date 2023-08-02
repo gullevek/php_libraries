@@ -3736,7 +3736,7 @@ class IO
 	 * Either a single element for a single insert or an array
 	 * if multiple insert values where used.
 	 *
-	 * @return array<mixed>|string|int|null Current insert query primary key
+	 * @return array<mixed>|string|int|null Current insert query primary key, null on not set
 	 */
 	public function dbGetInsertPK(): array|string|int|null
 	{

@@ -169,10 +169,10 @@ class Email
 	 * @param  string      $email email string
 	 * @param  bool        $short default false, if true,
 	 *                            returns only short type (pc instead of pc_html)
-	 * @return string|bool        email type, eg "pc", "docomo", etc,
+	 * @return string|false       email type, eg "pc", "docomo", etc,
 	 *                            false for invalid short type
 	 */
-	public static function getEmailType(string $email, bool $short = false)
+	public static function getEmailType(string $email, bool $short = false): string|false
 	{
 		// trip if there is no email address
 		if (!$email) {
@@ -200,9 +200,9 @@ class Email
 	 * gets the short email type from a long email type
 	 *
 	 * @param  string $email_type email string
-	 * @return string|bool              short string or false for invalid
+	 * @return string|false             short string or false for invalid
 	 */
-	public static function getShortEmailType(string $email_type)
+	public static function getShortEmailType(string $email_type): string|false
 	{
 		// check if the short email type exists
 		if (isset(self::$mobile_email_type_short[$email_type])) {
