@@ -49,7 +49,25 @@ class Json
 	}
 
 	/**
+	 * convert array to json
+	 * Will set empty json {} on false/error
+	 * Error can be read with jsonGetLastError
+	 * Deos not throw errors
+	 *
+	 * @param  array<mixed> $data
+	 * @param  int          $flags json_encode flags as is
+	 * @return string              JSON string or '{}' if false
+	 */
+	public static function jsonConvertArrayTo(array $data, int $flags = 0): string
+	{
+		$json_string = json_encode($data, $flags) ?: '{}';
+		self::$json_last_error = json_last_error();
+		return (string)$json_string;
+	}
+
+	/**
 	 * returns human readable string for json errors thrown in jsonConvertToArray
+	 * Source: https://www.php.net/manual/en/function.json-last-error.php
 	 *
 	 * @param  bool       $return_string [default=false] if set to true
 	 *                                   it will return the message string and not
@@ -79,6 +97,15 @@ class Json
 				break;
 			case JSON_ERROR_UTF8:
 				$json_error_string = 'Malformed UTF-8 characters, possibly incorrectly encoded';
+				break;
+			case JSON_ERROR_RECURSION:
+				$json_error_string = 'One or more recursive references in the value to be encoded';
+				break;
+			case JSON_ERROR_INF_OR_NAN:
+				$json_error_string = 'One or more NAN or INF values in the value to be encoded';
+				break;
+			case JSON_ERROR_UNSUPPORTED_TYPE:
+				$json_error_string = '	A value of a type that cannot be encoded was given';
 				break;
 			case JSON_ERROR_INVALID_PROPERTY_NAME:
 				$json_error_string = 'A key starting with \u0000 character was in the string';
