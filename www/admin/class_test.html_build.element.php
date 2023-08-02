@@ -75,6 +75,7 @@ print "EL_O: <pre>" . print_r($el_o, true) . "</pre>";
 echo "<hr>";
 print "buildHtml(): <pre>" . htmlentities($el_o->buildHtml()) . "</pre>";
 echo "<hr>";
+/** @phpstan-ignore-next-line */
 print "phfo(\$el_o): <pre>" . htmlentities($el_o::printHtmlFromObject($el_o, true)) . "</pre>";
 echo "<hr>";
 print "phfa(\$el_list): <pre>" . htmlentities($el_o::buildHtmlFromList($el_o_list, true)) . "</pre>";

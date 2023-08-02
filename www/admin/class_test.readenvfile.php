@@ -35,10 +35,12 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 print "ALREADY from config.php: " . \CoreLibs\Debug\Support::printAr($_ENV) . "<br>";
 
 // test .env in local
+/** @phpstan-ignore-next-line */
 $status = \CoreLibs\Get\DotEnv::readEnvFile('.', 'test.env');
 print "test.env: STATUS: " . $status . "<br>";
 print "AFTER reading test.env file: " . \CoreLibs\Debug\Support::printAr($_ENV) . "<br>";
 
 print "</body></html>";
+// ;;
 
 // __END__

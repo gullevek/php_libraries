@@ -63,6 +63,11 @@ print "J/S::E-JSON ERROR: " . $json_class::jsonGetLastError() . ": " . $json_cla
 // print "S::JSON: $json: " . DgS::printAr($output) . "<br>";
 // print "S::JSON ERROR: " . Jason::jsonGetLastError() . ": " . Jason::jsonGetLastError(true) . "<br>";
 
+// convert an array to json
+$array = ['foo' => 'bar'];
+$output = Json::jsonConvertArrayTo($array);
+print "S::JSON: " . DgS::printAr($array) . " => " . $output . "<br>";
+
 print "</body></html>";
 
 // __END__

@@ -16,7 +16,7 @@ final class CoreLibsConvertJsonTest extends TestCase
 	/**
 	 * test list for json convert tests
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function jsonProvider(): array
 	{
@@ -55,9 +55,35 @@ final class CoreLibsConvertJsonTest extends TestCase
 	}
 
 	/**
+	 * Undocumented function
+	 *
+	 * @return array<mixed>
+	 */
+	public function jsonArrayProvider(): array
+	{
+		return [
+			'valid json' => [
+				[
+					'm' => 2,
+					'f' => 'sub_2'
+				],
+				'{"m":2,"f":"sub_2"}',
+			],
+			'empty json array' => [
+				[],
+				'[]'
+			],
+			'empty json hash' => [
+				['' => ''],
+				'{"":""}'
+			]
+		];
+	}
+
+	/**
 	 * json error list
 	 *
-	 * @return array JSON error list
+	 * @return array<mixed> JSON error list
 	 */
 	public function jsonErrorProvider(): array
 	{
@@ -127,7 +153,7 @@ final class CoreLibsConvertJsonTest extends TestCase
 	 *
 	 * @param string|null $input
 	 * @param bool $flag
-	 * @param array $expected
+	 * @param array<mixed> $expected
 	 * @return void
 	 */
 	public function testJsonConvertToArray(?string $input, bool $flag, array $expected): void
@@ -146,7 +172,8 @@ final class CoreLibsConvertJsonTest extends TestCase
 	 * @testdox jsonGetLastError $input will be $expected_i/$expected_s [$_dataName]
 	 *
 	 * @param string|null $input
-	 * @param string $expected
+	 * @param int $expected_i
+	 * @param string $expected_s
 	 * @return void
 	 */
 	public function testJsonGetLastError(?string $input, int $expected_i, string $expected_s): void
@@ -159,6 +186,25 @@ final class CoreLibsConvertJsonTest extends TestCase
 		$this->assertEquals(
 			$expected_s,
 			\CoreLibs\Convert\Json::jsonGetLastError(true)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::jsonConvertArrayTo
+	 * @dataProvider jsonArrayProvider
+	 * @testdox jsonConvertArrayTo $input (Override: $flag) will be $expected [$_dataName]
+	 *
+	 * @param  array<mixed> $input
+	 * @param  string $expected
+	 * @return void
+	 */
+	public function testJsonConvertArrayto(array $input, string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Convert\Json::jsonConvertArrayTo($input)
 		);
 	}
 }
