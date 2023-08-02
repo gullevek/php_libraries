@@ -51,7 +51,6 @@ echo "<br><b>AUTO DETECT</b><br>";
 // DEPRECATED
 // $get_locale = Language\GetLocale::setLocale();
 // print "[AUTO, DEPRECATED]: " . Support::printAr($get_locale) . "<br>";
-/** @phpstan-ignore-next-line */
 $get_locale = Language\GetLocale::setLocaleFromSession(
 	SITE_LOCALE,
 	str_replace('/', '', CONTENT_PATH),
@@ -59,7 +58,6 @@ $get_locale = Language\GetLocale::setLocaleFromSession(
 	BASE . INCLUDES . LOCALE
 );
 print "[NAMED CONSTANTS OUTSIDE]: " . Support::printAr($get_locale) . "<br>";
-/** @phpstan-ignore-next-line */
 $get_locale = Language\GetLocale::setLocaleFromSession(
 	'en',
 	'foo',
@@ -76,7 +74,6 @@ $_SESSION['DEFAULT_LOCALE'] = 'ja_JP.UTF-8';
 $_SESSION['DEFAULT_CHARSET'] = 'UTF-8';
 $_SESSION['DEFAULT_DOMAIN'] = 'admin';
 $_SESSION['LOCALE_PATH'] = BASE . INCLUDES . LOCALE;
-/** @phpstan-ignore-next-line */
 $get_locale = Language\GetLocale::setLocaleFromSession(
 	SITE_LOCALE,
 	SITE_DOMAIN,
@@ -93,7 +90,6 @@ $_SESSION['DEFAULT_LOCALE'] = '00000#####';
 $_SESSION['DEFAULT_CHARSET'] = '';
 $_SESSION['DEFAULT_DOMAIN'] = 'admin';
 $_SESSION['LOCALE_PATH'] = BASE . INCLUDES . LOCALE;
-/** @phpstan-ignore-next-line */
 $get_locale = Language\GetLocale::setLocaleFromSession(
 	SITE_LOCALE,
 	SITE_DOMAIN,
