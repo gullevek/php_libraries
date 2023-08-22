@@ -405,7 +405,7 @@ class LoggingLegacy
 		// set per class, but don't use get_class as we will only get self
 		$rpl_string = !$this->log_per_class ? '' : '_'
 			// set sub class settings
-			. str_replace('\\', '-', Support::getCallerClass());
+			. str_replace('\\', '-', Support::getCallerTopLevelClass());
 		$fn = str_replace('{CLASS}', $rpl_string, $fn); // create output filename
 
 		// if request to write to one file
@@ -756,7 +756,7 @@ class LoggingLegacy
 			return $status;
 		}
 		// get the last class entry and wrie that
-		$class = Support::getCallerClass();
+		$class = Support::getCallerTopLevelClass();
 		// get timestamp
 		$timestamp = Support::printTime();
 		// same string put for print (no html data inside)
@@ -855,7 +855,7 @@ class LoggingLegacy
 				. 'border-bottom: 1px solid black; margin: 10px 0 10px 0; '
 				. 'background-color: white; color: black;">'
 				. '<div style="font-size: 12px;">{<span style="font-style: italic; color: #928100;">'
-				. Support::getCallerClass() . '</span>}</div>';
+				. Support::getCallerTopLevelClass() . '</span>}</div>';
 			$string_output = $string_prefix . $string_output
 				. '<div><span style="font-style: italic; color: #108db3;">Script Run Time:</span> '
 				. $script_end . '</div>'

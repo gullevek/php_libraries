@@ -4,40 +4,28 @@
  * TEST sets for DB::IO
  */
 
-namespace Test\DB;
-
-use CoreLibs\DB\IO;
+namespace TestCalls\DB;
 
 class TestDB
 {
-	/** @var IO */
-	private $db;
-	/** @var array<mixed> */
-	private $config;
+	/** @var \CoreLibs\DB\IO */
+	private \CoreLibs\DB\IO $db;
+	/** @var \CoreLibs\Logging\Logging */
+	private \CoreLibs\Logging\Logging $log;
+
+	/** @var \TestCalls\Test */
+	public $main;
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param \CoreLibs\Logging\Logging $log
+	 * @param \TestCalls\Test $main
 	 */
 	public function __construct(
-		\CoreLibs\Logging\Logging $log
+		\TestCalls\Test $main
 	) {
-		$this->config = [
-			'db_name' => $_ENV['DB_NAME_TEST'] ?? '',
-			'db_user' => $_ENV['DB_USER_TEST'] ?? '',
-			'db_pass' => $_ENV['DB_PASS_TEST'] ?? '',
-			'db_host' => $_ENV['DB_HOST_TEST'] ?? '',
-			'db_port' => 5432,
-			'db_schema' => 'public',
-			'db_type' => 'pgsql',
-			'db_encoding' => '',
-			'db_ssl' => 'allow'
-		];
-		$this->db = new IO(
-			$this->config,
-			$log
-		);
+		$this->db = $main->db;
+		$this->log = $main->log;
 	}
 
 	/**
@@ -47,6 +35,7 @@ class TestDB
 	 */
 	private function testDBa(): void
 	{
+		$this->log->debug('TEST DB', 'Call in testDBa');
 		$this->db->dbInfo();
 	}
 
@@ -57,6 +46,7 @@ class TestDB
 	 */
 	public function testRunDB(): void
 	{
+		$this->log->debug('TEST DB', 'Call in testRunDB');
 		$this->testDBa();
 	}
 }

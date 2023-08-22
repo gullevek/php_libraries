@@ -79,10 +79,10 @@ class Support
 	 * default true: true, false: false
 	 *
 	 * @param  bool   $bool    Variable to convert
-	 * @param  string $name    [default: ''] Prefix name
-	 * @param  string $true    [default: 'true'] True string
-	 * @param  string $false   [default: 'false'] False string
-	 * @param  bool   $no_html [default: false] if true do not print html
+	 * @param  string $name    [=''] Prefix name
+	 * @param  string $true    [='true'] True string
+	 * @param  string $false   [='false'] False string
+	 * @param  bool   $no_html [=false] if true do not print html
 	 * @return string          String with converted bool text for debug
 	 */
 	public static function printBool(
@@ -104,8 +104,8 @@ class Support
 	 * Convert bool value to string value. Short name alias for printBool
 	 *
 	 * @param  bool   $bool  Bool value to be transformed
-	 * @param  string $true  [default: 'true'] Override default string 'true'
-	 * @param  string $false [default: 'false'] Override default string 'false'
+	 * @param  string $true  [='true'] Override default string 'true'
+	 * @param  string $false [=false'] Override default string 'false'
 	 * @return string        $true or $false string for true/false bool
 	 */
 	public static function prBl(
@@ -159,7 +159,7 @@ class Support
 	 * Recommended debug output
 	 *
 	 * @param  mixed  $data         Anything
-	 * @param  bool   $no_html      [default=false] If true strip all html tags
+	 * @param  bool   $no_html      [=false] If true strip all html tags
 	 *                              (for text print)
 	 * @return string               A text string
 	 */
@@ -203,7 +203,7 @@ class Support
 	 * exports (dumps) var, in more printable design, but without detail info
 	 *
 	 * @param  mixed  $data    Anything
-	 * @param  bool   $no_html If true true do not add <pre> tags
+	 * @param  bool   $no_html [=false] If true true do not add <pre> tags
 	 * @return string          A text string
 	 */
 	public static function exportVar(mixed $data, bool $no_html = false): string
@@ -217,7 +217,7 @@ class Support
 	 * Return file name and line number where this was called
 	 * One level up
 	 *
-	 * @param  int         $level trace level, default 1
+	 * @param  int         $level [=1] trace level
 	 * @return string|null        null or file name:line number
 	 */
 	public static function getCallerFileLine(int $level = 1): ?string
@@ -238,18 +238,53 @@ class Support
 	 * eg for debugging, this function does this
 	 *
 	 * call this method in the child method and you get the parent function that called
-	 * @param  int    $level trace level, default 1
-	 * @return ?string       null or the function that called the function
-	 *                       where this method is called
+	 * @param  int         $level [=1] trace level
+	 * @return string|null        null or the function that called the function
+	 *                            where this method is called
 	 */
 	public static function getCallerMethod(int $level = 1): ?string
 	{
 		$traces = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-		// print \CoreLibs\Debug\Support::printAr($traces);
+		// print "getCallerMethod:<br>" . \CoreLibs\Debug\Support::printAr($traces);
 		// We should check from top down if unset?
 		// sets the start point here, and in level two (the sub call) we find this
 		if (isset($traces[$level])) {
 			return $traces[$level]['function'];
+		}
+		return null;
+	}
+
+	/**
+	 * get the class that first called it and skip the base class
+	 * Companion method to getCallerMethod
+	 *
+	 * @param  int    $level [=1] trace level
+	 * @return ?string       null if class not found
+	 */
+	public static function getCallerClass(int $level = 1): ?string
+	{
+		$traces = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+		// print "getCallerClass:<br>" . \CoreLibs\Debug\Support::printAr($traces);
+		if (isset($traces[$level])) {
+			return $traces[$level]['class'] ?? null;
+		}
+		return null;
+	}
+
+	/**
+	 * Returns class and method together
+	 *
+	 * @param  int         $level [=1] travel level
+	 * @return string|null        null if trace level not found, else namespace class and method
+	 */
+	public static function getCallerClassMethod(int $level = 1): ?string
+	{
+		$traces = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+		// print "getCallerClass:<br>" . \CoreLibs\Debug\Support::printAr($traces);
+		if (isset($traces[$level])) {
+			return ($traces[$level]['class'] ?? '-')
+				. ($traces[$level]['type'] ?? '')
+				. $traces[$level]['function'];
 		}
 		return null;
 	}
@@ -283,25 +318,21 @@ class Support
 	 * Is mostly used in debug log statements to get the class where the debug
 	 * was called
 	 * gets top level class
-	 *　loops over the debug backtrace until if finds the first class (from the end)
+	 * loops over the debug backtrace until if finds the first class (from the end)
 	 *
 	 * @return string Class name with namespace
 	 */
-	public static function getCallerClass(): string
+	public static function getCallerTopLevelClass(): string
 	{
-		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-		// ?? [['class' => get_called_class()]];
-		// TODO make sure that this doesn't loop forver
+		$traces = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+		// print "getCallerClass:<br>" . \CoreLibs\Debug\Support::printAr($traces);
 		$class = null;
-		while ($class === null && count($backtrace) > 0) {
-			// if current is
-			// [function] => debug
-			// [class] => CoreLibs\Debug\Logging
-			// then return
-			// (OUTSIDE) because it was not called from a class method
-			// or return file name
-			$get_class = array_pop($backtrace);
-			$class = $get_class['class'] ?? null;
+		// reverse and stop at first set class, this is the top level one
+		foreach (array_reverse($traces) as $trace) {
+			$class = $trace['class'] ?? null;
+			if (!empty($class)) {
+				break;
+			}
 		}
 		// on null or empty return empty string
 		return empty($class) ? '' : $class;

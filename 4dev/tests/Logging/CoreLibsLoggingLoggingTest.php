@@ -22,7 +22,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 		. "\[[\w\.]+(:\d+)?\]\s{1}" // host:port
 		. "\[[\w\-\.\/]+:\d+\]\s{1}" // folder/file
 		. "\[\w+\]\s{1}" // run id
-		. "{[\w\\\\]+(::\w+)?}\s{1}"; // class
+		. "{[\w\\\\]+((::|->)\w+)?}\s{1}"; // class
 
 	public static function tearDownAfterClass(): void
 	{

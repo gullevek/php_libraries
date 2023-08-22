@@ -169,6 +169,7 @@ class TestL
 	public function test(?string $ts = null): bool
 	{
 		print "* GETCALLERCLASS(INSIDE CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
+		print "* GETCALLERTOPCLASS(INSIDE CLASS): " . \CoreLibs\Debug\Support::getCallerTopLevelClass() . "<br>";
 		$this->log->debug('TESTL', 'Logging in class testL' . ($ts !== null ? ': ' . $ts : ''));
 		$this->log->debug('TESTL', 'Some other message');
 		return true;
@@ -191,6 +192,7 @@ class TestR extends TestL
 	public function subTest(): bool
 	{
 		print "** GETCALLERCLASS(INSIDE EXTND CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
+		print "** GETCALLERTOPCLASS(INSIDE EXTND CLASS): " . \CoreLibs\Debug\Support::getCallerTopLevelClass() . "<br>";
 		$this->log->debug('TESTR', 'Logging in class testR (extends testL)');
 		$this->test('TESTR INSIDE');
 		$this->log->debug('TESTR', 'Array: '

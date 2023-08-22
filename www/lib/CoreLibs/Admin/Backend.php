@@ -556,7 +556,7 @@ class Backend
 		string $suffix = '',
 		int $min_steps = 1,
 		bool $name_pos_back = false
-	) {
+	): string {
 		// get the build layout
 		$html_time = \CoreLibs\Output\Form\Elements::printDateTime(
 			$year,

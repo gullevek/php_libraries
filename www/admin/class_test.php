@@ -114,6 +114,7 @@ $test_files = [
 	'class_test.autoloader.php' => 'Class Test: AUTOLOADER',
 	'class_test.config.link.php' => 'Class Test: CONFIG LINK',
 	'class_test.config.direct.php' => 'Class Test: CONFIG DIRECT',
+	'class_test.class-calls.php' => 'Class Test: CLASS CALLS',
 	'subfolder/class_test.config.direct.php' => 'Class Test: CONFIG DIRECT SUB',
 ];
 

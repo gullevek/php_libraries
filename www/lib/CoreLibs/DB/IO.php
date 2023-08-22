@@ -805,7 +805,10 @@ class IO
 			$call_stack[] =
 				($call_trace['file'] ?? 'n/f') . ':'
 				. ($call_trace['line'] ?? '-') . ':'
-				. (!empty($call_trace['class']) ? $call_trace['class'] . '->' : '')
+				. (!empty($call_trace['class']) ?
+					$call_trace['class'] . ($call_trace['type'] ?? '') :
+					''
+				)
 				. $call_trace['function'];
 		}
 		$context = [
@@ -825,7 +828,7 @@ class IO
 				);
 				break;
 			default:
-			// used named arguments so we can easy change the order of debug
+				// used named arguments so we can easy change the order of debug
 				$this->log->debug(
 					group_id: $debug_id,
 					message: $error_string,
