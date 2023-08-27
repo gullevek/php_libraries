@@ -377,7 +377,7 @@ input[type="text"]:focus, textarea:focus, select:focus {
 	border-top-color: rgba(3, 155, 229 ,1);
 	border-radius: 50%;
 	display: inline-block;
-	animation: rotate 600ms infinite linear;
+	animation: progress-move 600ms infinite linear;
 	/* align */
 	left: 0;
 	top: 0;
@@ -385,7 +385,7 @@ input[type="text"]:focus, textarea:focus, select:focus {
 	z-index: 1000;
 }
 /* Animation for above progress */
-@keyframes rotate {
+@keyframes progress-move {
 	to {
 		transform: rotate(1turn)
 	}

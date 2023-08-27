@@ -302,9 +302,9 @@ class IO
 	/** @var string */
 	private string $to_encoding = '';
 	/** @var string the query string at the moment */
-	private string $query;
+	private string $query = '';
 	/** @var array<mixed> current params for query */
-	private array $params;
+	private array $params = [];
 	// only inside
 	// basic vars
 	// the dbh handler, if disconnected by command is null, bool:false on error,
@@ -344,7 +344,7 @@ class IO
 	// FOR BELOW: (This should be private and only readable through some method)
 	// cursor array for cached readings
 	/** @var array<string,mixed> extended cursoers string index with content */
-	private array $cursor_ext;
+	private array $cursor_ext = [];
 	// per query vars
 	/** @var \PgSql\Result|false actual cursor (DBH) */
 	private \PgSql\Result|false $cursor;
@@ -401,7 +401,7 @@ class IO
 	/** @var bool if we use RETURNING in the INSERT call */
 	private bool $returning_id = false;
 	/** @var string if a sync is running holds the hash key of the query */
-	private string $async_running;
+	private string $async_running = '';
 	// logging class, must be public so settings can be changed
 	/** @var \CoreLibs\Logging\Logging */
 	public \CoreLibs\Logging\Logging $log;
@@ -2687,7 +2687,7 @@ class IO
 	 */
 	public function dbGetCursor(): \PgSql\Result|false
 	{
-		return $this->cursor;
+		return $this->cursor ?? false;
 	}
 
 	// ***************************
@@ -2744,7 +2744,7 @@ class IO
 		}
 		$query_hash = $this->dbGetQueryHash($query, $params);
 		if (
-			is_array($this->cursor_ext) &&
+			!empty($this->cursor_ext) &&
 			isset($this->cursor_ext[$query_hash])
 		) {
 			if (empty($query_field)) {
@@ -2763,9 +2763,9 @@ class IO
 	 * @param  string       $query  Query to find in cursor_ext
 	 * @param  array<mixed> $params If the query is params type we need params
 	 *                              data to create a unique call one, optional
-	 * @return int|false            query position (row pos), false on error
+	 * @return int|false|null       query position (row pos), false on error
 	 */
-	public function dbGetCursorPos(string $query, array $params = []): int|false
+	public function dbGetCursorPos(string $query, array $params = []): int|false|null
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
@@ -2773,7 +2773,14 @@ class IO
 			return false;
 		}
 		$query_hash = $this->dbGetQueryHash($query, $params);
-		return (int)$this->cursor_ext[$query_hash]['pos'];
+		if (
+			!empty($this->cursor_ext) &&
+			isset($this->cursor_ext[$query_hash])
+		) {
+			return (int)$this->cursor_ext[$query_hash]['pos'];
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -2782,9 +2789,9 @@ class IO
 	 * @param  string       $query  Query to find in cursor_ext
 	 * @param  array<mixed> $params If the query is params type we need params
 	 *                              data to create a unique call one, optional
-	 * @return int|false            numer of rows returned, false on error
+	 * @return int|false|null       numer of rows returned, false on error
 	 */
-	public function dbGetCursorNumRows(string $query, array $params = []): int|false
+	public function dbGetCursorNumRows(string $query, array $params = []): int|false|null
 	{
 		$this->__dbErrorReset();
 		if (!$query) {
@@ -2792,7 +2799,14 @@ class IO
 			return false;
 		}
 		$query_hash = $this->dbGetQueryHash($query, $params);
-		return (int)$this->cursor_ext[$query_hash]['num_rows'];
+		if (
+			!empty($this->cursor_ext) &&
+			isset($this->cursor_ext[$query_hash])
+		) {
+			return (int)$this->cursor_ext[$query_hash]['num_rows'];
+		} else {
+			return null;
+		}
 	}
 
 	// ***************************
@@ -3194,7 +3208,7 @@ class IO
 	/**
 	 * Returns the current async running query hash
 	 *
-	 * @return string Current async running query hash
+	 * @return string Current async running query hash, empty string for nothing
 	 */
 	public function dbGetAsyncRunning(): string
 	{
@@ -3829,7 +3843,7 @@ class IO
 	 */
 	public function dbGetNumRows(): ?int
 	{
-		return $this->num_rows;
+		return $this->num_rows ?? null;
 	}
 
 	/**
@@ -3839,10 +3853,7 @@ class IO
 	 */
 	public function dbGetNumFields(): ?int
 	{
-		if (!isset($this->num_fields)) {
-			return null;
-		}
-		return $this->num_fields;
+		return $this->num_fields ?? null;
 	}
 
 	/**
