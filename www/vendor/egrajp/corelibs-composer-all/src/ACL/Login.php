@@ -231,8 +231,6 @@ class Login
 	) {
 		// attach db class
 		$this->db = $db;
-		// log login data for this class only
-		$log->setLogFlag(\CoreLibs\Logging\Logger\Flag::per_class);
 		// attach logger
 		$this->log = $log;
 		// attach session class
@@ -1060,9 +1058,9 @@ class Login
 					];
 					// set the default unit
 					if ($res['edit_default']) {
-						$_SESSION['UNIT_DEFAULT'] = $res['edit_access_id'];
+						$_SESSION['UNIT_DEFAULT'] = (int)$res['edit_access_id'];
 					}
-					$_SESSION['UNIT_UID'][$res['uid']] = $res['edit_access_id'];
+					$_SESSION['UNIT_UID'][$res['uid']] = (int)$res['edit_access_id'];
 					// sub arrays for simple access
 					array_push($eauid, $res['edit_access_id']);
 					$unit_acl[$res['edit_access_id']] = $res['level'];
@@ -1148,18 +1146,18 @@ class Login
 			// user > page > group
 			// group ACL 0
 			if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = $_SESSION['GROUP_ACL_LEVEL'];
+				$this->acl['base'] = (int)$_SESSION['GROUP_ACL_LEVEL'];
 			}
 			// page ACL 1
 			if (
 				isset($_SESSION['PAGES_ACL_LEVEL'][$this->page_name]) &&
 				$_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1
 			) {
-				$this->acl['base'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
+				$this->acl['base'] = (int)$_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
 			}
 			// user ACL 2
 			if ($_SESSION['USER_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = $_SESSION['USER_ACL_LEVEL'];
+				$this->acl['base'] = (int)$_SESSION['USER_ACL_LEVEL'];
 			}
 		}
 		$_SESSION['BASE_ACL_LEVEL'] = $this->acl['base'];
@@ -2347,7 +2345,10 @@ HTML;
 			is_array($_SESSION['UNIT']) &&
 			!array_key_exists($edit_access_id, $_SESSION['UNIT'])
 		) {
-			return $_SESSION['UNIT_DEFAULT'] ?? null;
+			$edit_access_id = null;
+			if (is_numeric($_SESSION['UNIT_DEFAULT'])) {
+				$edit_access_id = (int)$_SESSION['UNIT_DEFAULT'];
+			}
 		}
 		return $edit_access_id;
 	}

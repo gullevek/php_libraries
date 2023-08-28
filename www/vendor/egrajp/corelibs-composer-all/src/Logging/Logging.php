@@ -381,7 +381,7 @@ class Logging
 			// auto set (should be deprecated in future)
 			$this->setLogFileId(
 				str_replace(':', '-', $this->host_name) . '_'
-					. str_replace('\\', '-', Support::getCallerClass())
+					. str_replace('\\', '-', Support::getCallerTopLevelClass())
 			);
 		}
 		if (empty($this->getLogFileId())) {
@@ -460,7 +460,7 @@ class Logging
 		// set per class, but don't use get_class as we will only get self
 		$rpl_string = !$this->getLogFlag(Flag::per_class) ? '' : '_'
 			// set sub class settings
-			. str_replace('\\', '-', Support::getCallerClass());
+			. str_replace('\\', '-', Support::getCallerTopLevelClass());
 		$fn = str_replace('{CLASS}', $rpl_string, $fn); // create output filename
 
 		// if request to write to one file
@@ -526,7 +526,10 @@ class Logging
 
 	/**
 	 * Prepare the log message with all needed info blocks:
-	 * [timestamp] [host name] [file path + file] [running uid] {class} <debug level/group id> - message
+	 * [timestamp] [host name] [file path + file::row number] [running uid] {class::/->method}
+	 * <debug level:debug group id> - message
+	 * Note: group id is only for debug level
+	 * if no method can be found or no class is found a - will be wirtten
 	 *
 	 * @param  Level $level    Log level we will write to
 	 * @param  string|Stringable $message  The message to write
@@ -545,16 +548,32 @@ class Logging
 		if (!$this->checkLogLevel($level)) {
 			return '';
 		}
+		$file_line = '';
+		$caller_class_method = '-';
+		$traces = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+		// print "[" . $level->getName() . "] [$message] prepareLog:<br>" . Support::printAr($traces);
 		// file + line: call not this but one before (the one that calls this)
-		$file_line = Support::getCallerFileLine(2) ??
-			System::getPageName(System::FULL_PATH);
-		// get the last class entry and wrie that
-		$class = Support::getCallerClass();
-		// method/function: prepareLog->(debug|info|...)->[THIS]
-		$method = Support::getCallerMethod(3);
-		if ($method !== null) {
-			$class .= '::' . $method;
+		// start from this level, if unset fall down until we are at null
+		$start_trace_level = 2;
+		for ($trace_level = $start_trace_level; $trace_level >= 0; $trace_level--) {
+			if (isset($traces[$trace_level])) {
+				$file_line = ($traces[$trace_level]['file'] ?? $traces[$trace_level]['function'])
+					. ':' . ($traces[$trace_level]['line'] ?? '-');
+				// as namespace\class->method
+				$caller_class_method =
+					// get the last call before we are in the Logging class
+					($traces[$trace_level]['class'] ?? '')
+					// connector, if unkown use ==
+					. ($traces[$trace_level]['type'] ?? '')
+					// method/function: prepareLog->(debug|info|...)->[THIS]
+					. $traces[$trace_level]['function'];
+				break;
+			}
 		}
+		if (empty($file_line)) {
+			$file_line = System::getPageName(System::FULL_PATH);
+		}
+		// print "CLASS: " . $class . "<br>";
 		// get timestamp
 		$timestamp = Support::printTime();
 
@@ -574,7 +593,7 @@ class Logging
 			. '[' . $this->host_name . '] '
 			. '[' . $file_line . '] '
 			. '[' . $this->running_uid . '] '
-			. '{' . $class . '} '
+			. '{' . $caller_class_method . '} '
 			. '<' . strtoupper($group_str) . '> '
 			. $message
 			. $context_str;

@@ -28,7 +28,7 @@ class Colors
 	 * @param  int    $green      green 0-255
 	 * @param  int    $blue       blue 0-255
 	 * @param  bool   $hex_prefix default true, prefix with "#"
-	 * @return string|bool        rgb in hex values with leading # if set,
+	 * @return string|false       rgb in hex values with leading # if set,
 	 *                            false for invalid color
 	 */
 	public static function rgb2hex(
@@ -36,7 +36,7 @@ class Colors
 		int $green,
 		int $blue,
 		bool $hex_prefix = true
-	): string|bool {
+	): string|false {
 		$hex_color = '';
 		if ($hex_prefix === true) {
 			$hex_color = '#';
@@ -58,14 +58,14 @@ class Colors
 	 * @param  string $hexStr           RGB hexstring
 	 * @param  bool   $return_as_string flag to return as string
 	 * @param  string $seperator        string seperator: default: ","
-	 * @return string|array<string,float|int>|bool false on error or array with RGB
-	 *                                             or a string with the seperator
+	 * @return string|array<string,float|int>|false false on error or array with RGB
+	 *                                              or a string with the seperator
 	 */
 	public static function hex2rgb(
 		string $hexStr,
 		bool $return_as_string = false,
 		string $seperator = ','
-	): string|array|bool {
+	): string|array|false {
 		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
 		if (!is_string($hexStr)) {
 			return false;
@@ -97,13 +97,13 @@ class Colors
 	 * returns:
 	 * array with hue (0-360), sat (0-100%), brightness/value (0-100%)
 	 *
-	 * @param  int $red              red 0-255
-	 * @param  int $green            green 0-255
-	 * @param  int $blue             blue 0-255
-	 * @return array<int|float>|bool Hue, Sat, Brightness/Value
-	 *                               false for input value error
+	 * @param  int $red               red 0-255
+	 * @param  int $green             green 0-255
+	 * @param  int $blue              blue 0-255
+	 * @return array<int|float>|false Hue, Sat, Brightness/Value
+	 *                                false for input value error
 	 */
-	public static function rgb2hsb(int $red, int $green, int $blue): array|bool
+	public static function rgb2hsb(int $red, int $green, int $blue): array|false
 	{
 		// check that rgb is from 0 to 255
 		foreach (['red', 'green', 'blue'] as $c) {
@@ -144,13 +144,13 @@ class Colors
 	 * converts HSB/V to RGB values RGB is full INT
 	 * if HSB/V value is invalid, sets this value to 0
 	 *
-	 * @param  float $H          hue 0-360 (int)
-	 * @param  float $S          saturation 0-100 (int)
-	 * @param  float $V          brightness/value 0-100 (int)
-	 * @return array<int>|bool 0 red/1 green/2 blue array as 0-255
-	 *                         false for input value error
+	 * @param  float $H         hue 0-360 (int)
+	 * @param  float $S         saturation 0-100 (int)
+	 * @param  float $V         brightness/value 0-100 (int)
+	 * @return array<int>|false 0 red/1 green/2 blue array as 0-255
+	 *                          false for input value error
 	 */
-	public static function hsb2rgb(float $H, float $S, float $V): array|bool
+	public static function hsb2rgb(float $H, float $S, float $V): array|false
 	{
 		// check that H is 0 to 359, 360 = 0
 		// and S and V are 0 to 1
@@ -230,13 +230,13 @@ class Colors
 	 * return:
 	 * array with hue (0-360), saturation (0-100%) and luminance (0-100%)
 	 *
-	 * @param  int $red          red 0-255
-	 * @param  int $green        green 0-255
-	 * @param  int $blue         blue 0-255
-	 * @return array<float>|bool hue/sat/luminance
-	 *                           false for input value error
+	 * @param  int $red           red 0-255
+	 * @param  int $green         green 0-255
+	 * @param  int $blue          blue 0-255
+	 * @return array<float>|false hue/sat/luminance
+	 *                            false for input value error
 	 */
-	public static function rgb2hsl(int $red, int $green, int $blue): array|bool
+	public static function rgb2hsl(int $red, int $green, int $blue): array|false
 	{
 		// check that rgb is from 0 to 255
 		foreach (['red', 'green', 'blue'] as $c) {
@@ -284,12 +284,12 @@ class Colors
 	 * converts an HSL to RGB
 	 * if HSL value is invalid, set this value to 0
 	 *
-	 * @param  float $hue                hue: 0-360 (degrees)
-	 * @param  float $sat                saturation: 0-100
-	 * @param  float $lum                luminance: 0-100
-	 * @return array<int,float|int>|bool red/blue/green 0-255 each
+	 * @param  float $hue                 hue: 0-360 (degrees)
+	 * @param  float $sat                 saturation: 0-100
+	 * @param  float $lum                 luminance: 0-100
+	 * @return array<int,float|int>|false red/blue/green 0-255 each
 	 */
-	public static function hsl2rgb(float $hue, float $sat, float $lum): array|bool
+	public static function hsl2rgb(float $hue, float $sat, float $lum): array|false
 	{
 		if ($hue == 360) {
 			$hue = 0;

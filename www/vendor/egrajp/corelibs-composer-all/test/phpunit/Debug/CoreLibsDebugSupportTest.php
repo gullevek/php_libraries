@@ -562,10 +562,10 @@ final class CoreLibsDebugSupportTest extends TestCase
 	}
 
 	/**
-	 * Undocumented function
+	 * test the lowest one (one above base)
 	 *
 	 * @cover ::getCallerClass
-	 * @testWith ["PHPUnit\\TextUI\\Command"]
+	 * @testWith ["tests\\CoreLibsDebugSupportTest"]
 	 * @testdox getCallerClass check if it returns $expected [$_dataName]
 	 *
 	 * @return void
@@ -575,6 +575,40 @@ final class CoreLibsDebugSupportTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			Support::getCallerClass()
+		);
+	}
+
+	/**
+	 * test highest return (top level)
+	 *
+	 * @cover ::getCallerTopLevelClass
+	 * @testWith ["PHPUnit\\TextUI\\Command"]
+	 * @testdox getCallerTopLevelClass check if it returns $expected [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testGetCallerTopLevelClass(string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			Support::getCallerTopLevelClass()
+		);
+	}
+
+	/**
+	 * test highest return (top level)
+	 *
+	 * @cover ::getCallerClassMethod
+	 * @testWith ["tests\\CoreLibsDebugSupportTest->testGetCallerClassMethod"]
+	 * @testdox getCallerClassMethod check if it returns $expected [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testGetCallerClassMethod(string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			Support::getCallerClassMethod()
 		);
 	}
 

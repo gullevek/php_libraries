@@ -73,6 +73,36 @@ $db->dbSetEncoding('SJIS');
 print "ENCODING TEST: " . $db->dbVersionInfo('client_encoding') . "/" . $db->dbGetEncoding() . "<br>";
 $db->dbResetEncoding();
 
+// empty calls, none of the below should fail
+//
+$db->dbGetInsertPKName();
+//
+$db->dbGetInsertPK();
+//
+$db->dbGetReturningExt();
+$db->dbGetReturningExt('foo');
+$db->dbGetReturningExt('foo', 0);
+$db->dbGetReturningExt(pos:0);
+//
+$db->dbGetReturningArray();
+//
+$db->dbGetNumRows();
+//
+$db->dbGetNumFields();
+//
+$db->dbGetFieldNames();
+//
+$db->dbGetFieldTypes();
+//
+$db->dbGetFieldNameTypes();
+//
+$db->dbGetFieldName(0);
+//
+$db->dbGetFieldType(0);
+$db->dbGetFieldType('foo');
+//
+$db->dbGetPrepareCursorValue('foo', 'bar');
+
 // TEST CACHE READS
 
 $res = $db->dbReturn("SELECT * FROM max_test");
