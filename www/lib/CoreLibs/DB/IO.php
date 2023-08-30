@@ -340,6 +340,7 @@ class IO
 	// 4: convert numeric/floatN to float (CONVERT_NUMERIC)
 	// 8: convert bytea to string data (CONVERT_BYTEA)
 	/** @var int type settings as bit mask, 0 for off, anything >2 will aways set 1 too */
+	/** @phan-suppress-next-line PhanInvalidConstantExpression PhanUndeclaredClassConstant */
 	private int $convert_type = Convert::off->value;
 	// FOR BELOW: (This should be private and only readable through some method)
 	// cursor array for cached readings

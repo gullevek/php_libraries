@@ -132,6 +132,8 @@ return [
 		// start ignore annotations
 		'PhanUnextractableAnnotationElementName',
 		'PhanUnextractableAnnotationSuffix',
+		// enum problems in comments
+		'PhanCommentObjectInClassConstantType'
 	],
 
 	// Override to hardcode existence and types of (non-builtin) globals in the global scope.
