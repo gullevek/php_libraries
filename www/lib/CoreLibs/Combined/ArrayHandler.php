@@ -245,14 +245,13 @@ class ArrayHandler
 	 *         bool  key flag: true: handle keys as string or int
 	 *               default false: all keys are string
 	 *
-	 * @return array<mixed>|false merged array
+	 * @return array<mixed> merged array
 	 */
-	public static function arrayMergeRecursive(): array|false
+	public static function arrayMergeRecursive(): array
 	{
 		// croak on not enough arguemnts (we need at least two)
 		if (func_num_args() < 2) {
-			trigger_error(__FUNCTION__ . ' needs two or more array arguments', E_USER_WARNING);
-			return false;
+			throw new \ArgumentCountError(__FUNCTION__ . ' needs two or more array arguments');
 		}
 		// default key is not string
 		$key_is_string = false;
@@ -265,15 +264,13 @@ class ArrayHandler
 		}
 		// check that arrays count is at least two, else we don't have enough to do anything
 		if (count($arrays) < 2) {
-			trigger_error(__FUNCTION__ . ' needs two or more array arguments', E_USER_WARNING);
-			return false;
+			throw new \ArgumentCountError(__FUNCTION__ . ' needs two or more array arguments');
 		}
 		$merged = [];
 		while ($arrays) {
 			$array = array_shift($arrays);
 			if (!is_array($array)) {
-				trigger_error(__FUNCTION__ . ' encountered a non array argument', E_USER_WARNING);
-				return false;
+				throw new \TypeError(__FUNCTION__ . ' encountered a non array argument');
 			}
 			if (!$array) {
 				continue;

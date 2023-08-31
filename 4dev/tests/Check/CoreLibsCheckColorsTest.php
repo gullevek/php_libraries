@@ -321,7 +321,7 @@ final class CoreLibsCheckColorsTest extends TestCase
 	 */
 	public function testValidateColorException(int $flag): void
 	{
-		$this->expectException(\Exception::class);
+		$this->expectException(\UnexpectedValueException::class);
 		\CoreLibs\Check\Colors::validateColor('#ffffff', $flag);
 	}
 }

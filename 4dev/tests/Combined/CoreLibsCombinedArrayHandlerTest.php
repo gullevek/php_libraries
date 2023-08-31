@@ -518,17 +518,20 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		return [
 			// error <2 arguments
 			'too view arguments' => [
+				'ArgumentCountError',
 				'arrayMergeRecursive needs two or more array arguments',
 				[1]
 			],
 			// error <2 arrays
 			'only one array' => [
+				'ArgumentCountError',
 				'arrayMergeRecursive needs two or more array arguments',
 				[1],
 				true,
 			],
 			// error element is not array
 			'non array between array' => [
+				'TypeError',
 				'arrayMergeRecursive encountered a non array argument',
 				[1],
 				'string',
@@ -947,18 +950,20 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	 */
 	public function testArrayMergeRecursiveWarningA(): void
 	{
-		set_error_handler(
-			static function (int $errno, string $errstr): never {
-				throw new Exception($errstr, $errno);
-			},
-			E_USER_WARNING
-		);
+		// set_error_handler(
+		// 	static function (int $errno, string $errstr): never {
+		// 		throw new Exception($errstr, $errno);
+		// 	},
+		// 	E_USER_WARNING
+		// );
 
 		$arrays = func_get_args();
 		// first is expected warning
+		$exception = array_shift($arrays);
 		$warning = array_shift($arrays);
 
 		// phpunit 10.0 compatible
+		$this->expectException($exception);
 		$this->expectExceptionMessage($warning);
 
 		\CoreLibs\Combined\ArrayHandler::arrayMergeRecursive(...$arrays);

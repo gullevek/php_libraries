@@ -41,6 +41,7 @@ class Colors
 	 * @param  int|false $rgb_flag flag to check for rgb
 	 * @param  int|false $hsl_flag flag to check for hsl type
 	 * @return bool                True if no error, False if error
+	 * @throws \UnexpectedValueException 1: cannot extract color from string
 	 */
 	private static function rgbHslContentCheck(
 		string $color,
@@ -52,7 +53,7 @@ class Colors
 		if (
 			!is_array($color_list = preg_split("/,\s*/", $matches[1] ?? ''))
 		) {
-			throw new \Exception("Could not extract color list from rgg/hsl", 3);
+			throw new \UnexpectedValueException("Could not extract color list from rgg/hsl", 1);
 		}
 		// based on rgb/hsl settings check that entries are valid
 		// rgb: either 0-255 OR 0-100%
@@ -124,7 +125,8 @@ class Colors
 	 * @param int $flags    defaults to ALL, else use | to combined from
 	 *                      HEX_RGB, HEX_RGBA, RGB, RGBA, HSL, HSLA
 	 * @return bool         True if valid, False if not
-	 * @throws Exception    1: no valid flag set
+	 * @throws \UnexpectedValueException 1: no valid flag set
+	 * @throws \InvalidArgumentException 2: no regex block set
 	 */
 	public static function validateColor(string $color, int $flags = self::ALL): bool
 	{
@@ -152,10 +154,10 @@ class Colors
 		}
 		// wrong flag set
 		if ($flags > self::ALL) {
-			throw new \Exception("Invalid flags parameter: $flags", 1);
+			throw new \UnexpectedValueException("Invalid flags parameter: $flags", 1);
 		}
 		if (!count($regex_blocks)) {
-			throw new \Exception("No regex blocks set: $flags", 2);
+			throw new \InvalidArgumentException("No regex blocks set: $flags", 2);
 		}
 
 		// build regex

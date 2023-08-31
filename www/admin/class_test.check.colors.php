@@ -99,7 +99,7 @@ echo "<hr>";
 try {
 	$check = Colors::validateColor('#ab12cd', 99);
 	print "No Exception";
-} catch (\Exception $e) {
+} catch (\UnexpectedValueException $e) {
 	print "ERROR: " . $e->getCode() . ": " . $e->getMessage() . "<br>";
 }
 
