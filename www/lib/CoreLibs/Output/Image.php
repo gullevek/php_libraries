@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\Output;
 
+use Exception;
+
 class Image
 {
 	/**
@@ -23,7 +25,8 @@ class Image
 	 *                                   if empty ROOT is choosen
 	 * @param  string      $cache_source cache path, if not given TMP is used
 	 * @param  bool        $clear_cache  if set to true, will create thumb all the tame
-	 * @return string|false              thumbnail name, or false for error
+	 * @return string                    thumbnail name
+	 * @throws \RuntimeException no ImageMagick convert command found
 	 */
 	public static function createThumbnail(
 		string $pic,
@@ -33,7 +36,7 @@ class Image
 		string $path = '',
 		string $cache_source = '',
 		bool $clear_cache = false
-	): string|false {
+	): string {
 		// get image type flags
 		$image_types = [
 			0 => 'UNKOWN-IMAGE',
@@ -41,7 +44,7 @@ class Image
 			2 => 'jpg',
 			3 => 'png'
 		];
-		$return_data = false;
+		$return_data = '';
 		$CONVERT = '';
 		// if CONVERT is not defined, abort
 		/** @phan-suppress-next-line PhanUndeclaredConstant */
@@ -49,7 +52,7 @@ class Image
 			/** @phan-suppress-next-line PhanUndeclaredConstant */
 			$CONVERT = CONVERT;
 		} else {
-			return $return_data;
+			throw new \RuntimeException('CONVERT set binary is not executable or CONVERT is not defined');
 		}
 		if (!empty($cache_source)) {
 			$tmp_src = $cache_source;
@@ -69,72 +72,7 @@ class Image
 			$pic = $tmp[(count($tmp) - 1)];
 		}
 		// does this picture exist and is it a picture
-		if (file_exists($filename) && is_file($filename)) {
-			[$width, $height, $type] = getimagesize($filename) ?: [0, 0, 0];
-			$convert_prefix = '';
-			$create_file = false;
-			$delete_filename = '';
-			// check if we can skip the PDF creation: if we have size, if do not have type, we assume type png
-			if (!$type) {
-				$check_thumb = $tmp_src . 'thumb_' . $pic . '_' . $size_x . 'x' . $size_y . '.' . $image_types[3];
-				if (!is_file($check_thumb)) {
-					$create_file = true;
-				} else {
-					$type = 3;
-				}
-			}
-			// if type is not in the list, but returns as PDF, we need to convert to JPEG before
-			if (!$type)	{
-				$output = [];
-				$return = null;
-				// is this a PDF, if no, return from here with nothing
-				$convert_prefix = 'png:';
-				# TEMP convert to PNG, we then override the file name
-				$convert_string = $CONVERT . ' ' . $filename . ' ' . $convert_prefix . $filename . '_TEMP';
-				$status = exec($convert_string, $output, $return);
-				$filename .= '_TEMP';
-				// for delete, in case we need to glob
-				$delete_filename = $filename;
-				// find file, if we can't find base name, use -0 as the first one (ignore other pages in multiple ones)
-				if (!is_file($filename)) {
-					$filename .= '-0';
-				}
-				[$width, $height, $type] = getimagesize($filename) ?: [0, 0, 0];
-			}
-			// if no size given, set size to original
-			if (!$size_x || $size_x < 1) {
-				$size_x = $width;
-			}
-			if (!$size_y || $size_y < 1) {
-				$size_y = $height;
-			}
-			$thumb = 'thumb_' . $pic . '_' . $size_x . 'x' . $size_y . '.' . $image_types[$type];
-			$thumbnail = $tmp_src . $thumb;
-			// check if we already have this picture converted
-			if (!is_file($thumbnail) || $clear_cache == true) {
-				// convert the picture
-				if ($width > $size_x) {
-					$convert_string = $CONVERT . ' -geometry ' . $size_x . 'x ' . $filename . ' ' . $thumbnail;
-					$status = exec($convert_string, $output, $return);
-					// get the size of the converted data, if converted
-					if (is_file($thumbnail)) {
-						[$width, $height, $type] = getimagesize($thumbnail) ?: [0, 0, 0];
-					}
-				}
-				if ($height > $size_y) {
-					$convert_string = $CONVERT . ' -geometry x' . $size_y . ' ' . $filename . ' ' . $thumbnail;
-					$status = exec($convert_string, $output, $return);
-				}
-			}
-			if (!is_file($thumbnail)) {
-				copy($filename, $thumbnail);
-			}
-			$return_data = $thumb;
-			// if we have a delete filename, delete here with glob
-			if ($delete_filename) {
-				array_map('unlink', glob($delete_filename . '*') ?: []);
-			}
-		} else {
+		if (!file_exists($filename) || !is_file($filename)) {
 			if (!empty($dummy) && strstr($dummy, '/') === false) {
 				// check if we have the "dummy" image flag set
 				$filename = PICTURES . ICONS . strtoupper($dummy) . ".png";
@@ -142,11 +80,77 @@ class Image
 				if (!empty($dummy) && file_exists($filename) && is_file($filename)) {
 					$return_data = $filename;
 				} else {
-					$return_data = false;
+					throw new \Exception('Could not set dummy return file: ' . $dummy . ' in ' . $filename);
 				}
 			} else {
-				$filename = $dummy;
+				$return_data = $dummy;
 			}
+			return $return_data;
+		}
+		// resize image
+		[$width, $height, $type] = getimagesize($filename) ?: [0, 0, 0];
+		$convert_prefix = '';
+		$create_file = false;
+		$delete_filename = '';
+		// check if we can skip the PDF creation: if we have size, if do not have type, we assume type png
+		if (!$type) {
+			$check_thumb = $tmp_src . 'thumb_' . $pic . '_' . $size_x . 'x' . $size_y . '.' . $image_types[3];
+			if (!is_file($check_thumb)) {
+				$create_file = true;
+			} else {
+				$type = 3;
+			}
+		}
+		// if type is not in the list, but returns as PDF, we need to convert to JPEG before
+		if (!$type)	{
+			$output = [];
+			$return = null;
+			// is this a PDF, if no, return from here with nothing
+			$convert_prefix = 'png:';
+			# TEMP convert to PNG, we then override the file name
+			$convert_string = $CONVERT . ' ' . $filename . ' ' . $convert_prefix . $filename . '_TEMP';
+			$status = exec($convert_string, $output, $return);
+			$filename .= '_TEMP';
+			// for delete, in case we need to glob
+			$delete_filename = $filename;
+			// find file, if we can't find base name, use -0 as the first one (ignore other pages in multiple ones)
+			if (!is_file($filename)) {
+				$filename .= '-0';
+			}
+			[$width, $height, $type] = getimagesize($filename) ?: [0, 0, 0];
+		}
+		// if no size given, set size to original
+		if (!$size_x || $size_x < 1) {
+			$size_x = $width;
+		}
+		if (!$size_y || $size_y < 1) {
+			$size_y = $height;
+		}
+		$thumb = 'thumb_' . $pic . '_' . $size_x . 'x' . $size_y . '.' . $image_types[$type];
+		$thumbnail = $tmp_src . $thumb;
+		// check if we already have this picture converted
+		if (!is_file($thumbnail) || $clear_cache == true) {
+			// convert the picture
+			if ($width > $size_x) {
+				$convert_string = $CONVERT . ' -geometry ' . $size_x . 'x ' . $filename . ' ' . $thumbnail;
+				$status = exec($convert_string, $output, $return);
+				// get the size of the converted data, if converted
+				if (is_file($thumbnail)) {
+					[$width, $height, $type] = getimagesize($thumbnail) ?: [0, 0, 0];
+				}
+			}
+			if ($height > $size_y) {
+				$convert_string = $CONVERT . ' -geometry x' . $size_y . ' ' . $filename . ' ' . $thumbnail;
+				$status = exec($convert_string, $output, $return);
+			}
+		}
+		if (!is_file($thumbnail)) {
+			copy($filename, $thumbnail);
+		}
+		$return_data = $thumb;
+		// if we have a delete filename, delete here with glob
+		if ($delete_filename) {
+			array_map('unlink', glob($delete_filename . '*') ?: []);
 		}
 		return $return_data;
 	}
@@ -173,7 +177,9 @@ class Image
 	 *                                   set to false to not use (default true)
 	 *                                   to use quick but less nice version
 	 * @param  int         $jpeg_quality default 80, set image quality for jpeg only
-	 * @return string|false              thumbnail with path
+	 * @return string                    thumbnail with path
+	 * @throws \UnexpectedValueException input values for filename or cache_folder are wrong
+	 * @throws \RuntimeException         convert (gd) failed
 	 */
 	public static function createThumbnailSimple(
 		string $filename,
@@ -185,8 +191,9 @@ class Image
 		bool $use_cache = true,
 		bool $high_quality = true,
 		int $jpeg_quality = 80
-	): string|false {
+	): string {
 		$thumbnail = false;
+		$exception_message = 'Could not create thumbnail';
 		// $this->debug('IMAGE PREPARE', "FILE: $filename (exists "
 		//	.(string)file_exists($filename)."), WIDTH: $thumb_width, HEIGHT: $thumb_height");
 		if (
@@ -210,12 +217,17 @@ class Image
 		}
 		// check that input image exists and is either jpeg or png
 		// also fail if the basic CACHE folder does not exist at all
-		if (
-			!file_exists($filename) ||
-			!is_dir($cache_folder) ||
-			!is_writable($cache_folder)
-		) {
-			return $thumbnail;
+		if (!file_exists($filename)) {
+			// return $thumbnail;
+			throw new \UnexpectedValueException('Missing image file: ' . $filename);
+		}
+		if (!is_dir($cache_folder)) {
+			// return $thumbnail;
+			throw new \UnexpectedValueException('Cache folder is not a directory: ' . $cache_folder);
+		}
+		if (!is_writable($cache_folder)) {
+			// return $thumbnail;
+			throw new \UnexpectedValueException('Cache folder is not writeable: ' . $cache_folder);
 		}
 		// $this->debug('IMAGE PREPARE', "FILENAME OK, THUMB WIDTH/HEIGHT OK");
 		[$inc_width, $inc_height, $img_type] = getimagesize($filename) ?: [0, 0, null];
@@ -347,6 +359,7 @@ class Image
 						imagedestroy($source);
 						imagedestroy($thumb);
 					} else {
+						$exception_message = 'Invalid source image file. Only JPEG/PNG are allowed: ' . $filename;
 						$thumbnail = false;
 					}
 				}
@@ -430,7 +443,11 @@ class Image
 			// add web path
 			$thumbnail = $thumbnail_web_path . $thumbnail;
 		}
-		// either return false or the thumbnail name + output path web
+		// if still false -> throw exception
+		if ($thumbnail === false) {
+			throw new \RuntimeException($exception_message);
+		}
+		// else return the thumbnail name + output path web
 		return $thumbnail;
 	}
 

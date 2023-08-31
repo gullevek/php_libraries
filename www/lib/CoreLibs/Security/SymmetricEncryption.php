@@ -27,6 +27,7 @@ class SymmetricEncryption
 	 * @param  string $message Message to encrypt
 	 * @param  string $key     Encryption key (as hex string)
 	 * @return string
+	 * @throws \Exception
 	 * @throws \RangeException
 	 */
 	public static function encrypt(string $message, string $key): string
@@ -34,7 +35,7 @@ class SymmetricEncryption
 		try {
 			$key = CreateKey::hex2bin($key);
 		} catch (SodiumException $e) {
-			throw new \Exception('Invalid hex key');
+			throw new \UnexpectedValueException('Invalid hex key');
 		}
 		if (mb_strlen($key, '8bit') !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
 			throw new \RangeException(
@@ -84,10 +85,10 @@ class SymmetricEncryption
 				$key
 			);
 		} catch (SodiumException $e) {
-			throw new \Exception('Invalid ciphertext (too short)');
+			throw new \UnexpectedValueException('Invalid ciphertext (too short)');
 		}
 		if (!is_string($plain)) {
-			throw new \Exception('Invalid Key');
+			throw new \UnexpectedValueException('Invalid Key');
 		}
 		sodium_memzero($ciphertext);
 		sodium_memzero($key);

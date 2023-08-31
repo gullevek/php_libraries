@@ -15,9 +15,6 @@ namespace CoreLibs\Create;
 
 class Session
 {
-	/** @var string list for errors */
-	private string $session_intern_error_str = '';
-
 	/**
 	 * init a session, if array is empty or array does not have session_name set
 	 * then no auto init is run
@@ -72,17 +69,6 @@ class Session
 	}
 
 	/**
-	 * Return set error string, empty if none set
-	 * Error strings are only set in the startSession method
-	 *
-	 * @return string Last error string
-	 */
-	public function getErrorStr(): string
-	{
-		return $this->session_intern_error_str;
-	}
-
-	/**
 	 * check if session name is valid
 	 *
 	 * As from PHP 8.1/8.0/7.4 error
@@ -120,13 +106,11 @@ class Session
 	{
 		// we can't start sessions on command line
 		if ($this->checkCliStatus()) {
-			$this->session_intern_error_str = '[SESSION] No sessions in php cli';
-			return false;
+			throw new \RuntimeException('[SESSION] No sessions in php cli');
 		}
 		// if session are OFF
 		if ($this->getSessionStatus() === PHP_SESSION_DISABLED) {
-			$this->session_intern_error_str = '[SESSION] Sessions are disabled';
-			return false;
+			throw new \RuntimeException('[SESSION] Sessions are disabled');
 		}
 		// session_status
 		// initial the session if there is no session running already
@@ -139,8 +123,7 @@ class Session
 			if (!empty($session_name)) {
 				// invalid session name, abort
 				if (!$this->checkValidSessionName($session_name)) {
-					$this->session_intern_error_str = '[SESSION] Invalid session name: ' . $session_name;
-					return false;
+					throw new \UnexpectedValueException('[SESSION] Invalid session name: ' . $session_name);
 				}
 				$this->setSessionName($session_name);
 			}
@@ -149,11 +132,10 @@ class Session
 		}
 		// if we still have no active session
 		if (!$this->checkActiveSession()) {
-			$this->session_intern_error_str = '[SESSION] Failed to activate session';
-			return false;
+			throw new \RuntimeException('[SESSION] Failed to activate session');
 		}
 		if (false === ($session_id = $this->getSessionId())) {
-			$this->session_intern_error_str = '[SESSION] getSessionId did not return a session id';
+			throw new \UnexpectedValueException('[SESSION] getSessionId did not return a session id');
 		}
 		return $session_id;
 	}

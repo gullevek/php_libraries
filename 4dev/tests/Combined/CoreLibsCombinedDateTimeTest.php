@@ -309,41 +309,49 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'2020-12-12',
 				'2021-12-12',
 				-1,
+				null,
 			],
 			'dates equal' => [
 				'2020-12-12',
 				'2020-12-12',
 				0,
+				null,
 			],
 			'second date smaller' => [
 				'2021-12-12',
 				'2020-12-12',
-				1
+				1,
+				null,
 			],
 			'dates equal with different time' => [
 				'2020-12-12 12:12:12',
 				'2020-12-12 13:13:13',
 				0,
+				null,
 			],
 			'invalid dates --' => [
 				'--',
 				'--',
-				false
+				false,
+				'UnexpectedValueException',
 			],
 			'empty dates' => [
 				'',
 				'',
-				false
+				false,
+				'UnexpectedValueException'
 			],
 			'invalid dates' => [
 				'not a date',
 				'not a date either',
 				false,
+				'UnexpectedValueException'
 			],
 			'out of bound dates' => [
 				'1900-1-1',
 				'9999-12-31',
-				-1
+				-1,
+				null,
 			]
 		];
 	}
@@ -355,51 +363,61 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'2020-12-12',
 				'2021-12-12',
 				-1,
+				null,
 			],
 			'dates equal no timestamp' => [
 				'2020-12-12',
 				'2020-12-12',
 				0,
+				null,
 			],
 			'second date smaller no timestamp' => [
 				'2021-12-12',
 				'2020-12-12',
-				1
+				1,
+				null,
 			],
 			'date equal first time smaller' => [
 				'2020-12-12 12:12:12',
 				'2020-12-12 13:13:13',
 				-1,
+				null,
 			],
 			'date equal time equal' => [
 				'2020-12-12 12:12:12',
 				'2020-12-12 12:12:12',
 				0,
+				null,
 			],
 			'date equal second time smaller' => [
 				'2020-12-12 13:13:13',
 				'2020-12-12 12:12:12',
 				1,
+				null,
 			],
 			'valid date invalid time' => [
 				'2020-12-12 13:99:13',
 				'2020-12-12 12:12:99',
 				false,
+				'UnexpectedValueException'
 			],
 			'invalid datetimes --' => [
 				'--',
 				'--',
 				false,
+				'UnexpectedValueException'
 			],
 			'empty datetimess' => [
 				'',
 				'',
 				false,
+				'UnexpectedValueException'
 			],
 			'invalid datetimes' => [
 				'not a date',
 				'not a date either',
 				false,
+				'UnexpectedValueException'
 			],
 		];
 	}
@@ -616,8 +634,11 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	 * @param int|bool $expected
 	 * @return void
 	 */
-	public function testCompareDate(string $input_a, string $input_b, $expected): void
+	public function testCompareDate(string $input_a, string $input_b, int|bool $expected, ?string $exception): void
 	{
+		if ($expected === false) {
+			$this->expectException($exception);
+		}
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Combined\DateTime::compareDate($input_a, $input_b)
@@ -636,8 +657,11 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	 * @param int|bool $expected
 	 * @return void
 	 */
-	public function testCompareDateTime(string $input_a, string $input_b, $expected): void
+	public function testCompareDateTime(string $input_a, string $input_b, int|bool $expected, ?string $exception): void
 	{
+		if ($expected === false) {
+			$this->expectException($exception);
+		}
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Combined\DateTime::compareDateTime($input_a, $input_b)

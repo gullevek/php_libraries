@@ -109,6 +109,13 @@ foreach ($images as $image) {
 	echo "<hr>";
 }
 
+// errros
+try {
+	Image::createThumbnailSimple('', $thumb_width, 0, $cache_folder, $web_folder);
+} catch (\UnexpectedValueException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+}
+
 print "</body></html>";
 
 // __END__
