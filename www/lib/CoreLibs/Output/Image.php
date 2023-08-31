@@ -292,12 +292,18 @@ class Image
 					// image, copy source image, offset in image, source x/y, new size, source image size
 					$thumb = imagecreatetruecolor($thumb_width_r, $thumb_height_r);
 					if ($thumb === false) {
-						return false;
+						throw new \RuntimeException(
+							'imagecreatetruecolor failed: ' . $thumbnail . ', ' . $filename,
+							1
+						);
 					}
 					if ($img_type == IMAGETYPE_PNG) {
 						$imagecolorallocatealpha = imagecolorallocatealpha($thumb, 0, 0, 0, 127);
 						if ($imagecolorallocatealpha === false) {
-							return false;
+							throw new \RuntimeException(
+								'imagecolorallocatealpha failed: ' . $thumbnail . ', ' . $filename,
+								2
+							);
 						}
 						// preservere transaprency
 						imagecolortransparent(
@@ -359,8 +365,10 @@ class Image
 						imagedestroy($source);
 						imagedestroy($thumb);
 					} else {
-						$exception_message = 'Invalid source image file. Only JPEG/PNG are allowed: ' . $filename;
-						$thumbnail = false;
+						throw new \RuntimeException(
+							'Invalid source image file. Only JPEG/PNG are allowed: ' . $filename,
+							3
+						);
 					}
 				}
 			} else {
@@ -401,14 +409,20 @@ class Image
 				}
 				$thumb = imagecreatetruecolor($thumb_width, $thumb_height);
 				if ($thumb === false) {
-					return false;
+					throw new \RuntimeException(
+						'imagecreatetruecolor dummy failed: ' . $thumbnail . ', ' . $filename,
+						3
+					);
 				}
 				// add outside border px = 5% (rounded up)
 				// eg 50px -> 2.5px
 				$gray = imagecolorallocate($thumb, 200, 200, 200);
 				$white = imagecolorallocate($thumb, 255, 255, 255);
 				if ($gray === false || $white === false) {
-					return false;
+					throw new \RuntimeException(
+						'imagecolorallocate/imagecolorallocate dummy failed: ' . $thumbnail . ', ' . $filename,
+						2
+					);
 				}
 				// fill gray background
 				imagefill($thumb, 0, 0, $gray);

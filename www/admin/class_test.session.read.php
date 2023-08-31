@@ -69,16 +69,18 @@ print "[UNSET] Current session status: " . getSessionStatusString($session->getS
 
 print "[READ] " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 // start
-if (false === ($session_id = $session->startSession($session_name))) {
-	print "Session start failed: " . $session->getErrorStr() . "<br>";
-} else {
-	print "Current session id: " . $session_id . "<br>";
+try {
+	$session_id = $session->startSession($session_name);
+	print "[1] Current session id: " . $session_id . "<br>";
+} catch (\Exception $e) {
+	print "[1] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
 }
 // set again
-if (false === ($session_id = $session->startSession($session_name))) {
-	print "[2] Session start failed<br>";
-} else {
+try {
+	$session_id = $session->startSession($session_name);
 	print "[2] Current session id: " . $session_id . "<br>";
+} catch (\Exception $e) {
+	print "[2] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
 }
 print "[SET] Current session id: " . $session->getSessionId() . "<br>";
 print "[SET] Current session name: " . $session->getSessionName() . "<br>";

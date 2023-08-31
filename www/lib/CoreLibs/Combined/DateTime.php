@@ -324,7 +324,7 @@ class DateTime
 	 * @return int                int -1 (s<e)/0 (s=e)/1 (s>e) as difference
 	 * @throws \UnexpectedValueException On empty start/end values
 	 */
-	public static function compareDate(string $start_date, string $end_date): int|bool
+	public static function compareDate(string $start_date, string $end_date): int
 	{
 		// pre check for empty or wrong
 		if ($start_date == '--' || $end_date == '--' || empty($start_date) || empty($end_date)) {
@@ -337,18 +337,20 @@ class DateTime
 		if (($end_timestamp = strtotime($end_date)) === false) {
 			throw new \UnexpectedValueException("Error parsing end date through strtotime()");
 		}
+		$comp = 0;
 		// convert anything to Y-m-d and then to timestamp
 		// this is to remove any time parts
 		$start_timestamp = strtotime(date('Y-m-d', $start_timestamp));
 		$end_timestamp = strtotime(date('Y-m-d', $end_timestamp));
 		// compare, or end with false
 		if ($start_timestamp < $end_timestamp) {
-			return -1;
+			$comp = -1;
 		} elseif ($start_timestamp == $end_timestamp) {
-			return 0;
+			$comp = 0;
 		} elseif ($start_timestamp > $end_timestamp) {
-			return 1;
+			$comp = 1;
 		}
+		return $comp;
 	}
 
 	/**
@@ -365,7 +367,7 @@ class DateTime
 	 * @return int                    -1 (s<e)/0 (s=e)/1 (s>e) as difference
 	 * @throws \UnexpectedValueException On empty start/end values
 	 */
-	public static function compareDateTime(string $start_datetime, string $end_datetime): int|bool
+	public static function compareDateTime(string $start_datetime, string $end_datetime): int
 	{
 		// pre check for empty or wrong
 		if ($start_datetime == '--' || $end_datetime == '--' || empty($start_datetime) || empty($end_datetime)) {
@@ -378,14 +380,16 @@ class DateTime
 		if (($end_timestamp = strtotime($end_datetime)) === false) {
 			throw new \UnexpectedValueException("Error parsing end timestamp through strtotime()");
 		}
+		$comp = 0;
 		// compare, or return false
 		if ($start_timestamp < $end_timestamp) {
-			return -1;
+			$comp = -1;
 		} elseif ($start_timestamp == $end_timestamp) {
-			return 0;
+			$comp = 0;
 		} elseif ($start_timestamp > $end_timestamp) {
-			return 1;
+			$comp = 1;
 		}
+		return $comp;
 	}
 
 	/**
