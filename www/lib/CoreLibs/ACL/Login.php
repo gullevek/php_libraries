@@ -403,7 +403,6 @@ class Login
 			$this->log->info($message, ['code' => $code]);
 		} else {
 			$this->log->critical($message, ['code' => $code]);
-			// throw new \Exception($message, $code);
 		}
 		exit($code);
 	}

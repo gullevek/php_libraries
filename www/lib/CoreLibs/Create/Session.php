@@ -106,11 +106,11 @@ class Session
 	{
 		// we can't start sessions on command line
 		if ($this->checkCliStatus()) {
-			throw new \RuntimeException('[SESSION] No sessions in php cli');
+			throw new \RuntimeException('[SESSION] No sessions in php cli', 1);
 		}
 		// if session are OFF
 		if ($this->getSessionStatus() === PHP_SESSION_DISABLED) {
-			throw new \RuntimeException('[SESSION] Sessions are disabled');
+			throw new \RuntimeException('[SESSION] Sessions are disabled', 2);
 		}
 		// session_status
 		// initial the session if there is no session running already
@@ -123,7 +123,7 @@ class Session
 			if (!empty($session_name)) {
 				// invalid session name, abort
 				if (!$this->checkValidSessionName($session_name)) {
-					throw new \UnexpectedValueException('[SESSION] Invalid session name: ' . $session_name);
+					throw new \UnexpectedValueException('[SESSION] Invalid session name: ' . $session_name, 3);
 				}
 				$this->setSessionName($session_name);
 			}
@@ -132,10 +132,10 @@ class Session
 		}
 		// if we still have no active session
 		if (!$this->checkActiveSession()) {
-			throw new \RuntimeException('[SESSION] Failed to activate session');
+			throw new \RuntimeException('[SESSION] Failed to activate session', 4);
 		}
 		if (false === ($session_id = $this->getSessionId())) {
-			throw new \UnexpectedValueException('[SESSION] getSessionId did not return a session id');
+			throw new \UnexpectedValueException('[SESSION] getSessionId did not return a session id', 5);
 		}
 		return $session_id;
 	}

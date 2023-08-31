@@ -13,6 +13,11 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsCheckColorsTest extends TestCase
 {
+	/**
+	 * Undocumented function
+	 *
+	 * @return array<mixed>
+	 */
 	public function validateColorProvider(): array
 	{
 		/*

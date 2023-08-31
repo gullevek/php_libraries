@@ -328,14 +328,14 @@ class DateTime
 	{
 		// pre check for empty or wrong
 		if ($start_date == '--' || $end_date == '--' || empty($start_date) || empty($end_date)) {
-			throw new \UnexpectedValueException('Start or End date not set or are just "--"');
+			throw new \UnexpectedValueException('Start or End date not set or are just "--"', 1);
 		}
 		// if invalid, quit
 		if (($start_timestamp = strtotime($start_date)) === false) {
-			throw new \UnexpectedValueException("Error parsing start date through strtotime()");
+			throw new \UnexpectedValueException("Error parsing start date through strtotime()", 2);
 		}
 		if (($end_timestamp = strtotime($end_date)) === false) {
-			throw new \UnexpectedValueException("Error parsing end date through strtotime()");
+			throw new \UnexpectedValueException("Error parsing end date through strtotime()", 3);
 		}
 		$comp = 0;
 		// convert anything to Y-m-d and then to timestamp
@@ -371,14 +371,14 @@ class DateTime
 	{
 		// pre check for empty or wrong
 		if ($start_datetime == '--' || $end_datetime == '--' || empty($start_datetime) || empty($end_datetime)) {
-			throw new \UnexpectedValueException('Start or end timestamp not set or are just "--"');
+			throw new \UnexpectedValueException('Start or end timestamp not set or are just "--"', 1);
 		}
 		// quit if invalid timestamp
 		if (($start_timestamp = strtotime($start_datetime)) === false) {
-			throw new \UnexpectedValueException("Error parsing start timestamp through strtotime()");
+			throw new \UnexpectedValueException("Error parsing start timestamp through strtotime()", 2);
 		}
 		if (($end_timestamp = strtotime($end_datetime)) === false) {
-			throw new \UnexpectedValueException("Error parsing end timestamp through strtotime()");
+			throw new \UnexpectedValueException("Error parsing end timestamp through strtotime()", 3);
 		}
 		$comp = 0;
 		// compare, or return false

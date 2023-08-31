@@ -445,12 +445,14 @@ final class CoreLibsDBIOTest extends TestCase
 	{
 		// 0: connection array
 		// 1: status after connection
+		// 2: exception name
 		// 2: info string
 		// 3: ???
 		return [
 			'invalid connection' => [
 				self::$db_config['invalid'],
 				false,
+				'RuntimeException',
 				"-DB-info-> Connected to db '' with schema 'public' as user "
 					. "'' at host '' on port '5432' with ssl mode 'allow' **** "
 					. "-DB-info-> DB IO Class debug output: Yes **** ",
@@ -459,6 +461,7 @@ final class CoreLibsDBIOTest extends TestCase
 			'valid connection' => [
 				self::$db_config['valid'],
 				true,
+				'',
 				"-DB-info-> Connected to db 'corelibs_db_io_test' with "
 					. "schema 'public' as user 'corelibs_db_io_test' at host "
 					. "'localhost' on port '5432' with ssl mode 'allow' **** "
@@ -475,13 +478,21 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @dataProvider connectionProvider
 	 * @testdox Connection will be $expected [$_dataName]
 	 *
+	 * @param  array  $connection
+	 * @param  bool   $expected_status
+	 * @param  string   $exception
+	 * @param  string $expected_string
 	 * @return void
 	 */
 	public function testConnection(
 		array $connection,
 		bool $expected_status,
+		string $exception,
 		string $expected_string
 	): void {
+		if ($expected_status === false) {
+			$this->expectException($exception);
+		}
 		$db = new \CoreLibs\DB\IO(
 			$connection,
 			self::$log

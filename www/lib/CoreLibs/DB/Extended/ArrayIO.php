@@ -61,6 +61,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param \CoreLibs\Logging\Logging $log Logging class
 	 * @param int          $base_acl_level Set base acl level, if needed
 	 * @param int          $acl_admin      Flag if this is an admin ACL access level
+	 * @throws \RuntimeException Missing table array or table name entry
 	 */
 	public function __construct(
 		array $db_config,
@@ -83,6 +84,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// error abort if no table array or no table name
 		if (empty($table_array) || empty($table_name)) {
 			$this->__dbError(1999, false, 'MAJOR ERROR: Core settings missing');
+			throw new \RuntimeException('MAJOR ERROR: Core settings missing', 1999);
 		}
 
 		// set primary key for given table_array

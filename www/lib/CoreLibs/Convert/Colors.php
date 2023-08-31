@@ -45,7 +45,7 @@ class Colors
 			// if not valid, abort
 			if ($$color < 0 || $$color > 255) {
 				throw new \LengthException('Argument value ' . $$color . ' for color ' . $color
-					. ' is not in the range of 0 to 255');
+					. ' is not in the range of 0 to 255', 1);
 			}
 			// pad left with 0
 			$hex_color .= str_pad(dechex($$color), 2, '0', STR_PAD_LEFT);
@@ -71,7 +71,7 @@ class Colors
 	): string|array {
 		$hex_string = preg_replace("/[^0-9A-Fa-f]/", '', $hex_string); // Gets a proper hex string
 		if (!is_string($hex_string)) {
-			throw new \InvalidArgumentException('hex_string argument cannot be empty');
+			throw new \InvalidArgumentException('hex_string argument cannot be empty', 1);
 		}
 		$rgbArray = [];
 		if (strlen($hex_string) == 6) {
@@ -88,7 +88,7 @@ class Colors
 			$rgbArray['b'] = hexdec(str_repeat(substr($hex_string, 2, 1), 2));
 		} else {
 			// Invalid hex color code
-			throw new \UnexpectedValueException('Invalid hex_string: ' . $hex_string);
+			throw new \UnexpectedValueException('Invalid hex_string: ' . $hex_string, 2);
 		}
 		// returns the rgb string or the associative array
 		return $return_as_string ? implode($seperator, $rgbArray) : $rgbArray;
@@ -112,7 +112,7 @@ class Colors
 		foreach (['red', 'green', 'blue'] as $color) {
 			if ($$color < 0 || $$color > 255) {
 				throw new \LengthException('Argument value ' . $$color . ' for color ' . $color
-					. ' is not in the range of 0 to 255');
+					. ' is not in the range of 0 to 255', 1);
 			}
 			$$color = $$color / 255;
 		}
@@ -162,13 +162,13 @@ class Colors
 			$H = 0;
 		}
 		if ($H < 0 || $H > 359) {
-			throw new \LengthException('Argument value ' . $H . ' for hue is not in the range of 0 to 359');
+			throw new \LengthException('Argument value ' . $H . ' for hue is not in the range of 0 to 359', 1);
 		}
 		if ($S < 0 || $S > 100) {
-			throw new \LengthException('Argument value ' . $S . ' for saturation is not in the range of 0 to 100');
+			throw new \LengthException('Argument value ' . $S . ' for saturation is not in the range of 0 to 100', 2);
 		}
 		if ($V < 0 || $V > 100) {
-			throw new \LengthException('Argument value ' . $V . ' for brightness is not in the range of 0 to 100');
+			throw new \LengthException('Argument value ' . $V . ' for brightness is not in the range of 0 to 100', 3);
 		}
 		// convert to internal 0-1 format
 		$S /= 100;
@@ -246,7 +246,7 @@ class Colors
 		foreach (['red', 'green', 'blue'] as $color) {
 			if ($$color < 0 || $$color > 255) {
 				throw new \LengthException('Argument value ' . $$color . ' for color ' . $color
-					. ' is not in the range of 0 to 255');
+					. ' is not in the range of 0 to 255', 1);
 			}
 			$$color = $$color / 255;
 		}
@@ -301,13 +301,13 @@ class Colors
 			$hue = 0;
 		}
 		if ($hue < 0 || $hue > 359) {
-			throw new \LengthException('Argument value ' . $hue . ' for hue is not in the range of 0 to 359');
+			throw new \LengthException('Argument value ' . $hue . ' for hue is not in the range of 0 to 359', 1);
 		}
 		if ($sat < 0 || $sat > 100) {
-			throw new \LengthException('Argument value ' . $sat . ' for saturation is not in the range of 0 to 100');
+			throw new \LengthException('Argument value ' . $sat . ' for saturation is not in the range of 0 to 100', 2);
 		}
 		if ($lum < 0 || $lum > 100) {
-			throw new \LengthException('Argument value ' . $lum . ' for luminance is not in the range of 0 to 100');
+			throw new \LengthException('Argument value ' . $lum . ' for luminance is not in the range of 0 to 100', 3);
 		}
 		// calc to internal convert value for hue
 		$hue = (1 / 360) * $hue;

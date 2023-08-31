@@ -310,11 +310,13 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'2021-12-12',
 				-1,
 				null,
+				null,
 			],
 			'dates equal' => [
 				'2020-12-12',
 				'2020-12-12',
 				0,
+				null,
 				null,
 			],
 			'second date smaller' => [
@@ -322,11 +324,13 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'2020-12-12',
 				1,
 				null,
+				null,
 			],
 			'dates equal with different time' => [
 				'2020-12-12 12:12:12',
 				'2020-12-12 13:13:13',
 				0,
+				null,
 				null,
 			],
 			'invalid dates --' => [
@@ -334,28 +338,44 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'--',
 				false,
 				'UnexpectedValueException',
+				1,
 			],
 			'empty dates' => [
 				'',
 				'',
 				false,
-				'UnexpectedValueException'
+				'UnexpectedValueException',
+				1
 			],
 			'invalid dates' => [
 				'not a date',
 				'not a date either',
 				false,
-				'UnexpectedValueException'
+				'UnexpectedValueException',
+				2
+			],
+			'invalid end date' => [
+				'1990-01-01',
+				'not a date either',
+				false,
+				'UnexpectedValueException',
+				3
 			],
 			'out of bound dates' => [
 				'1900-1-1',
 				'9999-12-31',
 				-1,
 				null,
+				null,
 			]
 		];
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return array<mixed>
+	 */
 	public function dateTimeCompareProvider(): array
 	{
 		return [
@@ -364,11 +384,13 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'2021-12-12',
 				-1,
 				null,
+				null,
 			],
 			'dates equal no timestamp' => [
 				'2020-12-12',
 				'2020-12-12',
 				0,
+				null,
 				null,
 			],
 			'second date smaller no timestamp' => [
@@ -376,11 +398,13 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'2020-12-12',
 				1,
 				null,
+				null,
 			],
 			'date equal first time smaller' => [
 				'2020-12-12 12:12:12',
 				'2020-12-12 13:13:13',
 				-1,
+				null,
 				null,
 			],
 			'date equal time equal' => [
@@ -388,36 +412,56 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'2020-12-12 12:12:12',
 				0,
 				null,
+				null,
 			],
 			'date equal second time smaller' => [
 				'2020-12-12 13:13:13',
 				'2020-12-12 12:12:12',
 				1,
 				null,
+				null,
 			],
 			'valid date invalid time' => [
 				'2020-12-12 13:99:13',
 				'2020-12-12 12:12:99',
 				false,
-				'UnexpectedValueException'
+				'UnexpectedValueException',
+				2
+			],
+			'valid date invalid end time' => [
+				'2020-12-12 13:12:13',
+				'2020-12-12 12:12:99',
+				false,
+				'UnexpectedValueException',
+				3
 			],
 			'invalid datetimes --' => [
 				'--',
 				'--',
 				false,
-				'UnexpectedValueException'
+				'UnexpectedValueException',
+				1
 			],
 			'empty datetimess' => [
 				'',
 				'',
 				false,
-				'UnexpectedValueException'
+				'UnexpectedValueException',
+				1
 			],
-			'invalid datetimes' => [
+			'invalid date times' => [
 				'not a date',
 				'not a date either',
 				false,
-				'UnexpectedValueException'
+				'UnexpectedValueException',
+				2
+			],
+			'invalid end date time' => [
+				'1990-01-01 12:12:12',
+				'not a date either',
+				false,
+				'UnexpectedValueException',
+				3
 			],
 		];
 	}
@@ -632,12 +676,20 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	 * @param string $input_a
 	 * @param string $input_b
 	 * @param int|bool $expected
+	 * @param string|null $exception
+	 * @param int|null $exception_code
 	 * @return void
 	 */
-	public function testCompareDate(string $input_a, string $input_b, int|bool $expected, ?string $exception): void
-	{
+	public function testCompareDate(
+		string $input_a,
+		string $input_b,
+		int|bool $expected,
+		?string $exception,
+		?int $exception_code
+	): void {
 		if ($expected === false) {
 			$this->expectException($exception);
+			$this->expectExceptionCode($exception_code);
 		}
 		$this->assertEquals(
 			$expected,
@@ -655,12 +707,20 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	 * @param string $input_a
 	 * @param string $input_b
 	 * @param int|bool $expected
+	 * @param string|null $exception
+	 * @param int|null $exception_code
 	 * @return void
 	 */
-	public function testCompareDateTime(string $input_a, string $input_b, int|bool $expected, ?string $exception): void
-	{
+	public function testCompareDateTime(
+		string $input_a,
+		string $input_b,
+		int|bool $expected,
+		?string $exception,
+		?int $exception_code
+	): void {
 		if ($expected === false) {
 			$this->expectException($exception);
+			$this->expectExceptionCode($exception_code);
 		}
 		$this->assertEquals(
 			$expected,

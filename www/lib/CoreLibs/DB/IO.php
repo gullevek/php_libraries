@@ -414,6 +414,7 @@ class IO
 	 * phpcs:ignore
 	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[]} $db_config DB configuration array
 	 * @param \CoreLibs\Logging\Logging $log Logging class
+	 * @throws \RuntimeException If no DB connection can be established on launch
 	 */
 	public function __construct(
 		array $db_config,
@@ -492,6 +493,7 @@ class IO
 		if (!$this->__connectToDB()) {
 			$this->__dbError(16);
 			$this->db_connection_closed = true;
+			throw new \RuntimeException('INIT: No DB Handler found / connect or reconnect failed', 16);
 		}
 	}
 
@@ -974,9 +976,9 @@ class IO
 	/**
 	 * write an error
 	 *
-	 * @param integer $error_id            Any Error ID, used in debug message string
+	 * @param integer $error_id           Any Error ID, used in debug message string
 	 * @param \PgSql\Result|false $cursor Optional cursor, passed on to preprocessor
-	 * @param string $msg                  optional message added to debug
+	 * @param string $msg                 optional message added to debug
 	 * @return void
 	 */
 	protected function __dbError(
