@@ -39,8 +39,18 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 // define a list of from to color sets for conversion test
 
 // A(out of bounds)
-print "C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: " . CoreLibs\Convert\Colors::rgb2hex(-1, -1, -1) . "<br>";
-print "\$C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: " . $color_class::rgb2hex(-1, -1, -1) . "<br>";
+try {
+	print "C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: "
+		. CoreLibs\Convert\Colors::rgb2hex(-1, -1, -1) . "<br>";
+} catch (\LengthException $e) {
+	print "*Exception: " . $e->getMessage() . "<br>" . $e . "<br>";
+}
+try {
+	print "\$C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: "
+		. $color_class::rgb2hex(-1, -1, -1) . "<br>";
+} catch (\LengthException $e) {
+	print "**Exception: " . $e->getMessage() . "<br><pre>" . print_r($e, true) . "</pre><br>";
+}
 // B(valid)
 $rgb = [10, 20, 30];
 $hex = '#0a141e';
