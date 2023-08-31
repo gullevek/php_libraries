@@ -14,8 +14,6 @@ declare(strict_types=1);
 
 namespace CoreLibs\Check;
 
-use Exception;
-
 class Colors
 {
 	/** @var int 1 for HEX rgb */

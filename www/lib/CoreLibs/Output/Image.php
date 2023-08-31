@@ -8,8 +8,6 @@ declare(strict_types=1);
 
 namespace CoreLibs\Output;
 
-use Exception;
-
 class Image
 {
 	/**
