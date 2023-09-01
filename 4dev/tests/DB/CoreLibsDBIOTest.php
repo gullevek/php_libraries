@@ -733,6 +733,10 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testGetSetting(string $connection, array $settings): void
 	{
+		// if settings are all empty -> assume exception
+		if (empty($settings['db_name']) && empty($settings['db_user'])) {
+			$this->expectException('RuntimeException');
+		}
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config[$connection],
 			self::$log
