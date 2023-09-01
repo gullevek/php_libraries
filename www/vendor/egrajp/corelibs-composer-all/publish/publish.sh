@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 BASE_FOLDER=$(dirname $(readlink -f $0))"/";
+PACKAGE_DOWNLOAD="${BASE_FOLDER}package-download/";
+if [ ! -d "${PACKAGE_DOWNLOAD}" ]; then
+     mkdir "${PACKAGE_DOWNLOAD}";
+fi;
 VERSION=$(git tag --list | sort -V | tail -n1 | sed -e "s/^v//");
 file_last_published="${BASE_FOLDER}last.published";
 go_flag="$1";
@@ -19,6 +23,7 @@ if [ -f "${file_last_published}" ]; then
 fi;
 
 # read in the .env.deploy file and we must have
+# GITEA_UPLOAD_FILENAME
 # GITLAB_USER
 # GITLAB_TOKEN
 # GITLAB_URL
@@ -45,17 +50,18 @@ fi;
 
 echo "[START]";
 # gitea
-if [ ! -z "${GITEA_URL_DL}" ] && [ ! -z "${GITEA_URL_PUSH}" ] &&
+if [ ! -z "${GITEA_UPLOAD_FILENAME}" ] &&
+     [ ! -z "${GITEA_URL_DL}" ] && [ ! -z "${GITEA_URL_PUSH}" ] &&
      [ ! -z "${GITEA_USER}" ] && [ ! -z "${GITEA_TOKEN}" ]; then
      curl -LJO \
-          --output-dir "${BASE_FOLDER}" \
+          --output-dir "${PACKAGE_DOWNLOAD}" \
           ${GITEA_URL_DL}/v${VERSION}.zip;
      curl --user ${GITEA_USER}:${GITEA_TOKEN} \
-          --upload-file "${BASE_FOLDER}/CoreLibs-Composer-All-v${VERSION}.zip" \
+          --upload-file "${PACKAGE_DOWNLOAD}${GITEA_UPLOAD_FILENAME}-v${VERSION}.zip" \
           ${GITEA_URL_PUSH}?version=${VERSION};
      echo "${VERSION}" > "${file_last_published}";
 else
-     echo "Missing either GITEA_USER or GITEA_TOKEN environment variable";
+     echo "Missing either GITEA_UPLOAD_FILENAME, GITEA_URL_DL, GITEA_URL_PUSH, GITEA_USER or GITEA_TOKEN environment variable";
 fi;
 
 # gitlab

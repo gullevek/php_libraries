@@ -75,6 +75,14 @@ $db->dbResetEncoding();
 
 // empty calls, none of the below should fail
 //
+$db->dbGetCursor();
+//
+$db->dbGetCursorExt();
+//
+$db->dbGetCursorPos('SELECT foo', ['bar']);
+//
+$db->dbGetCursorNumRows('SELECT foo', ['bar']);
+//
 $db->dbGetInsertPKName();
 //
 $db->dbGetInsertPK();

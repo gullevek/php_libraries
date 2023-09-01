@@ -105,49 +105,48 @@ class DateTime
 		bool $show_micro = true
 	): string {
 		// check if the timestamp has any h/m/s/ms inside, if yes skip
-		if (!preg_match("/(h|m|s|ms)/", (string)$timestamp)) {
-			list($timestamp, $ms) = array_pad(explode('.', (string)round((float)$timestamp, 4)), 2, null);
-			// if negative remember
-			$negative = false;
-			if ((int)$timestamp < 0) {
-				$negative = true;
-			}
-			$timestamp = abs((float)$timestamp);
-			$timegroups = [86400, 3600, 60, 1];
-			$labels = ['d', 'h', 'm', 's'];
-			$time_string = '';
-			// if timestamp is zero, return zero string
-			if ($timestamp == 0) {
-				$time_string = '0s';
-			} else {
-				for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i++) {
-					$output = floor((float)$timestamp / $timegroups[$i]);
-					$timestamp = (float)$timestamp % $timegroups[$i];
-					// output has days|hours|min|sec
-					if ($output || $time_string) {
-						$time_string .= $output . $labels[$i] . (($i + 1) != count($timegroups) ? ' ' : '');
-					}
-				}
-			}
-			// only add ms if we have an ms value
-			if ($ms !== null) {
-				// if we have ms and it has leading zeros, remove them, but only if it is nut just 0
-				$ms = preg_replace("/^0+(\d+)$/", '${1}', $ms);
-				if (!is_string($ms) || empty($ms)) {
-					$ms = '0';
-				}
-				// add ms if there
-				if ($show_micro) {
-					$time_string .= ' ' . $ms . 'ms';
-				} elseif (!$time_string) {
-					$time_string .= $ms . 'ms';
-				}
-			}
-			if ($negative) {
-				$time_string = '-' . $time_string;
-			}
+		if (preg_match("/(h|m|s|ms)/", (string)$timestamp)) {
+			return (string)$timestamp;
+		}
+		list($timestamp, $ms) = array_pad(explode('.', (string)round((float)$timestamp, 4)), 2, null);
+		// if negative remember
+		$negative = false;
+		if ((int)$timestamp < 0) {
+			$negative = true;
+		}
+		$timestamp = abs((float)$timestamp);
+		$timegroups = [86400, 3600, 60, 1];
+		$labels = ['d', 'h', 'm', 's'];
+		$time_string = '';
+		// if timestamp is zero, return zero string
+		if ($timestamp == 0) {
+			$time_string = '0s';
 		} else {
-			$time_string = $timestamp;
+			for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i++) {
+				$output = floor((float)$timestamp / $timegroups[$i]);
+				$timestamp = (float)$timestamp % $timegroups[$i];
+				// output has days|hours|min|sec
+				if ($output || $time_string) {
+					$time_string .= $output . $labels[$i] . (($i + 1) != count($timegroups) ? ' ' : '');
+				}
+			}
+		}
+		// only add ms if we have an ms value
+		if ($ms !== null) {
+			// if we have ms and it has leading zeros, remove them, but only if it is nut just 0
+			$ms = preg_replace("/^0+(\d+)$/", '${1}', $ms);
+			if (!is_string($ms) || empty($ms)) {
+				$ms = '0';
+			}
+			// add ms if there
+			if ($show_micro) {
+				$time_string .= ' ' . $ms . 'ms';
+			} elseif (!$time_string) {
+				$time_string .= $ms . 'ms';
+			}
+		}
+		if ($negative) {
+			$time_string = '-' . $time_string;
 		}
 		return (string)$time_string;
 	}
@@ -162,37 +161,36 @@ class DateTime
 	public static function stringToTime(string|int|float $timestring): string|int|float
 	{
 		$timestamp = 0;
-		if (preg_match("/(d|h|m|s|ms)/", (string)$timestring)) {
-			$timestring = (string)$timestring;
-			// pos for preg match read + multiply factor
-			$timegroups = [2 => 86400, 4 => 3600, 6 => 60, 8 => 1];
-			$matches = [];
-			// if start with -, strip and set negative
-			$negative = false;
-			if (preg_match("/^-/", $timestring)) {
-				$negative = true;
-				$timestring = substr($timestring, 1);
-			}
-			// preg match: 0: full string
-			// 2, 4, 6, 8 are the to need values
-			preg_match("/^((\d+)d ?)?((\d+)h ?)?((\d+)m ?)?((\d+)s ?)?((\d+)ms)?$/", $timestring, $matches);
-			// multiply the returned matches and sum them up. the last one (ms) is added with .
-			foreach ($timegroups as $i => $time_multiply) {
-				if (isset($matches[$i]) && is_numeric($matches[$i])) {
-					$timestamp += (float)$matches[$i] * $time_multiply;
-				}
-			}
-			if (isset($matches[10]) && is_numeric($matches[10])) {
-				$timestamp .= '.' . $matches[10];
-			}
-			if ($negative) {
-				// cast to flaot so we can do a negative multiplication
-				$timestamp = (float)$timestamp * -1;
-			}
-			return $timestamp;
-		} else {
+		if (!preg_match("/(d|h|m|s|ms)/", (string)$timestring)) {
 			return $timestring;
 		}
+		$timestring = (string)$timestring;
+		// pos for preg match read + multiply factor
+		$timegroups = [2 => 86400, 4 => 3600, 6 => 60, 8 => 1];
+		$matches = [];
+		// if start with -, strip and set negative
+		$negative = false;
+		if (preg_match("/^-/", $timestring)) {
+			$negative = true;
+			$timestring = substr($timestring, 1);
+		}
+		// preg match: 0: full string
+		// 2, 4, 6, 8 are the to need values
+		preg_match("/^((\d+)d ?)?((\d+)h ?)?((\d+)m ?)?((\d+)s ?)?((\d+)ms)?$/", $timestring, $matches);
+		// multiply the returned matches and sum them up. the last one (ms) is added with .
+		foreach ($timegroups as $i => $time_multiply) {
+			if (isset($matches[$i]) && is_numeric($matches[$i])) {
+				$timestamp += (float)$matches[$i] * $time_multiply;
+			}
+		}
+		if (isset($matches[10]) && is_numeric($matches[10])) {
+			$timestamp .= '.' . $matches[10];
+		}
+		if ($negative) {
+			// cast to flaot so we can do a negative multiplication
+			$timestamp = (float)$timestamp * -1;
+		}
+		return $timestamp;
 	}
 
 	/**
@@ -323,36 +321,36 @@ class DateTime
 	 *
 	 * @param  string $start_date start date string in YYYY-MM-DD
 	 * @param  string $end_date   end date string in YYYY-MM-DD
-	 * @return int|bool           false on error
-	 *                            or int -1 (s<e)/0 (s=e)/1 (s>e) as difference
+	 * @return int                int -1 (s<e)/0 (s=e)/1 (s>e) as difference
+	 * @throws \UnexpectedValueException On empty start/end values
 	 */
-	public static function compareDate(string $start_date, string $end_date): int|bool
+	public static function compareDate(string $start_date, string $end_date): int
 	{
 		// pre check for empty or wrong
-		if ($start_date == '--' || $end_date == '--' || !$start_date || !$end_date) {
-			return false;
+		if ($start_date == '--' || $end_date == '--' || empty($start_date) || empty($end_date)) {
+			throw new \UnexpectedValueException('Start or End date not set or are just "--"', 1);
 		}
 		// if invalid, quit
 		if (($start_timestamp = strtotime($start_date)) === false) {
-			return false;
+			throw new \UnexpectedValueException("Error parsing start date through strtotime()", 2);
 		}
 		if (($end_timestamp = strtotime($end_date)) === false) {
-			return false;
+			throw new \UnexpectedValueException("Error parsing end date through strtotime()", 3);
 		}
+		$comp = 0;
 		// convert anything to Y-m-d and then to timestamp
 		// this is to remove any time parts
 		$start_timestamp = strtotime(date('Y-m-d', $start_timestamp));
 		$end_timestamp = strtotime(date('Y-m-d', $end_timestamp));
 		// compare, or end with false
 		if ($start_timestamp < $end_timestamp) {
-			return -1;
+			$comp = -1;
 		} elseif ($start_timestamp == $end_timestamp) {
-			return 0;
+			$comp = 0;
 		} elseif ($start_timestamp > $end_timestamp) {
-			return 1;
-		} else {
-			return false;
+			$comp = 1;
 		}
+		return $comp;
 	}
 
 	/**
@@ -366,32 +364,32 @@ class DateTime
 	 *
 	 * @param  string $start_datetime start date/time in YYYY-MM-DD HH:mm:ss
 	 * @param  string $end_datetime   end date/time in YYYY-MM-DD HH:mm:ss
-	 * @return int|bool               false for error
-	 *                                or -1 (s<e)/0 (s=e)/1 (s>e) as difference
+	 * @return int                    -1 (s<e)/0 (s=e)/1 (s>e) as difference
+	 * @throws \UnexpectedValueException On empty start/end values
 	 */
-	public static function compareDateTime(string $start_datetime, string $end_datetime): int|bool
+	public static function compareDateTime(string $start_datetime, string $end_datetime): int
 	{
 		// pre check for empty or wrong
-		if ($start_datetime == '--' || $end_datetime == '--' || !$start_datetime || !$end_datetime) {
-			return false;
+		if ($start_datetime == '--' || $end_datetime == '--' || empty($start_datetime) || empty($end_datetime)) {
+			throw new \UnexpectedValueException('Start or end timestamp not set or are just "--"', 1);
 		}
 		// quit if invalid timestamp
 		if (($start_timestamp = strtotime($start_datetime)) === false) {
-			return false;
+			throw new \UnexpectedValueException("Error parsing start timestamp through strtotime()", 2);
 		}
 		if (($end_timestamp = strtotime($end_datetime)) === false) {
-			return false;
+			throw new \UnexpectedValueException("Error parsing end timestamp through strtotime()", 3);
 		}
+		$comp = 0;
 		// compare, or return false
 		if ($start_timestamp < $end_timestamp) {
-			return -1;
+			$comp = -1;
 		} elseif ($start_timestamp == $end_timestamp) {
-			return 0;
+			$comp = 0;
 		} elseif ($start_timestamp > $end_timestamp) {
-			return 1;
-		} else {
-			return false;
+			$comp = 1;
 		}
+		return $comp;
 	}
 
 	/**

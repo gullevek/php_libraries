@@ -30,8 +30,10 @@ final class CoreLibsCreateSessionTest extends TestCase
 		//    setSessionName: true/false,
 		//    checkActiveSession: true/false, [1st call, 2nd call]
 		//    getSessionId: string or false
-		// 3: exepcted name (session)
-		// 4: expected error string
+		// 3: exepcted name (session)]
+		// 4: Exception thrown on error
+		// 5: exception code, null for none
+		// 6: expected error string
 		return [
 			'session parameter' => [
 				'sessionNameParameter',
@@ -44,7 +46,9 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'sessionNameParameter',
-				''
+				null,
+				null,
+				'',
 			],
 			'session globals' => [
 				'sessionNameGlobals',
@@ -57,7 +61,9 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'sessionNameGlobals',
-				''
+				null,
+				null,
+				'',
 			],
 			'session name default' => [
 				'',
@@ -70,7 +76,9 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'',
-				''
+				null,
+				null,
+				'',
 			],
 			// error checks
 			// 1: we are in cli
@@ -85,6 +93,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'',
+				'RuntimeException',
+				1,
 				'[SESSION] No sessions in php cli'
 			],
 			// 2: session disabled
@@ -99,6 +109,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'',
+				'RuntimeException',
+				2,
 				'[SESSION] Sessions are disabled'
 			],
 			// 3: invalid session name: string
@@ -113,6 +125,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'',
+				'UnexpectedValueException',
+				3,
 				'[SESSION] Invalid session name: 1invalid$session#;'
 			],
 			// 3: invalid session name: only numbers
@@ -127,6 +141,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'',
+				'UnexpectedValueException',
+				3,
 				'[SESSION] Invalid session name: 123'
 			],
 			// 3: invalid session name: invalid name short
@@ -143,6 +159,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'',
+				'RuntimeException',
+				4,
 				'[SESSION] Failed to activate session'
 			],
 			// 5: get session id return false
@@ -157,6 +175,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => false
 				],
 				'',
+				'UnexpectedValueException',
+				5,
 				'[SESSION] getSessionId did not return a session id'
 			],
 		];
@@ -173,6 +193,7 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 * @param string $type
 	 * @param array<mixed> $mock_data
 	 * @param string $expected
+	 * @param string|null $exception
 	 * @param string $expected_error
 	 * @return void
 	 */
@@ -181,6 +202,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 		string $type,
 		array $mock_data,
 		string $expected,
+		?string $exception,
+		?int $exception_code,
 		string $expected_error
 	): void {
 		// override expected
@@ -224,6 +247,11 @@ final class CoreLibsCreateSessionTest extends TestCase
 		// regex for session id
 		$ression_id_regex = "/^\w+$/";
 
+		if ($exception !== null) {
+			$this->expectException($exception);
+			$this->expectExceptionCode($exception_code);
+		}
+
 		unset($GLOBALS['SET_SESSION_NAME']);
 		$session_id = '';
 		switch ($type) {
@@ -252,13 +280,6 @@ final class CoreLibsCreateSessionTest extends TestCase
 			$this->assertEquals(
 				$expected,
 				$session_mock->getSessionName()
-			);
-		} else {
-			// false checks
-			$this->assertEquals(
-				$expected_error,
-				$session_mock->getErrorStr(),
-				'error assert'
 			);
 		}
 	}

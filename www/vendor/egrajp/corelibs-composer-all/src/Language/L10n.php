@@ -254,7 +254,7 @@ class L10n
 		}
 		// if this is still null here, we abort
 		if ($this->l10n === null) {
-			throw new \Exception(
+			throw new \RuntimeException(
 				"Could not create CoreLibs\Language\Core\GetTextReader object",
 				E_USER_ERROR
 			);

@@ -28,15 +28,15 @@ class Colors
 	 * @param  int    $green      green 0-255
 	 * @param  int    $blue       blue 0-255
 	 * @param  bool   $hex_prefix default true, prefix with "#"
-	 * @return string|false       rgb in hex values with leading # if set,
-	 *                            false for invalid color
+	 * @return string             rgb in hex values with leading # if set,
+	 * @throws \LengthException If any argument is not in the range of 0~255
 	 */
 	public static function rgb2hex(
 		int $red,
 		int $green,
 		int $blue,
 		bool $hex_prefix = true
-	): string|false {
+	): string {
 		$hex_color = '';
 		if ($hex_prefix === true) {
 			$hex_color = '#';
@@ -44,7 +44,8 @@ class Colors
 		foreach (['red', 'green', 'blue'] as $color) {
 			// if not valid, abort
 			if ($$color < 0 || $$color > 255) {
-				return false;
+				throw new \LengthException('Argument value ' . $$color . ' for color ' . $color
+					. ' is not in the range of 0 to 255', 1);
 			}
 			// pad left with 0
 			$hex_color .= str_pad(dechex($$color), 2, '0', STR_PAD_LEFT);
@@ -55,37 +56,39 @@ class Colors
 	/**
 	 * converts a hex RGB color to the int numbers
 	 *
-	 * @param  string $hexStr           RGB hexstring
+	 * @param  string $hex_string           RGB hexstring
 	 * @param  bool   $return_as_string flag to return as string
 	 * @param  string $seperator        string seperator: default: ","
-	 * @return string|array<string,float|int>|false false on error or array with RGB
-	 *                                              or a string with the seperator
+	 * @return string|array<string,float|int> array with RGB
+	 *                                        or a string with the seperator
+	 * @throws \InvalidArgumentException if hex string is empty
+	 * @throws \UnexpectedValueException if the hex string value is not valid
 	 */
 	public static function hex2rgb(
-		string $hexStr,
+		string $hex_string,
 		bool $return_as_string = false,
 		string $seperator = ','
-	): string|array|false {
-		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
-		if (!is_string($hexStr)) {
-			return false;
+	): string|array {
+		$hex_string = preg_replace("/[^0-9A-Fa-f]/", '', $hex_string); // Gets a proper hex string
+		if (!is_string($hex_string)) {
+			throw new \InvalidArgumentException('hex_string argument cannot be empty', 1);
 		}
 		$rgbArray = [];
-		if (strlen($hexStr) == 6) {
+		if (strlen($hex_string) == 6) {
 			// If a proper hex code, convert using bitwise operation.
 			// No overhead... faster
-			$colorVal = hexdec($hexStr);
+			$colorVal = hexdec($hex_string);
 			$rgbArray['r'] = 0xFF & ($colorVal >> 0x10);
 			$rgbArray['g'] = 0xFF & ($colorVal >> 0x8);
 			$rgbArray['b'] = 0xFF & $colorVal;
-		} elseif (strlen($hexStr) == 3) {
+		} elseif (strlen($hex_string) == 3) {
 			// If shorthand notation, need some string manipulations
-			$rgbArray['r'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
-			$rgbArray['g'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
-			$rgbArray['b'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
+			$rgbArray['r'] = hexdec(str_repeat(substr($hex_string, 0, 1), 2));
+			$rgbArray['g'] = hexdec(str_repeat(substr($hex_string, 1, 1), 2));
+			$rgbArray['b'] = hexdec(str_repeat(substr($hex_string, 2, 1), 2));
 		} else {
 			// Invalid hex color code
-			return false;
+			throw new \UnexpectedValueException('Invalid hex_string: ' . $hex_string, 2);
 		}
 		// returns the rgb string or the associative array
 		return $return_as_string ? implode($seperator, $rgbArray) : $rgbArray;
@@ -97,20 +100,21 @@ class Colors
 	 * returns:
 	 * array with hue (0-360), sat (0-100%), brightness/value (0-100%)
 	 *
-	 * @param  int $red               red 0-255
-	 * @param  int $green             green 0-255
-	 * @param  int $blue              blue 0-255
-	 * @return array<int|float>|false Hue, Sat, Brightness/Value
-	 *                                false for input value error
+	 * @param  int $red         red 0-255
+	 * @param  int $green       green 0-255
+	 * @param  int $blue        blue 0-255
+	 * @return array<int|float> Hue, Sat, Brightness/Value
+	 * @throws \LengthException If any argument is not in the range of 0~255
 	 */
-	public static function rgb2hsb(int $red, int $green, int $blue): array|false
+	public static function rgb2hsb(int $red, int $green, int $blue): array
 	{
 		// check that rgb is from 0 to 255
-		foreach (['red', 'green', 'blue'] as $c) {
-			if ($$c < 0 || $$c > 255) {
-				return false;
+		foreach (['red', 'green', 'blue'] as $color) {
+			if ($$color < 0 || $$color > 255) {
+				throw new \LengthException('Argument value ' . $$color . ' for color ' . $color
+					. ' is not in the range of 0 to 255', 1);
 			}
-			$$c = $$c / 255;
+			$$color = $$color / 255;
 		}
 
 		$MAX = max($red, $green, $blue);
@@ -144,13 +148,13 @@ class Colors
 	 * converts HSB/V to RGB values RGB is full INT
 	 * if HSB/V value is invalid, sets this value to 0
 	 *
-	 * @param  float $H         hue 0-360 (int)
-	 * @param  float $S         saturation 0-100 (int)
-	 * @param  float $V         brightness/value 0-100 (int)
-	 * @return array<int>|false 0 red/1 green/2 blue array as 0-255
-	 *                          false for input value error
+	 * @param  float $H   hue 0-360 (int)
+	 * @param  float $S   saturation 0-100 (int)
+	 * @param  float $V   brightness/value 0-100 (int)
+	 * @return array<int> 0 red/1 green/2 blue array as 0-255
+	 * @throws \LengthException If any argument is not in the valid range
 	 */
-	public static function hsb2rgb(float $H, float $S, float $V): array|false
+	public static function hsb2rgb(float $H, float $S, float $V): array
 	{
 		// check that H is 0 to 359, 360 = 0
 		// and S and V are 0 to 1
@@ -158,13 +162,13 @@ class Colors
 			$H = 0;
 		}
 		if ($H < 0 || $H > 359) {
-			return false;
+			throw new \LengthException('Argument value ' . $H . ' for hue is not in the range of 0 to 359', 1);
 		}
 		if ($S < 0 || $S > 100) {
-			return false;
+			throw new \LengthException('Argument value ' . $S . ' for saturation is not in the range of 0 to 100', 2);
 		}
 		if ($V < 0 || $V > 100) {
-			return false;
+			throw new \LengthException('Argument value ' . $V . ' for brightness is not in the range of 0 to 100', 3);
 		}
 		// convert to internal 0-1 format
 		$S /= 100;
@@ -230,20 +234,21 @@ class Colors
 	 * return:
 	 * array with hue (0-360), saturation (0-100%) and luminance (0-100%)
 	 *
-	 * @param  int $red           red 0-255
-	 * @param  int $green         green 0-255
-	 * @param  int $blue          blue 0-255
-	 * @return array<float>|false hue/sat/luminance
-	 *                            false for input value error
+	 * @param  int $red     red 0-255
+	 * @param  int $green   green 0-255
+	 * @param  int $blue    blue 0-255
+	 * @return array<float> hue/sat/luminance
+	 * @throws \LengthException If any argument is not in the range of 0~255
 	 */
-	public static function rgb2hsl(int $red, int $green, int $blue): array|false
+	public static function rgb2hsl(int $red, int $green, int $blue): array
 	{
 		// check that rgb is from 0 to 255
-		foreach (['red', 'green', 'blue'] as $c) {
-			if ($$c < 0 || $$c > 255) {
-				return false;
+		foreach (['red', 'green', 'blue'] as $color) {
+			if ($$color < 0 || $$color > 255) {
+				throw new \LengthException('Argument value ' . $$color . ' for color ' . $color
+					. ' is not in the range of 0 to 255', 1);
 			}
-			$$c = $$c / 255;
+			$$color = $$color / 255;
 		}
 
 		$min = min($red, $green, $blue);
@@ -284,24 +289,25 @@ class Colors
 	 * converts an HSL to RGB
 	 * if HSL value is invalid, set this value to 0
 	 *
-	 * @param  float $hue                 hue: 0-360 (degrees)
-	 * @param  float $sat                 saturation: 0-100
-	 * @param  float $lum                 luminance: 0-100
-	 * @return array<int,float|int>|false red/blue/green 0-255 each
+	 * @param  float $hue           hue: 0-360 (degrees)
+	 * @param  float $sat           saturation: 0-100
+	 * @param  float $lum           luminance: 0-100
+	 * @return array<int,float|int> red/blue/green 0-255 each
+	 * @throws \LengthException If any argument is not in the valid range
 	 */
-	public static function hsl2rgb(float $hue, float $sat, float $lum): array|false
+	public static function hsl2rgb(float $hue, float $sat, float $lum): array
 	{
 		if ($hue == 360) {
 			$hue = 0;
 		}
 		if ($hue < 0 || $hue > 359) {
-			return false;
+			throw new \LengthException('Argument value ' . $hue . ' for hue is not in the range of 0 to 359', 1);
 		}
 		if ($sat < 0 || $sat > 100) {
-			return false;
+			throw new \LengthException('Argument value ' . $sat . ' for saturation is not in the range of 0 to 100', 2);
 		}
 		if ($lum < 0 || $lum > 100) {
-			return false;
+			throw new \LengthException('Argument value ' . $lum . ' for luminance is not in the range of 0 to 100', 3);
 		}
 		// calc to internal convert value for hue
 		$hue = (1 / 360) * $hue;

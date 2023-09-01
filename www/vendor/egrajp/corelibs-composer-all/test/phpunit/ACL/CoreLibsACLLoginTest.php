@@ -167,8 +167,10 @@ final class CoreLibsACLLoginTest extends TestCase
 		//             change_password, pw_username, pw_old_password, pw_new_password,
 		//             pw_new_password_confirm
 		// 3[session]: override session set
-		// 4[error]  : expected error code, 0 for all ok, 3000 for login page view
-		//             note that 1000 (no db), 2000 (no session) must be tested too
+		// 4[error]  : expected error code, 0 for all ok, 100 for login page view
+		//             note that 1000 (no db), 2000 (no session), 3000 (options set error)
+		//             must be tested too
+		//             <1000 info, >=1000 critical error
 		// 5[return] : expected return array, eg login_error code,
 		//             or other info data to match
 		$tests = [
@@ -180,7 +182,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				[],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 0,
 					'error_string' => 'Success: <b>No error</b>',
@@ -198,7 +200,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				[],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 0,
 					'error_string' => 'Success: <b>No error</b>',
@@ -221,7 +223,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				[],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 0,
 					'error_string' => 'Success: <b>No error</b>',
@@ -308,7 +310,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => '',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 102,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -329,7 +331,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'abc',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 102,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -350,7 +352,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => '',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 102,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -371,7 +373,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'abc',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 1010,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -395,7 +397,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'abc',
 				],
 				[],
-				3000,
+				100,
 				[
 					// default password is plain text
 					'login_error' => 1012,
@@ -421,7 +423,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'admin',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 106,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -446,7 +448,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'admin',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 104,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -471,7 +473,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'admin',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 105,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -520,7 +522,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'admin',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 107,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -574,7 +576,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'admin',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 107,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -600,7 +602,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'admin',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 107,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -625,7 +627,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'login_password' => 'admin',
 				],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 108,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -761,7 +763,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				],
 				[],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 1010,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -853,7 +855,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				],
 				[],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 1101,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -909,7 +911,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				],
 				[],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 1102,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -965,7 +967,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				],
 				[],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 1102,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -992,7 +994,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				],
 				[],
 				[],
-				3000,
+				100,
 				[
 					'login_error' => 1102,
 					'error_string' => '<span style="color: red;">Fatal Error:</span> '
@@ -1133,7 +1135,7 @@ final class CoreLibsACLLoginTest extends TestCase
 		$login_mock->expects($this->any())
 			->method('loginTerminate')
 			->will(
-				$this->returnCallback(function ($code) {
+				$this->returnCallback(function ($message, $code) {
 					throw new \Exception('', $code);
 				})
 			);
@@ -1227,7 +1229,11 @@ final class CoreLibsACLLoginTest extends TestCase
 			$login_mock->loginSetMaxLoginErrorCount($mock_settings['max_login_error_count']);
 			// temporary wrong password
 			$_POST['login_password'] = 'wrong';
-			for ($run = 1, $max_run = $login_mock->loginGetMaxLoginErrorCount(); $run <= $max_run; $run++) {
+			for (
+				$run = 1, $max_run = $login_mock->loginGetMaxLoginErrorCount();
+				$run <= $max_run;
+				$run++
+			) {
 				try {
 					$login_mock->loginMainCall();
 				} catch (\Exception $e) {
@@ -1475,10 +1481,10 @@ final class CoreLibsACLLoginTest extends TestCase
 			// print "AJAX: " . $login_mock->loginGetAjaxFlag() . "\n";
 			// print "AJAX GLOBAL: " . ($GLOBALS['AJAX_PAGE'] ?? '{f}') . "\n";
 			// print "Login error expext: " . ($expected['login_error'] ?? '{0}') . "\n";
-			// if this is 3000, then we do further error checks
+			// if this is 100, then we do further error checks
 			if (
-				$e->getCode() == 3000 ||
-				!empty($_POST['login_exit']) && $_POST['login_exit'] == 3000
+				$e->getCode() == 100 ||
+				!empty($_POST['login_exit']) && $_POST['login_exit'] == 100
 			) {
 				$this->assertEquals(
 					$expected['login_error'],
@@ -1816,7 +1822,7 @@ final class CoreLibsACLLoginTest extends TestCase
 		$login_mock->expects($this->any())
 			->method('loginTerminate')
 			->will(
-				$this->returnCallback(function ($code) {
+				$this->returnCallback(function ($message, $code) {
 					throw new \Exception('', $code);
 				})
 			);
@@ -1930,7 +1936,7 @@ final class CoreLibsACLLoginTest extends TestCase
 		$login_mock->expects($this->any())
 			->method('loginTerminate')
 			->will(
-				$this->returnCallback(function ($code) {
+				$this->returnCallback(function ($message, $code) {
 					throw new \Exception('', $code);
 				})
 			);
@@ -2018,7 +2024,7 @@ final class CoreLibsACLLoginTest extends TestCase
 		$login_mock->expects($this->any())
 			->method('loginTerminate')
 			->will(
-				$this->returnCallback(function ($code) {
+				$this->returnCallback(function ($message, $code) {
 					throw new \Exception('', $code);
 				})
 			);
@@ -2114,7 +2120,7 @@ final class CoreLibsACLLoginTest extends TestCase
 		$login_mock->expects($this->any())
 			->method('loginTerminate')
 			->will(
-				$this->returnCallback(function ($code) {
+				$this->returnCallback(function ($message, $code) {
 					throw new \Exception('', $code);
 				})
 			);

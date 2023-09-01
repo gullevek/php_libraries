@@ -240,7 +240,7 @@ class Login
 		if (false === $this->loginSetOptions($options)) {
 			// on failure, exit
 			echo "<b>Could not set options</b>";
-			$this->loginTerminate(4000);
+			$this->loginTerminate('Could not set options', 3000);
 		}
 
 		// string key, msg: string, flag: e (error), o (ok)
@@ -392,11 +392,18 @@ class Login
 	/**
 	 * Wrapper for exit calls
 	 *
-	 * @param  int  $code
+	 * @param  string $message [='']
+	 * @param  int    $code [=0]
 	 * @return void
 	 */
-	protected function loginTerminate($code = 0): void
+	protected function loginTerminate(string $message = '', int $code = 0): void
 	{
+		// all below 1000 are info end, all above 1000 are critical -> should throw exception?
+		if ($code < 1000) {
+			$this->log->info($message, ['code' => $code]);
+		} else {
+			$this->log->critical($message, ['code' => $code]);
+		}
 		exit($code);
 	}
 
@@ -1810,14 +1817,14 @@ HTML;
 			$this->login_error = 1;
 			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
-			$this->loginTerminate(1000);
+			$this->loginTerminate('Could not connect to DB', 1000);
 		}
 		// initial the session if there is no session running already
 		// check if session exists and could be created
 		if ($this->session->checkActiveSession() === false) {
 			$this->login_error = 2;
 			echo '<b>No active session found</b>';
-			$this->loginTerminate(2000);
+			$this->loginTerminate('No active session found', 2000);
 		}
 		// set internal page name
 		$this->page_name = $this->loginReadPageName();
@@ -1916,7 +1923,7 @@ HTML;
 					$this->loginPrintLogin();
 				}
 				// exit so we don't process anything further, at all
-				$this->loginTerminate(3000);
+				$this->loginTerminate('Exit after non ajax page load', 100);
 			} else {
 				// if we are on an ajax page reset any POST/GET array data to avoid
 				// any accidentical processing going on
@@ -1924,7 +1931,7 @@ HTML;
 				$_GET = [];
 				// set the action to login so we can trigger special login html return
 				$_POST['action'] = 'login';
-				$_POST['login_exit'] = 3000;
+				$_POST['login_exit'] = 100;
 				$_POST['login_error'] = $this->loginGetLastErrorCode();
 				$_POST['login_error_text'] = $this->loginGetErrorMsg(
 					$this->loginGetLastErrorCode(),

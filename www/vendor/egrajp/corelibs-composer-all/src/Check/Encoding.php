@@ -90,27 +90,26 @@ class Encoding
 		$temp = mb_convert_encoding($string, $to_encoding, $from_encoding);
 		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);
 		// if string does not match anymore we have a convert problem
-		if ($string != $compare) {
-			$failed = [];
-			// go through each character and find the ones that do not match
-			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i++) {
-				$char = mb_substr($string, $i, 1, $from_encoding);
-				$r_char = mb_substr($compare, $i, 1, $from_encoding);
-				// the ord 194 is a hack to fix the IE7/IE8
-				// bug with line break and illegal character
-				if (
-					(($char != $r_char && (!self::$mb_error_char ||
-					in_array(self::$mb_error_char, ['none', 'long', 'entity']))) ||
-					($char != $r_char && $r_char == self::$mb_error_char && self::$mb_error_char)) &&
-					ord($char) != 194
-				) {
-					$failed[] = $char;
-				}
-			}
-			return $failed;
-		} else {
+		if ($string == $compare) {
 			return false;
 		}
+		$failed = [];
+		// go through each character and find the ones that do not match
+		for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i++) {
+			$char = mb_substr($string, $i, 1, $from_encoding);
+			$r_char = mb_substr($compare, $i, 1, $from_encoding);
+			// the ord 194 is a hack to fix the IE7/IE8
+			// bug with line break and illegal character
+			if (
+				(($char != $r_char && (!self::$mb_error_char ||
+				in_array(self::$mb_error_char, ['none', 'long', 'entity']))) ||
+				($char != $r_char && $r_char == self::$mb_error_char && self::$mb_error_char)) &&
+				ord($char) != 194
+			) {
+				$failed[] = $char;
+			}
+		}
+		return $failed;
 	}
 }
 

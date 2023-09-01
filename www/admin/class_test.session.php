@@ -78,16 +78,18 @@ if (isset($_SESSION)) {
 #
 print "[UNSET] To set session name valid: "
 	. ($session->checkValidSessionName($session_name) ? 'Valid' : 'Invalid') . "<br>";
-if (false === ($session_id = $session->startSession($session_name))) {
-	print "[FAILED] Session start failed: " . $session->getErrorStr() . "<br>";
-} else {
+try {
+	$session_id = $session->startSession($session_name);
 	print "[SET] Current session id: " . $session_id . "<br>";
+} catch (\Exception $e) {
+	print "[FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
 }
 // set again
-if (false === ($session_id = $session->startSession($session_name))) {
-	print "[2 FAILED] Session start failed: " . $session->getErrorStr() . "<br>";
-} else {
+try {
+	$session_id = $session->startSession($session_name);
 	print "[2 SET] Current session id: " . $session_id . "<br>";
+} catch (\Exception $e) {
+	print "[2 FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
 }
 print "[SET] Current session id: " . $session->getSessionId() . "<br>";
 print "[SET] Current session name: " . $session->getSessionName() . "<br>";
@@ -125,10 +127,11 @@ print "[READ MAGIC] unset Isset: " . (isset($session->setwrap) ? 'Yes' : 'No') .
 
 // differnt session name
 $session_name = 'class-test-session-ALT';
-if (false === ($session_id = $session->startSession($session_name))) {
-	print "[3 FAILED] Session start failed: " . $session->getErrorStr() . "<br>";
-} else {
+try {
+	$session_id = $session->startSession($session_name);
 	print "[3 SET] Current session id: " . $session_id . "<br>";
+} catch (\Exception $e) {
+	print "[3 FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
 }
 print "[SET AGAIN] Current session id: " . $session->getSessionId() . "<br>";
 
@@ -141,10 +144,11 @@ $_SESSION['will_never_be_written'] = 'empty';
 
 // open again
 $session_name = 'class-test-session';
-if (false === ($session_id = $session->startSession($session_name))) {
-	print "[4 FAILED] Session start failed: " . $session->getErrorStr() . "<br>";
-} else {
+try {
+	$session_id = $session->startSession($session_name);
 	print "[4 SET] Current session id: " . $session_id . "<br>";
+} catch (\Exception $e) {
+	print "[4 FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
 }
 print "[START AGAIN] Current session id: " . $session->getSessionId() . "<br>";
 $_SESSION['will_be_written_again'] = 'Full';
@@ -153,10 +157,11 @@ $_SESSION['will_be_written_again'] = 'Full';
 $session->writeClose();
 // invalid
 $session_name = '123';
-if (false === ($session_id = $session->startSession($session_name))) {
-	print "[5 FAILED] Session start failed: " . $session->getErrorStr() . "<br>";
-} else {
+try {
+	$session_id = $session->startSession($session_name);
 	print "[5 SET] Current session id: " . $session_id . "<br>";
+} catch (\Exception $e) {
+	print "[5 FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
 }
 print "[BAD NAME] Current session id: " . $session->getSessionId() . "<br>";
 print "[BAD NAME] Current session name: " . $session->getSessionName() . "<br>";

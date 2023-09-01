@@ -63,7 +63,7 @@ class FileWriter
 	 *
 	 * @param  string  $string string to write to the file
 	 * @param  boolean $enter  default true, if set adds a linebreak \n at the end
-	 * @return bool            True for log written, false for not wirrten
+	 * @return bool            True for log written, false for not written
 	 */
 	public static function fdebug(string $string, bool $enter = true): bool
 	{
@@ -75,7 +75,7 @@ class FileWriter
 			empty(self::$debug_folder) &&
 			defined('BASE') && defined('LOG')
 		) {
-			/** @deprecated Do not use this anymore, define path with fsetFolder */
+			/** @deprecated Do not use this anymore, define path with festFolder */
 			trigger_error(
 				'fsetFolder must be set first. Setting via LOG_FILE_ID and LOG constants is deprecated',
 				E_USER_DEPRECATED

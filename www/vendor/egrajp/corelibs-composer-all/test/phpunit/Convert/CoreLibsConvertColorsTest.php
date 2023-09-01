@@ -59,6 +59,27 @@ final class CoreLibsConvertColorsTest extends TestCase
 				3 => false,
 				4 => false
 			],
+			'invalid color red ' => [
+				0 => -12,
+				1 => 12,
+				2 => 12,
+				3 => false,
+				4 => false
+			],
+			'invalid color green ' => [
+				0 => 12,
+				1 => -12,
+				2 => 12,
+				3 => false,
+				4 => false
+			],
+			'invalid color blue ' => [
+				0 => 12,
+				1 => 12,
+				2 => -12,
+				3 => false,
+				4 => false
+			],
 		];
 	}
 
@@ -150,10 +171,40 @@ final class CoreLibsConvertColorsTest extends TestCase
 				'valid' => true,
 			],
 			// invalid values
-			'invalid color' => [
-				'rgb' => [-12, 300, 12],
-				'hsb' => [-12, 300, 12],
-				'hsl' => [-12, 300, 12],
+			'invalid color r/h/h low' => [
+				'rgb' => [-1, 12, 12],
+				'hsb' => [-1, 50, 50],
+				'hsl' => [-1, 50, 50],
+				'valid' => false,
+			],
+			'invalid color r/h/h high' => [
+				'rgb' => [256, 12, 12],
+				'hsb' => [361, 50, 50],
+				'hsl' => [361, 50, 50],
+				'valid' => false,
+			],
+			'invalid color g/s/s low' => [
+				'rgb' => [12, -1, 12],
+				'hsb' => [1, -1, 50],
+				'hsl' => [1, -1, 50],
+				'valid' => false,
+			],
+			'invalid color g/s/s high' => [
+				'rgb' => [12, 256, 12],
+				'hsb' => [1, 101, 50],
+				'hsl' => [1, 101, 50],
+				'valid' => false,
+			],
+			'invalid color b/b/l low' => [
+				'rgb' => [12, 12, -1],
+				'hsb' => [1, 50, -1],
+				'hsl' => [1, 50, -1],
+				'valid' => false,
+			],
+			'invalid color b/b/l high' => [
+				'rgb' => [12, 12, 256],
+				'hsb' => [1, 50, 101],
+				'hsl' => [1, 50, 101],
 				'valid' => false,
 			],
 		];
@@ -246,11 +297,22 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * @param int $input_r
 	 * @param int $input_g
 	 * @param int $input_b
+	 * @param string|bool $expected_hash
 	 * @param string|bool $expected
 	 * @return void
 	 */
-	public function testRgb2hex(int $input_r, int $input_g, int $input_b, $expected_hash, $expected)
-	{
+	public function testRgb2hex(
+		int $input_r,
+		int $input_g,
+		int $input_b,
+		string|bool $expected_hash,
+		string|bool $expected
+	) {
+		// if expected hash is or expected is false, we need to check for
+		// LengthException
+		if ($expected_hash === false || $expected === false) {
+			$this->expectException(\LengthException::class);
+		}
 		// with #
 		$this->assertEquals(
 			$expected_hash,
@@ -292,11 +354,19 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 */
 	public function testHex2rgb(
 		string $input,
-		$expected,
-		$expected_str,
+		array|bool $expected,
+		string|bool $expected_str,
 		string $separator,
-		$expected_str_sep
+		string|bool $expected_str_sep
 	): void {
+		if ($expected === false || $expected_str === false || $expected_str_sep === false) {
+			$hex_string = preg_replace("/[^0-9A-Fa-f]/", '', $input);
+			if (!is_string($hex_string)) {
+				$this->expectException(\InvalidArgumentException::class);
+			} else {
+				$this->expectException(\UnexpectedValueException::class);
+			}
+		}
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Colors::hex2rgb($input)
@@ -324,8 +394,11 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * @param array|bool $expected
 	 * @return void
 	 */
-	public function testRgb2hsb(int $input_r, int $input_g, int $input_b, $expected): void
+	public function testRgb2hsb(int $input_r, int $input_g, int $input_b, array|bool $expected): void
 	{
+		if ($expected === false) {
+			$this->expectException(\LengthException::class);
+		}
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Colors::rgb2hsb($input_r, $input_g, $input_b)
@@ -345,8 +418,12 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * @param array|bool $expected
 	 * @return void
 	 */
-	public function testHsb2rgb(float $input_h, float $input_s, float $input_b, $expected): void
+	public function testHsb2rgb(float $input_h, float $input_s, float $input_b, array|bool $expected): void
 	{
+		if ($expected === false) {
+			$this->expectException(\LengthException::class);
+			$expected = [];
+		}
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Colors::hsb2rgb($input_h, $input_s, $input_b)
@@ -366,8 +443,11 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * @param array|bool $expected
 	 * @return void
 	 */
-	public function testRgb2hsl(int $input_r, int $input_g, int $input_b, $expected): void
+	public function testRgb2hsl(int $input_r, int $input_g, int $input_b, array|bool $expected): void
 	{
+		if ($expected === false) {
+			$this->expectException(\LengthException::class);
+		}
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Colors::rgb2hsl($input_r, $input_g, $input_b)
@@ -387,8 +467,11 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * @param array|bool $expected
 	 * @return void
 	 */
-	public function testHsl2rgb($input_h, float $input_s, float $input_l, $expected): void
+	public function testHsl2rgb(int|float $input_h, float $input_s, float $input_l, array|bool $expected): void
 	{
+		if ($expected === false) {
+			$this->expectException(\LengthException::class);
+		}
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Colors::hsl2rgb($input_h, $input_s, $input_l)
@@ -406,11 +489,11 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 */
 	public function testHslHsb360hue(): void
 	{
-		$this->assertNotFalse(
+		$this->assertIsArray(
 			\CoreLibs\Convert\Colors::hsl2rgb(360.0, 90.5, 41.2),
 			'HSL to RGB with 360 hue'
 		);
-		$this->assertNotFalse(
+		$this->assertIsArray(
 			\CoreLibs\Convert\Colors::hsb2rgb(360, 95, 78.0),
 			'HSB to RGB with 360 hue'
 		);
