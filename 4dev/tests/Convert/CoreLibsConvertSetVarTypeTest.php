@@ -43,10 +43,15 @@ final class CoreLibsConvertSetVarTypeTest extends TestCase
 			'int, no override' => [
 				1,
 				null,
-				''
+				'1'
 			],
 			'int, override set' => [
 				1,
+				'not int',
+				'1'
+			],
+			'array, override set' => [
+				[1, 2],
 				'not int',
 				'not int'
 			]
@@ -189,7 +194,7 @@ final class CoreLibsConvertSetVarTypeTest extends TestCase
 			'float' => [
 				1.5,
 				null,
-				0
+				1
 			]
 		];
 	}
@@ -330,7 +335,7 @@ final class CoreLibsConvertSetVarTypeTest extends TestCase
 			'int' => [
 				1,
 				null,
-				0.0
+				1.0
 			]
 		];
 	}
@@ -341,7 +346,7 @@ final class CoreLibsConvertSetVarTypeTest extends TestCase
 	 * @dataProvider varSetTypeFloatProvider
 	 * @testdox setFloat $input with override $default will be $expected [$_dataName]
 	 *
-	 * @param  mixed    $input
+	 * @param  mixed      $input
 	 * @param  float|null $default
 	 * @param  float      $expected
 	 * @return void
