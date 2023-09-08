@@ -113,17 +113,32 @@ enum Level: int
 
 	/**
 	 * Returns true if the passed $level is higher or equal to $this
+	 *
+	 * @param  Level $level
+	 * @return bool
 	 */
 	public function includes(Level $level): bool
 	{
 		return $this->value <= $level->value;
 	}
 
+	/**
+	 * If level is higher than set one
+	 *
+	 * @param  Level $level
+	 * @return bool
+	 */
 	public function isHigherThan(Level $level): bool
 	{
 		return $this->value > $level->value;
 	}
 
+	/**
+	 * if level is lower than set one
+	 *
+	 * @param  Level $level
+	 * @return bool
+	 */
 	public function isLowerThan(Level $level): bool
 	{
 		return $this->value < $level->value;
