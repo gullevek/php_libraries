@@ -96,7 +96,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 			'log_level' => Level::Debug,
 		]);
 		$em = new \CoreLibs\Logging\ErrorMessage($log);
-		$em->setErrorMsgLevel(
+		$em->setError(
 			$level,
 			$str
 		);
