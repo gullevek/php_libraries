@@ -109,35 +109,8 @@ class ErrorMessage
 	 *                                  highlight points for field highlights
 	 * @param  string|null   $message   If abort/crash, non localized $str
 	 * @param  array<mixed>  $context   Additionl info for abort/crash messages
-	 * @deprecated 9.7 Use setError instead
 	 */
-	public function setErrorMsgLevel(
-		string $level,
-		string $str,
-		?string $error_id = null,
-		string $target = '',
-		array $highlight = [],
-		?string $message = null,
-		array $context = [],
-	): void {
-		$this->setErrorMsg($error_id ?? '', $level, $str, $target, $highlight, $message, $context);
-	}
-
-	/**
-	 * pushes new error message into the error_str array
-	 * Note, the parameter order is different and does not need an error id
-	 * This is for backend alerts
-	 *
-	 * @param  string        $level     error level (ok/warn/info/error)
-	 * @param  string        $str       error string
-	 * @param  string|null   $error_id  optional error id for precise error lookup
-	 * @param  string        $target    Alternate id name for output target on frontend
-	 * @param  array<string> $highlight Any additional error data as error OR
-	 *                                  highlight points for field highlights
-	 * @param  string|null   $message   If abort/crash, non localized $str
-	 * @param  array<mixed>  $context   Additionl info for abort/crash messages
-	 */
-	public function setError(
+	public function setMessage(
 		string $level,
 		string $str,
 		?string $error_id = null,
