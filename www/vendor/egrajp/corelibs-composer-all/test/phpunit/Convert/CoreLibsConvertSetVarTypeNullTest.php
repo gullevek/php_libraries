@@ -43,12 +43,17 @@ final class CoreLibsConvertSetVarTypeNullTest extends TestCase
 			'int, no override' => [
 				1,
 				null,
-				null
+				'1'
 			],
 			'int, override set' => [
 				1,
 				'not int',
-				'not int'
+				'1'
+			],
+			'array, override set' => [
+				[1, 2],
+				null,
+				null
 			]
 		];
 	}
@@ -201,7 +206,7 @@ final class CoreLibsConvertSetVarTypeNullTest extends TestCase
 			'float' => [
 				1.5,
 				null,
-				null
+				1
 			]
 		];
 	}
@@ -349,7 +354,7 @@ final class CoreLibsConvertSetVarTypeNullTest extends TestCase
 			'int' => [
 				1,
 				null,
-				null
+				1.0
 			]
 		];
 	}

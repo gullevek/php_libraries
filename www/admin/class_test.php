@@ -115,6 +115,7 @@ $test_files = [
 	'class_test.config.link.php' => 'Class Test: CONFIG LINK',
 	'class_test.config.direct.php' => 'Class Test: CONFIG DIRECT',
 	'class_test.class-calls.php' => 'Class Test: CLASS CALLS',
+	'class_test.error_msg.php' => 'Class Test: ERROR MSG',
 	'subfolder/class_test.config.direct.php' => 'Class Test: CONFIG DIRECT SUB',
 ];
 

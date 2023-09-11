@@ -26,8 +26,12 @@ class SetVarTypeMain
 		?string $default = null,
 		bool $to_null = false
 	): ?string {
-		if (is_string($val)) {
-			return $val;
+		if (
+			$val === null ||
+			is_scalar($val) ||
+			$val instanceof \Stringable
+		) {
+			return (string)$val;
 		}
 		if ($to_null === false) {
 			return (string)$default;
@@ -39,6 +43,7 @@ class SetVarTypeMain
 	 * Will convert input data to string if possible.
 	 * Runs for string/int/float/bool/null
 	 * Will skip array/object/resource/callable/etc and use default for that
+	 * Note: this is pretty much the same as setStrMain because string is easy
 	 *
 	 * @param  mixed       $val     Input variable
 	 * @param  string|null $default Default value
@@ -71,6 +76,7 @@ class SetVarTypeMain
 	/**
 	 * If input variable is int, return it, else return default value. If to_null
 	 * is true then null as return is allowed, else only int is returned
+	 * Note, if float is sent in, int is returned
 	 *
 	 * @param  mixed    $val     Input variable
 	 * @param  int|null $default Default value
@@ -82,8 +88,8 @@ class SetVarTypeMain
 		?int $default = null,
 		bool $to_null = false
 	): ?int {
-		if (is_int($val)) {
-			return $val;
+		if (is_numeric($val)) {
+			return (int)$val;
 		}
 		if ($to_null === false) {
 			return (int)$default;
@@ -129,6 +135,7 @@ class SetVarTypeMain
 	/**
 	 * If input is float return it, else set to default value. If to_null is set
 	 * to true, allow null return
+	 * Note if an int is sent in, float is returned
 	 *
 	 * @param  mixed      $val     Input variable
 	 * @param  float|null $default Default value
@@ -140,8 +147,8 @@ class SetVarTypeMain
 		?float $default = null,
 		bool $to_null = false
 	): ?float {
-		if (is_float($val)) {
-			return $val;
+		if (is_numeric($val)) {
+			return (float)$val;
 		}
 		if ($to_null === false) {
 			return (float)$default;

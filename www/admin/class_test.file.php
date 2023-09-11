@@ -15,7 +15,7 @@ define('USE_DATABASE', false);
 // sample config
 require 'config.php';
 // define log file id
-$LOG_FILE_ID = 'classTest-datetime';
+$LOG_FILE_ID = 'classTest-file';
 ob_end_flush();
 
 use CoreLibs\Check\File;
