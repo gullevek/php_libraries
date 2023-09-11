@@ -20,10 +20,21 @@ class ErrorMessage
 	/** @var \CoreLibs\Logging\Logging $log */
 	public \CoreLibs\Logging\Logging $log;
 
+	/** @var bool $log_error global flag to log error level message */
+	private bool $log_error = false;
+
+	/**
+	 * init ErrorMessage
+	 *
+	 * @param  \CoreLibs\Logging\Logging $log
+	 * @param  bool                      $log_error [=false]
+	 */
 	public function __construct(
-		\CoreLibs\Logging\Logging $log
+		\CoreLibs\Logging\Logging $log,
+		bool $log_error = false
 	) {
 		$this->log = $log;
+		$this->log_error = $log_error;
 	}
 
 	/**
@@ -50,6 +61,8 @@ class ErrorMessage
 	 *                                  highlight points for field highlights
 	 * @param  string|null   $message   If abort/crash, non localized $str
 	 * @param  array<mixed>  $context   Additionl info for abort/crash messages
+	 * @param  bool|null     $log_error [=null] log level 'error' to error, if null use global,
+	 *                                  else set for this call only
 	 */
 	public function setErrorMsg(
 		string $error_id,
@@ -59,7 +72,11 @@ class ErrorMessage
 		array $highlight = [],
 		?string $message = null,
 		array $context = [],
+		?bool $log_error = null,
 	): void {
+		if ($log_error === null) {
+			$log_error = $this->log_error;
+		}
 		$original_level = $level;
 		$level = MessageLevel::fromName($level)->name;
 		// if not string set, write message string if set, else level/error id
@@ -75,6 +92,14 @@ class ErrorMessage
 		];
 		// write to log for abort/crash
 		switch ($level) {
+			case 'error':
+				if ($log_error) {
+					$this->log->error($message ?? $str, array_merge([
+						'id' => $error_id,
+						'level' => $original_level,
+					], $context));
+				}
+				break;
 			case 'abort':
 				$this->log->critical($message ?? $str, array_merge([
 					'id' => $error_id,
@@ -109,6 +134,8 @@ class ErrorMessage
 	 *                                  highlight points for field highlights
 	 * @param  string|null   $message   If abort/crash, non localized $str
 	 * @param  array<mixed>  $context   Additionl info for abort/crash messages
+	 * @param  bool|null     $log_error [=null] log level 'error' to error, if null use global,
+	 *                                  else set for this call only
 	 */
 	public function setMessage(
 		string $level,
@@ -118,8 +145,9 @@ class ErrorMessage
 		array $highlight = [],
 		?string $message = null,
 		array $context = [],
+		?bool $log_error = null,
 	): void {
-		$this->setErrorMsg($error_id ?? '', $level, $str, $target, $highlight, $message, $context);
+		$this->setErrorMsg($error_id ?? '', $level, $str, $target, $highlight, $message, $context, $log_error);
 	}
 
 	// *********************************************************************
@@ -161,6 +189,31 @@ class ErrorMessage
 			'target' => '',
 			'highlight' => [],
 		];
+	}
+
+	// *********************************************************************
+	// FLAG SETTERS
+	// *********************************************************************
+
+	/**
+	 * Set the log error flag
+	 *
+	 * @param  bool $flag True to log level error too, False for do not (Default)
+	 * @return void
+	 */
+	public function setFlagLogError(bool $flag): void
+	{
+		$this->log_error = $flag;
+	}
+
+	/**
+	 * Get the current log error flag
+	 *
+	 * @return bool
+	 */
+	public function getFlagLogError(): bool
+	{
+		return $this->log_error;
 	}
 }
 

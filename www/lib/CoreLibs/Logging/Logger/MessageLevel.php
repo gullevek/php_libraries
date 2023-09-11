@@ -46,6 +46,39 @@ enum MessageLevel: int
 	{
 		return self::tryFrom($value) ?? self::unknown;
 	}
+
+	/**
+	 * Returns true if the passed $level is higher or equal to $this
+	 *
+	 * @param  MessageLevel $level
+	 * @return bool
+	 */
+	public function includes(MessageLevel $level): bool
+	{
+		return $this->value <= $level->value;
+	}
+
+	/**
+	 * If level is higher than set one
+	 *
+	 * @param  MessageLevel $level
+	 * @return bool
+	 */
+	public function isHigherThan(MessageLevel $level): bool
+	{
+		return $this->value > $level->value;
+	}
+
+	/**
+	 * if level is lower than set one
+	 *
+	 * @param  MessageLevel $level
+	 * @return bool
+	 */
+	public function isLowerThan(MessageLevel $level): bool
+	{
+		return $this->value < $level->value;
+	}
 }
 
 // __END__

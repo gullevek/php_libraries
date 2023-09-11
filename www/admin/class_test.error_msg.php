@@ -39,7 +39,8 @@ print "FN: " . ml::fromName('Affe')->name . "<br>";
 print "NU: " . ml::fromValue(100)->name . "<br>";
 print "NU: " . ml::fromValue(1000)->name . "<br>";
 
-$em->setErrorMsg('123', 'error', 'msg this is bad');
+$em->setErrorMsg('123', 'error', 'msg this is bad, not logged');
+$em->setErrorMsg('123', 'error', 'msg this is bad, logged', log_error:true);
 $em->setErrorMsg('1000', 'info', 'This is good');
 $em->setErrorMsg('9999', 'abort', 'BAD: This is critical (abort)');
 $em->setErrorMsg('10-1000', 'wrong', 'Wrong level: This is emergency');

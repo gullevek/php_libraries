@@ -200,14 +200,44 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		);
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function providerErrorMessageLog(): array
 	{
 		return [
+			'error, not logged' => [
+				'id' => '200',
+				'level' => 'error',
+				'str' => 'ERROR MESSAGE',
+				'message' => null,
+				'log_error' => null,
+				'expected' => '<ERROR> ERROR MESSAGE',
+			],
+			'error, logged' => [
+				'id' => '200',
+				'level' => 'error',
+				'str' => 'ERROR MESSAGE',
+				'message' => null,
+				'log_error' => true,
+				'expected' => '<ERROR> ERROR MESSAGE',
+			],
+			'error, logged, message' => [
+				'id' => '200',
+				'level' => 'error',
+				'str' => 'ERROR MESSAGE',
+				'message' => 'OTHER ERROR MESSAGE',
+				'log_error' => true,
+				'expected' => '<ERROR> OTHER ERROR MESSAGE',
+			],
 			'crash' => [
 				'id' => '300',
 				'level' => 'crash',
 				'str' => 'CRASH MESSAGE',
 				'message' => null,
+				'log_error' => null,
 				'expected' => '<ALERT> CRASH MESSAGE',
 			],
 			'crash, message' => [
@@ -215,6 +245,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'level' => 'crash',
 				'str' => 'CRASH MESSAGE',
 				'message' => 'OTHER CRASH MESSAGE',
+				'log_error' => null,
 				'expected' => '<ALERT> OTHER CRASH MESSAGE',
 			],
 			'abort' => [
@@ -222,6 +253,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'level' => 'abort',
 				'str' => 'ABORT MESSAGE',
 				'message' => null,
+				'log_error' => null,
 				'expected' => '<CRITICAL> ABORT MESSAGE',
 			],
 			'abort, message' => [
@@ -229,6 +261,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'level' => 'abort',
 				'str' => 'ABORT MESSAGE',
 				'message' => 'OTHER ABORT MESSAGE',
+				'log_error' => null,
 				'expected' => '<CRITICAL> OTHER ABORT MESSAGE',
 			],
 			'unknown' => [
@@ -236,6 +269,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'level' => 'wrong level',
 				'str' => 'WRONG LEVEL MESSAGE',
 				'message' => null,
+				'log_error' => null,
 				'expected' => '<EMERGENCY> WRONG LEVEL MESSAGE',
 			],
 			'unknown, message' => [
@@ -243,6 +277,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'level' => 'wrong level',
 				'str' => 'WRONG LEVEL MESSAGE',
 				'message' => 'OTHER WRONG LEVEL MESSAGE',
+				'log_error' => null,
 				'expected' => '<EMERGENCY> OTHER WRONG LEVEL MESSAGE',
 			],
 		];
@@ -254,10 +289,22 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 	 * @dataProvider providerErrorMessageLog
 	 * @testdox Test Log writing [$_dataName]
 	 *
+	 * @param  string      $id
+	 * @param  string      $level
+	 * @param  string      $str
+	 * @param  string|null $message
+	 * @param  bool|null   $log_error
+	 * @param  string      $expected
 	 * @return void
 	 */
-	public function testErrorMessageLog(string $id, string $level, string $str, ?string $message, string $expected)
-	{
+	public function testErrorMessageLog(
+		string $id,
+		string $level,
+		string $str,
+		?string $message,
+		?bool $log_error,
+		string $expected
+	): void {
 		$log = new \CoreLibs\Logging\Logging([
 			'log_file_id' => 'testErrorMessages',
 			'log_folder' => self::LOG_FOLDER,
@@ -269,15 +316,27 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 			$id,
 			$level,
 			$str,
-			message: $message
+			message: $message,
+			log_error: $log_error
 		);
-		$file_content = file_get_contents(
-			$log->getLogFolder() . $log->getLogFile()
-		) ?: '';
-		$this->assertStringContainsString(
-			$expected,
-			$file_content
-		);
+		$file_content = '';
+		if (is_file($log->getLogFolder() . $log->getLogFile())) {
+			$file_content = file_get_contents(
+				$log->getLogFolder() . $log->getLogFile()
+			) ?: '';
+		}
+		// if n
+		if ($level == 'error' && ($log_error === null || $log_error === false)) {
+			$this->assertStringNotContainsString(
+				$expected,
+				$file_content
+			);
+		} else {
+			$this->assertStringContainsString(
+				$expected,
+				$file_content
+			);
+		}
 	}
 }
 
