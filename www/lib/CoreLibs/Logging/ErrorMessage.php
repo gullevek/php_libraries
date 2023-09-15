@@ -15,7 +15,7 @@ use CoreLibs\Logging\Logger\MessageLevel;
 
 class ErrorMessage
 {
-	/** @var array<int,array{id:string,level:string,str:string,target:string,highlight:string[]}> */
+	/** @var array<int,array{id:string,level:string,str:string,target:string,target_style:string,highlight:string[]}> */
 	private array $error_str = [];
 	/** @var \CoreLibs\Logging\Logging $log */
 	public \CoreLibs\Logging\Logging $log;
@@ -52,23 +52,28 @@ class ErrorMessage
 	 *        not set: unkown, will be logged as "emergency"
 	 * target/highlight: id target name for frontend where to attach this message
 	 *                   highlight is a list of other target points to highlight
+	 *                   for highlight targets css names are $level without a prefix and should be
+	 *                   nested in the target element "input .error { ... }"
+	 * target_style: if not set uses 'error-' $level as css style. applies to targets or main only
 	 *
-	 * @param  string        $error_id  Any internal error ID for this error
-	 * @param  string        $level     Error level in ok/info/warn/error
-	 * @param  string        $str       Error message (out)
-	 * @param  string        $target    alternate attachment point for this error message
-	 * @param  array<string> $highlight Any additional error data as error OR
-	 *                                  highlight points for field highlights
-	 * @param  string|null   $message   If abort/crash, non localized $str
-	 * @param  array<mixed>  $context   Additionl info for abort/crash messages
-	 * @param  bool|null     $log_error [=null] log level 'error' to error, if null use global,
-	 *                                  else set for this call only
+	 * @param  string        $error_id     Any internal error ID for this error
+	 * @param  string        $level        Error level in ok/info/warn/error
+	 * @param  string        $str          Error message (out)
+	 * @param  string        $target       alternate attachment point for this error message
+	 * @param  string        $target_style Alternate color style for the error message
+	 * @param  array<string> $highlight    Any additional error data as error OR
+	 *                                     highlight points for field highlights
+	 * @param  string|null   $message      If abort/crash, non localized $str
+	 * @param  array<mixed>  $context      Additionl info for abort/crash messages
+	 * @param  bool|null     $log_error    [=null] log level 'error' to error, if null use global,
+	 *                                     else set for this call only
 	 */
 	public function setErrorMsg(
 		string $error_id,
 		string $level,
 		string $str,
 		string $target = '',
+		string $target_style = '',
 		array $highlight = [],
 		?string $message = null,
 		array $context = [],
@@ -88,6 +93,7 @@ class ErrorMessage
 			'level' => $level,
 			'str' => $str,
 			'target' => $target,
+			'target_style' => $target_style,
 			'highlight' => $highlight,
 		];
 		// write to log for abort/crash
@@ -126,28 +132,40 @@ class ErrorMessage
 	 * Note, the parameter order is different and does not need an error id
 	 * This is for backend alerts
 	 *
-	 * @param  string        $level     error level (ok/warn/info/error)
-	 * @param  string        $str       error string
-	 * @param  string|null   $error_id  optional error id for precise error lookup
-	 * @param  string        $target    Alternate id name for output target on frontend
-	 * @param  array<string> $highlight Any additional error data as error OR
-	 *                                  highlight points for field highlights
-	 * @param  string|null   $message   If abort/crash, non localized $str
-	 * @param  array<mixed>  $context   Additionl info for abort/crash messages
-	 * @param  bool|null     $log_error [=null] log level 'error' to error, if null use global,
-	 *                                  else set for this call only
+	 * @param  string        $level        error level (ok/warn/info/error)
+	 * @param  string        $str          error string
+	 * @param  string|null   $error_id     optional error id for precise error lookup
+	 * @param  string        $target       Alternate id name for output target on frontend
+	 * @param  string        $target_style Alternate color style for the error message
+	 * @param  array<string> $highlight    Any additional error data as error OR
+	 *                                     highlight points for field highlights
+	 * @param  string|null   $message      If abort/crash, non localized $str
+	 * @param  array<mixed>  $context      Additionl info for abort/crash messages
+	 * @param  bool|null     $log_error    [=null] log level 'error' to error, if null use global,
+	 *                                     else set for this call only
 	 */
 	public function setMessage(
 		string $level,
 		string $str,
 		?string $error_id = null,
 		string $target = '',
+		string $target_style = '',
 		array $highlight = [],
 		?string $message = null,
 		array $context = [],
 		?bool $log_error = null,
 	): void {
-		$this->setErrorMsg($error_id ?? '', $level, $str, $target, $highlight, $message, $context, $log_error);
+		$this->setErrorMsg(
+			$error_id ?? '',
+			$level,
+			$str,
+			$target,
+			$target_style,
+			$highlight,
+			$message,
+			$context,
+			$log_error
+		);
 	}
 
 	// *********************************************************************
@@ -178,7 +196,7 @@ class ErrorMessage
 	 * Gets the LAST entry in the array list.
 	 * If nothing found returns empty array set
 	 *
-	 * @return array{id:string,level:string,str:string,target:string,highlight:string[]} Error block
+	 * @return array{id:string,level:string,str:string,target:string,target:string,highlight:string[]} Error block
 	 */
 	public function getLastErrorMsg(): array
 	{
@@ -187,6 +205,7 @@ class ErrorMessage
 			'str' => '',
 			'id' => '',
 			'target' => '',
+			'target_string' => '',
 			'highlight' => [],
 		];
 	}
