@@ -70,23 +70,14 @@ class TypeParser
 	 */
 	public function enrichWithAttributes(TokenIterator $tokens, Ast\Node $type, int $startLine, int $startIndex): Ast\Node
 	{
-		$endLine = $tokens->currentTokenLine();
-		$endIndex = $tokens->currentTokenIndex();
-
 		if ($this->useLinesAttributes) {
 			$type->setAttribute(Ast\Attribute::START_LINE, $startLine);
-			$type->setAttribute(Ast\Attribute::END_LINE, $endLine);
+			$type->setAttribute(Ast\Attribute::END_LINE, $tokens->currentTokenLine());
 		}
 
 		if ($this->useIndexAttributes) {
-			$tokensArray = $tokens->getTokens();
-			$endIndex--;
-			if ($tokensArray[$endIndex][Lexer::TYPE_OFFSET] === Lexer::TOKEN_HORIZONTAL_WS) {
-				$endIndex--;
-			}
-
 			$type->setAttribute(Ast\Attribute::START_INDEX, $startIndex);
-			$type->setAttribute(Ast\Attribute::END_INDEX, $endIndex);
+			$type->setAttribute(Ast\Attribute::END_INDEX, $tokens->endIndexOfLastRelevantToken());
 		}
 
 		return $type;
@@ -205,28 +196,45 @@ class TypeParser
 			$tokens->dropSavePoint(); // because of ConstFetchNode
 		}
 
-		$exception = new ParserException(
-			$tokens->currentTokenValue(),
-			$tokens->currentTokenType(),
-			$tokens->currentTokenOffset(),
-			Lexer::TOKEN_IDENTIFIER,
-			null,
-			$tokens->currentTokenLine()
-		);
+		$currentTokenValue = $tokens->currentTokenValue();
+		$currentTokenType = $tokens->currentTokenType();
+		$currentTokenOffset = $tokens->currentTokenOffset();
+		$currentTokenLine = $tokens->currentTokenLine();
 
 		if ($this->constExprParser === null) {
-			throw $exception;
+			throw new ParserException(
+				$currentTokenValue,
+				$currentTokenType,
+				$currentTokenOffset,
+				Lexer::TOKEN_IDENTIFIER,
+				null,
+				$currentTokenLine
+			);
 		}
 
 		try {
 			$constExpr = $this->constExprParser->parse($tokens, true);
 			if ($constExpr instanceof Ast\ConstExpr\ConstExprArrayNode) {
-				throw $exception;
+				throw new ParserException(
+					$currentTokenValue,
+					$currentTokenType,
+					$currentTokenOffset,
+					Lexer::TOKEN_IDENTIFIER,
+					null,
+					$currentTokenLine
+				);
 			}
 
 			return $this->enrichWithAttributes($tokens, new Ast\Type\ConstTypeNode($constExpr), $startLine, $startIndex);
 		} catch (LogicException $e) {
-			throw $exception;
+			throw new ParserException(
+				$currentTokenValue,
+				$currentTokenType,
+				$currentTokenOffset,
+				Lexer::TOKEN_IDENTIFIER,
+				null,
+				$currentTokenLine
+			);
 		}
 	}
 
@@ -609,23 +617,33 @@ class TypeParser
 			}
 		}
 
-		$exception = new ParserException(
-			$tokens->currentTokenValue(),
-			$tokens->currentTokenType(),
-			$tokens->currentTokenOffset(),
-			Lexer::TOKEN_IDENTIFIER,
-			null,
-			$tokens->currentTokenLine()
-		);
+		$currentTokenValue = $tokens->currentTokenValue();
+		$currentTokenType = $tokens->currentTokenType();
+		$currentTokenOffset = $tokens->currentTokenOffset();
+		$currentTokenLine = $tokens->currentTokenLine();
 
 		if ($this->constExprParser === null) {
-			throw $exception;
+			throw new ParserException(
+				$currentTokenValue,
+				$currentTokenType,
+				$currentTokenOffset,
+				Lexer::TOKEN_IDENTIFIER,
+				null,
+				$currentTokenLine
+			);
 		}
 
 		try {
 			$constExpr = $this->constExprParser->parse($tokens, true);
 			if ($constExpr instanceof Ast\ConstExpr\ConstExprArrayNode) {
-				throw $exception;
+				throw new ParserException(
+					$currentTokenValue,
+					$currentTokenType,
+					$currentTokenOffset,
+					Lexer::TOKEN_IDENTIFIER,
+					null,
+					$currentTokenLine
+				);
 			}
 
 			$type = new Ast\Type\ConstTypeNode($constExpr);
@@ -640,7 +658,14 @@ class TypeParser
 
 			return $type;
 		} catch (LogicException $e) {
-			throw $exception;
+			throw new ParserException(
+				$currentTokenValue,
+				$currentTokenType,
+				$currentTokenOffset,
+				Lexer::TOKEN_IDENTIFIER,
+				null,
+				$currentTokenLine
+			);
 		}
 	}
 
