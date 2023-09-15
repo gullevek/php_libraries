@@ -106,6 +106,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => $str,
 				'id' => '',
 				'target' => '',
+				'target_style' => '',
 				'highlight' => [],
 			],
 			$em->getLastErrorMsg()
@@ -139,6 +140,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'level' => 'info',
 				'str' => 'INFO MESSAGE',
 				'target' => '',
+				'target_style' => '',
 				'highlight' => [],
 			],
 			$em->getLastErrorMsg()
@@ -154,6 +156,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 					'level' => 'info',
 					'str' => 'INFO MESSAGE',
 					'target' => '',
+					'target_style' => '',
 					'highlight' => [],
 				]
 			],
@@ -171,6 +174,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'level' => 'error',
 				'str' => 'ERROR MESSAGE',
 				'target' => '',
+				'target_style' => '',
 				'highlight' => [],
 			],
 			$em->getLastErrorMsg()
@@ -186,6 +190,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 					'level' => 'info',
 					'str' => 'INFO MESSAGE',
 					'target' => '',
+					'target_style' => '',
 					'highlight' => [],
 				],
 				[
@@ -193,6 +198,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 					'level' => 'error',
 					'str' => 'ERROR MESSAGE',
 					'target' => '',
+					'target_style' => '',
 					'highlight' => [],
 				]
 			],
