@@ -119,6 +119,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\Output\\Form\\TableArrays\\EditGroups' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/TableArrays/EditGroups.php',
         'CoreLibs\\Output\\Form\\TableArrays\\EditLanguages' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/TableArrays/EditLanguages.php',
         'CoreLibs\\Output\\Form\\TableArrays\\EditMenuGroup' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/TableArrays/EditMenuGroup.php',
+        'CoreLibs\\Output\\Form\\TableArrays\\EditOrder' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/TableArrays/EditOrder.php',
         'CoreLibs\\Output\\Form\\TableArrays\\EditPages' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/TableArrays/EditPages.php',
         'CoreLibs\\Output\\Form\\TableArrays\\EditSchemas' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/TableArrays/EditSchemas.php',
         'CoreLibs\\Output\\Form\\TableArrays\\EditUsers' => __DIR__ . '/../..' . '/lib/CoreLibs/Output/Form/TableArrays/EditUsers.php',

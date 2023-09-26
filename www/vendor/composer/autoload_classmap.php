@@ -68,6 +68,7 @@ return array(
     'CoreLibs\\Output\\Form\\TableArrays\\EditGroups' => $baseDir . '/lib/CoreLibs/Output/Form/TableArrays/EditGroups.php',
     'CoreLibs\\Output\\Form\\TableArrays\\EditLanguages' => $baseDir . '/lib/CoreLibs/Output/Form/TableArrays/EditLanguages.php',
     'CoreLibs\\Output\\Form\\TableArrays\\EditMenuGroup' => $baseDir . '/lib/CoreLibs/Output/Form/TableArrays/EditMenuGroup.php',
+    'CoreLibs\\Output\\Form\\TableArrays\\EditOrder' => $baseDir . '/lib/CoreLibs/Output/Form/TableArrays/EditOrder.php',
     'CoreLibs\\Output\\Form\\TableArrays\\EditPages' => $baseDir . '/lib/CoreLibs/Output/Form/TableArrays/EditPages.php',
     'CoreLibs\\Output\\Form\\TableArrays\\EditSchemas' => $baseDir . '/lib/CoreLibs/Output/Form/TableArrays/EditSchemas.php',
     'CoreLibs\\Output\\Form\\TableArrays\\EditUsers' => $baseDir . '/lib/CoreLibs/Output/Form/TableArrays/EditUsers.php',

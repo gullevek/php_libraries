@@ -35,6 +35,8 @@ class EditBase
 	private \CoreLibs\Output\Form\Generate $form;
 	/** @var \CoreLibs\Logging\Logging */
 	public \CoreLibs\Logging\Logging $log;
+	/** @var \CoreLibs\Language\L10n */
+	public \CoreLibs\Language\L10n $l;
 	/** @var \CoreLibs\ACL\Login */
 	public \CoreLibs\ACL\Login $login;
 
@@ -57,6 +59,7 @@ class EditBase
 	) {
 		$this->log = $log;
 		$this->login = $login;
+		$this->l = $l10n;
 		// smarty template engine (extended Translation version)
 		$this->smarty = new \CoreLibs\Template\SmartyExtend(
 			$l10n,
@@ -77,7 +80,7 @@ class EditBase
 			echo "I am sorry, but this page cannot be viewed by a mobile phone";
 			exit;
 		}
-		// $this->form->log->debug('POST', $this->form->log->prAr($_POST));
+		// $this->log->debug('POST', $this->log->prAr($_POST));
 	}
 
 	/**
@@ -179,7 +182,7 @@ class EditBase
 		} // while read data ...
 
 		// html title
-		$this->HEADER['HTML_TITLE'] = $this->form->l->__('Edit Order');
+		$this->HEADER['HTML_TITLE'] = $this->l->__('Edit Order');
 
 		$messages = [];
 		$error = $_POST['error'] ?? 0;
@@ -632,7 +635,7 @@ class EditBase
 			'editAdmin_' . $this->smarty->lang
 		);
 
-		$this->form->log->debug('DEBUGEND', '==================================== [Form END]');
+		$this->log->debug('DEBUGEND', '==================================== [Form END]');
 	}
 }
 
