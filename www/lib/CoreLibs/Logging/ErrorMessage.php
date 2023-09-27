@@ -42,6 +42,7 @@ class ErrorMessage
 	 * error_id: internal Error ID (should be unique)
 	 * level: error level, can only be ok, info, warn, error, abort, crash
 	 *        ok and info are positive response: success
+	 *        notice: a debug message for information only
 	 *        warn: success, but there might be some things that are not 100% ok
 	 *        error: input error or error in executing request
 	 *        abort: an internal error happened as mandatory information that normally is
@@ -98,6 +99,12 @@ class ErrorMessage
 		];
 		// write to log for abort/crash
 		switch ($level) {
+			case 'notice':
+				$this->log->notice($message ?? $str, array_merge([
+					'id' => $error_id,
+					'level' => $original_level,
+				], $context));
+				break;
 			case 'error':
 				if ($log_error) {
 					$this->log->error($message ?? $str, array_merge([

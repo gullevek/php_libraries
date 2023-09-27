@@ -44,6 +44,11 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'INFO',
 				'expected' => 'info',
 			],
+			'notice' => [
+				'level' => 'notice',
+				'str' => 'NOTICE',
+				'expected' => 'notice',
+			],
 			'warn' => [
 				'level' => 'warn',
 				'str' => 'WARN',
@@ -237,6 +242,22 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'message' => 'OTHER ERROR MESSAGE',
 				'log_error' => true,
 				'expected' => '<ERROR> OTHER ERROR MESSAGE',
+			],
+			'notice' => [
+				'id' => '100',
+				'level' => 'notice',
+				'str' => 'NOTICE MESSAGE',
+				'message' => null,
+				'log_error' => null,
+				'expected' => '<NOTICE> NOTICE MESSAGE',
+			],
+			'notice, message' => [
+				'id' => '100',
+				'level' => 'notice',
+				'str' => 'NOTICE MESSAGE',
+				'message' => 'OTHER NOTICE MESSAGE',
+				'log_error' => null,
+				'expected' => '<NOTICE> OTHER NOTICE MESSAGE',
 			],
 			'crash' => [
 				'id' => '300',

@@ -15,6 +15,7 @@ enum MessageLevel: int
 {
 	case ok = 100;
 	case info = 200;
+	case notice = 250;
 	case warn = 300;
 	case error = 400;
 	case abort = 500;
@@ -30,6 +31,7 @@ enum MessageLevel: int
 		return match (strtolower($name)) {
 			'ok' => self::ok,
 			'info' => self::info,
+			'notice' => self::notice,
 			'warn', 'warning' => self::warn,
 			'error' => self::error,
 			'abort' => self::abort,
