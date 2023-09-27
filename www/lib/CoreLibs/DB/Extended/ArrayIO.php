@@ -198,7 +198,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function dbCheckPkSet(): bool
 	{
 		// if pk_id is set, overrule ...
-		if ($this->pk_id) {
+		if (!empty($this->pk_id)) {
 			$this->table_array[$this->pk_name]['value'] = $this->pk_id;
 		}
 		// if not set ... produce error
