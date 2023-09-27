@@ -3232,7 +3232,7 @@ class IO
 	 *
 	 * @param  array<mixed> $write_array     list of elements to write
 	 * @param  array<mixed> $not_write_array list of elements not to write
-	 * @param  int          $primary_key     id key to decide if we write insert or update
+	 * @param  int|null     $primary_key     id key to decide if we write insert or update
 	 * @param  string       $table           name for the target table
 	 * @param  array<mixed> $data            data array to override _POST data
 	 * @return int|false                     primary key
@@ -3240,7 +3240,7 @@ class IO
 	public function dbWriteData(
 		array $write_array,
 		array $not_write_array,
-		int $primary_key,
+		?int $primary_key,
 		string $table,
 		array $data = []
 	): int|false {
@@ -3260,19 +3260,19 @@ class IO
 	 * PARAM INFO: $primary key
 	 * this can be a plain string/int and will be internal transformed into the array form
 	 * or it takes the array form of array [row => column, value => pk value]
-	 * @param  array<mixed>            $write_array     list of elements to write
-	 * @param  int|string|array<mixed> $primary_key     primary key string or array set
-	 * @param  string                  $table           name for the target table
-	 * @param  array<mixed>            $not_write_array list of elements not to write (optional)
-	 * @param  array<mixed>            $not_write_update_array list of elements not
-	 *                                                         to write during update (optional)
-	 * @param  array<mixed>            $data            optional array with data
-	 *                                                  if not _POST vars are used
-	 * @return int|false                                primary key
+	 * @param  array<mixed>                 $write_array     list of elements to write
+	 * @param  null|int|string|array<mixed> $primary_key     primary key string or array set
+	 * @param  string                       $table           name for the target table
+	 * @param  array<mixed>                 $not_write_array list of elements not to write (optional)
+	 * @param  array<mixed>                 $not_write_update_array list of elements not
+	 *                                                       to write during update (optional)
+	 * @param  array<mixed>                 $data            optional array with data
+	 *                                                       if not _POST vars are used
+	 * @return int|false                                     primary key
 	 */
 	public function dbWriteDataExt(
 		array $write_array,
-		int|string|array $primary_key,
+		null|int|string|array $primary_key,
 		string $table,
 		array $not_write_array = [],
 		array $not_write_update_array = [],
