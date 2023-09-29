@@ -154,7 +154,7 @@ class EditBase
 						$q = "UPDATE " . $table_name
 							. " SET order_number = " . $row_data_order[$i]
 							. " WHERE " . $table_name . "_id = " . $row_data_id[$i];
-						$q = $this->form->dbExec($q);
+						$q = $this->form->dba->dbExec($q);
 					}
 				} // for all article ids ...
 			} // if write
@@ -173,7 +173,7 @@ class EditBase
 		$options_name = [];
 		$options_selected = [];
 		// DB read data for menu
-		while (is_array($res = $this->form->dbReturn($q))) {
+		while (is_array($res = $this->form->dba->dbReturn($q))) {
 			$row_data[] = [
 				"id" => $res[$table_name . "_id"],
 				"name" => $res["name"],
@@ -431,9 +431,9 @@ class EditBase
 					$elements[] = $this->form->formCreateElement('template');
 					break;
 				case 'edit_pages':
-					if (!isset($this->form->table_array['edit_page_id']['value'])) {
+					if (!isset($this->form->dba->getTableArray()['edit_page_id']['value'])) {
 						$q = "DELETE FROM temp_files";
-						$this->form->dbExec($q);
+						$this->form->dba->dbExec($q);
 						// gets all files in the current dir and dirs given ending with .php
 						$folders = ['../admin/', '../frontend/'];
 						$files = ['*.php'];
@@ -461,16 +461,16 @@ class EditBase
 							if ($t_q) {
 								$t_q .= ', ';
 							}
-							$t_q .= "('" . $this->form->dbEscapeString($pathinfo['dirname']) . "', '"
-								. $this->form->dbEscapeString($pathinfo['basename']) . "')";
+							$t_q .= "('" . $this->form->dba->dbEscapeString($pathinfo['dirname']) . "', '"
+								. $this->form->dba->dbEscapeString($pathinfo['basename']) . "')";
 						}
-						$this->form->dbExec($q . $t_q, 'NULL');
+						$this->form->dba->dbExec($q . $t_q, 'NULL');
 						$elements[] = $this->form->formCreateElement('filename');
 					} else {
 						// show file menu
 						// just show name of file ...
 						$this->DATA['filename_exist'] = 1;
-						$this->DATA['filename'] = $this->form->table_array['filename']['value'];
+						$this->DATA['filename'] = $this->form->dba->getTableArray()['filename']['value'];
 					} // File Name View IF
 					$elements[] = $this->form->formCreateElement('hostname');
 					$elements[] = $this->form->formCreateElement('name');
