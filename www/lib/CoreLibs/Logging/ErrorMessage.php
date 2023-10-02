@@ -27,13 +27,19 @@ class ErrorMessage
 	 * init ErrorMessage
 	 *
 	 * @param  \CoreLibs\Logging\Logging $log
-	 * @param  bool                      $log_error [=false]
+	 * @param  null|bool                 $log_error [=null], defaults to false if log is not level debug
 	 */
 	public function __construct(
 		\CoreLibs\Logging\Logging $log,
-		bool $log_error = false
+		?bool $log_error = null
 	) {
 		$this->log = $log;
+		// if log default logging is debug then log_error is default set to true
+		if ($this->log->loggingLevelIsDebug() && $log_error === null) {
+			$log_error = true;
+		} else {
+			$log_error = $log_error ?? false;
+		}
 		$this->log_error = $log_error;
 	}
 

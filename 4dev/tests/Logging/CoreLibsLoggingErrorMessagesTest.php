@@ -96,9 +96,9 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 	public function testErrorMessageLevelOk(string $level, string $str, string $expected): void
 	{
 		$log = new \CoreLibs\Logging\Logging([
-			'log_file_id' => 'testErrorMessages',
+			'log_file_id' => 'testErrorMessagesLevelOk',
 			'log_folder' => self::LOG_FOLDER,
-			'log_level' => Level::Debug,
+			'log_level' => Level::Error,
 		]);
 		$em = new \CoreLibs\Logging\ErrorMessage($log);
 		$em->setMessage(
@@ -128,9 +128,9 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 	public function testErrorMessageOk(): void
 	{
 		$log = new \CoreLibs\Logging\Logging([
-			'log_file_id' => 'testErrorMessages',
+			'log_file_id' => 'testErrorMessagesOk',
 			'log_folder' => self::LOG_FOLDER,
-			'log_level' => Level::Debug
+			'log_level' => Level::Error
 		]);
 		$em = new \CoreLibs\Logging\ErrorMessage($log);
 		$em->setErrorMsg(
@@ -314,7 +314,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @dataProvider providerErrorMessageLog
-	 * @testdox Test Log writing [$_dataName]
+	 * @testdox Test Log writing with log level Error [$_dataName]
 	 *
 	 * @param  string      $id
 	 * @param  string      $level
@@ -324,7 +324,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 	 * @param  string      $expected
 	 * @return void
 	 */
-	public function testErrorMessageLog(
+	public function testErrorMessageLogErrorLevel(
 		string $id,
 		string $level,
 		string $str,
@@ -333,7 +333,63 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		string $expected
 	): void {
 		$log = new \CoreLibs\Logging\Logging([
-			'log_file_id' => 'testErrorMessages',
+			'log_file_id' => 'testErrorMessagesLogError',
+			'log_folder' => self::LOG_FOLDER,
+			'log_level' => Level::Notice,
+			'log_per_run' => true
+		]);
+		$em = new \CoreLibs\Logging\ErrorMessage($log);
+		$em->setErrorMsg(
+			$id,
+			$level,
+			$str,
+			message: $message,
+			log_error: $log_error
+		);
+		$file_content = '';
+		if (is_file($log->getLogFolder() . $log->getLogFile())) {
+			$file_content = file_get_contents(
+				$log->getLogFolder() . $log->getLogFile()
+			) ?: '';
+		}
+		// if error, if null or false, it will not be logged
+		if ($level == 'error' && ($log_error === null || $log_error === false)) {
+			$this->assertStringNotContainsString(
+				$expected,
+				$file_content
+			);
+		} else {
+			$this->assertStringContainsString(
+				$expected,
+				$file_content
+			);
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @dataProvider providerErrorMessageLog
+	 * @testdox Test Log writing with log Level Debug [$_dataName]
+	 *
+	 * @param  string      $id
+	 * @param  string      $level
+	 * @param  string      $str
+	 * @param  string|null $message
+	 * @param  bool|null   $log_error
+	 * @param  string      $expected
+	 * @return void
+	 */
+	public function testErrorMessageLogErrorDebug(
+		string $id,
+		string $level,
+		string $str,
+		?string $message,
+		?bool $log_error,
+		string $expected
+	): void {
+		$log = new \CoreLibs\Logging\Logging([
+			'log_file_id' => 'testErrorMessagesLogDebug',
 			'log_folder' => self::LOG_FOLDER,
 			'log_level' => Level::Debug,
 			'log_per_run' => true
@@ -352,8 +408,8 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				$log->getLogFolder() . $log->getLogFile()
 			) ?: '';
 		}
-		// if n
-		if ($level == 'error' && ($log_error === null || $log_error === false)) {
+		// if error, and log is debug level, only explicit false are not logged
+		if ($level == 'error' && $log_error === false) {
 			$this->assertStringNotContainsString(
 				$expected,
 				$file_content
