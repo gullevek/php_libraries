@@ -1571,6 +1571,7 @@ class Generate
 					// either one of the post pks is set, or the mandatory
 					foreach ($reference_array['elements'] as $el_name => $data_array) {
 						if (
+							/** @phan-suppress-next-line PhanTypeMismatchDimAssignment This error makes no sense */
 							!empty($data_array['mandatory'])
 						) {
 							$mand_name = $data_array['output_name'];
