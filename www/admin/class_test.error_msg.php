@@ -48,9 +48,16 @@ $em->setErrorMsg('123', 'error', 'msg this is bad, never logged', log_error:fals
 $em->setErrorMsg('1000', 'info', 'This is good');
 $em->setErrorMsg('9999', 'abort', 'BAD: This is critical (abort)');
 $em->setErrorMsg('10-1000', 'wrong', 'Wrong level: This is emergency');
+// set some jump targets too
+$em->setErrorMsg('100-1', 'error', 'Input wring', jump_target:['target' => 'foo-123', 'info' => 'Jump Target 123']);
+$em->setErrorMsg('100-2', 'error', 'Input wring', jump_target:['target' => 'foo-123', 'info' => 'Jump Target 456']);
+$em->setMessage('error', 'I have no id set', jump_target:['target' => 'bar-123', 'info' => 'Jump Bar']);
+$em->setMessage('error', 'Jump empty', jump_target:['target' => 'bar-empty']);
+
 print "ErrorsLast: <pre>" . $log->prAr($em->getLastErrorMsg()) . "</pre>";
 print "ErrorsIds: <pre>" . $log->prAr($em->getErrorIds()) . "</pre>";
 print "Errors: <pre>" . $log->prAr($em->getErrorMsg()) . "</pre>";
+print "JumpTargets: <pre>" . $log->prAr($em->getJumpTarget()) . "</pre>";
 
 print "</body></html>";
 

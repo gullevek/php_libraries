@@ -421,6 +421,70 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 			);
 		}
 	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @testdox Test jump target set and reporting
+	 *
+	 * @return void
+	 */
+	public function testJumpTarget(): void
+	{
+		$log = new \CoreLibs\Logging\Logging([
+			'log_file_id' => 'testErrorMessagesLogDebug',
+			'log_folder' => self::LOG_FOLDER,
+			'log_level' => Level::Debug,
+			'log_per_run' => true
+		]);
+		$em = new \CoreLibs\Logging\ErrorMessage($log);
+		$em->setJumpTarget(
+			'target-f',
+			'Target text'
+		);
+		$this->assertEquals(
+			[
+				'target-f' => 'Target text'
+			],
+			$em->getJumpTarget()
+		);
+		// set same target, keep as before
+		$em->setJumpTarget(
+			'target-f',
+			'Other text'
+		);
+		$this->assertEquals(
+			[
+				'target-f' => 'Target text'
+			],
+			$em->getJumpTarget()
+		);
+		// add new now two messages
+		$em->setJumpTarget(
+			'target-s',
+			'More text'
+		);
+		$this->assertEquals(
+			[
+				'target-f' => 'Target text',
+				'target-s' => 'More text'
+			],
+			$em->getJumpTarget()
+		);
+		// add empty info
+		$em->setJumpTarget(
+			'target-e',
+			''
+		);
+		$this->assertEquals(
+			[
+				'target-f' => 'Target text',
+				'target-s' => 'More text',
+				'target-e' => 'Jump to: target-e'
+			],
+			$em->getJumpTarget()
+		);
+	}
 }
 
 // __END__
