@@ -444,7 +444,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		);
 		$this->assertEquals(
 			[
-				'target-f' => 'Target text'
+				['target' => 'target-f', 'info' => 'Target text', 'level' => 'error']
 			],
 			$em->getJumpTarget()
 		);
@@ -455,7 +455,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		);
 		$this->assertEquals(
 			[
-				'target-f' => 'Target text'
+				['target' => 'target-f', 'info' => 'Target text', 'level' => 'error']
 			],
 			$em->getJumpTarget()
 		);
@@ -466,8 +466,8 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		);
 		$this->assertEquals(
 			[
-				'target-f' => 'Target text',
-				'target-s' => 'More text'
+				['target' => 'target-f', 'info' => 'Target text', 'level' => 'error'],
+				['target' => 'target-s', 'info' => 'More text', 'level' => 'error'],
 			],
 			$em->getJumpTarget()
 		);
@@ -478,9 +478,23 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		);
 		$this->assertEquals(
 			[
-				'target-f' => 'Target text',
-				'target-s' => 'More text',
-				'target-e' => 'Jump to: target-e'
+				['target' => 'target-f', 'info' => 'Target text', 'level' => 'error'],
+				['target' => 'target-s', 'info' => 'More text', 'level' => 'error'],
+				['target' => 'target-e', 'info' => 'Jump to: target-e', 'level' => 'error'],
+			],
+			$em->getJumpTarget()
+		);
+		// add through message
+		$em->setErrorMsg('E-101', 'abort', 'Abort message', jump_target:[
+			'target' => 'abort-target',
+			'info' => 'Abort error'
+		]);
+		$this->assertEquals(
+			[
+				['target' => 'target-f', 'info' => 'Target text', 'level' => 'error'],
+				['target' => 'target-s', 'info' => 'More text', 'level' => 'error'],
+				['target' => 'target-e', 'info' => 'Jump to: target-e', 'level' => 'error'],
+				['target' => 'abort-target', 'info' => 'Abort error', 'level' => 'abort'],
 			],
 			$em->getJumpTarget()
 		);

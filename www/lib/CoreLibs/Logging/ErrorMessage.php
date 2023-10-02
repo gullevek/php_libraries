@@ -17,8 +17,8 @@ class ErrorMessage
 {
 	/** @var array<int,array{id:string,level:string,str:string,target:string,target_style:string,highlight:string[]}> */
 	private array $error_str = [];
-	/** @var array<string,string> */
-	private array $jump_targets;
+	/** @var array<string,array{info:string,level:string}> */
+	private array $jump_targets = [];
 	/** @var \CoreLibs\Logging\Logging $log */
 	public \CoreLibs\Logging\Logging $log;
 
@@ -112,7 +112,7 @@ class ErrorMessage
 			'highlight' => $highlight,
 		];
 		// set a jump target
-		$this->setJumpTarget($jump_target['target'] ?? null, $jump_target['info'] ?? null);
+		$this->setJumpTarget($jump_target['target'] ?? null, $jump_target['info'] ?? null, $level);
 		// write to log for abort/crash
 		switch ($level) {
 			case 'notice':
@@ -202,15 +202,18 @@ class ErrorMessage
 	 *
 	 * @param  string|null $target
 	 * @param  string|null $info
+	 * @param  string      $level [='error']
 	 * @return void
 	 */
 	public function setJumpTarget(
 		?string $target,
 		?string $info,
+		string $level = 'error',
 	): void {
 		if (
 			empty($target) ||
-			!empty($this->jump_targets[$target])
+			array_key_exists($target, $this->jump_targets)
+			// !empty($this->jump_targets[$target])
 			// also check if this is an alphanumeric string? css id compatible?
 		) {
 			return;
@@ -218,7 +221,11 @@ class ErrorMessage
 		if (empty($info)) {
 			$info = 'Jump to: ' . $target;
 		}
-		$this->jump_targets[$target] = $info;
+		$level = MessageLevel::fromName($level)->name;
+		$this->jump_targets[$target] = [
+			'info' => $info,
+			'level' => $level,
+		];
 	}
 
 	// *********************************************************************
@@ -266,11 +273,21 @@ class ErrorMessage
 	/**
 	 * Return the jump target list
 	 *
-	 * @return array{}|array{string,string} List of jump targets with info text, or empty array if not set
+	 * @return array{}|array<int,array{target:string,info:string,level:string}> List of jump targets with info text,
+	 *                                                                          or empty array if not set
 	 */
 	public function getJumpTarget(): array
 	{
-		return $this->jump_targets ?? [];
+		$_jump_target = [];
+		foreach ($this->jump_targets as $target => $jump) {
+			$_jump_target[] = array_merge(
+				$jump,
+				[
+					'target' => $target,
+				]
+			);
+		}
+		return $_jump_target;
 	}
 
 	// *********************************************************************
