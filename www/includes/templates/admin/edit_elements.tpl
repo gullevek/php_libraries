@@ -42,6 +42,7 @@
 			<textarea name="{$element.data.name}"{if $element.data.rows} rows="{$element.data.rows}"{/if}{if $element.data.cols} cols="{$element.data.cols}"{/if}>{$element.data.value}</textarea>
 		{/if}
 		{if $element.type == 'drop_down'}
+			{* {$element.data.selected} *}
 			{html_options name=$element.data.name values=$element.data.value output=$element.data.output selected=$element.data.selected}
 			{if $drop_down_input}
 				&nbsp;&nbsp;&nbsp;<input type="text" name="{$element.data.input_name}" value="{$element.data.input_value}"{if $element.data.input_size} size="{$element.data.input_size}"{/if}{if $element.data.input_length} maxlength="{$element.data.input_length}"{/if}>

@@ -35,13 +35,16 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $em = new \CoreLibs\Logging\ErrorMessage($log);
 
+print "Log ERROR: " . $log->prAr($em->getFlagLogError()) . "<br>";
+
 print "FN: " . ml::fromName('Affe')->name . "<br>";
 print "NU: " . ml::fromValue(100)->name . "<br>";
 print "NU: " . ml::fromValue(1000)->name . "<br>";
 
-$em->setErrorMsg('123', 'error', 'msg this is bad, not logged');
-$em->setErrorMsg('123', 'error', 'msg this is bad, not logged', 'target-id', 'other-style');
-$em->setErrorMsg('123', 'error', 'msg this is bad, logged', log_error:true);
+$em->setErrorMsg('123', 'error', 'msg this is bad, auto logged if debug');
+$em->setErrorMsg('123', 'error', 'msg this is bad, auto logged if debug', 'target-id', 'other-style');
+$em->setErrorMsg('123', 'error', 'msg this is bad, logged always', log_error:true);
+$em->setErrorMsg('123', 'error', 'msg this is bad, never logged', log_error:false);
 $em->setErrorMsg('1000', 'info', 'This is good');
 $em->setErrorMsg('9999', 'abort', 'BAD: This is critical (abort)');
 $em->setErrorMsg('10-1000', 'wrong', 'Wrong level: This is emergency');
@@ -50,5 +53,7 @@ print "ErrorsIds: <pre>" . $log->prAr($em->getErrorIds()) . "</pre>";
 print "Errors: <pre>" . $log->prAr($em->getErrorMsg()) . "</pre>";
 
 print "</body></html>";
+
+$log->debug('[END]', '==========================================>');
 
 // __END__
