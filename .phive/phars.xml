@@ -8,4 +8,5 @@
   <phar name="psalm" version="^5.15.0" installed="5.15.0" location="./tools/psalm" copy="false"/>
   <phar name="phpdox" version="^0.12.0" installed="0.12.0" location="./tools/phpdox" copy="false"/>
   <phar name="phpdocumentor" version="^3.4.2" installed="3.4.2" location="./tools/phpDocumentor" copy="false"/>
+  <phar name="php-cs-fixer" version="^3.34.1" installed="3.34.1" location="./tools/php-cs-fixer" copy="false"/>
 </phive>
