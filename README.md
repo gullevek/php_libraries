@@ -92,3 +92,25 @@ Loads classes internal (not passed in, not extend)
 * \CoreLibs\Admin\EditBase loads \CoreLibs\Template\SmartyExtend, \CoreLibs\Output\Form\Generate
 * \CoreLibs\Output\From\Generate loads \CoreLibs\Debug\Logging, \CoreLibs\Language\L10n if not passed on
 * \CoreLibs\Output\From\Generate loads \CoreLibs\Output\From\TableArrays
+
+## PHP unit testing and Intelephense
+
+Intelephense can not directly read phar files so we do the following
+
+In the workspace root we have `.libs/`, be in the workspace folder not the `.libs/` folder
+
+`php -r "(new Phar('/path/to/.phive/phars/phpunit-9.6.13.phar'))->extractTo('.libs/phpunit/');"`
+
+andd add in vscode Intelephense > Enviroment: Include Paths (intelephense.environment.includePaths)
+
+```json
+"intelephense.environment.includePaths": [
+  "/.libs/phpunit/"
+]
+```
+
+Add `.libs` to the master .gitingore
+
+### Update phpunit
+
+On a version update the old phpunit folder in .libs has to be removed and the new version extracted again
