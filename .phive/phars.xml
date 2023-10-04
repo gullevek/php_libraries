@@ -6,4 +6,6 @@
   <phar name="phpstan" version="^1.10.37" installed="1.10.37" location="./tools/phpstan" copy="false"/>
   <phar name="phan" version="^5.4.2" installed="5.4.2" location="./tools/phan" copy="false"/>
   <phar name="psalm" version="^5.15.0" installed="5.15.0" location="./tools/psalm" copy="false"/>
+  <phar name="phpdox" version="^0.12.0" installed="0.12.0" location="./tools/phpdox" copy="false"/>
+  <phar name="phpdocumentor" version="^3.4.2" installed="3.4.2" location="./tools/phpDocumentor" copy="false"/>
 </phive>
