@@ -3,20 +3,9 @@
     "version": "dev-master",
     "description": "CoreLibs: Development package",
     "type": "library",
-    "require-dev": {
-        "phpstan/phpstan": "^1.10",
-        "phan/phan": "^5.4",
-        "phpstan/extension-installer": "^1.2",
-        "vimeo/psalm": "^5.7",
-        "phpstan/phpstan-deprecation-rules": "^1.1"
-    },
     "config": {
-        "allow-plugins": {
-            "phpstan/extension-installer": true
-        }
     },
     "require": {
-        "php": ">=8.1",
-        "psr/log": "^2.0 || ^3.0"
+        "php": ">=8.1"
     }
 }
