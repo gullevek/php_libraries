@@ -260,6 +260,6 @@ return array(
     'Smarty_Variable' => $vendorDir . '/egrajp/smarty-extended/src/sysplugins/smarty_variable.php',
     'TPC_yyStackEntry' => $vendorDir . '/egrajp/smarty-extended/src/sysplugins/smarty_internal_configfileparser.php',
     'TP_yyStackEntry' => $vendorDir . '/egrajp/smarty-extended/src/sysplugins/smarty_internal_templateparser.php',
-    'TestCalls\\DB\\TestDB' => $baseDir . '/lib/Test/DB/TestDB.php',
-    'TestCalls\\Test' => $baseDir . '/lib/Test/Test.php',
+    'TestCalls\\DB\\TestDB' => $baseDir . '/lib/TestCalls/DB/TestDB.php',
+    'TestCalls\\Test' => $baseDir . '/lib/TestCalls/Test.php',
 );

@@ -288,8 +288,8 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'Smarty_Variable' => __DIR__ . '/..' . '/egrajp/smarty-extended/src/sysplugins/smarty_variable.php',
         'TPC_yyStackEntry' => __DIR__ . '/..' . '/egrajp/smarty-extended/src/sysplugins/smarty_internal_configfileparser.php',
         'TP_yyStackEntry' => __DIR__ . '/..' . '/egrajp/smarty-extended/src/sysplugins/smarty_internal_templateparser.php',
-        'TestCalls\\DB\\TestDB' => __DIR__ . '/../..' . '/lib/Test/DB/TestDB.php',
-        'TestCalls\\Test' => __DIR__ . '/../..' . '/lib/Test/Test.php',
+        'TestCalls\\DB\\TestDB' => __DIR__ . '/../..' . '/lib/TestCalls/DB/TestDB.php',
+        'TestCalls\\Test' => __DIR__ . '/../..' . '/lib/TestCalls/Test.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
