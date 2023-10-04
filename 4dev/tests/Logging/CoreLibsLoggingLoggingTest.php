@@ -20,7 +20,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 	private const LOG_FOLDER = __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR;
 	private const REGEX_BASE = "\[[\d\-\s\.:]+\]\s{1}" // date
 		. "\[[\w\.]+(:\d+)?\]\s{1}" // host:port
-		. "\[[\w\-\.\/]+:\d+\]\s{1}" // folder/file
+		. "\[(phar:\/\/)?[\w\-\.\/]+:\d+\]\s{1}" // folder/file [note phar:// is for phpunit]
 		. "\[\w+\]\s{1}" // run id
 		. "{[\w\\\\]+((::|->)\w+)?}\s{1}"; // class
 

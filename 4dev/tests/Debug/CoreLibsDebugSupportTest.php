@@ -460,8 +460,8 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @cover ::getCallerFileLine
-	 * @testWith ["vendor/phpunit/phpunit/src/Framework/TestCase.php:"]
-	 * @testdox getCallerFileLine check based on regex /[\w\-\/]/vendor/phpunit/phpunit/src/Framework/TestCase.php:\d+ [$_dataName]
+	 * @testWith ["vendor/phpunit/phpunit/src/Framework/TestCase.php:6434","phar:///home/clemens/.phive/phars/phpunit-9.6.13.phar/phpunit/Framework/TestCase.php:6434"]
+	 * @testdox getCallerFileLine check based on regex .../Framework/TestCase.php:\d+ [$_dataName]
 	 *
 	 * @param  string $expected
 	 * @return void
@@ -469,7 +469,14 @@ final class CoreLibsDebugSupportTest extends TestCase
 	public function testGetCallerFileLine(): void
 	{
 		// regex prefix with path "/../" and then fixed vendor + \d+
-		$regex = "/^\/[\w\-\/]+\/vendor\/phpunit\/phpunit\/src\/Framework\/TestCase.php:\d+$/";
+		// or phar start if phiev installed
+		// phar:///home/clemens/.phive/phars/phpunit-9.6.13.phar/phpunit/Framework/TestCase.php
+		$regex = "/^("
+			. "\/.*\/vendor\/phpunit\/phpunit\/src"
+			. "|"
+			. "phar:\/\/\/.*\.phive\/phars\/phpunit-\d+\.\d+\.\d+\.phar\/phpunit"
+			. ")"
+			. "\/Framework\/TestCase.php:\d+$/";
 		$this->assertMatchesRegularExpression(
 			$regex,
 			Support::getCallerFileLine()
@@ -514,27 +521,30 @@ final class CoreLibsDebugSupportTest extends TestCase
 				// add nothing
 				$this->assertEquals(
 					$expected,
-					Support::getCallerMethodList(),
+					$compare,
 					'assert expected 10'
 				);
 				break;
 			case 11:
-				// add one "run" before "runBare"
-				// array_splice(
-				// 	$expected,
-				// 	7,
-				// 	0,
-				// 	['run']
-				// );
-				array_splice(
-					$expected,
-					0,
-					0,
-					['include']
-				);
+				if ($compare[0] == 'include') {
+					// add include at first
+					array_splice(
+						$expected,
+						0,
+						0,
+						['include']
+					);
+				} else {
+					array_splice(
+						$expected,
+						6,
+						0,
+						['run']
+					);
+				}
 				$this->assertEquals(
 					$expected,
-					Support::getCallerMethodList(),
+					$compare,
 					'assert expected 11'
 				);
 				break;
@@ -554,7 +564,7 @@ final class CoreLibsDebugSupportTest extends TestCase
 				);
 				$this->assertEquals(
 					$expected,
-					Support::getCallerMethodList(),
+					$compare,
 					'assert expected 12'
 				);
 				break;

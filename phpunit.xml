@@ -3,5 +3,6 @@
 	colors="true"
 	verbose="true"
 	convertDeprecationsToExceptions="true"
+	bootstrap="4dev/tests/bootstrap.php"
 >
 </phpunit>

@@ -17,7 +17,7 @@ if [ ! -z "${1}" ]; then
 		# "7.3") php_bin="/usr/bin/php7.3 "; ;;
 		# "7.4") php_bin="/usr/bin/php7.4 "; ;;
 		# "8.0") php_bin="/usr/bin/php8.0 "; ;;
-		"8.1") php_bin="/usr/bin/php8.1 "; ;;
+		# "8.1") php_bin="/usr/bin/php8.1 "; ;;
 		"8.2") php_bin="/usr/bin/php8.2 "; ;;
 		*) echo "Not support PHP: ${1}"; exit; ;;
 	esac;
@@ -27,13 +27,14 @@ if [ ! -z "${2}" ] && [ -z "${php_bin}" ]; then
 		# "7.3") php_bin="/usr/bin/php7.3 "; ;;
 		# "7.4") php_bin="/usr/bin/php7.4 "; ;;
 		# "8.0") php_bin="/usr/bin/php8.0 "; ;;
-		"8.1") php_bin="/usr/bin/php8.1 "; ;;
+		# "8.1") php_bin="/usr/bin/php8.1 "; ;;
 		"8.2") php_bin="/usr/bin/php8.2 "; ;;
 		*) echo "Not support PHP: ${1}"; exit; ;;
 	esac;
 fi;
 
-phpunit_call="${php_bin}${base}www/vendor/bin/phpunit ${opt_testdox} -c ${base}phpunit.xml ${base}4dev/tests/";
+# Note 4dev/tests/bootstrap.php has to be set as bootstrap file in phpunit.xml
+phpunit_call="${php_bin}phpunit ${opt_testdox} -c ${base}phpunit.xml ${base}4dev/tests/";
 
 ${phpunit_call};
 

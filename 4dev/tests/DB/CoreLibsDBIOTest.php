@@ -3907,7 +3907,8 @@ final class CoreLibsDBIOTest extends TestCase
 					'id' => '51',
 					'error' => 'Max query call needs to be set to at least 1',
 					// run:: can be +1 if called in set and not direct
-					'source' => "/^include::main::run::run::run::run::run::run::(run::)?runBare::runTest::testDbErrorHandling::dbSetMaxQueryCall$/",
+					// 'main::run::run::run::run::run::run::run::runBare::runTest::testDbErrorHandling::dbSetMaxQueryCall
+					'source' => "/^(include::)?main::(run::)+runBare::runTest::testDbErrorHandling::dbSetMaxQueryCall$/",
 					'pg_error' => '',
 					'msg' => '',
 				]
