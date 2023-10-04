@@ -53,6 +53,6 @@ parameters:
 		#	paths:
 		#		- ...
 		#		- ...
-		-
-			message: "#^Call to deprecated method #"
-			path: www/admin/class_test*.php
+		#-
+		#	message: "#^Call to deprecated method #"
+		#	path: www/admin/class_test*.php

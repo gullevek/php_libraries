@@ -34,7 +34,7 @@ if [ ! -z "${2}" ] && [ -z "${php_bin}" ]; then
 fi;
 
 # Note 4dev/tests/bootstrap.php has to be set as bootstrap file in phpunit.xml
-phpunit_call="${php_bin}phpunit ${opt_testdox} -c ${base}phpunit.xml ${base}4dev/tests/";
+phpunit_call="${php_bin}${base}tools/phpunit ${opt_testdox} -c ${base}phpunit.xml ${base}4dev/tests/";
 
 ${phpunit_call};
 
