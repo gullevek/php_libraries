@@ -281,12 +281,6 @@ class IO
 	public const NO_CACHE = 3;
 	/** @var string default hash type */
 	public const ERROR_HASH_TYPE = 'adler32';
-	/**
-	 * @var string regex for params: only stand alone $number allowed
-	 *             never allowed to start with '
-	 *             must be after space/tab, =, (
-	*/
-	public const REGEX_PARAMS = '/[^\'][\s(=](\$[0-9]{1,})/';
 	/** @var string regex to get returning with matches at position 1 */
 	public const REGEX_RETURNING = '/\s+returning\s+(.+\s*(?:.+\s*)+);?$/i';
 	// REGEX_SELECT
@@ -1265,6 +1259,32 @@ class IO
 	}
 
 	/**
+	 * count $ leading parameters only
+	 *
+	 * @param  string $query Query to check
+	 * @return int           Number of parameters found
+	 */
+	private function __dbCountQueryParams(string $query): int
+	{
+		$match = [];
+		// regex for params: only stand alone $number allowed
+		// exclude all '' enclosed strings, ignore all numbers [note must start with digit]
+		// can have space/tab/new line
+		// must have = , ( [equal, comma, opening round bracket]
+		// can have space/tab/new line
+		// $ number with 1-9 for first and 0-9 for further digits
+		// /s for matching new line in . list
+		// [disabled, we don't used ^ or $] /m for multi line match
+		// Matches in 1:, must be array_filtered to remove empty, count with array_unique
+		preg_match_all(
+			'/(?:\'.*?\')?\s*(?:\?\?|[(=,])\s*(?:\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))/s',
+			$query,
+			$match
+		);
+		return count(array_unique(array_filter($match[1])));
+	}
+
+	/**
 	 * Checks if the placeholder count in the query matches the params given
 	 * on call
 	 *
@@ -1274,10 +1294,7 @@ class IO
 	 */
 	private function __dbCheckQueryParams(string $query, int $params_count): bool
 	{
-		// search for $1, $2, in the query and push it into the control array
-		// skip counts for same eg $1, $1, $2 = 2 and not 3
-		preg_match_all(self::REGEX_PARAMS, $query, $match);
-		$placeholder_count = count(array_unique($match[1]));
+		$placeholder_count = $this->__dbCountQueryParams($query);
 		if ($params_count != $placeholder_count) {
 			$this->__dbError(
 				23,
@@ -1384,6 +1401,9 @@ class IO
 		) {
 			$this->returning_id = true;
 		}
+		// import protection, hash needed
+		$query_hash = $this->dbGetQueryHash($this->query, $this->params);
+
 		// $this->debug('DB IO', 'Q: ' . $this->query . ', RETURN: ' . $this->returning_id);
 		// for DEBUG, only on first time ;)
 		$this->__dbDebug(
@@ -1395,8 +1415,6 @@ class IO
 			'__dbPrepareExec',
 			($this->params === [] ? 'Q' : 'Qp')
 		);
-		// import protection, hash needed
-		$query_hash = $this->dbGetQueryHash($this->query, $this->params);
 		// if the array index does not exists set it 0
 		if (!array_key_exists($query_hash, $this->query_called)) {
 			$this->query_called[$query_hash] = 0;
@@ -2943,11 +2961,8 @@ class IO
 					$this->prepare_cursor[$stm_name]['pk_name'] = $pk_name;
 				}
 			}
-			$match = [];
-			// search for $1, $2, in the query and push it into the control array
-			// skip counts for same eg $1, $1, $2 = 2 and not 3
-			preg_match_all(self::REGEX_PARAMS, $query, $match);
-			$this->prepare_cursor[$stm_name]['count'] = count(array_unique($match[1]));
+			// check prepared curser parameter count
+			$this->prepare_cursor[$stm_name]['count'] = $this->__dbCountQueryParams($query);
 			$this->prepare_cursor[$stm_name]['query'] = $query;
 			$result = $this->db_functions->__dbPrepare($stm_name, $query);
 			if ($result) {
