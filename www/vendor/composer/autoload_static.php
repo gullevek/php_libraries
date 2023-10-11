@@ -70,6 +70,7 @@ class ComposerStaticInit10fe8fe2ec4017b8644d2b64bcf398b9
         'CoreLibs\\DB\\Options\\Convert' => __DIR__ . '/../..' . '/lib/CoreLibs/DB/Options/Convert.php',
         'CoreLibs\\DB\\SQL\\Interface\\SqlFunctions' => __DIR__ . '/../..' . '/lib/CoreLibs/DB/SQL/Interface/SqlFunctions.php',
         'CoreLibs\\DB\\SQL\\PgSQL' => __DIR__ . '/../..' . '/lib/CoreLibs/DB/SQL/PgSQL.php',
+        'CoreLibs\\DB\\Support\\ConvertPlaceholder' => __DIR__ . '/../..' . '/lib/CoreLibs/DB/Support/ConvertPlaceholder.php',
         'CoreLibs\\Debug\\FileWriter' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/FileWriter.php',
         'CoreLibs\\Debug\\Logging' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/Logging.php',
         'CoreLibs\\Debug\\LoggingLegacy' => __DIR__ . '/../..' . '/lib/CoreLibs/Debug/LoggingLegacy.php',

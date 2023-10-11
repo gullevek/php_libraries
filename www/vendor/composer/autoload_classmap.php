@@ -42,6 +42,7 @@ return array(
     'CoreLibs\\DB\\Options\\Convert' => $baseDir . '/lib/CoreLibs/DB/Options/Convert.php',
     'CoreLibs\\DB\\SQL\\Interface\\SqlFunctions' => $baseDir . '/lib/CoreLibs/DB/SQL/Interface/SqlFunctions.php',
     'CoreLibs\\DB\\SQL\\PgSQL' => $baseDir . '/lib/CoreLibs/DB/SQL/PgSQL.php',
+    'CoreLibs\\DB\\Support\\ConvertPlaceholder' => $baseDir . '/lib/CoreLibs/DB/Support/ConvertPlaceholder.php',
     'CoreLibs\\Debug\\FileWriter' => $baseDir . '/lib/CoreLibs/Debug/FileWriter.php',
     'CoreLibs\\Debug\\Logging' => $baseDir . '/lib/CoreLibs/Debug/Logging.php',
     'CoreLibs\\Debug\\LoggingLegacy' => $baseDir . '/lib/CoreLibs/Debug/LoggingLegacy.php',

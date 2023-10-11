@@ -261,6 +261,7 @@ use CoreLibs\Debug\Support;
 use CoreLibs\Create\Uids;
 use CoreLibs\Convert\Json;
 use CoreLibs\DB\Options\Convert;
+use CoreLibs\DB\Support\ConvertPlaceholder;
 
 // below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
 // as main system. Currently all @var sets are written as object
@@ -283,6 +284,8 @@ class IO
 	public const ERROR_HASH_TYPE = 'adler32';
 	/** @var string regex to get returning with matches at position 1 */
 	public const REGEX_RETURNING = '/\s+returning\s+(.+\s*(?:.+\s*)+);?$/i';
+	/** @var array<string> allowed convert target for placeholder */
+	public const DB_CONVERT_PLACEHOLDER_TARGET = ['pg', 'pdo'];
 	// REGEX_SELECT
 	// REGEX_UPDATE
 	// REGEX INSERT
@@ -326,10 +329,14 @@ class IO
 	private string $db_ssl;
 	/** @var array<string> flag for converting types from settings */
 	private array $db_convert_type = [];
+	/** @var bool convert placeholders from pdo to Pg or the other way around */
+	private bool $db_convert_placeholder = false;
+	/** @var string convert placeholders target, default is 'pg', other allowed is 'pdo' */
+	private string $db_convert_placeholder_target = 'pg';
 	// convert type settings
 	// 0: OFF (CONVERT_OFF)
 	// >0: ON
-	// 1: convert intN/bool (CONVERT_ON)
+	// 1: convert int/bool (CONVERT_ON)
 	// 2: convert json/jsonb to array (CONVERT_JSON)
 	// 4: convert numeric/floatN to float (CONVERT_NUMERIC)
 	// 8: convert bytea to string data (CONVERT_BYTEA)
@@ -406,7 +413,7 @@ class IO
 	 * and failure set on failed connection
 	 *
 	 * phpcs:ignore
-	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[]} $db_config DB configuration array
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string} $db_config DB configuration array
 	 * @param \CoreLibs\Logging\Logging $log Logging class
 	 * @throws \RuntimeException If no DB connection can be established on launch
 	 */
@@ -441,8 +448,7 @@ class IO
 			'17' => 'All dbReturn* methods work only with SELECT statements, '
 				. 'please use dbExec for everything else',
 			'18' => 'Query not found in cache. Nothing has been reset',
-			'19' => 'Wrong PK name given or no PK name given at all, can\'t '
-				. 'get Insert ID',
+			'19' => 'Wrong PK name given or no PK name given at all, can\'t get Insert ID',
 			'20' => 'Found given Prepare Statement Name in array, '
 				. 'Query not prepared, will use existing one',
 			'21' => 'Query Prepare failed',
@@ -472,7 +478,9 @@ class IO
 			'101' => 'Statement name empty for get prepare cursor',
 			'102' => 'Key empty for get prepare cursir',
 			'103' => 'No prepared cursor with this name',
-			'104' => 'No Key with this name in the prepared cursor array'
+			'104' => 'No Key with this name in the prepared cursor array',
+			// abort on Placeholder convert
+			'200' => 'Cannot have named, question mark or numbered placeholders in the same query',
 		];
 
 		// load the core DB functions wrapper class
@@ -507,7 +515,7 @@ class IO
 	 * Setup DB config and options
 	 *
 	 * phpcs:ignore
-	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[]} $db_config
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string} $db_config
 	 * @return bool
 	 */
 	private function __setConfigOptions(array $db_config): bool
@@ -548,6 +556,16 @@ class IO
 			}
 			$this->db_convert_type[] = $db_convert_type;
 			$this->__setConvertType($db_convert_type);
+		}
+		// set placeholder convert flag and target
+		if (isset($db_config['db_convert_placeholder']) && is_bool($db_config['db_convert_placeholder'])) {
+			$this->db_convert_placeholder = $db_config['db_convert_placeholder'];
+		}
+		if (
+			isset($db_config['db_convert_placeholder_target']) &&
+			in_array($db_config['db_convert_placeholder_target'], self::DB_CONVERT_PLACEHOLDER_TARGET)
+		) {
+			$this->db_convert_placeholder_target = $db_config['db_convert_placeholder_target'];
 		}
 
 		// return status true: ok, false: options error
@@ -1403,6 +1421,14 @@ class IO
 		}
 		// import protection, hash needed
 		$query_hash = $this->dbGetQueryHash($this->query, $this->params);
+		// QUERY PARAMS: run query params check and rewrite
+		if ($this->dbGetConvertPlaceholder() === true) {
+			$convert = ConvertPlaceholder::convertPlaceholderInQuery(
+				$query,
+				$params,
+				$this->dbGetConvertPlaceholderTarget()
+			);
+		}
 
 		// $this->debug('DB IO', 'Q: ' . $this->query . ', RETURN: ' . $this->returning_id);
 		// for DEBUG, only on first time ;)
@@ -2248,6 +2274,15 @@ class IO
 			$this->__dbError(17, false, $this->cursor_ext[$query_hash]['query']);
 			return false;
 		}
+		// QUERY PARAMS: run query params check and rewrite
+		if ($this->dbGetConvertPlaceholder() === true) {
+			$convert = ConvertPlaceholder::convertPlaceholderInQuery(
+				$query,
+				$params,
+				$this->dbGetConvertPlaceholderTarget()
+			);
+		}
+
 		// set the query parameters
 		$this->cursor_ext[$query_hash]['params'] = $params;
 		// check if params count matches
@@ -2540,7 +2575,7 @@ class IO
 	): \PgSql\Result|false {
 		$this->__dbErrorReset();
 		// prepare and check if we can actually run it
-		if ($this->__dbPrepareExec($query, $params, $pk_name) === false) {
+		if (($query_hash = $this->__dbPrepareExec($query, $params, $pk_name)) === false) {
 			// bail if no query hash set
 			return false;
 		}
@@ -3461,7 +3496,7 @@ class IO
 	}
 
 	/**
-	 * Undocumented function
+	 * convert db values (set)
 	 *
 	 * @param  Convert $convert
 	 * @return void
@@ -3472,7 +3507,7 @@ class IO
 	}
 
 	/**
-	 * Undocumented function
+	 * unsert convert db values flag
 	 *
 	 * @param  Convert $convert
 	 * @return void
@@ -3495,7 +3530,7 @@ class IO
 	}
 
 	/**
-	 * Undocumented function
+	 * check if a conert flag is set
 	 *
 	 * @param  Convert $convert
 	 * @return bool
@@ -3506,6 +3541,52 @@ class IO
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Set if we want to auto convert PDO/\Pg placeholders
+	 *
+	 * @param  bool $flag
+	 * @return void
+	 */
+	public function dbSetConvertPlaceholder(bool $flag): void
+	{
+		$this->db_convert_placeholder = $flag;
+	}
+
+	/**
+	 * get the flag status if we want to auto convert placeholders in the query
+	 *
+	 * @return bool
+	 */
+	public function dbGetConvertPlaceholder(): bool
+	{
+		return $this->db_convert_placeholder;
+	}
+
+	/**
+	 * Set convert target for placeholders, returns false on error, true on ok
+	 *
+	 * @param  string $target 'pg' or 'pdo', defined in DB_CONVERT_PLACEHOLDER_TARGET
+	 * @return bool
+	 */
+	public function dbSetConvertPlaceholderTarget(string $target): bool
+	{
+		if (in_array($target, self::DB_CONVERT_PLACEHOLDER_TARGET)) {
+			$this->db_convert_placeholder_target = $target;
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Get the current placeholder convert target
+	 *
+	 * @return string
+	 */
+	public function dbGetConvertPlaceholderTarget(): string
+	{
+		return $this->db_convert_placeholder_target;
 	}
 
 	/**

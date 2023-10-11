@@ -310,7 +310,7 @@ class Generate
 	 * construct form generator
 	 *
 	 * phpcs:ignore
-	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[]} $db_config db config array, mandatory
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string} $db_config db config array, mandatory
 	 * @param \CoreLibs\Logging\Logging $log          Logging class
 	 * @param \CoreLibs\Language\L10n $l10n         l10n language class
 	 * @param array<string,mixed>     $login_acl	Login ACL array,
