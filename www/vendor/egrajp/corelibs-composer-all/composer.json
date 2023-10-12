@@ -20,11 +20,7 @@
         "psr/log": "^3.0@dev"
     },
     "require-dev": {
-        "phpstan/phpstan": "^1.10",
-        "phan/phan": "v5.x-dev",
-        "phpunit/phpunit": "^9",
         "egrajp/smarty-extended": "^4.3",
-        "vimeo/psalm": "^5.0@dev",
         "gullevek/dotenv": "dev-master"
     },
     "repositories": {

@@ -360,10 +360,7 @@ return [
 	'directory_list' => [
 		'src',
 		'vendor/egrajp/smarty-extended/src',
-		'vendor/phan/phan/src/Phan',
-		'vendor/phpunit/phpunit/src',
 		'vendor/psr/log/src',
-		'vendor/vimeo/psalm/src/Psalm',
 		'vendor/gullevek/dotenv',
 	],
 

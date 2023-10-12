@@ -35,6 +35,8 @@ class EditBase
 	private \CoreLibs\Output\Form\Generate $form;
 	/** @var \CoreLibs\Logging\Logging */
 	public \CoreLibs\Logging\Logging $log;
+	/** @var \CoreLibs\Language\L10n */
+	public \CoreLibs\Language\L10n $l;
 	/** @var \CoreLibs\ACL\Login */
 	public \CoreLibs\ACL\Login $login;
 
@@ -57,6 +59,7 @@ class EditBase
 	) {
 		$this->log = $log;
 		$this->login = $login;
+		$this->l = $l10n;
 		// smarty template engine (extended Translation version)
 		$this->smarty = new \CoreLibs\Template\SmartyExtend(
 			$l10n,
@@ -77,7 +80,7 @@ class EditBase
 			echo "I am sorry, but this page cannot be viewed by a mobile phone";
 			exit;
 		}
-		// $this->form->log->debug('POST', $this->form->log->prAr($_POST));
+		// $this->log->debug('POST', $this->log->prAr($_POST));
 	}
 
 	/**
@@ -151,7 +154,7 @@ class EditBase
 						$q = "UPDATE " . $table_name
 							. " SET order_number = " . $row_data_order[$i]
 							. " WHERE " . $table_name . "_id = " . $row_data_id[$i];
-						$q = $this->form->dbExec($q);
+						$q = $this->form->dba->dbExec($q);
 					}
 				} // for all article ids ...
 			} // if write
@@ -170,7 +173,7 @@ class EditBase
 		$options_name = [];
 		$options_selected = [];
 		// DB read data for menu
-		while (is_array($res = $this->form->dbReturn($q))) {
+		while (is_array($res = $this->form->dba->dbReturn($q))) {
 			$row_data[] = [
 				"id" => $res[$table_name . "_id"],
 				"name" => $res["name"],
@@ -179,7 +182,7 @@ class EditBase
 		} // while read data ...
 
 		// html title
-		$this->HEADER['HTML_TITLE'] = $this->form->l->__('Edit Order');
+		$this->HEADER['HTML_TITLE'] = $this->l->__('Edit Order');
 
 		$messages = [];
 		$error = $_POST['error'] ?? 0;
@@ -428,9 +431,9 @@ class EditBase
 					$elements[] = $this->form->formCreateElement('template');
 					break;
 				case 'edit_pages':
-					if (!isset($this->form->table_array['edit_page_id']['value'])) {
+					if (!isset($this->form->dba->getTableArray()['edit_page_id']['value'])) {
 						$q = "DELETE FROM temp_files";
-						$this->form->dbExec($q);
+						$this->form->dba->dbExec($q);
 						// gets all files in the current dir and dirs given ending with .php
 						$folders = ['../admin/', '../frontend/'];
 						$files = ['*.php'];
@@ -458,16 +461,16 @@ class EditBase
 							if ($t_q) {
 								$t_q .= ', ';
 							}
-							$t_q .= "('" . $this->form->dbEscapeString($pathinfo['dirname']) . "', '"
-								. $this->form->dbEscapeString($pathinfo['basename']) . "')";
+							$t_q .= "('" . $this->form->dba->dbEscapeString($pathinfo['dirname']) . "', '"
+								. $this->form->dba->dbEscapeString($pathinfo['basename']) . "')";
 						}
-						$this->form->dbExec($q . $t_q, 'NULL');
+						$this->form->dba->dbExec($q . $t_q, 'NULL');
 						$elements[] = $this->form->formCreateElement('filename');
 					} else {
 						// show file menu
 						// just show name of file ...
 						$this->DATA['filename_exist'] = 1;
-						$this->DATA['filename'] = $this->form->table_array['filename']['value'];
+						$this->DATA['filename'] = $this->form->dba->getTableArray()['filename']['value'];
 					} // File Name View IF
 					$elements[] = $this->form->formCreateElement('hostname');
 					$elements[] = $this->form->formCreateElement('name');
@@ -632,7 +635,7 @@ class EditBase
 			'editAdmin_' . $this->smarty->lang
 		);
 
-		$this->form->log->debug('DEBUGEND', '==================================== [Form END]');
+		$this->log->debug('DEBUGEND', '==================================== [Form END]');
 	}
 }
 

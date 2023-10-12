@@ -39,13 +39,13 @@ class ArrayIO extends \CoreLibs\DB\IO
 {
 	// main calss variables
 	/** @var array<mixed> */
-	public array $table_array; // the array from the table to work on
+	private array $table_array; // the array from the table to work on
 	/** @var string */
-	public string $table_name; // the table_name
+	private string $table_name; // the table_name
 	/** @var string */
-	public string $pk_name = ''; // the primary key from this table
+	private string $pk_name = ''; // the primary key from this table
 	/** @var int|string|null */
-	public int|string|null $pk_id; // the PK id
+	private int|string|null $pk_id; // the PK id
 	// security values
 	/** @var int base acl for current page */
 	private int $base_acl_level = 0;
@@ -74,24 +74,21 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// instance db_io class
 		parent::__construct($db_config, $log);
 		// more error vars for this class
-		$this->error_string['1999'] = 'No table array or table name set';
+		$this->error_string['1998'] = 'No table name set';
+		$this->error_string['1999'] = 'No table array set';
 		$this->error_string['1021'] = 'No Primary Key given';
 		$this->error_string['1022'] = 'Could not run Array Query';
 
-		$this->table_array = $table_array;
-		$this->table_name = $table_name;
-
-		// error abort if no table array or no table name
-		if (empty($table_array) || empty($table_name)) {
-			$this->__dbError(1999, false, 'MAJOR ERROR: Core settings missing');
-			throw new \RuntimeException('MAJOR ERROR: Core settings missing', 1999);
-		}
+		$this->setTableArray($table_array);
+		$this->setTableName($table_name);
 
 		// set primary key for given table_array
 		foreach ($this->table_array as $key => $value) {
-			if (!empty($value['pk'])) {
-				$this->pk_name = $key;
+			if (empty($value['pk'])) {
+				continue;
 			}
+			$this->setPkName($key);
+			break;
 		}
 		$this->dbArrayIOSetAcl($base_acl_level, $acl_admin);
 	}
@@ -102,6 +99,144 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function __destruct()
 	{
 		parent::__destruct();
+	}
+
+	/**
+	 * Set the overall table array
+	 *
+	 * @param  array<mixed> $table_array
+	 * @return void
+	 * @throws \RuntimeException 1999 for empty table array
+	 */
+	public function setTableArray(array $table_array): void
+	{
+		$this->table_array = $table_array;
+		if (empty($this->table_array)) {
+			$this->__dbError(1999, false, 'MAJOR ERROR: Core settings missing: table_arrry');
+			throw new \RuntimeException('MAJOR ERROR: Core settings missing: table_array', 1999);
+		}
+	}
+
+	/**
+	 * return full table array, or [] if empty
+	 * of reset is set to true, will reset array first
+	 *
+	 * @param  bool         $reset [=false] run a reset before returning
+	 * @return array<mixed>
+	 */
+	public function getTableArray(bool $reset = false): array
+	{
+		if (!$reset) {
+			return $this->table_array ?? [];
+		}
+		$table_array = $this->table_array ?? [];
+		reset($table_array);
+		return $table_array;
+	}
+
+	/**
+	 * get a table array entry under the key with element pos
+	 *
+	 * @param  string $key
+	 * @param  string $pos
+	 * @return mixed
+	 */
+	public function getTableArrayEntry(string $key, string $pos): mixed
+	{
+		return $this->table_array[$key][$pos] ?? null;
+	}
+
+	/**
+	 * set a new value at key with pos
+	 *
+	 * @param  mixed  $value
+	 * @param  string $key
+	 * @param  string $pos
+	 * @return void
+	 */
+	public function setTableArrayEntry(mixed $value, string $key, string $pos): void
+	{
+		$this->table_array[$key][$pos] = $value;
+	}
+
+	/**
+	 * unset entry at key with pos
+	 *
+	 * @param  string $key
+	 * @param  string $pos
+	 * @return void
+	 */
+	public function unsetTableArrayEntry(string $key, string $pos): void
+	{
+		unset($this->table_array[$key][$pos]);
+	}
+
+	/**
+	 * Set table name
+	 *
+	 * @param  string $table_name
+	 * @return void
+	 * @throws \RuntimeException 1998 for empty table name
+	 */
+	public function setTableName(string $table_name): void
+	{
+		$this->table_name = $table_name;
+		if (empty($this->table_name)) {
+			$this->__dbError(1998, false, 'MAJOR ERROR: Core settings missing: table_name');
+			throw new \RuntimeException('MAJOR ERROR: Core settings missing: table_name', 1998);
+		}
+	}
+
+	/**
+	 * Return table name or empty string if not net
+	 *
+	 * @return string
+	 */
+	public function getTableName(): string
+	{
+		return $this->table_name ?? '';
+	}
+
+	/**
+	 * Set primary key name
+	 *
+	 * @param  string $pk_name
+	 * @return void
+	 */
+	public function setPkName(string $pk_name): void
+	{
+		$this->pk_name = $pk_name;
+	}
+
+	/**
+	 * get primary key name
+	 *
+	 * @return string
+	 */
+	public function getPkName(): string
+	{
+		return $this->pk_name;
+	}
+
+	/**
+	 * set primary key id, can be null for not yet set
+	 *
+	 * @param  int|string|null $pk_id
+	 * @return void
+	 */
+	public function setPkId(int|string|null $pk_id): void
+	{
+		$this->pk_id = $pk_id;
+	}
+
+	/**
+	 * return primary key id, or null if not set
+	 *
+	 * @return int|string|null
+	 */
+	public function getPkId(): int|string|null
+	{
+		return $this->pk_id;
 	}
 
 	/**
@@ -198,8 +333,8 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function dbCheckPkSet(): bool
 	{
 		// if pk_id is set, overrule ...
-		if ($this->pk_id) {
-			$this->table_array[$this->pk_name]['value'] = $this->pk_id;
+		if (!empty($this->getPkId())) {
+			$this->table_array[$this->pk_name]['value'] = $this->getPkId();
 		}
 		// if not set ... produce error
 		if (!$this->table_array[$this->pk_name]['value']) {
@@ -287,7 +422,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			$q .= ' AND ' . $q_where;
 		}
 		// if 0, error
-		$this->pk_id = null;
+		$this->setPkId(null);
 		if (!$this->dbExec($q)) {
 			$this->__dbError(1022);
 		}
@@ -374,7 +509,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 				}
 			}
 			// possible dbFetchArray errors ...
-			$this->pk_id = $this->table_array[$this->pk_name]['value'];
+			$this->setPkId($this->table_array[$this->pk_name]['value']);
 		} else {
 			$this->__dbError(1022);
 		}
@@ -397,10 +532,6 @@ class ArrayIO extends \CoreLibs\DB\IO
 		if (count($table_array)) {
 			$this->table_array = $table_array;
 		}
-		// PK ID check
-		// if ($this->pk_id && !$this->table_array[$this->pk_name]["value"]) {
-		// 	$this->table_array[$this->pk_name]["value"]=$this->pk_id;
-		// }
 		// checken ob PKs gesetzt, wenn alle -> update, wenn keiner -> insert, wenn ein paar -> ERROR!
 		if (!$this->table_array[$this->pk_name]['value']) {
 			$insert = 1;
@@ -624,16 +755,11 @@ class ArrayIO extends \CoreLibs\DB\IO
 				$q .= ' AND ' . $q_where;
 			}
 			// set pk_id ... if it has changed or so
-			$this->pk_id = $this->table_array[$this->pk_name]['value'];
+			$this->setPkId($this->table_array[$this->pk_name]['value']);
 		} else {
 			$q = 'INSERT INTO ' . $this->table_name . ' ';
 			$q .= '(' . $q_vars . ') ';
 			$q .= 'VALUES (' . $q_data . ')';
-			// write primary key too
-			// if ($q_data)
-			//	$q .= ", ";
-			// $q .= $this->pk_name." = ".$this->table_array[$this->pk_name]['value']." ";
-			// $this->pk_id = $this->table_array[$this->pk_name]['value'];
 		}
 		// return success or not
 		if (!$this->dbExec($q)) {
@@ -646,7 +772,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 				$insert_id = 0;
 			}
 			$this->table_array[$this->pk_name]['value'] = $insert_id;
-			$this->pk_id = $insert_id;
+			$this->setPkId($insert_id);
 		}
 		// return the table if needed
 		return $this->table_array;

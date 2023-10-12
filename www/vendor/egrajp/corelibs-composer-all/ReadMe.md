@@ -23,3 +23,21 @@ Alternative setup composer local zip file repot:
 ## Install package
 
 `composer require egrajp/corelibs-composer-all:^8.0`
+
+## Tests
+
+All tests must be run from the base folder
+
+### phan
+
+`phan --progress-bar -C --analyze-twic`
+
+### phpstan
+
+`phpstan`
+
+### phpunit
+
+PHP unit is installed via "phiev"
+
+`tools/phpunit test/phpunit`

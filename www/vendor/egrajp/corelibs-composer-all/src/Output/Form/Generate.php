@@ -221,7 +221,7 @@ namespace CoreLibs\Output\Form;
 use CoreLibs\Get\System;
 use CoreLibs\Debug\Support;
 
-class Generate extends \CoreLibs\DB\Extended\ArrayIO
+class Generate
 {
 	// for the load statetment describes which elements from
 	// the load query should be shown and i which format
@@ -247,7 +247,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public array $reference_array = []; // reference arrays -> stored in $this->reference_array[$table_name] => [];
 	// NOTE: should be changed to this @var mixed[]
 	/** @var array<mixed> */
-	public array $element_list; // element list for elements next to each other as a special sub group
+	public array $element_list = []; // element list for elements next to each other as a special sub group
 	/** @var array<mixed> */
 	public array $table_array = [];
 	/** @var string */
@@ -300,7 +300,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	// log
 	/** @var \CoreLibs\Logging\Logging */
 	public \CoreLibs\Logging\Logging $log;
-
+	/** @var \CoreLibs\DB\Extended\ArrayIO */
+	public \CoreLibs\DB\Extended\ArrayIO $dba;
 	// now some default error msgs (english)
 	/** @var array<mixed> */
 	public array $language_array = [];
@@ -373,7 +374,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		// $log->debug('CONFIG ARRAY', $log->prAr($config_array));
 		// start the array_io class which will start db_io ...
-		parent::__construct(
+		$this->dba = new \CoreLibs\DB\Extended\ArrayIO(
 			$db_config,
 			$config_array['table_array'],
 			$config_array['table_name'],
@@ -392,9 +393,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		if (empty($this->load_query)) {
 			$this->log->error('Missing Load Query for: ' . $this->my_page_name);
 		}
-		$this->archive_pk_name = 'a_' . $this->pk_name;
-		$this->col_name = str_replace('_id', '', $this->pk_name);
-		$this->int_pk_name = $this->pk_name;
+		$this->archive_pk_name = 'a_' . $this->dba->getPkName();
+		$this->col_name = str_replace('_id', '', $this->dba->getPkName());
+		$this->int_pk_name = $this->dba->getPkName();
 		// check if reference_arrays are given and proceed them
 		if (isset($config_array['reference_arrays']) && is_array($config_array['reference_arrays'])) {
 			foreach ($config_array['reference_arrays'] as $key => $value) {
@@ -445,17 +446,6 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 
 		// set email regex
 		$this->email_regex = \CoreLibs\Check\Email::getEmailRegex();
-	}
-
-	/**
-	 * deconstructor
-	 * writes out error msg to global var
-	 * closes db connectio
-	 */
-	public function __destruct()
-	{
-		// close DB connection
-		parent::__destruct();
 	}
 
 	// PRIVATE METHODS  |=================================================>
@@ -526,12 +516,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function formDumpTableArray()
 	{
-		if (!is_array($this->table_array)) {
-			$this->table_array = [];
-		}
-		reset($this->table_array);
-		$string = '<b>TABLE ARRAY DUMP:</b> ' . $this->table_name . '<br>';
-		foreach ($this->table_array as $key => $value) {
+		$string = '<b>TABLE ARRAY DUMP:</b> ' . $this->dba->getTableName() . '<br>';
+		foreach ($this->dba->getTableArray() as $key => $value) {
 			$string .= '<b>' . $key . '</b>: ' . $value['value'] . '<br>';
 		}
 		return $string;
@@ -550,11 +536,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		string $want_key,
 		?string $key_value = null
 	): ?string {
-		if (!is_array($this->table_array)) {
-			$this->table_array = [];
-		}
-		reset($this->table_array);
-		foreach ($this->table_array as $key => $value) {
+		foreach ($this->dba->getTableArray() as $key => $value) {
 			if (isset($value[$want_key]) && !$key_value) {
 				return $key;
 			} elseif (isset($value[$want_key]) && $value[$want_key] == $key_value && $key_value) {
@@ -577,11 +559,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		?string $key_value = null
 	): array {
 		$key_array = [];
-		if (!is_array($this->table_array)) {
-			$this->table_array = [];
-		}
-		reset($this->table_array);
-		foreach ($this->table_array as $key => $value) {
+		foreach ($this->dba->getTableArray(true) as $key => $value) {
 			if ($value[$want_key] && !$key_value) {
 				array_push($key_array, $key);
 			}
@@ -688,7 +666,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$this->delete &&
 			$this->base_acl_level >= $this->security_level['delete']
 		) {
-			if (isset($this->table_array['protected']['value']) && $this->table_array['protected']['value']) {
+			if (
+				!empty($this->dba->getTableArray()['protected']['value'])
+			) {
 				$this->msg .= $this->l->__('Cannot delete this Dataset, because it is internaly protected!');
 				$this->error = 2;
 			}
@@ -717,13 +697,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$this->log->debug('REMOVE ELEMENT', 'Remove REF ELEMENT: ' . $this->base_acl_level . ' >= '
 			. $this->security_level['delete']);
 		$this->log->debug('REMOVE ELEMENT', 'Protected Value set: '
-			. (string)isset($this->table_array['protected']['value']));
+			. (string)isset($this->dba->getTableArray()['protected']['value']));
 		$this->log->debug('REMOVE ELEMENT', 'Error: ' . $this->error);
 		// only do if the user is allowed to delete
 		if (
 			isset($this->security_level['delete']) &&
 			$this->base_acl_level >= $this->security_level['delete'] &&
-			empty($this->table_array['protected']['value']) &&
+			empty($this->dba->getTableArray()['protected']['value']) &&
 			!$this->error
 		) {
 			for ($i = 0, $i_max = count($element_list); $i < $i_max; $i++) {
@@ -753,7 +733,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					$flag = $remove_name[$i] . '_flag';
 					if ($_POST[$flag] == 'true') {
 						$q = 'DELETE FROM ' . $element_list[$i] . ' WHERE ' . $pk_name . ' = ' . $_POST[$id];
-						$this->dbExec($q);
+						$this->dba->dbExec($q);
 						$this->msg .= $this->l->__('Removed entry from list<br>');
 						$this->warning = 1;
 					} // post okay true -> delete
@@ -787,7 +767,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							$q = 'DELETE FROM ' . $element_list[$i]
 								. ' WHERE ' . $pk_name . ' = ' . $_POST[$prfx . $pk_name][$j];
 							// $this->log->debug('edit_db', 'DEL: $q');
-							$this->dbExec($q);
+							$this->dba->dbExec($q);
 							$this->msg .= $this->l->__('Deleted deselected entries from list<br>');
 							$this->warning = 1;
 						}
@@ -836,12 +816,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$t_pk_name = $this->archive_pk_name;
 
 		// load list data
-		$this->dbExec($this->load_query);
-		while (is_array($res = $this->dbFetchArray())) {
+		$this->dba->dbExec($this->load_query);
+		while (is_array($res = $this->dba->dbFetchArray())) {
 			$pk_ids[] = $res[$this->int_pk_name];
 			if (
-				isset($this->table_array[$this->int_pk_name]['value']) &&
-				$res[$this->int_pk_name] == $this->table_array[$this->int_pk_name]['value']
+				isset($this->dba->getTableArray()[$this->int_pk_name]['value']) &&
+				$res[$this->int_pk_name] == $this->dba->getTableArray()[$this->int_pk_name]['value']
 			) {
 				$pk_selected = $res[$this->int_pk_name];
 			}
@@ -958,7 +938,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$this->base_acl_level >= $this->security_level['save']
 		) {
 			$seclevel_okay = true;
-			if (empty($this->table_array[$this->int_pk_name]['value'])) {
+			if (empty($this->dba->getTableArray()[$this->int_pk_name]['value'])) {
 				$save = $this->l->__('Save');
 			} else {
 				$save = $this->l->__('Update');
@@ -966,12 +946,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// print the old_school hidden if requestet
 			if ($old_school_hidden === true) {
 				$pk_name = $this->int_pk_name;
-				$pk_value = $this->table_array[$this->int_pk_name]['value'];
+				$pk_value = $this->dba->getTableArray()[$this->int_pk_name]['value'];
 			}
 		} // show save part
 		// show delete part only if pk is set && we want to see the delete
 		if (
-			!empty($this->table_array[$this->int_pk_name]['value']) &&
+			!empty($this->dba->getTableArray()[$this->int_pk_name]['value']) &&
 			!$hide_delete &&
 			!empty($this->security_level['delete']) &&
 			$this->base_acl_level >= $this->security_level['delete']
@@ -1005,47 +985,47 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		$data = [];
 		// special 2nd color for 'binary' attribut
 		if (
-			$this->table_array[$element_name]['type'] == 'binary' &&
-			!isset($this->table_array[$element_name]['value'])
+			$this->dba->getTableArray()[$element_name]['type'] == 'binary' &&
+			!isset($this->dba->getTableArray()[$element_name]['value'])
 		) {
 			$EDIT_FGCOLOR_T = 'edit_fgcolor_no';
 		} else {
 			$EDIT_FGCOLOR_T = 'edit_fgcolor';
 		}
-		$output_name = $this->table_array[$element_name]['output_name'];
+		$output_name = $this->dba->getTableArray()[$element_name]['output_name'];
 		if (
-			isset($this->table_array[$element_name]['mandatory']) &&
-			$this->table_array[$element_name]['mandatory']
+			isset($this->dba->getTableArray()[$element_name]['mandatory']) &&
+			$this->dba->getTableArray()[$element_name]['mandatory']
 		) {
 			$output_name .= ' *';
 		}
 		// create right side depending on 'definiton' in table_array
-		$type = $this->table_array[$element_name]['type'];
+		$type = $this->dba->getTableArray()[$element_name]['type'];
 		// set default min edit/read to 100 (admin)
-		$min_edit_acl = $this->table_array[$element_name]['min_edit_acl'] ?? 100;
-		$min_show_acl = $this->table_array[$element_name]['min_show_acl'] ?? 100;
+		$min_edit_acl = $this->dba->getTableArray()[$element_name]['min_edit_acl'] ?? 100;
+		$min_show_acl = $this->dba->getTableArray()[$element_name]['min_show_acl'] ?? 100;
 		$show_value = '-';
 		// view only output
-		if ($this->table_array[$element_name]['type'] == 'view') {
-			$data['value'] = empty($this->table_array[$element_name]['value']) ?
-				$this->table_array[$element_name]['empty'] :
-				$this->table_array[$element_name]['value'];
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'view') {
+			$data['value'] = empty($this->dba->getTableArray()[$element_name]['value']) ?
+				$this->dba->getTableArray()[$element_name]['empty'] :
+				$this->dba->getTableArray()[$element_name]['value'];
 			$show_value = $data['value'];
 		}
 		// binary true/false element
-		if ($this->table_array[$element_name]['type'] == 'binary') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'binary') {
 			$data['checked'] = 0;
-			for ($i = (count($this->table_array[$element_name]['element_list']) - 1); $i >= 0; $i--) {
+			for ($i = (count($this->dba->getTableArray()[$element_name]['element_list']) - 1); $i >= 0; $i--) {
 				$data['value'][] = $i;
-				$data['output'][] = $this->table_array[$element_name]['element_list'][$i] ?? null;
+				$data['output'][] = $this->dba->getTableArray()[$element_name]['element_list'][$i] ?? null;
 				$data['name'] = $element_name;
 				if (
-					isset($this->table_array[$element_name]['value']) &&
-					(($i && $this->table_array[$element_name]['value']) ||
-					(!$i && !$this->table_array[$element_name]['value']))
+					isset($this->dba->getTableArray()[$element_name]['value']) &&
+					(($i && $this->dba->getTableArray()[$element_name]['value']) ||
+					(!$i && !$this->dba->getTableArray()[$element_name]['value']))
 				) {
-					$data['checked'] = $this->table_array[$element_name]['value'];
-					$show_value = $this->table_array[$element_name]['element_list'][$i] ?? $data['checked'];
+					$data['checked'] = $this->dba->getTableArray()[$element_name]['value'];
+					$show_value = $this->dba->getTableArray()[$element_name]['element_list'][$i] ?? $data['checked'];
 				}
 
 				if ($i) {
@@ -1054,85 +1034,84 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 		}
 		// checkbox element
-		if ($this->table_array[$element_name]['type'] == 'checkbox') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'checkbox') {
 			$data['name'] = $element_name;
-			$data['value'][] = $this->table_array[$element_name]['element_list'];
-			$data['checked'] = $this->table_array[$element_name]['value'];
+			$data['value'][] = $this->dba->getTableArray()[$element_name]['element_list'];
+			$data['checked'] = $this->dba->getTableArray()[$element_name]['value'];
 			// array map element list + value
 			// foreach ($data['checked'] as $checked)
 			$show_value = join(', ', $data['checked']);
 		}
 		// normal text element
-		if ($this->table_array[$element_name]['type'] == 'text') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'text') {
 			$data['name'] = $element_name;
-			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
-			$data['size'] = $this->table_array[$element_name]['size'] ?? '';
-			$data['length'] = $this->table_array[$element_name]['length'] ?? '';
+			$data['value'] = $this->dba->getTableArray()[$element_name]['value'] ?? '';
+			$data['size'] = $this->dba->getTableArray()[$element_name]['size'] ?? '';
+			$data['length'] = $this->dba->getTableArray()[$element_name]['length'] ?? '';
 			$show_value = $data['value'];
 		}
 		// password element, does not write back the value
-		if ($this->table_array[$element_name]['type'] == 'password') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'password') {
 			$data['name'] = $element_name;
-			$data['HIDDEN_value'] = $this->table_array[$element_name]['HIDDEN_value'];
-			$data['size'] = $this->table_array[$element_name]['size'] ?? '';
-			$data['length'] = $this->table_array[$element_name]['length'] ?? '';
+			$data['HIDDEN_value'] = $this->dba->getTableArray()[$element_name]['HIDDEN_value'];
+			$data['size'] = $this->dba->getTableArray()[$element_name]['size'] ?? '';
+			$data['length'] = $this->dba->getTableArray()[$element_name]['length'] ?? '';
 		}
 		// date (YYYY-MM-DD)
-		if ($this->table_array[$element_name]['type'] == 'date') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'date') {
 			$data['name'] = $element_name;
-			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
+			$data['value'] = $this->dba->getTableArray()[$element_name]['value'] ?? '';
 			$show_value = $data['value'];
 		}
 		// date time (no sec) (YYYY-MM-DD HH:mm)
-		if ($this->table_array[$element_name]['type'] == 'datetime') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'datetime') {
 			$data['name'] = $element_name;
-			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
+			$data['value'] = $this->dba->getTableArray()[$element_name]['value'] ?? '';
 			$show_value = $data['value'];
 		}
 		// textarea
-		if ($this->table_array[$element_name]['type'] == 'textarea') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'textarea') {
 			$data['name'] = $element_name;
-			$data['value'] = $this->table_array[$element_name]['value'] ?? '';
-			$data['rows'] = $this->table_array[$element_name]['rows'] ?? '';
-			$data['cols'] = $this->table_array[$element_name]['cols'] ?? '';
+			$data['value'] = $this->dba->getTableArray()[$element_name]['value'] ?? '';
+			$data['rows'] = $this->dba->getTableArray()[$element_name]['rows'] ?? '';
+			$data['cols'] = $this->dba->getTableArray()[$element_name]['cols'] ?? '';
 			$show_value = $data['value'];
 		}
 		// for drop_down_*
-		if (preg_match("/^drop_down_/", $this->table_array[$element_name]['type'])) {
+		if (preg_match("/^drop_down_/", $this->dba->getTableArray()[$element_name]['type'])) {
 			$type = 'drop_down';
 			// outer query overrules inner
-			if (empty($query) && !empty($this->table_array[$element_name]['query'])) {
-				$query = $this->table_array[$element_name]['query'];
+			if (empty($query) && !empty($this->dba->getTableArray()[$element_name]['query'])) {
+				$query = $this->dba->getTableArray()[$element_name]['query'];
 			}
 		}
 		// for drop_down_db*
 		$data['drop_down_input'] = 0;
-		if (preg_match("/^drop_down_db/", $this->table_array[$element_name]['type'])) {
+		if (preg_match("/^drop_down_db/", $this->dba->getTableArray()[$element_name]['type'])) {
 			// if still NO query
 			if (empty($query)) {
 				// select pk_name, input_name from table_name (order by order_by)
 				$query = "SELECT "
 					. (
 						(
-							isset($this->table_array[$element_name]['select_distinct']) &&
-							$this->table_array[$element_name]['select_distinct']
+							isset($this->dba->getTableArray()[$element_name]['select_distinct']) &&
+							$this->dba->getTableArray()[$element_name]['select_distinct']
 						) ? "DISTINCT" : ''
 					) . " "
-					. $this->table_array[$element_name]['pk_name'] . ", "
-					. $this->table_array[$element_name]['input_name'] . " ";
-				if (!empty($this->table_array[$element_name]['order_by'])) {
-					$query .= ", " . $this->table_array[$element_name]['order_by'] . " ";
+					. $this->dba->getTableArray()[$element_name]['pk_name'] . ", "
+					. $this->dba->getTableArray()[$element_name]['input_name'] . " ";
+				if (!empty($this->dba->getTableArray()[$element_name]['order_by'])) {
+					$query .= ", " . $this->dba->getTableArray()[$element_name]['order_by'] . " ";
 				}
-				$query .= "FROM " . $this->table_array[$element_name]['table_name'];
+				$query .= "FROM " . $this->dba->getTableArray()[$element_name]['table_name'];
 				// possible where statements
-				if (!empty($this->table_array[$element_name]['where'])) {
-					$query .= " WHERE " . $this->table_array[$element_name]['where'];
+				if (!empty($this->dba->getTableArray()[$element_name]['where'])) {
+					$query .= " WHERE " . $this->dba->getTableArray()[$element_name]['where'];
 				}
 				// not self where
 				if (
-					!empty($this->table_array[$element_name]['where_not_self']) &&
-					isset($this->table_array[$this->int_pk_name]['value']) &&
-					$this->table_array[$this->int_pk_name]['value']
+					!empty($this->dba->getTableArray()[$element_name]['where_not_self']) &&
+					!empty($this->dba->getTableArray()[$this->int_pk_name]['value'])
 				) {
 					// check if query has where already
 					if (strstr($query, 'WHERE') === false) {
@@ -1140,104 +1119,119 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					} else {
 						$query .= " AND ";
 					}
-					$query .= " " . $this->int_pk_name . " <> " . $this->table_array[$this->int_pk_name]['value'];
+					$query .= " " . $this->int_pk_name . " <> "
+						. $this->dba->getTableArray()[$this->int_pk_name]['value'];
 				}
 				// possible order statements
-				if (!empty($this->table_array[$element_name]['order_by'])) {
-					$query .= " ORDER BY " . $this->table_array[$element_name]['order_by'];
+				if (!empty($this->dba->getTableArray()[$element_name]['order_by'])) {
+					$query .= " ORDER BY " . $this->dba->getTableArray()[$element_name]['order_by'];
 				}
 			}
 			// set output data
 			$data['selected'] = '';
 			$data['name'] = $element_name;
 			$data['value'][] = '';
-			$data['output'][] = $this->l->__('Please choose .. . ');
-			while (is_array($res = $this->dbReturn($query))) {
+			$data['output'][] = $this->l->__('Please choose ... ');
+			// $this->log->debug('DROP DOWN DB', 'TABLE ARRAY [' . $element_name . ']: '
+			// 	. $this->log->prAr($this->dba->getTableArray()));
+			while (is_array($res = $this->dba->dbReturn($query))) {
+				// $this->log->debug('DROP DOWN DB', 'Hightlight: [' . $element_name . '] '
+				// 	. ($this->dba->getTableArray()[$element_name]['value'] ?? '-')
+				// 	. ' RES[0]: ' . $res[0] . ', Sel: ' . $res[1]);
 				$data['value'][] = $res[0];
 				$data['output'][] = $res[1];
 				if (
-					isset($this->table_array[$element_name]['value']) &&
-					$this->table_array[$element_name]['value'] == $res[0]
+					isset($this->dba->getTableArray()[$element_name]['value']) &&
+					$this->dba->getTableArray()[$element_name]['value'] == $res[0]
 				) {
-					$data['selected'] = $this->table_array[$element_name]['value'];
+					$data['selected'] = $this->dba->getTableArray()[$element_name]['value'];
 					$show_value = $res[1];
+					// $this->log->debug('DROP DOWN DB', 'Selectd [' . $element_name . ']: '
+					// 	. $data['selected'] . '/' . $show_value);
+					// break;
+					// continue;
 				}
 			}
+			// $this->dbCacheReset($query);
 			// for _input put additional field next to drop down
-			if (preg_match("/^drop_down_db_input/", $this->table_array[$element_name]['type'])) {
+			if (preg_match("/^drop_down_db_input/", $this->dba->getTableArray()[$element_name]['type'])) {
 				$data['drop_down_input'] = 1;
 				// pre fill the temp if empty and other side is selected, only for same_db
 				if (
-					$this->table_array[$element_name]['type'] == 'drop_down_db_input_same_db' &&
-					!$this->table_array[$element_name]['input_value'] &&
-					$this->table_array[$element_name]['value']
+					$this->dba->getTableArray()[$element_name]['type'] == 'drop_down_db_input_same_db' &&
+					!$this->dba->getTableArray()[$element_name]['input_value'] &&
+					$this->dba->getTableArray()[$element_name]['value']
 				) {
-					$this->table_array[$element_name]['input_value'] = $this->table_array[$element_name]['value'];
+					$this->dba->getTableArray()[$element_name]['input_value'] =
+						$this->dba->getTableArray()[$element_name]['value'];
 				}
-				$data['input_value'] = $this->table_array[$element_name]['input_value'];
-				$data['input_name'] = $this->table_array[$element_name]['input_name']
-					. (($this->table_array[$element_name]['type'] == 'drop_down_db_input_same_db') ? '_temp' : '');
-				$data['input_size'] = $this->table_array[$element_name]['size'];
-				$data['input_length'] = $this->table_array[$element_name]['length'];
+				$data['input_value'] = $this->dba->getTableArray()[$element_name]['input_value'];
+				$data['input_name'] = $this->dba->getTableArray()[$element_name]['input_name']
+					. (($this->dba->getTableArray()[$element_name]['type'] == 'drop_down_db_input_same_db') ?
+						'_temp' : ''
+					);
+				$data['input_size'] = $this->dba->getTableArray()[$element_name]['size'];
+				$data['input_length'] = $this->dba->getTableArray()[$element_name]['length'];
 			}
 		}
 		// drop down array
-		if ($this->table_array[$element_name]['type'] == 'drop_down_array') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'drop_down_array') {
 			$data['selected'] = '';
 			$data['name'] = $element_name;
 			$data['value'][] = '';
-			$data['output'][] = $this->l->__('Please choose .. . ');
+			$data['output'][] = $this->l->__('Please choose ... ');
 			// outer query overrules inner
 			foreach ($query as $key => $value) {
 				$data['value'][] = $key;
 				$data['output'][] = $value;
-				if ($this->table_array[$element_name]['value'] == $key) {
-					$data['selected'] = $this->table_array[$element_name]['value'];
+				if ($this->dba->getTableArray()[$element_name]['value'] == $key) {
+					$data['selected'] = $this->dba->getTableArray()[$element_name]['value'];
 					$show_value = $value;
 				}
 			}
 		}
 		// radio array
-		if ($this->table_array[$element_name]['type'] == 'radio_array') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'radio_array') {
 			if (!$query) {
-				$query = $this->table_array[$element_name]['query'];
+				$query = $this->dba->getTableArray()[$element_name]['query'];
 			}
 			$data['name'] = $element_name;
 			foreach ($query as $key => $value) {
 				$data['value'][] = $key;
 				$data['output'][] = $value;
-				if ($this->table_array[$element_name]['value'] == $key) {
-					$data['checked'] = $this->table_array[$element_name]['value'];
+				if ($this->dba->getTableArray()[$element_name]['value'] == $key) {
+					$data['checked'] = $this->dba->getTableArray()[$element_name]['value'];
 					$show_value = $value;
 				}
 				$data['separator'] = '';
 			}
 		}
 		// for media / not yet implemented
-		if ($this->table_array[$element_name]['type'] == 'media') {
-			//media::insert_file($element_name,$this->table_array[$element_name]['value'],$query);
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'media') {
+			//media::insert_file($element_name,$this->dba->getTableArray()[$element_name]['value'],$query);
 		}
 		// order button
-		if ($this->table_array[$element_name]['type'] == 'order') {
-			$data['output_name'] = $this->table_array[$element_name]['output_name'];
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'order') {
+			$data['output_name'] = $this->dba->getTableArray()[$element_name]['output_name'];
 			$data['name'] = $element_name;
-			$data['value'] = $this->table_array[$element_name]['value'] ?? 0;
+			$data['value'] = $this->dba->getTableArray()[$element_name]['value'] ?? 0;
 			$data['col_name'] = $this->col_name;
-			$data['table_name'] = $this->table_name;
+			$data['table_name'] = $this->dba->getTableName();
 			$data['query'] = $query !== null ? urlencode($query) : '';
 		}
 		// file upload
-		if ($this->table_array[$element_name]['type'] == 'file') {
+		if ($this->dba->getTableArray()[$element_name]['type'] == 'file') {
 			$data['name'] = $element_name;
 			// if file for this exsists, print 'delete, view stuff'
-			if ($this->table_array[$element_name]['value']) {
+			if ($this->dba->getTableArray()[$element_name]['value']) {
 				$data['content'] = 1;
-				$data['url'] = $this->table_array[$element_name]['open_dir']
-					. $this->table_array[$element_name]['value'];
-				$data['output'] = $this->table_array[$element_name]['value'];
-				$data['value'] = $this->table_array[$element_name]['value'];
+				$data['url'] = $this->dba->getTableArray()[$element_name]['open_dir']
+					. $this->dba->getTableArray()[$element_name]['value'];
+				$data['output'] = $this->dba->getTableArray()[$element_name]['value'];
+				$data['value'] = $this->dba->getTableArray()[$element_name]['value'];
 			}
 		}
+		// $this->log->debug('ELEMENT CREATE', 'Data: [' . $output_name . '] ' . $this->log->prAr($data));
 		return [
 			'output_name' => $output_name,
 			'color' => $EDIT_FGCOLOR_T,
@@ -1260,11 +1254,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function formErrorCheck(): void
 	{
-		if (!is_array($this->table_array)) {
-			$this->table_array = [];
-		}
-		reset($this->table_array);
-		foreach ($this->table_array as $key => $value) {
+		foreach ($this->dba->getTableArray() as $key => $value) {
 			// skip if we are not allowe to write this anyway
 			// $this->log->debug('ERROR CHECK', 'ACL K: ' . $key . ', '
 			// 	. ($value['min_edit_acl'] ?? 100) . ' < ' . $this->base_acl_level);
@@ -1275,8 +1265,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// if error value set && somethign input, check if input okay
 			if (
 				isset($value['error_check']) &&
-				isset($this->table_array[$key]['value']) &&
-				!empty($this->table_array[$key]['value'])
+				!empty($this->dba->getTableArray()[$key]['value'])
 			) {
 				$this->log->debug('ERROR CHECK', 'Key: ' . $key . ' => ' . $value['error_check']);
 				// each error check can be a piped seperated value, lets split it
@@ -1284,41 +1273,45 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				foreach (explode('|', $value['error_check']) as $error_check) {
 					switch ($error_check) {
 						case 'number':
-							if (!is_numeric($this->table_array[$key]['value'])) {
+							if (!is_numeric($this->dba->getTableArray()[$key]['value'])) {
 								$this->msg .= sprintf(
 									$this->l->__('Please enter a vailid Number for the <b>%s</b> Field!<br>'),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						case 'date': // YYYY-MM-DD
-							if (!\CoreLibs\Combined\DateTime::checkDate($this->table_array[$key]['value'])) {
+							if (!\CoreLibs\Combined\DateTime::checkDate($this->dba->getTableArray()[$key]['value'])) {
 								$this->msg .= sprintf(
 									$this->l->__(
 										'Please enter a valid date (YYYY-MM-DD) for the <b>%s</b> Field!<br>'
 									),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						case 'time': // HH:MM[:SS]
-							if (!\CoreLibs\Combined\DateTime::checkDateTime($this->table_array[$key]['value'])) {
+							if (
+								!\CoreLibs\Combined\DateTime::checkDateTime($this->dba->getTableArray()[$key]['value'])
+							) {
 								$this->msg .= sprintf(
 									$this->l->__(
 										'Please enter a valid time (HH:mm[:SS]) for the <b>%s</b> Field!<br>'
 									),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						case 'datetime': // YYYY-MM-DD HH:MM[:SS]
-							if (!\CoreLibs\Combined\DateTime::checkDateTime($this->table_array[$key]['value'])) {
+							if (
+								!\CoreLibs\Combined\DateTime::checkDateTime($this->dba->getTableArray()[$key]['value'])
+							) {
 								$this->msg .= sprintf(
 									$this->l->__(
 										'Please enter a valid date time (YYYY-MM-DD HH:mm) '
 											. 'for the <b>%s</b> Field!<br>'
 									),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
@@ -1326,7 +1319,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							if (
 								!preg_match(
 									"/^\d{1,3}\ ?([ymd]{1}|day(s)?|year(s)?|month(s)?)$/i",
-									$this->table_array[$key]['value']
+									$this->dba->getTableArray()[$key]['value']
 								)
 							) {
 								$this->msg .= sprintf(
@@ -1334,98 +1327,104 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 										'Please enter a valid time interval in the format '
 										. '<length> Y|M|D for the <b>%s</b> Field!<br>'
 									),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						case 'email':
-							if (!preg_match("/$this->email_regex/", $this->table_array[$key]['value'])) {
+							if (!preg_match("/$this->email_regex/", $this->dba->getTableArray()[$key]['value'])) {
 								$this->msg .= sprintf(
 									$this->l->__(
 										'Please enter a valid E-Mail Address for the <b>%s</b> Field!<br>'
 									),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						// check unique, check if field in table is not yet exist
 						case 'unique':
 							$q = 'SELECT ' . $key . ' AS unique_row '
-								. 'FROM ' . $this->table_name . ' '
+								. 'FROM ' . $this->dba->getTableName() . ' '
 								. 'WHERE ' . $key . ' = '
-								. "'" . $this->dbEscapeString($this->table_array[$key]['value']) . "'";
-							if ($this->table_array[$this->int_pk_name]['value']) {
+								. "'" . $this->dba->dbEscapeString($this->dba->getTableArray()[$key]['value']) . "'";
+							if ($this->dba->getTableArray()[$this->int_pk_name]['value']) {
 								$q .= ' AND ' . $this->int_pk_name . ' <> '
-									. $this->table_array[$this->int_pk_name]['value'];
+									. $this->dba->getTableArray()[$this->int_pk_name]['value'];
 							}
 							if (
-								is_array($s_res = $this->dbReturnRow($q)) &&
+								is_array($s_res = $this->dba->dbReturnRow($q)) &&
 								!empty($s_res['unique_row'])
 							) {
 								$this->msg .= sprintf(
 									$this->l->__('The field <b>%s</b> can be used only once!<br>'),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						case 'custom':
 							if (
-								!preg_match($this->table_array[$key]['error_regex'], $this->table_array[$key]['value'])
+								!preg_match(
+									$this->dba->getTableArray()[$key]['error_regex'],
+									$this->dba->getTableArray()[$key]['value']
+								)
 							) {
 								$this->msg .= sprintf(
 									$this->l->__('Please enter a valid (%s) input for the <b>%s</b> Field!<br>'),
-									$this->table_array[$key]['error_example'],
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['error_example'],
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						case 'alphanumericspace':
 							// $this->log->debug('edit', 'IN Alphanumericspace');
-							if (!preg_match("/^[0-9A-Za-z_\-\ ]+$/", $this->table_array[$key]['value'])) {
+							if (!preg_match("/^[0-9A-Za-z_\-\ ]+$/", $this->dba->getTableArray()[$key]['value'])) {
 								$this->msg .= sprintf(
 									$this->l->__('Please enter a valid alphanumeric (Numbers and Letters, -, _ '
 										. 'and spaces allowed) value for the <b>%s</b> Field!<br>'),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						case 'alphanumeric':
 							// $this->log->debug('edit', 'IN Alphanumeric');
-							if (!preg_match("/^[0-9A-Za-z_\-]+$/", $this->table_array[$key]['value'])) {
+							if (!preg_match("/^[0-9A-Za-z_\-]+$/", $this->dba->getTableArray()[$key]['value'])) {
 								$this->msg .= sprintf(
 									$this->l->__('Please enter a valid alphanumeric (Numbers and Letters only '
 										. 'also - and _, no spaces) value for the <b>%s</b> Field!<br>'),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						// this one also allows @ and .
 						case 'alphanumericextended':
 							// $this->log->debug('edit', 'IN Alphanumericextended');
-							if (!preg_match("/^[0-9A-Za-z_\-@\.]+$/", $this->table_array[$key]['value'])) {
+							if (!preg_match("/^[0-9A-Za-z_\-@\.]+$/", $this->dba->getTableArray()[$key]['value'])) {
 								$this->msg .= sprintf(
 									$this->l->__('Please enter a valid alphanumeric extended (Numbers, Letters, -,  '
 										. '_, @ and . only, no spaces) value for the <b>%s</b> Field!<br>'),
-									$this->table_array[$key]['output_name']
+									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
 							break;
 						case 'password':
 							// password can only be alphanumeric + special chars
 							// password and CONFIRM_password need to be the same
-							if ($this->table_array[$key]['value'] != $this->table_array[$key]['CONFIRM_value']) {
+							if (
+								$this->dba->getTableArray()[$key]['value'] !=
+								$this->dba->getTableArray()[$key]['CONFIRM_value']
+							) {
 								// error
 							}
 							break;
 						case 'json':
 							// check if valid json
-							$json_out = json_decode($this->table_array[$key]['value'], true);
+							$json_out = json_decode($this->dba->getTableArray()[$key]['value'], true);
 							$this->log->debug('JSON ENCODE', 'LAST ERROR: ' . json_last_error()
-								. ' WITH: ' . $this->table_array[$key]['value']);
+								. ' WITH: ' . $this->dba->getTableArray()[$key]['value']);
 							if (json_last_error()) {
 								$this->msg .= sprintf(
 									$this->l->__('Please enter a valid JSON string for the field <b>%s<b>: %s'),
-									$this->table_array[$key]['output_name'],
+									$this->dba->getTableArray()[$key]['output_name'],
 									json_last_error_msg()
 								);
 							}
@@ -1438,48 +1437,49 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				(
 					// for all 'normal' fields
 					(
-						$this->table_array[$key]['type'] != 'password' &&
-						$this->table_array[$key]['type'] != 'drop_down_db_input' &&
-						!$this->table_array[$key]['value']
+						$this->dba->getTableArray()[$key]['type'] != 'password' &&
+						$this->dba->getTableArray()[$key]['type'] != 'drop_down_db_input' &&
+						!$this->dba->getTableArray()[$key]['value']
 					) ||
 					// for drop_down_db_input check if one of both fields filled
 					(
-						$this->table_array[$key]['type'] == 'drop_down_db_input' &&
-						!$this->table_array[$key]['input_value'] &&
-						!$this->table_array[$key]['value']
+						$this->dba->getTableArray()[$key]['type'] == 'drop_down_db_input' &&
+						!$this->dba->getTableArray()[$key]['input_value'] &&
+						!$this->dba->getTableArray()[$key]['value']
 					) ||
 					// for password
 					(
-						$this->table_array[$key]['type'] == 'password' &&
-						!$this->table_array[$key]['value'] &&
-						!$this->table_array[$key]['HIDDEN_value']
+						$this->dba->getTableArray()[$key]['type'] == 'password' &&
+						!$this->dba->getTableArray()[$key]['value'] &&
+						!$this->dba->getTableArray()[$key]['HIDDEN_value']
 					)
 				)
 				// main if end
 			) {
 				// if mandatory && no input
-				// $this->log->debug('form', 'A: ' . $this->table_array[$key]['type'] . ' -- '
-				//	. $this->table_array[$key]['input_value'] . ' -- ' . $this->table_array[$key]['value']);
+				// $this->log->debug('form', 'A: ' . $this->dba->getTableArray()[$key]['type'] . ' -- '
+				//	. $this->dba->getTableArray()[$key]['input_value'] . ' -- '
+				//	. $this->dba->getTableArray()[$key]['value']);
 				if (
-					empty($this->table_array[$key]['value']) &&
-					$this->table_array[$key]['type'] != 'binary'
+					empty($this->dba->getTableArray()[$key]['value']) &&
+					$this->dba->getTableArray()[$key]['type'] != 'binary'
 				) {
 					$this->msg .= sprintf(
 						$this->l->__('Please enter something into the <b>%s</b> field!<br>'),
-						$this->table_array[$key]['output_name']
+						$this->dba->getTableArray()[$key]['output_name']
 					);
 				}
 			} // mandatory
 			// check file upload
 			if (
-				isset($this->table_array[$key]['type']) &&
-				$this->table_array[$key]['type'] == 'file' &&
+				isset($this->dba->getTableArray()[$key]['type']) &&
+				$this->dba->getTableArray()[$key]['type'] == 'file' &&
 				$GLOBALS['_FILES'][$key . '_file']['name'] &&
-				is_array($this->table_array[$key]['accept_type'])
+				is_array($this->dba->getTableArray()[$key]['accept_type'])
 			) {
 				// check against allowed types
 				$mime_okay = 0;
-				foreach ($this->table_array[$key]['accept_type'] as $mime_type) {
+				foreach ($this->dba->getTableArray()[$key]['accept_type'] as $mime_type) {
 					if ($GLOBALS['_FILES'][$key . '_file']['type'] == $mime_type) {
 						$mime_okay = 1;
 					}
@@ -1490,7 +1490,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 							. 'theallowed MIME List for Upload Field <b>%s</b>!<br>'),
 						$GLOBALS['_FILES'][$key . '_file']['name'],
 						$GLOBALS['_FILES'][$key . '_file']['type'],
-						$this->table_array[$key]['output_name']
+						$this->dba->getTableArray()[$key]['output_name']
 					);
 				}
 			}
@@ -1505,8 +1505,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				continue;
 			}
 			if (
-				isset($this->reference_array[$key]['mandatory']) &&
-				$this->reference_array[$key]['mandatory'] &&
+				!empty($this->reference_array[$key]['mandatory']) &&
 				!$this->reference_array[$key]['selected'][0]
 			) {
 				$this->msg .= sprintf(
@@ -1516,7 +1515,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 		}
 		// $this->log->debug('edit_error', 'QS: <pre>' . print_r($_POST, true) . '</pre>');
-		if (is_array($this->element_list)) {
+		if (!empty($this->element_list)) {
 			// check the mandatory stuff
 			// if mandatory, check that at least on pk exists or
 			// if at least the mandatory field is filled
@@ -1572,8 +1571,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					// either one of the post pks is set, or the mandatory
 					foreach ($reference_array['elements'] as $el_name => $data_array) {
 						if (
-							isset($data_array['mandatory']) &&
-							$data_array['mandatory']
+							/** @phan-suppress-next-line PhanTypeMismatchDimAssignment This error makes no sense */
+							!empty($data_array['mandatory'])
 						) {
 							$mand_name = $data_array['output_name'];
 						}
@@ -1710,35 +1709,35 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		// get order name
 		$order_name = $this->formGetColNameFromKey('order');
 		if (empty($order_name)) {
-			return $this->table_array;
+			return $this->dba->getTableArray();
 		}
 		// first check out of order ...
-		if (empty($this->table_array[$order_name]['value'])) {
+		if (empty($this->dba->getTableArray()[$order_name]['value'])) {
 			// set order (read max)
 			$q = 'SELECT MAX(' . $order_name . ') + 1 AS max_page_order '
-				. 'FROM ' . $this->table_name;
+				. 'FROM ' . $this->dba->getTableName();
 			if (
-				is_array($res = $this->dbReturnRow($q)) &&
+				is_array($res = $this->dba->dbReturnRow($q)) &&
 				!empty($res['max_page_order'])
 			) {
-				$this->table_array[$order_name]['value'] = $res['max_page_order'];
+				$this->dba->setTableArrayEntry($res['max_page_order'], $order_name, 'value');
 			}
 			// frist element is 0 because NULL gets returned, set to 1
-			if (!$this->table_array[$order_name]['value']) {
-				$this->table_array[$order_name]['value'] = 1;
+			if (!$this->dba->getTableArray()[$order_name]['value']) {
+				$this->dba->setTableArrayEntry(1, $order_name, 'value');
 			}
-		} elseif (!empty($this->table_array[$this->int_pk_name]['value'])) {
+		} elseif (!empty($this->dba->getTableArray()[$this->int_pk_name]['value'])) {
 			$q = 'SELECT ' . $order_name . ' AS order_name '
-				. 'FROM ' . $this->table_name . ' '
-				. 'WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
+				. 'FROM ' . $this->dba->getTableName() . ' '
+				. 'WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
 			if (
-				is_array($res = $this->dbReturnRow($q)) &&
+				is_array($res = $this->dba->dbReturnRow($q)) &&
 				!empty($res['order_name'])
 			) {
-				$this->table_array[$order_name]['value'] = $res['order_name'];
+				$this->dba->setTableArrayEntry($res['order_name'], $order_name, 'value');
 			}
 		}
-		return $this->table_array;
+		return $this->dba->getTableArray();
 	}
 
 	/**
@@ -1748,17 +1747,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	 */
 	public function formUnsetTableArray(): void
 	{
-		$this->pk_id = null;
-		if (!is_array($this->table_array)) {
-			$this->table_array = [];
-		}
-		reset($this->table_array);
-		foreach ($this->table_array as $key => $value) {
-			unset($this->table_array[$key]['value']);
-			unset($this->table_array[$key]['input_value']);
+		$this->dba->setPkId(null);
+		foreach ($this->dba->getTableArray() as $key => $value) {
+			$this->dba->unsetTableArrayEntry($key, 'value');
+			$this->dba->unsetTableArrayEntry($key, 'input_value');
 			// if preset var present preset
-			if (isset($this->table_array[$key]['preset'])) {
-				$this->table_array[$key]['value'] = $this->table_array[$key]['preset'];
+			if (isset($this->dba->getTableArray()[$key]['preset'])) {
+				$this->dba->setTableArrayEntry($this->dba->getTableArray()[$key]['preset'], $key, 'value');
 			}
 		}
 		if (is_array($this->reference_array)) {
@@ -1783,17 +1778,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formLoadTableArray(?string $pk_id = null): void
 	{
 		if ($pk_id) {
-			$this->pk_id = $pk_id;
+			$this->dba->setPkId($pk_id);
 		}
-		$this->table_array = $this->dbRead(true);
+		$this->dba->setTableArray($this->dba->dbRead(true));
 
-		// reset all temp fields
-		if (!is_array($this->table_array)) {
-			$this->table_array = [];
-		}
-		reset($this->table_array);
-		foreach ($this->table_array as $key => $value) {
-			unset($this->table_array[$key]['input_value']);
+		foreach ($this->dba->getTableArray() as $key => $value) {
+			$this->dba->unsetTableArrayEntry($key, 'input_value');
 		}
 
 		if (is_array($this->reference_array)) {
@@ -1806,8 +1796,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				unset($this->reference_array[$key]['selected']);
 				$q = 'SELECT ' . $this->reference_array[$key]['other_table_pk']
 					. ' FROM ' . $this->reference_array[$key]['table_name']
-					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
-				while (is_array($res = $this->dbReturn($q))) {
+					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
+				while (is_array($res = $this->dba->dbReturn($q))) {
 					$this->reference_array[$key]['selected'][] = $res[$this->reference_array[$key]['other_table_pk']];
 				}
 			}
@@ -1828,84 +1818,88 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	{
 		// for drop_down_db_input check if text field is filled and if, if not yet in db ...
 		// and upload files
-		if (!is_array($this->table_array)) {
-			$this->table_array = [];
-		}
-		reset($this->table_array);
-		foreach ($this->table_array as $key => $value) {
+
+		foreach ($this->dba->getTableArray() as $key => $value) {
 			// drop_down_db with input + reference table
-			// $this->log->debug('form', 'A: ' . $this->table_array[$key]['type']
-			//	. ' --- ' . $this->table_array[$key]['input_value']);
+			// $this->log->debug('form', 'A: ' . $this->dba->getTableArray()[$key]['type']
+			//	. ' --- ' . $this->dba->getTableArray()[$key]['input_value']);
 			if (
-				isset($this->table_array[$key]['type']) &&
-				$this->table_array[$key]['type'] == 'drop_down_db_input' &&
-				$this->table_array[$key]['input_value']
+				isset($this->dba->getTableArray()[$key]['type']) &&
+				$this->dba->getTableArray()[$key]['type'] == 'drop_down_db_input' &&
+				$this->dba->getTableArray()[$key]['input_value']
 			) {
 				// $this->log->debug('form', 'HERE');
 				// check if this text name already exists (lowercase compare)
-				$q = 'SELECT ' . $this->table_array[$key]['pk_name'] . ' AS pk_name '
-					. ' FROM ' . $this->table_array[$key]['table_name']
-					. ' WHERE LCASE(' . $this->table_array[$key]['input_name'] . ') = '
-					. "'" . $this->dbEscapeString(strtolower($this->table_array[$key]['input_value'])) . "'";
+				$q = 'SELECT ' . $this->dba->getTableArray()[$key]['pk_name'] . ' AS pk_name '
+					. ' FROM ' . $this->dba->getTableArray()[$key]['table_name']
+					. ' WHERE LCASE(' . $this->dba->getTableArray()[$key]['input_name'] . ') = '
+					. "'" . $this->dba->dbEscapeString(
+						strtolower($this->dba->getTableArray()[$key]['input_value'])
+					) . "'";
 				// if a where was given, add here
-				if ($this->table_array[$key]['where']) {
-					$q .= ' AND ' . $this->table_array[$key]['where'];
+				if ($this->dba->getTableArray()[$key]['where']) {
+					$q .= ' AND ' . $this->dba->getTableArray()[$key]['where'];
 				}
 				if (
-					is_array($s_res = $this->dbReturnRow($q)) &&
+					is_array($s_res = $this->dba->dbReturnRow($q)) &&
 					!empty($s_res['pk_name'])
 				) {
-					// $this->table_array[$key]['value'] = $pk_name_temp;
-					$this->table_array[$key]['value'] = $s_res['pk_name'];
+					$this->dba->setTableArrayEntry($s_res['pk_name'], $key, 'value');
 				} else {
 					// if a where was given, set this key also [dangerous!]
 					// postgreSQL compatible insert
-					$q = 'INSERT INTO ' . $this->table_array[$key]['table_name']
-						. ' (' . $this->table_array[$key]['input_name'] . ') VALUES ('
-						. "'" . $this->dbEscapeString($this->table_array[$key]['input_value']) . "')";
-					$this->dbExec($q);
-					if (!empty($this->table_array[$key]['where']) && is_numeric($this->dbGetInsertPK())) {
+					$q = 'INSERT INTO ' . $this->dba->getTableArray()[$key]['table_name']
+						. ' (' . $this->dba->getTableArray()[$key]['input_name'] . ') VALUES ('
+						. "'" . $this->dba->dbEscapeString($this->dba->getTableArray()[$key]['input_value']) . "')";
+					$this->dba->dbExec($q);
+					if (!empty($this->dba->getTableArray()[$key]['where']) && is_numeric($this->dba->dbGetInsertPK())) {
 						// make an update on the just inseted data with the where data als update values
-						$q = 'UPDATE ' . $this->table_array[$key]['table_name'] . ' SET ';
-						$q .= $this->table_array[$key]['where'] . ' ';
-						$q .= 'WHERE ' . $this->table_array[$key]['pk_name'] . ' = ' . $this->dbGetInsertPK();
-						$this->dbExec($q);
+						$q = 'UPDATE ' . $this->dba->getTableArray()[$key]['table_name'] . ' SET ';
+						$q .= $this->dba->getTableArray()[$key]['where'] . ' ';
+						$q .= 'WHERE ' . $this->dba->getTableArray()[$key]['pk_name']
+							. ' = ' . $this->dba->dbGetInsertPK();
+						$this->dba->dbExec($q);
 					}
-					$this->table_array[$key]['value'] = $this->dbGetInsertPK();
+					$this->dba->setTableArrayEntry($this->dba->dbGetInsertPK(), $key, 'value');
 				} // set value from DB through select or insert
-				unset($this->table_array[$key]['input_value']);
+				$this->dba->unsetTableArrayEntry($key, 'input_value');
 			} // if it is certain field type && if there is something in the temp field
 			// drop_down_db with input and in same table
 			if (
-				isset($this->table_array[$key]['type']) &&
-				$this->table_array[$key]['type'] == 'drop_down_db_input_same_db' &&
-				$this->table_array[$key]['input_value']
+				isset($this->dba->getTableArray()[$key]['type']) &&
+				$this->dba->getTableArray()[$key]['type'] == 'drop_down_db_input_same_db' &&
+				$this->dba->getTableArray()[$key]['input_value']
 			) {
 				// if drop down & input are different
-				if ($this->table_array[$key]['input_value'] != $this->table_array[$key]['value']) {
+				if ($this->dba->getTableArray()[$key]['input_value'] != $this->dba->getTableArray()[$key]['value']) {
 					// check if 'right input' is in DB
-					$q = 'SELECT ' . $this->table_array[$key]['input_name'] . ' AS temp '
-						. ' FROM ' . $this->table_array[$key]['table_name']
-						. ' WHERE LCASE(' . $this->table_array[$key]['input_name'] . ') = '
-						. "'" . strtolower($this->dbEscapeString($this->table_array[$key]['input_value'])) . "'";
+					$q = 'SELECT ' . $this->dba->getTableArray()[$key]['input_name'] . ' AS temp '
+						. ' FROM ' . $this->dba->getTableArray()[$key]['table_name']
+						. ' WHERE LCASE(' . $this->dba->getTableArray()[$key]['input_name'] . ') = '
+						. "'" . strtolower($this->dba->dbEscapeString(
+							$this->dba->getTableArray()[$key]['input_value']
+						)) . "'";
 					// if a where was given, add here
-					if ($this->table_array[$key]['where']) {
-						$q .= ' AND ' . $this->table_array[$key]['where'];
+					if ($this->dba->getTableArray()[$key]['where']) {
+						$q .= ' AND ' . $this->dba->getTableArray()[$key]['where'];
 					}
 					if (
-						is_array($s_res = $this->dbReturnRow($q)) &&
+						is_array($s_res = $this->dba->dbReturnRow($q)) &&
 						empty($s_res['temp'])
 					) {
-						$this->table_array[$key]['value'] = $this->table_array[$key]['input_value'];
+						$this->dba->setTableArrayEntry($this->dba->getTableArray()[$key]['input_value'], $key, 'value');
 					} else {
 						// found in DB
-						$this->table_array[$key]['input_value'] = $this->table_array[$key]['value'];
+						$this->dba->setTableArrayEntry($this->dba->getTableArray()[$key]['value'], $key, 'input_value');
 					}
 				} // key difference ?
 			} // for same_db drop down
 
 			// upload & save files to locations
-			if (isset($this->table_array[$key]['type']) && $this->table_array[$key]['type'] == 'file') {
+			if (
+				isset($this->dba->getTableArray()[$key]['type']) &&
+				$this->dba->getTableArray()[$key]['type'] == 'file'
+			) {
 				// if smth in $$key_file -> save or overwrite
 				// if smth in $key && $$key_delete && !$$key_file-> delte
 				// if smth in $key, keep as is
@@ -1915,20 +1909,25 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				// $this->log->debug('form', 'delete: ' . $key . '_delete => ' . $GLOBALS[$key . '_delete']);
 				if ($GLOBALS['_FILES'][$key . '_file']['name']) {
 					// check if dir exists
-					if (is_dir($this->table_array[$key]['save_dir'])) {
+					if (is_dir($this->dba->getTableArray()[$key]['save_dir'])) {
 						//if a slash at the end (if not add slash)
-						if (!preg_match("|/$|", $this->table_array[$key]['save_dir'])) {
-							$this->table_array[$key]['save_dir'] .= '/';
+						if (!preg_match("|/$|", $this->dba->getTableArray()[$key]['save_dir'])) {
+							$this->dba->getTableArray()[$key]['save_dir'] .= '/';
 						}
 						if (
 							move_uploaded_file(
 								$GLOBALS['_FILES'][$key . '_file']['tmp_name'],
-								$this->table_array[$key]['save_dir'] . $GLOBALS['_FILES'][$key . '_file']['name']
+								$this->dba->getTableArray()[$key]['save_dir']
+									. $GLOBALS['_FILES'][$key . '_file']['name']
 							)
 						) {
 							// make it unique with a unique number at the beginning
-							$this->table_array[$key]['value'] = uniqid((string)rand(), true)
-								. '_' . $GLOBALS['_FILES'][$key . '_file']['name'];
+							$this->dba->setTableArrayEntry(
+								uniqid((string)rand(), true)
+									. '_' . $GLOBALS['_FILES'][$key . '_file']['name'],
+								$key,
+								'value'
+							);
 						} else {
 							$this->msg .= $this->l->__('File could not be copied to target directory! '
 								. 'Perhaps wrong directory permissions . ');
@@ -1937,40 +1936,47 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 					} else {
 						$this->msg .= sprintf(
 							$this->l->__('Target Directory \'%s\' is not a vaild directory!'),
-							$this->table_array[$key]['save_dir']
+							$this->dba->getTableArray()[$key]['save_dir']
 						);
 						$this->error = 1;
 					} // could not dir check (dir wrong??)
 				}
 				if (
 					!empty($GLOBALS[$key . '_delete']) &&
-					$this->table_array[$key]['value'] && !$GLOBALS['_FILES'][$key . '_file']['name']
+					$this->dba->getTableArray()[$key]['value'] && !$GLOBALS['_FILES'][$key . '_file']['name']
 				) {
-					unlink($this->table_array[$key]['save_dir'] . $this->table_array[$key]['value']);
-					unset($this->table_array[$key]['value']);
+					unlink($this->dba->getTableArray()[$key]['save_dir'] . $this->dba->getTableArray()[$key]['value']);
+					$this->dba->unsetTableArrayEntry($key, 'value');
 				}
 			}
 
 			// for password crypt it as blowfish, or if not available MD5
-			if (isset($this->table_array[$key]['type']) && $this->table_array[$key]['type'] == 'password') {
-				if ($this->table_array[$key]['value']) {
+			if (
+				isset($this->dba->getTableArray()[$key]['type']) &&
+				$this->dba->getTableArray()[$key]['type'] == 'password'
+			) {
+				if ($this->dba->getTableArray()[$key]['value']) {
 					// use the better new passwordSet instead of crypt based
-					$this->table_array[$key]['value'] =
-						\CoreLibs\Security\Password::passwordSet($this->table_array[$key]['value']);
-					$this->table_array[$key]['HIDDEN_value'] = $this->table_array[$key]['value'];
+					$this->dba->getTableArray()[$key]['value'] =
+						\CoreLibs\Security\Password::passwordSet($this->dba->getTableArray()[$key]['value']);
+					$this->dba->setTableArrayEntry(
+						$this->dba->getTableArray()[$key]['value'],
+						$key,
+						'HIDDEN_value'
+					);
 				} else {
-					// $this->table_array[$key]['HIDDEN_value'] =
+					// $this->dba->getTableArray()[$key]['HIDDEN_value'] =
 				}
 			}
 		} // go through each field
 
 		// set object order (if necessary)
 		$this->formSetOrder();
-		// $this->log->debug('PK NAME SET', "PK NAME: " . $this->pk_name . "/" . $this->int_pk_name . ": "
-		//	. $this->table_array[$this->pk_name]['value'] . "/"
-		//	. $this->table_array[$this->int_pk_name]['value']);
+		// $this->log->debug('PK NAME SET', "PK NAME: " . $this->dba->getPkName() . "/" . $this->int_pk_name . ": "
+		//	. $this->dba->getTableArray()[$this->dba->getPkName()]['value'] . "/"
+		//	. $this->dba->getTableArray()[$this->int_pk_name]['value']);
 		// write the object
-		$this->dbWrite($addslashes, [], true);
+		$this->dba->dbWrite($addslashes, [], true);
 		// write reference array (s) if necessary
 		if (is_array($this->reference_array)) {
 			if (!is_array($this->reference_array)) {
@@ -1979,19 +1985,19 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			reset($this->reference_array);
 			foreach ($this->reference_array as $reference_array) {
 				$q = 'DELETE FROM ' . $reference_array['table_name']
-					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
-				$this->dbExec($q);
+					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
+				$this->dba->dbExec($q);
 				$q = 'INSERT INTO ' . $reference_array['table_name']
 					. ' (' . $reference_array['other_table_pk'] . ', ' . $this->int_pk_name . ') VALUES ';
 				for ($i = 0, $i_max = count($reference_array['selected']); $i < $i_max; $i++) {
 					$t_q = '(' . $reference_array['selected'][$i] . ', '
-						. $this->table_array[$this->int_pk_name]['value'] . ')';
-					$this->dbExec($q . $t_q);
+						. $this->dba->getTableArray()[$this->int_pk_name]['value'] . ')';
+					$this->dba->dbExec($q . $t_q);
 				}
 			} // foreach reference arrays
 		} // if reference arrays
 		// write element list
-		if (is_array($this->element_list)) {
+		if (!empty($this->element_list)) {
 			$type = [];
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $reference_array) {
@@ -2169,8 +2175,8 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 								$q_values[$i] .= $_value;
 							} else {
 								// normal data gets escaped
-								$q_data[$i] .= $el_name . ' = ' . "'" . $this->dbEscapeString($_value) . "'";
-								$q_values[$i] .= "'" . $this->dbEscapeString($_value) . "'";
+								$q_data[$i] .= $el_name . ' = ' . "'" . $this->dba->dbEscapeString($_value) . "'";
+								$q_values[$i] .= "'" . $this->dba->dbEscapeString($_value) . "'";
 							}
 						}
 					}
@@ -2198,14 +2204,14 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 								. $this->int_pk_name
 								. ($q_middle[$i] ?? '')
 								. ($q_values[$i] ?? '') . ', '
-								. $this->table_array[$this->int_pk_name]['value']
+								. $this->dba->getTableArray()[$this->int_pk_name]['value']
 								. $q_end[$i];
 						}
 						/** @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset */
 						$this->log->debug('edit', 'Pos[' . $i . '] => ' . $type[$i] . ' Q: ' . $q . '<br>');
 						// write the dataset
 						if ($q) {
-							$this->dbExec($q);
+							$this->dba->dbExec($q);
 						}
 					}
 				} // for each created query
@@ -2230,33 +2236,29 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			reset($this->reference_array);
 			foreach ($this->reference_array as $reference_array) {
 				$q = 'DELETE FROM ' . $reference_array['table_name']
-					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
-				$this->dbExec($q);
+					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
+				$this->dba->dbExec($q);
 			}
 		}
 		// remove any element list references
-		if (is_array($this->element_list)) {
-			if (!is_array($this->element_list)) {
-				$this->element_list = [];
-			}
+		if (!empty($this->element_list)) {
 			reset($this->element_list);
 			foreach ($this->element_list as $table_name => $data_array) {
 				$q = 'DELETE FROM ' . $table_name
-					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
-				$this->dbExec($q);
+					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
+				$this->dba->dbExec($q);
 			}
 		}
 		// unlink ALL files
-		if (!is_array($this->table_array)) {
-			$this->table_array = [];
-		}
-		reset($this->table_array);
-		foreach ($this->table_array as $key => $value) {
-			if (isset($this->table_array[$key]['type']) && $this->table_array[$key]['type'] == 'file') {
-				unlink($this->table_array[$key]['save_dir'] . $this->table_array[$key]['value']);
+		foreach ($this->dba->getTableArray() as $key => $value) {
+			if (
+				isset($this->dba->getTableArray()[$key]['type']) &&
+				$this->dba->getTableArray()[$key]['type'] == 'file'
+			) {
+				unlink($this->dba->getTableArray()[$key]['save_dir'] . $this->dba->getTableArray()[$key]['value']);
 			}
 		}
-		$this->dbDelete();
+		$this->dba->dbDelete();
 		$this->warning = 1;
 		$this->msg = $this->l->__('Dataset has been deleted!');
 	}
@@ -2270,17 +2272,13 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 	public function formCreateHiddenFields(array $hidden_array = []): array
 	{
 		$hidden = [];
-		if (!is_array($this->table_array)) {
-			$this->table_array = [];
-		}
-		reset($this->table_array);
-		foreach ($this->table_array as $key => $value) {
+		foreach ($this->dba->getTableArray() as $key => $value) {
 			if (
-				isset($this->table_array[$key]['type']) &&
-				$this->table_array[$key]['type'] == 'hidden'
+				isset($this->dba->getTableArray()[$key]['type']) &&
+				$this->dba->getTableArray()[$key]['type'] == 'hidden'
 			) {
-				if (array_key_exists($key, $this->table_array)) {
-					$hidden_array[$key] = $this->table_array[$key]['value'] ?? '';
+				if (array_key_exists($key, $this->dba->getTableArray())) {
+					$hidden_array[$key] = $this->dba->getTableArray()[$key]['value'] ?? '';
 				} else {
 					$hidden_array[$key] = '';
 				}
@@ -2318,7 +2316,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 		}
 		$data['name'] = $this->reference_array[$table_name]['other_table_pk'];
 		$data['size'] = $this->reference_array[$table_name]['select_size'];
-		while (is_array($res = $this->dbReturn($this->reference_array[$table_name]['query']))) {
+		while (is_array($res = $this->dba->dbReturn($this->reference_array[$table_name]['query']))) {
 			$data['value'][] = $res[0];
 			$data['output'][] = $res[1];
 			$selected = (\CoreLibs\Convert\Html::checked(
@@ -2434,18 +2432,18 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			}
 			// if drop down db read data for element list from the given sub table as from the query
 			// only two elements are allowed: pos 0 is key, pso 1 is visible output name
-			if (isset($data_array['type']) && $data_array['type'] == 'drop_down_db') {
-				while (is_array($res = $this->dbReturn($data_array['query']))) {
+			if (!empty($data_array['type']) && $data_array['type'] == 'drop_down_db') {
+				while (is_array($res = $this->dba->dbReturn($data_array['query']))) {
 					/** @phan-suppress-next-line PhanTypeInvalidDimOffset */
-					$this->log->debug('edit', 'Q[' . $this->dbGetQueryHash($data_array['query']) . '] pos: '
-						. $this->dbGetCursorPos($data_array['query'])
-						. ' | want: ' . ($data_array['preset'] ?? '-')
-						. ' | set: ' . ($data['preset'][$el_name] ?? '-'));
+					// $this->log->debug('ELEMENT LIST', 'Q[' . $this->dba->dbGetQueryHash($data_array['query']) . '] '
+					// 	. 'pos: ' . $this->dba->dbGetCursorPos($data_array['query'])
+					// 	. ' | want: ' . ($data_array['preset'] ?? '-')
+					// 	. ' | set: ' . ($data['preset'][$el_name] ?? '-'));
 					// first is default for this element
 					if (
 						isset($data_array['preset']) &&
 						(!isset($data['preset'][$el_name]) || empty($data['preset'][$el_name])) &&
-						($this->dbGetCursorPos($data_array['query']) == $data_array['preset'])
+						($this->dba->dbGetCursorPos($data_array['query']) == $data_array['preset'])
 					) {
 						$data['preset'][$el_name] = $res[0];
 					}
@@ -2456,11 +2454,15 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			} elseif (isset($data_array['element_list'])) {
 				$data['element_list'][$el_name] = $data_array['element_list']; // this is for the checkboxes
 			}
-			$this->log->debug('CREATE ELEMENT LIST TABLE', 'Table: ' . $table_name . ', Post: ' . $el_name . ' => '
-				. ((isset($_POST[$el_name]) && is_array($_POST[$el_name])) ?
-					'AS ARRAY'/*.$this->log->prAr($_POST[$el_name])*/ :
-					'NOT SET/OR NOT ARRAY')
-				. ((isset($_POST[$el_name]) && !is_array($_POST[$el_name])) ? $_POST[$el_name] : ''));
+			// $this->log->debug('ELEMENT LIST', 'Data: '
+			// 	. (count($data['element_list'][$el_name] ?? []) ? 'YES' : '*NO*')
+			// 	. ', B: ' . (is_bool($res ?? null) ? 'Y' : 'N'));
+			// $this->log->debug('POST CREATE ELEMENT LIST TABLE', 'Table: ' . $table_name
+			//	. ', Post: ' . $el_name . ' => '
+			// 	. ((isset($_POST[$el_name]) && is_array($_POST[$el_name])) ?
+			// 		'AS ARRAY'/*.$this->log->prAr($_POST[$el_name])*/ :
+			// 		'NOT SET/OR NOT ARRAY')
+			// 	. ((isset($_POST[$el_name]) && !is_array($_POST[$el_name])) ? $_POST[$el_name] : ''));
 			// if error, check new line addition so we don't lose it
 			if ($this->error) {
 				if (isset($_POST[$el_name]) && is_array($_POST[$el_name])) {
@@ -2519,7 +2521,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$data['type'][$data['prefix'] . $this->element_list[$table_name]['read_data']['name']] = 'string';
 			// build the read query
 			$q = 'SELECT ';
-			// if (!$this->table_array[$this->int_pk_name]['value'])
+			// if (!$this->dba->getTableArray()[$this->int_pk_name]['value'])
 			// 	$q .= 'DISTINCT ';
 			// prefix join key with table name, and implode the query select part
 			$q .= str_replace(
@@ -2533,7 +2535,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				implode(', ', $_q_select)
 			) . ' ';
 			// if (
-			//	!$this->table_array[$this->int_pk_name]['value'] &&
+			//	!$this->dba->getTableArray()[$this->int_pk_name]['value'] &&
 			//	$this->element_list[$table_name]['read_data']['order']
 			// ) {
 			// 	$q .= ', ' . $this->element_list[$table_name]['read_data']['order'] . ' ';
@@ -2549,10 +2551,10 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 				. $this->element_list[$table_name]['read_data']['pk_id'] . ' = '
 				/** @phan-suppress-next-line PhanTypeArraySuspiciousNullable */
 				. $table_name . '.' . $this->element_list[$table_name]['read_data']['pk_id'] . ' ';
-			// if ($this->table_array[$this->int_pk_name]['value'])
+			// if ($this->dba->getTableArray()[$this->int_pk_name]['value'])
 			$q .= 'AND ' . $table_name . '.' . $this->int_pk_name . ' = '
-				. (!empty($this->table_array[$this->int_pk_name]['value']) ?
-					$this->table_array[$this->int_pk_name]['value'] :
+				. (!empty($this->dba->getTableArray()[$this->int_pk_name]['value']) ?
+					$this->dba->getTableArray()[$this->int_pk_name]['value'] :
 					'NULL') . ' ';
 			$q .= ') ';
 			if (isset($this->element_list[$table_name]['read_data']['order'])) {
@@ -2566,12 +2568,12 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			// only create query if we have a primary key
 			// reads directly from the reference table
 			if (
-				isset($this->table_array[$this->int_pk_name]['value']) &&
-				$this->table_array[$this->int_pk_name]['value']
+				isset($this->dba->getTableArray()[$this->int_pk_name]['value']) &&
+				$this->dba->getTableArray()[$this->int_pk_name]['value']
 			) {
 				$q = 'SELECT ' . implode(', ', $q_select)
 					. ' FROM ' . $table_name
-					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->table_array[$this->int_pk_name]['value'];
+					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
 			}
 		}
 		// $this->log->debug('CFG QUERY', 'Q: ' . $q);
@@ -2581,7 +2583,7 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 			$prfx = $data['prefix']; // short
 			$pos = 0; // position in while for overwrite if needed
 			// read out the list and add the selected data if needed
-			while (is_array($res = $this->dbReturn($q))) {
+			while (is_array($res = $this->dba->dbReturn($q))) {
 				$_data = [];
 				// go through each res
 				for ($i = 0, $i_max = count($q_select); $i < $i_max; $i++) {
@@ -2696,9 +2698,9 @@ class Generate extends \CoreLibs\DB\Extended\ArrayIO
 						} elseif (
 							!empty($data['fk_name']) &&
 							$el_name == $data['fk_name'] &&
-							isset($this->table_array[$this->int_pk_name]['value'])
+							isset($this->dba->getTableArray()[$this->int_pk_name]['value'])
 						) {
-							$_data[$el_name] = $this->table_array[$this->int_pk_name]['value'];
+							$_data[$el_name] = $this->dba->getTableArray()[$this->int_pk_name]['value'];
 						}
 					}
 					$data['content'][] = $_data;

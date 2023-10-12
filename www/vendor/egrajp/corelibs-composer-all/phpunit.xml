@@ -2,5 +2,6 @@
 	cacheResultFile="/tmp/phpunit-corelibs-composer.result.cache"
 	colors="true"
 	verbose="true"
+	bootstrap="test/phpunit/bootstrap.php"
 >
 </phpunit>
