@@ -470,12 +470,20 @@ class Image
 	 *
 	 * @param  string $filename path + filename to rotate. This file must be writeable
 	 * @return void
+	 * @throws \RuntimeException if exit_read_data is not found
+	 * @throws \UnexpectedValueException if file name not writeable or file name not found
 	 */
 	public static function correctImageOrientation(string $filename): void
 	{
 		// function exists & file is writeable, else do nothing
-		if (!function_exists('exif_read_data') || !is_writeable($filename)) {
-			return;
+		if (!function_exists('exif_read_data')) {
+			throw new \RuntimeException('Function \'exit_read_data\' does not exist');
+		}
+		if (!file_exists($filename) || !is_file($filename)) {
+			throw new \UnexpectedValueException('Missing image file: ' . $filename);
+		}
+		if (!is_writeable($filename)) {
+			throw new \UnexpectedValueException('File name is not writeable: ' . $filename);
 		}
 		[$inc_width, $inc_height, $img_type] = getimagesize($filename) ?: [0, 0, null];
 		// add @ to avoid "file not supported error"
