@@ -46,7 +46,13 @@ $image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture_square.jpg';
 $cache_folder = BASE . LAYOUT . CONTENT_PATH . CACHE . IMAGES;
 $web_folder = LAYOUT . CACHE . IMAGES;
 // rotate image first
-$_image->correctImageOrientation($image);
+try {
+	$_image->correctImageOrientation($image);
+} catch (\UnexpectedValueException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+} catch (\RuntimeException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+}
 // thumbnail tests
 echo "<div>CLASS->CREATETHUMBNAILSIMPLE: "
 	. basename($image) . ": WIDTH: $thumb_width<br><img src="
@@ -54,7 +60,13 @@ echo "<div>CLASS->CREATETHUMBNAILSIMPLE: "
 // static
 $image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture.jpg';
 // rotate image first
-$image_class::correctImageOrientation($image);
+try {
+	$image_class::correctImageOrientation($image);
+} catch (\UnexpectedValueException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+} catch (\RuntimeException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+}
 // thumbnail tests
 echo "<div>S::CREATETHUMBNAILSIMPLE: "
 	. basename($image) . ": WIDTH: $thumb_width<br><img src="
@@ -87,7 +99,13 @@ foreach ($images as $image) {
 	echo "<div><b>IMAGE INFO</b>: " . $height . "x" . $width . ", TYPE: "
 		. \CoreLibs\Debug\Support::dumpVar($img_type) . " [" . $finfo->file($image) . "]</div>";
 	// rotate image first
-	Image::correctImageOrientation($image);
+	try {
+		Image::correctImageOrientation($image);
+	} catch (\UnexpectedValueException $e) {
+		print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+	} catch (\RuntimeException $e) {
+		print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+	}
 	// thumbnail tests
 	echo "<div>" . basename($image) . ": WIDTH: $thumb_width<br><img src="
 		. Image::createThumbnailSimple($image, $thumb_width, 0, $cache_folder, $web_folder) . "></div>";

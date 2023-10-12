@@ -16,17 +16,89 @@ final class CoreLibsOutputImageTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @testdox Output\Image Class tests
+	 * @covers ::createThumbnail
+	 * @testdox createThumbnail checks
 	 *
 	 * @return void
 	 */
-	public function testOutputImage()
+	public function testCreateThumbnail(): void
 	{
-		// $this->assertTrue(true, 'Output Image Tests not implemented');
-		$this->markTestIncomplete(
-			'Output\Image Tests have not yet been implemented'
+		// CONVERT does not exist
+		$this->expectException(\RuntimeException::class);
+		\CoreLibs\Output\Image::createThumbnail('do_not_exist.png', 200, 200);
+		// set convert
+		$paths = [
+			'/bin',
+			'/usr/bin',
+			'/usr/local/bin',
+		];
+		// find convert
+		foreach ($paths as $path) {
+			if (
+				file_exists($path . DIRECTORY_SEPARATOR . 'convert') &&
+				is_file($path . DIRECTORY_SEPARATOR . 'convert')
+			) {
+				// image magick convert location
+				define('CONVERT', $path . DIRECTORY_SEPARATOR . 'convert');
+				break;
+			}
+		}
+		unset($paths);
+		// cannot set dummy file
+		$this->expectException(\Exception::class);
+		\CoreLibs\Output\Image::createThumbnail('do_not_exist.png', 200, 200);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::createThumbnailSimple
+	 * @testdox createThumbnailSimple checks
+	 *
+	 * @return void
+	 */
+	public function testCreateThumbnailSimple(): void
+	{
+		// file does not exist
+		$this->expectException(\UnexpectedValueException::class);
+		\CoreLibs\Output\Image::createThumbnailSimple(
+			'do_not_exist.png',
+			200,
+			200,
+			cache_folder: '/tmp/',
+			web_folder: '/tmp/'
 		);
-		// $this->markTestSkipped('No implementation for Output\Image at the moment');
+		// cache folder is not dir
+		$this->expectException(\UnexpectedValueException::class);
+		\CoreLibs\Output\Image::createThumbnailSimple(
+			'do_not_exist.png',
+			200,
+			200,
+			cache_folder: '/foo/bar/',
+			web_folder: '/tmp/'
+		);
+		// target cache folder is not writeable
+
+		// RuntimeException: imagecreatetruecolor failed
+		// RuntimeException: imagecolorallocatealpha failed
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::correctImageOrientation
+	 * @testdox correctImageOrientation checks
+	 *
+	 * @return void
+	 */
+	public function testCorrectImageOrientation(): void
+	{
+		// test file does not exist
+		$this->expectException(\UnexpectedValueException::class);
+		\CoreLibs\Output\Image::correctImageOrientation('do_not_exist.png');
+		// test folder not writeable
+		// test exit_read_data not present (how)?
+		// test image rotate
 	}
 }
 
