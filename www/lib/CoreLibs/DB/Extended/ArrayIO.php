@@ -55,7 +55,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * primary key name automatically (from array)
 	 *
 	 * phpcs:ignore
-	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string} $db_config db connection config
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string,db_debug_replace_placeholder?:bool} $db_config db connection config
 	 * @param array<mixed> $table_array    table array config
 	 * @param string       $table_name     table name string
 	 * @param \CoreLibs\Logging\Logging $log Logging class
