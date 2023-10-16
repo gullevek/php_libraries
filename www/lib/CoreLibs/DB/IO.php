@@ -1597,15 +1597,13 @@ class IO
 	 * - if many this will also hold all non pk names too
 	 * then try to fill insert_id_arr, this is always multi level
 	 * - fill key: value as single array or multi array
-	 * insert_id_ext [DEPRECATED, all in insert_id_arr]
 	 * - holds all returning as array
-	 * TODO: Only use insert_id_arr and use functions to get ok array or single
 	 *
-	 * @param bool         $returning_id
-	 * @param string          $query
-	 * @param string|null     $pk_name
+	 * @param bool                $returning_id False if no RETURNING, try to get different via insert id
+	 * @param string              $query        Query with RETURNING
+	 * @param string|null         $pk_name      Primary key name
 	 * @param \PgSql\Result|false $cursor       (PgSql\Result)
-	 * @param string|null     $stm_name     If not null, is dbExecutre run
+	 * @param string|null         $stm_name     [null] If not null, is dbExecute run and not a prepared call
 	 * @return void
 	 */
 	private function __dbSetInsertId(
@@ -1627,9 +1625,16 @@ class IO
 		if ($cursor === false) {
 			// failed to get insert id
 			if ($stm_name === null) {
-				$this->__dbWarning(34, $cursor, '[dbExec]');
+				$this->__dbWarning(34, $cursor, '[dbExec]', context: [
+					'query' => $query,
+					'pk_name' => $pk_name,
+				]);
 			} else {
-				$this->__dbWarning(34, false, $stm_name . ': CURSOR is null');
+				$this->__dbWarning(34, false, 'CURSOR is null', [
+					'statement_name' => $stm_name,
+					'query' => $query,
+					'pk_name' => $pk_name,
+				]);
 			}
 			return;
 		}
@@ -1641,7 +1646,11 @@ class IO
 			$this->insert_id_arr[] = $insert_id;
 			// throw warning that no pk was found
 			if ($insert_id === false) {
-				$this->__dbWarning(31, $cursor, '[dbExec]');
+				$this->__dbWarning(31, $cursor, '[dbExec]', context: [
+					'query' => $query,
+					'pk_name' => $pk_name,
+					'returning_id' => $returning_id,
+				]);
 			}
 		} else { // was stm_name null or not null and cursor
 			// we have returning, now we need to check if we get one or many returned
@@ -1658,23 +1667,43 @@ class IO
 			if (count($this->insert_id_arr) == 0) {
 				// failed to get insert id
 				if ($stm_name === null) {
-					$this->__dbWarning(33, $cursor, '[dbExec]');
+					$this->__dbWarning(33, $cursor, '[dbExec]', context: [
+						'query' => $query,
+						'pk_name' => $pk_name,
+						'returning_id' => $returning_id,
+					]);
 				} else {
 					$this->__dbWarning(
 						33,
 						false,
-						$stm_name . ': RETURNING returned no data'
+						'RETURNING returned no data',
+						context: [
+							'statement_name' => $stm_name,
+							'query' => $query,
+							'pk_name' => $pk_name,
+							'returning_id' => $returning_id,
+						]
 					);
 				}
 			} elseif (count($this->insert_id_arr) > 1) {
 				// this error handling is only for INSERT (), (), ... sets
 				if ($stm_name === null) {
-					$this->__dbWarning(32, $cursor, '[dbExec]');
+					$this->__dbWarning(32, $cursor, '[dbExec]', context: [
+						'query' => $query,
+						'pk_name' => $pk_name,
+						'returning_id' => $returning_id,
+					]);
 				} else {
 					$this->__dbWarning(
 						32,
 						false,
-						$stm_name . ': RETURNING returned an array (possible multiple insert)'
+						'RETURNING returned an array (possible multiple insert)',
+						context: [
+							'statement_name' => $stm_name,
+							'query' => $query,
+							'pk_name' => $pk_name,
+							'returning_id' => $returning_id,
+						]
 					);
 				}
 			}
