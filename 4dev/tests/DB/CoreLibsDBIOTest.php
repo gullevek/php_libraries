@@ -232,7 +232,7 @@ final class CoreLibsDBIOTest extends TestCase
 		$this->assertEquals(
 			$error,
 			$last_error,
-			'Assert query warning'
+			'Assert query error'
 		);
 		return [$last_warning, $last_error];
 	}
@@ -251,8 +251,6 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbVersion(): void
 	{
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -276,8 +274,6 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbVersionNumeric(): void
 	{
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -306,8 +302,6 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbVersionInfoParameters(): void
 	{
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -365,8 +359,6 @@ final class CoreLibsDBIOTest extends TestCase
 	 */
 	public function testDbVersionInfo(string $parameter, string $expected): void
 	{
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -1592,8 +1584,6 @@ final class CoreLibsDBIOTest extends TestCase
 		string $error,
 		bool $run_many_times = false
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -1832,8 +1822,6 @@ final class CoreLibsDBIOTest extends TestCase
 		string $error,
 		string $insert_data
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -2002,8 +1990,6 @@ final class CoreLibsDBIOTest extends TestCase
 		string $error,
 		string $insert_data
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -3069,8 +3055,6 @@ final class CoreLibsDBIOTest extends TestCase
 		string $error,
 		string $insert_data
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -3465,12 +3449,37 @@ final class CoreLibsDBIOTest extends TestCase
 				$read_query,
 				null,
 				null,
-				//
+				// warning: 20
 				true, '20', '',
 				//
 				'result', '', '',
 				// no query but data for data only compare
 				'',
+				[],
+				//
+				$insert_query,
+				//
+				[
+					'pk_name' => '',
+					'count' => 0,
+					'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+					'returning_id' => false,
+				],
+			],
+			// prepare with different statement name
+			'prepare query with same statement name, different query' => [
+				'double_error',
+				$read_query,
+				// primary key
+				null,
+				// arguments (none)
+				null,
+				// expected return false, warning: no, error: 26
+				false, '', '26',
+				// return expected, warning, error
+				'', '', '',
+				// dummy query for second prepare with wrong query
+				$read_query . ' WHERE uid = $3',
 				[],
 				//
 				$insert_query,
@@ -3554,8 +3563,6 @@ final class CoreLibsDBIOTest extends TestCase
 		string $insert_data,
 		array $prepare_cursor,
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -3574,6 +3581,9 @@ final class CoreLibsDBIOTest extends TestCase
 			$prepare_result = $pk_name === null ?
 				$db->dbPrepare($stm_name, $query) :
 				$db->dbPrepare($stm_name, $query, $pk_name);
+		}
+		if ($error_prepare == '26') {
+			$prepare_result = $db->dbPrepare($stm_name, $expected_data_query);
 		}
 		// if result type, or if forced bool
 		if (is_string($expected_prepare) && $expected_prepare == 'result') {
@@ -3597,66 +3607,68 @@ final class CoreLibsDBIOTest extends TestCase
 
 		// for non fail prepare test exec
 		// check test result
-		$execute_result = $query_data === null ?
-			$db->dbExecute($stm_name) :
-			$db->dbExecute($stm_name, $query_data);
-		if ($expected_execute == 'result') {
-			// if PHP or newer, must be Object PgSql\Result
-			$this->assertIsObject(
-				$execute_result
-			);
-			// also check that this is correct instance type
-			$this->assertInstanceOf(
-				'PgSql\Result',
-				$execute_result
-			);
-			// if this is an select use dbFetchArray to get data and test
-		} else {
-			$this->assertEquals(
-				$expected_execute,
-				$execute_result
-			);
-		}
-		// error/warning check
-		$this->subAssertErrorTest($db, $warning_execute, $error_execute);
-		// now check test result if expected return is result
-		if (
-			$expected_execute == 'result' &&
-			!empty($expected_data_query)
-		) {
-			// $expected_data_query
-			// $expected_data
-			$rows = $db->dbReturnArray($expected_data_query);
-			$this->assertEquals(
-				$expected_data,
-				$rows
-			);
-		}
-		if (
-			$expected_execute == 'result' &&
-			$execute_result !== false &&
-			empty($expected_data_query) &&
-			count($expected_data)
-		) {
-			// compare previously read data to compare data
-			$compare_data = [];
-			// read in the query data
-			while (is_array($row = $db->dbFetchArray($execute_result, true))) {
-				$compare_data[] = $row;
+		if (!$error_prepare) {
+			$execute_result = $query_data === null ?
+				$db->dbExecute($stm_name) :
+				$db->dbExecute($stm_name, $query_data);
+			if ($expected_execute == 'result') {
+				// if PHP or newer, must be Object PgSql\Result
+				$this->assertIsObject(
+					$execute_result
+				);
+				// also check that this is correct instance type
+				$this->assertInstanceOf(
+					'PgSql\Result',
+					$execute_result
+				);
+				// if this is an select use dbFetchArray to get data and test
+			} else {
+				$this->assertEquals(
+					$expected_execute,
+					$execute_result
+				);
 			}
-			$this->assertEquals(
-				$expected_data,
-				$compare_data
-			);
-		}
+			// error/warning check
+			$this->subAssertErrorTest($db, $warning_execute, $error_execute);
+			// now check test result if expected return is result
+			if (
+				$expected_execute == 'result' &&
+				!empty($expected_data_query)
+			) {
+				// $expected_data_query
+				// $expected_data
+				$rows = $db->dbReturnArray($expected_data_query);
+				$this->assertEquals(
+					$expected_data,
+					$rows
+				);
+			}
+			if (
+				$expected_execute == 'result' &&
+				$execute_result !== false &&
+				empty($expected_data_query) &&
+				count($expected_data)
+			) {
+				// compare previously read data to compare data
+				$compare_data = [];
+				// read in the query data
+				while (is_array($row = $db->dbFetchArray($execute_result, true))) {
+					$compare_data[] = $row;
+				}
+				$this->assertEquals(
+					$expected_data,
+					$compare_data
+				);
+			}
 
-		// check dbGetPrepareCursorValue
-		foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
-			$this->assertEquals(
-				$prepare_cursor[$key],
-				$db->dbGetPrepareCursorValue($stm_name, $key),
-				'Prepared cursor: ' . $key . ': failed assertion'
-			);
+			// check dbGetPrepareCursorValue
+			foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
+				$this->assertEquals(
+					$prepare_cursor[$key],
+					$db->dbGetPrepareCursorValue($stm_name, $key),
+					'Prepared cursor: ' . $key . ': failed assertion'
+				);
+			}
 		}
 
 		// reset all data
@@ -3844,8 +3856,6 @@ final class CoreLibsDBIOTest extends TestCase
 		string $expected_get_var,
 		string $expected_get_db
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config[$connection],
 			self::$log
@@ -3910,7 +3920,10 @@ final class CoreLibsDBIOTest extends TestCase
 					// 'main::run::run::run::run::run::run::run::runBare::runTest::testDbErrorHandling::dbSetMaxQueryCall
 					'source' => "/^(include::)?main::(run::)+runBare::runTest::testDbErrorHandling::dbSetMaxQueryCall$/",
 					'pg_error' => '',
-					'msg' => '',
+					'message' => '',
+					'context' => [
+						'max_calls' => 0
+					]
 				]
 			],
 			'trigger warning' => [
@@ -3943,8 +3956,6 @@ final class CoreLibsDBIOTest extends TestCase
 		string $error_id,
 		array $expected_history
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -3970,7 +3981,7 @@ final class CoreLibsDBIOTest extends TestCase
 		foreach ($expected_history as $key => $value) {
 			// check if starts with / because this is regex (timestamp)
 			// if (substr($expected_2, 0, 1) == '/) {
-			if (strpos($value, '/') === 0) {
+			if (!is_array($value) && strpos($value, '/') === 0) {
 				// this is regex
 				$this->assertMatchesRegularExpression(
 					$value,
@@ -4058,8 +4069,6 @@ final class CoreLibsDBIOTest extends TestCase
 		bool $expected_set_flag,
 		string $expected_get_encoding
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config[$connection],
 			self::$log
@@ -4141,8 +4150,6 @@ final class CoreLibsDBIOTest extends TestCase
 		?string $encoding_php,
 		string $text
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config[$connection],
 			self::$log
@@ -4272,8 +4279,6 @@ final class CoreLibsDBIOTest extends TestCase
 		string $table,
 		string $primary_key
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -4330,7 +4335,7 @@ final class CoreLibsDBIOTest extends TestCase
 		// NOTE if there are different INSERTS before the primary keys
 		// will not match anymore. Must be updated by hand
 		// IMPORTANT: if this is stand alone the primary key will not match and fail
-		$table_with_primary_key_id = 68;
+		$table_with_primary_key_id = 70;
 		// 0: query + returning
 		// 1: params
 		// 1: pk name for db exec
@@ -4530,8 +4535,6 @@ final class CoreLibsDBIOTest extends TestCase
 		array|string|int|null $expected_ret_ext,
 		array $expected_ret_arr
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -4875,8 +4878,6 @@ final class CoreLibsDBIOTest extends TestCase
 		array $expected_col_names,
 		array $expected_col_types
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log
@@ -5030,6 +5031,147 @@ final class CoreLibsDBIOTest extends TestCase
 		$db->dbClose();
 	}
 
+	// query placeholder convert
+
+	public function queryPlaceholderReplaceProvider(): array
+	{
+		// 				WHERE row_varchar = $1
+		return [
+			'select, no change' => [
+				'query' => <<<SQL
+				SELECT row_varchar, row_varchar_literal, row_int, row_date
+				FROM table_with_primary_key
+				SQL,
+				'params' => [],
+				'found' => 0,
+				'expected_query' => '',
+				'expected_params' => [],
+			],
+			'select, params ?' => [
+				'query' => <<<SQL
+				SELECT row_varchar, row_varchar_literal, row_int, row_date
+				FROM table_with_primary_key
+				WHERE row_varchar = ?
+				SQL,
+				'params' => ['string a'],
+				'found' => 1,
+				'expected_query' => <<<SQL
+				SELECT row_varchar, row_varchar_literal, row_int, row_date
+				FROM table_with_primary_key
+				WHERE row_varchar = $1
+				SQL,
+				'expected_params' => ['string a'],
+			],
+			'select, params :' => [
+				'query' => <<<SQL
+				SELECT row_varchar, row_varchar_literal, row_int, row_date
+				FROM table_with_primary_key
+				WHERE row_varchar = :row_varchar
+				SQL,
+				'params' => [':row_varchar' => 'string a'],
+				'found' => 1,
+				'expected_query' => <<<SQL
+				SELECT row_varchar, row_varchar_literal, row_int, row_date
+				FROM table_with_primary_key
+				WHERE row_varchar = $1
+				SQL,
+				'expected_params' => ['string a'],
+			]
+		];
+	}
+
+	/**
+	 * test query string with placeholders convert
+	 *
+	 * @dataProvider queryPlaceholderReplaceProvider
+	 * @testdox Query replacement test [$_dataName]
+	 *
+	 * @param  string $query
+	 * @param  array  $params
+	 * @param  string $expected_query
+	 * @param  array  $expected_params
+	 * @return void
+	 */
+	public function testQueryPlaceholderReplace(
+		string $query,
+		array $params,
+		int $expected_found,
+		string $expected_query,
+		array $expected_params
+	): void {
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		$db->dbSetConvertPlaceholder(true);
+		//
+		if ($db->dbCheckQueryForSelect($query)) {
+			$res = $db->dbReturnRowParams($query, $params);
+			$converted = $db->dbGetPlaceholderConverted();
+		} else {
+			$db->dbExecParams($query, $params);
+			$converted = $db->dbGetPlaceholderConverted();
+		}
+		$this->assertEquals(
+			$expected_found,
+			$converted['found'],
+			'Found not equal'
+		);
+		$this->assertEquals(
+			$expected_query,
+			$converted['query'],
+			'Query not equal'
+		);
+		$this->assertEquals(
+			$expected_params,
+			$converted['params'],
+			'Params not equal'
+		);
+	}
+
+	/**
+	 * test exception for placeholder convert
+	 * -> internally converted to error
+	 *
+	 * @testdox Query Replace error tests
+	 *
+	 * @return void
+	 */
+	public function testQueryPlaceholderReplaceException(): void
+	{
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		$db->dbSetConvertPlaceholder(true);
+		$db->dbExecParams(
+			<<<SQL
+			SELECT foo FROM bar
+			WHERE a = ? and b = :bname
+			SQL,
+			['a', 'b']
+		);
+		$this->assertEquals(
+			200,
+			$db->dbGetLastError()
+		);
+
+		// catch unset, for :names
+		$db->dbExecParams(
+			<<<SQL
+			SELECT foo FROM bar
+			WHERE a = :aname and b = :bname
+			SQL,
+			[':foo' => 'a', ':bname' => 'b']
+		);
+		$this->assertEquals(
+			210,
+			$db->dbGetLastError()
+		);
+
+		// TODO: other way around for to pdo
+	}
+
 	// TODO implement below checks
 	// - complex write sets
 	//   dbWriteData, dbWriteDataExt
@@ -5158,8 +5300,6 @@ final class CoreLibsDBIOTest extends TestCase
 		string $warning_final,
 		string $error_final
 	): void {
-		// self::$log->setLogLevelAll('debug', true);
-		// self::$log->setLogLevelAll('print', true);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config['valid'],
 			self::$log

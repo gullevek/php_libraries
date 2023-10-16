@@ -284,8 +284,8 @@ class IO
 	public const ERROR_HASH_TYPE = 'adler32';
 	/** @var string regex to get returning with matches at position 1 */
 	public const REGEX_RETURNING = '/\s+returning\s+(.+\s*(?:.+\s*)+);?$/i';
-	/** @var array<string> allowed convert target for placeholder */
-	public const DB_CONVERT_PLACEHOLDER_TARGET = ['pg', 'pdo'];
+	/** @var array<string> allowed convert target for placeholder: pg or pdo (currently not available) */
+	public const DB_CONVERT_PLACEHOLDER_TARGET = ['pg'];
 	// REGEX_SELECT
 	// REGEX_UPDATE
 	// REGEX INSERT
@@ -302,6 +302,9 @@ class IO
 	private string $query = '';
 	/** @var array<mixed> current params for query */
 	private array $params = [];
+	// if we do have a convert call, store the convert data in here, else it will be empty
+	/** @var array{}|array{original:array{query:string,params:array<mixed>},type:''|'named'|'numbered'|'question_mark',found:int,matches:array<string>,params_lookup:array<mixed>,query:string,params:array<mixed>} */
+	private array $placeholder_converted = [];
 	// only inside
 	// basic vars
 	// the dbh handler, if disconnected by command is null, bool:false on error,
@@ -333,6 +336,8 @@ class IO
 	private bool $db_convert_placeholder = false;
 	/** @var string convert placeholders target, default is 'pg', other allowed is 'pdo' */
 	private string $db_convert_placeholder_target = 'pg';
+	/** @var bool Replace the placeholders in a query for debug output, defaults to false */
+	private bool $db_debug_replace_placeholder = false;
 	// convert type settings
 	// 0: OFF (CONVERT_OFF)
 	// >0: ON
@@ -374,6 +379,7 @@ class IO
 	private string $warning_id;
 	/** @var string */
 	private string $error_history_id;
+	// timestamp:string,level:string,id:string,error:string,source:string,pg_error:string,message:string,context:array<mixed>
 	/** @var array<mixed> Stores warning and errors combinded with detail info */
 	private array $error_history_long = [];
 	/** @var bool error thrown on class init if we cannot connect to db */
@@ -413,7 +419,7 @@ class IO
 	 * and failure set on failed connection
 	 *
 	 * phpcs:ignore
-	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string} $db_config DB configuration array
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string,db_debug_replace_placeholder?:bool} $db_config DB configuration array
 	 * @param \CoreLibs\Logging\Logging $log Logging class
 	 * @throws \RuntimeException If no DB connection can be established on launch
 	 */
@@ -442,15 +448,15 @@ class IO
 			'11' => 'No Querystring given',
 			'12' => 'No Cursor given, no correct query perhaps?',
 			'13' => 'Query could not be executed without errors',
-			'14' => 'Can\'t connect to DB server',
-			'15' => 'Can\'t select DB or no db name given',
-			'16' => 'No DB Handler found / connect or reconnect failed',
+			'14' => 'No DB Handler found / connect or reconnect failed',
+			'15' => 'Cannot select DB or no db name given',
+			// '16' => 'No DB Handler found / connect or reconnect failed', // 16 merged into 14
 			'17' => 'All dbReturn* methods work only with SELECT statements, '
 				. 'please use dbExec for everything else',
 			'18' => 'Query not found in cache. Nothing has been reset',
 			'19' => 'Wrong PK name given or no PK name given at all, can\'t get Insert ID',
-			'20' => 'Found given Prepare Statement Name in array, '
-				. 'Query not prepared, will use existing one',
+			'20' => 'Query has already been prepared',
+			'26' => 'Same prepare statement name has been used for a different query',
 			'21' => 'Query Prepare failed',
 			'22' => 'Query Execute failed',
 			'23' => 'Query Execute failed, data array does not match placeholders',
@@ -481,6 +487,10 @@ class IO
 			'104' => 'No Key with this name in the prepared cursor array',
 			// abort on Placeholder convert
 			'200' => 'Cannot have named, question mark or numbered placeholders in the same query',
+			'210' => 'Cannot lookup param named in param list',
+			'211' => 'Cannot lookup param named in param lookup list',
+			'220' => 'Cannot lookup param number in param list',
+			'221' => 'Cannot lookup param number in param lookup list',
 		];
 
 		// load the core DB functions wrapper class
@@ -493,7 +503,6 @@ class IO
 
 		// connect to DB
 		if (!$this->__connectToDB()) {
-			$this->__dbError(16);
 			$this->db_connection_closed = true;
 			throw new \RuntimeException('INIT: No DB Handler found / connect or reconnect failed', 16);
 		}
@@ -515,7 +524,7 @@ class IO
 	 * Setup DB config and options
 	 *
 	 * phpcs:ignore
-	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string} $db_config
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string,db_debug_replace_placeholder?:bool} $db_config
 	 * @return bool
 	 */
 	private function __setConfigOptions(array $db_config): bool
@@ -558,7 +567,10 @@ class IO
 			$this->__setConvertType($db_convert_type);
 		}
 		// set placeholder convert flag and target
-		if (isset($db_config['db_convert_placeholder']) && is_bool($db_config['db_convert_placeholder'])) {
+		if (
+			isset($db_config['db_convert_placeholder']) &&
+			is_bool($db_config['db_convert_placeholder'])
+		) {
 			$this->db_convert_placeholder = $db_config['db_convert_placeholder'];
 		}
 		if (
@@ -566,6 +578,13 @@ class IO
 			in_array($db_config['db_convert_placeholder_target'], self::DB_CONVERT_PLACEHOLDER_TARGET)
 		) {
 			$this->db_convert_placeholder_target = $db_config['db_convert_placeholder_target'];
+		}
+
+		if (
+			isset($db_config['db_debug_replace_placeholder']) &&
+			is_bool($db_config['db_debug_replace_placeholder'])
+		) {
+			$this->db_debug_replace_placeholder = $db_config['db_debug_replace_placeholder'];
 		}
 
 		// return status true: ok, false: options error
@@ -619,7 +638,7 @@ class IO
 			// if non set or none matching abort
 			default:
 				// abort error
-				$this->__dbError(10);
+				$this->__dbError(10, context: ['db_type' => $this->db_type]);
 				$this->db_connection_closed = true;
 				break;
 		}
@@ -637,7 +656,14 @@ class IO
 	{
 		// no DB name set, abort
 		if (empty($this->db_name)) {
-			$this->__dbError(15);
+			$this->__dbError(15, context: [
+				'host' => $this->db_host,
+				'user' => $this->db_user,
+				'password' => 'sha256:' . hash('sha256', $this->db_pwd),
+				'database' => $this->db_name,
+				'port' => $this->db_port,
+				'ssl' => $this->db_ssl
+			]);
 			return false;
 		}
 		// generate connect string
@@ -651,7 +677,14 @@ class IO
 		);
 		// if no dbh here, we couldn't connect to the DB itself
 		if (!$this->dbh) {
-			$this->__dbError(14);
+			$this->__dbError(14, context: [
+				'host' => $this->db_host,
+				'user' => $this->db_user,
+				'password' => 'sha256:' . hash('sha256', $this->db_pwd),
+				'database' => $this->db_name,
+				'port' => $this->db_port,
+				'ssl' => $this->db_ssl
+			]);
 			return false;
 		}
 		// 15 error (cant select to DB is not valid in postgres, as connect is different)
@@ -684,59 +717,6 @@ class IO
 			$this->db_functions->__dbClose();
 			$this->dbh = null;
 		}
-	}
-
-	/**
-	 * checks if query is a SELECT, SHOW or WITH, if not error, 0 return
-	 * NOTE:
-	 * Query needs to start with SELECT, SHOW or WITH
-	 *
-	 * @param  string $query query to check
-	 * @return bool          true if matching, false if not
-	 */
-	private function __checkQueryForSelect(string $query): bool
-	{
-		// change to string starts with?
-		if (preg_match("/^\s*(?:SELECT|SHOW|WITH)\s/i", $query)) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * check for DELETE, INSERT, UPDATE
-	 * if pure is set to true, only when INSERT is set will return true
-	 * NOTE:
-	 * Queries need to start with INSERT, UPDATE, DELETE. Anything else is ignored
-	 *
-	 * @param  string $query query to check
-	 * @param  bool   $pure  pure check (only insert), default false
-	 * @return bool          true if matching, false if not
-	 */
-	private function __checkQueryForInsert(string $query, bool $pure = false): bool
-	{
-		if ($pure && preg_match("/^\s*INSERT\s+?INTO\s/i", $query)) {
-			return true;
-		}
-		if (!$pure && preg_match("/^\s*(?:INSERT\s+?INTO|DELETE\s+?FROM|UPDATE)\s/i", $query)) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * returns true if the query starts with UPDATE
-	 * query NEEDS to start with UPDATE
-	 *
-	 * @param  string $query query to check
-	 * @return bool          returns true if the query starts with UPDATE
-	 */
-	private function __checkQueryForUpdate(string $query): bool
-	{
-		if (preg_match("/^\s*UPDATE\s?(.+)/i", $query)) {
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -899,12 +879,15 @@ class IO
 	 * @param \PgSql\Result|false $cursor current cursor for pg_result_error,
 	 *                             pg_last_error too, but pg_result_error
 	 *                             is more accurate (PgSql\Result)
+	 * @param bool $force_log [=false] if we want to log this error to log, on default logging is handled in the
+	 *                                 dbError/dbWarning calls
 	 * @return array<mixed> Pos 0: if we could get the method where it was called
 	 *                             if not found [Uknown Method]
 	 *                      Pos 1: if we have the pg_error_string from last error
 	 *                             if nothing then empty string
+	 *                      Pos 2: context array for detailed logging
 	 */
-	private function __dbErrorPreprocessor(\PgSql\Result|false $cursor = false): array
+	private function __dbErrorPreprocessor(\PgSql\Result|false $cursor = false, bool $force_log = false): array
 	{
 		$db_prefix = '';
 		$db_error_string = '';
@@ -941,12 +924,20 @@ class IO
 		} elseif (!empty($db_error_string)) {
 			$db_error_string = $db_prefix . ' ' . $db_error_string;
 		}
-		if ($db_error_string) {
+		if ($db_error_string && $force_log) {
 			$this->__dbDebugMessage('db', $db_error_string, 'DB_ERROR', $where_called);
+		}
+		$context = [];
+		if ($db_error_string) {
+			$context = [
+				'pg_error_string' => $db_error_string,
+				'where_called' => $where_called,
+			];
 		}
 		return [
 			$where_called,
-			$db_error_string
+			$db_error_string,
+			$context
 		];
 	}
 
@@ -957,11 +948,12 @@ class IO
 	 * additional pg error message if exists and optional msg given on error call
 	 * all error messages are grouped by error_history_id set when errors are reset
 	 *
-	 * @param string $level
-	 * @param string $error_id
-	 * @param string $where_called
-	 * @param string $pg_error_string
-	 * @param string $msg
+	 * @param string $level           warning or error
+	 * @param string $error_id        error id
+	 * @param string $where_called    context wher eerror was colled
+	 * @param string $pg_error_string if set, postgresql error string
+	 * @param string $message         additional message
+	 * @param array<mixed> $context   array with more context information (eg query, params, etc)
 	 * @return void
 	 */
 	private function __dbErrorHistory(
@@ -969,7 +961,8 @@ class IO
 		string $error_id,
 		string $where_called,
 		string $pg_error_string,
-		string $msg
+		string $message,
+		array $context
 	): void {
 		if (empty($this->error_history_id)) {
 			$this->error_history_id = Uids::uniqId(self::ERROR_HASH_TYPE);
@@ -981,7 +974,8 @@ class IO
 			'error' => $this->error_string[$error_id] ?? '[UNKNOWN ERROR]',
 			'source' => $where_called,
 			'pg_error' => $pg_error_string,
-			'msg' => $msg,
+			'message' => $message,
+			'context' => $context,
 		];
 	}
 
@@ -990,54 +984,60 @@ class IO
 	 *
 	 * @param integer $error_id           Any Error ID, used in debug message string
 	 * @param \PgSql\Result|false $cursor Optional cursor, passed on to preprocessor
-	 * @param string $msg                 optional message added to debug
+	 * @param string $message             Optional message added to debug
+	 * @param array<mixed> $context       Optional Context array, passed on as error_data to the main error
 	 * @return void
 	 */
 	protected function __dbError(
 		int $error_id,
 		\PgSql\Result|false $cursor = false,
-		string $msg = ''
+		string $message = '',
+		array $context = []
 	): void {
 		$error_id = (string)$error_id;
-		[$where_called, $pg_error_string] = $this->__dbErrorPreprocessor($cursor);
+		[$where_called, $pg_error_string, $_context] = $this->__dbErrorPreprocessor($cursor);
 		// write error msg ...
 		$this->__dbDebugMessage(
 			'db',
 			$error_id . ': ' . ($this->error_string[$error_id] ?? '[UNKNOWN ERROR]')
-				. ($msg ? ', ' . $msg : ''),
+				. ($message ? ', ' . $message : ''),
 			'DB_ERROR',
-			$where_called
+			$where_called,
+			array_merge($context, $_context)
 		);
 		$this->error_id = $error_id;
-		// keep warning history
-		$this->__dbErrorHistory('error', $error_id, $where_called, $pg_error_string, $msg);
+		// keep error history
+		$this->__dbErrorHistory('error', $error_id, $where_called, $pg_error_string, $message, $context);
 	}
 
 	/**
 	 * write a warning
 	 *
-	 * @param integer $warning_id          Integer warning id added to debug
+	 * @param integer $warning_id         Integer warning id added to debug
 	 * @param \PgSql\Result|false $cursor Optional cursor, passed on to preprocessor
-	 * @param string $msg                  optional message added to debug
+	 * @param string $message             Optional message added to debug
+	 * @param array<mixed> $context       Optional Context array, passed on as error_data to the main error
 	 * @return void
 	 */
 	protected function __dbWarning(
 		int $warning_id,
 		\PgSql\Result|false $cursor = false,
-		string $msg = ''
+		string $message = '',
+		array $context = []
 	): void {
 		$warning_id = (string)$warning_id;
-		[$where_called, $pg_error_string] = $this->__dbErrorPreprocessor($cursor);
+		[$where_called, $pg_error_string, $_context] = $this->__dbErrorPreprocessor($cursor);
 		$this->__dbDebugMessage(
 			'db',
 			$warning_id . ': ' . ($this->error_string[$warning_id] ?? '[UNKNOWN WARNING')
-				. ($msg ? ', ' . $msg : ''),
+				. ($message ? ', ' . $message : ''),
 			'DB_WARNING',
-			$where_called
+			$where_called,
+			array_merge($context, $_context)
 		);
 		$this->warning_id = $warning_id;
 		// keep warning history
-		$this->__dbErrorHistory('warning', $warning_id, $where_called, $pg_error_string, $msg);
+		$this->__dbErrorHistory('warning', $warning_id, $where_called, $pg_error_string, $message, $context);
 	}
 
 	/**
@@ -1138,37 +1138,67 @@ class IO
 
 	/**
 	 * for debug purpose replaces $1, $2, etc with actual data
+	 * TODO: :name and ? params
+	 * Also works with :name parameters
+	 * ? parameters, will be ignored
 	 *
 	 * @param  string       $query Query to replace values in
-	 * @param  array<mixed> $data  The data array
+	 * @param  array<mixed> $params  The data param array
 	 * @return string              string of query with data inside
 	 */
-	private function __dbDebugPrepare(string $query, array $data = []): string
+	private function __dbDebugPrepare(string $query, array $params = []): string
 	{
 		// skip anything if there is no data
-		if ($data === []) {
+		if ($params === []) {
 			return $query;
 		}
 		// get the keys from data array
-		$keys = array_keys($data);
+		$keys = array_keys($params);
+		// check if there is ? or :name i the keys list
 		// because the placeholders start with $ and at 1,
 		// we need to increase each key and prefix it with a $ char
 		for ($i = 0, $iMax = count($keys); $i < $iMax; $i++) {
 			// note: if I use $ here, the str_replace will
 			//       replace it again. eg $11 '$1'1would be replaced with $1 again
 			// prefix data set with parameter pos
-			$data[$i] = '#' . ($keys[$i] + 1) . ':' . ($data[$i] === null ?
-				'"NULL"' : (string)$data[$i]
+			$params[$i] = '#' . ($keys[$i] + 1) . ':' . ($params[$i] === null ?
+				'"NULL"' : (string)$params[$i]
 			);
 			// search part
 			$keys[$i] = '$' . ($keys[$i] + 1);
 		}
 		// simply replace the $1, $2, ... with the actual data and return it
+		// note that we do this in return to go from highest number to lowest
 		return str_replace(
 			array_reverse($keys),
-			array_reverse($data),
+			array_reverse($params),
 			$query
 		);
+	}
+
+	/**
+	 * Created the context/error_data error for debug messages
+	 *
+	 * @param  string       $query  Query called
+	 * @param  array<mixed> $params Params
+	 * @return array{}|array<string,mixed> Empty array if no params, or params
+	 *                                     with optional prepared statement
+	 */
+	private function __dbDebugPrepareContext(string $query, array $params = []): array
+	{
+		if ($this->params === []) {
+			return [];
+		}
+		$error_data = [
+			'params' => $params
+		];
+		if ($this->dbGetDebugReplacePlaceholder()) {
+			$error_data['prepared'] = $this->__dbDebugPrepare(
+				$query,
+				$params
+			);
+		}
+		return $error_data;
 	}
 
 	/**
@@ -1182,7 +1212,7 @@ class IO
 	{
 		$matches = [];
 		$schema_table = [];
-		if ($this->__checkQueryForSelect($query)) {
+		if ($this->dbCheckQueryForSelect($query)) {
 			// only selects the first one, this is more a fallback
 			// MATCHES 1 (call), 3 (schema), 4 (table)
 			preg_match("/\s+?(FROM)\s+?([\"'])?(?:([\w_]+)\.)?([\w_]+)(?:\2)?\s?/i", $query, $matches);
@@ -1306,20 +1336,25 @@ class IO
 	 * Checks if the placeholder count in the query matches the params given
 	 * on call
 	 *
-	 * @param  string $query        Query to check
-	 * @param  int    $params_count The parms count expected
+	 * @param  string       $query  Query to check
+	 * @param  array<mixed> $params The parms to count count expected
 	 * @return bool                 True for params count ok, else false
 	 */
-	private function __dbCheckQueryParams(string $query, int $params_count): bool
+	private function __dbCheckQueryParams(string $query, array $params): bool
 	{
 		$placeholder_count = $this->__dbCountQueryParams($query);
+		$params_count = count($params);
 		if ($params_count != $placeholder_count) {
 			$this->__dbError(
 				23,
 				false,
-				'Array data count does not match prepared fields. Need: '
-				. $placeholder_count . ', has: '
-				. $params_count
+				'Need: ' . $placeholder_count . ', has: ' . $params_count,
+				[
+					'query' => $query,
+					'params' => $params,
+					'placeholder_needed' => $placeholder_count,
+					'placeholder_provided' => $params_count,
+				]
 			);
 			return false;
 		}
@@ -1366,7 +1401,6 @@ class IO
 		if (!$this->dbh) {
 			// if reconnect fails drop out
 			if (!$this->__connectToDB()) {
-				$this->__dbError(16);
 				return false;
 			}
 		}
@@ -1376,7 +1410,7 @@ class IO
 		}
 		// if we do have an insert, check if there is no RETURNING pk_id,
 		// add it if I can get the PK id
-		if ($this->__checkQueryForInsert($this->query, true)) {
+		if ($this->dbCheckQueryForInsert($this->query, true)) {
 			$this->pk_name = $pk_name;
 			if ($this->pk_name != 'NULL') {
 				if (!$this->pk_name) {
@@ -1414,7 +1448,7 @@ class IO
 		}
 		// if we have an UPDATE and RETURNING, flag for true, but do not add anything
 		if (
-			$this->__checkQueryForUpdate($this->query) &&
+			$this->dbCheckQueryForUpdate($this->query) &&
 			preg_match(self::REGEX_RETURNING, $this->query, $matches)
 		) {
 			$this->returning_id = true;
@@ -1423,23 +1457,46 @@ class IO
 		$query_hash = $this->dbGetQueryHash($this->query, $this->params);
 		// QUERY PARAMS: run query params check and rewrite
 		if ($this->dbGetConvertPlaceholder() === true) {
-			$convert = ConvertPlaceholder::convertPlaceholderInQuery(
-				$query,
-				$params,
-				$this->dbGetConvertPlaceholderTarget()
-			);
+			try {
+				$this->placeholder_converted = ConvertPlaceholder::convertPlaceholderInQuery(
+					$this->query,
+					$this->params,
+					$this->dbGetConvertPlaceholderTarget()
+				);
+				// write the new queries over the old
+				if (!empty($this->placeholder_converted['query'])) {
+					$this->query = $this->placeholder_converted['query'];
+					$this->params = $this->placeholder_converted['params'];
+				}
+			} catch (\OutOfRangeException $e) {
+				$this->__dbError($e->getCode(), context:[
+					'query' => $this->query,
+					'params' => $this->params,
+					'location' => '__dbPrepareExec',
+					'error' => 'OutOfRangeException',
+					'exception' => $e
+				]);
+				return false;
+			} catch (\RuntimeException $e) {
+				$this->__dbError($e->getCode(), context:[
+					'query' => $this->query,
+					'params' => $this->params,
+					'location' => '__dbPrepareExec',
+					'error' => 'RuntimeException',
+					'exception' => $e
+				]);
+				return false;
+			}
 		}
 
 		// $this->debug('DB IO', 'Q: ' . $this->query . ', RETURN: ' . $this->returning_id);
 		// for DEBUG, only on first time ;)
 		$this->__dbDebug(
 			'db',
-			$this->__dbDebugPrepare(
-				$this->query,
-				$this->params
-			),
+			$this->query,
 			'__dbPrepareExec',
-			($this->params === [] ? 'Q' : 'Qp')
+			($this->params === [] ? 'Q' : 'Qp'),
+			error_data: $this->__dbDebugPrepareContext($this->query, $this->params)
 		);
 		// if the array index does not exists set it 0
 		if (!array_key_exists($query_hash, $this->query_called)) {
@@ -1455,16 +1512,11 @@ class IO
 			$this->MAX_QUERY_CALL != -1 &&
 			$this->query_called[$query_hash] > $this->MAX_QUERY_CALL
 		) {
-				$this->__dbError(30, false, $this->query);
-				$this->__dbDebugMessage(
-					'db',
-					$this->__dbDebugPrepare(
-						$this->query,
-						$this->params
-					),
-					'dbExec',
-					($this->params === [] ? 'Q[nc]' : 'Qp[nc]')
-				);
+				$this->__dbError(30, false, context: [
+					'query' => $this->query,
+					'params' => $this->params,
+					'location' => '__dbPrepareExec'
+				]);
 				return false;
 		}
 		$this->query_called[$query_hash] ++;
@@ -1484,14 +1536,17 @@ class IO
 		// if FALSE returned, set error stuff
 		// if either the cursor is false
 		if ($this->cursor === false || $this->db_functions->__dbLastErrorQuery()) {
-			// printout Query if debug is turned on
-			$this->__dbDebug('db', $this->query, 'dbExec', 'Q[nc]');
 			// internal error handling
-			$this->__dbError(13, $this->cursor);
+			$this->__dbError(13, $this->cursor, context: [
+				'query' => $this->query,
+				'params' => $this->params,
+				'location' => 'dbExec',
+				'query_id' => 'Q[nc]',
+			]);
 			return false;
 		} else {
 			// if SELECT do here ...
-			if ($this->__checkQueryForSelect($this->query)) {
+			if ($this->dbCheckQueryForSelect($this->query)) {
 				// count the rows returned (if select)
 				$this->num_rows = $this->db_functions->__dbNumRows($this->cursor);
 				// count the fields
@@ -1512,15 +1567,15 @@ class IO
 					$this->field_names,
 					$this->field_types
 				);
-			} elseif ($this->__checkQueryForInsert($this->query)) {
+			} elseif ($this->dbCheckQueryForInsert($this->query)) {
 				// if not select do here
 				// count affected rows
 				$this->num_rows = $this->db_functions->__dbAffectedRows($this->cursor);
 				if (
 					// ONLY insert with set pk name
-					($this->__checkQueryForInsert($this->query, true) && $this->pk_name != 'NULL') ||
+					($this->dbCheckQueryForInsert($this->query, true) && $this->pk_name != 'NULL') ||
 					// insert or update with returning add
-					($this->__checkQueryForInsert($this->query) && $this->returning_id)
+					($this->dbCheckQueryForInsert($this->query) && $this->returning_id)
 				) {
 					$this->__dbSetInsertId(
 						$this->returning_id,
@@ -1891,6 +1946,63 @@ class IO
 	}
 
 	// ***************************
+	// CHECK QUERY TYPE
+	// ***************************
+
+	/**
+	 * checks if query is a SELECT, SHOW or WITH, if not error, 0 return
+	 * NOTE:
+	 * Query needs to start with SELECT, SHOW or WITH
+	 *
+	 * @param  string $query query to check
+	 * @return bool          true if matching, false if not
+	 */
+	public function dbCheckQueryForSelect(string $query): bool
+	{
+		// change to string starts with?
+		if (preg_match("/^\s*(?:SELECT|SHOW|WITH)\s/i", $query)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * check for DELETE, INSERT, UPDATE
+	 * if pure is set to true, only when INSERT is set will return true
+	 * NOTE:
+	 * Queries need to start with INSERT, UPDATE, DELETE. Anything else is ignored
+	 *
+	 * @param  string $query query to check
+	 * @param  bool   $pure  pure check (only insert), default false
+	 * @return bool          true if matching, false if not
+	 */
+	public function dbCheckQueryForInsert(string $query, bool $pure = false): bool
+	{
+		if ($pure && preg_match("/^\s*INSERT\s+?INTO\s/i", $query)) {
+			return true;
+		}
+		if (!$pure && preg_match("/^\s*(?:INSERT\s+?INTO|DELETE\s+?FROM|UPDATE)\s/i", $query)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * returns true if the query starts with UPDATE
+	 * query NEEDS to start with UPDATE
+	 *
+	 * @param  string $query query to check
+	 * @return bool          returns true if the query starts with UPDATE
+	 */
+	public function dbCheckQueryForUpdate(string $query): bool
+	{
+		if (preg_match("/^\s*UPDATE\s?(.+)/i", $query)) {
+			return true;
+		}
+		return false;
+	}
+
+	// ***************************
 	// DATA WRITE CONVERSION
 	// ***************************
 
@@ -2136,7 +2248,10 @@ class IO
 		$table = (!empty($schema) ? $schema . '.' : '') . $table;
 		$array = $this->db_functions->__dbMetaData($table);
 		if (!is_array($array)) {
-			$this->__dbError(60);
+			$this->__dbError(60, context: [
+				'table' => $table,
+				'schema' => $schema
+			]);
 			$array = false;
 		}
 		return $array;
@@ -2245,6 +2360,8 @@ class IO
 				'query' => '',
 				// parameter
 				'params' => [],
+				// if we convert placeholders, conversion data is stored here
+				'placeholder_converted' => [],
 				// cache flag from method call
 				'cache_flag' => $cache,
 				// flag if we only have assoc data
@@ -2262,44 +2379,71 @@ class IO
 				'log_pos' => 1, // how many times called overall
 				'log' => [], // current run log
 			];
+
+			// set the query
+			$this->cursor_ext[$query_hash]['query'] = $query;
+			// before doing ANYTHING check if query is "SELECT ..." everything else does not work
+			if (!$this->dbCheckQueryForSelect($this->cursor_ext[$query_hash]['query'])) {
+				$this->__dbError(17, false, context: [
+					'query' => $this->cursor_ext[$query_hash]['query'],
+					'params' => $this->cursor_ext[$query_hash]['params'],
+					'location' => 'dbReturn',
+				]);
+				return false;
+			}
+			// set the query parameters
+			$this->cursor_ext[$query_hash]['params'] = $params;
+			// QUERY PARAMS: run query params check and rewrite
+			if ($this->dbGetConvertPlaceholder() === true) {
+				try {
+					$this->cursor_ext[$query_hash]['placeholder_converted'] =
+						ConvertPlaceholder::convertPlaceholderInQuery(
+							$this->cursor_ext[$query_hash]['query'],
+							$this->cursor_ext[$query_hash]['params'],
+							$this->dbGetConvertPlaceholderTarget()
+						);
+					if (!empty($this->cursor_ext[$query_hash]['placeholder_converted']['query'])) {
+						$this->cursor_ext[$query_hash]['query'] =
+							$this->cursor_ext[$query_hash]['placeholder_converted']['query'];
+						$this->cursor_ext[$query_hash]['params'] =
+							$this->cursor_ext[$query_hash]['placeholder_converted']['params'];
+					}
+				} catch (\OutOfRangeException $e) {
+					$this->__dbError($e->getCode(), context:[
+						'query' => $this->cursor_ext[$query_hash]['query'],
+						'params' => $this->cursor_ext[$query_hash]['params'],
+						'location' => 'dbReturn',
+						'error' => 'OutOfRangeException',
+						'exception' => $e
+					]);
+					return false;
+				} catch (\RuntimeException $e) {
+					$this->__dbError($e->getCode());
+					$this->__dbError($e->getCode(), context:[
+						'query' => $this->cursor_ext[$query_hash]['query'],
+						'params' => $this->cursor_ext[$query_hash]['params'],
+						'location' => 'dbReturn',
+						'error' => 'RuntimeException',
+						'exception' => $e
+					]);
+					return false;
+				}
+			}
+			// check if params count matches
+			// checks if the params count given matches the expected count
+			if (
+				$this->__dbCheckQueryParams(
+					$this->cursor_ext[$query_hash]['query'],
+					$this->cursor_ext[$query_hash]['params']
+				) === false
+			) {
+				return false;
+			}
 		} else {
 			$this->cursor_ext[$query_hash]['log_pos'] ++;
 		}
 		// reset log for each read
 		$this->cursor_ext[$query_hash]['log'] = [];
-		// set the query
-		$this->cursor_ext[$query_hash]['query'] = $query;
-		// before doing ANYTHING check if query is "SELECT ..." everything else does not work
-		if (!$this->__checkQueryForSelect($this->cursor_ext[$query_hash]['query'])) {
-			$this->__dbError(17, false, $this->cursor_ext[$query_hash]['query']);
-			return false;
-		}
-		// QUERY PARAMS: run query params check and rewrite
-		if ($this->dbGetConvertPlaceholder() === true) {
-			$convert = ConvertPlaceholder::convertPlaceholderInQuery(
-				$query,
-				$params,
-				$this->dbGetConvertPlaceholderTarget()
-			);
-		}
-
-		// set the query parameters
-		$this->cursor_ext[$query_hash]['params'] = $params;
-		// check if params count matches
-		// checks if the params count given matches the expected count
-		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
-			// in case we got an error print out query
-			$this->__dbDebug(
-				'db',
-				$this->__dbDebugPrepare(
-					$this->query,
-					$this->params
-				),
-				'dbReturn',
-				($this->params === [] ? 'Q[e]' : 'Qp[e]')
-			);
-			return false;
-		}
 		// set first call to false
 		$first_call = false;
 		// init return als false
@@ -2322,18 +2466,18 @@ class IO
 			// for DEBUG, print out each query executed
 			$this->__dbDebug(
 				'db',
-				$this->__dbDebugPrepare(
-					$this->cursor_ext[$query_hash]['query'],
-					$this->cursor_ext[$query_hash]['params']
-				),
+				$this->cursor_ext[$query_hash]['query'],
 				'dbReturn',
 				($this->cursor_ext[$query_hash]['params'] === [] ? 'Q' : 'Qp'),
+				error_data: $this->__dbDebugPrepareContext(
+					$this->cursor_ext[$query_hash]['query'],
+					$this->cursor_ext[$query_hash]['params']
+				)
 			);
 			// if no DB Handler try to reconnect
 			if (!$this->dbh) {
 				// if reconnect fails drop out
 				if (!$this->__connectToDB()) {
-					$this->__dbError(16);
 					return false;
 				}
 			}
@@ -2355,17 +2499,12 @@ class IO
 			}
 			// if still no cursor ...
 			if (!$this->cursor_ext[$query_hash]['cursor']) {
-				$this->__dbDebug(
-					'db',
-					$this->__dbDebugPrepare(
-						$this->cursor_ext[$query_hash]['query'],
-						$this->cursor_ext[$query_hash]['params']
-					),
-					'dbReturn',
-					($this->cursor_ext[$query_hash]['params'] === [] ? 'Q[e]' : 'Qp[e]'),
-				);
 				// internal error handling
-				$this->__dbError(13, $this->cursor_ext[$query_hash]['cursor']);
+				$this->__dbError(13, $this->cursor_ext[$query_hash]['cursor'], context: [
+					'query' => $this->cursor_ext[$query_hash]['query'],
+					'params' => $this->cursor_ext[$query_hash]['params'],
+					'location' => 'dbReturn'
+				]);
 				return false;
 			} else {
 				$first_call = true;
@@ -2580,19 +2719,23 @@ class IO
 			return false;
 		}
 		// checks if the params count given matches the expected count
-		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
+		if ($this->__dbCheckQueryParams($this->query, $this->params) === false) {
 			return false;
 		}
 		// ** actual db exec call
-		if ($params === []) {
+		if ($this->params === []) {
 			$cursor = $this->db_functions->__dbQuery($this->query);
 		} else {
-			$cursor = $this->db_functions->__dbQueryParams($this->query, $params);
+			$cursor = $this->db_functions->__dbQueryParams($this->query, $this->params);
 		}
 		// if we faield, just set the master cursors to false too
 		$this->cursor = $cursor;
 		if ($cursor === false) {
-			$this->__dbError(13);
+			$this->__dbError(13, context: [
+				'query' => $this->query,
+				'params' => $this->params,
+				'location' => 'dbExecParams',
+			]);
 			return false;
 		}
 		// if FALSE returned, set error stuff
@@ -2672,8 +2815,13 @@ class IO
 		}
 		// before doing ANYTHING check if query is
 		// "SELECT ..." everything else does not work
-		if (!$this->__checkQueryForSelect($query)) {
-			$this->__dbError(17, false, $query);
+		if (!$this->dbCheckQueryForSelect($query)) {
+			$this->__dbError(17, false, context: [
+				'query' => $query,
+				'params' => $params,
+				'assoc_only' => $assoc_only,
+				'location' => 'dbReturnRowParams'
+			]);
 			return false;
 		}
 		$cursor = $this->dbExecParams($query, $params);
@@ -2717,8 +2865,13 @@ class IO
 			return false;
 		}
 		// before doing ANYTHING check if query is "SELECT ..." everything else does not work
-		if (!$this->__checkQueryForSelect($query)) {
-			$this->__dbError(17, false, $query);
+		if (!$this->dbCheckQueryForSelect($query)) {
+			$this->__dbError(17, false, context: [
+				'query' => $query,
+				'params' => $params,
+				'assoc_only' => $assoc_only,
+				'location' => 'dbReturnArrayParams'
+			]);
 			return false;
 		}
 		$cursor = $this->dbExecParams($query, $params);
@@ -2763,7 +2916,11 @@ class IO
 		$query_hash = $this->dbGetQueryHash($query, $params);
 		// clears cache for this query
 		if (empty($this->cursor_ext[$query_hash]['query'])) {
-			$this->__dbError(18);
+			$this->__dbError(18, context: [
+				'query' => $query,
+				'params' => $params,
+				'hash' => $query_hash,
+			]);
 			return false;
 		}
 		unset($this->cursor_ext[$query_hash]);
@@ -2932,7 +3089,6 @@ class IO
 		if (!$this->dbh) {
 			// if reconnect fails drop out
 			if (!$this->__connectToDB()) {
-				$this->__dbError(16);
 				return false;
 			}
 		}
@@ -2959,7 +3115,7 @@ class IO
 				'returning_id' => false
 			];
 			// if this is an insert query, check if we can add a return
-			if ($this->__checkQueryForInsert($query, true)) {
+			if ($this->dbCheckQueryForInsert($query, true)) {
 				if ($pk_name != 'NULL') {
 					// set primary key name
 					// current: only via parameter
@@ -3007,14 +3163,34 @@ class IO
 				$this->__dbError(
 					21,
 					false,
-					$stm_name . ': Prepare field with: ' . $stm_name . ' | ' . $query
+					context: [
+						'statement_name' => $stm_name,
+						'query' => $query,
+						'pk_name' => $pk_name,
+					]
 				);
 				return $result;
 			}
 		} else {
-			// thrown warning
-			$this->__dbWarning(20, false, $stm_name);
-			return true;
+			// if we try to use the same statement name for a differnt query, error abort
+			if ($this->prepare_cursor[$stm_name]['query'] != $query) {
+				// thrown error
+				$this->__dbError(26, false, context: [
+					'statement_name' => $stm_name,
+					'prepared_query' => $this->prepare_cursor[$stm_name]['query'],
+					'query' => $query,
+					'pk_name' => $pk_name,
+				]);
+				return false;
+			} else {
+				// thrown warning
+				$this->__dbWarning(20, false, context: [
+					'statement_name' => $stm_name,
+					'query' => $query,
+					'pk_name' => $pk_name,
+				]);
+				return true;
+			}
 		}
 	}
 
@@ -3032,7 +3208,6 @@ class IO
 		if (!$this->dbh) {
 			// if reconnect fails drop out
 			if (!$this->__connectToDB()) {
-				$this->__dbError(16);
 				return false;
 			}
 		}
@@ -3054,28 +3229,37 @@ class IO
 			$this->__dbError(
 				24,
 				false,
-				$stm_name . ': We do not have a prepared query entry for this statement name.'
+				$stm_name . ': We do not have a prepared query entry for this statement name.',
+				context: ['statement_name' => $stm_name]
 			);
 			return false;
 		}
 		$this->__dbDebug(
 			'db',
-			$this->__dbDebugPrepare(
+			$this->prepare_cursor[$stm_name]['query'],
+			'dbExecute',
+			'Qpe',
+			error_data: array_merge([
+				'statement_name' => $stm_name,
+			], $this->__dbDebugPrepareContext(
 				$this->prepare_cursor[$stm_name]['query'],
 				$data
-			),
-			'dbExecPrep',
-			'Qpe'
+			))
 		);
 		// if the count does not match
 		if ($this->prepare_cursor[$stm_name]['count'] != count($data)) {
 			$this->__dbError(
 				23,
 				false,
-				$stm_name
-				. ': Array data count does not match prepared fields. Need: '
-				. $this->prepare_cursor[$stm_name]['count'] . ', has: '
-				. count($data)
+				'(' . $stm_name . ') '
+					. 'Need: ' . $this->prepare_cursor[$stm_name]['count'] . ', has: ' . count($data),
+				context: [
+					'statement_name' => $stm_name,
+					'query' => $this->prepare_cursor[$stm_name]['query'],
+					'params' => $data,
+					'placeholder_needed' => $this->prepare_cursor[$stm_name]['count'],
+					'placeholder_provided' => count($data)
+				]
 			);
 			return false;
 		}
@@ -3087,16 +3271,20 @@ class IO
 			$this->__dbError(
 				22,
 				$this->prepare_cursor[$stm_name]['result'],
-				$stm_name . ': Execution failed'
+				context: [
+					'statement_name' => $stm_name,
+					'query' => $this->prepare_cursor[$stm_name]['query'],
+					'params' => $data
+				]
 			);
 			return false;
 		}
 		if (
 			// pure insert wth pk name
-			($this->__checkQueryForInsert($this->prepare_cursor[$stm_name]['query'], true) &&
+			($this->dbCheckQueryForInsert($this->prepare_cursor[$stm_name]['query'], true) &&
 			$this->prepare_cursor[$stm_name]['pk_name'] != 'NULL') ||
 			// insert or update with returning set
-			($this->__checkQueryForInsert($this->prepare_cursor[$stm_name]['query']) &&
+			($this->dbCheckQueryForInsert($this->prepare_cursor[$stm_name]['query']) &&
 			$this->prepare_cursor[$stm_name]['returning_id'] === true
 			)
 		) {
@@ -3157,20 +3345,24 @@ class IO
 			return false;
 		}
 		// checks if the params count given matches the expected count
-		if ($this->__dbCheckQueryParams($query, count($params)) === false) {
+		if ($this->__dbCheckQueryParams($this->query, $this->params) === false) {
 			return false;
 		}
 		// ** actual db exec call
 		if ($params === []) {
 			$status = $this->db_functions->__dbSendQuery($this->query);
 		} else {
-			$status = $this->db_functions->__dbSendQueryParams($this->query, $params);
+			$status = $this->db_functions->__dbSendQueryParams($this->query, $this->params);
 		}
 		// run the async query, this just returns true or false
 		// the actually result is in dbCheckAsync
 		if (!$status) {
 			// if failed, process here
-			$this->__dbError(40);
+			$this->__dbError(40, context: [
+				'query' => $this->query,
+				'params' => $this->params,
+				'pk_name' => $pk_name,
+			]);
 			return false;
 		} else {
 			$this->async_running = (string)$query_hash;
@@ -3251,8 +3443,7 @@ class IO
 			// if no async running print error
 			$this->__dbError(
 				42,
-				false,
-				'No async query has been started yet.'
+				false
 			);
 			return false;
 		}
@@ -3590,6 +3781,27 @@ class IO
 	}
 
 	/**
+	 * Set flag if we print the query with replaced placeholders or not
+	 *
+	 * @param  bool $flag
+	 * @return void
+	 */
+	public function dbSetDebugReplacePlaceholder(bool $flag): void
+	{
+		$this->db_debug_replace_placeholder = $flag;
+	}
+
+	/**
+	 * get the current setting for the debug replace placeholder
+	 *
+	 * @return bool True for replace query, False for not
+	 */
+	public function dbGetDebugReplacePlaceholder(): bool
+	{
+		return $this->db_debug_replace_placeholder;
+	}
+
+	/**
 	 * set max query calls, set to -1 to disable loop
 	 * protection. this will generate a warning
 	 * empty call (null) will reset to default
@@ -3606,11 +3818,11 @@ class IO
 		// if -1 then disable loop check
 		// DANGEROUS, WARN USER
 		if ($max_calls == -1) {
-			$this->__dbWarning(50);
+			$this->__dbWarning(50, context: ['max_calls' => $max_calls]);
 		}
 		// negative or 0
 		if ($max_calls < -1 || $max_calls == 0) {
-			$this->__dbError(51);
+			$this->__dbError(51, context: ['max_calls' => $max_calls]);
 			// early abort
 			return false;
 		}
@@ -3654,7 +3866,7 @@ class IO
 			case 2:
 			// setting schema failed (3)
 			case 3:
-				$this->__dbError(71);
+				$this->__dbError(71, context: ['schema' => $db_schema]);
 				$status = false;
 				break;
 		}
@@ -3704,7 +3916,7 @@ class IO
 			case 2:
 			// 3 is set failed
 			case 3:
-				$this->__dbError(81);
+				$this->__dbError(81, context: ['encoding' => $db_encoding]);
 				$status = false;
 				break;
 		}
@@ -3827,6 +4039,16 @@ class IO
 	public function dbResetParams(): void
 	{
 		$this->params = [];
+	}
+
+	/**
+	 * Returns the placeholder convert set or empty
+	 *
+	 * @return array{}|array{original:array{query:string,params:array<mixed>},type:''|'named'|'numbered'|'question_mark',found:int,matches:array<string>,params_lookup:array<mixed>,query:string,params:array<mixed>}
+	 */
+	public function dbGetPlaceholderConverted(): array
+	{
+		return $this->placeholder_converted;
 	}
 
 	// ***************************
@@ -4047,7 +4269,8 @@ class IO
 			$this->__dbError(
 				102,
 				false,
-				'Invalid key name'
+				'Invalid key name',
+				context: ['key' => $key]
 			);
 			return false;
 		}
@@ -4056,7 +4279,8 @@ class IO
 			$this->__dbError(
 				103,
 				false,
-				'Statement name does not exist in prepare cursor array'
+				'Statement name does not exist in prepare cursor array',
+				context: ['statement_name' => $stm_name]
 			);
 			return false;
 		}
@@ -4065,7 +4289,11 @@ class IO
 			$this->__dbError(
 				104,
 				false,
-				'Key does not exist in prepare cursor array'
+				'Key does not exist in prepare cursor array',
+				context: [
+					'statement_name' => $stm_name,
+					'key' => $key
+				]
 			);
 			return false;
 		}

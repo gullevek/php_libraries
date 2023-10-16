@@ -24,10 +24,12 @@ class ConvertPlaceholder
 	 *
 	 * If the convert_to is either pg or pdo, nothing will be changed
 	 *
+	 * found has -1 if an error occoured in the preg_match_all call
+	 *
 	 * @param  string       $query      Query with placeholders to convert
 	 * @param  array<mixed> $params     The parameters that are used for the query, and will be updated
 	 * @param  string       $convert_to Either pdo or pg, will be converted to lower case for check
-	 * @return array{original:array{query:string,params:array<mixed>},type:''|'named'|'numbered'|'question_mark',found:int|false,matches:array<string>,params_lookup:array<mixed>,query:string,params:array<mixed>}
+	 * @return array{original:array{query:string,params:array<mixed>},type:''|'named'|'numbered'|'question_mark',found:int,matches:array<string>,params_lookup:array<mixed>,query:string,params:array<mixed>}
 	 * @throws \OutOfRangeException 200
 	 */
 	public static function convertPlaceholderInQuery(
@@ -61,14 +63,27 @@ class ConvertPlaceholder
 		// 2: ? question mark
 		// 3: $n numbered
 		$found = preg_match_all($pattern, $query, $matches, PREG_UNMATCHED_AS_NULL);
+		// if false or null set to -1
+		//  || $found === null
+		if ($found === false) {
+			$found = -1;
+		}
 		/** @var array<string> 1: named */
 		$named_matches = array_filter($matches[1]);
 		/** @var array<string> 2: open ? */
 		$qmark_matches = array_filter($matches[2]);
 		/** @var array<string> 3: $n matches */
 		$numbered_matches = array_filter($matches[3]);
+		// count matches
+		$count_named = count($named_matches);
+		$count_qmark = count($qmark_matches);
+		$count_numbered = count($numbered_matches);
 		// throw if mixed
-		if (count($named_matches) && count($qmark_matches) && count($numbered_matches)) {
+		if (
+			($count_named && $count_qmark) ||
+			($count_named && $count_numbered) ||
+			($count_qmark && $count_numbered)
+		) {
 			throw new \OutOfRangeException('Cannot have named, question mark and numbered in the same query', 200);
 		}
 		// rebuild
@@ -77,7 +92,7 @@ class ConvertPlaceholder
 		$query_new = '';
 		$params_new = [];
 		$params_lookup = [];
-		if (count($named_matches) && $convert_to == 'pg') {
+		if ($count_named && $convert_to == 'pg') {
 			$type = 'named';
 			$matches_return = $named_matches;
 			// only check for :named
@@ -113,7 +128,7 @@ class ConvertPlaceholder
 				},
 				$query
 			);
-		} elseif (count($qmark_matches) && $convert_to == 'pg') {
+		} elseif ($count_qmark && $convert_to == 'pg') {
 			$type = 'question_mark';
 			$matches_return = $qmark_matches;
 			// order and data stays the same
@@ -143,7 +158,7 @@ class ConvertPlaceholder
 				$query
 			);
 			// for each ?:DTN: -> replace with $1 ... $n, any remaining :DTN: remove
-		} elseif (count($numbered_matches) && $convert_to == 'pdo') {
+		} elseif ($count_numbered && $convert_to == 'pdo') {
 			// convert numbered to named
 			$type = 'numbered';
 			$matches_return = $numbered_matches;
@@ -190,8 +205,8 @@ class ConvertPlaceholder
 			],
 			// type found, empty if nothing was done
 			'type' => $type,
-			// int|null: found, not found; false: problem
-			'found' => $found,
+			// int: found, not found; -1: problem (set from false)
+			'found' => (int)$found,
 			'matches' => $matches_return,
 			// old to new lookup check
 			'params_lookup' => $params_lookup,

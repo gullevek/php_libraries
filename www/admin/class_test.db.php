@@ -38,9 +38,10 @@ print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title><head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
-print '<div><a href="class_test.db.type.php">Class Test DB Types</a></div>';
+print '<div><a href="class_test.db.type.php">Class Test DB row type convert to PHP type</a></div>';
+print '<div><a href="class_test.db.query-placeholder.php">Class Test DB Query Placeholder convert</a></div>';
 print '<div><a href="class_test.db.dbReturn.php">Class Test DB dbReturn</a></div>';
-print '<div><a href="class_test.db.single.php">Class Test DB Single Aciont</a></div>';
+print '<div><a href="class_test.db.single.php">Class Test DB Single Query tests</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 print "LOGFILE NAME: " . $db->log->getLogFile() . "<br>";
@@ -549,11 +550,13 @@ print "</pre>";
 
 print "<b>PREPARE QUERIES</b><br>";
 // READ PREPARE
-$q_prep = "SELECT test_foo_id, test, some_bool, string_a, number_a, "
-	. "number_a_numeric, some_time "
-	. "FROM test_foo "
-	. "WHERE test = $1 "
-	. "ORDER BY test_foo_id DESC LIMIT 5";
+$q_prep = <<<SQL
+SELECT test_foo_id, test, some_bool, string_a, number_a,
+number_a_numeric, some_time
+FROM test_foo
+WHERE test = $1
+ORDER BY test_foo_id DESC LIMIT 5
+SQL;
 if ($db->dbPrepare('sel_test_foo', $q_prep) === false) {
 	print "Error in sel_test_foo prepare<br>";
 } else {
@@ -681,15 +684,26 @@ echo "<hr>";
 $db_pgb = new CoreLibs\DB\IO($DB_CONFIG['test_pgbouncer'] ?? [], $log);
 print "[PGB] DBINFO: " . $db_pgb->dbInfo() . "<br>";
 if ($db->dbPrepare('pgb_sel_test_foo', $q_prep) === false) {
-	print "[PGB] [1] Error in pgb_sel_test_foo prepare<br>";
+	print "[PGB] [1] Warning in pgb_sel_test_foo prepare<br>";
 } else {
 	print "[PGB] [1] pgb_sel_test_foo prepare OK<br>";
 }
 // second prepare
 if ($db->dbPrepare('pgb_sel_test_foo', $q_prep) === false) {
-	print "[PGB] [2] Error in pgb_sel_test_foo prepare<br>";
+	print "[PGB] [2] Warning in pgb_sel_test_foo prepare<br>";
 } else {
 	print "[PGB] [2] pgb_sel_test_foo prepare OK<br>";
+}
+// same statment name, different query
+if (
+	$db->dbPrepare('pgb_sel_test_foo', <<<SQL
+	SELECT * FROM test_foo WHERE test = $1
+	ORDER BY test_foo_id DESC LIMIT 5
+	SQL) === false
+) {
+	print "[PGB] [3] Error in pgb_sel_test_foo prepare<br>";
+} else {
+	print "[PGB] [3] pgb_sel_test_foo prepare OK<br>";
 }
 $db_pgb->dbClose();
 
