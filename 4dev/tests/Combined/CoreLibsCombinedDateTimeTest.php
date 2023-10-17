@@ -67,6 +67,34 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	}
 
 	/**
+	 * date string convert test
+	 *
+	 * @covers ::dateStringFormat
+	 * @dataProvider timestampProvider
+	 * @testdox dateStringFormat $input (microtime $flag) will be $expected [$_dataName]
+	 *
+	 * @param int|float $input
+	 * @param bool      $flag
+	 * @param string    $expected
+	 * @return void
+	 */
+	public function testDateStringFormat(
+		$input,
+		bool $flag_show_micro,
+		bool $flag_micro_as_float,
+		string $expected
+	): void {
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::dateStringFormat(
+				$input,
+				$flag_show_micro,
+				$flag_micro_as_float
+			)
+		);
+	}
+
+	/**
 	 * interval for both directions
 	 *
 	 * @return array
@@ -74,6 +102,11 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	public function intervalProvider(): array
 	{
 		return [
+			'on hour' => [
+				3600,
+				false,
+				'1h 0m 0s'
+			],
 			'interval no microtime' => [
 				1641515890,
 				false,
@@ -82,7 +115,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 			'interval with microtime' => [
 				1641515890,
 				true,
-				'18999d 0h 38m 10s',
+				'18999d 0h 38m 10s 0ms',
 			],
 			'micro interval no microtime' => [
 				1641515890.123456,
@@ -92,7 +125,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 			'micro interval with microtime' => [
 				1641515890.123456,
 				true,
-				'18999d 0h 38m 10s 1235ms',
+				'18999d 0h 38m 10s 124ms',
 			],
 			'negative interval no microtime' => [
 				-1641515890,
@@ -103,27 +136,27 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 			'microtime only' => [
 				0.123456,
 				true,
-				'0s 1235ms',
+				'0s 123ms',
 			],
 			'seconds only' => [
 				30.123456,
 				true,
-				'30s 1235ms',
+				'30s 123ms',
 			],
 			'minutes only' => [
 				90.123456,
 				true,
-				'1m 30s 1235ms',
+				'1m 30s 123ms',
 			],
 			'hours only' => [
 				3690.123456,
 				true,
-				'1h 1m 30s 1235ms',
+				'1h 1m 30s 123ms',
 			],
 			'days only' => [
 				90090.123456,
 				true,
-				'1d 1h 1m 30s 1235ms',
+				'1d 1h 1m 30s 123ms',
 			],
 			'already set' => [
 				'1d 1h 1m 30s 1235ms',
@@ -141,6 +174,259 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'1s'
 			]
 		];
+	}
+
+	/**
+	 * time seconds convert test
+	 *
+	 * @covers ::timeStringFormat
+	 * @dataProvider intervalProvider
+	 * @testdox timeStringFormat $input (microtime $flag) will be $expected [$_dataName]
+	 *
+	 * @param string|int|float $input
+	 * @param bool      $flag
+	 * @param string    $expected
+	 * @return void
+	 */
+	public function testTimeStringFormat(string|int|float $input, bool $flag, string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::timeStringFormat($input, $flag)
+		);
+	}
+
+	/**
+	 * interval seconds convert
+	 *
+	 * @covers ::intervalStringFormat
+	 * @dataProvider intervalProvider
+	 * @testdox intervalStringFormat $input (microtime $show_micro) will be $expected [$_dataName]
+	 *
+	 * @param  string|int|float $input
+	 * @param  bool      $show_micro
+	 * @param  string    $expected
+	 * @return void
+	 */
+	public function testIntervalStringFormat(string|int|float $input, bool $show_micro, string $expected): void
+	{
+		// we skip string input, that is not allowed
+		if (is_string($input)) {
+			$this->assertTrue(true, 'Skip strings');
+			return;
+		}
+		// invalid values throw exception in default
+		if ($input == 999999999999999) {
+			$this->expectException(\LengthException::class);
+		}
+		// below is equal to timeStringFormat
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::intervalStringFormat(
+				$input,
+				show_microseconds: $show_micro,
+				show_only_days: true,
+				skip_zero: false,
+				skip_last_zero: false,
+				truncate_nanoseconds: true,
+				truncate_zero_seconds_if_microseconds: false
+			)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function intervalExtendedProvider(): array
+	{
+		return [
+			'default value' => [
+				[
+					'seconds' => 60,
+					'truncate_after' => null,
+					'natural_seperator' => null,
+					'name_space_seperator' => null,
+					'show_microseconds' => null,
+					'short_time_name' => null,
+					'skip_last_zero' => null,
+					'skip_zero' => null,
+					'show_only_days' => null,
+					'auto_fix_microseconds' => null,
+					'truncate_nanoseconds' => null,
+					'truncate_zero_seconds_if_microseconds' => null,
+				],
+				'expected' => '1m',
+				'exception' => null
+			],
+			'default value, skip_last_zero:false' => [
+				[
+					'seconds' => 60,
+					'truncate_after' => null,
+					'natural_seperator' => null,
+					'name_space_seperator' => null,
+					'show_microseconds' => true,
+					'short_time_name' => null,
+					'skip_last_zero' => false,
+					'skip_zero' => null,
+					'show_only_days' => null,
+					'auto_fix_microseconds' => null,
+					'truncate_nanoseconds' => null,
+					'truncate_zero_seconds_if_microseconds' => null,
+				],
+				'expected' => '1m',
+				'exception' => null
+			],
+		];
+	}
+
+	/**
+	 * test all options for interval conversion
+	 *
+	 * @covers ::intervalStringFormat
+	 * @dataProvider intervalExtendedProvider
+	 * @testdox intervalStringFormat $input will be $expected / $exception [$_dataName]
+	 *
+	 * @param  array<string,null|int|float|bool> $parameter_list
+	 * @param  string      $expected
+	 * @param  string      $exception
+	 * @return void
+	 */
+	public function testExtendedIntervalStringFormat(
+		array $parameter_list,
+		?string $expected,
+		?string $exception
+	): void {
+		if ($expected === null && $exception === null) {
+			$this->assertFalse(true, 'Cannot have expected and exception null in test data');
+		}
+		$parameters = [];
+		foreach (
+			[
+				'seconds' => null,
+				'truncate_after' => '',
+				'natural_seperator' => false,
+				'name_space_seperator' => false,
+				'show_microseconds' => true,
+				'short_time_name' => true,
+				'skip_last_zero' => true,
+				'skip_zero' => true,
+				'show_only_days' => false,
+				'auto_fix_microseconds' => false,
+				'truncate_nanoseconds' => false,
+				'truncate_zero_seconds_if_microseconds' => true,
+			] as $param => $default
+		) {
+			if (empty($parameter_list[$param]) && $default === null) {
+				$this->assertFalse(true, 'Parameter ' . $param . ' is mandatory ');
+			} elseif (empty($parameter_list[$param]) || $parameter_list[$param] === null) {
+				$parameters[] = $default;
+			} else {
+				$parameters[] = $parameter_list[$param];
+			}
+		}
+		if ($expected !== null) {
+			$this->assertEquals(
+				$expected,
+				call_user_func_array('CoreLibs\Combined\DateTime::intervalStringFormat', $parameters)
+			);
+		} else {
+			$this->expectException($exception);
+			call_user_func_array('CoreLibs\Combined\DateTime::intervalStringFormat', $parameters);
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array<mixed>
+	 */
+	public function exceptionsIntervalProvider(): array
+	{
+		return [
+			'UnexpectedValueException: 1 A' => [
+				'seconds' => 99999999999999999999999,
+				'params' => [],
+				'exception' => \UnexpectedValueException::class,
+				'exception_message' => "/^Seconds value is invalid, too large or more than six decimals: /",
+				'excpetion_code' => 1,
+			],
+			'UnexpectedValueException: 1 B' => [
+				'seconds' => 123.1234567,
+				'params' => [],
+				'exception' => \UnexpectedValueException::class,
+				'exception_message' => "/^Seconds value is invalid, too large or more than six decimals: /",
+				'excpetion_code' => 1,
+			],
+			// exception 2 is very likely covered by exception 1
+			'LengthException: 3' => [
+				'seconds' => 999999999999999999,
+				'params' => [
+					'show_only_days',
+				],
+				'exception' => \LengthException::class,
+				'exception_message' => "/^Input seconds value is too large for days output: /",
+				'excpetion_code' => 3,
+			],
+			'UnexpectedValueException: 4' => [
+				'seconds' => 1234567,
+				'params' => [
+					'truncate_after'
+				],
+				'exception' => \UnexpectedValueException::class,
+				'exception_message' => "/^truncate_after has an invalid value: /",
+				'excpetion_code' => 4,
+			],
+			'UnexpectedValueException: 5' => [
+				'seconds' => 1234567,
+				'params' => [
+					'show_only_days:truncate_after'
+				],
+				'exception' => \UnexpectedValueException::class,
+				'exception_message' =>
+					"/^If show_only_days is turned on, the truncate_after cannot be years or months: /",
+				'excpetion_code' => 5,
+			]
+		];
+	}
+
+	/**
+	 * Test all exceptions
+	 *
+	 * @covers ::intervalStringFormat
+	 * @dataProvider exceptionsIntervalProvider
+	 * @testdox intervalStringFormat: test Exceptions
+	 *
+	 * @param  int|float     $seconds
+	 * @param  array<string> $params
+	 * @param  string        $exception
+	 * @param  string        $exception_message
+	 * @param  int           $excpetion_code
+	 * @return void
+	 */
+	public function testExceptionsIntervalStringFormat(
+		int|float $seconds,
+		array $params,
+		string $exception,
+		string $exception_message,
+		int $excpetion_code,
+	): void {
+		$this->expectException($exception);
+		$this->expectExceptionMessageMatches($exception_message);
+		$this->expectExceptionCode($excpetion_code);
+		if (empty($params)) {
+			\CoreLibs\Combined\DateTime::intervalStringFormat($seconds);
+		} else {
+			if (in_array('show_only_days', $params)) {
+				echo "FOO\n";
+				\CoreLibs\Combined\DateTime::intervalStringFormat($seconds, show_only_days:true);
+			} elseif (in_array('truncate_after', $params)) {
+				\CoreLibs\Combined\DateTime::intervalStringFormat($seconds, truncate_after: 'v');
+			} elseif (in_array('show_only_days:truncate_after', $params)) {
+				\CoreLibs\Combined\DateTime::intervalStringFormat($seconds, show_only_days:true, truncate_after: 'y');
+			}
+		}
 	}
 
 	/**
@@ -206,6 +492,25 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::stringToTime
+	 * @dataProvider reverseIntervalProvider
+	 * @testdox stringToTime $input will be $expected [$_dataName]
+	 *
+	 * @param string|int|float $input
+	 * @param string|int|float $expected
+	 * @return void
+	 */
+	public function testStringToTime($input, $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::stringToTime($input)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
 	 * @return array
 	 */
 	public function dateProvider(): array
@@ -236,6 +541,25 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				true
 			]
 		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::checkDate
+	 * @dataProvider dateProvider
+	 * @testdox checkDate $input will be $expected [$_dataName]
+	 *
+	 * @param string $input
+	 * @param bool $expected
+	 * @return void
+	 */
+	public function testCheckDate(string $input, bool $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::checkDate($input)
+		);
 	}
 
 	/**
@@ -295,6 +619,25 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				false,
 			],
 		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::checkDateTime
+	 * @dataProvider dateTimeProvider
+	 * @testdox checkDateTime $input will be $expected [$_dataName]
+	 *
+	 * @param string $input
+	 * @param bool $expected
+	 * @return void
+	 */
+	public function testCheckDateTime(string $input, bool $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::checkDateTime($input)
+		);
 	}
 
 	/**
@@ -369,6 +712,37 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				null,
 			]
 		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::compareDate
+	 * @dataProvider dateCompareProvider
+	 * @testdox compareDate $input_a compared to $input_b will be $expected [$_dataName]
+	 *
+	 * @param string $input_a
+	 * @param string $input_b
+	 * @param int|bool $expected
+	 * @param string|null $exception
+	 * @param int|null $exception_code
+	 * @return void
+	 */
+	public function testCompareDate(
+		string $input_a,
+		string $input_b,
+		int|bool $expected,
+		?string $exception,
+		?int $exception_code
+	): void {
+		if ($expected === false) {
+			$this->expectException($exception);
+			$this->expectExceptionCode($exception_code);
+		}
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::compareDate($input_a, $input_b)
+		);
 	}
 
 	/**
@@ -469,6 +843,37 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @covers ::compareDateTime
+	 * @dataProvider dateTimeCompareProvider
+	 * @testdox compareDateTime $input_a compared to $input_b will be $expected [$_dataName]
+	 *
+	 * @param string $input_a
+	 * @param string $input_b
+	 * @param int|bool $expected
+	 * @param string|null $exception
+	 * @param int|null $exception_code
+	 * @return void
+	 */
+	public function testCompareDateTime(
+		string $input_a,
+		string $input_b,
+		int|bool $expected,
+		?string $exception,
+		?int $exception_code
+	): void {
+		if ($expected === false) {
+			$this->expectException($exception);
+			$this->expectExceptionCode($exception_code);
+		}
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\DateTime::compareDateTime($input_a, $input_b)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
 	 * @return array
 	 */
 	public function daysIntervalProvider(): array
@@ -518,214 +923,6 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				[2958463,2113189,845274],
 			],
 		];
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @return array
-	 */
-	public function dateRangeHasWeekendProvider(): array
-	{
-		return [
-			'no weekend' => [
-				'2023-07-03',
-				'2023-07-04',
-				false
-			],
-			'start weekend sat' => [
-				'2023-07-01',
-				'2023-07-04',
-				true
-			],
-			'start weekend sun' => [
-				'2023-07-02',
-				'2023-07-04',
-				true
-			],
-			'end weekend sat' => [
-				'2023-07-03',
-				'2023-07-08',
-				true
-			],
-			'end weekend sun' => [
-				'2023-07-03',
-				'2023-07-09',
-				true
-			],
-			'long period > 6 days' => [
-				'2023-07-03',
-				'2023-07-27',
-				true
-			]
-		];
-	}
-
-	/**
-	 * date string convert test
-	 *
-	 * @covers ::dateStringFormat
-	 * @dataProvider timestampProvider
-	 * @testdox dateStringFormat $input (microtime $flag) will be $expected [$_dataName]
-	 *
-	 * @param int|float $input
-	 * @param bool      $flag
-	 * @param string    $expected
-	 * @return void
-	 */
-	public function testDateStringFormat(
-		$input,
-		bool $flag_show_micro,
-		bool $flag_micro_as_float,
-		string $expected
-	): void {
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Combined\DateTime::dateStringFormat(
-				$input,
-				$flag_show_micro,
-				$flag_micro_as_float
-			)
-		);
-	}
-
-	/**
-	 * interval convert test
-	 *
-	 * @covers ::timeStringFormat
-	 * @dataProvider intervalProvider
-	 * @testdox timeStringFormat $input (microtime $flag) will be $expected [$_dataName]
-	 *
-	 * @param int|float $input
-	 * @param bool      $flag
-	 * @param string    $expected
-	 * @return void
-	 */
-	public function testTimeStringFormat($input, bool $flag, string $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Combined\DateTime::timeStringFormat($input, $flag)
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @covers ::stringToTime
-	 * @dataProvider reverseIntervalProvider
-	 * @testdox stringToTime $input will be $expected [$_dataName]
-	 *
-	 * @param string|int|float $input
-	 * @param string|int|float $expected
-	 * @return void
-	 */
-	public function testStringToTime($input, $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Combined\DateTime::stringToTime($input)
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @covers ::checkDate
-	 * @dataProvider dateProvider
-	 * @testdox checkDate $input will be $expected [$_dataName]
-	 *
-	 * @param string $input
-	 * @param bool $expected
-	 * @return void
-	 */
-	public function testCheckDate(string $input, bool $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Combined\DateTime::checkDate($input)
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @covers ::checkDateTime
-	 * @dataProvider dateTimeProvider
-	 * @testdox checkDateTime $input will be $expected [$_dataName]
-	 *
-	 * @param string $input
-	 * @param bool $expected
-	 * @return void
-	 */
-	public function testCheckDateTime(string $input, bool $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Combined\DateTime::checkDateTime($input)
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @covers ::compareDate
-	 * @dataProvider dateCompareProvider
-	 * @testdox compareDate $input_a compared to $input_b will be $expected [$_dataName]
-	 *
-	 * @param string $input_a
-	 * @param string $input_b
-	 * @param int|bool $expected
-	 * @param string|null $exception
-	 * @param int|null $exception_code
-	 * @return void
-	 */
-	public function testCompareDate(
-		string $input_a,
-		string $input_b,
-		int|bool $expected,
-		?string $exception,
-		?int $exception_code
-	): void {
-		if ($expected === false) {
-			$this->expectException($exception);
-			$this->expectExceptionCode($exception_code);
-		}
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Combined\DateTime::compareDate($input_a, $input_b)
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @covers ::compareDateTime
-	 * @dataProvider dateTimeCompareProvider
-	 * @testdox compareDateTime $input_a compared to $input_b will be $expected [$_dataName]
-	 *
-	 * @param string $input_a
-	 * @param string $input_b
-	 * @param int|bool $expected
-	 * @param string|null $exception
-	 * @param int|null $exception_code
-	 * @return void
-	 */
-	public function testCompareDateTime(
-		string $input_a,
-		string $input_b,
-		int|bool $expected,
-		?string $exception,
-		?int $exception_code
-	): void {
-		if ($expected === false) {
-			$this->expectException($exception);
-			$this->expectExceptionCode($exception_code);
-		}
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Combined\DateTime::compareDateTime($input_a, $input_b)
-		);
 	}
 
 	/**
@@ -904,6 +1101,47 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 			$expected,
 			$output
 		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function dateRangeHasWeekendProvider(): array
+	{
+		return [
+			'no weekend' => [
+				'2023-07-03',
+				'2023-07-04',
+				false
+			],
+			'start weekend sat' => [
+				'2023-07-01',
+				'2023-07-04',
+				true
+			],
+			'start weekend sun' => [
+				'2023-07-02',
+				'2023-07-04',
+				true
+			],
+			'end weekend sat' => [
+				'2023-07-03',
+				'2023-07-08',
+				true
+			],
+			'end weekend sun' => [
+				'2023-07-03',
+				'2023-07-09',
+				true
+			],
+			'long period > 6 days' => [
+				'2023-07-03',
+				'2023-07-27',
+				true
+			]
+		];
 	}
 
 	/**
