@@ -78,7 +78,7 @@ class Image
 				if (!empty($dummy) && file_exists($filename) && is_file($filename)) {
 					$return_data = $filename;
 				} else {
-					throw new \Exception('Could not set dummy return file: ' . $dummy . ' in ' . $filename);
+					throw new \RuntimeException('Could not set dummy return file: ' . $dummy . ' in ' . $filename);
 				}
 			} else {
 				$return_data = $dummy;
