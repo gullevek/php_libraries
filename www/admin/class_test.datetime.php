@@ -66,10 +66,10 @@ print "<hr>";
 // $interval = 1000000;
 // $interval = 123456;
 // $interval = 3600;
-// $interval = 3601;
+$interval = 3601;
 // $interval = 86400;
 // $interval = 86401;
-$interval = (86400 * 606) + 16434.5;
+// $interval = (86400 * 606) + 16434.5;
 // $interval = 1.5;
 // $interval = 123456;
 // $interval = 120.1;
@@ -79,28 +79,28 @@ $interval = (86400 * 606) + 16434.5;
 // $interval = 999999999999999999;
 // $interval = 60;
 try {
-	print "Test-A: [$interval] "
-		. DateTime::intervalStringFormatDeprecated(
-			$interval,
-			truncate_after: 'd',
-			natural_seperator: false,
-			name_space_seperator: false,
-			show_microseconds: true,
-			short_time_name: true,
-			skip_last_zero: true,
-			skip_zero: false,
-			show_only_days: false,
-			auto_fix_microseconds: false,
-			truncate_nanoseconds: false,
-			truncate_zero_seconds_if_microseconds: true,
-		)
-		// . " => "
-		// . DateTime::intervalStringFormat($interval)
-		. "<br>";
-	print "Test-B: [$interval] "
+	// print "Test-DEP: [$interval] "
+	// 	. intervalStringFormatDeprecated(
+	// 		$interval,
+	// 		truncate_after: '',
+	// 		natural_seperator: false,
+	// 		name_space_seperator: false,
+	// 		show_microseconds: true,
+	// 		short_time_name: true,
+	// 		skip_last_zero: true,
+	// 		skip_zero: false,
+	// 		show_only_days: false,
+	// 		auto_fix_microseconds: false,
+	// 		truncate_nanoseconds: false,
+	// 		truncate_zero_seconds_if_microseconds: true,
+	// 	)
+	// 	// . " => "
+	// 	// . DateTime::intervalStringFormat($interval)
+	// 	. "<br>";
+	print "Test-ACT: [$interval] "
 		. DateTime::intervalStringFormat(
 			$interval,
-			truncate_after: 'd',
+			truncate_after: '',
 			natural_seperator: false,
 			name_space_seperator: false,
 			show_microseconds: true,
@@ -112,23 +112,23 @@ try {
 			truncate_nanoseconds: false,
 			truncate_zero_seconds_if_microseconds: true,
 		)
-		// . " => "
-		// . DateTime::intervalStringFormat($interval)
+		. " => "
+		. DateTime::intervalStringFormat($interval)
 		. "<br>";
-	print "DEFAULT-A: " . DateTime::intervalStringFormatDeprecated($interval) . "<br>";
-	print "DEFAULT-B: " . DateTime::intervalStringFormat($interval) . "<br>";
+	print "DEFAULT-DEP: " . intervalStringFormatDeprecated($interval) . "<br>";
+	print "DEFAULT-ACT: " . DateTime::intervalStringFormat($interval) . "<br>";
 	$show_micro = true;
-	print "COMPATIBLE Test-A: " .
-	DateTime::intervalStringFormatDeprecated(
-		$interval,
-		show_microseconds: $show_micro,
-		show_only_days: true,
-		skip_zero: false,
-		skip_last_zero: false,
-		truncate_nanoseconds: true,
-		truncate_zero_seconds_if_microseconds: false
-	) . "<br>";
-	print "COMPATIBLE Test-B: " .
+	// print "COMPATIBLE Test-DEP: " .
+	// intervalStringFormatDeprecated(
+	// 	$interval,
+	// 	show_microseconds: $show_micro,
+	// 	show_only_days: true,
+	// 	skip_zero: false,
+	// 	skip_last_zero: false,
+	// 	truncate_nanoseconds: true,
+	// 	truncate_zero_seconds_if_microseconds: false
+	// ) . "<br>";
+	print "COMPATIBLE Test-ACT: " .
 	DateTime::intervalStringFormat(
 		$interval,
 		show_microseconds: $show_micro,
@@ -319,5 +319,238 @@ print "Has Weekend: " . $start_date . " ~ " . $end_date . ": "
 
 
 print "</body></html>";
+
+/**
+ * DEPREACTED, original rewrite, do not use
+ *
+ * update timeStringFormat with year and month support
+ *
+ * The following flags have to be set to be timeStringFormat compatible.
+ * Not that on seconds overflow this method will throw an exception, timeStringFormat returned -1s
+ * show_only_days: true,
+ * skip_zero: false,
+ * skip_last_zero: false,
+ * truncate_nanoseconds: true,
+ * truncate_zero_seconds_if_microseconds: false
+ *
+ * @param  int|float $seconds                        Seconds to convert, maxium 6 decimals,
+ *                                                   else \UnexpectedValueException will be thrown
+ *                                                   if days too large or years too large \LengthException is thrown
+ * @param  string    $truncate_after [='']           Truncate after which time name, will not round, hard end
+ *                                                   values are parts names or interval short names (y, d, f, ...)
+ *                                                   if illegal value \UnexpectedValueException is thrown
+ * @param  bool      $natural_seperator [=false]     use ',' and 'and', if off use space
+ * @param  bool      $name_space_seperator [=false]  add a space between the number and the time name
+ * @param  bool      $show_microseconds [=true]      show microseconds
+ * @param  bool      $short_time_name [=true]        use the short time names (eg s instead of seconds)
+ * @param  bool      $skip_last_zero [=true]         skip all trailing zero values, eg 5m 0s => 5m
+ * @param  bool      $skip_zero [=true]              do not show zero values anywhere, eg 1h 0m 20s => 1h 20s
+ * @param  bool      $show_only_days [=false]        do not show years or months, show only days
+ *                                                   if truncate after is set to year or month
+ *                                                   throws \UnexpectedValueException
+ * @param  bool      $auto_fix_microseconds [=false] if the micro seconds decimals are more than 6, round them
+ *                                                   on defaul throw \UnexpectedValueException
+ * @param  bool      $truncate_nanoseconds [=false]  if microseconds decimals >3 then normal we show 123.4ms
+ *                                                   cut the .4 is set to true
+ * @param  bool      $truncate_zero_seconds_if_microseconds [=true] if we have 0.123 seconds then if true no seconds
+ *                                                   will be shown
+ * @return string
+ * @throws \UnexpectedValueException if seconds has more than 6 decimals
+ *                                   if truncate has an illegal value
+ *                                   if truncate is set to year or month and show_only_days is turned on
+ * @throws \LengthException          if seconds is too large and show_days_only is selected and days is negetive
+ *                                   or if years is negativ
+ */
+function intervalStringFormatDeprecated(
+	int|float $seconds,
+	string $truncate_after = '',
+	bool $natural_seperator = false,
+	bool $name_space_seperator = false,
+	bool $show_microseconds = true,
+	bool $short_time_name = true,
+	bool $skip_last_zero = true,
+	bool $skip_zero = true,
+	bool $show_only_days = false,
+	bool $auto_fix_microseconds = false,
+	bool $truncate_nanoseconds = false,
+	bool $truncate_zero_seconds_if_microseconds = true,
+): string {
+	// auto fix long seconds, else \UnexpectedValueException will be thrown on error
+	// check if we have float and -> round to 6
+	if ($auto_fix_microseconds === true && is_float($seconds)) {
+		$seconds = round($seconds, 6);
+	}
+	// flag negative + set abs
+	$negative = $seconds < 0 ? '-' : '';
+	$seconds = abs($seconds);
+	// create base time
+	$date_now = new \DateTime("@0");
+	try {
+		$date_seconds = new \DateTime("@$seconds");
+	} catch (\Exception $e) {
+		throw new \UnexpectedValueException(
+			'Seconds value is invalid, too large or more than six decimals: ' . $seconds,
+			1,
+			$e
+		);
+	}
+	$interval = date_diff($date_now, $date_seconds);
+	// if show_only_days and negative but input postive alert that this has to be done in y/m/d ...
+	if ($interval->y < 0) {
+		throw new \LengthException('Input seconds value is too large for years output: ' . $seconds, 2);
+	} elseif ($interval->days < 0 && $show_only_days === true) {
+		throw new \LengthException('Input seconds value is too large for days output: ' . $seconds, 3);
+	}
+	// array order is important, small too large
+	$parts = [
+		'microseconds' => 'f',
+		'seconds' => 's', 'minutes' => 'i', 'hours' => 'h',
+		'days' => 'd', 'months' => 'm', 'years' => 'y',
+	];
+	$short_name = [
+		'years' => 'y', 'months' => 'm', 'days' => 'd',
+		'hours' => 'h', 'minutes' => 'm', 'seconds' => 's',
+		'microseconds' => 'ms'
+	];
+	$skip = false;
+	if (!empty($truncate_after)) {
+		// if truncate after not in key or value in parts
+		if (!in_array($truncate_after, array_keys($parts)) && !in_array($truncate_after, array_values($parts))) {
+			throw new \UnexpectedValueException(
+				'truncate_after has an invalid value: ' . $truncate_after,
+				4
+			);
+		}
+		// if truncate after is y or m and we have show_only_days, throw exception
+		if ($show_only_days === true && in_array($truncate_after, ['y', 'years', 'm', 'months'])) {
+			throw new \UnexpectedValueException(
+				'If show_only_days is turned on, the truncate_after cannot be years or months: '
+					. $truncate_after,
+				5
+			);
+		}
+		$skip = true;
+	}
+	$formatted = [];
+	$zero_list = [];
+	$zero_last_list = [];
+	$add_zero_seconds = false;
+	foreach ($parts as $time_name => $part) {
+		// end for micro seconds
+		if ($show_microseconds === false && $time_name == 'microseconds') {
+			continue;
+		}
+		// skip at this time position
+		if ($part == $truncate_after || $truncate_after == $time_name) {
+			$skip = false;
+		}
+		if ($skip === true) {
+			continue;
+		}
+		if ($show_only_days === true && $part == 'd') {
+			$value = $interval->days;
+			$skip = true;
+		} else {
+			$value = $interval->$part;
+		}
+		if ($value == 0 && $skip_last_zero === true) {
+			continue;
+		}
+		// print "-> V: $value | $part, $time_name | I: " . is_int($value) . " | F: " . is_float($value)
+		// 	. " | " . ($value != 0 ? 'Not zero' : 'ZERO') . "<br>";
+		// var_dump($skip_last_zero);
+		if ($value != 0 || $skip_zero === false || $skip_last_zero === false) {
+			if ($part == 'f') {
+				if ($truncate_nanoseconds === true) {
+					$value = round($value, 3);
+				}
+				$value *= 1000;
+				// anything above that is nano seconds?
+			}
+			// on first hit turn off (full off)
+			if ($value) {
+				$skip_last_zero = null;
+			} elseif (!$value && $skip_last_zero === false) {
+				$zero_last_list[] = $part;
+			}
+			// build format
+			$format = "$value";
+			if ($name_space_seperator) {
+				$format .= " ";
+			}
+			if ($short_time_name) {
+				$format .= $short_name[$time_name];
+			} elseif ($value == 1) {
+				$format .= substr($time_name, 0, -1);
+			} else {
+				$format .= $time_name;
+			}
+			$formatted[] = $format;
+		}
+		// if we have 0 value, but only for skip zero condition
+		if ($skip_zero === false) {
+			if ($value == 0) {
+				$zero_list[] = $part;
+			} else {
+				$zero_list = [];
+			}
+		}
+		if (
+			$part == 's' && $value == 0 &&
+			$show_microseconds === true &&
+			$truncate_zero_seconds_if_microseconds === false
+		) {
+			$add_zero_seconds = true;
+		}
+	}
+	// if there is a zero list, strip that from the beginning, this is done always
+	if (count($zero_list)) {
+		// strip
+		$formatted = array_slice($formatted, 0, count($zero_list) * -1);
+	} elseif (count($zero_last_list) == count($formatted)) {
+		// if we have all skip empty last, then we do not have any value
+		$formatted = [];
+	}
+	$formatted = array_reverse($formatted);
+	// print "=> F: " . print_r($formatted, true)
+	// 	. " | Z: " . print_r($zero_list, true)
+	// 	. " | ZL: " . print_r($zero_last_list, true)
+	// 	. "<br>";
+	if (count($formatted) == 0) {
+		// if we have truncate on, then we assume nothing was found
+		$str = "0";
+		if ($name_space_seperator) {
+			$str .= " ";
+		}
+		// if truncate is on, we assume we found nothing
+		if (!empty($truncate_after)) {
+			if (in_array($truncate_after, array_values($parts))) {
+				$truncate_after = array_flip($parts)[$truncate_after];
+			}
+			$str .= ($short_time_name ? $short_name[$truncate_after] : $truncate_after);
+		} else {
+			$str .= ($short_time_name ? $short_name['seconds'] : 'seconds');
+		}
+		return $str;
+	} elseif (count($formatted) == 1) {
+		return $negative .
+			($add_zero_seconds ?
+				'0'
+					. ($name_space_seperator ? ' ' : '')
+					. ($short_time_name ? $short_name['seconds'] : 'seconds')
+					. ' '
+				: ''
+			)
+			. $formatted[0];
+	} elseif ($natural_seperator === false) {
+		return $negative . implode(' ', $formatted);
+	} else {
+		$str = implode(', ', array_slice($formatted, 0, -1));
+		if (!empty($formatted[count($formatted) - 1])) {
+			$str .= ' and ' . $formatted[count($formatted) - 1];
+		}
+		return $negative . $str;
+	}
+}
 
 // __END__

@@ -242,42 +242,82 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	public function intervalExtendedProvider(): array
 	{
 		return [
-			'default value' => [
+			// A
+			'(60) default value' => [
 				[
 					'seconds' => 60,
-					'truncate_after' => null,
-					'natural_seperator' => null,
-					'name_space_seperator' => null,
-					'show_microseconds' => null,
-					'short_time_name' => null,
-					'skip_last_zero' => null,
-					'skip_zero' => null,
-					'show_only_days' => null,
-					'auto_fix_microseconds' => null,
-					'truncate_nanoseconds' => null,
-					'truncate_zero_seconds_if_microseconds' => null,
 				],
 				'expected' => '1m',
 				'exception' => null
 			],
-			'default value, skip_last_zero:false' => [
+			'(60) default value, skip_last_zero:false' => [
 				[
 					'seconds' => 60,
-					'truncate_after' => null,
-					'natural_seperator' => null,
-					'name_space_seperator' => null,
-					'show_microseconds' => true,
-					'short_time_name' => null,
 					'skip_last_zero' => false,
-					'skip_zero' => null,
-					'show_only_days' => null,
-					'auto_fix_microseconds' => null,
-					'truncate_nanoseconds' => null,
-					'truncate_zero_seconds_if_microseconds' => null,
 				],
-				'expected' => '1m',
+				'expected' => '1m 0s 0ms',
 				'exception' => null
 			],
+			// B
+			'(120.1) default value' => [
+				[
+					'seconds' => 120.1,
+				],
+				'expected' => '2m 100ms',
+				'exception' => null
+			],
+			'(120.1) default value, skip_zero:false' => [
+				[
+					'seconds' => 120.1,
+					'skip_zero' => false,
+				],
+				'expected' => '2m 0s 100ms',
+				'exception' => null
+			],
+			'(120.1) default value, skip_last_zero:false' => [
+				[
+					'seconds' => 120.1,
+					'skip_last_zero' => false,
+				],
+				'expected' => '2m 100ms',
+				'exception' => null
+			],
+			// C
+			'(3601) default value' => [
+				[
+					'seconds' => 3601,
+				],
+				'expected' => '1h 1s',
+				'exception' => null
+			],
+			'(3601) default value, skip_zero:false' => [
+				[
+					'seconds' => 3601,
+					'skip_zero' => false,
+				],
+				'expected' => '1h 0m 1s',
+				'exception' => null
+			],
+			'(3601) default value, skip_last_zero:false' => [
+				[
+					'seconds' => 3601,
+					'skip_last_zero' => false,
+				],
+				'expected' => '1h 1s 0ms',
+				'exception' => null
+			],
+			// TODO create unit tests for ALL edge cases
+			// CREATE abort tests, simple, all others are handled in exception tests
+			'exception: \UnexpectedValueException:1' => [
+				[
+					'seconds' => 99999999999999999999999
+				],
+				'expected' => null,
+				'exception' => [
+					'class' => \UnexpectedValueException::class,
+					'code' => 1,
+				],
+			]
 		];
 	}
 
@@ -289,14 +329,14 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	 * @testdox intervalStringFormat $input will be $expected / $exception [$_dataName]
 	 *
 	 * @param  array<string,null|int|float|bool> $parameter_list
-	 * @param  string      $expected
-	 * @param  string      $exception
+	 * @param  string       $expected
+	 * @param  array<string,mixed> $exception
 	 * @return void
 	 */
 	public function testExtendedIntervalStringFormat(
 		array $parameter_list,
 		?string $expected,
-		?string $exception
+		?array $exception
 	): void {
 		if ($expected === null && $exception === null) {
 			$this->assertFalse(true, 'Cannot have expected and exception null in test data');
@@ -320,7 +360,7 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 		) {
 			if (empty($parameter_list[$param]) && $default === null) {
 				$this->assertFalse(true, 'Parameter ' . $param . ' is mandatory ');
-			} elseif (empty($parameter_list[$param]) || $parameter_list[$param] === null) {
+			} elseif (!isset($parameter_list[$param]) || $parameter_list[$param] === null) {
 				$parameters[] = $default;
 			} else {
 				$parameters[] = $parameter_list[$param];
@@ -332,7 +372,15 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				call_user_func_array('CoreLibs\Combined\DateTime::intervalStringFormat', $parameters)
 			);
 		} else {
-			$this->expectException($exception);
+			if (empty($exception['class']) || empty($exception['code'])) {
+				$this->assertFalse(true, 'Exception tests need Exception name and Code');
+			}
+			$this->expectException($exception['class']);
+			$this->expectExceptionCode($exception['code']);
+			// if we have a message, must be regex
+			if (!empty($exception['message'])) {
+				$this->expectExceptionMessageMatches($exception['message']);
+			}
 			call_user_func_array('CoreLibs\Combined\DateTime::intervalStringFormat', $parameters);
 		}
 	}
