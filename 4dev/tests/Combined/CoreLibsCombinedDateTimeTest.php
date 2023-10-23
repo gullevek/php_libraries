@@ -467,7 +467,6 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 			\CoreLibs\Combined\DateTime::intervalStringFormat($seconds);
 		} else {
 			if (in_array('show_only_days', $params)) {
-				echo "FOO\n";
 				\CoreLibs\Combined\DateTime::intervalStringFormat($seconds, show_only_days:true);
 			} elseif (in_array('truncate_after', $params)) {
 				\CoreLibs\Combined\DateTime::intervalStringFormat($seconds, truncate_after: 'v');
