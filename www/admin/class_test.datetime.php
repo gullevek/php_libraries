@@ -470,7 +470,7 @@ function intervalStringFormatDeprecated(
 			// on first hit turn off (full off)
 			if ($value) {
 				$skip_last_zero = null;
-			} elseif (!$value && $skip_last_zero === false) {
+			} elseif ($skip_last_zero === false) {
 				$zero_last_list[] = $part;
 			}
 			// build format
