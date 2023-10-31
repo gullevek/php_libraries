@@ -2411,6 +2411,8 @@ class IO
 
 			// set the query
 			$this->cursor_ext[$query_hash]['query'] = $query;
+			// set the query parameters
+			$this->cursor_ext[$query_hash]['params'] = $params;
 			// before doing ANYTHING check if query is "SELECT ..." everything else does not work
 			if (!$this->dbCheckQueryForSelect($this->cursor_ext[$query_hash]['query'])) {
 				$this->__dbError(17, false, context: [
@@ -2420,8 +2422,6 @@ class IO
 				]);
 				return false;
 			}
-			// set the query parameters
-			$this->cursor_ext[$query_hash]['params'] = $params;
 			// QUERY PARAMS: run query params check and rewrite
 			if ($this->dbGetConvertPlaceholder() === true) {
 				try {
