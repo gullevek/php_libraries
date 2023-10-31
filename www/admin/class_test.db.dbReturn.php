@@ -56,7 +56,9 @@ print "<b>dbReturn CACHE tests</b><br>";
 $db->dbExec("DELETE FROM test_db_return");
 $db->dbExec("INSERT INTO test_db_return (uid, data) VALUES ('A1', 'Test A'), ('B1', 'Test B')");
 // read query to use
-$q_db_ret = "SELECT * FROM test_db_return ORDER BY uid";
+$q_db_ret = <<<SQL
+SELECT * FROM test_db_return ORDER BY uid
+SQL;
 
 RunningTime::hrRunningTime();
 
@@ -156,5 +158,16 @@ for ($i = 1; $i <= 6; $i++) {
 $db->dbCacheReset($q_db_ret);
 print "<br>";
 print "Overall Run time: " .  RunningTime::hrRunningTimeFromStart() . "<br>";
+
+print "<br>";
+print "PARAM TEST RUN<br>";
+// PARAM
+$q_db_ret = <<<SQL
+SELECT * FROM test_db_return WHERE uid = $1
+SQL;
+
+while (is_array($res = $db->dbReturnParams($q_db_ret, ['A1'], $db::NO_CACHE, true))) {
+	print "ROW: " . Support::printAr($res) . "<br>";
+}
 
 // __END__
