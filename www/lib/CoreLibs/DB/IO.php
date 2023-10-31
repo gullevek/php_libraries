@@ -1186,7 +1186,7 @@ class IO
 	 */
 	private function __dbDebugPrepareContext(string $query, array $params = []): array
 	{
-		if ($this->params === []) {
+		if ($params === []) {
 			return [];
 		}
 		$error_data = [
