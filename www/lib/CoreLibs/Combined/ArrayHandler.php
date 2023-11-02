@@ -237,6 +237,54 @@ class ArrayHandler
 	}
 
 	/**
+	 * main wrapper function for next/prev key
+	 *
+	 * @param  array<mixed>    $array array to search in
+	 * @param  int|string      $key   key for next/prev
+	 * @param  bool            $next  [=true] if to search next or prev
+	 * @return int|string|null        Next/prev key or null for end/first
+	 */
+	private static function arrayGetKey(array $array, int|string $key, bool $next = true): int|string|null
+	{
+		$keys = array_keys($array);
+		if (($position = array_search($key, $keys, true)) === false) {
+			return null;
+		}
+		$next_position = $next ? $position + 1 : $position - 1;
+
+		if (!isset($keys[$next_position])) {
+			return null;
+		}
+		return $keys[$next_position];
+	}
+
+	/**
+	 * Get previous array key from an array
+	 * null on not found
+	 *
+	 * @param  array<mixed>    $array
+	 * @param  int|string      $key
+	 * @return int|string|null        Next key, or null for not found
+	 */
+	public static function arrayGetPrevKey(array $array, int|string $key): int|string|null
+	{
+		return self::arrayGetKey($array, $key, false);
+	}
+
+	/**
+	 * Get next array key from an array
+	 * null on not found
+	 *
+	 * @param  array<mixed>    $array
+	 * @param  int|string      $key
+	 * @return int|string|null        Next key, or null for not found
+	 */
+	public static function arrayGetNextKey(array $array, int|string $key): int|string|null
+	{
+		return self::arrayGetKey($array, $key, true);
+	}
+
+	/**
 	 * correctly recursive merges as an array as array_merge_recursive
 	 * just glues things together
 	 *         array first array to merge
