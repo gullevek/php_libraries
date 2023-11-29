@@ -21,6 +21,7 @@ ob_end_flush();
 use CoreLibs\Combined\ArrayHandler;
 use CoreLibs\Debug\Support as DgS;
 use CoreLibs\Convert\SetVarType;
+use PHPUnit\Framework\Constraint\ArrayHasKey;
 
 $log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
@@ -235,6 +236,22 @@ $value = 'b';
 $flag = false;
 $output = \CoreLibs\Combined\ArrayHandler::genAssocArray($db_array, $key, $value, $flag);
 print "OUTPUT: " . \CoreLibs\Debug\Support::printAr($output) . "<br>";
+
+
+print "<hr>";
+$array = [
+	'a' => 'First',
+	'b' => 'Second',
+	'c' => 'Third',
+];
+
+foreach (array_keys($array) as $search) {
+	print "Result[" . $search . "]: "
+		. "next: " . DgS::printAr(ArrayHandler::arrayGetNextKey($array, $search)) . ", "
+		. "prev: " . DgS::printAr(ArrayHandler::arrayGetPrevKey($array, $search))
+		. "<br>";
+}
+print "Key not exists: " . DgS::printAr(ArrayHandler::arrayGetNextKey($array, 'z')) . "<br>";
 
 print "</body></html>";
 
