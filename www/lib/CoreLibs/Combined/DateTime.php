@@ -385,7 +385,7 @@ class DateTime
 		} else {
 			$str = implode(', ', array_slice($formatted, 0, -1));
 			if (!empty($formatted[count($formatted) - 1])) {
-				$str .= ' and ' . $formatted[count($formatted) - 1];
+				$str .= ' and ' . (string)array_pop($formatted);
 			}
 			return $negative . $str;
 		}

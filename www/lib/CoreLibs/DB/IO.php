@@ -1318,14 +1318,14 @@ class IO
 		// regex for params: only stand alone $number allowed
 		// exclude all '' enclosed strings, ignore all numbers [note must start with digit]
 		// can have space/tab/new line
-		// must have = , ( [equal, comma, opening round bracket]
+		// must have <> = , ( [not equal, equal, comma, opening round bracket]
 		// can have space/tab/new line
 		// $ number with 1-9 for first and 0-9 for further digits
 		// /s for matching new line in . list
 		// [disabled, we don't used ^ or $] /m for multi line match
 		// Matches in 1:, must be array_filtered to remove empty, count with array_unique
 		preg_match_all(
-			'/(?:\'.*?\')?\s*(?:\?\?|[(=,])\s*(?:\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))/s',
+			'/(?:\'.*?\')?\s*(?:\?\?|<>|[(=,])\s*(?:\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))/s',
 			$query,
 			$match
 		);
