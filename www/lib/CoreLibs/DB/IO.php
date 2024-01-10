@@ -1302,7 +1302,7 @@ class IO
 				}
 			}
 		}
-		$this->cursor_ext[$query_hash]['pos'] ++;
+		$this->cursor_ext[$query_hash]['pos']++;
 		return $return;
 	}
 
@@ -1519,7 +1519,7 @@ class IO
 				]);
 				return false;
 		}
-		$this->query_called[$query_hash] ++;
+		$this->query_called[$query_hash]++;
 		// return hash
 		return $query_hash;
 	}
@@ -2469,7 +2469,7 @@ class IO
 				return false;
 			}
 		} else {
-			$this->cursor_ext[$query_hash]['log_pos'] ++;
+			$this->cursor_ext[$query_hash]['log_pos']++;
 		}
 		// reset log for each read
 		$this->cursor_ext[$query_hash]['log'] = [];
@@ -2668,8 +2668,8 @@ class IO
 				if ($return) {
 					$this->cursor_ext[$query_hash]['log'][] = 'Return Data';
 					// internal position counter
-					$this->cursor_ext[$query_hash]['pos'] ++;
-					$this->cursor_ext[$query_hash]['read_rows'] ++;
+					$this->cursor_ext[$query_hash]['pos']++;
+					$this->cursor_ext[$query_hash]['read_rows']++;
 					// read is finished
 					if (
 						$this->cursor_ext[$query_hash]['read_rows'] ==

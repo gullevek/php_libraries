@@ -675,9 +675,9 @@ class DateTime
 		foreach ($period as $dt) {
 			$curr = $dt->format('D');
 			if ($curr == 'Sat' || $curr == 'Sun') {
-				$days[2] ++;
+				$days[2]++;
 			} else {
-				$days[1] ++;
+				$days[1]++;
 			}
 		}
 		if ($return_named === true) {
