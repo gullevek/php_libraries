@@ -3,7 +3,7 @@
         'name' => 'egrajp/corelibs-dev',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => NULL,
+        'reference' => null,
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'egrajp/corelibs-dev' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => NULL,
+            'reference' => null,
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -31,7 +31,7 @@
         'egrajp/smarty-extended' => array(
             'pretty_version' => '4.3.0',
             'version' => '4.3.0.0',
-            'reference' => NULL,
+            'reference' => null,
             'type' => 'library',
             'install_path' => __DIR__ . '/../egrajp/smarty-extended',
             'aliases' => array(),
