@@ -2,14 +2,14 @@
     "packages": [
         {
             "name": "egrajp/smarty-extended",
-            "version": "4.3.0",
-            "version_normalized": "4.3.0.0",
+            "version": "4.4.1",
+            "version_normalized": "4.4.1.0",
             "dist": {
                 "type": "zip",
-                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fsmarty-extended/4.3.0/egrajp-smarty-extended.4.3.0.zip",
-                "shasum": "d41bda35c0d52da35cf911ab0b018655a09f072b"
+                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fsmarty-extended/4.4.1/egrajp-smarty-extended.4.4.1.zip",
+                "shasum": "edd7a0960e49bfcc709e0a525729aaaf9ed0db75"
             },
-            "time": "2023-02-17T14:14:10+09:00",
+            "time": "2024-03-06T18:43:44+09:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
