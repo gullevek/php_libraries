@@ -204,11 +204,11 @@ class Image
 				E_USER_DEPRECATED
 			);
 			// NOTE: we need to depracte this
-			$cache_folder = BASE . LAYOUT . CONTENT_PATH . CACHE . IMAGES;
+			$cache_folder = BASE . CONTENT_PATH . LAYOUT . CACHE . IMAGES;
 			$web_folder = LAYOUT . CACHE . IMAGES;
 			if (!is_dir($cache_folder)) {
 				if (false === mkdir($cache_folder)) {
-					$cache_folder = BASE . LAYOUT . CONTENT_PATH . CACHE;
+					$cache_folder = BASE . CONTENT_PATH . LAYOUT . CACHE;
 					$web_folder = LAYOUT . CACHE;
 				}
 			}
