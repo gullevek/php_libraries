@@ -124,7 +124,7 @@ class Strings
 	 * eg: //foo///bar/foo.inc -> /foo/bar/foo.inc
 	 *
 	 * @param  string $path Path to strip slashes from
-	 * @return string       Clean path
+	 * @return string       Clean path, on error returns original path
 	 */
 	public static function stripMultiplePathSlashes(string $path): string
 	{
@@ -132,7 +132,7 @@ class Strings
 			'#/+#',
 			'/',
 			$path
-		);
+		) ?? $path;
 	}
 }
 
