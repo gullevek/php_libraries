@@ -826,27 +826,28 @@ class Generate
 				$pk_selected = $res[$this->int_pk_name];
 			}
 			$t_string = '';
-			foreach ($this->field_array as $i => $field_array) {
+			foreach ($this->field_array as $field_array) {
 				if ($t_string) {
 					$t_string .= ', ';
 				}
-				if (isset($field_array['before_value'])) {
-					$t_string .= $field_array['before_value'];
+				if (!empty($field_array['before_value'])) {
+					$t_string .= $this->l->__($field_array['before_value']);
 				}
 				// must have res element set
 				if (
-					isset($field_array['name']) &&
+					!empty($field_array['name']) &&
 					isset($res[$field_array['name']])
 				) {
-					if (isset($field_array['binary'])) {
-						if (isset($field_array['binary'][0])) {
-							$t_string .= $field_array['binary'][0];
-						} elseif (isset($field_array['binary'][1])) {
-							$t_string .= $field_array['binary'][1];
-						}
+					$_t_value = '';
+					// if we have a binary set, where 0 = YES and 1 = NO
+					if (!empty($field_array['binary'])) {
+						$_t_value = !empty($res[$field_array['name']]) ?
+							($field_array['binary'][0] ?? 'Yes') :
+							($field_array['binary'][1] ?? 'No');
 					} else {
-						$t_string .= $res[$field_array['name']];
+						$_t_value = $res[$field_array['name']];
 					}
+					$t_string .= $this->l->__($_t_value);
 				}
 			}
 			$pk_names[] = $t_string;
