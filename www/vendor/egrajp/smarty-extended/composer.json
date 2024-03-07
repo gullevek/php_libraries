@@ -8,9 +8,9 @@
     "homepage": "https://github.com/smarty-php/smarty/",
     "license": "LGPL-3.0",
     "autoload": {
-        "psr-4": {
-            "Smarty\\": "src/"
-        }
+        "classmap": [
+            "src/"
+        ]
     },
     "authors": [
         {

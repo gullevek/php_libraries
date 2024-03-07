@@ -156,7 +156,7 @@ class ProgressBar
 	{
 		// avoid divison through 0
 		if ($this->max - $this->min == 0) {
-			$this->max ++;
+			$this->max++;
 		}
 		$percent = round(($step - $this->min) / ($this->max - $this->min) * 100);
 		if ($percent > 100) {
@@ -186,7 +186,7 @@ class ProgressBar
 		}
 		// avoid divison through 0
 		if ($this->max - $this->min == 0) {
-			$this->max ++;
+			$this->max++;
 		}
 		$pixel = round(($step - $this->min) * ($bar - ($this->pedding * 2)) / ($this->max - $this->min));
 		if ($step <= $this->min) {

@@ -3,7 +3,7 @@
   <phar name="phpunit" version="^9.6" installed="9.6.13" location="./tools/phpunit" copy="false"/>
   <phar name="phpcs" version="^3.7.2" installed="3.7.2" location="./tools/phpcs" copy="false"/>
   <phar name="phpcbf" version="^3.7.2" installed="3.7.2" location="./tools/phpcbf" copy="false"/>
-  <phar name="psalm" version="^5.15.0" installed="5.15.0" location="./tools/psalm" copy="false"/>
-  <phar name="phpstan" version="^1.10.37" installed="1.10.37" location="./tools/phpstan" copy="false"/>
+  <phar name="psalm" version="^5.15.0" installed="5.16.0" location="./tools/psalm" copy="false"/>
+  <phar name="phpstan" version="^1.10.37" installed="1.10.46" location="./tools/phpstan" copy="false"/>
   <phar name="phan" version="^5.4.2" installed="5.4.2" location="./tools/phan" copy="false"/>
 </phive>

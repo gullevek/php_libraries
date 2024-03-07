@@ -2,12 +2,12 @@
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "dev-development",
+            "version_normalized": "dev-development",
             "dist": {
                 "type": "path",
                 "url": "/storage/var/www/html/developers/clemens/core_data/composer-packages/CoreLibs-Composer-All",
-                "reference": "4ab382990ecb9db90386f8ec1a4d87ac8f7c5dd7"
+                "reference": "d3d4cf512f62f139c61629d5aa21cf22ad726241"
             },
             "require": {
                 "php": ">=8.2",
@@ -42,12 +42,14 @@
         },
         {
             "name": "egrajp/smarty-extended",
-            "version": "4.3.0",
-            "version_normalized": "4.3.0.0",
+            "version": "4.4.1",
+            "version_normalized": "4.4.1.0",
             "dist": {
                 "type": "zip",
-                "url": "https://git.egplusww.jp/Composer/Smarty-Extended/archive/v4.3.0.zip"
+                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fsmarty-extended/4.4.1/egrajp-smarty-extended.4.4.1.zip",
+                "shasum": "edd7a0960e49bfcc709e0a525729aaaf9ed0db75"
             },
+            "time": "2024-03-06T18:43:44+09:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

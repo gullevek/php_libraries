@@ -28,10 +28,10 @@ final class CoreLibsCheckFileTest extends TestCase
 	public function filesList(): array
 	{
 		return [
-			['filename.txt', 'txt', 5],
-			['filename.csv', 'csv', 15],
-			['filename.tsv', 'tsv', 0],
-			['file_does_not_exits', '', -1],
+			['filename.txt', 'txt', 5, 'text/plain'],
+			['filename.csv', 'csv', 15, 'text/csv'],
+			['filename.tsv', 'tsv', 0, 'text/plain'],
+			['file_does_not_exits', '', -1, ''],
 		];
 	}
 
@@ -59,6 +59,15 @@ final class CoreLibsCheckFileTest extends TestCase
 		$list = [];
 		foreach ($this->filesList() as $row) {
 			$list[$row[0] . ' must have ' . $row[2] . ' lines'] = [$row[0], $row[2]];
+		}
+		return $list;
+	}
+
+	public function mimeTypeProvider(): array
+	{
+		$list = [];
+		foreach ($this->filesList() as $row) {
+			$list[$row[0] . ' must be mime type ' . $row[3]] = [$row[0], $row[3]];
 		}
 		return $list;
 	}
@@ -109,6 +118,51 @@ final class CoreLibsCheckFileTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Check\File::getLinesFromFile($this->base_folder . $input)
+		);
+		// unlink file
+		if (is_file($this->base_folder . $input)) {
+			unlink($this->base_folder . $input);
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::getMimeType
+	 * @dataProvider mimeTypeProvider
+	 * @testdox getMimeType $input must be mime type $expected [$_dataName]
+	 *
+	 * @param  string $input
+	 * @param  string $expected
+	 * @return void
+	 */
+	public function testGetMimeType(string $input, string $expected): void
+	{
+		if (!empty($expected)) {
+			$file = $this->base_folder . $input;
+			$fp = fopen($file, 'w');
+			switch ($expected) {
+				case 'text/csv':
+					for ($i = 1; $i <= 10; $i++) {
+						fwrite($fp, '"This is row","' . $expected . '",' . $i . PHP_EOL);
+					}
+					break;
+				case 'text/tsv':
+					for ($i = 1; $i <= 10; $i++) {
+						fwrite($fp, "\"This is row\"\t\"" . $expected . "\"\t\"" . $i . PHP_EOL);
+					}
+					break;
+				case 'text/plain':
+					fwrite($fp, 'This is mime type: ' . $expected . PHP_EOL);
+					break;
+			}
+			fclose($fp);
+		} else {
+			$this->expectException(\UnexpectedValueException::class);
+		}
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Check\File::getMimeType($this->base_folder . $input)
 		);
 		// unlink file
 		if (is_file($this->base_folder . $input)) {
