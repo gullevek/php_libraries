@@ -20,8 +20,8 @@
             'dev_requirement' => false,
         ),
         'egrajp/smarty-extended' => array(
-            'pretty_version' => '4.4.1',
-            'version' => '4.4.1.0',
+            'pretty_version' => '4.5.1',
+            'version' => '4.5.1.0',
             'reference' => null,
             'type' => 'library',
             'install_path' => __DIR__ . '/../egrajp/smarty-extended',

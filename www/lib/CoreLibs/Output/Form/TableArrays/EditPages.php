@@ -53,6 +53,7 @@ class EditPages implements Interface\TableArraysInterface
 					'value' => $_POST['name'] ?? '',
 					'output_name' => 'Page name',
 					'mandatory' => 1,
+					'error_check' => 'unique',
 					'type' => 'text'
 				],
 				'order_number' => [
