@@ -236,7 +236,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 */
 	public function getPkId(): int|string|null
 	{
-		return $this->pk_id;
+		return $this->pk_id ?? null;
 	}
 
 	/**

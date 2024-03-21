@@ -22,7 +22,7 @@ Alternative setup composer local zip file repot:
 
 ## Install package
 
-`composer require egrajp/corelibs-composer-all:^8.0`
+`composer require egrajp/corelibs-composer-all:^9.0`
 
 ## Tests
 

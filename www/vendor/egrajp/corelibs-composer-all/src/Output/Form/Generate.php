@@ -1507,7 +1507,7 @@ class Generate
 			}
 			if (
 				!empty($this->reference_array[$key]['mandatory']) &&
-				!$this->reference_array[$key]['selected'][0]
+				empty($this->reference_array[$key]['selected'][0])
 			) {
 				$this->msg .= sprintf(
 					$this->l->__('Please select at least one Element from field <b>%s</b>!<br>'),
