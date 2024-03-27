@@ -22,15 +22,12 @@ use SodiumException;
 class SymmetricEncryption
 {
 	/**
-	 * Encrypt a message
+	 * create key and check validity
 	 *
-	 * @param  string $message Message to encrypt
-	 * @param  string $key     Encryption key (as hex string)
-	 * @return string
-	 * @throws \Exception
-	 * @throws \RangeException
+	 * @param  string $key The key from which the binary key will be created
+	 * @return string      Binary key string
 	 */
-	public static function encrypt(string $message, string $key): string
+	public static function createKey(string $key): string
 	{
 		try {
 			$key = CreateKey::hex2bin($key);
@@ -43,6 +40,21 @@ class SymmetricEncryption
 					. 'SODIUM_CRYPTO_SECRETBOX_KEYBYTES bytes long).'
 			);
 		}
+		return $key;
+	}
+
+	/**
+	 * Encrypt a message
+	 *
+	 * @param  string $message Message to encrypt
+	 * @param  string $key     Encryption key (as hex string)
+	 * @return string
+	 * @throws \Exception
+	 * @throws \RangeException
+	 */
+	public static function encrypt(string $message, string $key): string
+	{
+		$key = self::createKey($key);
 		$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
 		$cipher = base64_encode(
@@ -68,11 +80,7 @@ class SymmetricEncryption
 	 */
 	public static function decrypt(string $encrypted, string $key): string
 	{
-		try {
-			$key = CreateKey::hex2bin($key);
-		} catch (SodiumException $e) {
-			throw new \Exception('Invalid hex key');
-		}
+		$key = self::createKey($key);
 		$decoded = base64_decode($encrypted);
 		$nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
 		$ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');

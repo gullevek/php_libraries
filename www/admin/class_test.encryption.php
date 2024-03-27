@@ -92,6 +92,13 @@ try {
 	print "Error: " . $e->getMessage() . "<br>";
 }
 
+// echo "<hr>";
+// $key = CreateKey::generateRandomKey();
+// $se = new SymmetricEncryption($key);
+// $string = "I a some deep secret";
+// $encrypted = $se->encrypt($string);
+// $decrypted = $se->decrypt($encrypted);
+
 print "</body></html>";
 
 // __END__
