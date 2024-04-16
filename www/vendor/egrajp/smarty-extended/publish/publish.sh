@@ -49,6 +49,7 @@ if [ "${go_flag}" != "go" ]; then
 fi;
 
 echo "[START]";
+
 # gitea
 if [ ! -z "${GITEA_UPLOAD_FILENAME}" ] &&
      [ ! -z "${GITEA_URL_DL}" ] && [ ! -z "${GITEA_URL_PUSH}" ] &&
@@ -82,6 +83,7 @@ if [ ! -z "${GITLAB_URL}" ] && [ ! -z  "${GITLAB_DEPLOY_TOKEN}" ]; then
 else
      echo "Missing GITLAB_DEPLOY_TOKEN environment variable";
 fi;
+
 echo "";
 echo "[DONE]";
 
