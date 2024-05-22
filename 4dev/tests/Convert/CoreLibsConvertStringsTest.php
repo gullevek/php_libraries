@@ -256,6 +256,80 @@ final class CoreLibsConvertStringsTest extends TestCase
 			$output
 		);
 	}
+
+	/**
+	 * provider for testStripMultiplePathSlashes
+	 *
+	 * @return array<mixed>
+	 */
+	public function stripMultiplePathSlashesProvider(): array
+	{
+		return [
+			'no slahses' => [
+				'input' => 'string_abc',
+				'expected' => 'string_abc',
+			],
+			'one slash' => [
+				'input' => 'some/foo',
+				'expected' => 'some/foo',
+			],
+			'two slashes' => [
+				'input' => 'some//foo',
+				'expected' => 'some/foo',
+			],
+			'three slashes' => [
+				'input' => 'some///foo',
+				'expected' => 'some/foo',
+			],
+			'slashes in front' => [
+				'input' => '/foo',
+				'expected' => '/foo',
+			],
+			'two slashes in front' => [
+				'input' => '//foo',
+				'expected' => '/foo',
+			],
+			'thee slashes in front' => [
+				'input' => '///foo',
+				'expected' => '/foo',
+			],
+			'slashes in back' => [
+				'input' => 'foo/',
+				'expected' => 'foo/',
+			],
+			'two slashes in back' => [
+				'input' => 'foo//',
+				'expected' => 'foo/',
+			],
+			'thee slashes in back' => [
+				'input' => 'foo///',
+				'expected' => 'foo/',
+			],
+			'multiple slashes' => [
+				'input' => '/foo//bar///string/end_times',
+				'expected' => '/foo/bar/string/end_times',
+			]
+		];
+	}
+
+	/**
+	 * test multiple slashes clean up
+	 *
+	 * @covers ::stripMultiplePathSlashes
+	 * @dataProvider stripMultiplePathSlashesProvider
+	 * @testdox stripMultiplePathSlashes $input will be $expected [$_dataName]
+	 *
+	 * @param  string $input
+	 * @param  string $expected
+	 * @return void
+	 */
+	public function testStripMultiplePathSlashes(string $input, string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Convert\Strings::stripMultiplePathSlashes($input)
+		);
+	}
 }
 
 // __END__

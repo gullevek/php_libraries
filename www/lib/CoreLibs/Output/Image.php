@@ -78,7 +78,7 @@ class Image
 				if (!empty($dummy) && file_exists($filename) && is_file($filename)) {
 					$return_data = $filename;
 				} else {
-					throw new \Exception('Could not set dummy return file: ' . $dummy . ' in ' . $filename);
+					throw new \RuntimeException('Could not set dummy return file: ' . $dummy . ' in ' . $filename);
 				}
 			} else {
 				$return_data = $dummy;
@@ -204,11 +204,11 @@ class Image
 				E_USER_DEPRECATED
 			);
 			// NOTE: we need to depracte this
-			$cache_folder = BASE . LAYOUT . CONTENT_PATH . CACHE . IMAGES;
+			$cache_folder = BASE . CONTENT_PATH . LAYOUT . CACHE . IMAGES;
 			$web_folder = LAYOUT . CACHE . IMAGES;
 			if (!is_dir($cache_folder)) {
 				if (false === mkdir($cache_folder)) {
-					$cache_folder = BASE . LAYOUT . CONTENT_PATH . CACHE;
+					$cache_folder = BASE . CONTENT_PATH . LAYOUT . CACHE;
 					$web_folder = LAYOUT . CACHE;
 				}
 			}

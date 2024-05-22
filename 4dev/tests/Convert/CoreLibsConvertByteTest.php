@@ -253,7 +253,8 @@ final class CoreLibsConvertByteTest extends TestCase
 	 */
 	public function testHumanReadableByteFormatException(int $flag): void
 	{
-		$this->expectException(\Exception::class);
+		$this->expectException(\InvalidArgumentException::class);
+		$this->expectExceptionCode(1);
 		\CoreLibs\Convert\Byte::humanReadableByteFormat(12, $flag);
 	}
 
@@ -272,7 +273,8 @@ final class CoreLibsConvertByteTest extends TestCase
 	 */
 	public function testStringByteFormatException(int $flag): void
 	{
-		$this->expectException(\Exception::class);
+		$this->expectException(\InvalidArgumentException::class);
+		$this->expectExceptionCode(1);
 		\CoreLibs\Convert\Byte::stringByteFormat(12, $flag);
 	}
 }

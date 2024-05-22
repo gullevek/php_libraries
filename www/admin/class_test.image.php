@@ -41,9 +41,9 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 $thumb_width = 250;
 $thumb_height = 300;
 // class
-$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture_square.jpg';
+$image = BASE . CONTENT_PATH . LAYOUT . IMAGES . 'no_picture_square.jpg';
 // folders
-$cache_folder = BASE . LAYOUT . CONTENT_PATH . CACHE . IMAGES;
+$cache_folder = BASE . CONTENT_PATH . LAYOUT . CACHE . IMAGES;
 $web_folder = LAYOUT . CACHE . IMAGES;
 // rotate image first
 try {
@@ -58,7 +58,7 @@ echo "<div>CLASS->CREATETHUMBNAILSIMPLE: "
 	. basename($image) . ": WIDTH: $thumb_width<br><img src="
 	. $_image->createThumbnailSimple($image, $thumb_width, 0, $cache_folder, $web_folder) . "></div>";
 // static
-$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture.jpg';
+$image = BASE . CONTENT_PATH . LAYOUT . IMAGES . 'no_picture.jpg';
 // rotate image first
 try {
 	$image_class::correctImageOrientation($image);
@@ -94,7 +94,7 @@ $images = array(
 // return mime type ala mimetype
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 foreach ($images as $image) {
-	$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . $image;
+	$image = BASE . CONTENT_PATH . LAYOUT . IMAGES . $image;
 	list ($height, $width, $img_type) = \CoreLibs\Convert\SetVarType::setArray(getimagesize($image));
 	echo "<div><b>IMAGE INFO</b>: " . $height . "x" . $width . ", TYPE: "
 		. \CoreLibs\Debug\Support::dumpVar($img_type) . " [" . $finfo->file($image) . "]</div>";

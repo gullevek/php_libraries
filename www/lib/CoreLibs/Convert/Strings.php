@@ -118,6 +118,22 @@ class Strings
 			return $value;
 		}
 	}
+
+	/**
+	 * Strip any duplicated slahes from a path
+	 * eg: //foo///bar/foo.inc -> /foo/bar/foo.inc
+	 *
+	 * @param  string $path Path to strip slashes from
+	 * @return string       Clean path, on error returns original path
+	 */
+	public static function stripMultiplePathSlashes(string $path): string
+	{
+		return preg_replace(
+			'#/+#',
+			'/',
+			$path
+		) ?? $path;
+	}
 }
 
 // __END__

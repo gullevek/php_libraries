@@ -8,11 +8,11 @@
     "packages": [
         {
             "name": "egrajp/smarty-extended",
-            "version": "4.3.0",
+            "version": "4.5.2",
             "dist": {
                 "type": "zip",
-                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fsmarty-extended/4.3.0/egrajp-smarty-extended.4.3.0.zip",
-                "shasum": "d41bda35c0d52da35cf911ab0b018655a09f072b"
+                "url": "https://git.egplusww.jp/api/packages/Composer/composer/files/egrajp%2Fsmarty-extended/4.5.2/egrajp-smarty-extended.4.5.2.zip",
+                "shasum": "a2c67a5047aad349a2cfa54240a44da449df9c4c"
             },
             "type": "library",
             "autoload": {
@@ -34,7 +34,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2023-02-17T14:14:10+09:00"
+            "time": "2024-04-16T18:25:27+09:00"
         },
         {
             "name": "gullevek/dotenv",
@@ -151,5 +151,5 @@
         "php": ">=8.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

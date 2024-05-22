@@ -28,7 +28,7 @@ if [ "${target}" == '' ]; then
 	# default is admin
 	TEXTDOMAIN=admin;
 fi;
-js_folder="layout/${TEXTDOMAIN}/javascript/";
+js_folder="${TEXTDOMAIN}/layout/javascript/";
 
 error=0;
 # this checks if the TEXTDOMAIN target actually exists

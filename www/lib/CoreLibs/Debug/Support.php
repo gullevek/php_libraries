@@ -295,8 +295,7 @@ class Support
 	 * Will start with start_level to skip unwanted from stack
 	 * Defaults to skip level 0 wich is this methid
 	 *
-	 * @param  integer $start_level From what level on, as defaul starts with 1
-	 *                              to exclude self
+	 * @param  integer $start_level [=1] From what level on, starts with 1 to exclude self
 	 * @return array<mixed>         All method names in list where max is last called
 	 */
 	public static function getCallerMethodList(int $start_level = 1): array
@@ -304,13 +303,44 @@ class Support
 		$traces = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 		$methods = [];
 		foreach ($traces as $level => $data) {
-			if ($level >= $start_level) {
-				if (!empty($data['function'])) {
-					array_unshift($methods, $data['function']);
-				}
+			if ($level < $start_level) {
+				continue;
+			}
+			if (!empty($data['function'])) {
+				array_unshift($methods, $data['function']);
 			}
 		}
 		return $methods;
+	}
+
+	/**
+	 * Get the full call stack from a certain starting level
+	 * The return string is
+	 * file:line:class->method
+	 *
+	 * Note that '::' is used for static calls
+	 *
+	 * @param  int   $start_level [=1] starts with 1 to exclude itself
+	 * @return array<string>      string with file, line, class and method
+	 */
+	public static function getCallStack(int $start_level = 1): array
+	{
+		$call_stack = [];
+		$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+		foreach ($backtrace as $level => $call_trace) {
+			if ($level < $start_level) {
+				continue;
+			}
+			$call_stack[] =
+				($call_trace['file'] ?? 'n/f') . ':'
+				. ($call_trace['line'] ?? '-') . ':'
+				. (!empty($call_trace['class']) ?
+					$call_trace['class'] . ($call_trace['type'] ?? '') :
+					''
+				)
+				. $call_trace['function'];
+		}
+		return $call_stack;
 	}
 
 	/**

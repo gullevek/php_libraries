@@ -115,6 +115,8 @@ echo "INSERT ALL COLUMN TYPES: "
 	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
 echo "<hr>";
 
+// test connectors: = , <> () for query detection
+
 // convert placeholder tests
 // ? -> $n
 // :name -> $n

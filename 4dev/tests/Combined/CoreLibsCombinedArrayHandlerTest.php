@@ -1098,14 +1098,107 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	 * @testdox arrayFlatForKey array $input will be $expected [$_dataName]
 	 *
 	 * @param array $input
+	 * @param string $search
 	 * @param array $expected
 	 * @return void
 	 */
-	public function testArrayFlatForKey(array $input, $search, array $expected): void
+	public function testArrayFlatForKey(array $input, string $search, array $expected): void
 	{
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Combined\ArrayHandler::arrayFlatForKey($input, $search)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerArrayGetNextPrevKey(): array
+	{
+		return [
+			'find, ok' => [
+				'input' => [
+					'a' => 'First',
+					'b' => 'Second',
+					'c' => 'Third',
+				],
+				'b',
+				'a',
+				'c'
+			],
+			'find, first' => [
+				'input' => [
+					'a' => 'First',
+					'b' => 'Second',
+					'c' => 'Third',
+				],
+				'a',
+				null,
+				'b'
+			],
+			'find, last' => [
+				'input' => [
+					'a' => 'First',
+					'b' => 'Second',
+					'c' => 'Third',
+				],
+				'c',
+				'b',
+				null
+			],
+			'find, not found' => [
+				'input' => [
+					'a' => 'First',
+					'b' => 'Second',
+					'c' => 'Third',
+				],
+				'z',
+				null,
+				null
+			],
+			'int, index' => [
+				'input' => [
+					'a',
+					'b',
+					'c'
+				],
+				1,
+				0,
+				2
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::arrayGetPrevKey, ::arrayGetNextKey
+	 * @dataProvider providerArrayGetNextPrevKey
+	 * @testdox arrayGetNextPrevKey get next/prev key for $search wtih $expected_prev/$expected_next [$_dataName]
+	 *
+	 * @param  array           $input
+	 * @param  int|string      $search
+	 * @param  int|string|null $expected_prev
+	 * @param  int|string|null $expected_next
+	 * @return void
+	 */
+	public function testArrayGetNextPrevKey(
+		array $input,
+		int|string $search,
+		int|string|null $expected_prev,
+		int|string|null $expected_next
+	): void {
+		$this->assertEquals(
+			$expected_prev,
+			\CoreLibs\Combined\ArrayHandler::arrayGetPrevKey($input, $search),
+			'Find prev key in array'
+		);
+		$this->assertEquals(
+			$expected_next,
+			\CoreLibs\Combined\ArrayHandler::arrayGetNextKey($input, $search),
+			'Find next key in array'
 		);
 	}
 }

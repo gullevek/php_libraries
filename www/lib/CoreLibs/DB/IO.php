@@ -1186,7 +1186,7 @@ class IO
 	 */
 	private function __dbDebugPrepareContext(string $query, array $params = []): array
 	{
-		if ($this->params === []) {
+		if ($params === []) {
 			return [];
 		}
 		$error_data = [
@@ -1302,7 +1302,7 @@ class IO
 				}
 			}
 		}
-		$this->cursor_ext[$query_hash]['pos'] ++;
+		$this->cursor_ext[$query_hash]['pos']++;
 		return $return;
 	}
 
@@ -1318,14 +1318,14 @@ class IO
 		// regex for params: only stand alone $number allowed
 		// exclude all '' enclosed strings, ignore all numbers [note must start with digit]
 		// can have space/tab/new line
-		// must have = , ( [equal, comma, opening round bracket]
+		// must have <> = , ( [not equal, equal, comma, opening round bracket]
 		// can have space/tab/new line
 		// $ number with 1-9 for first and 0-9 for further digits
 		// /s for matching new line in . list
 		// [disabled, we don't used ^ or $] /m for multi line match
 		// Matches in 1:, must be array_filtered to remove empty, count with array_unique
 		preg_match_all(
-			'/(?:\'.*?\')?\s*(?:\?\?|[(=,])\s*(?:\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))/s',
+			'/(?:\'.*?\')?\s*(?:\?\?|<>|[(=,])\s*(?:\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))/s',
 			$query,
 			$match
 		);
@@ -1519,7 +1519,7 @@ class IO
 				]);
 				return false;
 		}
-		$this->query_called[$query_hash] ++;
+		$this->query_called[$query_hash]++;
 		// return hash
 		return $query_hash;
 	}
@@ -2411,6 +2411,8 @@ class IO
 
 			// set the query
 			$this->cursor_ext[$query_hash]['query'] = $query;
+			// set the query parameters
+			$this->cursor_ext[$query_hash]['params'] = $params;
 			// before doing ANYTHING check if query is "SELECT ..." everything else does not work
 			if (!$this->dbCheckQueryForSelect($this->cursor_ext[$query_hash]['query'])) {
 				$this->__dbError(17, false, context: [
@@ -2420,8 +2422,6 @@ class IO
 				]);
 				return false;
 			}
-			// set the query parameters
-			$this->cursor_ext[$query_hash]['params'] = $params;
 			// QUERY PARAMS: run query params check and rewrite
 			if ($this->dbGetConvertPlaceholder() === true) {
 				try {
@@ -2469,7 +2469,7 @@ class IO
 				return false;
 			}
 		} else {
-			$this->cursor_ext[$query_hash]['log_pos'] ++;
+			$this->cursor_ext[$query_hash]['log_pos']++;
 		}
 		// reset log for each read
 		$this->cursor_ext[$query_hash]['log'] = [];
@@ -2668,8 +2668,8 @@ class IO
 				if ($return) {
 					$this->cursor_ext[$query_hash]['log'][] = 'Return Data';
 					// internal position counter
-					$this->cursor_ext[$query_hash]['pos'] ++;
-					$this->cursor_ext[$query_hash]['read_rows'] ++;
+					$this->cursor_ext[$query_hash]['pos']++;
+					$this->cursor_ext[$query_hash]['read_rows']++;
 					// read is finished
 					if (
 						$this->cursor_ext[$query_hash]['read_rows'] ==

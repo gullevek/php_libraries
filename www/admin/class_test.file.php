@@ -37,6 +37,7 @@ $file = '/some/path/to/some/file.txt';
 print "GETFILENAMEENDING: $file: " . File::getFilenameEnding($file) . "<br>";
 $file = getcwd() . DIRECTORY_SEPARATOR . 'class_test.file.php';
 print "GETLINESFROMFILE: $file: " . File::getLinesFromFile($file) . "<br>";
+print "MIMEINFO: $file: " . File::getMimeType($file) . "<br>";
 
 print "</body></html>";
 

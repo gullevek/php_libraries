@@ -513,7 +513,7 @@ final class CoreLibsDebugSupportTest extends TestCase
 	public function testGetCallerMethodList(array $expected): void
 	{
 		$compare = Support::getCallerMethodList();
-		// 10: legact
+		// 10: legacy
 		// 11: direct
 		// 12: full call
 		switch (count($compare)) {
@@ -569,6 +569,31 @@ final class CoreLibsDebugSupportTest extends TestCase
 				);
 				break;
 		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @cover ::getCallStack
+	 * @testdox getCallStack check if it returns data [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testGetCallStack(): void
+	{
+		$call_stack = Support::getCallStack();
+		// print "Get CALL: " . print_r(Support::getCallStack(), true) . "\n";
+		if ($call_stack < 8) {
+			$this->assertFalse(true, 'getCallStack too low: 8');
+		} else {
+			$this->assertTrue(true, 'getCallSteck ok');
+		}
+		// just test top entry
+		$first = array_shift($call_stack);
+		$this->assertStringEndsWith(
+			':tests\CoreLibsDebugSupportTest->testGetCallStack',
+			$first,
+		);
 	}
 
 	/**
