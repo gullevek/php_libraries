@@ -13,7 +13,7 @@
         'egrajp/corelibs-composer-all' => array(
             'pretty_version' => 'dev-development',
             'version' => 'dev-development',
-            'reference' => '3f5b3f02ad635611fc8e12704995abeff02ee558',
+            'reference' => '1357b98883c6e4bcac163c5fb29e28c8f968a814',
             'type' => 'library',
             'install_path' => __DIR__ . '/../egrajp/corelibs-composer-all',
             'aliases' => array(),
@@ -29,8 +29,8 @@
             'dev_requirement' => false,
         ),
         'egrajp/smarty-extended' => array(
-            'pretty_version' => '4.5.1',
-            'version' => '4.5.1.0',
+            'pretty_version' => '4.5.2',
+            'version' => '4.5.2.0',
             'reference' => null,
             'type' => 'library',
             'install_path' => __DIR__ . '/../egrajp/smarty-extended',

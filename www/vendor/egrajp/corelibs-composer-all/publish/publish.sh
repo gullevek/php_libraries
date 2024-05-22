@@ -53,13 +53,19 @@ echo "[START]";
 if [ ! -z "${GITEA_UPLOAD_FILENAME}" ] &&
      [ ! -z "${GITEA_URL_DL}" ] && [ ! -z "${GITEA_URL_PUSH}" ] &&
      [ ! -z "${GITEA_USER}" ] && [ ! -z "${GITEA_TOKEN}" ]; then
-     curl -LJO \
-          --output-dir "${PACKAGE_DOWNLOAD}" \
-          ${GITEA_URL_DL}/v${VERSION}.zip;
-     curl --user ${GITEA_USER}:${GITEA_TOKEN} \
-          --upload-file "${PACKAGE_DOWNLOAD}${GITEA_UPLOAD_FILENAME}-v${VERSION}.zip" \
-          ${GITEA_URL_PUSH}?version=${VERSION};
-     echo "${VERSION}" > "${file_last_published}";
+     if [ ! -f "${PACKAGE_DOWNLOAD}${GITEA_UPLOAD_FILENAME}-v${VERSION}.zip" ]; then
+          curl -LJO \
+               --output-dir "${PACKAGE_DOWNLOAD}" \
+               ${GITEA_URL_DL}/v${VERSION}.zip;
+     fi;
+     if [ ! -f "${PACKAGE_DOWNLOAD}${GITEA_UPLOAD_FILENAME}-v${VERSION}.zip" ]; then
+          echo "Version file does not exist for ${VERSION}";
+     else
+          curl --user ${GITEA_USER}:${GITEA_TOKEN} \
+               --upload-file "${PACKAGE_DOWNLOAD}${GITEA_UPLOAD_FILENAME}-v${VERSION}.zip" \
+               ${GITEA_URL_PUSH}?version=${VERSION};
+          echo "${VERSION}" > "${file_last_published}";
+     fi;
 else
      echo "Missing either GITEA_UPLOAD_FILENAME, GITEA_URL_DL, GITEA_URL_PUSH, GITEA_USER or GITEA_TOKEN environment variable";
 fi;
