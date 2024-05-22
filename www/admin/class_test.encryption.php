@@ -40,16 +40,33 @@ $key = CreateKey::generateRandomKey();
 print "Secret Key: " . $key . "<br>";
 
 $string = "I a some deep secret";
-$encrypted = SymmetricEncryption::encrypt($string, $key);
-$decrypted = SymmetricEncryption::decrypt($encrypted, $key);
+//
+$crypt = new SymmetricEncryption($key);
+$encrypted = $crypt->encrypt($string);
+$decrypted = $crypt->decrypt($encrypted);
+print "[C] Encrypted: " . $encrypted . "<br>";
+print "[C] Decrytped: " . $decrypted . "<br>";
+$encrypted = SymmetricEncryption::getInstance($key)->encrypt($string);
+$decrypted = SymmetricEncryption::getInstance($key)->decrypt($encrypted);
+print "[S] Original: " . $string . "<br>";
+print "[S] Encrypted: " . $encrypted . "<br>";
+print "[S] Decrytped: " . $decrypted . "<br>";
+$encrypted = SymmetricEncryption::encryptKey($string, $key);
+$decrypted = SymmetricEncryption::decryptKey($encrypted, $key);
+print "[SS] Encrypted: " . $encrypted . "<br>";
+print "[SS] Decrytped: " . $decrypted . "<br>";
 
-print "Original: " . $string . "<br>";
-print "Encrypted: " . $encrypted . "<br>";
-print "Decrytped: " . $decrypted . "<br>";
+print "<br>INIT KEY MISSING<br>";
+try {
+	$crypt = new SymmetricEncryption();
+	$encrypted = $crypt->decrypt($string);
+} catch (Exception $e) {
+	print("Error: " . $e->getMessage() . "<br>");
+}
 
 print "<br>WRONG CIPHERTEXT<br>";
 try {
-	$decrypted = SymmetricEncryption::decrypt('flupper', $key);
+	$decrypted = SymmetricEncryption::decryptKey('flupper', $key);
 } catch (Exception $e) {
 	print "Error: " . $e->getMessage() . "<br>";
 }
@@ -57,7 +74,7 @@ try {
 print "<br>SHORT and WRONG KEY<br>";
 $key = 'wrong_key';
 try {
-	$encrypted = SymmetricEncryption::encrypt($string, $key);
+	$encrypted = SymmetricEncryption::encryptKey($string, $key);
 } catch (Exception $e) {
 	print "Error: " . $e->getMessage() . "<br>";
 }
@@ -65,7 +82,7 @@ try {
 print "<br>INVALID HEX KEY<br>";
 $key = '1cabd5cba9e042f12522f4ff2de5c31d233b';
 try {
-	$encrypted = SymmetricEncryption::encrypt($string, $key);
+	$encrypted = SymmetricEncryption::encryptKey($string, $key);
 } catch (Exception $e) {
 	print "Error: " . $e->getMessage() . "<br>";
 }
@@ -73,24 +90,20 @@ try {
 print "<br>WRONG KEY TO DECRYPT<br>";
 $key = CreateKey::generateRandomKey();
 $string = "I a some deep secret";
-$encrypted = SymmetricEncryption::encrypt($string, $key);
-$key = CreateKey::generateRandomKey();
-try {
-	$decrypted = SymmetricEncryption::decrypt($encrypted, $key);
-} catch (Exception $e) {
-	print "Error: " . $e->getMessage() . "<br>";
-}
-
-print "<br>WRONG KEY TO DECRYPT<br>";
-$key = CreateKey::generateRandomKey();
-$string = "I a some deep secret";
-$encrypted = SymmetricEncryption::encrypt($string, $key);
+$encrypted = SymmetricEncryption::encryptKey($string, $key);
 $key = 'wrong_key';
 try {
-	$decrypted = SymmetricEncryption::decrypt($encrypted, $key);
+	$decrypted = SymmetricEncryption::decryptKey($encrypted, $key);
 } catch (Exception $e) {
 	print "Error: " . $e->getMessage() . "<br>";
 }
+
+// echo "<hr>";
+// $key = CreateKey::generateRandomKey();
+// $se = new SymmetricEncryption($key);
+// $string = "I a some deep secret";
+// $encrypted = $se->encrypt($string);
+// $decrypted = $se->decrypt($encrypted);
 
 print "</body></html>";
 
