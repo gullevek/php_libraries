@@ -2,7 +2,7 @@
 includes:
 	- phpstan-conditional.php
 parameters:
-	tmpDir: /tmp/phpstan-corelibs
+	tmpDir: %currentWorkingDirectory%/tmp/phpstan-corelibs
 	level: 8 # max is now 9
 	checkMissingCallableSignature: true
 	treatPhpDocTypesAsCertain: false
