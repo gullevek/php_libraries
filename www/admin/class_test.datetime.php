@@ -451,6 +451,7 @@ function intervalStringFormatDeprecated(
 			$value = $interval->days;
 			$skip = true;
 		} else {
+			/** @phan-suppress-next-line PhanUndeclaredProperty */
 			$value = $interval->$part;
 		}
 		if ($value == 0 && $skip_last_zero === true) {
