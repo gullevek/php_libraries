@@ -97,7 +97,7 @@ $smarty->DATA['drop_down_test'] = [
 	'foobar' => 'Foo Bar',
 ];
 $smarty->DATA['drop_down_test_selected'] = 'bar';
-$smarty->DATA['drop_down_test_nested']  = [
+$smarty->DATA['drop_down_test_nested'] = [
 	'' => '選択してください',
 	'4/25(木)' => [
 		'4/25(木) 11:00-11:50' => '4/25(木) 11:00-11:50',

@@ -19,7 +19,7 @@ require 'config.php';
 $LOG_FILE_ID = 'classTest-db-query-placeholders';
 ob_end_flush();
 
-use CoreLibs\Debug\Support;
+// use CoreLibs\Debug\Support;
 
 $log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,

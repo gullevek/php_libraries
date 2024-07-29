@@ -20,7 +20,7 @@ $LOG_FILE_ID = 'classTest-db-query-placeholder';
 ob_end_flush();
 
 use CoreLibs\Debug\Support;
-use CoreLibs\DB\Support\ConvertPlaceholder;
+// use CoreLibs\DB\Support\ConvertPlaceholder;
 
 $log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,

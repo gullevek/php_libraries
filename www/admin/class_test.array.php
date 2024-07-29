@@ -21,7 +21,7 @@ ob_end_flush();
 use CoreLibs\Combined\ArrayHandler;
 use CoreLibs\Debug\Support as DgS;
 use CoreLibs\Convert\SetVarType;
-use PHPUnit\Framework\Constraint\ArrayHasKey;
+// use PHPUnit\Framework\Constraint\ArrayHasKey;
 
 $log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
