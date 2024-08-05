@@ -63,7 +63,7 @@ $backend->db->dbInfo(true);
 ob_end_flush();
 
 print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS</title><head>";
+print "<html><head><title>TEST CLASS</title></head>";
 print "<body>";
 
 // key: file name, value; name

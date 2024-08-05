@@ -35,7 +35,7 @@ $db->log->debug('START', '=============================>');
 
 $PAGE_NAME = 'TEST CLASS: DB';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><a href="class_test.db.type.php">Class Test DB row type convert to PHP type</a></div>';

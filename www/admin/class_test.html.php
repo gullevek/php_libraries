@@ -35,19 +35,20 @@ $elements_class = 'CoreLibs\Output\Form\Elements';
 
 $PAGE_NAME = 'TEST CLASS: HTML/ELEMENTS';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
-$string = "Something < = > Other <br> Next line";
-print "HTMLENT: " . Html::htmlent($string) . ": " . $_html->htmlent($string) . "<br>";
+$string = "Something < = > Other <br> Next line and Quotes '\"";
+echo "String: <pre>$string</pre><br>";
+print "HTMLENT: " . Html::htmlent($string) . ": " . $_html->htmlent($string) . " (" . htmlentities($string) . ")<br>";
 print "REMOVELB: " . Html::htmlent($string) . ": " . $_html->removeLB($string) . "<br>";
 $date_str = [2021, 5, 1, 11, 10];
 print "PRINTDATETIME: "
 	. $_elements->printDateTime($date_str[0], $date_str[1], $date_str[2], $date_str[3], $date_str[4]) . "<br>";
 // STATIC
-$string = "Something < = > Other <br> Next line";
+// $string = "Something < = > Other <br> Next line and Quotes '\"";
 print "S::HTMLENT: " . Html::htmlent($string) . ": " . $html_class::htmlent($string) . "<br>";
 print "S::REMOVELB: " . Html::htmlent($string) . ": " . $html_class::removeLB($string) . "<br>";
 $date_str = [2021, 5, 1, 11, 10];
