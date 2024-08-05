@@ -23,7 +23,7 @@ $byte_class = 'CoreLibs\Convert\Strings';
 
 $PAGE_NAME = 'TEST CLASS: STRINGS CONVERT';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';

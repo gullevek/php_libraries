@@ -26,7 +26,7 @@ $log = new CoreLibs\Logging\Logging([
 
 $PAGE_NAME = 'TEST CLASS: CONFIG DIRECT SUB';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="../class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';

@@ -47,7 +47,7 @@ $l10n = new \CoreLibs\Language\L10n(
 );
 
 print "<!DOCTYPE html>";
-print "<html><head><title>GROUP TESTER</title><head>";
+print "<html><head><title>GROUP TESTER</title></head>";
 print "<body>";
 
 print '<form method="post" name="loginlogout">';
