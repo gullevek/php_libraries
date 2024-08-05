@@ -16,16 +16,22 @@ class Html
 	/**
 	 * full wrapper for html entities
 	 *
+	 * uses default params as: ENT_QUOTES | ENT_HTML5
+	 * switches from ENT_HTML401 to ENT_HTML5 as we assume all our pages have <!DOCTYPE html>
+	 * removed: ENT_SUBSTITUTE -> wrong characters will be replaced with space
+	 * encodes in UTF-8
+	 * does not double encode
+	 *
 	 * @param  mixed $string string to html encode
+	 * @param  int   $flags [default: ENT_QUOTES | ENT_HTML5]
 	 * @return mixed         if string, encoded, else as is (eg null)
 	 */
-	public static function htmlent(mixed $string): mixed
+	public static function htmlent(mixed $string, int $flags = ENT_QUOTES | ENT_HTML5): mixed
 	{
 		if (is_string($string)) {
-			return htmlentities($string, ENT_COMPAT | ENT_HTML401, 'UTF-8', false);
-		} else {
-			return $string;
+			return htmlentities($string, $flags, 'UTF-8', false);
 		}
+		return $string;
 	}
 
 	/**
@@ -54,14 +60,10 @@ class Html
 	 */
 	public static function checked(array|string $haystack, string $needle, int $type = 0): ?string
 	{
-		if (is_array($haystack)) {
-			if (in_array($needle, $haystack)) {
-				return $type ? 'checked' : 'selected';
-			}
-		} else {
-			if ($haystack == $needle) {
-				return $type ? 'checked' : 'selected';
-			}
+		if (is_array($haystack) && in_array($needle, $haystack)) {
+			return $type ? 'checked' : 'selected';
+		} elseif (!is_array($haystack) && $haystack == $needle) {
+			return $type ? 'checked' : 'selected';
 		}
 		return null;
 	}

@@ -39,9 +39,11 @@ class ConvertPlaceholder
 	): array {
 		$convert_to = strtolower($convert_to);
 		$matches = [];
+		$query_split = '[(=,?-]|->|->>|#>|#>>|@>|<@|\?\|\?\&|\|\||#-';
 		$pattern = '/'
 			// prefix string part, must match towards
-			. '(?:\'.*?\')?\s*(?:\?\?|[(=,])\s*'
+			// seperator for ( = , ? - [and json/jsonb in pg doc section 9.15]
+			. '(?:\'.*?\')?\s*(?:\?\?|' . $query_split . ')\s*'
 			// match for replace part
 			. '(?:'
 			// digit -> ignore
@@ -96,7 +98,10 @@ class ConvertPlaceholder
 			$type = 'named';
 			$matches_return = $named_matches;
 			// only check for :named
-			$pattern_replace = '/((?:\'.*?\')?\s*(?:\?\?|[(=,])\s*)(\d+|(?:\'.*?\')|(:\w+))/s';
+			$pattern_replace = '/'
+				. '((?:\'.*?\')?\s*(?:\?\?|' . $query_split . ')\s*)'
+				. '(\d+|(?:\'.*?\')|(:\w+))'
+				. '/s';
 			// 0: full
 			// 1: pre part
 			// 2: keep part UNLESS '3' is set
@@ -134,7 +139,10 @@ class ConvertPlaceholder
 			// order and data stays the same
 			$params_new = $params;
 			// only check for ?
-			$pattern_replace = '/((?:\'.*?\')?\s*(?:\?\?|[(=,])\s*)(\d+|(?:\'.*?\')|(?:(?:\?\?)?\s*(\?{1})))/s';
+			$pattern_replace = '/'
+				. '((?:\'.*?\')?\s*(?:\?\?|' . $query_split . ')\s*)'
+				. '(\d+|(?:\'.*?\')|(?:(?:\?\?)?\s*(\?{1})))'
+				. '/s';
 			// 0: full
 			// 1: pre part
 			// 2: keep part UNLESS '3' is set
@@ -163,7 +171,10 @@ class ConvertPlaceholder
 			$type = 'numbered';
 			$matches_return = $numbered_matches;
 			// only check for $n
-			$pattern_replace = '/((?:\'.*?\')?\s*(?:\?\?|[(=,])\s*)(\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))/s';
+			$pattern_replace = '/'
+				. '((?:\'.*?\')?\s*(?:\?\?|' . $query_split . ')\s*)'
+				. '(\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))'
+				. '/s';
 			// 0: full
 			// 1: pre part
 			// 2: keep part UNLESS '3' is set

@@ -185,7 +185,7 @@ class SmartyExtend extends \Smarty
 		// call basic smarty
 		// or Smarty::__construct();
 		parent::__construct();
-		// iinit lang
+		// init lang
 		$this->l10n = $l10n;
 		// parse and read, legacy stuff
 		$locale = $this->l10n->getLocaleAsArray();

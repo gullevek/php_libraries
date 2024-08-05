@@ -46,12 +46,34 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	public function testEncryptDecryptSuccess(string $input, string $expected): void
 	{
 		$key = CreateKey::generateRandomKey();
-		$encrypted = SymmetricEncryption::encrypt($input, $key);
-		$decrypted = SymmetricEncryption::decrypt($encrypted, $key);
+
+		// test class
+		$crypt = new SymmetricEncryption($key);
+		$encrypted = $crypt->encrypt($input);
+		$decrypted = $crypt->decrypt($encrypted);
+		$this->assertEquals(
+			$expected,
+			$decrypted,
+			'Class call',
+		);
+
+		// test indirect
+		$encrypted = SymmetricEncryption::getInstance($key)->encrypt($input);
+		$decrypted = SymmetricEncryption::getInstance($key)->decrypt($encrypted);
+		$this->assertEquals(
+			$expected,
+			$decrypted,
+			'Class Instance call',
+		);
+
+		// test static
+		$encrypted = SymmetricEncryption::encryptKey($input, $key);
+		$decrypted = SymmetricEncryption::decryptKey($encrypted, $key);
 
 		$this->assertEquals(
 			$expected,
-			$decrypted
+			$decrypted,
+			'Static call',
 		);
 	}
 
@@ -86,10 +108,24 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	public function testEncryptFailed(string $input, string $exception_message): void
 	{
 		$key = CreateKey::generateRandomKey();
-		$encrypted = SymmetricEncryption::encrypt($input, $key);
 		$wrong_key = CreateKey::generateRandomKey();
+
+		// wrong key in class call
+		$crypt = new SymmetricEncryption($key);
+		$encrypted = $crypt->encrypt($input);
 		$this->expectExceptionMessage($exception_message);
-		SymmetricEncryption::decrypt($encrypted, $wrong_key);
+		$crypt->setKey($key);
+		$crypt->decrypt($encrypted);
+
+		// class instance
+		$encrypted = SymmetricEncryption::getInstance($key)->encrypt($input);
+		$this->expectExceptionMessage($exception_message);
+		SymmetricEncryption::getInstance($wrong_key)->decrypt($encrypted);
+
+		// class static
+		$encrypted = SymmetricEncryption::encryptKey($input, $key);
+		$this->expectExceptionMessage($exception_message);
+		SymmetricEncryption::decryptKey($encrypted, $wrong_key);
 	}
 
 	/**
@@ -107,7 +143,6 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 			'too short hex key' => [
 				'key' => '1cabd5cba9e042f12522f4ff2de5c31d233b',
 				'excpetion_message' => 'Key is not the correct size (must be '
-					. 'SODIUM_CRYPTO_SECRETBOX_KEYBYTES bytes long).'
 			],
 		];
 	}
@@ -126,13 +161,33 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	 */
 	public function testWrongKey(string $key, string $exception_message): void
 	{
-		$this->expectExceptionMessage($exception_message);
-		SymmetricEncryption::encrypt('test', $key);
-		// we must encrypt valid thing first so we can fail with the wrong kjey
 		$enc_key = CreateKey::generateRandomKey();
-		$encrypted = SymmetricEncryption::encrypt('test', $enc_key);
+
+		// class
+		$crypt = new SymmetricEncryption($key);
 		$this->expectExceptionMessage($exception_message);
-		SymmetricEncryption::decrypt($encrypted, $key);
+		$crypt->encrypt('test');
+		$crypt->setKey($enc_key);
+		$encrypted = $crypt->encrypt('test');
+		$this->expectExceptionMessage($exception_message);
+		$crypt->setKey($key);
+		$crypt->decrypt($encrypted);
+
+		// class instance
+		$this->expectExceptionMessage($exception_message);
+		SymmetricEncryption::getInstance($key)->encrypt('test');
+		// we must encrypt valid thing first so we can fail with the wrong key
+		$encrypted = SymmetricEncryption::getInstance($enc_key)->encrypt('test');
+		$this->expectExceptionMessage($exception_message);
+		SymmetricEncryption::getInstance($key)->decrypt($encrypted);
+
+		// class static
+		$this->expectExceptionMessage($exception_message);
+		SymmetricEncryption::encryptKey('test', $key);
+		// we must encrypt valid thing first so we can fail with the wrong key
+		$encrypted = SymmetricEncryption::encryptKey('test', $enc_key);
+		$this->expectExceptionMessage($exception_message);
+		SymmetricEncryption::decryptKey($encrypted, $key);
 	}
 
 	/**
@@ -145,7 +200,7 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		return [
 			'too short ciphertext' => [
 				'input' => 'short',
-				'exception_message' => 'Invalid ciphertext (too short)'
+				'exception_message' => 'Decipher message failed: '
 			],
 		];
 	}
@@ -164,8 +219,18 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	public function testWrongCiphertext(string $input, string $exception_message): void
 	{
 		$key = CreateKey::generateRandomKey();
+		// class
+		$crypt = new SymmetricEncryption($key);
 		$this->expectExceptionMessage($exception_message);
-		SymmetricEncryption::decrypt($input, $key);
+		$crypt->decrypt($input);
+
+		// class instance
+		$this->expectExceptionMessage($exception_message);
+		SymmetricEncryption::getInstance($key)->decrypt($input);
+
+		// class static
+		$this->expectExceptionMessage($exception_message);
+		SymmetricEncryption::decryptKey($input, $key);
 	}
 }
 

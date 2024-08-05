@@ -21,7 +21,8 @@
     },
     "require-dev": {
         "egrajp/smarty-extended": "^4.3",
-        "gullevek/dotenv": "dev-master"
+        "gullevek/dotenv": "dev-master",
+        "phpunit/phpunit": "^9"
     },
     "repositories": {
         "git.egplusww.jp.Composer": {

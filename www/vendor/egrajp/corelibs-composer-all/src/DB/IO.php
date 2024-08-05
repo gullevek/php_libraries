@@ -1324,8 +1324,12 @@ class IO
 		// /s for matching new line in . list
 		// [disabled, we don't used ^ or $] /m for multi line match
 		// Matches in 1:, must be array_filtered to remove empty, count with array_unique
+		$query_split = '[(=,?-]|->|->>|#>|#>>|@>|<@|\?\|\?\&|\|\||#-';
 		preg_match_all(
-			'/(?:\'.*?\')?\s*(?:\?\?|<>|[(=,])\s*(?:\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))/s',
+			'/'
+			. '(?:\'.*?\')?\s*(?:\?\?|<>|' . $query_split . ')\s*'
+			. '(?:\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))'
+			. '/s',
 			$query,
 			$match
 		);
