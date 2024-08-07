@@ -1,7 +1,7 @@
 /* general edit javascript */
 /* jquery version */
 
-/* jshint esversion: 6 */
+/* jshint esversion: 11 */
 
 /* global i18n */
 

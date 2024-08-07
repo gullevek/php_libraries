@@ -24,35 +24,29 @@ declare(strict_types=1);
 // ];
 
 $__LOCAL_CONFIG = [
+	// db config selection
 	'db_host' => 'test',
+	// other db connections
+	// 'db_host_target' => '',
+	// 'db_host_other' => '',
+	// location flagging (test/dev/live) for debug output
 	'location' => 'test',
+	// show DEBUG override
 	'debug_level' => 'debug',
+	// site locale
 	'site_locale' => 'en_US.UTF-8',
+	// site encoding
 	'site_encoding' => 'UTF-8',
+	// enable/disable login override
 	'login_enabled' => true
 ];
 
 // each host has a different db_host
 $SITE_CONFIG = [
 	// development host
-	'soba.tokyo.tequila.jp' => [
-		// db config selection
-		'db_host' => 'test',
-		// other db connections
-		// 'db_host_target' => '',
-		// 'db_host_other' => '',
-		// location flagging (test/dev/live) for debug output
-		'location' => 'test',
-		// show DEBUG override
-		'debug_level' => 'debug',
-		// site locale
-		'site_locale' => 'en_US.UTF-8',
-		// site encoding
-		'site_encoding' => 'UTF-8',
-		// enable/disable login override
-		'login_enabled' => true
-	],
+	'soba.tokyo.tequila.jp' => $__LOCAL_CONFIG,
 	// 'other.host.com' => $__LOCAL_CONFIG
+	'soba.egplusww.jp' => $__LOCAL_CONFIG,
 	'soba-dev.tequila.jp' => $__LOCAL_CONFIG,
 	'soba.tequila.jp' => $__LOCAL_CONFIG,
 	'soba.teq.jp' => $__LOCAL_CONFIG,
