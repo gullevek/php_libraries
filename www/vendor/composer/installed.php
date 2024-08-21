@@ -29,9 +29,9 @@
             'dev_requirement' => false,
         ),
         'gullevek/dotenv' => array(
-            'pretty_version' => 'v2.0.8',
-            'version' => '2.0.8.0',
-            'reference' => 'e29f9fcd8853a09bb89b0eb8ee555b754ecee36e',
+            'pretty_version' => 'v2.1.0',
+            'version' => '2.1.0.0',
+            'reference' => 'b9feacaded4e48effff9da7d1173752aef3dc27f',
             'type' => 'library',
             'install_path' => __DIR__ . '/../gullevek/dotenv',
             'aliases' => array(),
