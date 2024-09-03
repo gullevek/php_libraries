@@ -134,6 +134,18 @@ class Strings
 			$path
 		) ?? $path;
 	}
+
+	/**
+	 * Remove UTF8 BOM Byte string from line
+	 * Note: this is often found in CSV files exported from Excel at the first row, first element
+	 *
+	 * @param  string $text
+	 * @return string
+	 */
+	public static function stripUTF8BomBytes(string $text): string
+	{
+		return trim($text, pack('H*', 'EFBBBF'));
+	}
 }
 
 // __END__

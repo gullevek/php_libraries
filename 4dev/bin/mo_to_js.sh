@@ -2,16 +2,18 @@
 
 # read source mo files and writes target js files in object form
 
-# check for ARG 1 is "mv"
-# then move the files directly and don't do manual check (don't create temp files)
-FILE_MOVE=0;
-if [ "${1}" = "mv" ]; then
+# check for ARG 1 is "no-move"
+# then do not move the files directly for manual check
+FILE_MOVE=1;
+if [ "${1}" = "no-move" ]; then
+	echo "+++ CREATE TEMPORARY FILES +++";
+	FILE_MOVE=0;
+else
 	echo "*** Direct write ***";
-	FILE_MOVE=1;
 fi;
 
 target='';
-BASE_FOLDER=$(dirname $(readlink -f $0))"/";
+BASE_FOLDER=$(dirname "$(readlink -f "$0")")"/";
 # Assume script is in 4dev/bin
 base_folder="${BASE_FOLDER}../../www/";
 po_folder='../4dev/locale/'
@@ -26,7 +28,7 @@ if [ "${target}" == '' ]; then
 	echo "*** Non smarty ***";
 	TEXTDOMAINDIR=${base_folder}${mo_folder}.
 	# default is admin
-	TEXTDOMAIN=admin;
+	TEXTDOMAIN="admin";
 fi;
 js_folder="${TEXTDOMAIN}/layout/javascript/";
 
@@ -44,15 +46,16 @@ if [ ${error} -eq 1 ]; then
 fi;
 
 # locale gettext po to mo translator master
-for file in $(ls -1 ${base_folder}../4dev/locale/*.po); do
-	file=$(basename $file .po);
-	echo "Translate language ${file}";
+for file in "${base_folder}"../4dev/locale/*.po; do
+	[[ -e "$file" ]] || break
+	file=$(basename "$file" .po);
 	locale=$(echo "${file}" | cut -d "-" -f 1);
 	domain=$(echo "${file}" | cut -d "-" -f 2);
+	echo "- Translate language file '${file}' for locale '${locale}' and domain '${domain}':";
 	if [ ! -d "${base_folder}/includes/locale/${locale}/LC_MESSAGES/" ]; then
 		mkdir -p "${base_folder}/includes/locale/${locale}/LC_MESSAGES/";
 	fi;
-	msgfmt -o ${base_folder}/includes/locale/${locale}/LC_MESSAGES/${domain}.mo ${base_folder}${po_folder}${locale}-${domain}.po;
+	msgfmt -o "${base_folder}/includes/locale/${locale}/LC_MESSAGES/${domain}.mo" "${base_folder}${po_folder}${locale}-${domain}.po";
 done;
 
 rx_msgid_empty="^msgid \"\"";
@@ -62,7 +65,7 @@ rx_msgstr="^msgstr \""
 # quick copy string at the end
 quick_copy='';
 
-for language in ${language_list[*]}; do
+for language in "${language_list[@]}"; do
 	# I don't know which one must be set, but I think at least LANGUAGE
 	case ${language} in
 		ja)
@@ -79,7 +82,8 @@ for language in ${language_list[*]}; do
 	esac;
 	# write only one for language and then symlink files
 	template_file=$(echo ${template_file_stump} | sed -e "s/##SUFFIX##//" | sed -e "s/##LANGUAGE##/${LANG}/");
-	original_file=$(echo ${template_file} | sed -e 's/\.TMP//g');
+	# original_file=$(echo ${template_file} | sed -e 's/\.TMP//g');
+	original_file=${template_file//.TMP/};
 	if [ "${FILE_MOVE}" -eq 0 ]; then
 		file=${target_folder}${template_file};
 	else
@@ -88,16 +92,18 @@ for language in ${language_list[*]}; do
 	echo "===> Write translation file ${file}";
 	echo ". = normal, : = escape, x = skip";
 	# init line [aka don't touch this file]
-	echo "// AUTO FILL, changes will be overwritten" > $file;
-	echo "// source: ${suffix}, language: ${language}" >> $file;
-	echo "// Translation strings in the format" >> $file;
-	echo "// \"Original\":\"Translated\""$'\n' >> $file;
-	echo "var i18n = {" >> $file;
+	echo "// AUTO FILL, changes will be overwritten" > "$file";
+	{
+		echo "// source: ${suffix}, language: ${language}";
+		echo "// Translation strings in the format";
+		echo "// \"Original\":\"Translated\""$'\n'
+		echo "var i18n = {"
+	}  >> "$file"
 	# translations stuff
 	# read the po file
 	pos=0; # do we add a , for the next line
 	cat "${base_folder}${po_folder}${language}-${TEXTDOMAIN}.po" |
-	while read str; do
+	while read -r str; do
 		# echo "S: ${str}";
 		# skip empty
 		if [[ "${str}" =~ ${rx_msgid_empty} ]]; then
@@ -112,12 +118,13 @@ for language in ${language_list[*]}; do
 			str_source=$(echo "${str}" | sed -e "s/^msgid \"//" | sed -e "s/\"$//");
 			# close right side, if not last add ,
 			if [ "${pos}" -eq 1 ]; then
-				echo -n "," >> $file;
+				echo -n "," >> "$file";
 			fi;
 			# all " inside string need to be escaped
-			str_source=$(echo "${str_source}" | sed -e 's/"/\\"/g');
+			# str_source=$(echo "${str_source}" | sed -e 's/"/\\"/g');
+			str_source=${str_source//\"/\\\"}
 			# fix with proper layout
-			echo -n "\"$str_source\":\"$(TEXTDOMAINDIR=${TEXTDOMAINDIR} LANGUAGE=${language} LANG=${LANG} gettext ${TEXTDOMAIN} "${str_source}")\"" >> $file;
+			echo -n "\"$str_source\":\"$(TEXTDOMAINDIR=${TEXTDOMAINDIR} LANGUAGE=${language} LANG=${LANG} gettext "${TEXTDOMAIN}" "${str_source}")\"" >> "$file";
 			pos=1;
 		elif [[ "${str}" =~ ${rx_msgstr} ]]; then
 			# open right side (ignore)
@@ -128,8 +135,8 @@ for language in ${language_list[*]}; do
 		fi;
 	done;
 
-	echo "" >> $file;
-	echo "};" >> $file;
+	echo "" >> "$file";
+	echo "};" >> "$file";
 	echo " [DONE]";
 
 	# on no move
@@ -140,19 +147,19 @@ for language in ${language_list[*]}; do
 	fi;
 
 	# symlink to master file
-	for suffix in ${source_list[*]}; do
+	for suffix in "${source_list[@]}"; do
 		# symlink with full lang name
 		symlink_file[0]=$(echo ${template_file_stump} | sed -e "s/##SUFFIX##/${suffix}_/" | sed -e "s/##LANGUAGE##/${LANG}/" | sed -e 's/\.TMP//g');
 		# create second one with lang (no country) + encoding
 		symlink_file[1]=$(echo ${template_file_stump} | sed -e "s/##SUFFIX##/${suffix}_/" | sed -e "s/##LANGUAGE##/${LANGUAGE}\.${ENCODING}/" | sed -e 's/\.TMP//g');
-		for template_file in ${symlink_file[@]}; do
+		for template_file in "${symlink_file[@]}"; do
 		# if this is not symlink, create them
 			if [ ! -h "${template_file}" ]; then
 				echo "Create symlink: ${template_file}";
 				# symlik to original
-				cd "${target_folder}";
+				cd "${target_folder}" || exit;
 				ln -sf "${original_file}" "${template_file}";
-				cd - >/dev/null;
+				cd - >/dev/null || exit;
 			fi;
 		done;
 	done;

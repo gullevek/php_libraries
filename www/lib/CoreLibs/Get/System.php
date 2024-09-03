@@ -116,6 +116,29 @@ class System
 			3
 		) === 'cli' ? true : false;
 	}
+
+	/**
+	 * Collect all IP addresses
+	 * REMOTE_ADDR, HTTP_X_FORWARD_FOR, CLIENT_IP
+	 * and retuns them in an array with index of io source
+	 * if address source has addresses with "," will add "-array" with these as array block
+	 *
+	 * @return array
+	 */
+	public static function getIpAddresses(): array
+	{
+		$ip_addr = [];
+		foreach (['REMOTE_ADDR', 'HTTP_X_FORWARDED_FOR', 'CLIENT_IP'] as $_ip_source) {
+			if (!empty($_SERVER[$_ip_source])) {
+				$ip_addr[$_ip_source] = $_SERVER[$_ip_source];
+				// same level as ARRAY IF there is a , inside
+				if (strstr($_SERVER[$_ip_source], ',') !== false) {
+					$ip_addr[$_ip_source . '-array'] = explode(',', $_SERVER[$_ip_source]);
+				}
+			}
+		}
+		return $ip_addr;
+	}
 }
 
 // __END__

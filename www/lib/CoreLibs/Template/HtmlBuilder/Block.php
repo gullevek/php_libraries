@@ -19,7 +19,7 @@ use CoreLibs\Template\HtmlBuilder\General\HtmlBuilderExcpetion;
 class Block
 {
 	/**
-	 * Undocumented function
+	 * Create Element
 	 *
 	 * @param  string $tag
 	 * @param  string $id
@@ -86,7 +86,7 @@ class Block
 	}
 
 	/**
-	 * Undocumented function
+	 * Add multiple elements to the base element
 	 *
 	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $base
 	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} ...$attach
@@ -101,7 +101,7 @@ class Block
 	}
 
 	/**
-	 * Undocumented function
+	 * Add multiple sub elements to the base element
 	 *
 	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $element
 	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $sub
@@ -117,7 +117,7 @@ class Block
 	}
 
 	/**
-	 * Undocumented function
+	 * Remove all sub element entries
 	 *
 	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $element
 	 * @return array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}
@@ -131,7 +131,7 @@ class Block
 	// CSS Elements
 
 	/**
-	 * Undocumented function
+	 * Add css entry to the css entries
 	 *
 	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $element
 	 * @param  string ...$css
@@ -144,7 +144,7 @@ class Block
 	}
 
 	/**
-	 * Undocumented function
+	 * Remove a css entry entry from the css array
 	 *
 	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $element
 	 * @param  string ...$css
@@ -157,7 +157,7 @@ class Block
 	}
 
 	/**
-	 * Undocumented function
+	 * Switch CSS entries
 	 * scssel (switch) is not supported
 	 * use rcssel -> acssel
 	 *
@@ -175,7 +175,7 @@ class Block
 	}
 
 	/**
-	 * Undocumented function
+	 * Build HTML from the content tree
 	 * alias phfo
 	 *
 	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $tree
@@ -231,7 +231,23 @@ class Block
 	}
 
 	/**
-	 * Undocumented function
+	 * Alias for phfo
+	 *
+	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $tree
+	 * @param  bool         $add_nl [default=false]
+	 * @return string
+	 *
+	 * @param  array  $tree
+	 * @param  bool   $add_nl
+	 * @return string
+	 */
+	public static function phfo(array $tree, bool $add_nl = false): string
+	{
+		return self::buildHtml($tree, $add_nl);
+	}
+
+	/**
+	 * Build HTML elements from an array of elements
 	 * alias phfa
 	 *
 	 * @param  array<array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}> $list
@@ -248,8 +264,7 @@ class Block
 	}
 
 	/**
-	 * Undocumented function
-	 * wrapper for buildHtmlFromList
+	 * alias for buildHtmlFromList
 	 *
 	 * @param  array<array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>}> $list                   array of Elements to build string from
 	 * @param  bool           $add_nl [default=false] Optional output string line break

@@ -2402,7 +2402,7 @@ class IO
 				// flag if we have cache data stored at the moment
 				'cached' => false,
 				// when fetch array or cache read returns false
-				// in loop read that means dbReturn retuns false without erro
+				// in loop read that means dbReturn retuns false without error
 				'finished' => false,
 				 // read from cache/db (pos == rows)
 				'read_finished' => false,
