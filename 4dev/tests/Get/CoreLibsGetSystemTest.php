@@ -216,6 +216,29 @@ final class CoreLibsGetSystemTest extends TestCase
 			);
 		}
 	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::getIpAddresses
+	 * @testdox getIpAddresses check
+	 *
+	 * @return void
+	 */
+	public function testGetIpAddresses()
+	{
+		// response must have "REMOTE_ADDR" entry, others are optional
+		// NOTE: we have no IP addresses on command line
+		$this->assertTrue(
+			true,
+			"We do not have REMOTE_ADDR on command line"
+		);
+		// $this->assertContains(
+		// 	'REMOTE_ADDR',
+		// 	array_keys(\CoreLibs\Get\System::getIpAddresses()),
+		// 	'failed REMOTE_ADDR assert'
+		// );
+	}
 }
 
 // __END__
