@@ -13,6 +13,8 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsConvertStringsTest extends TestCase
 {
+	private const DATA_FOLDER = __DIR__ . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR;
+
 	/**
 	 * Undocumented function
 	 *
@@ -328,6 +330,52 @@ final class CoreLibsConvertStringsTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Strings::stripMultiplePathSlashes($input)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerStripUTF8BomBytes(): array
+	{
+		return [
+			"utf8-bom" => [
+				"file" => "UTF8BOM.csv",
+				"expect" => "Asset Type,Epic,File Name\n",
+			],
+			"utf8" => [
+				"file" => "UTF8.csv",
+				"expect" => "Asset Type,Epic,File Name\n",
+			],
+		];
+	}
+
+	/**
+	 * test utf8 bom remove
+	 *
+	 * @covers ::stripUTF8BomBytes
+	 * @dataProvider providerStripUTF8BomBytes
+	 * @testdox stripUTF8BomBytes $file will be $expected [$_dataName]
+	 *
+	 * @param  string $file
+	 * @param  string $expected
+	 * @return void
+	 */
+	public function testStripUTF8BomBytes(string $file, string $expected): void
+	{
+		// load sample file
+		if (!is_file(self::DATA_FOLDER . $file)) {
+			$this->markTestSkipped('File: ' . $file . ' could not be opened');
+		}
+		$file = file_get_contents(self::DATA_FOLDER . $file);
+		if ($file === false) {
+			$this->markTestSkipped('File: ' . $file . ' could not be read');
+		}
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Convert\Strings::stripUTF8BomBytes($file)
 		);
 	}
 }

@@ -203,7 +203,8 @@ class SmartyExtend extends \Smarty
 		_bind_textdomain_codeset($this->domain, $this->encoding);
 
 		// register smarty variable
-		$this->registerPlugin('modifier', 'getvar', [&$this, 'getTemplateVars']);
+		// $this->registerPlugin(\Smarty\Smarty::PLUGIN_MODIFIER, 'getvar', [&$this, 'getTemplateVars']);
+		$this->registerPlugin(self::PLUGIN_MODIFIER, 'getvar', [&$this, 'getTemplateVars']);
 
 		$this->page_name = \CoreLibs\Get\System::getPageName();
 
