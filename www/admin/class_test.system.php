@@ -41,7 +41,7 @@ print "GETPAGENAME(0): " . System::getPageName() . "<br>";
 print "GETPAGENAME(1): " . System::getPageName(System::NO_EXTENSION) . "<br>";
 print "GETPAGENAME(2): " . System::getPageName(System::FULL_PATH) . "<br>";
 print "System::getPageNameArray():<br>";
-print "GETPAGENAMEARRAY: " . \CoreLibs\Debug\Support::printAr(System::getPageNameArray()) . "<br>";
+print "GETPAGENAMEARRAY: " . DgS::printAr(System::getPageNameArray()) . "<br>";
 // seting errro codes file upload
 print "System::fileUploadErrorMessage():<br>";
 print "FILEUPLOADERRORMESSAGE(): " . System::fileUploadErrorMessage(-1) . "<br>";
@@ -50,5 +50,7 @@ print "FILEUPLOADERRORMESSAGE(UPLOAD_ERR_CANT_WRITE): "
 
 print "System::checkCLI():<br>";
 print "Are we in an CLI: " . (System::checkCLI() ? 'Yes' : 'No') . "<br>";
+
+print "Get Addresses: " . DgS::printAr(System::getIpAddresses()) . "<br>";
 
 print "</body></html>";
