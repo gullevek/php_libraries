@@ -123,7 +123,7 @@ class System
 	 * and retuns them in an array with index of io source
 	 * if address source has addresses with "," will add "-array" with these as array block
 	 *
-	 * @return array
+	 * @return array<string,string|array<string>>
 	 */
 	public static function getIpAddresses(): array
 	{

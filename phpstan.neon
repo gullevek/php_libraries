@@ -39,9 +39,9 @@ parameters:
 		- www/vendor
 	# ignore errores with
 	ignoreErrors:
-		- # in the class_test tree we allow deprecated calls
-			message: "#^Call to deprecated method #"
-			path: %currentWorkingDirectory%/www/admin/class_test.*.php
+		# - # in the class_test tree we allow deprecated calls
+		# 	message: "#^Call to deprecated method #"
+		# 	path: %currentWorkingDirectory%/www/admin/class_test.*.php
 		# - '#Expression in empty\(\) is always falsy.#'
 		# -
 		# 	message: '#Reflection error: [a-zA-Z0-9\\_]+ not found.#'

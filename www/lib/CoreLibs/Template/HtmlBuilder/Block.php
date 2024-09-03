@@ -236,10 +236,6 @@ class Block
 	 * @param  array{tag:string,id:string,name:string,content:string,css:array<string>,options:array<string,string>,sub:array<mixed>} $tree
 	 * @param  bool         $add_nl [default=false]
 	 * @return string
-	 *
-	 * @param  array  $tree
-	 * @param  bool   $add_nl
-	 * @return string
 	 */
 	public static function phfo(array $tree, bool $add_nl = false): string
 	{
