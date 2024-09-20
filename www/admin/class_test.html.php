@@ -42,6 +42,7 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $string = "Something < = > Other <br> Next line and Quotes '\"";
 echo "String: <pre>$string</pre><br>";
+$log->debug('HTMLENT', Html::htmlent($string));
 print "HTMLENT: " . Html::htmlent($string) . ": " . $_html->htmlent($string) . " (" . htmlentities($string) . ")<br>";
 print "REMOVELB: " . Html::htmlent($string) . ": " . $_html->removeLB($string) . "<br>";
 $date_str = [2021, 5, 1, 11, 10];
