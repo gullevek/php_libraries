@@ -39,6 +39,11 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'OK',
 				'expected' => 'ok',
 			],
+			'success' => [
+				'level' => 'success',
+				'str' => 'SUCCESS',
+				'expected' => 'success',
+			],
 			'info' => [
 				'level' => 'info',
 				'str' => 'INFO',

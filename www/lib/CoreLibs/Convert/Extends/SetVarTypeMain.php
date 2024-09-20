@@ -52,7 +52,7 @@ class SetVarTypeMain
 	 */
 	protected static function makeStrMain(
 		mixed $val,
-		string $default = null,
+		?string $default = null,
 		bool $to_null = false
 	): ?string {
 		// int/float/string/bool/null, everything else is ignored
@@ -113,7 +113,7 @@ class SetVarTypeMain
 	 */
 	protected static function makeIntMain(
 		mixed $val,
-		int $default = null,
+		?int $default = null,
 		bool $to_null = false
 	): ?int {
 		// if we can filter it to a valid int, we can convert it
@@ -167,7 +167,7 @@ class SetVarTypeMain
 	 */
 	protected static function makeFloatMain(
 		mixed $val,
-		float $default = null,
+		?float $default = null,
 		bool $to_null = false
 	): ?float {
 		if (

@@ -1896,7 +1896,12 @@ class IO
 		$matches = [];
 		// compare has =, >, < prefix, and gets stripped
 		// if the rest is not X.Y format then error
-		preg_match("/^([<>=]{1,})(\d{1,})\.(\d{1,})/", $compare, $matches);
+		if (!preg_match("/^([<>=]{1,})(\d{1,})\.(\d{1,})/", $compare, $matches)) {
+			$this->log->error('Could not regex match compare version string', [
+				"compare" => $compare
+			]);
+			return false;
+		}
 		$compare = $matches[1];
 		$to_master = $matches[2];
 		$to_minor = $matches[3];
@@ -1908,11 +1913,18 @@ class IO
 		}
 		// db_version can return X.Y.Z
 		// we only compare the first two
-		preg_match(
-			"/^(\d{1,})\.(\d{1,})\.?(\d{1,})?/",
-			$this->dbVersion(),
-			$matches
-		);
+		if (
+			!preg_match(
+				"/^(\d{1,})\.(\d{1,})\.?(\d{1,})?/",
+				$this->dbVersion(),
+				$matches
+			)
+		) {
+			$this->log->error('Could not regex match dbVersion string', [
+				"dbVersion" => $this->dbVersion()
+			]);
+			return false;
+		}
 		$master = $matches[1];
 		$minor = $matches[2];
 		$version = $master . ($minor < 10 ? '0' : '') . $minor;

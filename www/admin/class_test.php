@@ -178,7 +178,7 @@ $log->debug('SOME MARK', 'Some error output');
 print "EDIT ACCESS ID: " . $backend->edit_access_id . "<br>";
 if (is_object($login)) {
 	//	print "ACL: <br>".$backend->print_ar($login->loginGetAcl())."<br>";
-	$log->debug('ACL', "ACL: " . \CoreLibs\Debug\Support::dumpVar($login->loginGetAcl()));
+	// $log->debug('ACL', "ACL: " . \CoreLibs\Debug\Support::dumpVar($login->loginGetAcl()));
 	//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
 	//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
 	// $result = array_flip(

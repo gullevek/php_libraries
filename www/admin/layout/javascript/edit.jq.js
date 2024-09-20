@@ -931,7 +931,7 @@ function rel(base) // eslint-disable-line no-unused-vars
 /**
  * searches and removes style from css array
  * @param  {Object} _element element to work one
- * @param  {String css      style sheet to remove (name)
+ * @param  {String} css      style sheet to remove (name)
  * @return {Object}          returns full element
  */
 function rcssel(_element, css)
