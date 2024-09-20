@@ -504,9 +504,9 @@ class Backend
 		string $data,
 		string $key_name,
 		string $key_value,
-		string $associate = null,
-		string $file = null,
-		string $db_schema = null,
+		?string $associate = null,
+		?string $file = null,
+		?string $db_schema = null,
 	): void {
 		/** @var string $DB_SCHEMA check schema */
 		$DB_SCHEMA = 'public';

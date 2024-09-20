@@ -90,7 +90,7 @@ class Basic
 	 * @deprecated DO NOT USE Class\Basic anymore. Use dedicated logger and sub classes
 	 */
 	public function __construct(
-		\CoreLibs\Logging\Logging $log = null,
+		?\CoreLibs\Logging\Logging $log = null,
 		?string $session_name = null
 	) {
 		trigger_error('Class \CoreLibs\Basic is deprected', E_USER_DEPRECATED);

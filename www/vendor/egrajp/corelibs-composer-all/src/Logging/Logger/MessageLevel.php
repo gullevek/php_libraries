@@ -14,6 +14,7 @@ namespace CoreLibs\Logging\Logger;
 enum MessageLevel: int
 {
 	case ok = 100;
+	case success = 110; // special for file uploads
 	case info = 200;
 	case notice = 250;
 	case warn = 300;
@@ -30,6 +31,7 @@ enum MessageLevel: int
 	{
 		return match (strtolower($name)) {
 			'ok' => self::ok,
+			'success' => self::success,
 			'info' => self::info,
 			'notice' => self::notice,
 			'warn', 'warning' => self::warn,

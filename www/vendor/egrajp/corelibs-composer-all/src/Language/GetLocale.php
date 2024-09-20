@@ -128,7 +128,7 @@ class GetLocale
 				$matches
 			)
 		) {
-			$lang = ($matches['lang'] ?? 'en')
+			$lang = $matches['lang']
 				// add country only if set
 				. (!empty($matches['country']) ? '_' . $matches['country'] : '');
 		} else {
@@ -235,7 +235,7 @@ class GetLocale
 				$matches
 			)
 		) {
-			$lang = ($matches['lang'] ?? 'en')
+			$lang = $matches['lang']
 				// add country only if set
 				. (!empty($matches['country']) ? '_' . $matches['country'] : '');
 		} else {

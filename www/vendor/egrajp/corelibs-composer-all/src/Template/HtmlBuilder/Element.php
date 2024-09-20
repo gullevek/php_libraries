@@ -401,7 +401,7 @@ class Element
 	 * @param  bool         $add_nl [default=false] Optional output string line breaks
 	 * @return string                               HTML as string
 	 */
-	public function buildHtml(Element $tree = null, bool $add_nl = false): string
+	public function buildHtml(?Element $tree = null, bool $add_nl = false): string
 	{
 		// print "D01: " . microtime(true) . "<br>";
 		if ($tree === null) {
@@ -533,7 +533,7 @@ class Element
 	 * @return string                           build html as string
 	 * @deprecated Do not use, use Element->buildHtml() instead
 	 */
-	public static function printHtmlFromObject(Element $tree = null, bool $add_nl = false): string
+	public static function printHtmlFromObject(?Element $tree = null, bool $add_nl = false): string
 	{
 		// nothing ->bad
 		if ($tree === null) {

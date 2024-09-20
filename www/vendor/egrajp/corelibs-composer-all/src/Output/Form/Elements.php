@@ -194,13 +194,13 @@ class Elements
 			"/(mailto:)?(\>)?\b([\w\.-]+)@([\w\.\-]+)\.([a-zA-Z]{2,4})\b(\|([^\||^#]+)(#([^\|]+))?\|)?/",
 			function ($matches) {
 				return self::createEmail(
-					$matches[1] ?? '',
-					$matches[2] ?? '',
-					$matches[3] ?? '',
-					$matches[4] ?? '',
-					$matches[5] ?? '',
+					$matches[1],
+					$matches[2],
+					$matches[3],
+					$matches[4],
+					$matches[5],
 					$matches[7] ?? '',
-					$matches[9] ?? ''
+					$matches[9] ?? '',
 				);
 			},
 			$output
