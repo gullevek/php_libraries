@@ -24,16 +24,20 @@ class ErrorMessage
 
 	/** @var bool $log_error global flag to log error level message */
 	private bool $log_error = false;
+	/** @var bool $log_warning global flat to log warning level messages */
+	private bool $log_warning = false;
 
 	/**
 	 * init ErrorMessage
 	 *
 	 * @param  \CoreLibs\Logging\Logging $log
 	 * @param  null|bool                 $log_error [=null], defaults to false if log is not level debug
+	 * @param  null|bool                 $log_warning [=null], defaults to false if log is not level debug
 	 */
 	public function __construct(
 		\CoreLibs\Logging\Logging $log,
-		?bool $log_error = null
+		?bool $log_error = null,
+		?bool $log_warning = null
 	) {
 		$this->log = $log;
 		// if log default logging is debug then log_error is default set to true
@@ -43,6 +47,13 @@ class ErrorMessage
 			$log_error = $log_error ?? false;
 		}
 		$this->log_error = $log_error;
+		// if log default logging is debug then log_warning is default set to true
+		if ($this->log->loggingLevelIsDebug() && $log_warning === null) {
+			$log_warning = true;
+		} else {
+			$log_warning = $log_warning ?? false;
+		}
+		$this->log_warning = $log_warning;
 	}
 
 	/**
@@ -81,6 +92,8 @@ class ErrorMessage
 	 * @param  array<mixed>  $context      Additionl info for abort/crash messages
 	 * @param  bool|null     $log_error    [=null] log level 'error' to error, if null use global,
 	 *                                     else set for this call only
+	 * @param  bool|null     $log_warning  [=null] log level 'warning' to warning, if null use global,
+	 *                                     else set for this call only
 	 */
 	public function setErrorMsg(
 		string $error_id,
@@ -93,9 +106,13 @@ class ErrorMessage
 		?string $message = null,
 		array $context = [],
 		?bool $log_error = null,
+		?bool $log_warning = null,
 	): void {
 		if ($log_error === null) {
 			$log_error = $this->log_error;
+		}
+		if ($log_warning === null) {
+			$log_warning = $this->log_warning;
 		}
 		$original_level = $level;
 		$level = MessageLevel::fromName($level)->name;
@@ -120,6 +137,14 @@ class ErrorMessage
 					'id' => $error_id,
 					'level' => $original_level,
 				], $context));
+				break;
+			case 'warn':
+				if ($log_warning) {
+					$this->log->warning($message ?? $str, array_merge([
+						'id' => $error_id,
+						'level' => $original_level,
+					], $context));
+				}
 				break;
 			case 'error':
 				if ($log_error) {
@@ -169,6 +194,8 @@ class ErrorMessage
 	 * @param  array<mixed>  $context      Additionl info for abort/crash messages
 	 * @param  bool|null     $log_error    [=null] log level 'error' to error, if null use global,
 	 *                                     else set for this call only
+	 * @param  bool|null     $log_warning  [=null] log level 'warning' to warning, if null use global,
+	 *                                     else set for this call only
 	 */
 	public function setMessage(
 		string $level,
@@ -181,6 +208,7 @@ class ErrorMessage
 		?string $message = null,
 		array $context = [],
 		?bool $log_error = null,
+		?bool $log_warning = null,
 	): void {
 		$this->setErrorMsg(
 			$error_id ?? '',
@@ -192,7 +220,8 @@ class ErrorMessage
 			$jump_target,
 			$message,
 			$context,
-			$log_error
+			$log_error,
+			$log_warning
 		);
 	}
 
@@ -313,6 +342,27 @@ class ErrorMessage
 	public function getFlagLogError(): bool
 	{
 		return $this->log_error;
+	}
+
+	/**
+	 * Set the log warning flag
+	 *
+	 * @param  bool $flag True to log level warning too, False for do not (Default)
+	 * @return void
+	 */
+	public function setFlagLogWarning(bool $flag): void
+	{
+		$this->log_warning = $flag;
+	}
+
+	/**
+	 * Get the current log error flag
+	 *
+	 * @return bool
+	 */
+	public function getFlagLogWarning(): bool
+	{
+		return $this->log_warning;
 	}
 }
 

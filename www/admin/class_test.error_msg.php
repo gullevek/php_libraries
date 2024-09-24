@@ -45,6 +45,8 @@ $em->setErrorMsg('123', 'error', 'msg this is bad, auto logged if debug');
 $em->setErrorMsg('123', 'error', 'msg this is bad, auto logged if debug', 'target-id', 'other-style');
 $em->setErrorMsg('123', 'error', 'msg this is bad, logged always', log_error:true);
 $em->setErrorMsg('123', 'error', 'msg this is bad, never logged', log_error:false);
+$em->setErrorMsg('500', 'warning', 'This is perhaps not super good, logged_always', log_warning:true);
+$em->setErrorMsg('500', 'warning', 'This is perhaps not super good, logged_never', log_warning:false);
 $em->setErrorMsg('1000', 'info', 'This is good');
 $em->setErrorMsg('9999', 'abort', 'BAD: This is critical (abort)');
 $em->setErrorMsg('10-1000', 'wrong', 'Wrong level: This is emergency');
