@@ -288,19 +288,31 @@ class Backend
 			case 'BINARY':
 			case 'BZIP':
 				$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($data)));
-				$data_write = 'see bzip compressed data_binary field';
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'BZIP',
+					'message' => 'see bzip compressed data_binary field'
+				]);
 				break;
 			case 'ZLIB':
 				$data_binary = $this->db->dbEscapeBytea((string)gzcompress(serialize($data)));
-				$data_write = 'see zlib compressed data_binary field';
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'ZLIB',
+					'message' => 'see zlib compressed data_binary field'
+				]);
 				break;
 			case 'STRING':
 			case 'SERIAL':
-				$data_binary = '';
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'SERIAL',
+					'message' => 'see serial string data field'
+				]));
 				$data_write = serialize($data);
 				break;
 			case 'JSON':
-				$data_binary = '';
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'JSON',
+					'message' => 'see json string data field'
+				]));
 				// must be converted to array
 				if (!is_array($data)) {
 					$data = ["data" => $data];
