@@ -172,7 +172,7 @@ class Backend
 		}
 
 		// queue key
-		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action)) {
+		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action ?? '')) {
 			$this->queue_key = \CoreLibs\Create\RandomKey::randomKeyGen(3);
 		}
 	}
@@ -282,14 +282,14 @@ class Backend
 				"NULL" :
 				"'" . $this->session->getSessionId() . "'")
 			. ", "
-			. "'" . $this->db->dbEscapeString($this->action) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_id) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_yes) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_flag) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_menu) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_loaded) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_value) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_error) . "')";
+			. "'" . $this->db->dbEscapeString($this->action ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($this->action_id ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($this->action_yes ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($this->action_flag ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($this->action_menu ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($this->action_loaded ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($this->action_value ?? '') . "', "
+			. "'" . $this->db->dbEscapeString($this->action_error ?? '') . "')";
 		$this->db->dbExec($q, 'NULL');
 	}
 
