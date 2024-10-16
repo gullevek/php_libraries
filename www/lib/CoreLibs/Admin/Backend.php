@@ -117,18 +117,20 @@ class Backend
 	/**
 	 * main class constructor
 	 *
-	 * @param \CoreLibs\DB\IO          $db      Database connection class
-	 * @param \CoreLibs\Logging\Logging  $log     Logging class
-	 * @param \CoreLibs\Create\Session $session Session interface class
-	 * @param \CoreLibs\Language\L10n  $l10n    l10n language class
-	 * @param int|null                 $set_default_acl_level Default ACL level
+	 * @param \CoreLibs\DB\IO           $db      Database connection class
+	 * @param \CoreLibs\Logging\Logging $log     Logging class
+	 * @param \CoreLibs\Create\Session  $session Session interface class
+	 * @param \CoreLibs\Language\L10n   $l10n    l10n language class
+	 * @param int|null                  $set_default_acl_level [default=null] Default ACL level
+	 * @param bool                      $init_action_vars [default=true] If the action vars should be set
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
 		\CoreLibs\Logging\Logging $log,
 		\CoreLibs\Create\Session $session,
 		\CoreLibs\Language\L10n $l10n,
-		?int $set_default_acl_level = null
+		?int $set_default_acl_level = null,
+		bool $init_action_vars = true
 	) {
 		// attach db class
 		$this->db = $db;
@@ -151,9 +153,9 @@ class Backend
 		// set the page name
 		$this->page_name = \CoreLibs\Get\System::getPageName();
 
-		// set the action ids
-		foreach ($this->action_list as $_action) {
-			$this->$_action = $_POST[$_action] ?? '';
+		// NOTE: if any of the "action" vars are used somewhere, it is recommended to NOT set them here
+		if ($init_action_vars) {
+			$this->adbSetActionVars();
 		}
 
 		if ($set_default_acl_level === null) {
@@ -193,6 +195,29 @@ class Backend
 	public function setACL(array $acl): void
 	{
 		$this->acl = $acl;
+	}
+
+	/**
+	 * Return current set ACL
+	 *
+	 * @return array<mixed>
+	 */
+	public function adbGetAcl(): array
+	{
+		return $this->acl;
+	}
+
+	/**
+	 * Set _POST action vars if needed
+	 *
+	 * @return void
+	 */
+	public function adbSetActionVars()
+	{
+		// set the action ids
+		foreach ($this->action_list as $_action) {
+			$this->$_action = $_POST[$_action] ?? '';
+		}
 	}
 
 	/**

@@ -61,6 +61,8 @@ print "ErrorsIds: <pre>" . $log->prAr($em->getErrorIds()) . "</pre>";
 print "Errors: <pre>" . $log->prAr($em->getErrorMsg()) . "</pre>";
 print "JumpTargets: <pre>" . $log->prAr($em->getJumpTarget()) . "</pre>";
 
+print "IS info > ok: " . ml::fromName('info')->isHigherThan(ml::ok) . "<br>";
+
 print "</body></html>";
 
 $log->debug('[END]', '==========================================>');
