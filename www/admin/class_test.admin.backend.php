@@ -55,7 +55,24 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 print "SETACL[]: <br>";
 $backend->setACL(['EMPTY' => 'EMPTY']);
 print "ADBEDITLOG: <br>";
-$backend->adbEditLog('CLASSTEST-ADMIN', 'Some info string');
+$backend->adbEditLog('CLASSTEST-ADMIN-BINARY', 'Some info string', 'BINARY');
+$backend->adbEditLog('CLASSTEST-ADMIN-SERIAL', 'Some info string', 'SERIAL');
+$backend->adbEditLog('CLASSTEST-ADMIN-JSON', 'Some info string', 'JSON');
+// test with various
+$backend->action = 'TEST ACTION';
+$backend->action_id = 'TEST ACTION ID';
+$backend->action_yes = 'TEST ACTION YES';
+$backend->action_flag = 'TEST ACTION FLAG';
+$backend->action_menu = 'TEST ACTION MENU';
+$backend->action_loaded = 'TEST ACTION LOADED';
+$backend->action_value = 'TEST ACTION VALUE';
+$backend->action_type = 'TEST ACTION TYPE';
+$backend->action_error = 'TEST ACTION ERROR';
+$backend->adbEditLog('CLASSTEST-ADMIN-JSON', [
+	"_GET" => $_GET,
+	"_POST" => $_POST,
+], 'JSON');
+
 print "ADBTOPMENU(0): " . Support::printAr($backend->adbTopMenu(CONTENT_PATH)) . "<br>";
 print "ADBMSG: <br>";
 $backend->adbMsg('info', 'Message: %1$d', [1]);
