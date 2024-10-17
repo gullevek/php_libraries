@@ -825,7 +825,6 @@ class IO
 			default:
 				// no context on DB_INFO
 				if ($id == 'DB_INFO') {
-					echo "DB INFO<br>";
 					$context = [];
 				}
 				// used named arguments so we can easy change the order of debug
