@@ -823,6 +823,11 @@ class IO
 				);
 				break;
 			default:
+				// no context on DB_INFO
+				if ($id == 'DB_INFO') {
+					echo "DB INFO<br>";
+					$context = [];
+				}
 				// used named arguments so we can easy change the order of debug
 				$this->log->debug(
 					group_id: $debug_id,
@@ -1814,14 +1819,13 @@ class IO
 		$html_tags = ['{b}', '{/b}', '{br}'];
 		$replace_html = ['<b>', '</b>', '<br>'];
 		$replace_text = ['', '', ' **** '];
-		$string = '';
-		$string .= '{b}-DB-info->{/b} Connected to db {b}\'' . $this->db_name . '\'{/b} ';
-		$string .= 'with schema {b}\'' . $this->db_schema . '\'{/b} ';
-		$string .= 'as user {b}\'' . $this->db_user . '\'{/b} ';
-		$string .= 'at host {b}\'' . $this->db_host . '\'{/b} ';
-		$string .= 'on port {b}\'' . $this->db_port . '\'{/b} ';
-		$string .= 'with ssl mode {b}\'' . $this->db_ssl . '\'{/b}{br}';
-		$string .= '{b}-DB-info->{/b} DB IO Class debug output: {b}'
+		$string = '{b}-DB-info->{/b} Connected to db {b}\'' . $this->db_name . '\'{/b} '
+			. 'with schema {b}\'' . $this->db_schema . '\'{/b} '
+			. 'as user {b}\'' . $this->db_user . '\'{/b} '
+			. 'at host {b}\'' . $this->db_host . '\'{/b} '
+			. 'on port {b}\'' . $this->db_port . '\'{/b} '
+			. 'with ssl mode {b}\'' . $this->db_ssl . '\'{/b}{br}'
+			. '{b}-DB-info->{/b} DB IO Class debug output: {b}'
 			. ($this->dbGetDebug() ? 'Yes' : 'No') . '{/b}';
 		if ($log === true) {
 			// if debug, remove / change b
@@ -1829,7 +1833,7 @@ class IO
 				$html_tags,
 				$replace_text,
 				$string
-			), 'dbInfo');
+			), 'DB_INFO');
 		} else {
 			$string = $string . '{br}';
 		}
@@ -1985,7 +1989,7 @@ class IO
 		if (is_array($array)) {
 			$this->nbsp = '';
 			$string .= $this->__printArray($array);
-			$this->__dbDebugMessage('db', $string, 'dbDumpData');
+			$this->__dbDebugMessage('db', $string, 'DB_INFO');
 		}
 		return $string;
 	}
