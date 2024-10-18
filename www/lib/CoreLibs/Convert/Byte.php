@@ -37,9 +37,9 @@ class Byte
 	 *                                 BYTE_FORMAT_ADJUST: sprintf adjusted two 2 decimals
 	 *                                 BYTE_FORMAT_SI: use 1000 instead of 1024
 	 * @return string                  converted byte number (float) with suffix
-	 * @throws \Exception               1: no valid flag set
+	 * @throws \InvalidArgumentException 1: no valid flag set
 	 */
-	public static function humanReadableByteFormat($bytes, int $flags = 0): string
+	public static function humanReadableByteFormat(string|int|float $bytes, int $flags = 0): string
 	{
 		// if not numeric, return as is
 		if (is_numeric($bytes)) {
@@ -63,7 +63,7 @@ class Byte
 				$si = false;
 			}
 			if ($flags > 7) {
-				throw new \Exception("Invalid flags parameter: $flags", 1);
+				throw new \InvalidArgumentException("Invalid flags parameter: $flags", 1);
 			}
 
 			// si or normal
@@ -119,9 +119,9 @@ class Byte
 	 * @param  int              $flags  bitwise flag with use space turned on
 	 *                                  BYTE_FORMAT_SI: use 1000 instead of 1024
 	 * @return string|int|float         converted value or original value
-	 * @throws \Exception                1: no valid flag set
+	 * @throws \InvalidArgumentException 1: no valid flag set
 	 */
-	public static function stringByteFormat($number, int $flags = 0)
+	public static function stringByteFormat(string|int|float $number, int $flags = 0): string|int|float
 	{
 		// use SI 1000 mod and not 1024 mod
 		if ($flags & self::BYTE_FORMAT_SI) {
@@ -130,7 +130,7 @@ class Byte
 			$si = false;
 		}
 		if ($flags != 0 && $flags != 4) {
-			throw new \Exception("Invalid flags parameter: $flags", 1);
+			throw new \InvalidArgumentException("Invalid flags parameter: $flags", 1);
 		}
 		// matches in regex
 		$matches = [];

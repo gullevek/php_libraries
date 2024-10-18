@@ -29,9 +29,9 @@ namespace CoreLibs\Language\Core;
 class CachedFileReader extends \CoreLibs\Language\Core\StringReader
 {
 	/** @var int */
-	public $error = 0;
+	public int $error = 0;
 	/** @var string */
-	public $fd_str = '';
+	public string $fd_str = '';
 
 	/**
 	 * Undocumented function
@@ -46,7 +46,7 @@ class CachedFileReader extends \CoreLibs\Language\Core\StringReader
 			if (!is_resource($fd)) {
 				$this->error = 3; // Cannot read file, probably permissions
 			} else {
-				$this->fd_str = fread($fd, filesize($filename) ?: 0) ?: '';
+				$this->fd_str = fread($fd, filesize($filename) ?: 1) ?: '';
 				fclose($fd);
 			}
 		} else {

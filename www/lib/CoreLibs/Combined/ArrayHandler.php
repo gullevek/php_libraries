@@ -21,12 +21,12 @@ class ArrayHandler
 	 *                                      the needle can be found in the
 	 *                                      haystack array
 	 */
-	public static function arraySearchRecursive($needle, array $haystack, ?string $key_search_for = null): array
-	{
+	public static function arraySearchRecursive(
+		string|int $needle,
+		array $haystack,
+		?string $key_search_for = null
+	): array {
 		$path = [];
-		if (!is_array($haystack)) {
-			$haystack = [];
-		}
 		if (
 			$key_search_for != null &&
 			array_key_exists($key_search_for, $haystack) &&
@@ -72,7 +72,7 @@ class ArrayHandler
 	 *
 	 * @param  string|int        $needle         needle (search for)
 	 * @param  array<mixed>      $haystack       haystack (search in)
-	 * @param  string|int        $key_search_for the key to look for in
+	 * @param  string|int|null   $key_search_for the key to look for in
 	 * @param  bool              $old            [true], if set to false will
 	 *                                           return new flat layout
 	 * @param  array<mixed>|null $path           recursive call for previous path
@@ -80,9 +80,9 @@ class ArrayHandler
 	 *                                           the element was found
 	 */
 	public static function arraySearchRecursiveAll(
-		$needle,
+		string|int $needle,
 		array $haystack,
-		$key_search_for,
+		string|int|null $key_search_for,
 		bool $old = true,
 		?array $path = null
 	): ?array {
@@ -100,10 +100,6 @@ class ArrayHandler
 			if (!isset($path['work'])) {
 				$path['work'] = [];
 			}
-		}
-		// should not be needed because it would trigger a php mehtod error
-		if (!is_array($haystack)) {
-			$haystack = [];
 		}
 
 		// go through the array,
@@ -152,17 +148,18 @@ class ArrayHandler
 	 * array search simple. looks for key, value combination, if found, returns true
 	 * on default does not strict check, so string '4' will match int 4 and vica versa
 	 *
-	 * @param  array<mixed> $array search in as array
-	 * @param  string|int  $key    key (key to search in)
-	 * @param  string|int  $value  value (what to find)
-	 * @param  bool        $strict [false], if set to true, will strict check key/value
-	 * @return bool                true on found, false on not found
+	 * @param  array<mixed>    $array search in as array
+	 * @param  string|int      $key    key (key to search in)
+	 * @param  string|int|bool $value  value (what to find)
+	 * @param  bool            $strict [false], if set to true, will strict check key/value
+	 * @return bool            true on found, false on not found
 	 */
-	public static function arraySearchSimple(array $array, $key, $value, bool $strict = false): bool
-	{
-		if (!is_array($array)) {
-			$array = [];
-		}
+	public static function arraySearchSimple(
+		array $array,
+		string|int $key,
+		string|int|bool $value,
+		bool $strict = false
+	): bool {
 		foreach ($array as $_key => $_value) {
 			// if value is an array, we search
 			if (is_array($_value)) {
@@ -181,6 +178,113 @@ class ArrayHandler
 	}
 
 	/**
+	 * search for one or many keys in array and return matching values
+	 * If flat is set to true, return flat array with found values only
+	 * If prefix is turned on each found group will be prefixed with the
+	 * search key
+	 *
+	 * @param  array<mixed> $array   array to search in
+	 * @param  array<mixed> $needles keys to find in array
+	 * @param  bool         $flat    [false] Turn on flat output
+	 * @param  bool         $prefix  [false] Prefix found with needle key
+	 * @return array<mixed>          Found values
+	 */
+	public static function arraySearchKey(
+		array $array,
+		array $needles,
+		bool $flat = false,
+		bool $prefix = false
+	): array {
+		$iterator  = new \RecursiveArrayIterator($array);
+		$recursive = new \RecursiveIteratorIterator(
+			$iterator,
+			\RecursiveIteratorIterator::SELF_FIRST
+		);
+		$hit_list = [];
+		if ($prefix === true) {
+			$hit_list = array_fill_keys($needles, []);
+		}
+		$key_path = [];
+		$prev_depth = 0;
+		foreach ($recursive as $key => $value) {
+			if ($prev_depth > $recursive->getDepth()) {
+				// remove all trailing to ne depth
+				$diff = $prev_depth - $recursive->getDepth();
+				array_splice($key_path, -$diff, $diff);
+			}
+			$prev_depth = $recursive->getDepth();
+			if ($flat === false) {
+				$key_path[$recursive->getDepth()] = $key;
+			}
+			if (in_array($key, $needles, true)) {
+				ksort($key_path);
+				if ($flat === true) {
+					$hit = $value;
+				} else {
+					$hit = [
+						'value' => $value,
+						'path' => $key_path
+					];
+				}
+				if ($prefix === true) {
+					$hit_list[$key][] = $hit;
+				} else {
+					$hit_list[] = $hit;
+				}
+			}
+		}
+		return $hit_list;
+	}
+
+	/**
+	 * main wrapper function for next/prev key
+	 *
+	 * @param  array<mixed>    $array array to search in
+	 * @param  int|string      $key   key for next/prev
+	 * @param  bool            $next  [=true] if to search next or prev
+	 * @return int|string|null        Next/prev key or null for end/first
+	 */
+	private static function arrayGetKey(array $array, int|string $key, bool $next = true): int|string|null
+	{
+		$keys = array_keys($array);
+		if (($position = array_search($key, $keys, true)) === false) {
+			return null;
+		}
+		$next_position = $next ? $position + 1 : $position - 1;
+
+		if (!isset($keys[$next_position])) {
+			return null;
+		}
+		return $keys[$next_position];
+	}
+
+	/**
+	 * Get previous array key from an array
+	 * null on not found
+	 *
+	 * @param  array<mixed>    $array
+	 * @param  int|string      $key
+	 * @return int|string|null        Next key, or null for not found
+	 */
+	public static function arrayGetPrevKey(array $array, int|string $key): int|string|null
+	{
+		return self::arrayGetKey($array, $key, false);
+	}
+
+	/**
+	 * Get next array key from an array
+	 * null on not found
+	 *
+	 * @param  array<mixed>    $array
+	 * @param  int|string      $key
+	 * @return int|string|null        Next key, or null for not found
+	 */
+	public static function arrayGetNextKey(array $array, int|string $key): int|string|null
+	{
+		return self::arrayGetKey($array, $key, true);
+	}
+
+	/**
 	 * correctly recursive merges as an array as array_merge_recursive
 	 * just glues things together
 	 *         array first array to merge
@@ -189,14 +293,13 @@ class ArrayHandler
 	 *         bool  key flag: true: handle keys as string or int
 	 *               default false: all keys are string
 	 *
-	 * @return array<mixed>|bool merged array
+	 * @return array<mixed> merged array
 	 */
-	public static function arrayMergeRecursive()
+	public static function arrayMergeRecursive(): array
 	{
 		// croak on not enough arguemnts (we need at least two)
 		if (func_num_args() < 2) {
-			trigger_error(__FUNCTION__ . ' needs two or more array arguments', E_USER_WARNING);
-			return false;
+			throw new \ArgumentCountError(__FUNCTION__ . ' needs two or more array arguments');
 		}
 		// default key is not string
 		$key_is_string = false;
@@ -209,15 +312,13 @@ class ArrayHandler
 		}
 		// check that arrays count is at least two, else we don't have enough to do anything
 		if (count($arrays) < 2) {
-			trigger_error(__FUNCTION__ . ' needs two or more array arguments', E_USER_WARNING);
-			return false;
+			throw new \ArgumentCountError(__FUNCTION__ . ' needs two or more array arguments');
 		}
 		$merged = [];
 		while ($arrays) {
 			$array = array_shift($arrays);
 			if (!is_array($array)) {
-				trigger_error(__FUNCTION__ . ' encountered a non array argument', E_USER_WARNING);
-				return false;
+				throw new \TypeError(__FUNCTION__ . ' encountered a non array argument');
 			}
 			if (!$array) {
 				continue;
@@ -264,10 +365,10 @@ class ArrayHandler
 	 * @param  array<mixed> $needle   elements to search for
 	 * @param  array<mixed> $haystack array where the $needle elements should
 	 *                                be searched int
-	 * @return array<mixed>|bool      either the found elements or
+	 * @return array<mixed>|false     either the found elements or
 	 *                                false for nothing found or error
 	 */
-	public static function inArrayAny(array $needle, array $haystack)
+	public static function inArrayAny(array $needle, array $haystack): array|false
 	{
 		$found = [];
 		foreach ($needle as $element) {
@@ -291,8 +392,12 @@ class ArrayHandler
 	 * @param  bool            $set_only flag to return all (default), or set only
 	 * @return array<mixed>              associative array
 	 */
-	public static function genAssocArray(array $db_array, $key, $value, bool $set_only = false): array
-	{
+	public static function genAssocArray(
+		array $db_array,
+		string|int|bool $key,
+		string|int|bool $value,
+		bool $set_only = false
+	): array {
 		$ret_array = [];
 		// do this to only run count once
 		for ($i = 0, $iMax = count($db_array); $i < $iMax; $i++) {
@@ -385,11 +490,8 @@ class ArrayHandler
 	 *                              and will be pushed up
 	 * @return array<mixed>         modified, flattened array
 	 */
-	public static function arrayFlatForKey(array $array, $search): array
+	public static function arrayFlatForKey(array $array, string|int $search): array
 	{
-		if (!is_array($array)) {
-			$array = [];
-		}
 		foreach ($array as $key => $value) {
 			// if it is not an array do just nothing
 			if (!is_array($value)) {
@@ -406,6 +508,22 @@ class ArrayHandler
 			}
 		}
 		return $array;
+	}
+
+	/**
+	 * Remove entries from a simple array, will not keep key order
+	 *
+	 * any array content is allowed
+	 *
+	 * https://stackoverflow.com/a/369608
+	 *
+	 * @param  array<mixed> $array  Array where elements are located
+	 * @param  array<mixed> $remove Elements to remove
+	 * @return array<mixed>         Array with $remove elements removed
+	 */
+	public static function arrayRemoveEntry(array $array, array $remove): array
+	{
+		return array_diff($array, $remove);
 	}
 }
 

@@ -11,45 +11,36 @@ For local install only
 
 ## Setup from central composer
 
-| Host | Location | Type |
-| - | - | - |
-| composer.tokyo.tequila.jp | soba-local | Local test |
-| composer-local.tokyo.tequila.jp | udon-local | Local Live, no https |
-| composer.egplusww.jp | udon | General Live (use this) |
+Setup from gitea internal servers
 
-composer.json:
-
-For Local test, note that secure-http has to be turned off:
-
-```json
-{
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "http://composer.tokyo.tequila.jp"
-        }
-    ],
-    "require": {
-        "egrajp/smarty-extended": "@dev"
-    },
-    "config": {
-        "secure-http": false
-    }
-}
+```sh
+composer config repositories.git.egplusww.jp.Composer composer https://git.egplusww.jp/api/packages/Composer/composer
 ```
 
-For live settings
+Alternative setup composer local zip file repot:
+`composer config repositories.composer.egplusww.jp composer http://composer.egplusww.jp`
 
-```json
-{
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://composer.egplusww.jp"
-        }
-    ],
-    "require": {
-        "egrajp/smarty-extended": "@dev"
-    }
-}
-```
+## Install package
+
+`composer require egrajp/smarty-extended:^4.3`
+
+## How to update
+
+1) update the original composer for ^4.3
+2) copy over the src/sysplugins and all base files in src/
+3) check either function.html_checkboxes.php and function.html_options.php have changed
+4) copy src/plugins except the above two files, be sure to keep the block.t.php and function_popup*.php
+5) Create new release version as official relase number
+
+## Updated files (different from master)
+
+### New
+
+`src/plugins/block.t.php`
+`src/plugins/function_popup.php`
+`src/plugins/function_popup.init.php`
+
+### Changed
+
+`src/plugins/function.html_checkboxes.php`
+`src/plugins/function.html_options.php`

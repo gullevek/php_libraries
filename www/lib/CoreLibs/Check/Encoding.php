@@ -11,7 +11,7 @@ namespace CoreLibs\Check;
 class Encoding
 {
 	/** @var int<min, -1>|int<1, max>|string */
-	private static $mb_error_char = '';
+	private static int|string $mb_error_char = '';
 
 	/**
 	 * set error char
@@ -25,7 +25,7 @@ class Encoding
 	 *                                 if null is set then "none"
 	 * @return void
 	 */
-	public static function setErrorChar($string): void
+	public static function setErrorChar(string|int|null $string): void
 	{
 		if (empty($string)) {
 			$string = 'none';
@@ -52,7 +52,7 @@ class Encoding
 	 *                                      directly
 	 * @return string|int Set error character
 	 */
-	public static function getErrorChar(bool $return_substitute_func = false)
+	public static function getErrorChar(bool $return_substitute_func = false): string|int
 	{
 		// return mb_substitute_character();
 		if ($return_substitute_func === true) {
@@ -78,39 +78,38 @@ class Encoding
 	 * @param  string     $string        string to test
 	 * @param  string     $from_encoding encoding of string to test
 	 * @param  string     $to_encoding   target encoding
-	 * @return bool|array<string>        false if no error or
+	 * @return array<string>|false       false if no error or
 	 *                                   array with failed characters
 	 */
 	public static function checkConvertEncoding(
 		string $string,
 		string $from_encoding,
 		string $to_encoding
-	) {
+	): array|false {
 		// convert to target encoding and convert back
 		$temp = mb_convert_encoding($string, $to_encoding, $from_encoding);
 		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);
 		// if string does not match anymore we have a convert problem
-		if ($string != $compare) {
-			$failed = [];
-			// go through each character and find the ones that do not match
-			for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i++) {
-				$char = mb_substr($string, $i, 1, $from_encoding);
-				$r_char = mb_substr($compare, $i, 1, $from_encoding);
-				// the ord 194 is a hack to fix the IE7/IE8
-				// bug with line break and illegal character
-				if (
-					(($char != $r_char && (!self::$mb_error_char ||
-					in_array(self::$mb_error_char, ['none', 'long', 'entity']))) ||
-					($char != $r_char && $r_char == self::$mb_error_char && self::$mb_error_char)) &&
-					ord($char) != 194
-				) {
-					$failed[] = $char;
-				}
-			}
-			return $failed;
-		} else {
+		if ($string == $compare) {
 			return false;
 		}
+		$failed = [];
+		// go through each character and find the ones that do not match
+		for ($i = 0, $iMax = mb_strlen($string, $from_encoding); $i < $iMax; $i++) {
+			$char = mb_substr($string, $i, 1, $from_encoding);
+			$r_char = mb_substr($compare, $i, 1, $from_encoding);
+			// the ord 194 is a hack to fix the IE7/IE8
+			// bug with line break and illegal character
+			if (
+				(($char != $r_char && (!self::$mb_error_char ||
+				in_array(self::$mb_error_char, ['none', 'long', 'entity']))) ||
+				($char != $r_char && $r_char == self::$mb_error_char && self::$mb_error_char)) &&
+				ord($char) != 194
+			) {
+				$failed[] = $char;
+			}
+		}
+		return $failed;
 	}
 }
 

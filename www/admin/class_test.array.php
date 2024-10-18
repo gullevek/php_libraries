@@ -6,14 +6,7 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
-
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -27,23 +20,20 @@ ob_end_flush();
 
 use CoreLibs\Combined\ArrayHandler;
 use CoreLibs\Debug\Support as DgS;
+use CoreLibs\Convert\SetVarType;
+// use PHPUnit\Framework\Constraint\ArrayHasKey;
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 // $_array = new CoreLibs\Combined\ArrayHandler();
 // $array_class = 'CoreLibs\Combination\ArrayHandler';
 
 $PAGE_NAME = 'TEST CLASS: ARRAY HANDLER';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
@@ -92,7 +82,9 @@ $array_3 = [
 	]
 ];
 // recusrice merge
-print "ARRAYMERGERECURSIVE: " . DgS::printAr(ArrayHandler::arrayMergeRecursive($array_1, $array_2, $array_3)) . "<br>";
+print "ARRAYMERGERECURSIVE: " . DgS::printAr(SetVarType::setArray(
+	ArrayHandler::arrayMergeRecursive($array_1, $array_2, $array_3)
+)) . "<br>";
 // array difference
 $array_left = [
 	'same' => 'data',
@@ -104,7 +96,9 @@ $array_right = [
 ];
 print "ARRAYDIFF: " . DgS::printAr(ArrayHandler::arrayDiff($array_left, $array_right)) . "<br>";
 // in array check
-print "INARRAYANY([1,3], [array]): " . DgS::printAr(ArrayHandler::inArrayAny([1, 3], $array_2)) . "<br>";
+print "INARRAYANY([1,3], [array]): " . DgS::printAr(SetVarType::setArray(
+	ArrayHandler::inArrayAny([1, 3], $array_2)
+)) . "<br>";
 // flatten array
 print "FLATTENARRAY: " . DgS::printAr(ArrayHandler::flattenArray($test_array)) . "<br>";
 print "FLATTENARRAYKEY: " . DgS::printAr(ArrayHandler::flattenArrayKey($test_array)) . "<br>";
@@ -114,10 +108,10 @@ print "ARRAYFLATFORKEY: " . DgS::printAr(ArrayHandler::arrayFlatForKey($test_arr
 /**
  * attach key/value to an array so it becomes nested
  *
- * @param string $pre  Attach to new (empty for new root node)
- * @param string $cur  New node
- * @param array  $node Previous created array
- * @return array       Updated array
+ * @param string       $pre  Attach to new (empty for new root node)
+ * @param string       $cur  New node
+ * @param array<mixed> $node Previous created array
+ * @return array<mixed>      Updated array
  */
 function rec(string $pre, string $cur, array $node = [])
 {
@@ -145,6 +139,38 @@ function rec(string $pre, string $cur, array $node = [])
 	}
 	return $node;
 }
+
+$data = [
+	'image' => 'foo',
+	'element' => 'w-1',
+	'rotate' => 360,
+	'html' => [
+		'image' => 'bar',
+		'result_image' => 'baz',
+		'rule' => 'wrong'
+	],
+	[
+		'image' => 'large'
+	],
+	[
+		'nothing' => 'wrong'
+	],
+	'nest' => [
+		'nust' => [
+			'nist' =>  [
+				'foo' => 'bar',
+				'image' => 'long, long'
+			]
+		]
+	],
+	's' => [
+		'image' => 'path?'
+	],
+];
+
+$search = ['image', 'result_image', 'nothing', 'EMPTY'];
+$result = ArrayHandler::arraySearchKey($data, $search);
+print "ARRAYSEARCHKEY: Search: " . DgS::printAr($search) . ", Found: " . DgS::printAr($result) . "<br>";
 
 // $test = [
 // 	'A' => [
@@ -211,8 +237,21 @@ $flag = false;
 $output = \CoreLibs\Combined\ArrayHandler::genAssocArray($db_array, $key, $value, $flag);
 print "OUTPUT: " . \CoreLibs\Debug\Support::printAr($output) . "<br>";
 
-// error message
-print $log->printErrorMsg();
+
+print "<hr>";
+$array = [
+	'a' => 'First',
+	'b' => 'Second',
+	'c' => 'Third',
+];
+
+foreach (array_keys($array) as $search) {
+	print "Result[" . $search . "]: "
+		. "next: " . DgS::printAr(ArrayHandler::arrayGetNextKey($array, $search)) . ", "
+		. "prev: " . DgS::printAr(ArrayHandler::arrayGetPrevKey($array, $search))
+		. "<br>";
+}
+print "Key not exists: " . DgS::printAr(ArrayHandler::arrayGetNextKey($array, 'z')) . "<br>";
 
 print "</body></html>";
 

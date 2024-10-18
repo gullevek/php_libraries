@@ -54,14 +54,15 @@ class System
 
 	/**
 	 * get the host name without the port as given by the SELF var
+	 * if no host name found will set to NOHOST:0
 	 *
-	 * @return array<mixed> host name/port name
+	 * @return array{string,int} host name/port number
 	 */
 	public static function getHostName(): array
 	{
-		$host = $_SERVER['HTTP_HOST'] ?? 'NOHOST:NOPORT';
-		list($host_name, $port) = array_pad(explode(':', $host), 2, self::DEFAULT_PORT);
-		return [$host_name, $port];
+		$host = $_SERVER['HTTP_HOST'] ?? 'NOHOST:0';
+		[$host_name, $port] = array_pad(explode(':', $host), 2, self::DEFAULT_PORT);
+		return [$host_name, (int)$port];
 	}
 
 	/**
@@ -114,6 +115,29 @@ class System
 			0,
 			3
 		) === 'cli' ? true : false;
+	}
+
+	/**
+	 * Collect all IP addresses
+	 * REMOTE_ADDR, HTTP_X_FORWARD_FOR, CLIENT_IP
+	 * and retuns them in an array with index of io source
+	 * if address source has addresses with "," will add "-array" with these as array block
+	 *
+	 * @return array<string,string|array<string>>
+	 */
+	public static function getIpAddresses(): array
+	{
+		$ip_addr = [];
+		foreach (['REMOTE_ADDR', 'HTTP_X_FORWARDED_FOR', 'CLIENT_IP'] as $_ip_source) {
+			if (!empty($_SERVER[$_ip_source])) {
+				$ip_addr[$_ip_source] = $_SERVER[$_ip_source];
+				// same level as ARRAY IF there is a , inside
+				if (strstr($_SERVER[$_ip_source], ',') !== false) {
+					$ip_addr[$_ip_source . '-array'] = explode(',', $_SERVER[$_ip_source]);
+				}
+			}
+		}
+		return $ip_addr;
 	}
 }
 

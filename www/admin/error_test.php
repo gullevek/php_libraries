@@ -2,12 +2,9 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
+$DEBUG_LEVEL = \CoreLibs\Logging\Logger\Level::Debug;
 
-if ($DEBUG_ALL) {
+if ($DEBUG_LEVEL->name == 'Debug') {
 	error_reporting(E_ALL);
 }
 

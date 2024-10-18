@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore PSR1.Files.SideEffects
 
 /********************************************************************
 * AUTHOR: Clemens Schwaighofer
@@ -10,6 +10,20 @@
 *********************************************************************/
 
 declare(strict_types=1);
+
+// find trigger name "admin/" or "frontend/" in the getcwd() folder
+$folder = '';
+foreach (['admin', 'frontend'] as $_folder) {
+	if (strstr(getcwd() ?: '', DIRECTORY_SEPARATOR . $_folder)) {
+		$folder = $_folder;
+		break;
+	}
+}
+// if content path is empty, fallback is default
+if (empty($folder)) {
+	$folder = 'default';
+}
+define('CONTENT_PATH', $folder . DIRECTORY_SEPARATOR);
 
 // File and Folder paths
 // ID is TARGET (first array element)

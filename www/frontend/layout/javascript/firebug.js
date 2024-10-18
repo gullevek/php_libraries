@@ -1,0 +1,1 @@
+../../../admin/layout/javascript/firebug.js

@@ -51,43 +51,49 @@ if ($AJAX_PAGE && !$ZIP_STREAM) {
 // start session
 $session = new \CoreLibs\Create\Session($SET_SESSION_NAME);
 // create logger
-$log = new \CoreLibs\Debug\Logging([
+$log = new \CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	'print_file_date' => true,
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'log_file_id' => $LOG_FILE_ID,
+	// set log level based on host setting
+	'log_level' => \CoreLibs\Logging\Logging::processLogLevel(DEBUG_LEVEL),
+	'log_per_date' => true,
 ]);
-// automatic hide for DEBUG messages on live server
-// can be overridden when setting DEBUG_ALL_OVERRIDE on top of the script
-// (for emergency debugging of one page only)
-if (
-	(TARGET == 'live' || TARGET == 'remote') &&
-	DEBUG === true &&
-	!empty($DEBUG_ALL_OVERRIDE)
-) {
-	foreach (['debug', 'echo', 'print'] as $target) {
-		$log->setLogLevelAll($target, false);
-	}
+// allow override of debug log level settings
+if (!empty($DEBUG_ALL_OVERRIDE)) {
+	$log->setLoggingLevel((string)$DEBUG_ALL_OVERRIDE);
 }
 // db config with logger
 $db = new \CoreLibs\DB\IO(DB_CONFIG, $log);
 // login & page access check
-$login = new \CoreLibs\ACL\Login($db, $log, $session);
+$login = new \CoreLibs\ACL\Login(
+	$db,
+	$log,
+	$session,
+	[
+		'auto_login' => true,
+		'default_acl_level' => DEFAULT_ACL_LEVEL,
+		'logout_target' => '',
+		'site_locale' => SITE_LOCALE,
+		'site_domain' => SITE_DOMAIN,
+		'site_encoding' => SITE_ENCODING,
+		'locale_path' => BASE . INCLUDES . LOCALE,
+	]
+);
 // lang, path, domain
 // pre auto detect language after login
-$locale = \CoreLibs\Language\GetLocale::setLocale();
+$locale = $login->loginGetLocale();
 // set lang and pass to smarty/backend
 $l10n = new \CoreLibs\Language\L10n(
 	$locale['locale'],
 	$locale['domain'],
 	$locale['path'],
+	$locale['encoding'],
 );
+
 // create smarty object
-$smarty = new \CoreLibs\Template\SmartyExtend($l10n, $locale);
+$smarty = new \CoreLibs\Template\SmartyExtend($l10n, CACHE_ID, COMPILE_ID);
 // create new Backend class with db and loger attached
-$cms = new \CoreLibs\Admin\Backend($db, $log, $session, $l10n, $locale);
+$cms = new \CoreLibs\Admin\Backend($db, $log, $session, $l10n, DEFAULT_ACL_LEVEL);
 // the menu show flag (what menu to show)
 $cms->menu_show_flag = 'main';
 // db info
@@ -115,6 +121,6 @@ if (!$login->loginActionRun()) {
 //------------------------------ logging end
 
 // pass on DEBUG flag to JS via smarty variable
-$smarty->DATA['JS_DEBUG'] = DEBUG;
+$smarty->DATA['JS_DEBUG'] = $log->loggingLevelIsDebug();
 
 // __END__

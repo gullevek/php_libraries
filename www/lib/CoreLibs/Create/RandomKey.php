@@ -12,13 +12,13 @@ class RandomKey
 {
 	// key generation
 	/** @var string */
-	private static $key_range = '';
+	private static string $key_range = '';
 	/** @var int */
-	private static $one_key_length;
+	private static int $one_key_length;
 	/** @var int */
-	private static $key_length = 4; // default key length
+	private static int $key_length = 4; // default key length
 	/** @var int */
-	private static $max_key_length = 256; // max allowed length
+	private static int $max_key_length = 256; // max allowed length
 
 	/**
 	 * if launched as class, init random key data first
@@ -32,7 +32,7 @@ class RandomKey
 	 *
 	 * @return void has no return
 	 */
-	private static function initRandomKeyData()
+	private static function initRandomKeyData(): void
 	{
 		// random key generation base string
 		self::$key_range = join('', array_merge(
@@ -52,7 +52,6 @@ class RandomKey
 	private static function validateRandomKeyLenght(int $key_length): bool
 	{
 		if (
-			is_numeric($key_length) &&
 			$key_length > 0 &&
 			$key_length <= self::$max_key_length
 		) {
@@ -101,7 +100,9 @@ class RandomKey
 	public static function randomKeyGen(int $key_length = -1): string
 	{
 		// init random key strings if not set
-		if (!is_numeric(self::$one_key_length)) {
+		if (
+			!isset(self::$one_key_length)
+		) {
 			self::initRandomKeyData();
 		}
 		$use_key_length = 0;

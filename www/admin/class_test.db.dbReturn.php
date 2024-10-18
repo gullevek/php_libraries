@@ -15,24 +15,18 @@ ob_start();
 define('USE_DATABASE', true);
 // sample config
 require 'config.php';
-// override ECHO ALL FALSE
-$ECHO_ALL = true;
 // define log file id
 $LOG_FILE_ID = 'classTest-db';
 ob_end_flush();
 
 use CoreLibs\Debug\Support;
 use CoreLibs\Debug\RunningTime;
+use CoreLibs\Convert\SetVarType;
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 // db connection and attach logger
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
@@ -40,14 +34,14 @@ $db->log->debug('START', '=============================>');
 
 $PAGE_NAME = 'TEST CLASS: DB dbReturn';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><a href="class_test.db.php">Class Test DB</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
-print "LOGFILE NAME: " . $db->log->getSetting('log_file_name') . "<br>";
-print "LOGFILE ID: " . $db->log->getSetting('log_file_id') . "<br>";
+print "LOGFILE NAME: " . $db->log->getLogFile() . "<br>";
+print "LOGFILE ID: " . $db->log->getLogFileId() . "<br>";
 print "DBINFO: " . $db->dbInfo() . "<br>";
 
 // DB client encoding
@@ -62,23 +56,45 @@ print "<b>dbReturn CACHE tests</b><br>";
 $db->dbExec("DELETE FROM test_db_return");
 $db->dbExec("INSERT INTO test_db_return (uid, data) VALUES ('A1', 'Test A'), ('B1', 'Test B')");
 // read query to use
-$q_db_ret = "SELECT * FROM test_db_return ORDER BY uid";
+$q_db_ret = <<<SQL
+SELECT * FROM test_db_return ORDER BY uid
+SQL;
 
 RunningTime::hrRunningTime();
+
+$cache_flag = '[DEFAULT] NO_CACHE (0)';
+print "dbReturn '" . $cache_flag . "'/Default: " . $q_db_ret . "<br>";
+// Do twice
+for ($i = 1; $i <= 6; $i++) {
+	$res = $db->dbReturn($q_db_ret);
+	print $i . ") " . $cache_flag . ": "
+		. "res: " . (is_bool($res) ?
+			"<b>Bool:</b> " . Support::prBl($res) :
+			(is_array($res) ?
+				"Array: " . Support::prBl(is_array($res)) : '{-}')
+		) . ", "
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
+	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
+}
+print "<hr>";
 
 $cache_flag = 'USE_CACHE (0)';
 print "dbReturn '" . $cache_flag . "'/Default: " . $q_db_ret . "<br>";
 // SINGLE read on multi row return
 // Do twice
 for ($i = 1; $i <= 6; $i++) {
-	$res = $db->dbReturn($q_db_ret);
+	$res = $db->dbReturn($q_db_ret, $db::USE_CACHE);
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
-			"<b>Bool:</b> " . $db->log->prBl($res) :
+			"<b>Bool:</b> " . Support::prBl($res) :
 			(is_array($res) ?
-				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
+				"Array: " . Support::prBl(is_array($res)) : '{-}')
 		) . ", "
-		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
 	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
 }
 // reset all read data
@@ -91,11 +107,13 @@ for ($i = 1; $i <= 6; $i++) {
 	$res = $db->dbReturn($q_db_ret, $db::READ_NEW);
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
-			"<b>Bool:</b> " . $db->log->prBl($res) :
+			"<b>Bool:</b> " . Support::prBl($res) :
 			(is_array($res) ?
-				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
+				"Array: " . Support::prBl(is_array($res)) : '{-}')
 		) . ", "
-		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
 	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
 }
 // reset all read data
@@ -108,11 +126,13 @@ for ($i = 1; $i <= 6; $i++) {
 	$res = $db->dbReturn($q_db_ret, $db::CLEAR_CACHE);
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
-			"<b>Bool:</b> " . $db->log->prBl($res) :
+			"<b>Bool:</b> " . Support::prBl($res) :
 			(is_array($res) ?
-				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
+				"Array: " . Support::prBl(is_array($res)) : '{-}')
 		) . ", "
-		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
 	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
 }
 // reset all read data
@@ -125,16 +145,29 @@ for ($i = 1; $i <= 6; $i++) {
 	$res = $db->dbReturn($q_db_ret, $db::NO_CACHE);
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
-			"<b>Bool:</b> " . $db->log->prBl($res) :
+			"<b>Bool:</b> " . Support::prBl($res) :
 			(is_array($res) ?
-				"Array: " . $db->log->prBl(is_array($res)) : '{-}')
+				"Array: " . Support::prBl(is_array($res)) : '{-}')
 		) . ", "
-		. "cursor_ext: <pre>" . Support::printAr($db->dbGetCursorExt($q_db_ret)) . "</pre>";
+		. "cursor_ext: <pre>" . Support::printAr(
+			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
+		) . "</pre>";
 	print "Run time: " .  RunningTime::hrRunningTime() . "<br>";
 }
 // reset all data
 $db->dbCacheReset($q_db_ret);
 print "<br>";
 print "Overall Run time: " .  RunningTime::hrRunningTimeFromStart() . "<br>";
+
+print "<br>";
+print "PARAM TEST RUN<br>";
+// PARAM
+$q_db_ret = <<<SQL
+SELECT * FROM test_db_return WHERE uid = $1
+SQL;
+
+while (is_array($res = $db->dbReturnParams($q_db_ret, ['A1'], $db::NO_CACHE, true))) {
+	print "ROW: " . Support::printAr($res) . "<br>";
+}
 
 // __END__

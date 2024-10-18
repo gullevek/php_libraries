@@ -35,7 +35,7 @@ class SetVarTypeNull extends Extends\SetVarTypeMain
 	 * @param  string|null $default Default override value
 	 * @return string|null          Input value as string or default as string/null
 	 */
-	public static function makeStr(mixed $val, string $default = null): ?string
+	public static function makeStr(mixed $val, ?string $default = null): ?string
 	{
 		return SetVarTypeMain::makeStrMain($val, $default, true);
 	}
@@ -60,7 +60,7 @@ class SetVarTypeNull extends Extends\SetVarTypeMain
 	 * @param  int|null $default Default override value
 	 * @return int|null          Input value as int or default as int/null
 	 */
-	public static function makeInt(mixed $val, int $default = null): ?int
+	public static function makeInt(mixed $val, ?int $default = null): ?int
 	{
 		return SetVarTypeMain::makeIntMain($val, $default, true);
 	}
@@ -84,7 +84,7 @@ class SetVarTypeNull extends Extends\SetVarTypeMain
 	 * @param  float|null $default Default override value
 	 * @return float|null          Input value as float or default as float/null
 	 */
-	public static function makeFloat(mixed $val, float $default = null): ?float
+	public static function makeFloat(mixed $val, ?float $default = null): ?float
 	{
 		return SetVarTypeMain::makeFloatMain($val, $default, true);
 	}

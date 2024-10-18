@@ -51,6 +51,23 @@ class File
 		// return lines in file
 		return $lines;
 	}
+
+	/**
+	 * get the mime type of a file via finfo
+	 * if file not found, throws exception
+	 * else returns '' for any other finfo read problem
+	 *
+	 * @param  string $read_file File to read, relative or absolute path
+	 * @return string
+	 */
+	public static function getMimeType(string $read_file): string
+	{
+		$finfo = new \finfo(FILEINFO_MIME_TYPE);
+		if (!is_file($read_file)) {
+			throw new \UnexpectedValueException('[getMimeType] File not found: ' . $read_file);
+		}
+		return $finfo->file($read_file) ?: '';
+	}
 }
 
 // __END__

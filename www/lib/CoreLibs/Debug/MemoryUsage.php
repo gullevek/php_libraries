@@ -13,13 +13,13 @@ use CoreLibs\Convert\Byte;
 class MemoryUsage
 {
 	/** @var int */
-	private static $start_memory = 0;
+	private static int $start_memory = 0;
 	/** @var int */
-	private static $set_memory = 0;
+	private static int $set_memory = 0;
 	/** @var int */
-	private static $previous_memory = 0;
+	private static int $previous_memory = 0;
 	/** @var bool */
-	private static $debug_memory = false;
+	private static bool $debug_memory = false;
 
 	/**
 	 * set memory flag, or return set memory flag

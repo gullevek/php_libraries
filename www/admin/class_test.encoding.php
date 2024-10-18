@@ -6,14 +6,7 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
-
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -28,16 +21,12 @@ ob_end_flush();
 use CoreLibs\Convert\Encoding as ConEnc;
 use CoreLibs\Check\Encoding as ChkEnc;
 use CoreLibs\Convert\MimeEncode;
+use CoreLibs\Debug\Support;
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 // class type
 $_chk_enc = new CoreLibs\Check\Encoding();
@@ -46,7 +35,7 @@ $chk_enc = 'CoreLibs\Check\Encoding';
 
 $PAGE_NAME = 'TEST CLASS: ENCODING (CHECK/CONVERT/MIME)';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
@@ -102,10 +91,7 @@ foreach ($enc_strings as $_string) {
 // static use
 $_string = $enc_strings[1];
 $string = $chk_enc::checkConvertEncoding($_string, 'UTF-8', 'ISO-2022-JP-MS');
-print "S::ENC CHECK: $_string: " . ($string === false ? '-OK-' : $string) . "<br>";
-
-// error message
-print $log->printErrorMsg();
+print "S::ENC CHECK: $_string: " . ($string === false ? '-OK-' : Support::printAr($string)) . "<br>";
 
 print "</body></html>";
 

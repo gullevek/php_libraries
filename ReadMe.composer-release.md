@@ -9,13 +9,8 @@
 - run phan/phpstan/phpunit tests in composer branch
 - commit and sync to master
 - create the same version tag as before in the trunk/master
-- GITEA
-  - download ZIP file from TAG
-  - `curl --user clemens.schwaighofer:KEY \
-     --upload-file ~/Documents/Composer/CoreLibs-Composer-All-vX.Y.Z.zip \
-     https://git.egplusww.jp/api/packages/Composer/composer?version=X.Y.Z`
-- GitLab
-  - `curl --data tag=vX-Y-Z --header "Deploy-Token: TOKENr" "https://gitlab-na.factory.tools/api/v4/projects/950/packages/composer"`
+- GITEA and GITLAB:
+  - Run `publish/publish.sh` script to create composer packages
 - Composer Packagest local
   - update pacakges.json file with new version and commit
-  - `git pull egra-gitea master`
+  - run `git pull egra-gitea master` on udon-core in `/var/www/html/composer/www`

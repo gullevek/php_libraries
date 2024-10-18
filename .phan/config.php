@@ -27,6 +27,7 @@ use Phan\Config;
 
 return [
 	// "target_php_version" => "8.2",
+	"minimum_target_php_version" => "8.1",
 	// turn color on (-C)
 	"color_issue_messages_if_supported" => true,
 	// If true, missing properties will be created when
@@ -95,8 +96,6 @@ return [
 	"exclude_analysis_directory_list" => [
 		'www/vendor',
 		'www/tests',
-		'www/lib/Smarty',
-		'www/lib/smarty-4.3.0',
 		'www/templates_c',
 		'www/log',
 		'www/tmp',
@@ -117,10 +116,6 @@ return [
 		// ignore the old qq tests
 		'www/admin/qq_file_upload_front.php',
 		'www/admin/qq_file_upload_ajax.php',
-		// symlink ignore
-		'www/lib/smarty-4.3.0/libs/Smarty.class.php',
-		// legacy edit base (until removal)
-		'www/includes/edit_base.LEGACY.php'
 	],
 
 	// what not to show as problem
@@ -133,7 +128,12 @@ return [
 		'PhanWriteOnlyPublicProperty',
 		'PhanUnreferencedConstant',
 		'PhanWriteOnlyPublicProperty',
-		'PhanReadOnlyPublicProperty'
+		'PhanReadOnlyPublicProperty',
+		// start ignore annotations
+		'PhanUnextractableAnnotationElementName',
+		'PhanUnextractableAnnotationSuffix',
+		// enum problems in comments
+		'PhanCommentObjectInClassConstantType'
 	],
 
 	// Override to hardcode existence and types of (non-builtin) globals in the global scope.

@@ -39,56 +39,56 @@ class ArrayIO extends \CoreLibs\DB\IO
 {
 	// main calss variables
 	/** @var array<mixed> */
-	public $table_array; // the array from the table to work on
+	private array $table_array; // the array from the table to work on
 	/** @var string */
-	public $table_name; // the table_name
+	private string $table_name; // the table_name
 	/** @var string */
-	public $pk_name = ''; // the primary key from this table
+	private string $pk_name = ''; // the primary key from this table
 	/** @var int|string|null */
-	public $pk_id; // the PK id
+	private int|string|null $pk_id; // the PK id
 	// security values
 	/** @var int base acl for current page */
-	private $base_acl_level = 0;
+	private int $base_acl_level = 0;
 
 	/**
 	 * constructor for the array io class, set the
 	 * primary key name automatically (from array)
 	 *
-	 * @param array<mixed> $db_config      db connection config
+	 * phpcs:ignore
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string,db_debug_replace_placeholder?:bool} $db_config db connection config
 	 * @param array<mixed> $table_array    table array config
 	 * @param string       $table_name     table name string
-	 * @param \CoreLibs\Debug\Logging|null $log Logging class, default set if not set
+	 * @param \CoreLibs\Logging\Logging $log Logging class
 	 * @param int          $base_acl_level Set base acl level, if needed
 	 * @param int          $acl_admin      Flag if this is an admin ACL access level
+	 * @throws \RuntimeException Missing table array or table name entry
 	 */
 	public function __construct(
 		array $db_config,
 		array $table_array,
 		string $table_name,
-		\CoreLibs\Debug\Logging $log = null,
+		\CoreLibs\Logging\Logging $log,
 		int $base_acl_level = 0,
 		int $acl_admin = 0
 	) {
 		// instance db_io class
-		parent::__construct($db_config, $log ?? new \CoreLibs\Debug\Logging());
+		parent::__construct($db_config, $log);
 		// more error vars for this class
-		$this->error_string['1999'] = 'No table array or table name set';
+		$this->error_string['1998'] = 'No table name set';
+		$this->error_string['1999'] = 'No table array set';
 		$this->error_string['1021'] = 'No Primary Key given';
 		$this->error_string['1022'] = 'Could not run Array Query';
 
-		$this->table_array = $table_array;
-		$this->table_name = $table_name;
-
-		// error abort if no table array or no table name
-		if (empty($table_array) || empty($table_name)) {
-			$this->__dbError(1999, false, 'MAJOR ERROR: Core settings missing');
-		}
+		$this->setTableArray($table_array);
+		$this->setTableName($table_name);
 
 		// set primary key for given table_array
 		foreach ($this->table_array as $key => $value) {
-			if (!empty($value['pk'])) {
-				$this->pk_name = $key;
+			if (empty($value['pk'])) {
+				continue;
 			}
+			$this->setPkName($key);
+			break;
 		}
 		$this->dbArrayIOSetAcl($base_acl_level, $acl_admin);
 	}
@@ -99,6 +99,144 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function __destruct()
 	{
 		parent::__destruct();
+	}
+
+	/**
+	 * Set the overall table array
+	 *
+	 * @param  array<mixed> $table_array
+	 * @return void
+	 * @throws \RuntimeException 1999 for empty table array
+	 */
+	public function setTableArray(array $table_array): void
+	{
+		$this->table_array = $table_array;
+		if (empty($this->table_array)) {
+			$this->__dbError(1999, false, 'MAJOR ERROR: Core settings missing: table_arrry');
+			throw new \RuntimeException('MAJOR ERROR: Core settings missing: table_array', 1999);
+		}
+	}
+
+	/**
+	 * return full table array, or [] if empty
+	 * of reset is set to true, will reset array first
+	 *
+	 * @param  bool         $reset [=false] run a reset before returning
+	 * @return array<mixed>
+	 */
+	public function getTableArray(bool $reset = false): array
+	{
+		if (!$reset) {
+			return $this->table_array ?? [];
+		}
+		$table_array = $this->table_array ?? [];
+		reset($table_array);
+		return $table_array;
+	}
+
+	/**
+	 * get a table array entry under the key with element pos
+	 *
+	 * @param  string $key
+	 * @param  string $pos
+	 * @return mixed
+	 */
+	public function getTableArrayEntry(string $key, string $pos): mixed
+	{
+		return $this->table_array[$key][$pos] ?? null;
+	}
+
+	/**
+	 * set a new value at key with pos
+	 *
+	 * @param  mixed  $value
+	 * @param  string $key
+	 * @param  string $pos
+	 * @return void
+	 */
+	public function setTableArrayEntry(mixed $value, string $key, string $pos): void
+	{
+		$this->table_array[$key][$pos] = $value;
+	}
+
+	/**
+	 * unset entry at key with pos
+	 *
+	 * @param  string $key
+	 * @param  string $pos
+	 * @return void
+	 */
+	public function unsetTableArrayEntry(string $key, string $pos): void
+	{
+		unset($this->table_array[$key][$pos]);
+	}
+
+	/**
+	 * Set table name
+	 *
+	 * @param  string $table_name
+	 * @return void
+	 * @throws \RuntimeException 1998 for empty table name
+	 */
+	public function setTableName(string $table_name): void
+	{
+		$this->table_name = $table_name;
+		if (empty($this->table_name)) {
+			$this->__dbError(1998, false, 'MAJOR ERROR: Core settings missing: table_name');
+			throw new \RuntimeException('MAJOR ERROR: Core settings missing: table_name', 1998);
+		}
+	}
+
+	/**
+	 * Return table name or empty string if not net
+	 *
+	 * @return string
+	 */
+	public function getTableName(): string
+	{
+		return $this->table_name ?? '';
+	}
+
+	/**
+	 * Set primary key name
+	 *
+	 * @param  string $pk_name
+	 * @return void
+	 */
+	public function setPkName(string $pk_name): void
+	{
+		$this->pk_name = $pk_name;
+	}
+
+	/**
+	 * get primary key name
+	 *
+	 * @return string
+	 */
+	public function getPkName(): string
+	{
+		return $this->pk_name;
+	}
+
+	/**
+	 * set primary key id, can be null for not yet set
+	 *
+	 * @param  int|string|null $pk_id
+	 * @return void
+	 */
+	public function setPkId(int|string|null $pk_id): void
+	{
+		$this->pk_id = $pk_id;
+	}
+
+	/**
+	 * return primary key id, or null if not set
+	 *
+	 * @return int|string|null
+	 */
+	public function getPkId(): int|string|null
+	{
+		return $this->pk_id ?? null;
 	}
 
 	/**
@@ -137,7 +275,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  string $text any html encoded string
 	 * @return string       decoded html string
 	 */
-	public function convertData($text): string
+	public function convertData(string $text): string
 	{
 		$text = str_replace('&lt;b&gt;', '<b>', $text);
 		$text = str_replace('&lt;/b&gt;', '</b>', $text);
@@ -156,7 +294,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  string $text encoded html string
 	 * @return string       decoded html string
 	 */
-	public function convertEntities($text): string
+	public function convertEntities(string $text): string
 	{
 		$text = str_replace('&lt;', '<', $text);
 		$text = str_replace('&gt;', '>', $text);
@@ -172,7 +310,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 * @param  bool   $write write to error message, default false
 	 * @return string        the array data as html string entry
 	 */
-	public function dbDumpArray($write = false): string
+	public function dbDumpArray(bool $write = false): string
 	{
 		reset($this->table_array);
 		$string = '';
@@ -192,11 +330,11 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 *
 	 * @return bool true if pk value is set, else false
 	 */
-	public function dbCheckPkSet()
+	public function dbCheckPkSet(): bool
 	{
 		// if pk_id is set, overrule ...
-		if ($this->pk_id) {
-			$this->table_array[$this->pk_name]['value'] = $this->pk_id;
+		if (!empty($this->getPkId())) {
+			$this->table_array[$this->pk_name]['value'] = $this->getPkId();
 		}
 		// if not set ... produce error
 		if (!$this->table_array[$this->pk_name]['value']) {
@@ -210,10 +348,10 @@ class ArrayIO extends \CoreLibs\DB\IO
 
 	/**
 	 * resets the whole array values
-	 * @param  boolean $reset_pk true if we want to reset the pk too
+	 * @param  bool $reset_pk true if we want to reset the pk too
 	 * @return void              has no return
 	 */
-	public function dbResetArray($reset_pk = false): void
+	public function dbResetArray(bool $reset_pk = false): void
 	{
 		reset($this->table_array);
 		foreach (array_keys($this->table_array) as $column) {
@@ -230,10 +368,10 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 *
 	 * @param  array<mixed> $table_array optional override for table array set
 	 *                                   set this as new table array too
-	 * @param  boolean      $acl_limit   [false], if set to true, well do ACL limit check
+	 * @param  bool      $acl_limit   [false], if set to true, well do ACL limit check
 	 * @return array<mixed>              returns the table array that was deleted
 	 */
-	public function dbDelete($table_array = [], $acl_limit = false)
+	public function dbDelete(array $table_array = [], bool $acl_limit = false): array
 	{
 		// is array and has values, override set and set new
 		if (is_array($table_array) && count($table_array)) {
@@ -243,7 +381,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			return $this->table_array;
 		}
 		if ($acl_limit === true && $this->base_acl_level < 100) {
-			$this->log->debug('DB DELETE ERROR', 'ACL Limit on, Delete, '
+			$this->log->error('DB DELETE ERROR: ACL Limit on, Delete, '
 				. 'but base ACL level of 100 not met: ' . $this->base_acl_level);
 			return $this->table_array;
 		}
@@ -284,7 +422,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 			$q .= ' AND ' . $q_where;
 		}
 		// if 0, error
-		$this->pk_id = null;
+		$this->setPkId(null);
 		if (!$this->dbExec($q)) {
 			$this->__dbError(1022);
 		}
@@ -294,12 +432,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 	/**
 	 * reads one row into the array
 	 *
-	 * @param  boolean      $edit        on true convert data, else as is
+	 * @param  bool      $edit        on true convert data, else as is
 	 * @param  array<mixed> $table_array optional table array, overwrites
 	 *                                   internal set array
 	 * @return array<mixed>              set table array with values
 	 */
-	public function dbRead($edit = false, $table_array = [])
+	public function dbRead(bool $edit = false, array $table_array = []): array
 	{
 		// if array give, overrules internal array
 		if (is_array($table_array) && count($table_array)) {
@@ -371,7 +509,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 				}
 			}
 			// possible dbFetchArray errors ...
-			$this->pk_id = $this->table_array[$this->pk_name]['value'];
+			$this->setPkId($this->table_array[$this->pk_name]['value']);
 		} else {
 			$this->__dbError(1022);
 		}
@@ -381,9 +519,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 	/**
 	 * writes one set into DB or updates one set (if PK exists)
 	 *
-	 * @param  boolean      $addslashes  old convert entities and set set escape
+	 * @param  bool      $addslashes  old convert entities and set set escape
 	 * @param  array<mixed> $table_array optional table array, overwrites internal one
-	 * @param  boolean      $acl_limit   [false], if set to true, well do ACL limit check
+	 * @param  bool      $acl_limit   [false], if set to true, well do ACL limit check
 	 * @return array<mixed>              table array or null
 	 */
 	public function dbWrite(
@@ -391,13 +529,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 		array $table_array = [],
 		bool $acl_limit = false
 	): array {
-		if (is_array($table_array) && count($table_array)) {
+		if (count($table_array)) {
 			$this->table_array = $table_array;
 		}
-		// PK ID check
-		// if ($this->pk_id && !$this->table_array[$this->pk_name]["value"]) {
-		// 	$this->table_array[$this->pk_name]["value"]=$this->pk_id;
-		// }
 		// checken ob PKs gesetzt, wenn alle -> update, wenn keiner -> insert, wenn ein paar -> ERROR!
 		if (!$this->table_array[$this->pk_name]['value']) {
 			$insert = 1;
@@ -406,7 +540,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		}
 		// early abort for new write with not enough ACL level
 		if ($insert && $acl_limit === true && $this->base_acl_level < 100) {
-			$this->log->debug('DB WRITE ERROR', 'ACL Limit on, Insert, '
+			$this->log->error('DB WRITE ERROR: ACL Limit on, Insert, '
 				. 'but base ACL level of 100 not met: ' . $this->base_acl_level);
 			return $this->table_array;
 		}
@@ -475,13 +609,12 @@ class ArrayIO extends \CoreLibs\DB\IO
 				$this->table_array[$column]['type'] != 'view' &&
 				strlen($column) > 0 &&
 				// no acl limiter
-				($acl_limit === false ||
 				(
+					$acl_limit === false ||
 					// acl limit is true, min edit must be at larger than set
-					$acl_limit === true &&
 					$this->base_acl_level >=
 						($this->table_array[$column]['min_edit_acl'] ?? 100)
-				))
+				)
 			) {
 				// for password use hidden value if main is not set
 				if (
@@ -528,7 +661,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 					}
 					$q_data .= $_value;
 				} elseif (isset($this->table_array[$column]['bool'])) {
-					// boolean storeage (reverse check on ifset)
+					// bool storage (reverse check on ifset)
 					$q_data .= "'" . $this->dbBoolean($this->table_array[$column]['value'], true) . "'";
 				} elseif (
 					isset($this->table_array[$column]['interval']) ||
@@ -580,7 +713,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		} // while ...
 
 		if (empty($q_data)) {
-			$this->log->debug('DB WRITE ERROR', 'No data to write, possible through ACL');
+			$this->log->error('DB WRITE ERROR: No data to write, possible through ACL');
 			return $this->table_array;
 		}
 
@@ -588,7 +721,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 		// get it at the end, cause now we can be more sure of no double IDs, etc
 		reset($this->table_array);
 		// create select part & addition FK part
-		foreach ($this->table_array as $column => $data_array) {
+		foreach (array_keys($this->table_array) as $column) {
 			// check FK ...
 			if (
 				isset($this->table_array[$column]['fk']) &&
@@ -622,16 +755,11 @@ class ArrayIO extends \CoreLibs\DB\IO
 				$q .= ' AND ' . $q_where;
 			}
 			// set pk_id ... if it has changed or so
-			$this->pk_id = $this->table_array[$this->pk_name]['value'];
+			$this->setPkId($this->table_array[$this->pk_name]['value']);
 		} else {
 			$q = 'INSERT INTO ' . $this->table_name . ' ';
 			$q .= '(' . $q_vars . ') ';
 			$q .= 'VALUES (' . $q_data . ')';
-			// write primary key too
-			// if ($q_data)
-			//	$q .= ", ";
-			// $q .= $this->pk_name." = ".$this->table_array[$this->pk_name]['value']." ";
-			// $this->pk_id = $this->table_array[$this->pk_name]['value'];
 		}
 		// return success or not
 		if (!$this->dbExec($q)) {
@@ -644,7 +772,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 				$insert_id = 0;
 			}
 			$this->table_array[$this->pk_name]['value'] = $insert_id;
-			$this->pk_id = $insert_id;
+			$this->setPkId($insert_id);
 		}
 		// return the table if needed
 		return $this->table_array;

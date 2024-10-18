@@ -7,7 +7,7 @@ namespace CoreLibs\Output\Form\TableArrays;
 class EditSchemas implements Interface\TableArraysInterface
 {
 	/** @var \CoreLibs\Output\Form\Generate */
-	private $form;
+	private \CoreLibs\Output\Form\Generate $form;
 
 	/**
 	 * constructor
@@ -68,7 +68,9 @@ class EditSchemas implements Interface\TableArraysInterface
 				],
 			],
 			'table_name' => 'edit_scheme',
-			'load_query' => "SELECT edit_scheme_id, name, enabled FROM edit_scheme ORDER BY name",
+			'load_query' => "SELECT edit_scheme_id, name, enabled "
+				. "FROM edit_scheme "
+				. "ORDER BY name",
 			'show_fields' => [
 				[
 					'name' => 'name'

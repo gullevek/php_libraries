@@ -118,6 +118,34 @@ class Strings
 			return $value;
 		}
 	}
+
+	/**
+	 * Strip any duplicated slahes from a path
+	 * eg: //foo///bar/foo.inc -> /foo/bar/foo.inc
+	 *
+	 * @param  string $path Path to strip slashes from
+	 * @return string       Clean path, on error returns original path
+	 */
+	public static function stripMultiplePathSlashes(string $path): string
+	{
+		return preg_replace(
+			'#/+#',
+			'/',
+			$path
+		) ?? $path;
+	}
+
+	/**
+	 * Remove UTF8 BOM Byte string from line
+	 * Note: this is often found in CSV files exported from Excel at the first row, first element
+	 *
+	 * @param  string $text
+	 * @return string
+	 */
+	public static function stripUTF8BomBytes(string $text): string
+	{
+		return trim($text, pack('H*', 'EFBBBF'));
+	}
 }
 
 // __END__

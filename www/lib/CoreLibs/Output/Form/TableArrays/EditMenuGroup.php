@@ -7,7 +7,7 @@ namespace CoreLibs\Output\Form\TableArrays;
 class EditMenuGroup implements Interface\TableArraysInterface
 {
 	/** @var \CoreLibs\Output\Form\Generate */
-	private $form;
+	private \CoreLibs\Output\Form\Generate $form;
 
 	/**
 	 * constructor
@@ -55,7 +55,9 @@ class EditMenuGroup implements Interface\TableArraysInterface
 				],
 			],
 			'table_name' => 'edit_menu_group',
-			'load_query' => "SELECT edit_menu_group_id, name FROM edit_menu_group ORDER BY name",
+			'load_query' => "SELECT edit_menu_group_id, name "
+				. "FROM edit_menu_group "
+				. "ORDER BY name",
 			'show_fields' => [
 				[
 					'name' => 'name'

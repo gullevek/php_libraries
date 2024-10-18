@@ -18,21 +18,16 @@ require 'config.php';
 $LOG_FILE_ID = 'classTest-readEnvFile';
 ob_end_flush();
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 $ref_class = 'CoreLibs\Get\ReadEnvFile';
 
 $PAGE_NAME = 'TEST CLASS: READ ENV FILE';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
@@ -44,9 +39,7 @@ $status = \CoreLibs\Get\DotEnv::readEnvFile('.', 'test.env');
 print "test.env: STATUS: " . $status . "<br>";
 print "AFTER reading test.env file: " . \CoreLibs\Debug\Support::printAr($_ENV) . "<br>";
 
-// error message
-print $log->printErrorMsg();
-
 print "</body></html>";
+// ;;
 
 // __END__

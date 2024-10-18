@@ -12,7 +12,7 @@ namespace CoreLibs\Convert;
 class MimeAppName
 {
 	/** @var array<string,string> */
-	private static $mime_apps = [];
+	private static array $mime_apps = [];
 
 	/**
 	 * constructor: init mime list

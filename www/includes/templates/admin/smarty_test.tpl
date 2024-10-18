@@ -1,6 +1,9 @@
 <div>
 	SMARTY_TEST: {$SMARTY_TEST}
 </div>
+<div>
+	MERGE DATA: {$adm_set}
+</div>
 <div {popup width="250" caption="Info" text="Text block<br>Control"} style="border: 1px solid black; margin: 5px 0 5px 0; padding: 5px;">
 	POPUP HERE (hover mouse)
 </div>

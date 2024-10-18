@@ -100,27 +100,6 @@ define('DEFAULT_ACL_LEVEL', 80);
 /************* LOGOUT ********************/
 // logout target
 define('LOGOUT_TARGET', '');
-// password change allowed
-define('PASSWORD_CHANGE', false);
-define('PASSWORD_FORGOT', false);
-// min/max password length
-define('PASSWORD_MIN_LENGTH', 9);
-define('PASSWORD_MAX_LENGTH', 255);
-// defines allowed special characters
-define('PASSWORD_SPECIAL_RANGE', '@$!%*?&');
-// password must have upper case, lower case, number, special
-// comment out for not mandatory
-define('PASSWORD_LOWER', '(?=.*[a-z])');
-define('PASSWORD_UPPER', '(?=.*[A-Z])');
-define('PASSWORD_NUMBER', '(?=.*\d)');
-define('PASSWORD_SPECIAL', "(?=.*[" . PASSWORD_SPECIAL_RANGE . "])");
-// define full regex
-define('PASSWORD_REGEX', "/^"
-	. (defined('PASSWORD_LOWER') ? PASSWORD_LOWER : '')
-	. (defined('PASSWORD_UPPER') ? PASSWORD_UPPER : '')
-	. (defined('PASSWORD_NUMBER') ? PASSWORD_NUMBER : '')
-	. (defined('PASSWORD_SPECIAL') ? PASSWORD_SPECIAL : '')
-	. "[A-Za-z\d" . PASSWORD_SPECIAL_RANGE . "]{" . PASSWORD_MIN_LENGTH . "," . PASSWORD_MAX_LENGTH . "}$/");
 
 /************* AJAX / ACCESS *************/
 // ajax request type
@@ -161,13 +140,6 @@ define('DEFAULT_LOCALE', 'en_US.UTF-8');
 // default web page encoding setting
 define('DEFAULT_ENCODING', 'UTF-8');
 
-/************* LOGGING *******************/
-// below two can be defined here, but they should be
-// defined in either the header file or the file itself
-// as $LOG_FILE_ID which takes presence over LOG_FILE_ID
-// see Basic class constructor
-define('LOG_FILE_ID', BASE_NAME);
-
 /************* QUEUE TABLE *************/
 // if we have a dev/live system
 // set_live is a per page/per item
@@ -206,7 +178,7 @@ if (file_exists(BASE . CONFIGS . 'config.path.php')) {
 // live frontend pages
 // ** missing live domains **
 // get the name without the port
-list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
+[$HOST_NAME] = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 // set HOST name
 define('HOST_NAME', $HOST_NAME);
 // BAIL ON MISSING MASTER SITE CONFIG
@@ -252,7 +224,17 @@ if ($is_secure) {
 }
 // define the db config set name, the db config and the db schema
 define('DB_CONFIG_NAME', $SITE_CONFIG[HOST_NAME]['db_host'] ?? '');
-define('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME] ?? []);
+define('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME] ?? [
+	'db_name' => '',
+	'db_user' => '',
+	'db_pass' => '',
+	'db_host' => '',
+	'db_port' => 5432,
+	'db_schema' => '',
+	'db_encoding' => '',
+	'db_type' => '',
+	'db_ssl' => ''
+]);
 // because we can't change constant, but we want to for db debug flag
 $GLOBALS['DB_CONFIG_SET'] = DB_CONFIG;
 // define('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
@@ -264,8 +246,9 @@ $GLOBALS['DB_CONFIG_SET'] = DB_CONFIG;
 // define('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA);
 // debug settings, site lang, etc
 define('TARGET', $SITE_CONFIG[HOST_NAME]['location'] ?? 'test');
-define('DEBUG', $SITE_CONFIG[HOST_NAME]['debug_flag'] ?? false);
+define('DEBUG_LEVEL', $SITE_CONFIG[HOST_NAME]['debug_level'] ?? 'debug');
 define('SITE_LOCALE', $SITE_CONFIG[HOST_NAME]['site_locale'] ?? DEFAULT_LOCALE);
+define('SITE_DOMAIN', str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH));
 define('SITE_ENCODING', $SITE_CONFIG[HOST_NAME]['site_encoding'] ?? DEFAULT_ENCODING);
 define('LOGIN_ENABLED', $SITE_CONFIG[HOST_NAME]['login_enabled'] ?? false);
 define('AUTH', $SITE_CONFIG[HOST_NAME]['auth'] ?? false);
@@ -273,9 +256,6 @@ define('AUTH', $SITE_CONFIG[HOST_NAME]['auth'] ?? false);
 // define('CSV_PATH', $PATHS[TARGET]['csv_path'] ?? '');
 // define('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin'] ?? '');
 // define('REDIRECT_URL', $PATHS[TARGET]['redirect_url'] ?? '');
-
-// show all errors if debug_all & show_error_handling are enabled
-define('SHOW_ALL_ERRORS', true);
 
 /************* GENERAL PAGE TITLE ********/
 define('G_TITLE', $_ENV['G_TITLE'] ?? '');
@@ -291,24 +271,6 @@ define('JAVASCRIPT', $_ENV['JAVASCRIPT'] ?? 'frontend.js');
 // any other global definitons in the config.other.php
 if (file_exists(BASE . CONFIGS . 'config.other.php')) {
 	require BASE . CONFIGS . 'config.other.php';
-}
-
-/************* DEBUG *******************/
-// turn off debug if debug flag is OFF
-if (defined('DEBUG') && DEBUG == false) {
-	$ECHO_ALL = false;
-	$DEBUG_ALL = false;
-	$PRINT_ALL = false;
-	$DB_DEBUG = false;
-	$ENABLE_ERROR_HANDLING = false;
-	$DEBUG_ALL_OVERRIDE = false;
-} else {
-	$ECHO_ALL = false;
-	$DEBUG_ALL = true;
-	$PRINT_ALL = true;
-	$DB_DEBUG = true;
-	$ENABLE_ERROR_HANDLING = false;
-	$DEBUG_ALL_OVERRIDE = false;
 }
 
 // __END__

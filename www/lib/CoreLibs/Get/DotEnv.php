@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\Get;
 
+// NOTE: it is recommended to use gullvek\dotenv instead which is a copy of this
+
 class DotEnv
 {
 	/** @var string constant comment char, set to # */
@@ -29,11 +31,17 @@ class DotEnv
 	 *                          1 for file loadable, no data or data already loaded
 	 *                          2 for file not readable or open failed
 	 *                          3 for file not found
+	 * @deprecated Use composer package gullevek\dotenv instead -> \gullevek\dotenv\DotEnv::readEnvFile(...)
 	 */
 	public static function readEnvFile(
 		string $path = __DIR__,
 		string $env_file = '.env'
 	): int {
+		trigger_error(
+			'\CoreLibs\Get\DotEnv is deprecated in favor for '
+				. 'composer package gullevek\dotenv which is a copy of this',
+			E_USER_DEPRECATED
+		);
 		// default -1;
 		$status = -1;
 		$env_file_target = $path . DIRECTORY_SEPARATOR . $env_file;

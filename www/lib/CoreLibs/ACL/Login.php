@@ -68,71 +68,97 @@ declare(strict_types=1);
 
 namespace CoreLibs\ACL;
 
-use CoreLibs\Check\Password;
+use CoreLibs\Security\Password;
+use CoreLibs\Convert\Json;
 
 class Login
 {
-	/** @var string the user id var*/
-	private $euid;
+	/** @var ?int the user id var*/
+	private ?int $euid;
 	/** @var string _GET/_POST loginUserId parameter for non password login */
-	private $login_user_id = '';
+	private string $login_user_id = '';
 	/** @var string source, either _GET or _POST or empty */
-	private $login_user_id_source = '';
+	private string $login_user_id_source = '';
 	/** @var bool set to true if illegal characters where found in the login user id string */
-	private $login_user_id_unclear = false;
+	private bool $login_user_id_unclear = false;
 	// is set to one if login okay, or EUID is set and user is okay to access this page
 	/** @var bool */
-	private $permission_okay = false;
+	private bool $permission_okay = false;
 	/** @var string pressed login */
-	private $login = '';
+	private string $login = '';
 	/** @var string master action command */
-	private $action;
+	private string $action;
 	/** @var string login name */
-	private $username;
+	private string $username;
 	/** @var string login password */
-	private $password;
+	private string $password;
 	/** @var string logout button */
-	private $logout;
+	private string $logout;
 	/** @var bool if this is set to true, the user can change passwords */
-	private $password_change = false;
+	private bool $password_change = false;
 	/** @var bool password change was successful */
-	private $password_change_ok = false;
+	private bool $password_change_ok = false;
 	// can we reset password and mail to user with new password set screen
 	/** @var bool */
-	private $password_forgot = false;
+	private bool $password_forgot = false;
 	/** @var bool password forgot mail send ok */
 	// private $password_forgot_ok = false;
 	/** @var string */
-	private $change_password;
+	private string $change_password;
 	/** @var string */
-	private $pw_username;
+	private string $pw_username;
 	/** @var string */
-	private $pw_old_password;
+	private string $pw_old_password;
 	/** @var string */
-	private $pw_new_password;
+	private string $pw_new_password;
 	/** @var string */
-	private $pw_new_password_confirm;
+	private string $pw_new_password_confirm;
 	/** @var array<string> array of users for which the password change is forbidden */
-	private $pw_change_deny_users = [];
+	private array $pw_change_deny_users = [];
 	/** @var string */
-	private $logout_target = '';
+	private string $logout_target = '';
 	/** @var int */
-	private $max_login_error_count = -1;
+	private int $max_login_error_count = -1;
 	/** @var array<string> */
-	private $lock_deny_users = [];
+	private array $lock_deny_users = [];
 	/** @var string */
-	private $page_name = '';
+	private string $page_name = '';
 
 	/** @var int if we have password change we need to define some rules */
-	private $password_min_length = 9;
+	private int $password_min_length = 9;
 	/** @var int an true maxium min, can never be set below this */
-	private $password_min_length_max = 9;
+	private int $password_min_length_max = 9;
 	// max length is fixed as 255 (for input type max), if set highter
 	// it will be set back to 255
 	/** @var int */
-	private $password_max_length = 255;
+	private int $password_max_length = 255;
+
+	/** @var int minum password length */
+	public const PASSWORD_MIN_LENGTH = 9;
+	/** @var int maxium password lenght */
+	public const PASSWORD_MAX_LENGTH = 255;
+	/** @var string special characters for regex */
+	public const PASSWORD_SPECIAL_RANGE = '@$!%*?&';
+	/** @var string regex for lower case alphabet */
+	public const PASSWORD_LOWER = '(?=.*[a-z])';
+	/** @var string regex for upper case alphabet */
+	public const PASSWORD_UPPER = '(?=.*[A-Z])';
+	/** @var string regex for numbers */
+	public const PASSWORD_NUMBER = '(?=.*\d)';
+	/** @var string regex for special chanagers */
+	public const PASSWORD_SPECIAL = "(?=.*[" . self::PASSWORD_SPECIAL_RANGE . "])";
+	/** @var string regex for fixed allowed characters password regex */
+	public const PASSWORD_REGEX = "/^"
+		. self::PASSWORD_LOWER
+		. self::PASSWORD_UPPER
+		. self::PASSWORD_NUMBER
+		. self::PASSWORD_SPECIAL
+		. "[A-Za-z\d" . self::PASSWORD_SPECIAL_RANGE . "]"
+		. "{" . self::PASSWORD_MIN_LENGTH . "," . self::PASSWORD_MAX_LENGTH . "}"
+		. "$/";
+
 	/** @var array<string> can have several regexes, if nothing set, all is ok */
-	private $password_valid_chars = [
+	private array $password_valid_chars = [
 		// '^(?=.*\d)(?=.*[A-Za-z])[0-9A-Za-z!@#$%]{8,}$',
 		// '^(?.*(\pL)u)(?=.*(\pN)u)(?=.*([^\pL\pN])u).{8,}',
 	];
@@ -140,13 +166,13 @@ class Login
 	// login error code, can be matched to the array login_error_msg,
 	// which holds the string
 	/** @var int */
-	private $login_error = 0;
+	private int $login_error = 0;
 	/** @var array<mixed> all possible login error conditions */
-	private $login_error_msg = [];
+	private array $login_error_msg = [];
 	// this is an array holding all strings & templates passed
 	// rom the outside (translation)
 	/** @var array<mixed> */
-	private $login_template = [
+	private array $login_template = [
 		'strings' => [],
 		'password_change' => '',
 		'template' => ''
@@ -154,53 +180,68 @@ class Login
 
 	// acl vars
 	/** @var array<mixed> */
-	private $acl = [];
+	private array $acl = [];
 	/** @var array<mixed> */
-	private $default_acl_list = [];
-	/** @var array<int|string,mixed> Reverse list to lookup level from type */
-	private $default_acl_list_type = [];
+	private array $default_acl_list = [];
+	/** @var array<string,int> Reverse list to lookup level from type */
+	private array $default_acl_list_type = [];
 	/** @var int default ACL level to be based on if nothing set */
-	private $default_acl_level = 0;
+	private int $default_acl_level = 0;
 	// login html, if we are on an ajax page
 	/** @var string|null */
-	private $login_html = '';
+	private ?string $login_html = '';
 	/** @var bool */
-	private $login_is_ajax_page = false;
+	private bool $login_is_ajax_page = false;
 
-	/** @var \CoreLibs\Debug\Logging logger */
-	public $log;
+	// settings
+	/** @var array<string,mixed> options */
+	private array $options = [];
+	/** @var array<string,string> locale options: locale, domain, encoding (opt), path */
+	private array $locale = [
+		'locale' => '',
+		'domain' => '',
+		'encoding' => '',
+		'path' => '',
+	];
+
+	/** @var \CoreLibs\Logging\Logging logger */
+	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\DB\IO database */
-	public $db;
+	public \CoreLibs\DB\IO $db;
 	/** @var \CoreLibs\Language\L10n language */
-	public $l;
+	public \CoreLibs\Language\L10n $l;
 	/** @var \CoreLibs\Create\Session session class */
-	public $session;
+	public \CoreLibs\Create\Session $session;
 
 	/**
 	 * constructor, does ALL, opens db, works through connection checks,
 	 * finishes itself
 	 *
 	 * @param \CoreLibs\DB\IO          $db      Database connection class
-	 * @param \CoreLibs\Debug\Logging  $log     Logging class
+	 * @param \CoreLibs\Logging\Logging  $log     Logging class
 	 * @param \CoreLibs\Create\Session $session Session interface class
-	 * @param bool $auto_login [default true]   Auto login flag, legacy
-	 *                                          If set to true will run login
-	 *                                          during construction
+	 * @param array<string,mixed>      $options Login ACL settings
+	 * $auto_login [default true]   DEPRECATED, moved into options
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
-		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Logging\Logging $log,
 		\CoreLibs\Create\Session $session,
-		bool $auto_login = true
+		array $options = []
 	) {
 		// attach db class
 		$this->db = $db;
-		// log login data for this class only
-		$log->setLogPer('class', true);
 		// attach logger
 		$this->log = $log;
 		// attach session class
 		$this->session = $session;
+
+		// set and check options
+		if (false === $this->loginSetOptions($options)) {
+			// on failure, exit
+			echo "<b>Could not set options</b>";
+			$this->loginTerminate('Could not set options', 3000);
+		}
 
 		// string key, msg: string, flag: e (error), o (ok)
 		$this->login_error_msg = [
@@ -332,14 +373,14 @@ class Login
 				'type' => $res['type'],
 				'name' => $res['name']
 			];
-			$this->default_acl_list_type[$res['type']] = $res['level'];
+			$this->default_acl_list_type[(string)$res['type']] = (int)$res['level'];
 		}
 		// write that into the session
 		$_SESSION['DEFAULT_ACL_LIST'] = $this->default_acl_list;
 		$_SESSION['DEFAULT_ACL_LIST_TYPE'] = $this->default_acl_list_type;
 
 		// this will be deprecated
-		if ($auto_login === true) {
+		if ($this->options['auto_login'] === true) {
 			$this->loginMainCall();
 		}
 	}
@@ -351,11 +392,18 @@ class Login
 	/**
 	 * Wrapper for exit calls
 	 *
-	 * @param  int  $code
+	 * @param  string $message [='']
+	 * @param  int    $code [=0]
 	 * @return void
 	 */
-	protected function loginTerminate($code = 0): void
+	protected function loginTerminate(string $message = '', int $code = 0): void
 	{
+		// all below 1000 are info end, all above 1000 are critical -> should throw exception?
+		if ($code < 1000) {
+			$this->log->info($message, ['code' => $code]);
+		} else {
+			$this->log->critical($message, ['code' => $code]);
+		}
 		exit($code);
 	}
 
@@ -383,6 +431,192 @@ class Login
 	// *************************************************************************
 	// **** PRIVATE INTERNAL
 	// *************************************************************************
+
+	/**
+	 * Set options
+	 * Current allowed:
+	 * target <string>: site target
+	 * debug <bool>
+	 * auto_login <bool>: self start login process
+	 * db_schema <string>
+	 * password_min_length <int>
+	 * default_acl_level <int>
+	 * logout_target <string>: should default be '' or target path to where
+	 * can_change <bool>: can change password (NOT IMPLEMENTED)
+	 * forget_flow <boo>: reset password on forget (NOT IMPLEMENTED)
+	 * locale_path <string>: absolue path to the locale folder
+	 * site_locale <string>: what locale to load
+	 * site_domain <string>: what domain (locale file name) to use
+	 *
+	 * @param  array<string,mixed> $options Options array from class load
+	 * @return bool                         True on ok, False on failure
+	 */
+	private function loginSetOptions(array $options): bool
+	{
+		// target and debug flag
+		if (
+			empty($options['target'])
+		) {
+			$options['target'] = 'test';
+		}
+		if (
+			empty($options['debug']) ||
+			!is_bool($options['debug'])
+		) {
+			$options['debug'] = false;
+		}
+
+		// AUTO LOGIN
+		if (
+			!isset($options['auto_login']) ||
+			!is_bool($options['auto_login'])
+		) {
+			// if set to true will run login call during class construction
+			$options['auto_login'] = false;
+		}
+
+		// DB SCHEMA
+		if (
+			empty($options['db_schema']) ||
+			// TODO more strict check
+			is_string($options['db_schema'])
+		) {
+			// get scham from db, else fallback to public
+			if (!empty($this->db->dbGetSchema(true))) {
+				$options['db_schema'] = $this->db->dbGetSchema(true);
+			} else {
+				$options['db_schema'] = 'public';
+			}
+		}
+		if ($this->db->dbGetSchema() != $options['db_schema']) {
+			$this->db->dbSetSchema($options['db_schema']);
+		}
+
+		// MIN PASSWORD LENGTH
+		// can only be in length of current defined min/max
+		if (
+			!empty($options['password_min_lenght']) &&
+			!is_numeric($options['password_min_length']) &&
+			$options['password_min_length'] >= self::PASSWORD_MIN_LENGTH &&
+			$options['password_min_length'] <= self::PASSWORD_MAX_LENGTH
+		) {
+			if (
+				false === $this->loginSetPasswordMinLength(
+					(int)$options['password_min_length']
+				)
+			) {
+				$options['password_min_length'] = self::PASSWORD_MIN_LENGTH;
+			}
+		}
+
+		// DEFAULT ACL LEVEL
+		if (
+			!isset($options['default_acl_level']) ||
+			!is_numeric($options['default_acl_level']) ||
+			$options['default_acl_level'] < 0 || $options['default_acl_level'] > 100
+		) {
+			$options['default_acl_level'] = 0;
+			if (defined('DEFAULT_ACL_LEVEL')) {
+				trigger_error(
+					'loginMainCall: DEFAULT_ACL_LEVEL should not be used',
+					E_USER_DEPRECATED
+				);
+				$options['default_acl_level'] = DEFAULT_ACL_LEVEL;
+			}
+		}
+		$this->default_acl_level = (int)$options['default_acl_level'];
+
+		// LOGOUT TARGET
+		if (!isset($options['logout_target'])) {
+			if (defined('LOGOUT_TARGET')) {
+				trigger_error(
+					'loginMainCall: LOGOUT_TARGET should not be used',
+					E_USER_DEPRECATED
+				);
+				$options['logout_target'] = LOGOUT_TARGET;
+				$this->logout_target = $options['logout_target'];
+			}
+		}
+
+		// *** PASSWORD SETTINGS
+		// User can change password
+		if (
+			!isset($options['can_change']) ||
+			!is_bool($options['can_change'])
+		) {
+			$options['can_change'] = false;
+		}
+		$this->password_change = $options['can_change'];
+		// User can trigger a forgot password flow
+		if (
+			!isset($options['forgot_flow']) ||
+			!is_bool($options['forgot_flow'])
+		) {
+			$options['forgot_flow'] = false;
+		}
+		$this->password_forgot = $options['forgot_flow'];
+
+		// *** LANGUAGE
+		// LANG: LOCALE PATH
+		if (empty($options['locale_path'])) {
+			// trigger deprecation error
+			trigger_error(
+				'loginSetOptions: misssing locale_path entry is deprecated',
+				E_USER_DEPRECATED
+			);
+			// set path
+			$options['locale_path'] = BASE . INCLUDES . LOCALE;
+		}
+		$_SESSION['LOCALE_PATH'] = $options['locale_path'];
+		// LANG: LOCALE
+		if (empty($options['site_locale'])) {
+			trigger_error(
+				'loginMainCall: SITE_LOCALE should not be used',
+				E_USER_DEPRECATED
+			);
+			$options['site_locale'] = defined('SITE_LOCALE') && !empty(SITE_LOCALE) ?
+				SITE_LOCALE : 'en.UTF-8';
+		}
+		// LANG: DOMAIN
+		if (empty($options['site_domain'])) {
+			// we need to get domain set from outside
+			$options['site_domain'] = 'admin';
+			if (
+				defined('SITE_DOMAIN')
+			) {
+				// trigger deprecation error
+				trigger_error(
+					'loginSetOptions: misssing site_domain entry is deprecated (SITE_DOMAIN)',
+					E_USER_DEPRECATED
+				);
+				// set domain
+				$options['site_domain'] = SITE_DOMAIN;
+			} elseif (
+				defined('CONTENT_PATH')
+			) {
+				// trigger deprecation error
+				trigger_error(
+					'loginSetOptions: misssing site_domain entry is deprecated (CONTENT_PATH)',
+					E_USER_DEPRECATED
+				);
+				$options['set_domain'] = str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH);
+			}
+		}
+		$_SESSION['DEFAULT_DOMAIN'] = $options['site_domain'];
+		// LANG: ENCODING
+		if (empty($options['site_encoding'])) {
+			trigger_error(
+				'loginMainCall: SITE_ENCODING should not be used',
+				E_USER_DEPRECATED
+			);
+			$options['site_encoding'] = defined('SITE_ENCODING') && !empty(SITE_ENCODING) ?
+				SITE_ENCODING : 'UTF-8';
+		}
+
+		// write array to options
+		$this->options = $options;
+		return true;
+	}
 
 	/**
 	 * Checks for all flags and sets error codes for each
@@ -525,7 +759,10 @@ class Login
 		// we have to get the themes in here too
 		$q = "SELECT eu.edit_user_id, eu.username, eu.password, "
 			. "eu.edit_group_id, "
-			. "eg.name AS edit_group_name, admin, "
+			. "eg.name AS edit_group_name, eu.admin, "
+			// additinal acl lists
+			. "eu.additional_acl AS user_additional_acl, "
+			. "eg.additional_acl AS group_additional_acl, "
 			// login error + locked
 			. "eu.login_error_count, eu.login_error_date_last, "
 			. "eu.login_error_date_first, eu.strict, eu.locked, "
@@ -651,7 +888,7 @@ class Login
 			}
 			// normal user processing
 			// set class var and session var
-			$_SESSION['EUID'] = $this->euid = $res['edit_user_id'];
+			$_SESSION['EUID'] = $this->euid = (int)$res['edit_user_id'];
 			// check if user is okay
 			$this->loginCheckPermissions();
 			if ($this->login_error == 0) {
@@ -673,8 +910,10 @@ class Login
 				$_SESSION['GROUP_NAME'] = $res['edit_group_name'];
 				$_SESSION['USER_ACL_LEVEL'] = $res['user_level'];
 				$_SESSION['USER_ACL_TYPE'] = $res['user_type'];
+				$_SESSION['USER_ADDITIONAL_ACL'] = Json::jsonConvertToArray($res['user_additional_acl']);
 				$_SESSION['GROUP_ACL_LEVEL'] = $res['group_level'];
 				$_SESSION['GROUP_ACL_TYPE'] = $res['group_type'];
+				$_SESSION['GROUP_ADDITIONAL_ACL'] = Json::jsonConvertToArray($res['group_additional_acl']);
 				// deprecated TEMPLATE setting
 				$_SESSION['TEMPLATE'] = $res['template'] ? $res['template'] : '';
 				$_SESSION['HEADER_COLOR'] = !empty($res['second_header_color']) ?
@@ -691,6 +930,7 @@ class Login
 				// rgb: nnn.n for each
 				// hsl: nnn.n for first, nnn.n% for 2nd, 3rd
 				// Check\Colors::validateColor()
+				// LANGUAGE/LOCALE/ENCODING:
 				$_SESSION['LANG'] = $res['locale'] ?? 'en';
 				$_SESSION['DEFAULT_CHARSET'] = $res['encoding'] ?? 'UTF-8';
 				$_SESSION['DEFAULT_LOCALE'] = $_SESSION['LANG']
@@ -792,7 +1032,8 @@ class Login
 				$_SESSION['PAGES'] = $pages;
 				$_SESSION['PAGES_ACL_LEVEL'] = $pages_acl;
 				// load the edit_access user rights
-				$q = "SELECT ea.edit_access_id, level, type, ea.name, ea.color, ea.uid, edit_default "
+				$q = "SELECT ea.edit_access_id, level, type, ea.name, "
+					. "ea.color, ea.uid, edit_default, ea.additional_acl "
 					. "FROM edit_access_user eau, edit_access_right ear, edit_access ea "
 					. "WHERE eau.edit_access_id = ea.edit_access_id "
 					. "AND eau.edit_access_right_id = ear.edit_access_right_id "
@@ -812,20 +1053,21 @@ class Login
 					}
 					// build master unit array
 					$unit_access[$res['edit_access_id']] = [
-						'id' => $res['edit_access_id'],
+						'id' => (int)$res['edit_access_id'],
 						'acl_level' => $res['level'],
 						'acl_type' => $res['type'],
 						'name' => $res['name'],
 						'uid' => $res['uid'],
 						'color' => $res['color'],
 						'default' => $res['edit_default'],
+						'additional_acl' => Json::jsonConvertToArray($res['additional_acl']),
 						'data' => $ea_data
 					];
 					// set the default unit
 					if ($res['edit_default']) {
-						$_SESSION['UNIT_DEFAULT'] = $res['edit_access_id'];
+						$_SESSION['UNIT_DEFAULT'] = (int)$res['edit_access_id'];
 					}
-					$_SESSION['UNIT_UID'][$res['uid']] = $res['edit_access_id'];
+					$_SESSION['UNIT_UID'][$res['uid']] = (int)$res['edit_access_id'];
 					// sub arrays for simple access
 					array_push($eauid, $res['edit_access_id']);
 					$unit_acl[$res['edit_access_id']] = $res['level'];
@@ -893,6 +1135,11 @@ class Login
 		// username (login), group name
 		$this->acl['user_name'] = $_SESSION['USER_NAME'];
 		$this->acl['group_name'] = $_SESSION['GROUP_NAME'];
+		// set additional acl
+		$this->acl['additional_acl'] = [
+			'user' => $_SESSION['USER_ADDITIONAL_ACL'],
+			'group' => $_SESSION['GROUP_ADDITIONAL_ACL'],
+		];
 		// we start with the default acl
 		$this->acl['base'] = $this->default_acl_level;
 
@@ -906,18 +1153,18 @@ class Login
 			// user > page > group
 			// group ACL 0
 			if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = $_SESSION['GROUP_ACL_LEVEL'];
+				$this->acl['base'] = (int)$_SESSION['GROUP_ACL_LEVEL'];
 			}
 			// page ACL 1
 			if (
 				isset($_SESSION['PAGES_ACL_LEVEL'][$this->page_name]) &&
 				$_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1
 			) {
-				$this->acl['base'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
+				$this->acl['base'] = (int)$_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
 			}
 			// user ACL 2
 			if ($_SESSION['USER_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = $_SESSION['USER_ACL_LEVEL'];
+				$this->acl['base'] = (int)$_SESSION['USER_ACL_LEVEL'];
 			}
 		}
 		$_SESSION['BASE_ACL_LEVEL'] = $this->acl['base'];
@@ -937,6 +1184,12 @@ class Login
 			$this->acl['page'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
 		}
 
+		$this->acl['unit_id'] = null;
+		$this->acl['unit_name'] = null;
+		$this->acl['unit_uid'] = null;
+		$this->acl['unit'] = [];
+		$this->acl['unit_detail'] = [];
+
 		// PER ACCOUNT (UNIT/edit access)->
 		foreach ($_SESSION['UNIT'] as $ea_id => $unit) {
 			// if admin flag is set, all units are set to 100
@@ -955,7 +1208,8 @@ class Login
 				'uid' => $unit['uid'],
 				'level' => $this->default_acl_list[$this->acl['unit'][$ea_id]]['name'] ?? -1,
 				'default' => $unit['default'],
-				'data' => $unit['data']
+				'data' => $unit['data'],
+				'additional_acl' => $unit['additional_acl']
 			];
 			// set default
 			if (!empty($unit['default'])) {
@@ -981,12 +1235,71 @@ class Login
 	}
 
 	/**
+	 * set locale
+	 * if invalid, set to empty string
+	 *
+	 * @return void
+	 */
+	private function loginSetLocale(): void
+	{
+		// ** LANGUAGE SET AFTER LOGIN **
+		// set the locale
+		if (
+			!empty($_SESSION['DEFAULT_LOCALE']) &&
+			preg_match("/^[-A-Za-z0-9_.@]+$/", $_SESSION['DEFAULT_LOCALE'])
+		) {
+			$locale = $_SESSION['DEFAULT_LOCALE'];
+		} elseif (
+			!preg_match("/^[-A-Za-z0-9_.@]+$/", $this->options['site_locale'])
+		) {
+			$locale = $this->options['site_locale'];
+		} else {
+			$locale = '';
+		}
+		// set the charset
+		preg_match('/(?:\\.(?P<charset>[-A-Za-z0-9_]+))/', $locale, $matches);
+		$locale_encoding = $matches['charset'] ?? '';
+		if (!empty($locale_encoding)) {
+			$encoding = strtoupper($locale_encoding);
+		} elseif (
+			!empty($_SESSION['DEFAULT_CHARSET']) &&
+			preg_match("/^[-A-Za-z0-9_]+$/", $_SESSION['DEFAULT_CHARSET'])
+		) {
+			$encoding = $_SESSION['DEFAULT_CHARSET'];
+		} elseif (
+			!preg_match("/^[-A-Za-z0-9_]+$/", $this->options['site_encoding'])
+		) {
+			$encoding = $this->options['site_encoding'];
+		} else {
+			$encoding = '';
+		}
+		// check domain
+		$domain = $this->options['site_domain'];
+		if (
+			!preg_match("/^\w+$/", $this->options['site_domain'])
+		) {
+			$domain = '';
+		}
+		$path = $this->options['locale_path'];
+		if (!is_dir($path)) {
+			$path = '';
+		}
+		// domain and path are a must set from class options
+		$this->locale = [
+			'locale' => $locale,
+			'domain' => $domain,
+			'encoding' => $encoding,
+			'path' => $path,
+		];
+	}
+
+	/**
 	 * checks if the password is in a valid format
 	 *
 	 * @param  string $password the new password
 	 * @return bool             true or false if valid password or not
 	 */
-	private function loginPasswordChangeValidPassword($password): bool
+	private function loginPasswordChangeValidPassword(string $password): bool
 	{
 		$is_valid_password = true;
 		// check for valid in regex arrays in list
@@ -1126,7 +1439,7 @@ class Login
 	 *
 	 * @return string|null html data for login page, or null for nothing
 	 */
-	private function loginCreateLoginHTML()
+	private function loginCreateLoginHTML(): ?string
 	{
 		$html_string = null;
 		// if permission is ok, return null
@@ -1306,7 +1619,7 @@ class Login
 			// TODO: submit or JS to set target page as ajax call
 			// NOTE: for the HTML block I ignore line lengths
 			// phpcs:disable
-			$this->login_template['password_change'] = <<<EOM
+			$this->login_template['password_change'] = <<<HTML
 <div id="pw_change_div" class="hidden" style="position: absolute; top: 30px; left: 50px; width: 400px; height: 220px; background-color: white; border: 1px solid black; padding: 25px;">
 <table>
 <tr><td class="norm" align="center" colspan="2"><h3>{TITLE_PASSWORD_CHANGE}</h3></td></tr>
@@ -1324,7 +1637,7 @@ class Login
 </table>
 </div>
 {PASSWORD_CHANGE_SHOW}
-EOM;
+HTML;
 			// phpcs:enable
 		}
 		if ($this->password_forgot) {
@@ -1348,7 +1661,7 @@ EOM;
 		// now check templates
 		// TODO: submit or JS to set target page as ajax call
 		if (!$this->login_template['template']) {
-			$this->login_template['template'] = <<<EOM
+			$this->login_template['template'] = <<<HTML
 <!DOCTYPE html>
 <html lang="{LANGUAGE}">
 <head>
@@ -1410,7 +1723,7 @@ h3 { font-size: 18px; }
 </form>
 </body>
 </html>
-EOM;
+HTML;
 		}
 	}
 
@@ -1423,8 +1736,12 @@ EOM;
 	 * @param  string     $username login user username
 	 * @return void                 has no return
 	 */
-	private function writeLog(string $event, string $data, $error = '', string $username = ''): void
-	{
+	private function writeLog(
+		string $event,
+		string $data,
+		string|int $error = '',
+		string $username = ''
+	): void {
 		if ($this->login) {
 				$this->action = 'Login';
 		} elseif ($this->logout) {
@@ -1500,58 +1817,17 @@ EOM;
 			$this->login_error = 1;
 			echo 'Could not connect to DB<br>';
 			// if I can't connect to the DB to auth exit hard. No access allowed
-			$this->loginTerminate(1000);
+			$this->loginTerminate('Could not connect to DB', 1000);
 		}
 		// initial the session if there is no session running already
 		// check if session exists and could be created
 		if ($this->session->checkActiveSession() === false) {
 			$this->login_error = 2;
 			echo '<b>No active session found</b>';
-			$this->loginTerminate(2000);
+			$this->loginTerminate('No active session found', 2000);
 		}
-
-		// if we have a search path we need to set it, to use the correct DB to login
-		// check what schema to use. if there is a login schema use this, else check
-		// if there is a schema set in the config, or fall back to DB_SCHEMA
-		// if this exists, if this also does not exists use public schema
-		/** @phpstan-ignore-next-line */
-		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
-			$SCHEMA = LOGIN_DB_SCHEMA;
-		} elseif (!empty($this->db->dbGetSchema(true))) {
-			$SCHEMA = $this->db->dbGetSchema(true);
-		} elseif (defined('PUBLIC_SCHEMA')) {
-			$SCHEMA = PUBLIC_SCHEMA;
-		} else {
-			$SCHEMA = 'public';
-		}
-		// set schema if schema differs to schema set in db conneciton
-		if ($this->db->dbGetSchema() != $SCHEMA) {
-			$this->db->dbExec("SET search_path TO " . $SCHEMA);
-		}
-
 		// set internal page name
 		$this->page_name = $this->loginReadPageName();
-
-		// set default ACL Level
-		if (defined('DEFAULT_ACL_LEVEL')) {
-			$this->default_acl_level = DEFAULT_ACL_LEVEL;
-		}
-
-		if (defined('PASSWORD_MIN_LENGTH')) {
-			$this->password_min_length = PASSWORD_MIN_LENGTH;
-			$this->password_min_length_max = PASSWORD_MIN_LENGTH;
-		}
-		if (defined('PASSWORD_MIN_LENGTH')) {
-			$this->password_max_length = PASSWORD_MAX_LENGTH;
-		}
-
-		// pre-check that password min/max lengths are inbetween 1 and 255;
-		if ($this->password_max_length > 255) {
-			$this->password_max_length = 255;
-		}
-		if ($this->password_min_length < 1) {
-			$this->password_min_length = 1;
-		}
 
 		// set global is ajax page for if we show the data directly,
 		// or need to pass it back
@@ -1584,13 +1860,13 @@ EOM;
 			if ($login_user_id_changed > 0) {
 				$this->login_user_id_unclear = true;
 				// error for invalid user id?
-				$this->log->debug('LOGIN USER ID', 'Invalid characters: '
+				$this->log->error('LOGIN USER ID: Invalid characters: '
 					. $login_user_id_changed . ' in loginUserId: '
 					. $this->login_user_id . ' (' . $this->login_user_id_source . ')');
 			}
 		}
 		// if there is none, there is none, saves me POST/GET check
-		$this->euid = array_key_exists('EUID', $_SESSION) ? $_SESSION['EUID'] : 0;
+		$this->euid = array_key_exists('EUID', $_SESSION) ? (int)$_SESSION['EUID'] : 0;
 		// get login vars, are so, can't be changed
 		// prepare
 		// pass on vars to Object vars
@@ -1604,20 +1880,8 @@ EOM;
 		$this->pw_old_password = $_POST['pw_old_password'] ?? '';
 		$this->pw_new_password = $_POST['pw_new_password'] ?? '';
 		$this->pw_new_password_confirm = $_POST['pw_new_password_confirm'] ?? '';
-		// logout target (from config)
-		if (defined('LOGOUT_TARGET')) {
-			$this->logout_target = LOGOUT_TARGET;
-		}
 		// disallow user list for password change
 		$this->pw_change_deny_users = ['admin'];
-		// set flag if password change is okay
-		if (defined('PASSWORD_CHANGE')) {
-			$this->password_change = PASSWORD_CHANGE;
-		}
-		// NOTE: forgot password flow with email
-		if (defined('PASSWORD_FORGOT')) {
-			$this->password_forgot = PASSWORD_FORGOT;
-		}
 		// max login counts before error reporting
 		$this->max_login_error_count = 10;
 		// users that never get locked, even if they are set strict
@@ -1630,26 +1894,13 @@ EOM;
 		// logsout user
 		$this->loginLogoutUser();
 		// ** LANGUAGE SET AFTER LOGIN **
-		// set the locale
-		if (
-			$this->session->checkActiveSession() === true &&
-			!empty($_SESSION['DEFAULT_LOCALE'])
-		) {
-			$locale = $_SESSION['DEFAULT_LOCALE'];
-		} else {
-			$locale = (defined('SITE_LOCALE') && !empty(SITE_LOCALE)) ?
-				SITE_LOCALE :
-				/** @phpstan-ignore-next-line DEFAULT_LOCALE could be empty */
-				((defined('DEFAULT_LOCALE') && !empty(DEFAULT_LOCALE)) ?
-					DEFAULT_LOCALE : 'en.UTF-8');
-		}
-		// set domain
-		if (defined('CONTENT_PATH')) {
-			$domain = str_replace('/', '', CONTENT_PATH);
-		} else {
-			$domain = 'admin';
-		}
-		$this->l = new \CoreLibs\Language\L10n($locale, $domain);
+		$this->loginSetLocale();
+		// load translator
+		$this->l = new \CoreLibs\Language\L10n(
+			$this->locale['locale'],
+			$this->locale['domain'],
+			$this->locale['path']
+		);
 		// if the password change flag is okay, run the password change method
 		if ($this->password_change) {
 			$this->loginPasswordChange();
@@ -1665,26 +1916,14 @@ EOM;
 			// if variable AJAX flag is not set, show output
 			// else pass through for ajax work
 			if ($this->login_is_ajax_page === false) {
-				// the login screen if we hav no login permission & login screen html data
+				// the login screen if we hav no login permission and
+				// login screen html data
 				if ($this->login_html !== null) {
 					// echo $this->login_html;
 					$this->loginPrintLogin();
 				}
-				// do not go anywhere, quit processing here
-				// do something with possible debug data?
-				if (TARGET == 'live' || TARGET == 'remote')	{
-					// login
-					$this->log->setLogLevelAll('debug', DEBUG ? true : false);
-					$this->log->setLogLevelAll('echo', false);
-					$this->log->setLogLevelAll('print', DEBUG ? true : false);
-				}
-				$status_msg = $this->log->printErrorMsg();
-				// if ($this->echo_output_all) {
-				if ($this->log->getLogLevelAll('echo')) {
-					echo $status_msg;
-				}
 				// exit so we don't process anything further, at all
-				$this->loginTerminate(3000);
+				$this->loginTerminate('Exit after non ajax page load', 100);
 			} else {
 				// if we are on an ajax page reset any POST/GET array data to avoid
 				// any accidentical processing going on
@@ -1692,7 +1931,7 @@ EOM;
 				$_GET = [];
 				// set the action to login so we can trigger special login html return
 				$_POST['action'] = 'login';
-				$_POST['login_exit'] = 3000;
+				$_POST['login_exit'] = 100;
 				$_POST['login_error'] = $this->loginGetLastErrorCode();
 				$_POST['login_error_text'] = $this->loginGetErrorMsg(
 					$this->loginGetLastErrorCode(),
@@ -1798,7 +2037,7 @@ EOM;
 		if (
 			$length >= $this->password_min_length_max &&
 			$length <= $this->password_max_length &&
-			$length <= 255
+			$length <= self::PASSWORD_MAX_LENGTH
 		) {
 			$this->password_min_length = $length;
 			return true;
@@ -1876,7 +2115,7 @@ EOM;
 		// unset session vars set/used in this login
 		$this->session->sessionDestroy();
 		// unset euid
-		$this->euid = '';
+		$this->euid = null;
 		// then prints the login screen again
 		$this->permission_okay = false;
 	}
@@ -2070,9 +2309,12 @@ EOM;
 	 * @param  string   $type Type name to look in the acl list
 	 * @return int|bool       Either int level or false for not found
 	 */
-	public function loginGetAclListFromType(string $type)
+	public function loginGetAclListFromType(string $type): int|bool
 	{
-		return $this->default_acl_list_type[$type] ?? false;
+		if (!isset($this->default_acl_list_type[$type])) {
+			return false;
+		}
+		return (int)$this->default_acl_list_type[$type];
 	}
 
 	/**
@@ -2082,7 +2324,7 @@ EOM;
 	 * @return bool                     true/false: if the edit access is not
 	 *                                  in the valid list: false
 	 */
-	public function loginCheckEditAccess($edit_access_id): bool
+	public function loginCheckEditAccess(?int $edit_access_id): bool
 	{
 		if ($edit_access_id === null) {
 			return false;
@@ -2110,7 +2352,10 @@ EOM;
 			is_array($_SESSION['UNIT']) &&
 			!array_key_exists($edit_access_id, $_SESSION['UNIT'])
 		) {
-			return $_SESSION['UNIT_DEFAULT'] ?? null;
+			$edit_access_id = null;
+			if (is_numeric($_SESSION['UNIT_DEFAULT'])) {
+				$edit_access_id = (int)$_SESSION['UNIT_DEFAULT'];
+			}
 		}
 		return $edit_access_id;
 	}
@@ -2123,8 +2368,10 @@ EOM;
 	 * @param  string|int $data_key       key value to search for
 	 * @return bool|string                false for not found or string for found data
 	 */
-	public function loginGetEditAccessData(int $edit_access_id, $data_key)
-	{
+	public function loginGetEditAccessData(
+		int $edit_access_id,
+		string|int $data_key
+	): bool|string {
 		if (!isset($_SESSION['UNIT'][$edit_access_id]['data'][$data_key])) {
 			return false;
 		}
@@ -2138,9 +2385,12 @@ EOM;
 	 * @param  string   $uid Edit Access UID to look for
 	 * @return int|bool      Either primary key in int or false in bool for not found
 	 */
-	public function loginGetEditAccessIdFromUid(string $uid)
+	public function loginGetEditAccessIdFromUid(string $uid): int|bool
 	{
-		return $_SESSION['UNIT_UID'][$uid] ?? false;
+		if (!isset($_SESSION['UNIT_UID'][$uid])) {
+			return false;
+		}
+		return (int)$_SESSION['UNIT_UID'][$uid];
 	}
 
 	/**
@@ -2205,9 +2455,58 @@ EOM;
 	 * @param  string|int  $data_key
 	 * @return bool|string
 	 */
-	public function loginSetEditAccessData(int $edit_access_id, $data_key)
-	{
+	public function loginSetEditAccessData(
+		int $edit_access_id,
+		string|int $data_key
+	): bool|string {
 		return $this->loginGetEditAccessData($edit_access_id, $data_key);
+	}
+
+	/**
+	 * Return locale settings with
+	 * locale
+	 * domain
+	 * encoding
+	 * path
+	 *
+	 * empty string if not set
+	 *
+	 * @return array<string,string> Locale settings
+	 */
+	public function loginGetLocale(): array
+	{
+		return $this->locale;
+	}
+
+	/**
+	 * return header color or null for not set
+	 *
+	 * @return string|null Header color in RGB hex with leading sharp
+	 */
+	public function loginGetHeaderColor(): ?string
+	{
+		return $_SESSION['HEADER_COLOR'] ?? null;
+	}
+
+	/**
+	 * Return the current loaded list of pages the user can access
+	 *
+	 * @return array<mixed>
+	 */
+	public function loginGetPages(): array
+	{
+
+		return $_SESSION['PAGES'] ?? [];
+	}
+
+	/**
+	 * Get the current set EUID (edit user id)
+	 *
+	 * @return string EUID as string
+	 */
+	public function loginGetEuid(): string
+	{
+		return (string)$this->euid;
 	}
 }
 

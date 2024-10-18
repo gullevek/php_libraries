@@ -31,36 +31,67 @@ header("Content-type: text/html; charset=" . DEFAULT_ENCODING);
 // start session
 $session = new \CoreLibs\Create\Session(EDIT_SESSION_NAME);
 // init logger
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => LOG_FILE_ID . 'EditBase',
-	'print_file_date' => true,
-	'per_class' => true,
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'log_file_id' => BASE_NAME . 'EditBase',
+	'log_level' => \CoreLibs\Logging\Logging::processLogLevel(DEBUG_LEVEL),
+	'log_per_date' => true,
+	'log_per_class' => true,
 ]);
 // db connection
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
 // login page
-$login = new CoreLibs\ACL\Login($db, $log, $session);
+$login = new CoreLibs\ACL\Login(
+	$db,
+	$log,
+	$session,
+	[
+		'auto_login' => true,
+		'default_acl_level' => DEFAULT_ACL_LEVEL,
+		'logout_target' => '',
+		'site_locale' => SITE_LOCALE,
+		'site_domain' => SITE_DOMAIN,
+		'site_encoding' => SITE_ENCODING,
+		'locale_path' => BASE . INCLUDES . LOCALE,
+	]
+);
 // space for setting special debug flags
 // $login->log->setLogLevelAll('debug', true);
 // lang, path, domain
 // pre auto detect language after login
-$locale = \CoreLibs\Language\GetLocale::setLocale();
+$locale = $login->loginGetLocale();
 // set lang and pass to smarty/backend
 $l10n = new \CoreLibs\Language\L10n(
 	$locale['locale'],
 	$locale['domain'],
 	$locale['path'],
+	$locale['encoding']
 );
 // flush and start
 ob_end_flush();
 
 // init smarty and form class
-$edit_base = new CoreLibs\Admin\EditBase(DB_CONFIG, $log, $l10n, $locale);
+$edit_base = new CoreLibs\Admin\EditBase(
+	DB_CONFIG,
+	$log,
+	$l10n,
+	$login,
+	[
+		'cache_id' => CACHE_ID,
+		'compile_id' => COMPILE_ID
+	]
+);
 // creates edit pages and runs actions
-$edit_base->editBaseRun();
+$edit_base->editBaseRun(
+	BASE . INCLUDES . TEMPLATES . CONTENT_PATH,
+	BASE . TEMPLATES_C,
+	BASE . CACHE,
+	EDIT_BASE_STYLESHEET,
+	DEFAULT_ENCODING,
+	LAYOUT . CSS,
+	LAYOUT . JS,
+	ROOT,
+	CONTENT_PATH
+);
 
 // __END__

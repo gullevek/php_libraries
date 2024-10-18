@@ -31,109 +31,127 @@ declare(strict_types=1);
 
 namespace CoreLibs\Admin;
 
+use CoreLibs\Convert\Json;
+
 class Backend
 {
 	// page name
 	/** @var array<mixed> */
-	public $menu = [];
+	public array $menu = [];
 	/** @var int|string */
-	public $menu_show_flag = 0; // top menu flag (mostly string)
+	public int|string $menu_show_flag = 0; // top menu flag (mostly string)
 	// action ids
 	/** @var array<string> */
-	public $action_list = [
+	public array $action_list = [
 		'action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag',
-		'action_menu', 'action_value', 'action_error', 'action_loaded'
+		'action_menu', 'action_value', 'action_type', 'action_error', 'action_loaded'
 	];
 	/** @var string */
-	public $action;
+	public string $action;
 	/** @var string|int */
-	public $action_id;
+	public string|int $action_id;
 	/** @var string|int */
-	public $action_sub_id;
+	public string|int $action_sub_id;
 	/** @var string|int|bool */
-	public $action_yes;
+	public string|int|bool $action_yes;
 	/** @var string */
-	public $action_flag;
+	public string $action_flag;
 	/** @var string */
-	public $action_menu;
+	public string $action_menu;
 	/** @var string */
-	public $action_loaded;
+	public string $action_loaded;
 	/** @var string */
-	public $action_value;
+	public string $action_value;
 	/** @var string */
-	public $action_error;
+	public string $action_type;
+	/** @var string */
+	public string $action_error;
+
 	// ACL array variable if we want to set acl data from outisde
 	/** @var array<mixed> */
-	public $acl = [];
+	public array $acl = [];
 	/** @var int */
-	public $default_acl;
+	public int $default_acl;
+
 	// queue key
 	/** @var string */
-	public $queue_key;
+	public string $queue_key;
+
+	/** @var array<string> list of allowed types for edit log write */
+	private const WRITE_TYPES = ['BINARY', 'BZIP2', 'LZIP', 'STRING', 'SERIAL', 'JSON'];
+	/** @var array<string> list of available write types for log */
+	private array $write_types_available = [];
+
 	// the current active edit access id
-	/** @var int */
-	public $edit_access_id;
+	/** @var int|null */
+	public int|null $edit_access_id;
 	/** @var string */
-	public $page_name;
+	public string $page_name;
+
 	// error/warning/info messages
 	/** @var array<mixed> */
-	public $messages = [];
+	public array $messages = [];
 	/** @var bool */
-	public $error = false;
+	public bool $error = false;
 	/** @var bool */
-	public $warning = false;
+	public bool $warning = false;
 	/** @var bool */
-	public $info = false;
+	public bool $info = false;
+
 	// internal lang & encoding vars
 	/** @var string */
-	public $lang_dir = '';
+	public string $lang_dir = '';
 	/** @var string */
-	public $lang;
+	public string $lang;
 	/** @var string */
-	public $lang_short;
+	public string $lang_short;
 	/** @var string */
-	public $domain;
+	public string $domain;
 	/** @var string */
-	public $encoding;
-	/** @var \CoreLibs\Debug\Logging logger */
-	public $log;
+	public string $encoding;
+
+	/** @var \CoreLibs\Logging\Logging logger */
+	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\DB\IO database */
-	public $db;
+	public \CoreLibs\DB\IO $db;
 	/** @var \CoreLibs\Language\L10n language */
-	public $l;
+	public \CoreLibs\Language\L10n $l;
 	/** @var \CoreLibs\Create\Session session class */
-	public $session;
+	public \CoreLibs\Create\Session $session;
+
 	// smarty publics [end processing in smarty class]
 	/** @var array<mixed> */
-	public $DATA;
+	public array $DATA = [];
 	/** @var array<mixed> */
-	public $HEADER;
+	public array $HEADER = [];
 	/** @var array<mixed> */
-	public $DEBUG_DATA;
+	public array $DEBUG_DATA = [];
 	/** @var array<mixed> */
-	public $CONTENT_DATA;
+	public array $CONTENT_DATA = [];
 
 	// CONSTRUCTOR / DECONSTRUCTOR |====================================>
 	/**
 	 * main class constructor
 	 *
-	 * @param \CoreLibs\DB\IO          $db      Database connection class
-	 * @param \CoreLibs\Debug\Logging  $log     Logging class
-	 * @param \CoreLibs\Create\Session $session Session interface class
-	 * @param \CoreLibs\Language\L10n  $l10n    l10n language class
-	 * @param array<string,string>     $locale  locale data read from setLocale
+	 * @param \CoreLibs\DB\IO           $db      Database connection class
+	 * @param \CoreLibs\Logging\Logging $log     Logging class
+	 * @param \CoreLibs\Create\Session  $session Session interface class
+	 * @param \CoreLibs\Language\L10n   $l10n    l10n language class
+	 * @param int|null                  $set_default_acl_level [default=null] Default ACL level
+	 * @param bool                      $init_action_vars [default=true] If the action vars should be set
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
-		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Logging\Logging $log,
 		\CoreLibs\Create\Session $session,
 		\CoreLibs\Language\L10n $l10n,
-		array $locale
+		?int $set_default_acl_level = null,
+		bool $init_action_vars = true
 	) {
 		// attach db class
 		$this->db = $db;
 		// set to log not per class
-		$log->setLogPer('class', false);
+		$log->unsetLogFlag(\CoreLibs\Logging\Logger\Flag::per_class);
 		// attach logger
 		$this->log = $log;
 		// attach session class
@@ -141,27 +159,41 @@ class Backend
 		// get the language sub class & init it
 		$this->l = $l10n;
 		// parse and read, legacy stuff
+		$locale = $this->l->getLocaleAsArray();
 		$this->encoding = $locale['encoding'];
 		$this->lang = $locale['lang'];
-		// get first part from lang
-		$this->lang_short = explode('_', $locale['lang'])[0];
-		$this->domain = $this->l->getDomain();
-		$this->lang_dir = $this->l->getBaseLocalePath();
+		$this->lang_short = $locale['lang_short'];
+		$this->domain = $locale['domain'];
+		$this->lang_dir = $locale['path'];
 
 		// set the page name
 		$this->page_name = \CoreLibs\Get\System::getPageName();
 
-		// set the action ids
-		foreach ($this->action_list as $_action) {
-			$this->$_action = $_POST[$_action] ?? '';
+		// NOTE: if any of the "action" vars are used somewhere, it is recommended to NOT set them here
+		if ($init_action_vars) {
+			$this->adbSetActionVars();
 		}
 
-		$this->default_acl = DEFAULT_ACL_LEVEL;
+		if ($set_default_acl_level === null) {
+			/** @deprecated Admin::__construct missing default_acl_level parameter */
+			trigger_error(
+				'Calling Admin::__construct without default_acl_level parameter is deprecated',
+				E_USER_DEPRECATED
+			);
+		}
+		$this->default_acl = $set_default_acl_level ?? DEFAULT_ACL_LEVEL;
+		// if negative or larger than 100, reset to 0
+		if ($this->default_acl < 0 || $this->default_acl > 100) {
+			$this->default_acl = 0;
+		}
 
 		// queue key
-		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action)) {
+		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action ?? '')) {
 			$this->queue_key = \CoreLibs\Create\RandomKey::randomKeyGen(3);
 		}
+
+		// check what edit log data write types are allowed
+		$this->adbSetEditLogWriteTypeAvailable();
 	}
 
 	/**
@@ -172,7 +204,26 @@ class Backend
 		// NO OP
 	}
 
-	// PUBLIC METHODS |=================================================>
+	// MARK: PRIVATE METHODS
+
+	/**
+	 * set the write types that are allowed
+	 *
+	 * @return void
+	 */
+	private function adbSetEditLogWriteTypeAvailable()
+	{
+		// check what edit log data write types are allowed
+		$this->write_types_available = self::WRITE_TYPES;
+		if (!function_exists('bzcompress')) {
+			$this->write_types_available = array_diff($this->write_types_available, ['BINARY', 'BZIP']);
+		}
+		if (!function_exists('gzcompress')) {
+			$this->write_types_available = array_diff($this->write_types_available, ['LZIP']);
+		}
+	}
+
+	// MARK: PUBLIC METHODS |=================================================>
 
 	/**
 	 * set internal ACL from login ACL
@@ -185,75 +236,159 @@ class Backend
 	}
 
 	/**
+	 * Return current set ACL
+	 *
+	 * @return array<mixed>
+	 */
+	public function adbGetAcl(): array
+	{
+		return $this->acl;
+	}
+
+	/**
+	 * Set _POST action vars if needed
+	 *
+	 * @return void
+	 */
+	public function adbSetActionVars()
+	{
+		// set the action ids
+		foreach ($this->action_list as $_action) {
+			$this->$_action = $_POST[$_action] ?? '';
+		}
+	}
+
+	/**
 	 * writes all action vars plus other info into edit_log table
 	 *
-	 * @param  string              $event      any kind of event description,
-	 * @param  string|array<mixed> $data       any kind of data related to that event
-	 * @param  string              $write_type write type can bei STRING or BINARY
+	 * @param  string              $event [default='']        any kind of event description,
+	 * @param  string|array<mixed> $data [default='']         any kind of data related to that event
+	 * @param  string              $write_type [default=JSON] write type can be
+	 *                                                        JSON, STRING/SERIEAL, BINARY/BZIP or ZLIB
+	 * @param  string|null         $db_schema [default=null]  override target schema
 	 * @return void
 	 */
 	public function adbEditLog(
 		string $event = '',
-		$data = '',
-		string $write_type = 'STRING'
+		string|array $data = '',
+		string $write_type = 'JSON',
+		?string $db_schema = null
 	): void {
 		$data_binary = '';
-		if ($write_type == 'BINARY') {
-			$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($data)));
-			$data = 'see bzip compressed data_binary field';
+		$data_write = '';
+		// check if write type is valid, if not fallback to JSON
+		if (!in_array($write_type, $this->write_types_available)) {
+			$this->log->warning('Write type not in allowed array, fallback to JSON', context:[
+				"write_type" => $write_type,
+				"write_list" => $this->write_types_available,
+			]);
+			$write_type = 'JSON';
 		}
-		if ($write_type == 'STRING') {
-			$data_binary = '';
-			$data = $this->db->dbEscapeString(serialize($data));
+		switch ($write_type) {
+			case 'BINARY':
+			case 'BZIP':
+				$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($data)));
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'BZIP',
+					'message' => 'see bzip compressed data_binary field'
+				]);
+				break;
+			case 'ZLIB':
+				$data_binary = $this->db->dbEscapeBytea((string)gzcompress(serialize($data)));
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'ZLIB',
+					'message' => 'see zlib compressed data_binary field'
+				]);
+				break;
+			case 'STRING':
+			case 'SERIAL':
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'SERIAL',
+					'message' => 'see serial string data field'
+				]));
+				$data_write = serialize($data);
+				break;
+			case 'JSON':
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'JSON',
+					'message' => 'see json string data field'
+				]));
+				// must be converted to array
+				if (!is_array($data)) {
+					$data = ["data" => $data];
+				}
+				$data_write = Json::jsonConvertArrayTo($data);
+				break;
+			default:
+				$this->log->alert('Invalid type for data compression was set', context:[
+					"write_type" => $write_type
+				]);
+				break;
 		}
 
-		// check schema
-		$SCHEMA = 'public';
-		/** @phpstan-ignore-next-line */
-		if (defined('LOGIN_DB_SCHEMA') && !empty(LOGIN_DB_SCHEMA)) {
-			$SCHEMA = LOGIN_DB_SCHEMA;
-		} elseif ($this->db->dbGetSchema()) {
-			$SCHEMA = $this->db->dbGetSchema();
-		} elseif (defined('PUBLIC_SCHEMA')) {
-			$SCHEMA = PUBLIC_SCHEMA;
+		/** @var string $DB_SCHEMA check schema */
+		$DB_SCHEMA = 'public';
+		if ($db_schema !== null) {
+			$DB_SCHEMA = $db_schema;
+		} elseif (!empty($this->db->dbGetSchema())) {
+			$DB_SCHEMA = $this->db->dbGetSchema();
 		}
-		/** @phpstan-ignore-next-line for whatever reason $SCHEMA is seen as possible array */
-		$q = "INSERT INTO " . $SCHEMA . ".edit_log "
-			. "(euid, event_date, event, data, data_binary, page, "
-			. "ip, user_agent, referer, script_name, query_string, server_name, http_host, "
-			. "http_accept, http_accept_charset, http_accept_encoding, session_id, "
-			. "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) "
-			. "VALUES "
-			. "(" . $this->db->dbEscapeString(isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
-				$_SESSION['EUID'] :
-				'NULL')
-			. ", "
-			. "NOW(), "
-			. "'" . $this->db->dbEscapeString((string)$event) . "', '" . $data . "', "
-			. "'" . $data_binary . "', '" . $this->db->dbEscapeString((string)$this->page_name) . "', "
-			. "'" . @$_SERVER["REMOTE_ADDR"] . "', "
-			. "'" . $this->db->dbEscapeString(@$_SERVER['HTTP_USER_AGENT']) . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_REFERER'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['SCRIPT_FILENAME'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['QUERY_STRING'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['SERVER_NAME'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_HOST'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT_CHARSET'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '') . "', "
-			. ($this->session->getSessionId() === false ?
-				"NULL" :
-				"'" . $this->session->getSessionId() . "'")
-			. ", "
-			. "'" . $this->db->dbEscapeString($this->action) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_id) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_yes) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_flag) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_menu) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_loaded) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_value) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_error) . "')";
-		$this->db->dbExec($q, 'NULL');
+		$q = <<<SQL
+		INSERT INTO {DB_SCHEMA}.edit_log (
+			euid, event_date, event, data, data_binary, page,
+			ip, user_agent, referer, script_name, query_string, server_name, http_host,
+			http_accept, http_accept_charset, http_accept_encoding, session_id,
+			action, action_id, action_yes, action_flag, action_menu, action_loaded,
+			action_value, action_type, action_error
+		) VALUES (
+			$1, NOW(), $2, $3, $4, $5,
+			$6, $7, $8, $9, $10, $11, $12,
+			$13, $14, $15, $16,
+			$17, $18, $19, $20, $21, $22,
+			$23, $24, $25
+		)
+		SQL;
+		$this->db->dbExecParams(
+			str_replace(
+				['{DB_SCHEMA}'],
+				[$DB_SCHEMA],
+				$q
+			),
+			[
+				// row 1
+				isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
+					$_SESSION['EUID'] : null,
+				(string)$event,
+				$data_write,
+				$data_binary,
+				(string)$this->page_name,
+				// row 2
+				$_SERVER["REMOTE_ADDR"] ?? '',
+				$_SERVER['HTTP_USER_AGENT'] ?? '',
+				$_SERVER['HTTP_REFERER'] ?? '',
+				$_SERVER['SCRIPT_FILENAME'] ?? '',
+				$_SERVER['QUERY_STRING'] ?? '',
+				$_SERVER['SERVER_NAME'] ?? '',
+				$_SERVER['HTTP_HOST'] ?? '',
+				// row 3
+				$_SERVER['HTTP_ACCEPT'] ?? '',
+				$_SERVER['HTTP_ACCEPT_CHARSET'] ?? '',
+				$_SERVER['HTTP_ACCEPT_ENCODING'] ?? '',
+				$this->session->getSessionId() !== false ?
+					$this->session->getSessionId() : null,
+				// row 4
+				$this->action ?? '',
+				$this->action_id ?? '',
+				$this->action_yes ?? '',
+				$this->action_flag ?? '',
+				$this->action_menu ?? '',
+				$this->action_loaded ?? '',
+				$this->action_value ?? '',
+				$this->action_type ?? '',
+				$this->action_error ?? '',
+			],
+			'NULL'
+		);
 	}
 
 	/**
@@ -262,7 +397,7 @@ class Backend
 	 * @param string|int $menu_show_flag
 	 * @return string|int
 	 */
-	public function adbSetMenuShowFlag($menu_show_flag)
+	public function adbSetMenuShowFlag(string|int $menu_show_flag): string|int
 	{
 		// must be string or int
 		$this->menu_show_flag = $menu_show_flag;
@@ -274,7 +409,7 @@ class Backend
 	 *
 	 * @return string|int
 	 */
-	public function adbGetMenuShowFlag()
+	public function adbGetMenuShowFlag(): string|int
 	{
 		return $this->menu_show_flag;
 	}
@@ -282,11 +417,25 @@ class Backend
 	/**
 	 * menu creater (from login menu session pages)
 	 *
-	 * @param  int $flag    visible flag trigger
+	 * @param  string|null $set_content_path
+	 * @param  int         $flag             visible flag trigger
 	 * @return array<mixed> menu array for output on page (smarty)
 	 */
-	public function adbTopMenu(int $flag = 0): array
-	{
+	public function adbTopMenu(
+		?string $set_content_path = null,
+		int $flag = 0,
+	): array {
+		if (
+			$set_content_path === null ||
+			!is_string($set_content_path)
+		) {
+			/** @deprecated adbTopMenu missing set_content_path parameter */
+			trigger_error(
+				'Calling adbTopMenu without set_content_path parameter is deprecated',
+				E_USER_DEPRECATED
+			);
+		}
+		$set_content_path = $set_content_path ?? CONTENT_PATH;
 		if ($this->menu_show_flag) {
 			$flag = $this->menu_show_flag;
 		}
@@ -377,7 +526,7 @@ class Backend
 						\CoreLibs\Get\System::getPageName() == $data['filename'] &&
 						(!isset($data['hostname']) || (
 							isset($data['hostname']) &&
-								(!$data['hostname'] || strstr($data['hostname'], CONTENT_PATH) !== false)
+								(!$data['hostname'] || strstr($data['hostname'], $set_content_path) !== false)
 						))
 					) {
 						$selected = 1;
@@ -427,69 +576,6 @@ class Backend
 		};
 		return $enabled;
 	}
-
-	/**
-	 * creates out of a normal db_return array an assoc array
-	 *
-	 * @param  array<mixed>    $db_array input array
-	 * @param  string|int|bool $key      key
-	 * @param  string|int|bool $value    value
-	 * @return array<mixed>              associative array
-	 * @deprecated \CoreLibs\Combined\ArrayHandler::genAssocArray()
-	 */
-	public function adbAssocArray(array $db_array, $key, $value): array
-	{
-		trigger_error(
-			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Combined\ArrayHandler::genAssocArray',
-			E_USER_DEPRECATED
-		);
-		return \CoreLibs\Combined\ArrayHandler::genAssocArray($db_array, $key, $value);
-	}
-
-	/**
-	 * converts bytes into formated string with KB, MB, etc
-	 *
-	 * @param  string|int|float $number string or int or number
-	 * @return string                   formatted string
-	 * @deprecated \CoreLibs\Convert\Byte::humanReadableByteFormat()
-	 */
-	public function adbByteStringFormat($number): string
-	{
-		trigger_error(
-			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Convert\Byte::humanReadableByteFormat()',
-			E_USER_DEPRECATED
-		);
-		return \CoreLibs\Convert\Byte::humanReadableByteFormat($number);
-	}
-
-	/**
-	 * converts picture to a thumbnail with max x and max y size
-	 *
-	 * @param  string      $pic    source image file with or without path
-	 * @param  int         $size_x maximum size width
-	 * @param  int         $size_y maximum size height
-	 * @param  string      $dummy  empty, or file_type to show an icon
-	 *                             instead of nothing if file is not found
-	 * @param  string      $path   if source start is not ROOT path
-	 *                             if empty ROOT is choosen
-	 * @return string|bool         thumbnail name, or false for error
-	 * @deprecated \CoreLibs\Output\Image::createThumbnail()
-	 */
-	public function adbCreateThumbnail(
-		string $pic,
-		int $size_x,
-		int $size_y,
-		string $dummy = '',
-		string $path = '',
-		string $cache = ''
-	) {
-		trigger_error(
-			'Method ' . __METHOD__ . ' is deprecated: \CoreLibs\Output\Image::createThumbnail()',
-			E_USER_DEPRECATED
-		);
-		return \CoreLibs\Output\Image::createThumbnail($pic, $size_x, $size_y, $dummy, $path, $cache);
-	}
-
 	/**
 	 * wrapper function to fill up the mssages array
 	 *
@@ -523,15 +609,16 @@ class Backend
 	/**
 	 * writes live queue
 	 *
-	 * @param  string  $queue_key string to identfy the queue
-	 * @param  string  $type      [description]
-	 * @param  string  $target    [description]
-	 * @param  string  $data      [description]
-	 * @param  string  $key_name  [description]
-	 * @param  string  $key_value [description]
-	 * @param  ?string $associate [description]
-	 * @param  ?string $file      [description]
-	 * @return void               has no return
+	 * @param  string      $queue_key string to identfy the queue
+	 * @param  string      $type      [description]
+	 * @param  string      $target    [description]
+	 * @param  string      $data      [description]
+	 * @param  string      $key_name  [description]
+	 * @param  string      $key_value [description]
+	 * @param  string|null $associate [description]
+	 * @param  string|null $file      [description]
+	 * @param  string|null $db_schema override target schema
+	 * @return void
 	 */
 	public function adbLiveQueue(
 		string $queue_key,
@@ -540,61 +627,73 @@ class Backend
 		string $data,
 		string $key_name,
 		string $key_value,
-		string $associate = null,
-		string $file = null
+		?string $associate = null,
+		?string $file = null,
+		?string $db_schema = null,
 	): void {
-		/** @phpstan-ignore-next-line */
-		if (defined('GLOBAL_DB_SCHEMA') && !empty(GLOBAL_DB_SCHEMA)) {
-			$SCHEMA = GLOBAL_DB_SCHEMA;
-		} elseif ($this->db->dbGetSchema()) {
-			$SCHEMA = $this->db->dbGetSchema();
-		} elseif (defined('PUBLIC_SCHEMA')) {
-			$SCHEMA = PUBLIC_SCHEMA;
-		} else {
-			$SCHEMA = 'public';
+		/** @var string $DB_SCHEMA check schema */
+		$DB_SCHEMA = 'public';
+		if ($db_schema !== null) {
+			$DB_SCHEMA = $db_schema;
+		} elseif (!empty($this->db->dbGetSchema())) {
+			$DB_SCHEMA = $this->db->dbGetSchema();
 		}
-		$q = "INSERT INTO " . $SCHEMA . ".live_queue ("
-			. "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file"
-			. ") VALUES ("
-			. "'" . $this->db->dbEscapeString($queue_key) . "', '" . $this->db->dbEscapeString($key_value) . "', "
-			. "'" . $this->db->dbEscapeString($key_name) . "', '" . $this->db->dbEscapeString($type) . "', "
-			. "'" . $this->db->dbEscapeString($target) . "', '" . $this->db->dbEscapeString($data) . "', "
-			. "'" . $this->queue_key . "', '" . $this->action . "', "
-			. "'" . $this->db->dbEscapeString((string)$associate) . "', "
-			. "'" . $this->db->dbEscapeString((string)$file) . "')";
-		$this->db->dbExec($q);
+		$q = <<<SQL
+		INSERT INTO {DB_SCHEMA}.live_queue (
+			queue_key, key_value, key_name, type,
+			target, data, group_key, action, associate, file
+		) VALUES (
+			$1, $2, $3, $4,
+			$5, $6, $7, $8, $9, $10
+		)
+		SQL;
+		// $this->db->dbExec($q);
+		$this->db->dbExecParams(
+			str_replace(
+				['{DB_SCHEMA}'],
+				[$DB_SCHEMA],
+				$q
+			),
+			[
+				$queue_key, $key_value,
+				$key_name, $type,
+				$target, $data,
+				$this->queue_key, $this->action,
+				(string)$associate, (string)$file
+			]
+		);
 	}
 
 	/**
 	 * Basic class holds exact the same, except the Year/Month/Day/etc strings
 	 * are translated in this call
 	 *
-	 * @param  int    $year          year YYYY
-	 * @param  int    $month         month m
-	 * @param  int    $day           day d
-	 * @param  int    $hour          hour H
-	 * @param  int    $min           min i
-	 * @param  string $suffix        additional info printed after the date time
-	 *                               variable in the drop down
-	 *                               also used for ID in the on change JS call
-	 * @param  int    $min_steps     default is 1 (minute), can set to anything,
-	 *                               is used as sum up from 0
-	 * @param  bool   $name_pos_back default false, if set to true,
-	 *                               the name will be printend
-	 *                               after the drop down and not before the drop down
-	 * @return string                HTML formated strings for drop down lists
-	 *                               of date and time
+	 * @param  int|string $year          year YYYY
+	 * @param  int|string $month         month m
+	 * @param  int|string $day           day d
+	 * @param  int|string $hour          hour H
+	 * @param  int|string $min           min i
+	 * @param  string     $suffix        additional info printed after the date time
+	 *                                   variable in the drop down
+	 *                                   also used for ID in the on change JS call
+	 * @param  int        $min_steps     default is 1 (minute), can set to anything,
+	 *                                   is used as sum up from 0
+	 * @param  bool       $name_pos_back default false, if set to true,
+	 *                                   the name will be printend
+	 *                                   after the drop down and not before the drop down
+	 * @return string                    HTML formated strings for drop down lists
+	 *                                   of date and time
 	 */
 	public function adbPrintDateTime(
-		$year,
-		$month,
-		$day,
-		$hour,
-		$min,
+		int|string $year,
+		int|string $month,
+		int|string $day,
+		int|string $hour,
+		int|string $min,
 		string $suffix = '',
 		int $min_steps = 1,
 		bool $name_pos_back = false
-	) {
+	): string {
 		// get the build layout
 		$html_time = \CoreLibs\Output\Form\Elements::printDateTime(
 			$year,

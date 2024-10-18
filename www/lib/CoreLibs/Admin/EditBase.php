@@ -20,55 +20,67 @@ use SmartyException;
 class EditBase
 {
 	/** @var array<mixed> */
-	private $HEADER = [];
+	private array $HEADER = [];
 	/** @var array<mixed> */
-	private $DATA = [];
+	private array $DATA = [];
 	/** @var array<mixed> */
-	private $DEBUG_DATA = [];
+	private array $DEBUG_DATA = [];
 
 	/** @var string the template name */
-	private $EDIT_TEMPLATE = '';
+	private string $EDIT_TEMPLATE = '';
 
 	/** @var \CoreLibs\Template\SmartyExtend smarty system */
-	private $smarty;
+	private \CoreLibs\Template\SmartyExtend $smarty;
 	/** @var \CoreLibs\Output\Form\Generate form generate system */
-	private $form;
-	/** @var \CoreLibs\Debug\Logging */
-	public $log;
+	private \CoreLibs\Output\Form\Generate $form;
+	/** @var \CoreLibs\Logging\Logging */
+	public \CoreLibs\Logging\Logging $log;
+	/** @var \CoreLibs\Language\L10n */
+	public \CoreLibs\Language\L10n $l;
+	/** @var \CoreLibs\ACL\Login */
+	public \CoreLibs\ACL\Login $login;
 
 	/**
 	 * construct form generator
 	 *
-	 * @param array<mixed>            $db_config db config array, mandatory
-	 * @param \CoreLibs\Debug\Logging $log       Logging class, null auto set
+	 * phpcs:ignore
+	 * @param array{db_name:string,db_user:string,db_pass:string,db_host:string,db_port:int,db_schema:string,db_encoding:string,db_type:string,db_ssl:string,db_convert_type?:string[],db_convert_placeholder?:bool,db_convert_placeholder_target?:string,db_debug_replace_placeholder?:bool} $db_config db config array, mandatory
+	 * @param \CoreLibs\Logging\Logging $log       Logging class, null auto set
 	 * @param \CoreLibs\Language\L10n $l10n      l10n language class, null auto set
-	 * @param array<string,string>    $locale    locale array from ::setLocale,
-	 *                                           null auto set
+	 * @param \CoreLibs\ACL\Login     $login     login class for ACL settings
+	 * @param array<string,mixed>     $options   Various settings options
 	 */
 	public function __construct(
 		array $db_config,
-		\CoreLibs\Debug\Logging $log,
+		\CoreLibs\Logging\Logging $log,
 		\CoreLibs\Language\L10n $l10n,
-		array $locale
+		\CoreLibs\ACL\Login $login,
+		array $options
 	) {
 		$this->log = $log;
+		$this->login = $login;
+		$this->l = $l10n;
 		// smarty template engine (extended Translation version)
-		$this->smarty = new \CoreLibs\Template\SmartyExtend($l10n, $locale);
+		$this->smarty = new \CoreLibs\Template\SmartyExtend(
+			$l10n,
+			$options['cache_id'] ?? '',
+			$options['compile_id'] ?? '',
+		);
 		// turn off set log per class
-		$log->setLogPer('class', false);
+		$log->unsetLogFlag(\CoreLibs\Logging\Logger\Flag::per_class);
 
 		// create form class
 		$this->form = new \CoreLibs\Output\Form\Generate(
 			$db_config,
 			$log,
 			$l10n,
-			$locale
+			$this->login->loginGetAcl()
 		);
 		if ($this->form->mobile_phone) {
 			echo "I am sorry, but this page cannot be viewed by a mobile phone";
 			exit;
 		}
-		// $this->form->log->debug('POST', $this->form->log->prAr($_POST));
+		// $this->log->debug('POST', $this->log->prAr($_POST));
 	}
 
 	/**
@@ -142,7 +154,7 @@ class EditBase
 						$q = "UPDATE " . $table_name
 							. " SET order_number = " . $row_data_order[$i]
 							. " WHERE " . $table_name . "_id = " . $row_data_id[$i];
-						$q = $this->form->dbExec($q);
+						$q = $this->form->dba->dbExec($q);
 					}
 				} // for all article ids ...
 			} // if write
@@ -161,7 +173,7 @@ class EditBase
 		$options_name = [];
 		$options_selected = [];
 		// DB read data for menu
-		while (is_array($res = $this->form->dbReturn($q))) {
+		while (is_array($res = $this->form->dba->dbReturn($q))) {
 			$row_data[] = [
 				"id" => $res[$table_name . "_id"],
 				"name" => $res["name"],
@@ -170,7 +182,7 @@ class EditBase
 		} // while read data ...
 
 		// html title
-		$this->HEADER['HTML_TITLE'] = $this->form->l->__('Edit Order');
+		$this->HEADER['HTML_TITLE'] = $this->l->__('Edit Order');
 
 		$messages = [];
 		$error = $_POST['error'] ?? 0;
@@ -228,10 +240,14 @@ class EditBase
 	/**
 	 * all edit pages
 	 *
+	 * @param string $set_root
+	 * @param string $set_content_path
 	 * @return void
 	 */
-	private function editPageFlow(): void
-	{
+	private function editPageFlow(
+		string $set_root,
+		string $set_content_path,
+	): void {
 		// set table width
 		$table_width = '100%';
 		// load call only if id is set
@@ -268,23 +284,16 @@ class EditBase
 
 		// MENU START
 		// request some session vars
-		if (empty($_SESSION['HEADER_COLOR'])) {
-			$this->DATA['HEADER_COLOR'] = '#E0E2FF';
-		} else {
-			$this->DATA['HEADER_COLOR'] = $_SESSION['HEADER_COLOR'];
-		}
-		$this->DATA['USER_NAME'] = $_SESSION['USER_NAME'];
-		$this->DATA['EUID'] = $_SESSION['EUID'];
-		$this->DATA['GROUP_NAME'] = $_SESSION['GROUP_NAME'];
-		$this->DATA['GROUP_LEVEL'] = $_SESSION['GROUP_ACL_LEVEL'];
-		$PAGES = $_SESSION['PAGES'];
+		$this->DATA['HEADER_COLOR'] = $this->login->loginGetHeaderColor() ?? '#E0E2FF';
+		$this->DATA['USER_NAME'] = $this->login->loginGetAcl()['user_name'] ?? '';
+		$this->DATA['EUID'] = $this->login->loginGetEuid();
+		$this->DATA['GROUP_NAME'] = $this->login->loginGetAcl()['group_name'] ?? '';
+		$this->DATA['ACCESS_LEVEL'] = $this->login->loginGetAcl()['base'] ?? '';
+		// below is old and to removed when edit_body.tpl is updates
+		$this->DATA['GROUP_LEVEL'] = $this->DATA['ACCESS_LEVEL'];
+		$PAGES = $this->login->loginGetPages();
 
 		//$this->form->log->debug('menu', $this->form->log->prAr($PAGES));
-
-		// build nav from $PAGES ...
-		if (!isset($PAGES) || !is_array($PAGES)) {
-			$PAGES = [];
-		}
 		$menuarray = [];
 		foreach ($PAGES as $PAGE_CUID => $PAGE_DATA) {
 			if ($PAGE_DATA['menu'] && $PAGE_DATA['online']) {
@@ -334,7 +343,7 @@ class EditBase
 				$menu_element['filename'] == \CoreLibs\Get\System::getPageName() &&
 				(!isset($menu_element['hostname']) || (
 					isset($menu_element['hostname']) &&
-						(!$menu_element['hostname'] || strstr($menu_element['hostname'], CONTENT_PATH) !== false)
+						(!$menu_element['hostname'] || strstr($menu_element['hostname'], $set_content_path) !== false)
 				))
 			) {
 				$position = $i;
@@ -414,22 +423,24 @@ class EditBase
 					$elements[] = $this->form->formCreateElement('additional_acl');
 					break;
 				case 'edit_schemes':
+					// @deprecated Will be removed
+				case 'edit_schemas':
 					$elements[] = $this->form->formCreateElement('enabled');
 					$elements[] = $this->form->formCreateElement('name');
 					$elements[] = $this->form->formCreateElement('header_color');
 					$elements[] = $this->form->formCreateElement('template');
 					break;
 				case 'edit_pages':
-					if (!isset($this->form->table_array['edit_page_id']['value'])) {
+					if (!isset($this->form->dba->getTableArray()['edit_page_id']['value'])) {
 						$q = "DELETE FROM temp_files";
-						$this->form->dbExec($q);
+						$this->form->dba->dbExec($q);
 						// gets all files in the current dir and dirs given ending with .php
 						$folders = ['../admin/', '../frontend/'];
 						$files = ['*.php'];
 						$search_glob = [];
 						foreach ($folders as $folder) {
 							// make sure this folder actually exists
-							if (is_dir(ROOT . $folder)) {
+							if (is_dir($set_root . $folder)) {
 								foreach ($files as $file) {
 									$search_glob[] = $folder . $file;
 								}
@@ -450,16 +461,16 @@ class EditBase
 							if ($t_q) {
 								$t_q .= ', ';
 							}
-							$t_q .= "('" . $this->form->dbEscapeString($pathinfo['dirname']) . "', '"
-								. $this->form->dbEscapeString($pathinfo['basename']) . "')";
+							$t_q .= "('" . $this->form->dba->dbEscapeString($pathinfo['dirname']) . "', '"
+								. $this->form->dba->dbEscapeString($pathinfo['basename']) . "')";
 						}
-						$this->form->dbExec($q . $t_q, 'NULL');
+						$this->form->dba->dbExec($q . $t_q, 'NULL');
 						$elements[] = $this->form->formCreateElement('filename');
 					} else {
 						// show file menu
 						// just show name of file ...
 						$this->DATA['filename_exist'] = 1;
-						$this->DATA['filename'] = $this->form->table_array['filename']['value'];
+						$this->DATA['filename'] = $this->form->dba->getTableArray()['filename']['value'];
 					} // File Name View IF
 					$elements[] = $this->form->formCreateElement('hostname');
 					$elements[] = $this->form->formCreateElement('name');
@@ -532,31 +543,74 @@ class EditBase
 	 * @throws Exception
 	 * @throws SmartyException
 	 */
-	public function editBaseRun()
-	{
+	public function editBaseRun(
+		?string $template_dir = null,
+		?string $compile_dir = null,
+		?string $cache_dir = null,
+		?string $set_admin_stylesheet = null,
+		?string $set_default_encoding = null,
+		?string $set_css = null,
+		?string $set_js = null,
+		?string $set_root = null,
+		?string $set_content_path = null
+	): void {
+		// trigger deprecated warning
+		if (
+			$template_dir === null ||
+			$compile_dir === null ||
+			$cache_dir === null ||
+			$set_admin_stylesheet === null ||
+			$set_default_encoding === null ||
+			$set_css === null ||
+			$set_js === null ||
+			$set_root === null ||
+			$set_content_path === null
+		) {
+			/** @deprecated editBaseRun call without parameters */
+			trigger_error(
+				'Calling editBaseRun without paramters is deprecated',
+				E_USER_DEPRECATED
+			);
+		}
+		// set vars (to be deprecated)
+		$template_dir = $template_dir ?? BASE . INCLUDES . TEMPLATES . CONTENT_PATH;
+		$compile_dir = $compile_dir ?? BASE . TEMPLATES_C;
+		$cache_dir = $cache_dir ?? BASE . CACHE;
+		$set_admin_stylesheet = $set_admin_stylesheet ?? ADMIN_STYLESHEET;
+		$set_default_encoding = $set_default_encoding ?? DEFAULT_ENCODING;
+		$set_css = $set_css ?? LAYOUT . CSS;
+		$set_js = $set_js ?? LAYOUT . JS;
+		$set_root = $set_root ?? ROOT;
+		$set_content_path = $set_content_path ?? CONTENT_PATH;
+
 		// set the template dir
-		// WARNING: this has a special check for the mailing tool layout (old layout)
-		if (defined('LAYOUT')) {
-			$this->smarty->setTemplateDir(BASE . INCLUDES . TEMPLATES . CONTENT_PATH);
-			$this->DATA['css'] = LAYOUT . CSS;
-			$this->DATA['js'] = LAYOUT . JS;
-		} else {
+		// WARNING: this has a special check for the mailing tool layout (old no layout folder)
+		if (!defined('LAYOUT')) {
+			trigger_error(
+				'EditBase with unset LAYOUT is deprecated',
+				E_USER_DEPRECATED
+			);
 			$this->smarty->setTemplateDir(TEMPLATES);
 			$this->DATA['css'] = CSS;
 			$this->DATA['js'] = JS;
+		} else {
+			$this->smarty->setTemplateDir($template_dir);
+			$this->DATA['css'] = $set_css;
+			$this->DATA['js'] = $set_js;
 		}
-		$ADMIN_STYLESHEET = 'edit.css';
 		// define all needed smarty stuff for the general HTML/page building
-		$this->HEADER['CSS'] = CSS;
-		$this->HEADER['DEFAULT_ENCODING'] = DEFAULT_ENCODING;
-		/** @phpstan-ignore-next-line because ADMIN_STYLESHEET can be null */
-		$this->HEADER['STYLESHEET'] = $ADMIN_STYLESHEET ?? ADMIN_STYLESHEET;
+		$this->HEADER['CSS'] = $set_css;
+		$this->HEADER['DEFAULT_ENCODING'] = $set_default_encoding;
+		$this->HEADER['STYLESHEET'] = $set_admin_stylesheet;
 
 		// main run
 		if ($this->form->my_page_name == 'edit_order') {
 			$this->editOrderPage();
 		} else {
-			$this->editPageFlow();
+			$this->editPageFlow(
+				$set_root,
+				$set_content_path
+			);
 		}
 
 		// debug data, if DEBUG flag is on, this data is print out
@@ -569,11 +623,11 @@ class EditBase
 		foreach ($CONTENT_DATA as $key => $value) {
 			$this->smarty->assign($key, $value);
 		}
-		if (is_dir(BASE . TEMPLATES_C)) {
-			$this->smarty->setCompileDir(BASE . TEMPLATES_C);
+		if (is_dir($compile_dir)) {
+			$this->smarty->setCompileDir($compile_dir);
 		}
-		if (is_dir(BASE . CACHE)) {
-			$this->smarty->setCacheDir(BASE . CACHE);
+		if (is_dir($cache_dir)) {
+			$this->smarty->setCacheDir($cache_dir);
 		}
 		$this->smarty->display(
 			$this->EDIT_TEMPLATE,
@@ -581,7 +635,7 @@ class EditBase
 			'editAdmin_' . $this->smarty->lang
 		);
 
-		$this->form->log->debug('DEBUGEND', '==================================== [Form END]');
+		$this->log->debug('DEBUGEND', '==================================== [Form END]');
 	}
 }
 

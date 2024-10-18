@@ -1,12 +1,16 @@
 <?php
 
 /*
+ * NOTE: this is deprecated and all moved \CoreLibs\Security\Password
+ *
  * core password set, check and rehash check wrapper functions
  */
 
 declare(strict_types=1);
 
 namespace CoreLibs\Check;
+
+use CoreLibs\Security\Password as PasswordNew;
 
 class Password
 {
@@ -15,13 +19,16 @@ class Password
 	 *
 	 * @param  string $password password
 	 * @return string           hashed password
+	 * @deprecated v9.0 Moved to \CoreLibs\Security\Password::passwordSet
 	 */
 	public static function passwordSet(string $password): string
 	{
-		// always use the PHP default for the password
-		// password options ca be set in the password init,
-		// but should be kept as default
-		return password_hash($password, PASSWORD_DEFAULT);
+		trigger_error(
+			'Method ' . __METHOD__ . ' is deprecated, use '
+				. '\CoreLibs\Security\Password::passwordSet',
+			E_USER_DEPRECATED
+		);
+		return PasswordNew::passwordSet($password);
 	}
 
 	/**
@@ -30,14 +37,16 @@ class Password
 	 * @param  string $password password
 	 * @param  string $hash     password hash
 	 * @return bool             true or false
+	 * @deprecated v9.0 Moved to \CoreLibs\Security\Password::passwordVerify
 	 */
 	public static function passwordVerify(string $password, string $hash): bool
 	{
-		if (password_verify($password, $hash)) {
-			return true;
-		} else {
-			return false;
-		}
+		trigger_error(
+			'Method ' . __METHOD__ . ' is deprecated, use '
+				. '\CoreLibs\Security\Password::passwordVerify',
+			E_USER_DEPRECATED
+		);
+		return PasswordNew::passwordVerify($password, $hash);
 	}
 
 	/**
@@ -45,14 +54,16 @@ class Password
 	 *
 	 * @param  string $hash password hash
 	 * @return bool         true or false
+	 * @deprecated v9.0 Moved to \CoreLibs\Security\Password::passwordRehashCheck
 	 */
 	public static function passwordRehashCheck(string $hash): bool
 	{
-		if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
-			return true;
-		} else {
-			return false;
-		}
+		trigger_error(
+			'Method ' . __METHOD__ . ' is deprecated, use '
+				. '\CoreLibs\Security\Password::passwordRehashCheck',
+			E_USER_DEPRECATED
+		);
+		return PasswordNew::passwordRehashCheck($hash);
 	}
 }
 

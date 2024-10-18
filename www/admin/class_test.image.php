@@ -6,14 +6,7 @@
 
 declare(strict_types=1);
 
-$DEBUG_ALL_OVERRIDE = 0; // set to 1 to debug on live/remote server locations
-$DEBUG_ALL = 1;
-$PRINT_ALL = 1;
-$DB_DEBUG = 1;
-
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -27,15 +20,10 @@ ob_end_flush();
 
 use CoreLibs\Output\Image;
 
-$log = new CoreLibs\Debug\Logging([
+$log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
-	'file_id' => $LOG_FILE_ID,
-	// add file date
-	'print_file_date' => true,
-	// set debug and print flags
-	'debug_all' => $DEBUG_ALL ?? false,
-	'echo_all' => $ECHO_ALL ?? false,
-	'print_all' => $PRINT_ALL ?? false,
+	'log_file_id' => $LOG_FILE_ID,
+	'log_per_date' => true,
 ]);
 $_image = new CoreLibs\Output\Image();
 $image_class = 'CoreLibs\Output\Image';
@@ -44,7 +32,7 @@ $image_class = 'CoreLibs\Output\Image';
 
 $PAGE_NAME = 'TEST CLASS: IMAGE';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
@@ -53,21 +41,36 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 $thumb_width = 250;
 $thumb_height = 300;
 // class
-$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture_square.jpg';
+$image = BASE . CONTENT_PATH . LAYOUT . IMAGES . 'no_picture_square.jpg';
+// folders
+$cache_folder = BASE . CONTENT_PATH . LAYOUT . CACHE . IMAGES;
+$web_folder = LAYOUT . CACHE . IMAGES;
 // rotate image first
-$_image->correctImageOrientation($image);
+try {
+	$_image->correctImageOrientation($image);
+} catch (\UnexpectedValueException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+} catch (\RuntimeException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+}
 // thumbnail tests
 echo "<div>CLASS->CREATETHUMBNAILSIMPLE: "
 	. basename($image) . ": WIDTH: $thumb_width<br><img src="
-	. $_image->createThumbnailSimple($image, $thumb_width) . "></div>";
+	. $_image->createThumbnailSimple($image, $thumb_width, 0, $cache_folder, $web_folder) . "></div>";
 // static
-$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . 'no_picture.jpg';
+$image = BASE . CONTENT_PATH . LAYOUT . IMAGES . 'no_picture.jpg';
 // rotate image first
-$image_class::correctImageOrientation($image);
+try {
+	$image_class::correctImageOrientation($image);
+} catch (\UnexpectedValueException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+} catch (\RuntimeException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+}
 // thumbnail tests
 echo "<div>S::CREATETHUMBNAILSIMPLE: "
 	. basename($image) . ": WIDTH: $thumb_width<br><img src="
-	. $image_class::createThumbnailSimple($image, $thumb_width) . "></div>";
+	. $image_class::createThumbnailSimple($image, $thumb_width, 0, $cache_folder, $web_folder) . "></div>";
 
 echo "U-STATIC VARIOUS:<br>";
 // image thumbnail
@@ -91,27 +94,45 @@ $images = array(
 // return mime type ala mimetype
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 foreach ($images as $image) {
-	$image = BASE . LAYOUT . CONTENT_PATH . IMAGES . $image;
-	list ($height, $width, $img_type) = getimagesize($image);
+	$image = BASE . CONTENT_PATH . LAYOUT . IMAGES . $image;
+	list ($height, $width, $img_type) = \CoreLibs\Convert\SetVarType::setArray(getimagesize($image));
 	echo "<div><b>IMAGE INFO</b>: " . $height . "x" . $width . ", TYPE: "
-		. $img_type . " [" . $finfo->file($image) . "]</div>";
+		. \CoreLibs\Debug\Support::dumpVar($img_type) . " [" . $finfo->file($image) . "]</div>";
 	// rotate image first
-	Image::correctImageOrientation($image);
+	try {
+		Image::correctImageOrientation($image);
+	} catch (\UnexpectedValueException $e) {
+		print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+	} catch (\RuntimeException $e) {
+		print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+	}
 	// thumbnail tests
 	echo "<div>" . basename($image) . ": WIDTH: $thumb_width<br><img src="
-		. Image::createThumbnailSimple($image, $thumb_width) . "></div>";
+		. Image::createThumbnailSimple($image, $thumb_width, 0, $cache_folder, $web_folder) . "></div>";
 	echo "<div>" . basename($image) . ": HEIGHT: $thumb_height<br><img src="
-		. Image::createThumbnailSimple($image, 0, $thumb_height) . "></div>";
+		. Image::createThumbnailSimple($image, 0, $thumb_height, $cache_folder, $web_folder) . "></div>";
 	echo "<div>" . basename($image) . ": WIDTH/HEIGHT: $thumb_width x $thumb_height<br><img src="
-		. Image::createThumbnailSimple($image, $thumb_width, $thumb_height) . "></div>";
+		. Image::createThumbnailSimple($image, $thumb_width, $thumb_height, $cache_folder, $web_folder) . "></div>";
 	// test with dummy
 	echo "<div>" . basename($image) . ": WIDTH/HEIGHT: $thumb_width x $thumb_height (+DUMMY)<br><img src="
-		. Image::createThumbnailSimple($image, $thumb_width, $thumb_height, null, true, false) . "></div>";
+		. Image::createThumbnailSimple(
+			$image,
+			$thumb_width,
+			$thumb_height,
+			$cache_folder,
+			$web_folder,
+			true,
+			false
+		) . "></div>";
 	echo "<hr>";
 }
 
-// error message
-print $log->printErrorMsg();
+// errros
+try {
+	Image::createThumbnailSimple('', $thumb_width, 0, $cache_folder, $web_folder);
+} catch (\UnexpectedValueException $e) {
+	print "Message:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+}
 
 print "</body></html>";
 

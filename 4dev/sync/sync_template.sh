@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # create path
 path=$(pwd)"/"$0;
@@ -9,6 +9,11 @@ REMOTE_WEB="<remote folder>";
 TARGET_HOST_WEB="<user>@<host>";
 TMP_DIR=$LOCAL_BASE_DIR"/4dev/tmp/";
 tmpf_web=$TMP_DIR"sync.exclude.tmp";
+
+if [ ! -d "$LOCAL_BASE_DIR" ]; then
+	echo "Folder: $LOCAL_BASE_DIR not found";
+	exit;
+fi;
 
 # if vendor be sure group folder is +x
 chmod -R ug+rX ${LOCAL_DIR}/vender/

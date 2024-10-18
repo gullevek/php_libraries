@@ -7,15 +7,12 @@
 declare(strict_types=1);
 
 // all the settings are overruled by config
-$DEBUG_ALL_OVERRIDE = true; // set to 1 to debug on live/remote server locations
 $DEBUG_ALL = true;
 $PRINT_ALL = false;
 $ECHO_ALL = true;
 $DB_DEBUG = true;
 
-if ($DEBUG_ALL) {
-	error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
-}
+error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -34,7 +31,7 @@ $ECHO_ALL = true;
 use CoreLibs\Debug\Support as DebugSupport;
 use CoreLibs\Debug\FileWriter;
 
-$debug = new CoreLibs\Debug\Logging([
+$debug = new CoreLibs\Debug\LoggingLegacy([
 	'log_folder' => BASE . LOG,
 	'file_id' => $LOG_FILE_ID,
 	'debug_all' => $DEBUG_ALL,
@@ -42,21 +39,31 @@ $debug = new CoreLibs\Debug\Logging([
 	'echo_all' => $ECHO_ALL,
 ]);
 $debug_support_class = 'CoreLibs\Debug\Support';
-$debug_logging_class = 'CoreLibs\Debug\Logging';
+$debug_logging_class = 'CoreLibs\Debug\LoggingLegacy';
 
 $PAGE_NAME = 'TEST CLASS: DEBUG';
 print "<!DOCTYPE html>";
-print "<html><head><title>" . $PAGE_NAME . "</title><head>";
+print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
-function test()
+/**
+ * Undocumented function
+ *
+ * @return string|null
+ */
+function test(): ?string
 {
 	return DebugSupport::getCallerMethod(1);
 }
 
-function test2()
+/**
+ * Undocumented function
+ *
+ * @return array<mixed>
+ */
+function test2(): array
 {
 	return DebugSupport::getCallerMethodList(1);
 }
@@ -64,16 +71,43 @@ function test2()
 print "S::GETCALLERMETHOD: " . DebugSupport::getCallerMethod(0) . "<br>";
 print "S::GETCALLERMETHOD: " . test() . "<br>";
 print "S::GETCALLERMETHODLIST: <pre>" . print_r(test2(), true) . "</pre><br>";
+// printAr
 print "S::PRINTAR: " . DebugSupport::printAr(['Foo', 'Bar']) . "<br>";
 print "V-S::PRINTAR: " . $debug_support_class::printAr(['Foo', 'Bar']) . "<br>";
+// printBool
 print "S::PRINTBOOL(default): " . DebugSupport::printBool(true) . "<br>";
 print "S::PRINTBOOL(name): " . DebugSupport::printBool(true, 'Name') . "<br>";
 print "S::PRINTBOOL(name, ok): " . DebugSupport::printBool(true, 'Name', 'ok') . "<br>";
 print "S::PRINTBOOL(name, ok, not): " . DebugSupport::printBool(false, 'Name', 'ok', 'not') . "<br>";
+// debugString
+print "S::DEBUSTRING(s): " . DebugSupport::debugString('SET') . "<br>";
 print "S::DEBUSTRING(s): " . DebugSupport::debugString('SET') . "<br>";
 print "S::DEBUSTRING(s&gt;): " . DebugSupport::debugString('<SET>') . "<br>";
 print "S::DEBUSTRING(''): " . DebugSupport::debugString('') . "<br>";
 print "S::DEBUSTRING(,s): " . DebugSupport::debugString(null, '{-}') . "<br>";
+// dumpVar
+print "S::DUMPVAR(s): " . DebugSupport::dumpVar('SET') . "<br>";
+print "S::DUMPVAR(s,true): " . DebugSupport::dumpVar('SET', true) . "<br>";
+print "S::DUMPVAR(s&gt;): " . DebugSupport::dumpVar('<SET>') . "<br>";
+print "S::DUMPVAR(s&gt;,true): " . DebugSupport::dumpVar('<SET>', true) . "<br>";
+print "S::DUMPVAR(''): " . DebugSupport::dumpVar('') . "<br>";
+print "S::DUMPVAR(,s): " . DebugSupport::dumpVar(null) . "<br>";
+print "S::DUMPVAR([a,b]): " . DebugSupport::dumpVar(['a', 'b']) . "<br>";
+print "S::DUMPVAR([a,b],true): " . DebugSupport::dumpVar(['a', 'b'], true) . "<br>";
+print "S::DUMPVAR([MIXED]): " . DebugSupport::dumpVar(<<<EOM
+Line is
+break
+with
+<html>block</html>
+and > and <
+EOM) . "<br>";
+// exportVar
+// print "S::EXPORTVAR(s): " . DebugSupport::exportVar('SET') . "<br>";
+// print "S::EXPORTVAR(s&gt;): " . DebugSupport::exportVar('<SET>') . "<br>";
+// print "S::EXPORTVAR(''): " . DebugSupport::exportVar('') . "<br>";
+// print "S::EXPORTVAR(,s): " . DebugSupport::exportVar(null) . "<br>";
+// print "S::EXPORTVAR([a,b]): " . DebugSupport::exportVar(['a', 'b']) . "<br>";
+// print "S::EXPORTVAR([a,b],true): " . DebugSupport::exportVar(['a', 'b']) . "<br>";
 
 // get test
 print "LOG FOLDER: " . $debug->getSetting('log_folder') . "<br>";
@@ -87,7 +121,7 @@ print "C->PRINTERRORMSG: <br>" . $debug->printErrorMsg() . "<br>";
 echo "<b>OPTIONS DEBUG CALL</b><br>";
 
 // new log type with options
-$new_log = new CoreLibs\Debug\Logging([
+$new_log = new CoreLibs\Debug\LoggingLegacy([
 	'log_folder' => '../log/',
 	'file_id' => 'DebugTestNewLogger',
 	// add file date
@@ -108,21 +142,36 @@ $new_log = new CoreLibs\Debug\Logging([
 $new_log->debug('OPTIONS TYPE', 'New Type error');
 print "OPTIONS LOGGER:<br>" . $new_log->printErrorMsg();
 $new_log->setLogLevel('debug', 'on', ['A', 'B', 'C' => false]);
-print "LOG LEVEL: " .  DebugSupport::printAr($new_log->getLogLevel('debug', 'on')) . "<br>";
+print "LOG LEVEL: " .  DebugSupport::printAr(\CoreLibs\Convert\SetVarType::setArray(
+	$new_log->getLogLevel('debug', 'on')
+)) . "<br>";
 
 echo "<b>CLASS DEBUG CALL</b><br>";
 
 // @codingStandardsIgnoreLine
 class TestL
 {
+	/** @var \CoreLibs\Debug\LoggingLegacy */
 	public $log;
 	public function __construct()
 	{
-		$this->log = new CoreLibs\Debug\Logging();
+		$this->log = new CoreLibs\Debug\LoggingLegacy([
+			'log_folder' => '../log/',
+			'file_id' => 'DebugTestTestLLogger',
+		]);
 	}
-	public function test(string $ts = null)
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string|null $ts
+	 * @return bool
+	 */
+	public function test(?string $ts = null): bool
 	{
 		print "* GETCALLERCLASS(INSIDE CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
+		print "* GETCALLERTOPCLASS(INSIDE CLASS): " . \CoreLibs\Debug\Support::getCallerTopLevelClass() . "<br>";
+		print "* GETCALLSTACK(INSIDE CLASS): <pre>"
+			. DebugSupport::prAr(\CoreLibs\Debug\Support::getCallStack()) . "</pre><br>";
 		$this->log->debug('TESTL', 'Logging in class testL' . ($ts !== null ? ': ' . $ts : ''));
 		$this->log->debug('TESTL', 'Some other message');
 		return true;
@@ -131,14 +180,23 @@ class TestL
 // @codingStandardsIgnoreLine
 class TestR extends TestL
 {
+	/** @var string */
 	public $foo;
 	public function __construct()
 	{
 		parent::__construct();
 	}
-	public function subTest()
+	/**
+	 * Undocumented function
+	 *
+	 * @return bool
+	 */
+	public function subTest(): bool
 	{
 		print "** GETCALLERCLASS(INSIDE EXTND CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
+		print "** GETCALLERTOPCLASS(INSIDE EXTND CLASS): " . \CoreLibs\Debug\Support::getCallerTopLevelClass() . "<br>";
+		print "** GETCALLSTACK(INSIDE EXTND CLASS): <pre>"
+			. DebugSupport::prAr(\CoreLibs\Debug\Support::getCallStack()) . "</pre><br>";
 		$this->log->debug('TESTR', 'Logging in class testR (extends testL)');
 		$this->test('TESTR INSIDE');
 		$this->log->debug('TESTR', 'Array: '
@@ -160,12 +218,18 @@ print "CLASS EXTEND: PRINTERRORMSG: <br>" . $tr->log->printErrorMsg() . "<br>";
 // @codingStandardsIgnoreLine
 class AttachOutside
 {
+	/** @var \CoreLibs\Debug\LoggingLegacy */
 	public $log;
-	public function __construct(object $logger_class)
+	public function __construct(\CoreLibs\Debug\LoggingLegacy $logger_class)
 	{
 		$this->log = $logger_class;
 	}
-	public function test()
+	/**
+	 * Undocumented function
+	 *
+	 * @return string
+	 */
+	public function test(): string
 	{
 		$this->log->debug('ATTACHOUTSIDE', 'A test');
 		return get_class($this);
@@ -177,6 +241,7 @@ print "AO-CLASS: DEBUG: " . $ao->test() . "<br>";
 print "GETCALLERCLASS(NON CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
 
 // fdebug
+print "S::FSETFILENAME: " . FileWriter::fsetFolder(BASE . LOG) . "<br>";
 print "S::FSETFILENAME: " . FileWriter::fsetFilename('class_test_debug_file.log') . "<br>";
 print "S::FDEBUG: " . FileWriter::fdebug('CLASS TEST DEBUG FILE: ' . date('Y-m-d H:i:s')) . "<br>";
 
@@ -189,6 +254,12 @@ $debug->setLogPer('level', false);
 $ar = ['A', 1, ['B' => 'D']];
 $debug->debug('ARRAY', 'Array: ' . $debug->prAr($ar));
 $debug->debug('BOOL', 'True: ' . $debug->prBl(true) . ', False: ' . $debug->prBl(false));
+$debug->debug('MIXED', 'ANYTHING: ' . DebugSupport::dumpVar([
+	'foo' => 1,
+	'bar' => null,
+	'self' => [1, 2, 3],
+	'other' => false
+]));
 
 // error message
 // future DEPRECATED

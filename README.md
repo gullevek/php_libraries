@@ -4,7 +4,6 @@
 
 * Uses PSR-12
 * tab indent instead of 4 spaces indent
-* Warning at 120 character length, error at 240 character length
 
 ## General information
 
@@ -24,9 +23,9 @@ There are three branches:
 ### master
 
 The active branch, which is the namespace branch.
-Currently compatible with PHP 7.4 and 8.0
+Compatible with PHP 8.1 or higher
 
-### legacy
+### legacy (deprecated)
 
 The old non namepsace format layout.
 This is fully deprecated and will no longer be maintaned.
@@ -39,17 +38,17 @@ Any current development is done here
 ## Static checks
 
 With phpstan (`4dev/checking/phpstan.sh`)
-`phpstan`
+`vendor/bin/phpstan`
 
 With phan (`4dev/checking/phan.sh`)
-`phan --progress-bar -C --analyze-twice`
+`vendor/bin/phan --progress-bar -C --analyze-twice`
 
 pslam is setup but not configured
 
 ## Unit tests
 
 With phpunit (`4dev/checking/phpunit.sh`)
-`phpunit -c $phpunit.xml 4dev/tests/`
+`www/vendor/bin/phpunit -c $phpunit.xml 4dev/tests/`
 
 ## Other Notes
 
@@ -93,3 +92,25 @@ Loads classes internal (not passed in, not extend)
 * \CoreLibs\Admin\EditBase loads \CoreLibs\Template\SmartyExtend, \CoreLibs\Output\Form\Generate
 * \CoreLibs\Output\From\Generate loads \CoreLibs\Debug\Logging, \CoreLibs\Language\L10n if not passed on
 * \CoreLibs\Output\From\Generate loads \CoreLibs\Output\From\TableArrays
+
+## PHP unit testing and Intelephense
+
+Intelephense can not directly read phar files so we do the following
+
+In the workspace root we have `.libs/`, be in the workspace folder not the `.libs/` folder
+
+`php -r "(new Phar('/path/to/.phive/phars/phpunit-9.6.13.phar'))->extractTo('.libs/phpunit/');"`
+
+andd add in vscode Intelephense > Enviroment: Include Paths (intelephense.environment.includePaths)
+
+```json
+"intelephense.environment.includePaths": [
+  "/.libs/phpunit/"
+]
+```
+
+Add `.libs` to the master .gitingore
+
+### Update phpunit
+
+On a version update the old phpunit folder in .libs has to be removed and the new version extracted again

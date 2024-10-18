@@ -27,13 +27,13 @@ namespace CoreLibs\Language\Core;
 class FileReader
 {
 	/** @var int */
-	public $fr_pos;
+	public int $fr_pos;
 	/** @var resource|bool */
-	public $fr_fd;
+	public mixed $fr_fd; // no resource type yet
 	/** @var int */
-	public $fr_length;
+	public int $fr_length;
 	/** @var int */
-	public $error = 0;
+	public int $error = 0;
 
 	/**
 	 * file read constructor

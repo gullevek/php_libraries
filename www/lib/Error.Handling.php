@@ -32,8 +32,13 @@ function MyErrorHandler(
 	int $line,
 	array $context = []
 ): bool {
-	/** @phpstan-ignore-next-line cannot check show all errors constant */
-	if (!(error_reporting() & $type) && SHOW_ALL_ERRORS === false) {
+	if (!defined('SHOW_ALL_ERRORS')) {
+		return false;
+	}
+	if (
+		!(error_reporting() & $type) &&
+		SHOW_ALL_ERRORS === false
+	) {
 		// This error code is not included in error_reporting
 		return false;
 	}
@@ -79,10 +84,13 @@ function MyErrorHandler(
 	}
 	$LOG = 'log' . DIRECTORY_SEPARATOR;
 	// if the log folder is not found, try to create it
+	$error = false;
 	if (!is_dir($ROOT . $LOG) && !is_file($ROOT . LOG)) {
 		$ok = mkdir($ROOT . $LOG);
+		if (!$ok) {
+			$error = true;
+		}
 	}
-	$error = 0;
 	// again, if the folder now exists, else set error flag
 	if (is_dir($ROOT . $LOG)) {
 		$fn = $ROOT . $LOG . 'php_errors-' . date('Y-m-d') . '.log';
@@ -94,10 +102,10 @@ function MyErrorHandler(
 			fwrite($fp, '[' . date("Y-m-d H:i:s") . '] ' . $output . "\n");
 			fclose($fp);
 		} else {
-			$error = 1;
+			$error = true;
 		}
 	} else {
-		$error = 1;
+		$error = true;
 	}
 
 	// if the above writing failed

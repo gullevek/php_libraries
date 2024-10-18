@@ -22,7 +22,7 @@ $DB_CONFIG = [
 		'db_type' => 'pgsql',
 		'db_encoding' => '',
 		'db_ssl' => 'allow', // allow, disable, require, prefer
-		'db_debug' => true, // turn on logging or not
+		// 'db_convert_type' => ['json'] // on, json, numeric, bytea
 	],
 	// same as above, but uses pg bouncer
 	'test_pgbouncer' => [
@@ -35,7 +35,6 @@ $DB_CONFIG = [
 		'db_type' => 'pgsql',
 		'db_encoding' => '',
 		'db_ssl' => 'allow', // allow, disable, require, prefer
-		'db_debug' => true, // turn on logging or not
 	],
 ];
 

@@ -7,7 +7,7 @@ namespace CoreLibs\Output\Form\TableArrays;
 class EditAccess implements Interface\TableArraysInterface
 {
 	/** @var \CoreLibs\Output\Form\Generate */
-	private $form;
+	private \CoreLibs\Output\Form\Generate $form;
 
 	/**
 	 * constructor
@@ -87,7 +87,9 @@ class EditAccess implements Interface\TableArraysInterface
 				],
 			],
 			'table_name' => 'edit_access',
-			"load_query" => "SELECT edit_access_id, name FROM edit_access ORDER BY name",
+			"load_query" => "SELECT edit_access_id, name "
+				. "FROM edit_access "
+				. "ORDER BY name",
 			'show_fields' => [
 				[
 					'name' => 'name'
