@@ -1,9 +1,16 @@
 # PHP Stan Config
 includes:
 	- phpstan-conditional.php
+	- ./vendor/yamadashy/phpstan-friendly-formatter/extension.neon
 parameters:
 	tmpDir: %currentWorkingDirectory%/tmp/phpstan-corelibs
+	errorFormat: friendly
+	friendly:
+		lineBefore: 5
+		lineAfter: 3
 	level: 8 # max is now 9
+	# strictRules:
+	#	allRules: true
 	checkMissingCallableSignature: true
 	treatPhpDocTypesAsCertain: false
 	paths:
@@ -53,6 +60,6 @@ parameters:
 		#	paths:
 		#		- ...
 		#		- ...
-		#-
-		#	message: "#^Call to deprecated method #"
-		#	path: www/admin/class_test*.php
+		-
+			message: "#^Call to deprecated method #"
+			path: www/admin/class_test*.php
