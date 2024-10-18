@@ -3,10 +3,9 @@
     "version": "dev-master",
     "description": "CoreLibs: Development package",
     "type": "library",
-    "config": {
-    },
     "require": {
         "php": ">=8.1"
+    },
     "require-dev": {
         "phpstan/phpstan": "^1.10",
         "phan/phan": "^5.4",
