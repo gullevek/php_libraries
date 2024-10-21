@@ -39,6 +39,10 @@ $url = 'https://soba.egplusww.jp';
 
 $data = $client->requestGet($url, []);
 
+print "<hr>";
+print "RESPONSE: <pre>" . print_r($data, true) . "</pre>";
+print "<hr>";
+
 print "</body></html>";
 
 // __END__

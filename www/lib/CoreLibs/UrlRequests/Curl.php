@@ -139,9 +139,7 @@ class Curl implements Interface\RequestsInterface
 		// init curl handle
 		$handle = $this->handleCurleInit($url);
 		// set the standard curl options
-		if ($headers !== []) {
-			$this->setCurlOptions($handle, $headers);
-		}
+		$this->setCurlOptions($handle, $headers);
 		// for post we set POST option
 		if ($type == "post") {
 			curl_setopt($handle, CURLOPT_POST, true);
@@ -205,7 +203,9 @@ class Curl implements Interface\RequestsInterface
 		if (!empty($this->auth_ident)) {
 			curl_setopt($handle, CURLOPT_USERPWD, $this->auth_ident);
 		}
-		curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
+		if ($headers !== []) {
+			curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
+		}
 		// curl_setopt($handle, CURLOPT_FAILONERROR, true);
 		curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 		// for debug only

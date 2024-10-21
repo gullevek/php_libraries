@@ -117,6 +117,7 @@ $test_files = [
 	'class_test.config.direct.php' => 'Class Test: CONFIG DIRECT',
 	'class_test.class-calls.php' => 'Class Test: CLASS CALLS',
 	'class_test.error_msg.php' => 'Class Test: ERROR MSG',
+	'class_test.url-requests.curl.php' => 'Class Test: URL REQUESTS: CURL',
 	'subfolder/class_test.config.direct.php' => 'Class Test: CONFIG DIRECT SUB',
 ];
 
