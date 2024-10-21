@@ -10,7 +10,6 @@ use PHPUnit\Framework\TestCase;
  * Test class for DB\Extended\ArrayIO
  * This will only test the PgSQL parts
  * @coversDefaultClass \CoreLibs\DB\Extended\ArrayIO
- * @coversDefaultClass \CoreLibs\DB\Extended\ArrayIO
  * @testdox \CoreLibs\Extended\ArrayIO method tests for extended DB interface
  */
 final class CoreLibsDBExtendedArrayIOTest extends TestCase
