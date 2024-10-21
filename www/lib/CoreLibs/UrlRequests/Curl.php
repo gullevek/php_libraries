@@ -93,16 +93,16 @@ class Curl implements Interface\RequestsInterface
 	}
 
 	/**
-	 * Convert array params to json type string
+	 * Convert array payload data to json type string
 	 *
-	 * @param  string|array<string,mixed> $params
+	 * @param  string|array<string,mixed> $payload
 	 * @return string
 	 */
-	private function convertParams(string|array $params): string
+	private function convertPayloadData(string|array $payload): string
 	{
 		// convert to string as JSON block if it is an array
-		if (is_array($params)) {
-			$params = Json::jsonConvertArrayTo($params);
+		if (is_array($payload)) {
+			$params = Json::jsonConvertArrayTo($payload);
 		}
 		return $params;
 	}
@@ -341,22 +341,22 @@ class Curl implements Interface\RequestsInterface
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  string|array<string,mixed>      $params  String to pass on as POST
-	 * @param  array<string>                   $headers Headers to be used in the request
-	 * @param  null|string|array<string,mixed> $query   Optinal query parameters, array will be converted
+	 * @param  string|array<string,mixed>      $payload Data to pass on as POST
+	 * @param  array<string>                   $headers [default=[]] Headers to be used in the request
+	 * @param  null|string|array<string,mixed> $query   [default=null] Optinal query parameters, array will be converted
 	 * @return array{code:string,content:string} Result code and content as array, content is json
 	 */
 	public function requestPost(
 		string $url,
-		string|array $params,
-		array $headers,
+		string|array $payload,
+		array $headers = [],
 		null|string|array $query = null
 	): array {
 		return $this->curlRequest(
 			"post",
 			$this->convertQuery($url, $query),
 			$headers,
-			$this->convertParams($params)
+			$this->convertPayloadData($payload)
 		);
 	}
 
@@ -366,22 +366,22 @@ class Curl implements Interface\RequestsInterface
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  string|array<string,mixed>      $params  String to pass on as POST
-	 * @param  array<string>                   $headers Headers to be used in the request
-	 * @param  null|string|array<string,mixed> $query   Optinal query parameters, array will be converted
+	 * @param  string|array<string,mixed>      $payload String to pass on as POST
+	 * @param  array<string>                   $headers [default=[]] Headers to be used in the request
+	 * @param  null|string|array<string,mixed> $query   [default=null] Optinal query parameters, array will be converted
 	 * @return array{code:string,content:string} Result code and content as array, content is json
 	 */
 	public function requestPut(
 		string $url,
-		string|array $params,
-		array $headers,
+		string|array $payload,
+		array $headers = [],
 		null|string|array $query = null
 	): array {
 		return $this->curlRequest(
 			"put",
 			$this->convertQuery($url, $query),
 			$headers,
-			$this->convertParams($params)
+			$this->convertPayloadData($payload)
 		);
 	}
 

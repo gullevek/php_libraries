@@ -17,11 +17,12 @@ interface RequestsInterface
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  array<string>                   $headers Headers to be used in the request
-	 * @param  null|string|array<string,mixed> $query   String to pass on as GET, if array will be converted
+	 * @param  array<string>                   $headers [default=[]] Headers to be used in the request
+	 * @param  null|string|array<string,mixed> $query   [default=null] String to pass on as GET,
+	 *                                                  if array will be converted
 	 * @return array{code:string,content:string} Result code and content as array, content is json
 	 */
-	public function requestGet(string $url, array $headers, null|string|array $query = null): array;
+	public function requestGet(string $url, array $headers = [], null|string|array $query = null): array;
 
 	/**
 	 * Makes an request to the target url via curl: POST
@@ -29,15 +30,15 @@ interface RequestsInterface
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  string|array<string,mixed>      $params  String to pass on as POST
-	 * @param  array<string>                   $headers Headers to be used in the request
-	 * @param  null|string|array<string,mixed> $query   URL query parameters
+	 * @param  string|array<string,mixed>      $payload Data to pass on as POST
+	 * @param  array<string>                   $headers [default=[]] Headers to be used in the request
+	 * @param  null|string|array<string,mixed> $query   [default=null] Optinal query parameters, array will be converted
 	 * @return array{code:string,content:string} Result code and content as array, content is json
 	 */
 	public function requestPost(
 		string $url,
-		string|array $params,
-		array $headers,
+		string|array $payload,
+		array $headers = [],
 		null|string|array $query = null
 	): array;
 
@@ -47,15 +48,15 @@ interface RequestsInterface
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  string|array<string,mixed>      $params  String to pass on as POST
-	 * @param  array<string>                   $headers Headers to be used in the request
-	 * @param  null|string|array<string,mixed> $query   String to pass on as GET, if array will be converted
+	 * @param  string|array<string,mixed>      $payload Data to pass on as POST
+	 * @param  array<string>                   $headers [default=[]] Headers to be used in the request
+	 * @param  null|string|array<string,mixed> $query   [default=null] Optinal query parameters, array will be converted
 	 * @return array{code:string,content:string} Result code and content as array, content is json
 	 */
 	public function requestPut(
 		string $url,
-		string|array $params,
-		array $headers,
+		string|array $payload,
+		array $headers = [],
 		null|string|array $query = null
 	): array;
 
@@ -65,11 +66,12 @@ interface RequestsInterface
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  array<string>                   $headers Headers to be used in the request
-	 * @param  null|string|array<string,mixed> $query   String to pass on as GET, if array will be converted
+	 * @param  array<string>                   $headers [default=[]] Headers to be used in the request
+	 * @param  null|string|array<string,mixed> $query   [default=null] String to pass on as GET,
+	 *                                                  if array will be converted
 	 * @return array{code:string,content:string} Result code and content as array, content is json
 	 */
-	public function requestDelete(string $url, array $headers, null|string|array $query = null): array;
+	public function requestDelete(string $url, array $headers = [], null|string|array $query = null): array;
 }
 
 // __END__
