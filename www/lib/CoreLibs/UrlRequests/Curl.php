@@ -15,7 +15,11 @@ use CoreLibs\Convert\Json;
 class Curl implements Interface\RequestsInterface
 {
 	/** @var array<string> all the valid request type */
-	private const VALID_REQUEST_TYPES = ["get", "post", "put", "delete"];
+	private const VALID_REQUEST_TYPES = ["get", "post", "put", "patch", "delete"];
+	/** @var array<string> list of requests type that are set as custom in the curl options */
+	private const CUSTOM_REQUESTS = ["put", "patch", "delete"];
+	/** @var array<string> list of requests types that have _POST type fields */
+	private const HAVE_POST_FIELDS = ["post", "put", "patch", "delete"];
 	/** @var int error bad request */
 	public const HTTP_BAD_REQUEST = 400;
 	/** @var int error not authorized Request */
@@ -143,10 +147,10 @@ class Curl implements Interface\RequestsInterface
 		// for post we set POST option
 		if ($type == "post") {
 			curl_setopt($handle, CURLOPT_POST, true);
-		} elseif (in_array($type, ["put", "delete"])) {
+		} elseif (in_array($type, self::CUSTOM_REQUESTS)) {
 			curl_setopt($handle, CURLOPT_CUSTOMREQUEST, strtoupper($type));
 		}
-		if (in_array($type, ["post", "put"]) && !empty($params)) {
+		if (in_array($type, self::HAVE_POST_FIELDS) && !empty($params)) {
 			curl_setopt($handle, CURLOPT_POSTFIELDS, $params);
 		}
 		// run curl execute
@@ -386,19 +390,55 @@ class Curl implements Interface\RequestsInterface
 	}
 
 	/**
-	 * Makes an request to the target url via curl: DELETE
+	 * Makes an request to the target url via curl: PATCH
 	 * Returns result as string (json)
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
+	 * @param  string|array<string,mixed>      $payload String to pass on as POST
+	 * @param  array<string>                   $headers [default=[]] Headers to be used in the request
+	 * @param  null|string|array<string,mixed> $query   [default=null] Optinal query parameters, array will be converted
+	 * @return array{code:string,content:string} Result code and content as array, content is json
+	 */
+	public function requestPatch(
+		string $url,
+		string|array $payload,
+		array $headers = [],
+		null|string|array $query = null
+	): array {
+		return $this->curlRequest(
+			"patch",
+			$this->convertQuery($url, $query),
+			$headers,
+			$this->convertPayloadData($payload)
+		);
+	}
+
+	/**
+	 * Makes an request to the target url via curl: DELETE
+	 * Returns result as string (json)
+	 * Note that DELETE payload is optional
+	 *
+	 * @param  string                          $url     The URL being requested,
+	 *                                                  including domain and protocol
+	 * @param  null|string|array<string,mixed> $payload [default=null] Data to pass on as POST
 	 * @param  array<string>                   $headers [default=[]] Headers to be used in the request
 	 * @param  null|string|array<string,mixed> $query   [default=null] String to pass on as GET,
 	 *                                                  if array will be converted
 	 * @return array{code:string,content:string} Result code and content as array, content is json
 	 */
-	public function requestDelete(string $url, array $headers = [], null|string|array $query = null): array
-	{
-		return $this->curlRequest("delete", $this->convertQuery($url, $query), $headers);
+	public function requestDelete(
+		string $url,
+		null|string|array $payload = null,
+		array $headers = [],
+		null|string|array $query = null
+	): array {
+		return $this->curlRequest(
+			"delete",
+			$this->convertQuery($url, $query),
+			$headers,
+			$payload !== null ? $this->convertPayloadData($payload) : null
+		);
 	}
 }
 

@@ -63,15 +63,22 @@ interface RequestsInterface
 	/**
 	 * Makes an request to the target url via curl: DELETE
 	 * Returns result as string (json)
+	 * Note that DELETE payload is optional
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
+	 * @param  null|string|array<string,mixed> $payload [default=null] Data to pass on as POST
 	 * @param  array<string>                   $headers [default=[]] Headers to be used in the request
 	 * @param  null|string|array<string,mixed> $query   [default=null] String to pass on as GET,
 	 *                                                  if array will be converted
 	 * @return array{code:string,content:string} Result code and content as array, content is json
 	 */
-	public function requestDelete(string $url, array $headers = [], null|string|array $query = null): array;
+	public function requestDelete(
+		string $url,
+		null|string|array $payload = null,
+		array $headers = [],
+		null|string|array $query = null
+	): array;
 }
 
 // __END__

@@ -35,13 +35,88 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
-$url = 'https://soba.egplusww.jp';
-
-$data = $client->requestGet($url, []);
+print "<hr>";
+$data = $client->requestGet(
+	'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/UrlReqeusts.target.php'
+	. '?other=get_a',
+	['test-header: ABC', 'request-type: _GET'],
+	['foo' => 'BAR']
+);
+print "_GET RESPONSE: <pre>" . print_r($data, true) . "</pre>";
 
 print "<hr>";
-print "RESPONSE: <pre>" . print_r($data, true) . "</pre>";
+$data = $client->requestPost(
+	'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/UrlReqeusts.target.php'
+	. '?other=post_a',
+	['payload' => 'data post'],
+	[
+		'Content-Type: application/json',
+		'Accept: application/json',
+		'test-header: ABC',
+		'info-request-type: _POST'
+	],
+	['foo' => 'BAR post'],
+);
+print "_POST RESPONSE: <pre>" . print_r($data, true) . "</pre>";
+
 print "<hr>";
+$data = $client->requestPut(
+	'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/UrlReqeusts.target.php'
+	. '?other=put_a',
+	['payload' => 'data put'],
+	[
+		'Content-Type: application/json',
+		'Accept: application/json',
+		'test-header: ABC',
+		'info-request-type: _PUT'
+	],
+	['foo' => 'BAR put'],
+);
+print "_PUT RESPONSE: <pre>" . print_r($data, true) . "</pre>";
+
+print "<hr>";
+$data = $client->requestPatch(
+	'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/UrlReqeusts.target.php'
+	. '?other=patch_a',
+	['payload' => 'data patch'],
+	[
+		'Content-Type: application/json',
+		'Accept: application/json',
+		'test-header: ABC',
+		'info-request-type: _PATCH'
+	],
+	['foo' => 'BAR patch'],
+);
+print "_PATCH RESPONSE: <pre>" . print_r($data, true) . "</pre>";
+
+print "<hr>";
+$data = $client->requestDelete(
+	'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/UrlReqeusts.target.php'
+	. '?other=delete_no_body_a',
+	null,
+	[
+		'Content-Type: application/json',
+		'Accept: application/json',
+		'test-header: ABC',
+		'info-request-type: _DELETE'
+	],
+	['foo' => 'BAR delete'],
+);
+print "_DELETE RESPONSE: <pre>" . print_r($data, true) . "</pre>";
+$data = $client->requestDelete(
+	'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/UrlReqeusts.target.php'
+	. '?other=delete_body_a',
+	['payload' => 'data delete'],
+	[
+		'Content-Type: application/json',
+		'Accept: application/json',
+		'test-header: ABC',
+		'info-request-type: _DELETE'
+	],
+	['foo' => 'BAR delete'],
+);
+print "_DELETE RESPONSE: <pre>" . print_r($data, true) . "</pre>";
+
 
 print "</body></html>";
 
