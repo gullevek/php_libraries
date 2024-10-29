@@ -51,6 +51,7 @@ $SITE_CONFIG = [
 	'soba.tequila.jp' => $__LOCAL_CONFIG,
 	'soba.teq.jp' => $__LOCAL_CONFIG,
 	'soba-local.tokyo.tequila.jp' => $__LOCAL_CONFIG,
+	'localhost' => $__LOCAL_CONFIG,
 ];
 
 // __END__
