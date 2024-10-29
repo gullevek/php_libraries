@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // url requests target test
 require 'config.php';
 use CoreLibs\Convert\Json;
@@ -16,7 +18,7 @@ $http_headers = array_filter($_SERVER, function ($value, $key) {
 	}
 }, ARRAY_FILTER_USE_BOTH);
 
-$file_get = file_get_contents('php://input');
+$file_get = file_get_contents('php://input') ?: '{"Error" => "file_get_contents failed"}';
 // str_replace('\"', '"', trim($file_get, '"'));
 
 $log->debug('SERVER', $log->prAr($_SERVER));
