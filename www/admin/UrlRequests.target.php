@@ -23,13 +23,16 @@ $file_get = file_get_contents('php://input') ?: '{"Error" => "file_get_contents 
 
 $log->debug('SERVER', $log->prAr($_SERVER));
 $log->debug('HEADERS', $log->prAr($http_headers));
+$log->debug('GET', $log->prAr($_GET));
 $log->debug('POST', $log->prAr($_POST));
 $log->debug('PHP-INPUT', $log->prAr($file_get));
 
+header("Content-Type: application/json; charset=UTF-8");
+
 print Json::jsonConvertArrayTo([
-	'HTTP_HEADERS' => $http_headers,
-	"_GET" => $_GET,
-	"_POST" => Json::jsonConvertToArray($file_get),
+	'HEADERS' => $http_headers,
+	"PARAMS" => $_GET,
+	"BODY" => Json::jsonConvertToArray($file_get),
 ]);
 
 $log->debug('[END]', '=========================================>');
