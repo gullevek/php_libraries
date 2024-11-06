@@ -42,9 +42,16 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		// -t /storage/var/www/html/developers/clemens/core_data/php_libraries/trunk/4dev/tests/AAASetupData/requests/
 		foreach (
 			[
-			'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/'
-				. '4dev/tests/AAASetupData/requests/http_requests.php',
-			'localhost:30999/http_requests.php',
+				// main dev
+				'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/'
+					. '4dev/tests/AAASetupData/requests/http_requests.php',
+				// composer package
+				'https://soba.egplusww.jp/developers/clemens/core_data/composer-packages/'
+					. 'CoreLibs-Composer-All/test/phpunit/AAASetupData/http_requests.php',
+				// if we run php -S localhost:30999 -t [see below]
+				// dev: /storage/var/www/html/developers/clemens/core_data/php_libraries/trunk/4dev/tests/AAASetupData/requests/
+				// composer: /storage/var/www/html/developers/clemens/core_data/composer-packages/CoreLibs-Composer-All/test/phpunit/AAASetupData
+				'localhost:30999/http_requests.php',
 			] as $url
 		) {
 			$handle = curl_init($url);
