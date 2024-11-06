@@ -458,22 +458,25 @@ class Curl implements Interface\RequestsInterface
 	/**
 	 * Overall request call
 	 *
-	 * @param  string                                  $type    get, post, pathc, put, delete:
-	 *                                                          if not set or invalid throw error
-	 * @param  string                                  $url     The URL being requested,
-	 *                                                          including domain and protocol
-	 * @param  null|array<string,string|array<string>> $headers [default=[]] Headers to be used in the request
-	 * @param  null|array<string,string>               $query   [default=null] Optinal query parameters
-	 * @param  null|string|array<string,mixed>         $body    [default=null] Data body, converted to JSON
+	 * @param  string                                  $type        get, post, pathc, put, delete:
+	 *                                                              if not set or invalid throw error
+	 * @param  string                                  $url         The URL being requested,
+	 *                                                              including domain and protocol
+	 * @param  null|array<string,string|array<string>> $headers     Headers to be used in the request
+	 * @param  null|array<string,string>               $query       Optinal query parameters
+	 * @param  null|string|array<string,mixed>         $body        Data body, converted to JSON
+	 * @param  null|bool                               $http_errors Throw exception on http response
+	 *                                                              400 or higher if set to true
 	 * @return array{code:string,headers:array<string,array<string>>,content:string}
 	 * @throws \RuntimeException if type param is not valid
 	 */
 	private function curlRequest(
 		string $type,
 		string $url,
-		null|array $headers = [],
-		null|array $query = null,
-		null|string|array $body = null
+		null|array $headers,
+		null|array $query,
+		null|string|array $body,
+		null|bool $http_errors,
 	): array {
 		$this->url = $this->buildQuery($url, $query);
 		$this->headers = $this->convertHeaders($this->buildHeaders($headers));
@@ -514,7 +517,7 @@ class Curl implements Interface\RequestsInterface
 		// for debug
 		// print "CURLINFO_HEADER_OUT: <pre>" . curl_getinfo($handle, CURLINFO_HEADER_OUT) . "</pre>";
 		// get response code and bail on not authorized
-		$http_response = $this->handleCurlResponse($http_result, $handle);
+		$http_response = $this->handleCurlResponse($http_result, $http_errors, $handle);
 		// close handler
 		$this->handleCurlClose($handle);
 		// return response and result
@@ -685,17 +688,19 @@ class Curl implements Interface\RequestsInterface
 	 * can be turned off by setting http_errors to false
 	 *
 	 * @param  string      $http_result result string from the url call
+	 * @param  ?bool       $http_errors if we should throw an exception on error, override config setting
 	 * @param  \CurlHandle $handle      Curl handler
 	 * @return string                   http response code
 	 * @throws \RuntimeException if http_errors is true then will throw exception on any response code >= 400
 	 */
 	private function handleCurlResponse(
 		string $http_result,
+		?bool $http_errors,
 		\CurlHandle $handle
 	): string {
 		$http_response = curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
 		if (
-			empty($this->config['http_errors']) ||
+			empty($http_errors ?? $this->config['http_errors']) ||
 			$http_response < self::HTTP_BAD_REQUEST
 		) {
 			return (string)$http_response;
@@ -942,7 +947,7 @@ class Curl implements Interface\RequestsInterface
 	 * phpcs:disable Generic.Files.LineLength
 	 * @param  string $type
 	 * @param  string $url
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<string,mixed>} $options
+	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options
 	 * @return array{code:string,headers:array<string,array<string>>,content:string} Result code, headers and content as array, content is json
 	 * @throws \UnexpectedValueException on missing body data when body data is needed
 	 * phpcs:enable Generic.Files.LineLength
@@ -964,7 +969,8 @@ class Curl implements Interface\RequestsInterface
 			$url,
 			!array_key_exists('headers', $options) ? [] : $options['headers'],
 			$options['query'] ?? null,
-			$options['body'] ?? null
+			$options['body'] ?? null,
+			!array_key_exists('http_errors', $options) ? null : $options['http_errors'],
 		);
 	}
 }

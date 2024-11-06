@@ -990,7 +990,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		$curl = new \CoreLibs\UrlRequests\Curl();
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessageMatches("/InvalidRequestType/");
-		$response = $curl->request('wrong', 'http://foo.bar.com');
+		$curl->request('wrong', 'http://foo.bar.com');
 	}
 
 	/**
@@ -1018,13 +1018,13 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessageMatches("/CurlExecError/");
 		// invalid yrl
-		$response = $curl->request('get', 'as-4939345!#$%');
+		$curl->request('get', 'as-4939345!#$%');
 	}
 
 	/**
-	 * TODO: Exception:BadRequest
+	 * Exception:ClientError
 	 *
-	 * @testdox UrlRequests\Curl Exception:BadRequest
+	 * @testdox UrlRequests\Curl Exception:ClientError
 	 *
 	 * @return void
 	 */
@@ -1033,12 +1033,72 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => true]);
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessageMatches("/ClientError/");
+		$curl->get($this->url_basic, [
+			"headers" => [
+				"Authorization" => "schmalztiegel",
+				"RunAuthTest" => "yes",
+			]
+		]);
+	}
+
+	/**
+	 * Exception:ClientError
+	 *
+	 * @testdox UrlRequests\Curl Exception:ClientError on call enable
+	 *
+	 * @return void
+	 */
+	public function testExceptionBadRequestEnable(): void
+	{
+		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => false]);
+		$this->expectException(\RuntimeException::class);
+		$this->expectExceptionMessageMatches("/ClientError/");
+		$curl->get($this->url_basic, [
+			"headers" => [
+				"Authorization" => "schmalztiegel",
+				"RunAuthTest" => "yes",
+			],
+			"http_errors" => true
+		]);
+	}
+
+	/**
+	 * Exception:ClientError
+	 *
+	 * @testdox UrlRequests\Curl Exception:ClientError unset on call
+	 *
+	 * @return void
+	 */
+	public function testExceptionBadRequestUnset(): void
+	{
+		// if true, with false it has to be off
+		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => true]);
 		$response = $curl->get($this->url_basic, [
 			"headers" => [
 				"Authorization" => "schmalztiegel",
-			"RunAuthTest" => "yes",
-			]
+				"RunAuthTest" => "yes",
+			],
+			"http_errors" => false,
 		]);
+		$this->assertEquals(
+			"401",
+			$response['code'],
+			'Unset Exception failed with false'
+		);
+		// if false, null should not change it
+		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => false]);
+		$response = $curl->get($this->url_basic, [
+			"headers" => [
+				"Authorization" => "schmalztiegel",
+				"RunAuthTest" => "yes",
+			],
+			"http_errors" => null,
+		]);
+		$this->assertEquals(
+			"401",
+			$response['code'],
+			'Unset Exception failed with null'
+		);
 	}
 
 	/**

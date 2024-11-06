@@ -276,6 +276,24 @@ try {
 } catch (Exception $e) {
 	print "Exception: <pre>" . print_r(json_decode($e->getMessage(), true), true) . "</pre><br>";
 }
+print "AUTH REQUEST WITH EXCEPTION (UNSET):<br>";
+try {
+	$uc = new Curl([
+		"base_uri" => 'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/',
+		"http_errors" => true,
+		"headers" =>  [
+			"Authorization" => "schmalztiegel",
+			"RunAuthTest" => "yes",
+		]
+	]);
+	$response = $uc->get('UrlRequests.target.php', ['http_errors' => false]);
+	print "AUTH REQUEST (UNSET): <pre>" . print_r($response, true) . "</pre>";
+	print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
+	print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
+	print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";
+} catch (Exception $e) {
+	print "Exception: <pre>" . print_r(json_decode($e->getMessage(), true), true) . "</pre><br>";
+}
 
 print "<hr>";
 $uc = new Curl([
