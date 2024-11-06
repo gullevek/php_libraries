@@ -1044,6 +1044,46 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	}
 
 	/**
+	 * Exception:InvalidHeaderKey
+	 *
+	 * @covers ::request
+	 * @testdox UrlRequests\Curl Exception:InvalidHeaderKey
+	 *
+	 * @return void
+	 */
+	public function testExceptionInvalidHeaderKey(): void
+	{
+		$curl = new \CoreLibs\UrlRequests\Curl();
+		$this->expectException(\RuntimeException::class);
+		$this->expectExceptionMessageMatches("/InvalidHeaderKey/");
+		$curl->request('get', $this->url_basic, [
+			"headers" => [
+				"(invalid-key)" => "key"
+			]
+		]);
+	}
+
+	/**
+	 * Exception:InvalidHeaderValue
+	 *
+	 * @covers ::request
+	 * @testdox UrlRequests\Curl Exception:InvalidHeaderValue
+	 *
+	 * @return void
+	 */
+	public function testExceptionInvalidHeaderValue(): void
+	{
+		$curl = new \CoreLibs\UrlRequests\Curl();
+		$this->expectException(\RuntimeException::class);
+		$this->expectExceptionMessageMatches("/InvalidHeaderValue/");
+		$curl->request('get', $this->url_basic, [
+			"headers" => [
+				"invalid-value" => "\x19\x10"
+			]
+		]);
+	}
+
+	/**
 	 * TODO: Exception:CurlInitError
 	 *
 	 * @testdox UrlRequests\Curl Exception:CurlInitError
