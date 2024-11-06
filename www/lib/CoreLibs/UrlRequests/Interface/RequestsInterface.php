@@ -12,18 +12,6 @@ namespace CoreLibs\UrlRequests\Interface;
 interface RequestsInterface
 {
 	/**
-	 * Convert an array with header strings like "foo: bar" to the interface
-	 * needed "foo" => "bar" type
-	 * Skips entries that are already in key => value type, by checking if the
-	 * key is a not a number
-	 *
-	 * @param  array<int|string,string> $headers
-	 * @return array<string,string>
-	 * @throws \UnexpectedValueException on duplicate header key
-	 */
-	public function prepareHeaders(array $headers): array;
-
-	/**
 	 * get the config array with all settings
 	 *
 	 * @return array<string,mixed> all current config settings
@@ -84,7 +72,7 @@ interface RequestsInterface
 	 * phpcs:disable Generic.Files.LineLength
 	 * @param  string $type
 	 * @param  string $url
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<string,mixed>} $options
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options
 	 * @return array{code:string,headers:array<string,array<string>>,content:string} Result code, headers and content as array, content is json
 	 * @throws \UnexpectedValueException on missing body data when body data is needed
 	 * phpcs:enable Generic.Files.LineLength

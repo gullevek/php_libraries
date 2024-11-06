@@ -732,7 +732,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		);
 	}
 
-	// MARK: test basi call provider
+	// MARK: test basic call provider
 
 	/**
 	 * Undocumented function
@@ -976,11 +976,61 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		);
 	}
 
+	// MARK: auth header set via config
+
+	/**
+	 * Test auth settings and auth override
+	 *
+	 * @testdox UrlRequests\Curl auth test call
+	 *
+	 * @return void
+	 */
+	public function testUrlRequestsCurlAuthHeader()
+	{
+		$curl = new \CoreLibs\UrlRequests\Curl([
+			"auth" => ["user", "pass", "basic"],
+			"http_errors" => false,
+		]);
+		$curl->request('get', $this->url_basic);
+		// check that the auth header matches
+		$this->assertContains(
+			"Authorization:Basic dXNlcjpwYXNz",
+			$curl->getHeadersSent()
+		);
+		// if we sent new request with auth header, this one should not be used
+		$curl->request('get', $this->url_basic, [
+			"headers" => ["Authorization" => "Failed"]
+		]);
+		// check that the auth header matches
+		$this->assertContains(
+			"Authorization:Basic dXNlcjpwYXNz",
+			$curl->getHeadersSent()
+		);
+		// override auth: reset
+		$curl->request('get', $this->url_basic, [
+			"auth" => null
+		]);
+		$this->assertNotContains(
+			"Authorization:Basic dXNlcjpwYXNz",
+			$curl->getHeadersSent()
+		);
+		// override auth: different auth
+		$curl->request('get', $this->url_basic, [
+			"auth" => ["user2", "pass2", "basic"]
+		]);
+		// check that the auth header matches
+		$this->assertContains(
+			"Authorization:Basic dXNlcjI6cGFzczI=",
+			$curl->getHeadersSent()
+		);
+	}
+
 	// MARK: test exceptions
 
 	/**
-	 * Undocumented function
+	 * Exception:InvalidRequestType
 	 *
+	 * @covers ::request
 	 * @testdox UrlRequests\Curl Exception:InvalidRequestType
 	 *
 	 * @return void
@@ -1006,9 +1056,10 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	// }
 
 	/**
-	 * Undocumented function
+	 * Exception:CurlExecError
 	 *
-	 * @testdox UrlRequests\Curl Exception:CurlError
+	 * @covers ::request
+	 * @testdox UrlRequests\Curl Exception:CurlExecError
 	 *
 	 * @return void
 	 */
@@ -1024,6 +1075,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	/**
 	 * Exception:ClientError
 	 *
+	 * @covers ::request
 	 * @testdox UrlRequests\Curl Exception:ClientError
 	 *
 	 * @return void
@@ -1033,7 +1085,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => true]);
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessageMatches("/ClientError/");
-		$curl->get($this->url_basic, [
+		$curl->request('get', $this->url_basic, [
 			"headers" => [
 				"Authorization" => "schmalztiegel",
 				"RunAuthTest" => "yes",
@@ -1044,6 +1096,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	/**
 	 * Exception:ClientError
 	 *
+	 * @covers ::request
 	 * @testdox UrlRequests\Curl Exception:ClientError on call enable
 	 *
 	 * @return void
@@ -1053,7 +1106,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => false]);
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessageMatches("/ClientError/");
-		$curl->get($this->url_basic, [
+		$curl->request('get', $this->url_basic, [
 			"headers" => [
 				"Authorization" => "schmalztiegel",
 				"RunAuthTest" => "yes",
@@ -1065,6 +1118,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	/**
 	 * Exception:ClientError
 	 *
+	 * @covers ::request
 	 * @testdox UrlRequests\Curl Exception:ClientError unset on call
 	 *
 	 * @return void
@@ -1073,7 +1127,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	{
 		// if true, with false it has to be off
 		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => true]);
-		$response = $curl->get($this->url_basic, [
+		$response = $curl->request('get', $this->url_basic, [
 			"headers" => [
 				"Authorization" => "schmalztiegel",
 				"RunAuthTest" => "yes",
@@ -1087,7 +1141,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		);
 		// if false, null should not change it
 		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => false]);
-		$response = $curl->get($this->url_basic, [
+		$response = $curl->request('get', $this->url_basic, [
 			"headers" => [
 				"Authorization" => "schmalztiegel",
 				"RunAuthTest" => "yes",
@@ -1099,24 +1153,6 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			$response['code'],
 			'Unset Exception failed with null'
 		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @testdox UrlRequests\Curl Exception:DuplicatedArrayKey
-	 *
-	 * @return void
-	 */
-	public function testExceptionDuplicatedArrayKey(): void
-	{
-		$curl = new \CoreLibs\UrlRequests\Curl();
-		$this->expectException(\UnexpectedValueException::class);
-		$this->expectExceptionMessageMatches("/DuplicatedArrayKey/");
-		$curl->prepareHeaders([
-			'header-double:a',
-			'header-double:b',
-		]);
 	}
 }
 

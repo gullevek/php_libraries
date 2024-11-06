@@ -25,25 +25,21 @@ trait CurlTrait
 	 * "get" calls do not set any body
 	 *
 	 * @param  string $type if set as get do not add body, else add body
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Request options
-	 * @return array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Request options
+	 * @return array{auth?:array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}
 	 */
 	private function setOptions(string $type, array $options): array
 	{
-		if ($type == "get") {
-			return [
-				"headers" => !array_key_exists('headers', $options) ? [] : $options['headers'],
-				"query" => $options['query'] ?? null,
-				"http_errors" => !array_key_exists('http_errors', $options) ? null : $options['http_errors'],
-			];
-		} else {
-			return [
-				"headers" => !array_key_exists('headers', $options) ? [] : $options['headers'],
-				"query" => $options['query'] ?? null,
-				"body" => $options['body'] ?? null,
-				"http_errors" => !array_key_exists('http_errors', $options) ? null : $options['http_errors'],
-			];
+		$base = [
+			"auth" => !array_key_exists('auth', $options) ? [] : $options['auth'],
+			"headers" => !array_key_exists('headers', $options) ? [] : $options['headers'],
+			"query" => $options['query'] ?? null,
+			"http_errors" => !array_key_exists('http_errors', $options) ? null : $options['http_errors'],
+		];
+		if ($type != "get") {
+			$base["body"] =  $options['body'] ?? null;
 		}
+		return $base;
 	}
 
 	/**
@@ -55,7 +51,7 @@ trait CurlTrait
 	 *
 	 * @param  string $type What type of request we send, will throw exception if not a valid one
 	 * @param  string $url  The url to send
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}  $options Request options
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Request options
 	 * @return array{code:string,headers:array<string,array<string>>,content:string} [default=[]] Result code, headers and content as array, content is json
 	 * @throws \UnexpectedValueException on missing body data when body data is needed
 	 */
@@ -67,7 +63,7 @@ trait CurlTrait
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}  $options Options to set
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Options to set
 	 * @return array{code:string,headers:array<string,array<string>>,content:string} [default=[]] Result code, headers and content as array, content is json
 	 */
 	public function get(string $url, array $options = []): array
@@ -77,9 +73,6 @@ trait CurlTrait
 			$url,
 			$this->setOptions('get', $options),
 		);
-
-		// array{headers?: array<string, array<string>|string>|null, query?: array<string, string>|null, body?: array<string, mixed>|string|null},
-		// array{headers?: array<string, array<string>|string>|null, query?: array<string, mixed>|string|null, body?: array<string, mixed>|string|null}
 	}
 
 	/**
@@ -88,7 +81,7 @@ trait CurlTrait
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}  $options Options to set
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Options to set
 	 * @return array{code:string,headers:array<string,array<string>>,content:string} Result code, headers and content as array, content is json
 	 */
 	public function post(string $url, array $options): array
@@ -106,7 +99,7 @@ trait CurlTrait
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}  $options Options to set
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Options to set
 	 * @return array{code:string,headers:array<string,array<string>>,content:string} Result code, headers and content as array, content is json
 	 */
 	public function put(string $url, array $options): array
@@ -124,7 +117,7 @@ trait CurlTrait
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}  $options Options to set
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Options to set
 	 * @return array{code:string,headers:array<string,array<string>>,content:string} Result code, headers and content as array, content is json
 	 */
 	public function patch(string $url, array $options): array
@@ -143,7 +136,7 @@ trait CurlTrait
 	 *
 	 * @param  string                          $url     The URL being requested,
 	 *                                                  including domain and protocol
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}  $options Options to set
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Options to set
 	 * @return array{code:string,headers:array<string,array<string>>,content:string} [default=[]] Result code, headers and content as array, content is json
 	 */
 	public function delete(string $url, array $options = []): array

@@ -40,11 +40,11 @@ $data = $client->get(
 	'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/UrlRequests.target.php'
 		. '?other=get_a',
 	[
-		'headers' => $client->prepareHeaders([
-			'test-header: ABC',
-			'info-request-type: _GET',
+		'headers' => [
+			'test-header' => 'ABC',
+			'info-request-type' => '_GET',
 			'Funk-pop' => 'Semlly god'
-		]),
+		],
 		'query' => ['foo' => 'BAR']
 	]
 );
@@ -78,11 +78,11 @@ $data = $client->request(
 		. 'trunk/www/admin/UrlRequests.target.php'
 		. '?other=get_a',
 	[
-		"headers" => $client->prepareHeaders([
-			'test-header: ABC',
-			'info-request-type: _GET',
+		"headers" => [
+			'test-header' => 'ABC',
+			'info-request-type' => '_GET',
 			'Funk-pop' => 'Semlly god'
-		]),
+		],
 		"query" => ['foo' => 'BAR'],
 	],
 );
@@ -94,12 +94,12 @@ $data = $client->post(
 	. '?other=post_a',
 	[
 		'body' => ['payload' => 'data post'],
-		'headers' => $client->prepareHeaders([
-			'Content-Type: application/json',
-			'Accept: application/json',
-			'test-header: ABC',
-			'info-request-type: _POST'
-		]),
+		'headers' => [
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'test-header' => 'ABC',
+			'info-request-type' => '_POST',
+		],
 		'query' => ['foo' => 'BAR post'],
 	]
 );
@@ -111,12 +111,12 @@ $data = $client->request(
 	. '?other=post_a',
 	[
 		"body" => ['payload' => 'data post', 'request' => 'I am the request body'],
-		"headers" => $client->prepareHeaders([
-			'Content-Type: application/json',
-			'Accept: application/json',
-			'test-header: ABC',
-			'info-request-type: _POST'
-		]),
+		"headers" => [
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'test-header' => 'ABC',
+			'info-request-type' => '_POST',
+		],
 		"query" => ['foo' => 'BAR post'],
 	]
 );
@@ -128,12 +128,12 @@ $data = $client->put(
 	. '?other=put_a',
 	[
 		"body" => ['payload' => 'data put'],
-		"headers" => $client->prepareHeaders([
-			'Content-Type: application/json',
-			'Accept: application/json',
-			'test-header: ABC',
-			'info-request-type: _PUT'
-		]),
+		"headers" => [
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'test-header' => 'ABC',
+			'info-request-type' => '_PUT',
+		],
 		'query' => ['foo' => 'BAR put'],
 	]
 );
@@ -145,12 +145,12 @@ $data = $client->patch(
 	. '?other=patch_a',
 	[
 		"body" => ['payload' => 'data patch'],
-		"headers" => $client->prepareHeaders([
-			'Content-Type: application/json',
-			'Accept: application/json',
-			'test-header: ABC',
-			'info-request-type: _PATCH'
-		]),
+		"headers" => [
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'test-header' => 'ABC',
+			'info-request-type' => '_PATCH',
+		],
 		'query' => ['foo' => 'BAR patch'],
 	]
 );
@@ -162,12 +162,12 @@ $data = $client->delete(
 	. '?other=delete_no_body_a',
 	[
 		"body" => null,
-		"headers" => $client->prepareHeaders([
-			'Content-Type: application/json',
-			'Accept: application/json',
-			'test-header: ABC',
-			'info-request-type: _DELETE'
-		]),
+		"headers" => [
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'test-header' => 'ABC',
+			'info-request-type' => '_DELETE',
+		],
 		"query" => ['foo' => 'BAR delete'],
 	]
 );
@@ -179,12 +179,12 @@ $data = $client->delete(
 	. '?other=delete_body_a',
 	[
 		"body" => ['payload' => 'data delete'],
-		"headers" => $client->prepareHeaders([
-			'Content-Type: application/json',
-			'Accept: application/json',
-			'test-header: ABC',
-			'info-request-type: _DELETE'
-		]),
+		"headers" => [
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'test-header' => 'ABC',
+			'info-request-type' => '_DELETE',
+		],
 		"query" => ['foo' => 'BAR delete'],
 	]
 );
@@ -294,6 +294,24 @@ try {
 } catch (Exception $e) {
 	print "Exception: <pre>" . print_r(json_decode($e->getMessage(), true), true) . "</pre><br>";
 }
+print "AUTH REQUEST HEADER SET:<br>";
+try {
+	$uc = new Curl([
+		"base_uri" => 'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/',
+		"auth" => ["user", "pass", "basic"],
+		"headers" =>  [
+			"Authorization" => "schmalztiegel",
+			"RunAuthTest" => "yes",
+		]
+	]);
+	$response = $uc->get('UrlRequests.target.php');
+	print "AUTH REQUEST (HEADER): <pre>" . print_r($response, true) . "</pre>";
+	print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
+	print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
+	print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";
+} catch (Exception $e) {
+	print "Exception: <pre>" . print_r(json_decode($e->getMessage(), true), true) . "</pre><br>";
+}
 
 print "<hr>";
 $uc = new Curl([
@@ -304,6 +322,19 @@ $uc = new Curl([
 ]);
 $response = $uc->get('UrlRequests.target.php', ["headers" => null, "query" => ["test" => "one-test"]]);
 print "HEADER RESET REQUEST: <pre>" . print_r($response, true) . "</pre>";
+print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
+print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
+print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";
+
+print "<hr>";
+$uc = new Curl([
+	"base_uri" => 'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/',
+	"headers" => [
+		'bar' => 'foo:bar'
+	]
+]);
+$response = $uc->get('UrlRequests.target.php');
+print "HEADER SET TEST REQUEST: <pre>" . print_r($response, true) . "</pre>";
 print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
 print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
 print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";

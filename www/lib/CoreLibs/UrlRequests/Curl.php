@@ -59,12 +59,11 @@ class Curl implements Interface\RequestsInterface
 	/** @var array{auth?:array{0:string,1:string,2:string},http_errors:bool,base_uri:string,headers:array<string,string|array<string>>,query:array<string,string>,timeout:float,connection_timeout:float} config settings as
 	 *phpcs:enable Generic.Files.LineLength
 	 * auth: [0: user, 1: password, 2: auth type]
+	 * http_errors: default true, bool true/false for throwing exception on >= 400 HTTP errors
 	 * base_uri: base url to set, will prefix all urls given in calls
 	 * headers: (array) base headers, can be overwritten by headers set in call
 	 * timeout: default 0, in seconds (CURLOPT_TIMEOUT_MS)
 	 * connect_timeout: default 300, in seconds (CURLOPT_CONNECTTIMEOUT_MS)
-	 * : below is not a guzzleHttp config
-	 * http_errors: default true, bool true/false for throwing exception on >= 400 HTTP errors
 	 */
 	private array $config = [
 		'http_errors' => true,
@@ -129,29 +128,10 @@ class Curl implements Interface\RequestsInterface
 		];
 		// auth string is array of 0: user, 1: password, 2: auth type
 		if (!empty($config['auth']) && is_array($config['auth'])) {
-			// base auth sets the header actually
-			$type = isset($config['auth'][2]) ? strtolower($config['auth'][2]) : 'basic';
-			$userpwd = $config['auth'][0] . ':' . $config['auth'][1];
-			switch ($type) {
-				case 'basic':
-					$this->auth_basic_header = 'Basic ' . base64_encode(
-						$userpwd
-					);
-					// if (!isset($config['headers']['Authorization'])) {
-					// 	$config['headers']['Authorization'] = 'Basic ' . base64_encode(
-					// 		$userpwd
-					// 	);
-					// }
-					break;
-				case 'digest':
-					$this->auth_type = CURLAUTH_DIGEST;
-					$this->auth_userpwd = $userpwd;
-					break;
-				case 'ntlm':
-					$this->auth_type = CURLAUTH_NTLM;
-					$this->auth_userpwd = $userpwd;
-					break;
-			}
+			$auth_data = $this->authParser($config['auth']);
+			$this->auth_basic_header = $auth_data['auth_basic_header'];
+			$this->auth_type = $auth_data['auth_type'];
+			$this->auth_userpwd = $auth_data['auth_userpwd'];
 		}
 		// only set if bool
 		if (
@@ -185,6 +165,46 @@ class Curl implements Interface\RequestsInterface
 		}
 
 		$this->config = array_merge($default_config, $config);
+	}
+
+	// MARK: auth parser
+
+	/**
+	 * set various auth parameters and return them as array for further processing
+	 *
+	 * @param  array{0:string,1:string,2:string} $auth
+	 * @return array{auth_basic_header:string,auth_type:int,auth_userpwd:string}
+	 */
+	private function authParser(?array $auth): array
+	{
+		$return_auth = [
+			'auth_basic_header' => '',
+			'auth_type' => 0,
+			'auth_userpwd' => '',
+		];
+		// on empty return as is, to force defaults
+		if ($auth === []) {
+			return $return_auth;
+		}
+		// base auth sets the header actually
+		$type = isset($auth[2]) ? strtolower($auth[2]) : 'basic';
+		$userpwd = $auth[0] . ':' . $auth[1];
+		switch ($type) {
+			case 'basic':
+				$return_auth['auth_basic_header'] = 'Basic ' . base64_encode(
+					$userpwd
+				);
+				break;
+			case 'digest':
+				$return_auth['auth_type'] = CURLAUTH_DIGEST;
+				$return_auth['auth_userpwd'] = $userpwd;
+				break;
+			case 'ntlm':
+				$return_auth['auth_type'] = CURLAUTH_NTLM;
+				$return_auth['auth_userpwd'] = $userpwd;
+				break;
+		}
+		return $return_auth;
 	}
 
 	// MARK: parse and build url
@@ -371,6 +391,7 @@ class Curl implements Interface\RequestsInterface
 	private function convertHeaders(array $headers): array
 	{
 		$return_headers = [];
+		$header_keys = [];
 		foreach ($headers as $key => $value) {
 			if (!is_string($key)) {
 				// TODO: throw error
@@ -378,8 +399,19 @@ class Curl implements Interface\RequestsInterface
 			}
 			// bad if not valid header key
 			if (!preg_match('/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/D', $key)) {
-				// TODO throw error
-				continue;
+				throw new \UnexpectedValueException(
+					Json::jsonConvertArrayTo([
+						'status' => 'ERROR',
+						'code' => 'R002',
+						'type' => 'InvalidHeaderKey',
+						'message' => 'Header key contains invalid characters',
+						'context' => [
+							'key' => $key,
+							'allowed' => '/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/D',
+						],
+					]),
+					1
+				);
 			}
 			// if value is array, join to string
 			if (is_array($value)) {
@@ -388,8 +420,20 @@ class Curl implements Interface\RequestsInterface
 			$value = trim((string)$value, " \t");
 			// header values must be valid
 			if (!preg_match('/^[\x20\x09\x21-\x7E\x80-\xFF]*$/D', $value)) {
-				// TODO throw error
-				continue;
+				throw new \UnexpectedValueException(
+					Json::jsonConvertArrayTo([
+						'status' => 'ERROR',
+						'code' => 'R003',
+						'type' => 'InvalidHeaderValue',
+						'message' => 'Header value contains invalid characters',
+						'context' => [
+							'key' => $key,
+							'value' => $value,
+							'allowed' => '/^[\x20\x09\x21-\x7E\x80-\xFF]*$/D',
+						],
+					]),
+					1
+				);
 			}
 			$return_headers[] = (string)$key . ':' .  $value;
 		}
@@ -402,14 +446,23 @@ class Curl implements Interface\RequestsInterface
 	 * Authorization
 	 * User-Agent
 	 *
-	 * @param  array<string,string|array<string>> $headers already set headers
+	 * @param  array<string,string|array<string>> $headers           already set headers
+	 * @param  ?string                            $auth_basic_header
 	 * @return array<string,string|array<string>>
 	 */
-	private function buildDefaultHeaders($headers = []): array
+	private function buildDefaultHeaders(array $headers = [], ?string $auth_basic_header = ''): array
 	{
-		// add auth header if set
-		if (!empty($this->auth_basic_header)) {
-			$headers['Authorization'] = $this->auth_basic_header;
+		// add auth header if set, will overwrite any already set auth header
+		if ($auth_basic_header !== null && $auth_basic_header == '' && !empty($this->auth_basic_header)) {
+			$auth_basic_header = $this->auth_basic_header;
+		}
+		if (!empty($auth_basic_header)) {
+			// check if there is any auth header set, remove that one
+			if (!empty($auth_header_set = $this->headers_named[strtolower('Authorization')] ?? null)) {
+				unset($headers[$auth_header_set]);
+			}
+			// set new auth header
+			$headers['Authorization'] = $auth_basic_header;
 		}
 		// always add HTTP_HOST and HTTP_USER_AGENT
 		if (!isset($headers[strtolower('User-Agent')])) {
@@ -422,14 +475,15 @@ class Curl implements Interface\RequestsInterface
 	 * Build headers, combine with global headers of they are set
 	 *
 	 * @param  null|array<string,string|array<string>> $headers
+	 * @param  ?string                                 $auth_basic_header
 	 * @return array<string,string|array<string>>
 	 */
-	private function buildHeaders(null|array $headers): array
+	private function buildHeaders(null|array $headers, ?string $auth_basic_header): array
 	{
 		// if headers is null, return empty headers, do not set config default headers
 		// but the automatic set User-Agent and Authorization headers are always set
 		if ($headers === null) {
-			return $this->buildDefaultHeaders();
+			return $this->buildDefaultHeaders(auth_basic_header: $auth_basic_header);
 		}
 		// merge master headers with sub headers, sub headers overwrite master headers
 		if (!empty($this->config['headers'])) {
@@ -447,7 +501,7 @@ class Curl implements Interface\RequestsInterface
 				$headers[$key] = $this->config['headers'][$key];
 			}
 		}
-		$headers = $this->buildDefaultHeaders($headers);
+		$headers = $this->buildDefaultHeaders($headers, $auth_basic_header);
 		return $headers;
 	}
 
@@ -465,6 +519,7 @@ class Curl implements Interface\RequestsInterface
 	 * @param  null|string|array<string,mixed>         $body        Data body, converted to JSON
 	 * @param  null|bool                               $http_errors Throw exception on http response
 	 *                                                              400 or higher if set to true
+	 * @param  null|array{0:string,1:string,2:string}  $auth        auth array, if null reset global set auth
 	 * @return array{code:string,headers:array<string,array<string>>,content:string}
 	 * @throws \RuntimeException if type param is not valid
 	 */
@@ -475,14 +530,29 @@ class Curl implements Interface\RequestsInterface
 		null|array $query,
 		null|string|array $body,
 		null|bool $http_errors,
+		null|array $auth,
 	): array {
+		// set auth from override
+		if (is_array($auth)) {
+			$auth_data = $this->authParser($auth);
+		} else {
+			$auth_data = [
+				'auth_basic_header' => null,
+				'auth_type' => null,
+				'auth_userpwd' => null,
+			];
+		}
+		// build url
 		$this->url = $this->buildQuery($url, $query);
-		$this->headers = $this->convertHeaders($this->buildHeaders($headers));
+		$this->headers = $this->convertHeaders($this->buildHeaders(
+			$headers,
+			$auth_data['auth_basic_header']
+		));
 		if (!in_array($type, self::VALID_REQUEST_TYPES)) {
 			throw new \RuntimeException(
 				Json::jsonConvertArrayTo([
 					'status' => 'ERROR',
-					'code' => 'R002',
+					'code' => 'R001',
 					'type' => 'InvalidRequestType',
 					'message' => 'Invalid request type set: ' . $type,
 					'context' => [
@@ -497,7 +567,10 @@ class Curl implements Interface\RequestsInterface
 		// init curl handle
 		$handle = $this->handleCurleInit($this->url);
 		// set the standard curl options
-		$this->setCurlOptions($handle, $this->headers);
+		$this->setCurlOptions($handle, $this->headers, [
+			'auth_type' => $auth_data['auth_type'],
+			'auth_userpwd' => $auth_data['auth_userpwd'],
+		]);
 		// for post we set POST option
 		if ($type == "post") {
 			curl_setopt($handle, CURLOPT_POST, true);
@@ -515,7 +588,7 @@ class Curl implements Interface\RequestsInterface
 		// for debug
 		// print "CURLINFO_HEADER_OUT: <pre>" . curl_getinfo($handle, CURLINFO_HEADER_OUT) . "</pre>";
 		// get response code and bail on not authorized
-		$http_response = $this->handleCurlResponse($http_result, $http_errors, $handle);
+		$http_response = $this->handleCurlResponse($handle, $http_result, $http_errors);
 		// close handler
 		$this->handleCurlClose($handle);
 		// return response and result
@@ -565,14 +638,26 @@ class Curl implements Interface\RequestsInterface
 	 *
 	 * @param  \CurlHandle   $handle
 	 * @param  array<string> $headers list of options
+	 * @param  array{auth_type:?int,auth_userpwd:?string} $auth_data auth options to override global
 	 * @return void
 	 */
-	private function setCurlOptions(\CurlHandle $handle, array $headers): void
+	private function setCurlOptions(\CurlHandle $handle, array $headers, ?array $auth_data): void
 	{
-		// for not Basic auth, basic auth sets its own header
-		if (!empty($this->auth_type) && !empty($this->auth_userpwd)) {
-			curl_setopt($handle, CURLOPT_HTTPAUTH, $this->auth_type);
-			curl_setopt($handle, CURLOPT_USERPWD, $this->auth_userpwd);
+		// for not Basic auth only, basic auth sets its own header
+		if ($auth_data['auth_type'] !== null || $auth_data['auth_userpwd'] !== null) {
+			// set global if any of the two is empty and both globals are set
+			if (
+				(empty($auth_data['auth_type']) || empty($auth_data['auth_userpwd'])) &&
+				!empty($this->auth_type) && !empty($this->auth_userpwd)
+			) {
+				$auth_data['auth_type'] = $this->auth_type;
+				$auth_data['auth_userpwd'] = $this->auth_userpwd;
+			}
+		}
+		// set auth options for curl
+		if (!empty($auth_data['auth_type']) && !empty($auth_data['auth_userpwd'])) {
+			curl_setopt($handle, CURLOPT_HTTPAUTH, $auth_data['auth_type']);
+			curl_setopt($handle, CURLOPT_USERPWD, $auth_data['auth_userpwd']);
 		}
 		if ($headers !== []) {
 			curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
@@ -694,9 +779,9 @@ class Curl implements Interface\RequestsInterface
 	 * @throws \RuntimeException if http_errors is true then will throw exception on any response code >= 400
 	 */
 	private function handleCurlResponse(
+		\CurlHandle $handle,
 		string $http_result,
-		?bool $http_errors,
-		\CurlHandle $handle
+		?bool $http_errors
 	): string {
 		$http_response = curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
 		if (
@@ -742,48 +827,6 @@ class Curl implements Interface\RequestsInterface
 	// *********************************************************************
 	// MARK: PUBLIC METHODS
 	// *********************************************************************
-
-	/**
-	 * Convert an array with header strings like "foo: bar" to the interface
-	 * needed "foo" => "bar" type
-	 * Skips entries that are already in key => value type, by checking if the
-	 * key is a not a number
-	 *
-	 * @param  array<int|string,string> $headers
-	 * @return array<string,string>
-	 * @throws \UnexpectedValueException on duplicate header key
-	 */
-	public function prepareHeaders(array $headers): array
-	{
-		$return_headers = [];
-		foreach ($headers as $header_key => $header) {
-			// skip if header key is not numeric
-			if (!is_numeric($header_key)) {
-				$return_headers[$header_key] = $header;
-				continue;
-			}
-			list($_key, $_value) = explode(':', $header);
-			if (array_key_exists($_key, $return_headers)) {
-				// raise exception if key already exists
-				throw new \UnexpectedValueException(
-					Json::jsonConvertArrayTo([
-						'status' => 'ERROR',
-						'code' => 'R001',
-						'type' => 'DuplicatedArrayKey',
-						'message' => 'Key already exists in the headers',
-						'context' => [
-							'key' => $_key,
-							'headers' => $headers,
-							'return_headers' => $return_headers,
-						],
-					]),
-					1
-				);
-			}
-			$return_headers[$_key] = $_value;
-		}
-		return $return_headers;
-	}
 
 	// MARK: get class vars
 
@@ -947,7 +990,7 @@ class Curl implements Interface\RequestsInterface
 	 * phpcs:disable Generic.Files.LineLength
 	 * @param  string $type
 	 * @param  string $url
-	 * @param  array{headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options
 	 * @return array{code:string,headers:array<string,array<string>>,content:string} Result code, headers and content as array, content is json
 	 * @throws \UnexpectedValueException on missing body data when body data is needed
 	 * phpcs:enable Generic.Files.LineLength
@@ -971,6 +1014,7 @@ class Curl implements Interface\RequestsInterface
 			$options['query'] ?? null,
 			$options['body'] ?? null,
 			!array_key_exists('http_errors', $options) ? null : $options['http_errors'],
+			!array_key_exists('auth', $options) ? [] : $options['auth'],
 		);
 	}
 }
