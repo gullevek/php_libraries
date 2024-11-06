@@ -18,10 +18,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\UrlRequests;
 
-use RuntimeException;
 use CoreLibs\Convert\Json;
 
-/** @package CoreLibs\UrlRequests */
 class Curl implements Interface\RequestsInterface
 {
 	// all general calls: get/post/put/patch/delete
@@ -404,11 +402,11 @@ class Curl implements Interface\RequestsInterface
 	 * Authorization
 	 * User-Agent
 	 *
-	 * @return array<string,string>
+	 * @param  array<string,string|array<string>> $headers already set headers
+	 * @return array<string,string|array<string>>
 	 */
-	private function buildDefaultHeaders(): array
+	private function buildDefaultHeaders($headers = []): array
 	{
-		$headers = [];
 		// add auth header if set
 		if (!empty($this->auth_basic_header)) {
 			$headers['Authorization'] = $this->auth_basic_header;
@@ -449,7 +447,7 @@ class Curl implements Interface\RequestsInterface
 				$headers[$key] = $this->config['headers'][$key];
 			}
 		}
-		$headers = array_merge($headers, $this->buildDefaultHeaders());
+		$headers = $this->buildDefaultHeaders($headers);
 		return $headers;
 	}
 
@@ -481,8 +479,8 @@ class Curl implements Interface\RequestsInterface
 		$this->url = $this->buildQuery($url, $query);
 		$this->headers = $this->convertHeaders($this->buildHeaders($headers));
 		if (!in_array($type, self::VALID_REQUEST_TYPES)) {
-			throw new RuntimeException(
-				json_encode([
+			throw new \RuntimeException(
+				Json::jsonConvertArrayTo([
 					'status' => 'ERROR',
 					'code' => 'R002',
 					'type' => 'InvalidRequestType',
@@ -492,7 +490,7 @@ class Curl implements Interface\RequestsInterface
 						'url' => $this->url,
 						'headers' => $this->headers,
 					],
-				]) ?: '',
+				]),
 				0,
 			);
 		}
@@ -544,8 +542,8 @@ class Curl implements Interface\RequestsInterface
 			return $handle;
 		}
 		// throw Error here with all codes
-		throw new RuntimeException(
-			json_encode([
+		throw new \RuntimeException(
+			Json::jsonConvertArrayTo([
 				'status' => 'FAILURE',
 				'code' => 'C001',
 				'type' => 'CurlInitError',
@@ -553,7 +551,7 @@ class Curl implements Interface\RequestsInterface
 				'context' => [
 					'url' => $url,
 				],
-			]) ?: '',
+			]),
 			0,
 		);
 	}
@@ -591,11 +589,13 @@ class Curl implements Interface\RequestsInterface
 		$timeout_requires_no_signal = false;
 		// if we have a timeout signal
 		if (!empty($this->config['timeout'])) {
-			$timeout_requires_no_signal |= $this->config['timeout'] < 1;
+			$timeout_requires_no_signal = $timeout_requires_no_signal ||
+				$this->config['timeout'] < 1;
 			curl_setopt($handle, CURLOPT_TIMEOUT_MS, $this->config['timeout'] * 1000);
 		}
 		if (!empty($this->config['connection_timeout'])) {
-			$timeout_requires_no_signal |= $this->config['connection_timeout'] < 1;
+			$timeout_requires_no_signal = $timeout_requires_no_signal ||
+				$this->config['connection_timeout'] < 1;
 			curl_setopt($handle, CURLOPT_CONNECTTIMEOUT_MS, $this->config['connection_timeout'] * 1000);
 		}
 		if ($timeout_requires_no_signal && strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
@@ -665,8 +665,8 @@ class Curl implements Interface\RequestsInterface
 		}
 
 		// throw an error like in the normal reqeust, but set to CURL error
-		throw new RuntimeException(
-			json_encode([
+		throw new \RuntimeException(
+			Json::jsonConvertArrayTo([
 				'status' => 'FAILURE',
 				'code' => 'C002',
 				'type' => 'CurlExecError',
@@ -676,7 +676,7 @@ class Curl implements Interface\RequestsInterface
 					'errno' => $errno,
 					'message' => $message,
 				],
-			]) ?: '',
+			]),
 			$errno
 		);
 	}
@@ -708,8 +708,8 @@ class Curl implements Interface\RequestsInterface
 		// set curl error number
 		$err = curl_errno($handle);
 		// throw Error here with all codes
-		throw new RuntimeException(
-			json_encode([
+		throw new \RuntimeException(
+			Json::jsonConvertArrayTo([
 				'status' => 'ERROR',
 				'code' => 'H' . (string)$http_response,
 				'type' => $http_response < 500 ? 'ClientError' : 'ServerError',
@@ -717,13 +717,13 @@ class Curl implements Interface\RequestsInterface
 				'context' => [
 					'http_response' => $http_response,
 					// extract all the error content if returned
-					'result' => json_decode((string)$http_result, true),
+					'result' => Json::jsonConvertToArray($http_result),
 					// curl internal error number
 					'curl_errno' => $err,
 					// the full curl info block
 					'curl_info' => curl_getinfo($handle),
 				],
-			]) ?: '',
+			]),
 			$err
 		);
 	}
@@ -766,7 +766,7 @@ class Curl implements Interface\RequestsInterface
 			if (array_key_exists($_key, $return_headers)) {
 				// raise exception if key already exists
 				throw new \UnexpectedValueException(
-					json_encode([
+					Json::jsonConvertArrayTo([
 						'status' => 'ERROR',
 						'code' => 'R001',
 						'type' => 'DuplicatedArrayKey',
@@ -776,7 +776,7 @@ class Curl implements Interface\RequestsInterface
 							'headers' => $headers,
 							'return_headers' => $return_headers,
 						],
-					]) ?: '',
+					]),
 					1
 				);
 			}
