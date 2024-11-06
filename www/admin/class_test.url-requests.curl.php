@@ -204,6 +204,9 @@ try {
 			'default-remove-array-part-alt' => ['c', 'd', 'e'],
 			'default-overwrite' => 'will be overwritten',
 			'default-add' => 'will be added',
+		],
+		'query' => [
+			'global-p' => 'glob'
 		]
 	]);
 	print "CONFIG: <pre>" . print_r($uc->getConfig(), true) . "</pre>";
@@ -217,13 +220,16 @@ try {
 	print "CONFIG: <pre>" . print_r($uc->getConfig(), true) . "</pre>";
 	$data = $uc->request(
 		'get',
-		'UrlRequests.target.php?other=get_a',
+		'UrlRequests.target.php',
 		[
 			'headers' => [
 				'call-header' => 'call-get',
 				'default-header' => 'overwrite-uc-get',
 				'X-Foo' => ['bar', 'baz'],
-			]
+			],
+			'query' => [
+				'other' => 'get_a',
+			],
 		]
 	);
 	print "[uc] _GET RESPONSE, nothing set: <pre>" . print_r($data, true) . "</pre>";
@@ -234,6 +240,55 @@ try {
 	print "Exception: <pre>" . print_r(json_decode($e->getMessage(), true), true) . "</pre><br>";
 }
 
+print "<hr>";
+try {
+	$uc = new Curl([
+		"base_uri" => 'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/',
+		"exception_on_not_authorized" => false,
+		"headers" =>  [
+			"Authorization" => "schmalztiegel",
+			"RunAuthTest" => "yes",
+		]
+	]);
+	$response = $uc->get('UrlRequests.target.php');
+	print "AUTH REQUEST: <pre>" . print_r($response, true) . "</pre>";
+	print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
+	print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
+	print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";
+} catch (Exception $e) {
+	print "Exception: <pre>" . print_r(json_decode($e->getMessage(), true), true) . "</pre><br>";
+}
+print "AUTH REQUEST WITH EXCEPTION:<br>";
+try {
+	$uc = new Curl([
+		"base_uri" => 'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/',
+		"exception_on_not_authorized" => true,
+		"headers" =>  [
+			"Authorization" => "schmalztiegel",
+			"RunAuthTest" => "yes",
+		]
+	]);
+	$response = $uc->get('UrlRequests.target.php');
+	print "AUTH REQUEST: <pre>" . print_r($response, true) . "</pre>";
+	print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
+	print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
+	print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";
+} catch (Exception $e) {
+	print "Exception: <pre>" . print_r(json_decode($e->getMessage(), true), true) . "</pre><br>";
+}
+
+print "<hr>";
+$uc = new Curl([
+	"base_uri" => 'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/',
+	"headers" =>  [
+		"header-one" => "one"
+	]
+]);
+$response = $uc->get('UrlRequests.target.php', ["headers" => null, "query" => ["test" => "one-test"]]);
+print "AUTH REQUEST: <pre>" . print_r($response, true) . "</pre>";
+print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
+print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
+print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";
 
 print "</body></html>";
 
