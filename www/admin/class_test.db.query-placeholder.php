@@ -204,6 +204,20 @@ WHERE string_a = $1
 SQL, []);
 print "PL: " . Support::PrAr($db->dbGetPlaceholderConverted()) . "<br>";
 
+echo "dbReturn read LIKE: <br>";
+while (
+	is_array($res = $db->dbReturnParams(
+		<<<SQL
+SELECT test, string_a, number_a
+FROM test_foo
+WHERE string_a LIKE ?
+SQL,
+		['%A-1%']
+	))
+) {
+	print "RES: " . Support::prAr($res) . "<br>";
+}
+
 print "</body></html>";
 $db->log->debug('DEBUGEND', '==================================== [END]');
 

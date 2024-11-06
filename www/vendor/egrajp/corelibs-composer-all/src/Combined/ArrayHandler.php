@@ -509,6 +509,22 @@ class ArrayHandler
 		}
 		return $array;
 	}
+
+	/**
+	 * Remove entries from a simple array, will not keep key order
+	 *
+	 * any array content is allowed
+	 *
+	 * https://stackoverflow.com/a/369608
+	 *
+	 * @param  array<mixed> $array  Array where elements are located
+	 * @param  array<mixed> $remove Elements to remove
+	 * @return array<mixed>         Array with $remove elements removed
+	 */
+	public static function arrayRemoveEntry(array $array, array $remove): array
+	{
+		return array_diff($array, $remove);
+	}
 }
 
 // __END__

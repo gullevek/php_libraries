@@ -230,6 +230,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'ERROR MESSAGE',
 				'message' => null,
 				'log_error' => null,
+				'log_warning' => null,
 				'expected' => '<ERROR> ERROR MESSAGE',
 			],
 			'error, logged' => [
@@ -238,6 +239,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'ERROR MESSAGE',
 				'message' => null,
 				'log_error' => true,
+				'log_warning' => null,
 				'expected' => '<ERROR> ERROR MESSAGE',
 			],
 			'error, logged, message' => [
@@ -246,7 +248,35 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'ERROR MESSAGE',
 				'message' => 'OTHER ERROR MESSAGE',
 				'log_error' => true,
+				'log_warning' => null,
 				'expected' => '<ERROR> OTHER ERROR MESSAGE',
+			],
+			'warn, not logged' => [
+				'id' => '300',
+				'level' => 'warn',
+				'str' => 'WARNING MESSAGE',
+				'message' => null,
+				'log_error' => null,
+				'log_warning' => null,
+				'expected' => '<WARNING> WARNING MESSAGE',
+			],
+			'warn, logged' => [
+				'id' => '300',
+				'level' => 'warn',
+				'str' => 'WARNING MESSAGE',
+				'message' => null,
+				'log_error' => null,
+				'log_warning' => true,
+				'expected' => '<WARNING> WARNING MESSAGE',
+			],
+			'warn, logged, message' => [
+				'id' => '300',
+				'level' => 'warn',
+				'str' => 'WARNING MESSAGE',
+				'message' => 'OTHER WARNING MESSAGE',
+				'log_error' => null,
+				'log_warning' => true,
+				'expected' => '<WARNING> OTHER WARNING MESSAGE',
 			],
 			'notice' => [
 				'id' => '100',
@@ -254,6 +284,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'NOTICE MESSAGE',
 				'message' => null,
 				'log_error' => null,
+				'log_warning' => null,
 				'expected' => '<NOTICE> NOTICE MESSAGE',
 			],
 			'notice, message' => [
@@ -262,6 +293,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'NOTICE MESSAGE',
 				'message' => 'OTHER NOTICE MESSAGE',
 				'log_error' => null,
+				'log_warning' => null,
 				'expected' => '<NOTICE> OTHER NOTICE MESSAGE',
 			],
 			'crash' => [
@@ -270,6 +302,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'CRASH MESSAGE',
 				'message' => null,
 				'log_error' => null,
+				'log_warning' => null,
 				'expected' => '<ALERT> CRASH MESSAGE',
 			],
 			'crash, message' => [
@@ -278,6 +311,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'CRASH MESSAGE',
 				'message' => 'OTHER CRASH MESSAGE',
 				'log_error' => null,
+				'log_warning' => null,
 				'expected' => '<ALERT> OTHER CRASH MESSAGE',
 			],
 			'abort' => [
@@ -286,6 +320,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'ABORT MESSAGE',
 				'message' => null,
 				'log_error' => null,
+				'log_warning' => null,
 				'expected' => '<CRITICAL> ABORT MESSAGE',
 			],
 			'abort, message' => [
@@ -294,6 +329,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'ABORT MESSAGE',
 				'message' => 'OTHER ABORT MESSAGE',
 				'log_error' => null,
+				'log_warning' => null,
 				'expected' => '<CRITICAL> OTHER ABORT MESSAGE',
 			],
 			'unknown' => [
@@ -302,6 +338,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'WRONG LEVEL MESSAGE',
 				'message' => null,
 				'log_error' => null,
+				'log_warning' => null,
 				'expected' => '<EMERGENCY> WRONG LEVEL MESSAGE',
 			],
 			'unknown, message' => [
@@ -310,6 +347,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 				'str' => 'WRONG LEVEL MESSAGE',
 				'message' => 'OTHER WRONG LEVEL MESSAGE',
 				'log_error' => null,
+				'log_warning' => null,
 				'expected' => '<EMERGENCY> OTHER WRONG LEVEL MESSAGE',
 			],
 		];
@@ -326,6 +364,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 	 * @param  string      $str
 	 * @param  string|null $message
 	 * @param  bool|null   $log_error
+	 * @param  bool|null   $log_warning
 	 * @param  string      $expected
 	 * @return void
 	 */
@@ -335,6 +374,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		string $str,
 		?string $message,
 		?bool $log_error,
+		?bool $log_warning,
 		string $expected
 	): void {
 		$log = new \CoreLibs\Logging\Logging([
@@ -349,7 +389,8 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 			$level,
 			$str,
 			message: $message,
-			log_error: $log_error
+			log_error: $log_error,
+			log_warning: $log_warning
 		);
 		$file_content = '';
 		if (is_file($log->getLogFolder() . $log->getLogFile())) {
@@ -359,6 +400,11 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		}
 		// if error, if null or false, it will not be logged
 		if ($level == 'error' && ($log_error === null || $log_error === false)) {
+			$this->assertStringNotContainsString(
+				$expected,
+				$file_content
+			);
+		} elseif ($level == 'warn' && ($log_warning === null || $log_warning === false)) {
 			$this->assertStringNotContainsString(
 				$expected,
 				$file_content
@@ -382,6 +428,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 	 * @param  string      $str
 	 * @param  string|null $message
 	 * @param  bool|null   $log_error
+	 * @param  bool|null   $log_warning
 	 * @param  string      $expected
 	 * @return void
 	 */
@@ -391,6 +438,7 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		string $str,
 		?string $message,
 		?bool $log_error,
+		?bool $log_warning,
 		string $expected
 	): void {
 		$log = new \CoreLibs\Logging\Logging([
@@ -405,7 +453,8 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 			$level,
 			$str,
 			message: $message,
-			log_error: $log_error
+			log_error: $log_error,
+			log_warning: $log_warning
 		);
 		$file_content = '';
 		if (is_file($log->getLogFolder() . $log->getLogFile())) {
@@ -415,6 +464,11 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		}
 		// if error, and log is debug level, only explicit false are not logged
 		if ($level == 'error' && $log_error === false) {
+			$this->assertStringNotContainsString(
+				$expected,
+				$file_content
+			);
+		} elseif ($level == 'warn' && $log_warning === false) {
 			$this->assertStringNotContainsString(
 				$expected,
 				$file_content

@@ -56,8 +56,9 @@ print "SETACL[]: <br>";
 $backend->setACL(['EMPTY' => 'EMPTY']);
 print "ADBEDITLOG: <br>";
 $backend->adbEditLog('CLASSTEST-ADMIN-BINARY', 'Some info string', 'BINARY');
+$backend->adbEditLog('CLASSTEST-ADMIN-ZLIB', 'Some info string', 'ZLIB');
 $backend->adbEditLog('CLASSTEST-ADMIN-SERIAL', 'Some info string', 'SERIAL');
-$backend->adbEditLog('CLASSTEST-ADMIN-JSON', 'Some info string', 'JSON');
+$backend->adbEditLog('CLASSTEST-ADMIN-INVALID', 'Some info string', 'INVALID');
 // test with various
 $backend->action = 'TEST ACTION';
 $backend->action_id = 'TEST ACTION ID';
