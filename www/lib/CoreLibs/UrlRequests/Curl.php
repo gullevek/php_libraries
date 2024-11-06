@@ -53,10 +53,12 @@ class Curl implements Interface\RequestsInterface
 	public const HTTP_CREATED = 201;
 	/** @var int http ok no content */
 	public const HTTP_NO_CONTENT = 204;
+	/** @var int major version for user agent */
+	public const MAJOR_VERSION = 1;
 
 	// the config is set to be as much compatible to guzzelHttp as possible
 	// phpcs:disable Generic.Files.LineLength
-	/** @var array{auth?:array{0:string,1:string,2:string},auth_type?:int|string,auth_userpwd?:string,exception_on_not_authorized:bool,base_uri:string,headers:array<string,string|array<string>>,query:array<string,string>,timeout:float,connection_timeout:float} config settings as
+	/** @var array{auth?:array{0:string,1:string,2:string},exception_on_not_authorized:bool,base_uri:string,headers:array<string,string|array<string>>,query:array<string,string>,timeout:float,connection_timeout:float} config settings as
 	 *phpcs:enable Generic.Files.LineLength
 	 * auth: [0: user, 1: password, 2: auth type]
 	 * base_uri: base url to set, will prefix all urls given in calls
@@ -78,6 +80,12 @@ class Curl implements Interface\RequestsInterface
 	private array $parsed_base_uri = [];
 	/** @var array<string,string> lower key header name matches to given header name */
 	private array $headers_named = [];
+	/** @var int auth type from auth array in config */
+	private int $auth_type = 0;
+	/** @var string username and password string from auth array in config */
+	private string $auth_userpwd = '';
+	/** @var string set if auth type basic is given, will be set as "Authorization: ..." */
+	private string $auth_basic_header = '';
 
 	/** @var array<string,array<string>> received headers per header name, with sub array if there are redirects */
 	private array $received_headers = [];
@@ -107,7 +115,7 @@ class Curl implements Interface\RequestsInterface
 	 * Set the main configuration
 	 *
 	 * phpcs:disable Generic.Files.LineLength
-	 * @param  array{auth?:array{0:string,1:string,2:string},auth_type?:int|string,auth_userpwd?:string,exception_on_not_authorized?:bool,base_uri?:string,headers?:array<string,string|array<string>>,query?:array<string,string>,timeout?:float,connection_timeout?:float}  $config
+	 * @param  array{auth?:array{0:string,1:string,2:string},exception_on_not_authorized?:bool,base_uri?:string,headers?:array<string,string|array<string>>,query?:array<string,string>,timeout?:float,connection_timeout?:float}  $config
 	 * @return void
 	 * phpcs:enable Generic.Files.LineLength
 	 */
@@ -128,19 +136,22 @@ class Curl implements Interface\RequestsInterface
 			$userpwd = $config['auth'][0] . ':' . $config['auth'][1];
 			switch ($type) {
 				case 'basic':
-					if (!isset($config['headers']['Authorization'])) {
-						$config['headers']['Authorization'] = 'Basic ' . base64_encode(
-							$userpwd
-						);
-					}
+					$this->auth_basic_header = 'Basic ' . base64_encode(
+						$userpwd
+					);
+					// if (!isset($config['headers']['Authorization'])) {
+					// 	$config['headers']['Authorization'] = 'Basic ' . base64_encode(
+					// 		$userpwd
+					// 	);
+					// }
 					break;
 				case 'digest':
-					$config['auth_type'] = CURLAUTH_DIGEST;
-					$config['auth_userpwd'] = $userpwd;
+					$this->auth_type = CURLAUTH_DIGEST;
+					$this->auth_userpwd = $userpwd;
 					break;
 				case 'ntlm':
-					$config['auth_type'] = CURLAUTH_NTLM;
-					$config['auth_userpwd'] = $userpwd;
+					$this->auth_type = CURLAUTH_NTLM;
+					$this->auth_userpwd = $userpwd;
 					break;
 			}
 		}
@@ -152,8 +163,6 @@ class Curl implements Interface\RequestsInterface
 			$config['exception_on_not_authorized'] = false;
 		}
 		if (!empty($config['base_uri'])) {
-			// TODO: this should be run through Guzzle\Psr7\Utils in future
-			// $config['base_uri'] = Psr7\Utils::urlFor($config['base_uri']);
 			if (($parsed_base_uri = $this->parseUrl($config['base_uri'])) !== false) {
 				$this->parsed_base_uri = $parsed_base_uri;
 				$config['base_uri'] = $config['base_uri'];
@@ -303,6 +312,14 @@ class Curl implements Interface\RequestsInterface
 				$this->parsed_url = $parsed_url;
 			}
 		}
+		// build query with global query
+		// any query set in the base_url or url_req will be overwritten
+		if (!empty($this->config['query'])) {
+			// add current query if set
+			// for params: if foo[0] then we ADD as php array type
+			// note that this has to be done on the user side, we just merge and local overrides global
+			$query = array_merge($this->config['query'], $query ?? []);
+		}
 		if (is_array($query)) {
 			$query = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 		}
@@ -383,6 +400,27 @@ class Curl implements Interface\RequestsInterface
 	}
 
 	/**
+	 * default headers that are always set
+	 * Authorization
+	 * User-Agent
+	 *
+	 * @return array<string,string>
+	 */
+	private function buildDefaultHeaders(): array
+	{
+		$headers = [];
+		// add auth header if set
+		if (!empty($this->auth_basic_header)) {
+			$headers['Authorization'] = $this->auth_basic_header;
+		}
+		// always add HTTP_HOST and HTTP_USER_AGENT
+		if (!isset($headers[strtolower('User-Agent')])) {
+			$headers['User-Agent'] = 'CoreLibsUrlRequestCurl/' . self::MAJOR_VERSION;
+		}
+		return $headers;
+	}
+
+	/**
 	 * Build headers, combine with global headers of they are set
 	 *
 	 * @param  null|array<string,string|array<string>> $headers
@@ -390,9 +428,10 @@ class Curl implements Interface\RequestsInterface
 	 */
 	private function buildHeaders(null|array $headers): array
 	{
-		// if headers is null, return empty headers, do not set default headers
+		// if headers is null, return empty headers, do not set config default headers
+		// but the automatic set User-Agent and Authorization headers are always set
 		if ($headers === null) {
-			return [];
+			return $this->buildDefaultHeaders();
 		}
 		// merge master headers with sub headers, sub headers overwrite master headers
 		if (!empty($this->config['headers'])) {
@@ -410,7 +449,7 @@ class Curl implements Interface\RequestsInterface
 				$headers[$key] = $this->config['headers'][$key];
 			}
 		}
-		// always add HTTP_HOST and HTTP_USER_AGENT
+		$headers = array_merge($headers, $this->buildDefaultHeaders());
 		return $headers;
 	}
 
@@ -427,6 +466,7 @@ class Curl implements Interface\RequestsInterface
 	 * @param  null|array<string,string>               $query   [default=null] Optinal query parameters
 	 * @param  null|string|array<string,mixed>         $body    [default=null] Data body, converted to JSON
 	 * @return array{code:string,headers:array<string,array<string>>,content:string}
+	 * @throws \RuntimeException if type param is not valid
 	 */
 	private function curlRequest(
 		string $type,
@@ -492,6 +532,7 @@ class Curl implements Interface\RequestsInterface
 	 *
 	 * @param  string            $url
 	 * @return \CurlHandle
+	 * @throws \RuntimeException if curl could not be initialized
 	 */
 	private function handleCurleInit(string $url): \CurlHandle
 	{
@@ -528,14 +569,15 @@ class Curl implements Interface\RequestsInterface
 	private function setCurlOptions(\CurlHandle $handle, array $headers): void
 	{
 		// for not Basic auth, basic auth sets its own header
-		if (!empty($this->config['auth_type']) && !empty($this->config['auth_userpwd'])) {
-			curl_setopt($handle, CURLOPT_HTTPAUTH, $this->config['auth_type']);
-			curl_setopt($handle, CURLOPT_USERPWD, $this->config['auth_userpwd']);
+		if (!empty($this->auth_type) && !empty($this->auth_userpwd)) {
+			curl_setopt($handle, CURLOPT_HTTPAUTH, $this->auth_type);
+			curl_setopt($handle, CURLOPT_USERPWD, $this->auth_userpwd);
 		}
 		if ($headers !== []) {
 			curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
 		}
 		// curl_setopt($handle, CURLOPT_FAILONERROR, true);
+		// return response as string and not just HTTP_OK
 		curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 		// for debug only
 		curl_setopt($handle, CURLINFO_HEADER_OUT, true);
@@ -547,11 +589,11 @@ class Curl implements Interface\RequestsInterface
 		// if we have a timeout signal
 		if (!empty($this->config['timeout'])) {
 			$timeout_requires_no_signal |= $this->config['timeout'] < 1;
-			curl_setopt($handle, CURLOPT_TIMEOUT_MS, $this->config['timeout']);
+			curl_setopt($handle, CURLOPT_TIMEOUT_MS, $this->config['timeout'] * 1000);
 		}
 		if (!empty($this->config['connection_timeout'])) {
 			$timeout_requires_no_signal |= $this->config['connection_timeout'] < 1;
-			curl_setopt($handle, CURLOPT_CONNECTTIMEOUT_MS, $this->config['connection_timeout']);
+			curl_setopt($handle, CURLOPT_CONNECTTIMEOUT_MS, $this->config['connection_timeout'] * 1000);
 		}
 		if ($timeout_requires_no_signal && strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
 			curl_setopt($handle, CURLOPT_NOSIGNAL, true);
@@ -583,14 +625,17 @@ class Curl implements Interface\RequestsInterface
 	/**
 	 * handles any CURL execute and on error throws a correct error message
 	 *
-	 * @param  \CurlHandle $handle
-	 * @return string
+	 * @param  \CurlHandle $handle Curl handler
+	 * @return string              Return content as string, if False will throw exception
+	 *                             will only return HTTP_OK if CURLOPT_RETURNTRANSFER is turned off
+	 * @throws \RuntimeException if the connection had an error
 	 */
 	private function handleCurlExec(\CurlHandle $handle): string
 	{
 		// execute query
 		$http_result = curl_exec($handle);
 		if ($http_result === true) {
+			// only if CURLOPT_RETURNTRANSFER
 			return (string)self::HTTP_OK;
 		} elseif ($http_result !== false) {
 			return $http_result;
@@ -640,7 +685,8 @@ class Curl implements Interface\RequestsInterface
 	 *
 	 * @param  string      $http_result
 	 * @param  \CurlHandle $handle
-	 * @return string
+	 * @return string                   http response code
+	 * @throws \RuntimeException Auth error
 	 */
 	private function handleCurlResponse(
 		string $http_result,
@@ -658,18 +704,14 @@ class Curl implements Interface\RequestsInterface
 		$result_ar = json_decode((string)$http_result, true);
 
 		$url = curl_getinfo($handle, CURLINFO_EFFECTIVE_URL);
-		$error_status = 'ERROR';
-		$error_code = $http_response;
-		$error_type = 'UnauthorizedRequest';
-		$message = 'Request could not be finished successfully because of an authorization error';
 
 		// throw Error here with all codes
 		throw new RuntimeException(
 			json_encode([
-				'status' => $error_status,
-				'code' => $error_code,
-				'type' => $error_type,
-				'message' => $message,
+				'status' => 'ERROR',
+				'code' => $http_response,
+				'type' => 'UnauthorizedRequest',
+				'message' => 'Request could not be finished successfully because of an authorization error',
 				'context' => [
 					'url' => $url,
 					'result' => $result_ar,
@@ -823,7 +865,7 @@ class Curl implements Interface\RequestsInterface
 	 * remove header entry
 	 * if key is only set then match only key, if both are set both sides must match
 	 *
-	 * @param  array<string,string> $remove_headers
+	 * @param  array<string,null|string|array<string>> $remove_headers
 	 * @return void
 	 */
 	public function removeHeaders(array $remove_headers): void
@@ -861,10 +903,11 @@ class Curl implements Interface\RequestsInterface
 				if (!is_array($value)) {
 					$value = [$value];
 				}
-				$this->config['headers'][$header_key] = array_diff(
+				// array values so we rewrite the key pos
+				$this->config['headers'][$header_key] = array_values(array_diff(
 					$this->config['headers'][$header_key],
 					$value
-				);
+				));
 			}
 		}
 	}
@@ -917,7 +960,7 @@ class Curl implements Interface\RequestsInterface
 		return $this->curlRequest(
 			$type,
 			$url,
-			$options['headers'] ?? [],
+			!array_key_exists('headers', $options) ? [] : $options['headers'],
 			$options['query'] ?? null,
 			$options['body'] ?? null
 		);
