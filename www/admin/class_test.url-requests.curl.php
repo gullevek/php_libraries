@@ -244,7 +244,7 @@ print "<hr>";
 try {
 	$uc = new Curl([
 		"base_uri" => 'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/',
-		"exception_on_not_authorized" => false,
+		"http_errors" => false,
 		"headers" =>  [
 			"Authorization" => "schmalztiegel",
 			"RunAuthTest" => "yes",
@@ -262,7 +262,7 @@ print "AUTH REQUEST WITH EXCEPTION:<br>";
 try {
 	$uc = new Curl([
 		"base_uri" => 'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/',
-		"exception_on_not_authorized" => true,
+		"http_errors" => true,
 		"headers" =>  [
 			"Authorization" => "schmalztiegel",
 			"RunAuthTest" => "yes",
@@ -270,6 +270,24 @@ try {
 	]);
 	$response = $uc->get('UrlRequests.target.php');
 	print "AUTH REQUEST: <pre>" . print_r($response, true) . "</pre>";
+	print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
+	print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
+	print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";
+} catch (Exception $e) {
+	print "Exception: <pre>" . print_r(json_decode($e->getMessage(), true), true) . "</pre><br>";
+}
+print "AUTH REQUEST WITH EXCEPTION (UNSET):<br>";
+try {
+	$uc = new Curl([
+		"base_uri" => 'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/',
+		"http_errors" => true,
+		"headers" =>  [
+			"Authorization" => "schmalztiegel",
+			"RunAuthTest" => "yes",
+		]
+	]);
+	$response = $uc->get('UrlRequests.target.php', ['http_errors' => false]);
+	print "AUTH REQUEST (UNSET): <pre>" . print_r($response, true) . "</pre>";
 	print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
 	print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
 	print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";
@@ -285,7 +303,7 @@ $uc = new Curl([
 	]
 ]);
 $response = $uc->get('UrlRequests.target.php', ["headers" => null, "query" => ["test" => "one-test"]]);
-print "AUTH REQUEST: <pre>" . print_r($response, true) . "</pre>";
+print "HEADER RESET REQUEST: <pre>" . print_r($response, true) . "</pre>";
 print "[uc] SENT URL: " . $uc->getUrlSent() . "<br>";
 print "[uc] SENT URL PARSED: <pre>" . print_r($uc->getUrlParsedSent(), true) . "</pre>";
 print "[uc] SENT HEADERS: <pre>" . print_r($uc->getHeadersSent(), true) . "</pre>";
