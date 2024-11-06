@@ -10,7 +10,7 @@
  * https://docs.guzzlephp.org/en/stable/index.html
  *
  * Requests are guzzleHttp compatible
- * Config for setup is guzzleHttp compatible (except the exception_on_not_authorized)
+ * Config for setup is guzzleHttp compatible (except the http_errors)
  * Any setters and getters are only for this class
 */
 
@@ -35,6 +35,12 @@ class Curl implements Interface\RequestsInterface
 	private const HAVE_POST_FIELDS = ["post", "put", "patch", "delete"];
 	/** @var array<string> list of requests that must have a body */
 	private const MANDATORY_POST_FIELDS = ["post", "put", "patch"];
+	/** @var int http ok request */
+	public const HTTP_OK = 200;
+	/** @var int http ok creted response */
+	public const HTTP_CREATED = 201;
+	/** @var int http ok no content */
+	public const HTTP_NO_CONTENT = 204;
 	/** @var int error bad request */
 	public const HTTP_BAD_REQUEST = 400;
 	/** @var int error not authorized Request */
@@ -47,18 +53,12 @@ class Curl implements Interface\RequestsInterface
 	public const HTTP_CONFLICT = 409;
 	/** @var int error unprocessable entity */
 	public const HTTP_UNPROCESSABLE_ENTITY = 422;
-	/** @var int http ok request */
-	public const HTTP_OK = 200;
-	/** @var int http ok creted response */
-	public const HTTP_CREATED = 201;
-	/** @var int http ok no content */
-	public const HTTP_NO_CONTENT = 204;
 	/** @var int major version for user agent */
 	public const MAJOR_VERSION = 1;
 
 	// the config is set to be as much compatible to guzzelHttp as possible
 	// phpcs:disable Generic.Files.LineLength
-	/** @var array{auth?:array{0:string,1:string,2:string},exception_on_not_authorized:bool,base_uri:string,headers:array<string,string|array<string>>,query:array<string,string>,timeout:float,connection_timeout:float} config settings as
+	/** @var array{auth?:array{0:string,1:string,2:string},http_errors:bool,base_uri:string,headers:array<string,string|array<string>>,query:array<string,string>,timeout:float,connection_timeout:float} config settings as
 	 *phpcs:enable Generic.Files.LineLength
 	 * auth: [0: user, 1: password, 2: auth type]
 	 * base_uri: base url to set, will prefix all urls given in calls
@@ -66,10 +66,10 @@ class Curl implements Interface\RequestsInterface
 	 * timeout: default 0, in seconds (CURLOPT_TIMEOUT_MS)
 	 * connect_timeout: default 300, in seconds (CURLOPT_CONNECTTIMEOUT_MS)
 	 * : below is not a guzzleHttp config
-	 * exception_on_not_authorized: bool true/false for throwing exception on auth error
+	 * http_errors: default true, bool true/false for throwing exception on >= 400 HTTP errors
 	 */
 	private array $config = [
-		'exception_on_not_authorized' => false,
+		'http_errors' => true,
 		'base_uri' => '',
 		'query' => [],
 		'headers' => [],
@@ -115,14 +115,14 @@ class Curl implements Interface\RequestsInterface
 	 * Set the main configuration
 	 *
 	 * phpcs:disable Generic.Files.LineLength
-	 * @param  array{auth?:array{0:string,1:string,2:string},exception_on_not_authorized?:bool,base_uri?:string,headers?:array<string,string|array<string>>,query?:array<string,string>,timeout?:float,connection_timeout?:float}  $config
+	 * @param  array{auth?:array{0:string,1:string,2:string},http_errors?:bool,base_uri?:string,headers?:array<string,string|array<string>>,query?:array<string,string>,timeout?:float,connection_timeout?:float}  $config
 	 * @return void
 	 * phpcs:enable Generic.Files.LineLength
 	 */
 	private function setConfiguration(array $config)
 	{
 		$default_config = [
-			'exception_on_not_authorized' => false,
+			'http_errors' => true,
 			'base_uri' => '',
 			'query' => [],
 			'headers' => [],
@@ -157,10 +157,10 @@ class Curl implements Interface\RequestsInterface
 		}
 		// only set if bool
 		if (
-			!isset($config['exception_on_not_authorized']) ||
-			!is_bool($config['exception_on_not_authorized'])
+			!isset($config['http_errors']) ||
+			!is_bool($config['http_errors'])
 		) {
-			$config['exception_on_not_authorized'] = false;
+			$config['http_errors'] = true;
 		}
 		if (!empty($config['base_uri'])) {
 			if (($parsed_base_uri = $this->parseUrl($config['base_uri'])) !== false) {
@@ -480,8 +480,8 @@ class Curl implements Interface\RequestsInterface
 		if (!in_array($type, self::VALID_REQUEST_TYPES)) {
 			throw new RuntimeException(
 				json_encode([
-					'status' => 'FAILURE',
-					'code' => 'C003',
+					'status' => 'ERROR',
+					'code' => 'R002',
 					'type' => 'InvalidRequestType',
 					'message' => 'Invalid request type set: ' . $type,
 					'context' => [
@@ -635,7 +635,7 @@ class Curl implements Interface\RequestsInterface
 		// execute query
 		$http_result = curl_exec($handle);
 		if ($http_result === true) {
-			// only if CURLOPT_RETURNTRANSFER
+			// only if CURLOPT_RETURNTRANSFER is turned off
 			return (string)self::HTTP_OK;
 		} elseif ($http_result !== false) {
 			return $http_result;
@@ -666,7 +666,7 @@ class Curl implements Interface\RequestsInterface
 			json_encode([
 				'status' => 'FAILURE',
 				'code' => 'C002',
-				'type' => 'CurlError',
+				'type' => 'CurlExecError',
 				'message' => $message,
 				'context' => [
 					'url' => $url,
@@ -681,12 +681,13 @@ class Curl implements Interface\RequestsInterface
 	// MARK: curl response handler
 
 	/**
-	 * Handle curl response and not auth 401 errors
+	 * Handle curl response, will throw exception on anything that is lower 400
+	 * can be turned off by setting http_errors to false
 	 *
-	 * @param  string      $http_result
-	 * @param  \CurlHandle $handle
+	 * @param  string      $http_result result string from the url call
+	 * @param  \CurlHandle $handle      Curl handler
 	 * @return string                   http response code
-	 * @throws \RuntimeException Auth error
+	 * @throws \RuntimeException if http_errors is true then will throw exception on any response code >= 400
 	 */
 	private function handleCurlResponse(
 		string $http_result,
@@ -694,27 +695,28 @@ class Curl implements Interface\RequestsInterface
 	): string {
 		$http_response = curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
 		if (
-			empty($this->config['exception_on_not_authorized']) ||
-			$http_response !== self::HTTP_NOT_AUTHORIZED
+			empty($this->config['http_errors']) ||
+			$http_response < self::HTTP_BAD_REQUEST
 		) {
 			return (string)$http_response;
 		}
+		// set curl error number
 		$err = curl_errno($handle);
-		// extract all the error codes
-		$result_ar = json_decode((string)$http_result, true);
-
-		$url = curl_getinfo($handle, CURLINFO_EFFECTIVE_URL);
-
 		// throw Error here with all codes
 		throw new RuntimeException(
 			json_encode([
 				'status' => 'ERROR',
-				'code' => $http_response,
-				'type' => 'UnauthorizedRequest',
-				'message' => 'Request could not be finished successfully because of an authorization error',
+				'code' => 'H' . (string)$http_response,
+				'type' => $http_response < 500 ? 'ClientError' : 'ServerError',
+				'message' => 'Request could not be finished successfully because of bad request response',
 				'context' => [
-					'url' => $url,
-					'result' => $result_ar,
+					'http_response' => $http_response,
+					// extract all the error content if returned
+					'result' => json_decode((string)$http_result, true),
+					// curl internal error number
+					'curl_errno' => $err,
+					// the full curl info block
+					'curl_info' => curl_getinfo($handle),
 				],
 			]) ?: '',
 			$err
@@ -761,7 +763,7 @@ class Curl implements Interface\RequestsInterface
 				throw new \UnexpectedValueException(
 					json_encode([
 						'status' => 'ERROR',
-						'code' => 'C004',
+						'code' => 'R001',
 						'type' => 'DuplicatedArrayKey',
 						'message' => 'Key already exists in the headers',
 						'context' => [

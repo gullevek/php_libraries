@@ -21,7 +21,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	private string $url_basic_start = '';
 	private string $url_basic_end = '';
 	private array $default_config = [
-		'exception_on_not_authorized' => false,
+		'http_errors' => true,
 		'base_uri' => '',
 		'query' => [],
 		'headers' => [],
@@ -109,7 +109,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			'no config' => [
 				'config' => null,
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [],
@@ -125,7 +125,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			'setup all possible configs' => [
 				'config' => [
 					'auth' => ['user', 'passowrd', 'Basic'],
-					'exception_on_not_authorized' => true,
+					'http_errors' => false,
 					'base_uri' => 'http://foo.bar.com',
 					'headers' => [
 						'something' => 'other',
@@ -138,7 +138,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 				],
 				'expected_set' => [
 					'auth' => ['user', 'passowrd', 'Basic'],
-					'exception_on_not_authorized' => true,
+					'http_errors' => false,
 					'base_uri' => 'http://foo.bar.com',
 					'headers' => [
 						'something' => 'other',
@@ -161,7 +161,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					'base_uri' => 'http://bar.foo.com'
 				],
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => 'http://bar.foo.com',
 					'query' => [],
 					'headers' => [],
@@ -179,7 +179,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					'base_uri' => 'http://bar.foo.com'
 				],
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => 'http://bar.foo.com',
 					'query' => [],
 					'headers' => [],
@@ -191,7 +191,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 				'set_header_add' => null,
 				'remove_header' => null,
 				'expected_change' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => 'http://bar.baz.com',
 					'query' => [],
 					'headers' => [],
@@ -203,7 +203,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			'set header new' =>  [
 				'config' => null,
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [],
@@ -217,7 +217,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 				'set_header_add' => false,
 				'remove_header' => null,
 				'expected_change' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -234,7 +234,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					],
 				],
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -250,7 +250,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 				'set_header_add' => false,
 				'remove_header' => null,
 				'expected_change' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -267,7 +267,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					],
 				],
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -283,7 +283,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 				'set_header_add' => true,
 				'remove_header' => null,
 				'expected_change' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -301,7 +301,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					],
 				],
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -317,7 +317,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					'remove-entry' => 'foo'
 				],
 				'expected_change' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [],
@@ -332,7 +332,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					],
 				],
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -348,7 +348,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					'remove-entry' => null
 				],
 				'expected_change' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [],
@@ -363,7 +363,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					],
 				],
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -379,7 +379,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					'remove-entry' => null
 				],
 				'expected_change' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [],
@@ -394,7 +394,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					],
 				],
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -410,7 +410,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					'remove-entry' => 'foo'
 				],
 				'expected_change' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -427,7 +427,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					],
 				],
 				'expected_set' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -443,7 +443,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					'remove-entry' => ['foo', 'bar',]
 				],
 				'expected_change' => [
-					'exception_on_not_authorized' => false,
+					'http_errors' => true,
 					'base_uri' => '',
 					'query' => [],
 					'headers' => [
@@ -1016,32 +1016,29 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	{
 		$curl = new \CoreLibs\UrlRequests\Curl();
 		$this->expectException(\RuntimeException::class);
-		$this->expectExceptionMessageMatches("/CurlError/");
+		$this->expectExceptionMessageMatches("/CurlExecError/");
 		// invalid yrl
 		$response = $curl->request('get', 'as-4939345!#$%');
 	}
 
 	/**
-	 * TODO: Exception:UnauthorizedRequest
+	 * TODO: Exception:BadRequest
 	 *
-	 * @testdox UrlRequests\Curl Exception:UnauthorizedRequest
+	 * @testdox UrlRequests\Curl Exception:BadRequest
 	 *
 	 * @return void
 	 */
-	public function testExceptionUnauthorizedRequest(): void
+	public function testExceptionBadRequest(): void
 	{
-		$curl = new \CoreLibs\UrlRequests\Curl(["exception_on_not_authorized" => true]);
+		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => true]);
 		$this->expectException(\RuntimeException::class);
-		$this->expectExceptionMessageMatches("/UnauthorizedRequest/");
+		$this->expectExceptionMessageMatches("/ClientError/");
 		$response = $curl->get($this->url_basic, [
 			"headers" => [
 				"Authorization" => "schmalztiegel",
 			"RunAuthTest" => "yes",
 			]
 		]);
-		// $response = $curl->get('https://httpbin.org/bearer', [
-		// 	"headers" => ["Authorization" => "schmalztiegel"]
-		// ]);
 	}
 
 	/**
