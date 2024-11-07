@@ -118,6 +118,7 @@ $test_files = [
 	'class_test.config.direct.php' => 'Class Test: CONFIG DIRECT',
 	'class_test.class-calls.php' => 'Class Test: CLASS CALLS',
 	'class_test.error_msg.php' => 'Class Test: ERROR MSG',
+	'class_test.url-requests.curl.php' => 'Class Test: URL REQUESTS: CURL',
 	'subfolder/class_test.config.direct.php' => 'Class Test: CONFIG DIRECT SUB',
 ];
 
@@ -134,7 +135,7 @@ print "<div>READ _ENV ARRAY:</div>";
 print Support::dumpVar(array_map('htmlentities', $_ENV));
 // set + check edit access id
 $edit_access_id = 3;
-if (is_object($login) && isset($login->loginGetAcl()['unit'])) {
+if (isset($login->loginGetAcl()['unit'])) {
 	print "ACL UNIT: " . print_r(array_keys($login->loginGetAcl()['unit']), true) . "<br>";
 	print "ACCESS CHECK: " . (string)$login->loginCheckEditAccess($edit_access_id) . "<br>";
 	if ($login->loginCheckEditAccess($edit_access_id)) {
@@ -177,25 +178,23 @@ $log->debug('SOME MARK', 'Some error output');
 
 // INTERNAL SET
 print "EDIT ACCESS ID: " . $backend->edit_access_id . "<br>";
-if (is_object($login)) {
-	//	print "ACL: <br>".$backend->print_ar($login->loginGetAcl())."<br>";
-	// $log->debug('ACL', "ACL: " . \CoreLibs\Debug\Support::dumpVar($login->loginGetAcl()));
-	//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
-	//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
-	// $result = array_flip(
-	// 	array_filter(
-	// 		array_flip($login->default_acl_list),
-	// 		function ($key) {
-	// 			if (is_numeric($key)) {
-	// 				return $key;
-	// 			}
-	// 		}
-	// 	)
-	// );
-	//	print "DEFAULT ACL: <br>".$backend->print_ar($result)."<br>";
-	// DEPRICATED CALL
-	//	$backend->adbSetACL($login->loginGetAcl());
-}
+//	print "ACL: <br>".$backend->print_ar($login->loginGetAcl())."<br>";
+// $log->debug('ACL', "ACL: " . \CoreLibs\Debug\Support::dumpVar($login->loginGetAcl()));
+//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
+//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
+// $result = array_flip(
+// 	array_filter(
+// 		array_flip($login->default_acl_list),
+// 		function ($key) {
+// 			if (is_numeric($key)) {
+// 				return $key;
+// 			}
+// 		}
+// 	)
+// );
+//	print "DEFAULT ACL: <br>".$backend->print_ar($result)."<br>";
+// DEPRICATED CALL
+//	$backend->adbSetACL($login->loginGetAcl());
 
 print "THIS HOST: " . HOST_NAME . ", with PROTOCOL: " . HOST_PROTOCOL . " is running SSL: " . HOST_SSL . "<br>";
 print "DIR: " . DIR . "<br>";
