@@ -13,16 +13,26 @@ declare(strict_types=1);
  * build return json
  *
  * @param  array<string,mixed> $http_headers
- * @param  string $body
+ * @param  ?string $body
  * @return string
  */
-function buildContent(array $http_headers, string $body): string
+function buildContent(array $http_headers, ?string $body): string
 {
+	if (is_string($body) && !empty($body)) {
+		$_body = json_decode($body, true);
+		if (!is_array($_body)) {
+			$body = [$body];
+		} else {
+			$body = $_body;
+		}
+	} elseif (is_string($body)) {
+		$body = [];
+	}
 	return json_encode([
 		'HEADERS' => $http_headers,
 		"REQUEST_TYPE" => $_SERVER['REQUEST_METHOD'],
 		"PARAMS" => $_GET,
-		"BODY" => json_decode($body, true)
+		"BODY" => $body,
 	]);
 }
 
@@ -41,11 +51,15 @@ if (!empty($http_headers['HTTP_AUTHORIZATION']) && !empty($http_headers['HTTP_RU
 	exit;
 }
 
-if (($file_get = file_get_contents('php://input')) === false) {
+// if server request type is get set file_get to null -> no body
+if ($_SERVER['REQUEST_METHOD'] == "GET") {
+	$file_get = null;
+} elseif (($file_get = file_get_contents('php://input')) === false) {
 	header("HTTP/1.1 404 Not Found");
 	print buildContent($http_headers, '{"code": 404, "content": {"Error": "file_get_contents failed"}}');
 	exit;
 }
+
 print buildContent($http_headers, $file_get);
 
 // __END__

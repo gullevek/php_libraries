@@ -121,6 +121,23 @@ $data = $client->request(
 	]
 );
 print "[request] _POST RESPONSE: <pre>" . print_r($data, true) . "</pre>";
+print "<hr>";
+$data = $client->request(
+	"post",
+	'https://soba.egplusww.jp/developers/clemens/core_data/php_libraries/trunk/www/admin/UrlRequests.target.php'
+	. '?other=post_a',
+	[
+		"body" => 'string body here',
+		"headers" => [
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'test-header' => 'ABC',
+			'info-request-type' => '_POST',
+		],
+		"query" => ['foo' => 'BAR post'],
+	]
+);
+print "[request|string body] _POST RESPONSE: <pre>" . print_r($data, true) . "</pre>";
 
 print "<hr>";
 $data = $client->put(

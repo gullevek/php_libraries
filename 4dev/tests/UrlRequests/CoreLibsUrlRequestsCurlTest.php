@@ -768,7 +768,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 				'type' => $type,
 				'options' => null,
 				'return_code' => "200",
-				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":[],"BODY":null}'
+				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":[],"BODY":[]}'
 			];
 			$provider["basic " . $type . ", query options"] = [
 				'type' => $type,
@@ -776,7 +776,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 					"query" => ["foo" => "bar"],
 				],
 				'return_code' => "200",
-				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":{"foo":"bar"},"BODY":null}'
+				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":{"foo":"bar"},"BODY":[]}'
 			];
 			$provider["basic " . $type . ", query/body options"] = [
 				'type' => $type,
@@ -786,6 +786,22 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 				],
 				'return_code' => "200",
 				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":{"foo":"bar"},"BODY":{"foobar":"barbaz"}}'
+			];
+			$provider["basic " . $type . ", body options"] = [
+				'type' => $type,
+				'options' => [
+					"body" => ["foobar" => "barbaz"],
+				],
+				'return_code' => "200",
+				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":[],"BODY":{"foobar":"barbaz"}}'
+			];
+			$provider["basic " . $type . ", body options as string"] = [
+				'type' => $type,
+				'options' => [
+					"body" => "body is a string",
+				],
+				'return_code' => "200",
+				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":[],"BODY":["body is a string"]}'
 			];
 		}
 		// MARK: post/put/patch
@@ -814,7 +830,24 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 				'return_code' => "200",
 				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":{"foo":"bar"},"BODY":{"foobar":"barbaz"}}'
 			];
+			$provider["basic " . $type . ", body options"] = [
+				'type' => $type,
+				'options' => [
+					"body" => ["foobar" => "barbaz"],
+				],
+				'return_code' => "200",
+				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":[],"BODY":{"foobar":"barbaz"}}'
+			];
+			$provider["basic " . $type . ", body option as string"] = [
+				'type' => $type,
+				'options' => [
+					"body" => "body is a string",
+				],
+				'return_code' => "200",
+				'return_content' => '{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_ACCEPT":"*\/*","HTTP_HOST":"soba.egplusww.jp"},"REQUEST_TYPE":"' . strtoupper($type) . '","PARAMS":[],"BODY":["body is a string"]}'
+			];
 		}
+		// $provider['"basic post']
 		return $provider;
 		// phpcs:enable Generic.Files.LineLength
 	}
@@ -917,7 +950,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		);
 	}
 
-	// TODO: multi requests with same base connection
+	// MARK: multi requests with same base connection
 
 	/**
 	 * Undocumented function
@@ -970,7 +1003,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			. '"HTTP_THIRD_CALL":"delete","HTTP_ACCEPT":"*\/*",'
 			. '"HTTP_HOST":"soba.egplusww.jp"},'
 			. '"REQUEST_TYPE":"DELETE",'
-			. '"PARAMS":[],"BODY":null}',
+			. '"PARAMS":[],"BODY":[]}',
 			$response['content'],
 			'multi call: delete content not matching'
 		);

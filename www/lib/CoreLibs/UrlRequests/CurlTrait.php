@@ -19,30 +19,6 @@ namespace CoreLibs\UrlRequests;
 trait CurlTrait
 {
 	/**
-	 * Set the array block that is sent to the request call
-	 * Make sure that if headers is set as key but null it stays null and set to empty array
-	 * if headers key is missing
-	 * "get" calls do not set any body
-	 *
-	 * @param  string $type if set as get do not add body, else add body
-	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Request options
-	 * @return array{auth?:array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}
-	 */
-	private function setOptions(string $type, array $options): array
-	{
-		$base = [
-			"auth" => !array_key_exists('auth', $options) ? [] : $options['auth'],
-			"headers" => !array_key_exists('headers', $options) ? [] : $options['headers'],
-			"query" => $options['query'] ?? null,
-			"http_errors" => !array_key_exists('http_errors', $options) ? null : $options['http_errors'],
-		];
-		if ($type != "get") {
-			$base["body"] =  $options['body'] ?? null;
-		}
-		return $base;
-	}
-
-	/**
 	 * combined set call for any type of request with options type parameters
 	 * The following options can be set:
 	 * header: as array string:string
@@ -71,7 +47,7 @@ trait CurlTrait
 		return $this->request(
 			"get",
 			$url,
-			$this->setOptions('get', $options),
+			$options,
 		);
 	}
 
@@ -89,7 +65,7 @@ trait CurlTrait
 		return $this->request(
 			"post",
 			$url,
-			$this->setOptions('post', $options),
+			$options,
 		);
 	}
 
@@ -107,7 +83,7 @@ trait CurlTrait
 		return $this->request(
 			"put",
 			$url,
-			$this->setOptions('put', $options),
+			$options,
 		);
 	}
 
@@ -125,7 +101,7 @@ trait CurlTrait
 		return $this->request(
 			"patch",
 			$url,
-			$this->setOptions('patch', $options),
+			$options,
 		);
 	}
 
@@ -144,7 +120,7 @@ trait CurlTrait
 		return $this->request(
 			"delete",
 			$url,
-			$this->setOptions('delete', $options),
+			$options,
 		);
 	}
 }

@@ -175,7 +175,7 @@ class Curl implements Interface\RequestsInterface
 	 * @param  array{0:string,1:string,2:string} $auth
 	 * @return array{auth_basic_header:string,auth_type:int,auth_userpwd:string}
 	 */
-	private function authParser(?array $auth): array
+	private function authParser(array $auth): array
 	{
 		$return_auth = [
 			'auth_basic_header' => '',
@@ -376,6 +376,8 @@ class Curl implements Interface\RequestsInterface
 		// convert to string as JSON block if it is an array
 		if (is_array($body)) {
 			$params = Json::jsonConvertArrayTo($body);
+		} elseif (is_string($body)) {
+			$params = $body;
 		}
 		return $params ?? '';
 	}
@@ -505,36 +507,59 @@ class Curl implements Interface\RequestsInterface
 		return $headers;
 	}
 
+	/**
+	 * Set the array block that is sent to the request call
+	 * Make sure that if headers is set as key but null it stays null and set to empty array
+	 * if headers key is missing
+	 * "get" calls do not set any body (null)
+	 *
+	 * phpcs:disable Generic.Files.LineLength
+	 * @param  string $type if set as get do not add body, else add body
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool} $options Request options
+	 * @return array{auth:null|array{0:string,1:string,2:string},headers:null|array<string,string|array<string>>,query:null|array<string,string>,body:null|string|array<mixed>,http_errors:null|bool}
+	 * phpcs:enable Generic.Files.LineLength
+	 */
+	private function setOptions(string $type, array $options): array
+	{
+		return [
+			"auth" => !array_key_exists('auth', $options) ? ['', '', ''] : $options['auth'],
+			"headers" => !array_key_exists('headers', $options) ? [] : $options['headers'],
+			"query" => $options['query'] ?? null,
+			"http_errors" => !array_key_exists('http_errors', $options) ? null : $options['http_errors'],
+			"body" =>  $options["body"] ??
+				// check if we need a payload data set, set empty on not set
+				(in_array($type, self::MANDATORY_POST_FIELDS) && !isset($options['body']) ? [] : null)
+		];
+	}
+
 	// MARK: main curl request
 
 	/**
 	 * Overall request call
 	 *
-	 * @param  string                                  $type        get, post, pathc, put, delete:
-	 *                                                              if not set or invalid throw error
-	 * @param  string                                  $url         The URL being requested,
-	 *                                                              including domain and protocol
-	 * @param  null|array<string,string|array<string>> $headers     Headers to be used in the request
-	 * @param  null|array<string,string>               $query       Optinal query parameters
-	 * @param  null|string|array<string,mixed>         $body        Data body, converted to JSON
-	 * @param  null|bool                               $http_errors Throw exception on http response
-	 *                                                              400 or higher if set to true
-	 * @param  null|array{0:string,1:string,2:string}  $auth        auth array, if null reset global set auth
-	 * @return array{code:string,headers:array<string,array<string>>,content:string}
+	 * phpcs:disable Generic.Files.LineLength
+	 * @param  string    $type   get, post, pathc, put, delete:
+	 *                           if not set or invalid throw error
+	 * @param  string    $url    The URL being requested,
+	 *                           including domain and protocol
+	 * @param  array{auth?:null|array{0:string,1:string,2:string},headers?:null|array<string,string|array<string>>,query?:null|array<string,string>,body?:null|string|array<mixed>,http_errors?:null|bool}      $options Request options
+	 * @return array{code:string,headers:array<string,array<string>>,content:string} Return content
+	 *         code: HTTP code, if http_errors if off, this can also hold 400 or 500 type codes
+	 *         headers: earch header entry has an array of the entries, can be more than one if proxied, etc
+	 *         content: content string as is, if JSON type must be decoded afterwards
 	 * @throws \RuntimeException if type param is not valid
+	 * phpcs:enable Generic.Files.LineLength
 	 */
 	private function curlRequest(
 		string $type,
 		string $url,
-		null|array $headers,
-		null|array $query,
-		null|string|array $body,
-		null|bool $http_errors,
-		null|array $auth,
+		array $options,
 	): array {
+		// check if we need a payload data set, set empty on not set
+		$options = $this->setOptions($type, $options);
 		// set auth from override
-		if (is_array($auth)) {
-			$auth_data = $this->authParser($auth);
+		if (is_array($options['auth'])) {
+			$auth_data = $this->authParser($options['auth']);
 		} else {
 			$auth_data = [
 				'auth_basic_header' => null,
@@ -543,9 +568,9 @@ class Curl implements Interface\RequestsInterface
 			];
 		}
 		// build url
-		$this->url = $this->buildQuery($url, $query);
+		$this->url = $this->buildQuery($url, $options['query']);
 		$this->headers = $this->convertHeaders($this->buildHeaders(
-			$headers,
+			$options['headers'],
 			$auth_data['auth_basic_header']
 		));
 		if (!in_array($type, self::VALID_REQUEST_TYPES)) {
@@ -578,8 +603,8 @@ class Curl implements Interface\RequestsInterface
 			curl_setopt($handle, CURLOPT_CUSTOMREQUEST, strtoupper($type));
 		}
 		// set body data if not null, will send empty [] for empty data
-		if (in_array($type, self::HAVE_POST_FIELDS) && $body !== null) {
-			curl_setopt($handle, CURLOPT_POSTFIELDS, $this->convertPayloadData($body));
+		if (in_array($type, self::HAVE_POST_FIELDS) && $options['body'] !== null) {
+			curl_setopt($handle, CURLOPT_POSTFIELDS, $this->convertPayloadData($options['body']));
 		}
 		// reset all headers before we start the call
 		$this->received_headers = [];
@@ -588,7 +613,7 @@ class Curl implements Interface\RequestsInterface
 		// for debug
 		// print "CURLINFO_HEADER_OUT: <pre>" . curl_getinfo($handle, CURLINFO_HEADER_OUT) . "</pre>";
 		// get response code and bail on not authorized
-		$http_response = $this->handleCurlResponse($handle, $http_result, $http_errors);
+		$http_response = $this->handleCurlResponse($handle, $http_result, $options['http_errors']);
 		// close handler
 		$this->handleCurlClose($handle);
 		// return response and result
@@ -641,7 +666,7 @@ class Curl implements Interface\RequestsInterface
 	 * @param  array{auth_type:?int,auth_userpwd:?string} $auth_data auth options to override global
 	 * @return void
 	 */
-	private function setCurlOptions(\CurlHandle $handle, array $headers, ?array $auth_data): void
+	private function setCurlOptions(\CurlHandle $handle, array $headers, array $auth_data): void
 	{
 		// for not Basic auth only, basic auth sets its own header
 		if ($auth_data['auth_type'] !== null || $auth_data['auth_userpwd'] !== null) {
@@ -674,8 +699,7 @@ class Curl implements Interface\RequestsInterface
 		$timeout_requires_no_signal = false;
 		// if we have a timeout signal
 		if (!empty($this->config['timeout'])) {
-			$timeout_requires_no_signal = $timeout_requires_no_signal ||
-				$this->config['timeout'] < 1;
+			$timeout_requires_no_signal = $this->config['timeout'] < 1;
 			curl_setopt($handle, CURLOPT_TIMEOUT_MS, $this->config['timeout'] * 1000);
 		}
 		if (!empty($this->config['connection_timeout'])) {
@@ -772,9 +796,10 @@ class Curl implements Interface\RequestsInterface
 	 * Handle curl response, will throw exception on anything that is lower 400
 	 * can be turned off by setting http_errors to false
 	 *
-	 * @param  string      $http_result result string from the url call
-	 * @param  ?bool       $http_errors if we should throw an exception on error, override config setting
 	 * @param  \CurlHandle $handle      Curl handler
+	 * @param  string      $http_result result string from the url call
+	 * @param  ?bool       $http_errors if we should throw an exception on error,
+	 *                                  override config setting
 	 * @return string                   http response code
 	 * @throws \RuntimeException if http_errors is true then will throw exception on any response code >= 400
 	 */
@@ -1000,21 +1025,15 @@ class Curl implements Interface\RequestsInterface
 		// can have
 		// - headers
 		// - query
+		// - auth: null for no auth at all
+		// - http_errors: false for no exception on http error
 		// depending on type, must have (post/put/patch), optional for (delete)
 		// - body
 		$type = strtolower($type);
-		// check if we need a payload data set, set empty on not set
-		if (in_array($type, self::MANDATORY_POST_FIELDS) && !isset($options['body'])) {
-			$options['body'] = [];
-		}
 		return $this->curlRequest(
 			$type,
 			$url,
-			!array_key_exists('headers', $options) ? [] : $options['headers'],
-			$options['query'] ?? null,
-			$options['body'] ?? null,
-			!array_key_exists('http_errors', $options) ? null : $options['http_errors'],
-			!array_key_exists('auth', $options) ? [] : $options['auth'],
+			$options,
 		);
 	}
 }
