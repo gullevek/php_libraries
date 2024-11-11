@@ -19,6 +19,8 @@ $LOG_FILE_ID = 'classTest-convert-colors';
 ob_end_flush();
 
 use CoreLibs\Convert\Colors;
+use CoreLibs\Convert\Color\Color;
+use CoreLibs\Convert\Color\Coordinates;
 use CoreLibs\Debug\Support as DgS;
 use CoreLibs\Convert\SetVarType;
 
@@ -52,16 +54,16 @@ try {
 	print "**Exception: " . $e->getMessage() . "<br><pre>" . print_r($e, true) . "</pre><br>";
 }
 // B(valid)
-$rgb = [10, 20, 30];
+$rgb = [50, 20, 30];
 $hex = '#0a141e';
 $hsb = [210, 67, 12];
 $hsb_f = [210.5, 67.5, 12.5];
-$hsl = [210, 50, 7.8];
+$hsb = [210, 50, 7.8];
 print "S::COLOR rgb->hex: $rgb[0], $rgb[1], $rgb[2]: " . Colors::rgb2hex($rgb[0], $rgb[1], $rgb[2]) . "<br>";
 print "S::COLOR hex->rgb: $hex: " . DgS::printAr(SetVarType::setArray(
 	Colors::hex2rgb($hex)
 )) . "<br>";
-print "C::S/COLOR rgb->hext: $hex: " . DgS::printAr(SetVarType::setArray(
+print "C::S/COLOR rgb->hex: $hex: " . DgS::printAr(SetVarType::setArray(
 	CoreLibs\Convert\Colors::hex2rgb($hex)
 )) . "<br>";
 // C(to hsb/hsl)
@@ -82,9 +84,9 @@ print "S::COLOR hsb_f->rgb: $hsb_f[0], $hsb_f[1], $hsb_f[2]: "
 	. DgS::printAr(SetVarType::setArray(
 		Colors::hsb2rgb($hsb_f[0], $hsb_f[1], $hsb_f[2])
 	)) . "<br>";
-print "S::COLOR hsl->rgb: $hsl[0], $hsl[1], $hsl[2]: "
+print "S::COLOR hsl->rgb: $hsb[0], $hsb[1], $hsb[2]: "
 	. DgS::printAr(SetVarType::setArray(
-		Colors::hsl2rgb($hsl[0], $hsl[1], $hsl[2])
+		Colors::hsl2rgb($hsb[0], $hsb[1], $hsb[2])
 	)) . "<br>";
 
 $hsb = [0, 0, 5];
@@ -102,7 +104,43 @@ print "RANDOM IN: H: " . $h . ", S: " . $s . ", B/L: " . $b . "/" . $l . "<br>";
 print "RANDOM hsb->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsb2rgb($h, $s, $b))) . "</pre><br>";
 print "RANDOM hsl->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsl2rgb($h, $s, $l))) . "</pre><br>";
 
+$rgb = [0, 0, 0];
+print "rgb 0,0,0: " . Dgs::printAr($rgb) . " => " . Dgs::printAr(Colors::rgb2hsb($rgb[0], $rgb[1], $rgb[2])) . "<br>";
+
 // TODO: run compare check input must match output
+
+$hwb = Color::hsbToHwb(Coordinates\HSB::__constructFromArray([
+	160,
+	0,
+	50,
+]));
+print "HWB: " . DgS::printAr($hwb) . "<br>";
+$hsb = Color::hwbToHsb($hwb);
+print "HSB: " . DgS::printAr($hsb) . "<br>";
+
+$oklch = Color::rgbToOkLch(Coordinates\RGB::__constructFromArray([
+	250,
+	0,
+	0
+]));
+print "OkLch: " . DgS::printAr($oklch) . "<br>";
+$rgb = Color::okLchToRgb($oklch);
+print "OkLch -> RGB: " . DgS::printAr($rgb) . "<br>";
+
+$oklab = Color::rgbToOkLab(Coordinates\RGB::__constructFromArray([
+	250,
+	0,
+	0
+]));
+print "OkLab: " . DgS::printAr($oklab) . "<br>";
+$rgb = Color::okLabToRgb($oklab);
+print "OkLab -> RGB: " . DgS::printAr($rgb) . "<br>";
+
+$rgb = Coordinates\RGB::__constructFromArray([250, 100, 10])->toLinear();
+print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
+$rgb = Coordinates\RGB::__constructFromArray([0, 0, 0])->toLinear();
+print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
+
 
 print "</body></html>";
 

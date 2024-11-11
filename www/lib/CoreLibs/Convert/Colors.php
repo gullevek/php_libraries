@@ -120,26 +120,29 @@ class Colors
 		$MAX = max($red, $green, $blue);
 		$MIN = min($red, $green, $blue);
 		$HUE = 0;
+		$DELTA = $MAX - $MIN;
 
+		// achromatic
 		if ($MAX == $MIN) {
 			return [0, 0, round($MAX * 100)];
 		}
 		if ($red == $MAX) {
-			$HUE = ($green - $blue) / ($MAX - $MIN);
+			$HUE = fmod(($green - $blue) / $DELTA, 6);
 		} elseif ($green == $MAX) {
-			$HUE = 2 + (($blue - $red) / ($MAX - $MIN));
+			$HUE = (($blue - $red) / $DELTA) + 2;
 		} elseif ($blue == $MAX) {
-			$HUE = 4 + (($red - $green) / ($MAX - $MIN));
+			$HUE = (($red - $green) / $DELTA) + 4;
 		}
 		$HUE *= 60;
+		// avoid negative
 		if ($HUE < 0) {
 			$HUE += 360;
 		}
 
 		return [
-			(int)round($HUE),
-			(int)round((($MAX - $MIN) / $MAX) * 100),
-			(int)round($MAX * 100)
+			(int)round($HUE), // Hue
+			(int)round(($DELTA / $MAX) * 100), // Saturation
+			(int)round($MAX * 100) // Value/Brightness
 		];
 	}
 

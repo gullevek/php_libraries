@@ -56,6 +56,95 @@ class Math
 			return (float)$number;
 		}
 	}
+
+	/**
+	 * calc cube root
+	 *
+	 * @param  float $number Number to cubic root
+	 * @return float         Calculated value
+	 */
+	public static function cbrt(float $number): float
+	{
+		return pow($number, 1.0 / 3);
+	}
+
+	/**
+	 * This function is directly inspired by the multiplyMatrices() function in color.js
+	 * form Lea Verou and Chris Lilley.
+	 * (see https://github.com/LeaVerou/color.js/blob/main/src/multiply-matrices.js)
+	 * From:
+	 * https://github.com/matthieumastadenis/couleur/blob/3842cf51c9517e77afaa0a36ec78643a0c258e0b/src/utils/utils.php#L507
+	 *
+	 * It returns an array which is the product of the two number matrices passed as parameters.
+	 *
+	 * @param  array<array<int|float>> $a m x n matrice
+	 * @param  array<array<int|float>> $b n x p matrice
+	 *
+	 * @return array<array<int|float>>    m x p product
+	 */
+	public static function multiplyMatrices(array $a, array $b): array
+	{
+		$m = count($a);
+
+		if (!is_array($a[0] ?? null)) {
+			// $a is vector, convert to [[a, b, c, ...]]
+			$a = [ $a ];
+		}
+
+		if (!is_array($b[0])) {
+			// $b is vector, convert to [[a], [b], [c], ...]]
+			$b = array_map(
+				callback: fn ($v) => [ $v ],
+				array: $b,
+			);
+		}
+
+		$p = count($b[0]);
+
+		// transpose $b:
+		$bCols = array_map(
+			callback: fn ($k) => \array_map(
+				(fn ($i) => $i[$k]),
+				$b,
+			),
+			array: array_keys($b[0]),
+		);
+
+		$product = array_map(
+			callback: fn ($row) => array_map(
+				callback: fn ($col) => is_array($row) ?
+					array_reduce(
+						array: $row,
+						callback: fn ($a, $v, $i = null) => $a + $v * (
+							$col[$i ?? array_search($v, $row)] ?? 0
+						),
+						initial: 0,
+					) :
+					array_reduce(
+						array: $col,
+						callback: fn ($a, $v) => $a + $v * $row,
+						initial: 0,
+					),
+				array: $bCols,
+			),
+			array: $a,
+		);
+
+		if ($m === 1) {
+			// Avoid [[a, b, c, ...]]:
+			$product = $product[0];
+		}
+
+		if ($p === 1) {
+			// Avoid [[a], [b], [c], ...]]:
+			return array_map(
+				callback: fn ($v) => $v[0],
+				array: $product,
+			);
+		}
+
+		return $product;
+	}
 }
 
 // __END__
