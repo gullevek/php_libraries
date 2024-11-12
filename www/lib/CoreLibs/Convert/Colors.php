@@ -17,6 +17,9 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert;
 
+use CoreLibs\Convert\Color\Color;
+use CoreLibs\Convert\Color\Coordinates;
+
 class Colors
 {
 	/**
@@ -37,7 +40,8 @@ class Colors
 		int $blue,
 		bool $hex_prefix = true
 	): string {
-		$hex_color = '';
+		return Coordinates\RGB::__constructFromArray([$red, $green, $blue])->returnAsHex($hex_prefix);
+		/* $hex_color = '';
 		if ($hex_prefix === true) {
 			$hex_color = '#';
 		}
@@ -50,7 +54,7 @@ class Colors
 			// pad left with 0
 			$hex_color .= str_pad(dechex($$color), 2, '0', STR_PAD_LEFT);
 		}
-		return $hex_color;
+		return $hex_color; */
 	}
 
 	/**
@@ -69,7 +73,7 @@ class Colors
 		bool $return_as_string = false,
 		string $seperator = ','
 	): string|array {
-		$hex_string = preg_replace("/[^0-9A-Fa-f]/", '', $hex_string); // Gets a proper hex string
+		/* $hex_string = preg_replace("/[^0-9A-Fa-f]/", '', $hex_string); // Gets a proper hex string
 		if (!is_string($hex_string)) {
 			throw new \InvalidArgumentException('hex_string argument cannot be empty', 1);
 		}
@@ -89,7 +93,8 @@ class Colors
 		} else {
 			// Invalid hex color code
 			throw new \UnexpectedValueException('Invalid hex_string: ' . $hex_string, 2);
-		}
+		} */
+		$rgbArray = Coordinates\RGB::__constructFromHexString($hex_string)->returnAsArray();
 		// returns the rgb string or the associative array
 		return $return_as_string ? implode($seperator, $rgbArray) : $rgbArray;
 	}
@@ -108,7 +113,10 @@ class Colors
 	 */
 	public static function rgb2hsb(int $red, int $green, int $blue): array
 	{
-		// check that rgb is from 0 to 255
+		return Color::rgbToHsb(
+			Coordinates\RGB::__constructFromArray([$red, $green, $blue])
+		)->returnAsArray();
+		/* // check that rgb is from 0 to 255
 		foreach (['red', 'green', 'blue'] as $color) {
 			if ($$color < 0 || $$color > 255) {
 				throw new \LengthException('Argument value ' . $$color . ' for color ' . $color
@@ -143,7 +151,7 @@ class Colors
 			(int)round($HUE), // Hue
 			(int)round(($DELTA / $MAX) * 100), // Saturation
 			(int)round($MAX * 100) // Value/Brightness
-		];
+		]; */
 	}
 
 	/**
@@ -159,7 +167,11 @@ class Colors
 	 */
 	public static function hsb2rgb(float $H, float $S, float $V): array
 	{
-		// check that H is 0 to 359, 360 = 0
+		return Color::hsbToRgb(
+			Coordinates\HSB::__constructFromArray([$H, $S, $V])
+		)->returnAsArray();
+
+		/* // check that H is 0 to 359, 360 = 0
 		// and S and V are 0 to 1
 		if ($H == 360) {
 			$H = 0;
@@ -229,7 +241,7 @@ class Colors
 			(int)round($red * 255),
 			(int)round($green * 255),
 			(int)round($blue * 255)
-		];
+		]; */
 	}
 
 	/**
@@ -245,7 +257,11 @@ class Colors
 	 */
 	public static function rgb2hsl(int $red, int $green, int $blue): array
 	{
-		// check that rgb is from 0 to 255
+		return Color::rgbToHsl(
+			Coordinates\RGB::__constructFromArray([$red, $green, $blue])
+		)->returnAsArray();
+
+		/* // check that rgb is from 0 to 255
 		foreach (['red', 'green', 'blue'] as $color) {
 			if ($$color < 0 || $$color > 255) {
 				throw new \LengthException('Argument value ' . $$color . ' for color ' . $color
@@ -285,7 +301,7 @@ class Colors
 				round($sat * 100, 1),
 				round($lum * 100, 1)
 			];
-		}
+		} */
 	}
 
 	/**
@@ -300,7 +316,11 @@ class Colors
 	 */
 	public static function hsl2rgb(float $hue, float $sat, float $lum): array
 	{
-		if ($hue == 360) {
+		return Color::hslToRgb(
+			Coordinates\HSL::__constructFromArray([$hue, $sat, $lum])
+		)->returnAsArray();
+
+		/* if ($hue == 360) {
 			$hue = 0;
 		}
 		if ($hue < 0 || $hue > 359) {
@@ -347,7 +367,7 @@ class Colors
 				(int)round(255 * $hueue($hue)),
 				(int)round(255 * $hueue($hue - (1 / 3)))
 			];
-		}
+		} */
 	}
 }
 

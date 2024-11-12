@@ -13,12 +13,18 @@ namespace CoreLibs\Convert\Color\Coordinates;
 
 class HSB
 {
+	/** @var array<string> allowed colorspaces */
+	private const COLORSPACES = ['sRGB'];
+
 	/** @var float hue */
 	private float $H = 0.0;
 	/** @var float saturation */
 	private float $S = 0.0;
 	/** @var float brightness / value */
 	private float $B = 0.0;
+
+	/** @var string color space: either ok or cie */
+	private string $colorspace = '';
 
 	/**
 	 * HSB (HSV) color coordinates
@@ -29,28 +35,16 @@ class HSB
 	}
 
 	/**
-	 * set with each value as parameters
-	 *
-	 * @param  float $H Hue
-	 * @param  float $S Saturation
-	 * @param  float $B Brightness
-	 * @return self
-	 */
-	public static function __constructFromSet(float $H, float $S, float $B): self
-	{
-		return (new HSB())->setAsArray([$H, $S, $B]);
-	}
-
-	/**
 	 * set from array
 	 * where 0: Hue, 1: Saturation, 2: Brightness
 	 *
-	 * @param  array{0:float,1:float,2:float} $hsb
+	 * @param  array{0:float,1:float,2:float} $colors
+	 * @param  string $colorspace [default=sRGB]
 	 * @return self
 	 */
-	public static function __constructFromArray(array $hsb): self
+	public static function __constructFromArray(array $colors, string $colorspace = 'sRGB'): self
 	{
-		return (new HSB())->setAsArray($hsb);
+		return (new HSB())->setColorspace($colorspace)->setFromArray($colors);
 	}
 
 	/**
@@ -114,6 +108,21 @@ class HSB
 	}
 
 	/**
+	 * set the colorspace
+	 *
+	 * @param  string $colorspace
+	 * @return self
+	 */
+	private function setColorspace(string $colorspace): self
+	{
+		if (!in_array($colorspace, $this::COLORSPACES)) {
+			throw new \InvalidArgumentException('Not allowed colorspace', 0);
+		}
+		$this->colorspace = $colorspace;
+		return $this;
+	}
+
+	/**
 	 * Returns the color as array
 	 * where 0: Hue, 1: Saturation, 2: Brightness
 	 *
@@ -128,14 +137,14 @@ class HSB
 	 * set color as array
 	 * where 0: Hue, 1: Saturation, 2: Brightness
 	 *
-	 * @param  array{0:float,1:float,2:float} $hsb
+	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setAsArray(array $hsb): self
+	public function setFromArray(array $colors): self
 	{
-		$this->__set('H', $hsb[0]);
-		$this->__set('S', $hsb[1]);
-		$this->__set('B', $hsb[2]);
+		$this->__set('H', $colors[0]);
+		$this->__set('S', $colors[1]);
+		$this->__set('B', $colors[2]);
 		return $this;
 	}
 

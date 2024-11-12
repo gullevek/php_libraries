@@ -12,10 +12,12 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
+use CoreLibs\Convert\Color\Stringify;
+
 class Lab
 {
 	/** @var array<string> allowed colorspaces */
-	private const COLORSPACES = ['Oklab', 'cie'];
+	private const COLORSPACES = ['OkLab', 'CIELab'];
 
 	/** @var float lightness/luminance
 	 * CIE: 0f to 100f
@@ -48,20 +50,6 @@ class Lab
 	}
 
 	/**
-	 * set with each value as parameters
-	 *
-	 * @param  float $L
-	 * @param  float $a
-	 * @param  float $b
-	 * @param  string $colorspace
-	 * @return self
-	 */
-	public static function __constructFromSet(float $L, float $a, float $b, string $colorspace): self
-	{
-		return (new Lab())->setColorspace($colorspace)->setAsArray([$L, $a, $b]);
-	}
-
-	/**
 	 * set from array
 	 * where 0: Lightness, 1: a, 2: b
 	 *
@@ -69,9 +57,9 @@ class Lab
 	 * @param  string $colorspace
 	 * @return self
 	 */
-	public static function __constructFromArray(array $lab, string $colorspace): self
+	public static function __constructFromArray(array $colors, string $colorspace): self
 	{
-		return (new Lab())->setColorspace($colorspace)->setAsArray($lab);
+		return (new Lab())->setColorspace($colorspace)->setFromArray($colors);
 	}
 
 	/**
@@ -162,15 +150,44 @@ class Lab
 	 * set color as array
 	 * where 0: Lightness, 1: a, 2: b
 	 *
-	 * @param  array{0:float,1:float,2:float} $lab
+	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setAsArray(array $lab): self
+	public function setFromArray(array $colors): self
 	{
-		$this->__set('L', $lab[0]);
-		$this->__set('a', $lab[1]);
-		$this->__set('b', $lab[2]);
+		$this->__set('L', $colors[0]);
+		$this->__set('a', $colors[1]);
+		$this->__set('b', $colors[2]);
 		return $this;
+	}
+
+	/**
+	 * Convert into css string with optional opacity
+	 *
+	 * @param  null|float|string|null $opacity
+	 * @return string
+	 */
+	public function toCssString(null|float|string $opacity = null): string
+	{
+		$string = '';
+		switch ($this->colorspace) {
+			case 'CIELab':
+				$string = 'lab';
+				break;
+			case 'OkLab':
+				$string = 'oklab';
+				break;
+		}
+		$string .= '('
+			. $this->L
+			. ' '
+			. $this->a
+			. ' '
+			. $this->b
+			. Stringify::setOpacity($opacity)
+			. ');';
+
+		return $string;
 	}
 }
 

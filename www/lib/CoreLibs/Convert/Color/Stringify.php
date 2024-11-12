@@ -20,7 +20,26 @@ use CoreLibs\Convert\Color\Coordinates\LCH;
 class Stringify
 {
 	/**
-	 * Undocumented function
+	 * Build the opactiy sub string part and return it
+	 *
+	 * @param  null|float|string|null $opacity
+	 * @return string
+	 */
+	public static function setOpacity(null|float|string $opacity = null): string
+	{
+		// set opacity, either a string or float
+		if (is_string($opacity)) {
+			$opacity = ' / ' . $opacity;
+		} elseif ($opacity !== null) {
+			$opacity = ' / ' . $opacity;
+		} else {
+			$opacity = '';
+		}
+		return $opacity;
+	}
+
+	/**
+	 * return the CSS string including optional opacity
 	 *
 	 * @param  RGB|Lab|LCH|HSL|HWB $data
 	 * @param  null|float|string   $opacity

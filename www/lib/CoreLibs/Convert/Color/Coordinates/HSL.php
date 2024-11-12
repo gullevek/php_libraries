@@ -11,14 +11,23 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
+use CoreLibs\Convert\Color\Stringify;
+
 class HSL
 {
+	/** @var array<string> allowed colorspaces */
+	private const COLORSPACES = ['sRGB'];
+
 	/** @var float hue */
 	private float $H = 0.0;
 	/** @var float saturation */
 	private float $S = 0.0;
 	/** @var float lightness (luminance) */
 	private float $L = 0.0;
+
+	/** @var string color space: either ok or cie */
+	private string $colorspace = '';
+
 	/**
 	 * Color Coordinate HSL
 	 * Hue/Saturation/Lightness
@@ -28,28 +37,16 @@ class HSL
 	}
 
 	/**
-	 * set with each value as parameters
-	 *
-	 * @param  float $H Hue
-	 * @param  float $S Saturation
-	 * @param  float $L Lightness
-	 * @return self
-	 */
-	public static function __constructFromSet(float $H, float $S, float $L): self
-	{
-		return (new HSL())->setAsArray([$H, $S, $L]);
-	}
-
-	/**
 	 * set from array
 	 * where 0: Hue, 1: Saturation, 2: Lightness
 	 *
-	 * @param  array{0:float,1:float,2:float} $hsl
+	 * @param  array{0:float,1:float,2:float} $colors
+	 * @param  string $colorspace [default=sRGB]
 	 * @return self
 	 */
-	public static function __constructFromArray(array $hsl): self
+	public static function __constructFromArray(array $colors, string $colorspace = 'sRGB'): self
 	{
-		return (new HSL())->setAsArray($hsl);
+		return (new HSL())->setColorspace($colorspace)->setFromArray($colors);
 	}
 
 	/**
@@ -111,6 +108,21 @@ class HSL
 	}
 
 	/**
+	 * set the colorspace
+	 *
+	 * @param  string $colorspace
+	 * @return self
+	 */
+	private function setColorspace(string $colorspace): self
+	{
+		if (!in_array($colorspace, $this::COLORSPACES)) {
+			throw new \InvalidArgumentException('Not allowed colorspace', 0);
+		}
+		$this->colorspace = $colorspace;
+		return $this;
+	}
+
+	/**
 	 * Returns the color as array
 	 * where 0: Hue, 1: Saturation, 2: Lightness
 	 *
@@ -125,15 +137,34 @@ class HSL
 	 * set color as array
 	 * where 0: Hue, 1: Saturation, 2: Lightness
 	 *
-	 * @param  array{0:float,1:float,2:float} $hsl
+	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setAsArray(array $hsl): self
+	public function setFromArray(array $colors): self
 	{
-		$this->__set('H', $hsl[0]);
-		$this->__set('S', $hsl[1]);
-		$this->__set('L', $hsl[2]);
+		$this->__set('H', $colors[0]);
+		$this->__set('S', $colors[1]);
+		$this->__set('L', $colors[2]);
 		return $this;
+	}
+
+		/**
+	 * convert to css string with optional opacityt
+	 *
+	 * @param  float|string|null $opacity
+	 * @return string
+	 */
+	public function toCssString(null|float|string $opacity = null): string
+	{
+		$string = 'hsl('
+			. $this->H
+			. ' '
+			. $this->S
+			. ' '
+			. $this->L
+			. Stringify::setOpacity($opacity)
+			. ')';
+		return $string;
 	}
 }
 

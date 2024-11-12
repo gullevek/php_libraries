@@ -12,8 +12,13 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
+use CoreLibs\Convert\Color\Stringify;
+
 class LCH
 {
+	/** @var array<string> allowed colorspaces */
+	private const COLORSPACES = ['OkLab', 'CIELab'];
+
 	/** @var float Lightness/Luminance
 	 * CIE: 0 to 100
 	 * OKlch: 0.0 to 1.0
@@ -43,28 +48,16 @@ class LCH
 	}
 
 	/**
-	 * set with each value as parameters
-	 *
-	 * @param  float $L
-	 * @param  float $c
-	 * @param  float $h
-	 * @return self
-	 */
-	public static function __constructFromSet(float $L, float $c, float $h): self
-	{
-		return (new LCH())->setAsArray([$L, $c, $h]);
-	}
-
-	/**
 	 * set from array
 	 * where 0: Lightness, 1: Chroma, 2: Hue
 	 *
-	 * @param  array{0:float,1:float,2:float} $lch
+	 * @param  array{0:float,1:float,2:float} $colors
+	 * @param  string $colorspace
 	 * @return self
 	 */
-	public static function __constructFromArray(array $lch): self
+	public static function __constructFromArray(array $colors, string $colorspace): self
 	{
-		return (new LCH())->setAsArray($lch);
+		return (new LCH())->setColorspace($colorspace)->setFromArray($colors);
 	}
 
 	/**
@@ -140,6 +133,21 @@ class LCH
 	}
 
 	/**
+	 * set the colorspace
+	 *
+	 * @param  string $colorspace
+	 * @return self
+	 */
+	private function setColorspace(string $colorspace): self
+	{
+		if (!in_array($colorspace, $this::COLORSPACES)) {
+			throw new \InvalidArgumentException('Not allowed colorspace', 0);
+		}
+		$this->colorspace = $colorspace;
+		return $this;
+	}
+
+	/**
 	 * Returns the color as array
 	 * where 0: Lightness, 1: Chroma, 2: Hue
 	 *
@@ -154,15 +162,44 @@ class LCH
 	 * set color as array
 	 * where 0: Lightness, 1: Chroma, 2: Hue
 	 *
-	 * @param  array{0:float,1:float,2:float} $lch
+	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setAsArray(array $lch): self
+	public function setFromArray(array $colors): self
 	{
-		$this->__set('L', $lch[0]);
-		$this->__set('C', $lch[1]);
-		$this->__set('H', $lch[2]);
+		$this->__set('L', $colors[0]);
+		$this->__set('C', $colors[1]);
+		$this->__set('H', $colors[2]);
 		return $this;
+	}
+
+	/**
+	 * Convert into css string with optional opacity
+	 *
+	 * @param  null|float|string|null $opacity
+	 * @return string
+	 */
+	public function toCssString(null|float|string $opacity = null): string
+	{
+		$string = '';
+		switch ($this->colorspace) {
+			case 'CIELab':
+				$string = 'lch';
+				break;
+			case 'OkLab':
+				$string = 'oklch';
+				break;
+		}
+		$string .= '('
+			. $this->L
+			. ' '
+			. $this->c
+			. ' '
+			. $this->h
+			. Stringify::setOpacity($opacity)
+			. ');';
+
+		return $string;
 	}
 }
 

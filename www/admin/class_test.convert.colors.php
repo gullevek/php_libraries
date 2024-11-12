@@ -31,6 +31,36 @@ $log = new CoreLibs\Logging\Logging([
 ]);
 $color_class = 'CoreLibs\Convert\Colors';
 
+/**
+ * print out a color block with info
+ *
+ * @param  string $color
+ * @param  string $text
+ * @param  string $text_add
+ * @return string
+ */
+function display(string $color, string $text, string $text_add): string
+{
+	$css = 'margin:5px;padding:50px;'
+		. 'width:10%;'
+		. 'text-align:center;'
+		. 'color:white;text-shadow: 0 0 5px black;font-weight:bold;';
+	$template = <<<HTML
+	<div style="background-color:{COLOR};{CSS}">
+		{TEXT}
+	</div>
+	HTML;
+	return str_replace(
+		["{COLOR}", "{TEXT}", "{CSS}"],
+		[
+			$color,
+			$text . ($text_add ? '<br>' . $text_add : ''),
+			$css
+		],
+		$template
+	);
+}
+
 $PAGE_NAME = 'TEST CLASS: CONVERT COLORS';
 print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title></head>";
@@ -133,13 +163,19 @@ $oklab = Color::rgbToOkLab(Coordinates\RGB::__constructFromArray([
 	0
 ]));
 print "OkLab: " . DgS::printAr($oklab) . "<br>";
+print display($oklab->toCssString(), $oklab->toCssString(), 'Oklab');
 $rgb = Color::okLabToRgb($oklab);
 print "OkLab -> RGB: " . DgS::printAr($rgb) . "<br>";
+print display($rgb->toCssString(), $rgb->toCssString(), 'OkLab to RGB');
 
 $rgb = Coordinates\RGB::__constructFromArray([250, 100, 10])->toLinear();
 print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
 $rgb = Coordinates\RGB::__constructFromArray([0, 0, 0])->toLinear();
 print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
+
+$cie_lab = Color::okLabToLab($oklab);
+print "CieLab: " . DgS::printAr($cie_lab) . "<br>";
+print display($cie_lab->toCssString(), $cie_lab->toCssString(), 'OkLab to Cie Lab');
 
 
 print "</body></html>";

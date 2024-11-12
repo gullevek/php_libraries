@@ -11,14 +11,23 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
+use CoreLibs\Convert\Color\Stringify;
+
 class HWB
 {
+	/** @var array<string> allowed colorspaces */
+	private const COLORSPACES = ['sRGB'];
+
 	/** @var float Hue */
 	private float $H = 0.0;
 	/** @var float Whiteness */
 	private float $W = 0.0;
 	/** @var float Blackness */
 	private float $B = 0.0;
+
+	/** @var string color space: either ok or cie */
+	private string $colorspace = '';
+
 	/**
 	 * Color Coordinate: HWB
 	 * Hue/Whiteness/Blackness
@@ -28,28 +37,16 @@ class HWB
 	}
 
 	/**
-	 * set with each value as parameters
-	 *
-	 * @param  float $H Hue
-	 * @param  float $W Whiteness
-	 * @param  float $B Blackness
-	 * @return self
-	 */
-	public static function __constructFromSet(float $H, float $W, float $B): self
-	{
-		return (new HWB())->setAsArray([$H, $W, $B]);
-	}
-
-	/**
 	 * set from array
 	 * where 0: Hue, 1: Whiteness, 2: Blackness
 	 *
-	 * @param  array{0:float,1:float,2:float} $hwb
+	 * @param  array{0:float,1:float,2:float} $colors
+	 * @param  string $colorspace [default=sRGB]
 	 * @return self
 	 */
-	public static function __constructFromArray(array $hwb): self
+	public static function __constructFromArray(array $colors, string $colorspace = 'sRGB'): self
 	{
-		return (new HWB())->setAsArray($hwb);
+		return (new HWB())->setColorspace($colorspace)->setFromArray($colors);
 	}
 
 	/**
@@ -111,6 +108,21 @@ class HWB
 	}
 
 	/**
+	 * set the colorspace
+	 *
+	 * @param  string $colorspace
+	 * @return self
+	 */
+	private function setColorspace(string $colorspace): self
+	{
+		if (!in_array($colorspace, $this::COLORSPACES)) {
+			throw new \InvalidArgumentException('Not allowed colorspace', 0);
+		}
+		$this->colorspace = $colorspace;
+		return $this;
+	}
+
+	/**
 	 * Returns the color as array
 	 * where 0: Hue, 1: Whiteness, 2: Blackness
 	 *
@@ -125,15 +137,34 @@ class HWB
 	 * set color as array
 	 * where 0: Hue, 1: Whiteness, 2: Blackness
 	 *
-	 * @param  array{0:float,1:float,2:float} $hwb
+	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setAsArray(array $hwb): self
+	public function setFromArray(array $colors): self
 	{
-		$this->__set('H', $hwb[0]);
-		$this->__set('W', $hwb[1]);
-		$this->__set('B', $hwb[2]);
+		$this->__set('H', $colors[0]);
+		$this->__set('W', $colors[1]);
+		$this->__set('B', $colors[2]);
 		return $this;
+	}
+
+	/**
+	 * convert to css string with optional opacityt
+	 *
+	 * @param  float|string|null $opacity
+	 * @return string
+	 */
+	public function toCssString(null|float|string $opacity = null): string
+	{
+		$string = 'hwb('
+			. $this->H
+			. ' '
+			. $this->W
+			. ' '
+			. $this->B
+			. Stringify::setOpacity($opacity)
+			. ')';
+		return $string;
 	}
 }
 

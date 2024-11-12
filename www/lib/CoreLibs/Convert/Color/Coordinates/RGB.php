@@ -11,14 +11,22 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
+use CoreLibs\Convert\Color\Stringify;
+
 class RGB
 {
+	/** @var array<string> allowed colorspaces */
+	private const COLORSPACES = ['sRGB'];
+
 	/** @var float red 0 to 255 or 0.0f to 1.0f for linear RGB */
 	private float $R = 0.0;
 	/** @var float green 0 to 255 or 0.0f to 1.0f for linear RGB */
 	private float $G = 0.0;
 	/** @var float blue 0 to 255 or 0.0f to 1.0f for linear RGB */
 	private float $B = 0.0;
+
+	/** @var string color space: either ok or cie */
+	private string $colorspace = '';
 
 	/** @var bool set if this is linear */
 	private bool $linear = false;
@@ -31,30 +39,33 @@ class RGB
 	}
 
 	/**
-	 * set with each value as parameters
-	 *
-	 * @param  float $R Red
-	 * @param  float $G Green
-	 * @param  float $B Blue
-	 * @param  bool $linear [default=false]
-	 * @return self
-	 */
-	public static function __constructFromSet(float $R, float $G, float $B, bool $linear = false): self
-	{
-		return (new RGB())->flagLinear($linear)->setAsArray([$R, $G, $B]);
-	}
-
-	/**
 	 * set from array
 	 * where 0: Red, 1: Green, 2: Blue
 	 *
-	 * @param  array{0:float,1:float,2:float} $rgb
+	 * @param  array{0:float,1:float,2:float} $colors
+	 * @param  string $colorspace [default=sRGB]
 	 * @param  bool $linear [default=false]
 	 * @return self
 	 */
-	public static function __constructFromArray(array $rgb, bool $linear = false): self
+	public static function __constructFromArray(array $colors, string $colorspace = 'sRGB', bool $linear = false): self
 	{
-		return (new RGB())->flagLinear($linear)->setAsArray($rgb);
+		return (new RGB())->setColorspace($colorspace)->flagLinear($linear)->setFromArray($colors);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string $hex_string
+	 * @param  string $colorspace
+	 * @param  bool   $linear
+	 * @return self
+	 */
+	public static function __constructFromHexString(
+		string $hex_string,
+		string $colorspace = 'sRGB',
+		bool $linear = false
+	): self {
+		return (new RGB())->setColorspace($colorspace)->flagLinear($linear)->setFromHex($hex_string);
 	}
 
 	/**
@@ -100,6 +111,21 @@ class RGB
 	}
 
 	/**
+	 * set the colorspace
+	 *
+	 * @param  string $colorspace
+	 * @return self
+	 */
+	private function setColorspace(string $colorspace): self
+	{
+		if (!in_array($colorspace, $this::COLORSPACES)) {
+			throw new \InvalidArgumentException('Not allowed colorspace', 0);
+		}
+		$this->colorspace = $colorspace;
+		return $this;
+	}
+
+	/**
 	 * Returns the color as array
 	 * where 0: Red, 1: Green, 2: Blue
 	 *
@@ -114,15 +140,74 @@ class RGB
 	 * set color as array
 	 * where 0: Red, 1: Green, 2: Blue
 	 *
-	 * @param  array{0:float,1:float,2:float} $rgb
+	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setAsArray(array $rgb): self
+	public function setFromArray(array $colors): self
 	{
-		$this->__set('R', $rgb[0]);
-		$this->__set('G', $rgb[1]);
-		$this->__set('B', $rgb[2]);
+		$this->__set('R', $colors[0]);
+		$this->__set('G', $colors[1]);
+		$this->__set('B', $colors[2]);
 		return $this;
+	}
+
+	/**
+	 * Return current set RGB as hex string. with or without # prefix
+	 *
+	 * @param  bool   $hex_prefix
+	 * @return string
+	 */
+	public function returnAsHex(bool $hex_prefix = true): string
+	{
+		// prefix
+		$hex_color = '';
+		if ($hex_prefix === true) {
+			$hex_color = '#';
+		}
+		// convert if in linear
+		if ($this->linear) {
+			$this->fromLinear();
+		}
+		foreach ($this->returnAsArray() as $color) {
+			$hex_color .= str_pad(dechex((int)$color), 2, '0', STR_PAD_LEFT);
+		}
+		return $hex_color;
+	}
+
+	/**
+	 * set colors RGB from hex string
+	 *
+	 * @param  string $hex_string
+	 * @return self
+	 */
+	public function setFromHex(string $hex_string): self
+	{
+		$hex_string = preg_replace("/[^0-9A-Fa-f]/", '', $hex_string); // Gets a proper hex string
+		if (!is_string($hex_string)) {
+			throw new \InvalidArgumentException('hex_string argument cannot be empty', 1);
+		}
+		$rgbArray = [];
+		if (strlen($hex_string) == 6) {
+			// If a proper hex code, convert using bitwise operation.
+			// No overhead... faster
+			$colorVal = hexdec($hex_string);
+			$rgbArray = [
+				0xFF & ($colorVal >> 0x10),
+				0xFF & ($colorVal >> 0x8),
+				0xFF & $colorVal
+			];
+		} elseif (strlen($hex_string) == 3) {
+			// If shorthand notation, need some string manipulations
+			$rgbArray = [
+				hexdec(str_repeat(substr($hex_string, 0, 1), 2)),
+				hexdec(str_repeat(substr($hex_string, 1, 1), 2)),
+				hexdec(str_repeat(substr($hex_string, 2, 1), 2))
+			];
+		} else {
+			// Invalid hex color code
+			throw new \UnexpectedValueException('Invalid hex_string: ' . $hex_string, 2);
+		}
+		return $this->setFromArray($rgbArray);
 	}
 
 	/**
@@ -153,7 +238,7 @@ class RGB
 	 */
 	public function toLinear(): self
 	{
-		$this->flagLinear(true)->setAsArray(array_map(
+		$this->flagLinear(true)->setFromArray(array_map(
 			callback: function (int|float $v) {
 				$v = (float)($v / 255);
 				$abs = abs($v);
@@ -177,7 +262,7 @@ class RGB
 	 */
 	public function fromLinear(): self
 	{
-		$this->flagLinear(false)->setAsArray(array_map(
+		$this->flagLinear(false)->setFromArray(array_map(
 			callback: function (int|float $v) {
 				$abs  = abs($v);
 				$sign = ($v < 0) ? -1 : 1;
@@ -197,29 +282,31 @@ class RGB
 
 	/**
 	 * convert to css string with optional opacity
-	 * Note: if this is a linea RGB, this data will not be correct
+	 * Note: if this is a linear RGB, the data will converted during this operation and the converted back
 	 *
 	 * @param  float|string|null $opacity
 	 * @return string
 	 */
 	public function toCssString(null|float|string $opacity = null): string
 	{
-		// set opacity, either a string or float
-		if (is_string($opacity)) {
-			$opacity = ' / ' . $opacity;
-		} elseif ($opacity !== null) {
-			$opacity = ' / ' . $opacity;
-		} else {
-			$opacity = '';
+		// if we are in linear mode, convert to normal mode temporary
+		$was_linear = false;
+		if ($this->linear) {
+			$this->fromLinear();
+			$was_linear = true;
 		}
-		return 'rgb('
+		$string = 'rgb('
 			. (int)round($this->R, 0)
 			. ' '
 			. (int)round($this->G, 0)
 			. ' '
 			. (int)round($this->B, 0)
-			. $opacity
+			. Stringify::setOpacity($opacity)
 			. ')';
+		if ($was_linear) {
+			$this->toLinear();
+		}
+		return $string;
 	}
 }
 

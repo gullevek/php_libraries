@@ -9,38 +9,79 @@
  * We convert between color cooradinates and color spaces
  * as seen in the list below
  *
- * |      |         RGB           |     Oklab     |       Cie
- * |      |     | HSB |     |     |       |       |        |        |
- * |      | RGB | HSV | HSL | HWB | OkLab | OkLch | CieLab | CieLch |
- * -------+-----+-----+-----+-----+-------+-------+--------+--------+
- * RGB    |  -  |  o  |  o  |  o  |   o   |   o   |        |        |
- * HSB/HB |  o  |  -  |  o  |  o  |       |       |        |        |
- * HSL    |  o  |  o  |  -  |  o  |   o   |   o   |        |        |
- * HWB    |  o  |  o  |  o  |  -  |       |       |        |        |
- * OkLab  |  o  |     |  o  |     |   -   |       |        |        |
- * OkLch  |  o  |     |  o  |     |       |   -   |        |        |
- * CieLab |     |     |     |     |       |       |   -    |        |
- * CieLch |     |     |     |     |       |       |        |   -    |
+ * |       |         RGB           |     Oklab     |     CieLab      |
+ * |       |     | HSB |     |     |       |       |        |        |
+ * |       | RGB | HSV | HSL | HWB | OkLab | OkLch | CieLab | CieLch |
+ * --------+-----+-----+-----+-----+-------+-------+--------+--------+
+ * RGB     |  -  |  o  |  o  |  o  |   o   |   o   |   o    |   o    |
+ * HSB/HSV |  o  |  -  |  o  |  o  |   o   |   o   |   o    |   o    |
+ * HSL     |  o  |  o  |  -  |  o  |   o   |   o   |   o    |   o    |
+ * HWB     |  o  |  o  |  o  |  -  |   o   |   o   |   o    |   o    |
+ * OkLab   |  o  |  o  |  o  |  o  |   -   |   o   |   o    |   o    |
+ * OkLch   |  o  |  o  |  o  |  o  |   o   |   -   |   o    |   o    |
+ * CieLab  |  o  |  o  |  o  |  o  |   o   |   o   |   -    |   o    |
+ * CieLch  |  o  |  o  |  o  |  o  |   o   |   o   |   o    |   -    |
  *
  * All color coordinates are classes
  * The data can then be converted to a CSS string
+ *
+ * CieXyz Class
+ * Not theat xyz (CIEXYZ) does not have its own conversion as it is not used in web
+ * applications
+ * Also XYZ has two different coordinate systems for the D50 an D65 whitepoint
 */
 
 declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color;
 
-use CoreLibs\Convert\Math;
 use CoreLibs\Convert\Color\Coordinates\RGB;
 use CoreLibs\Convert\Color\Coordinates\HSL;
 use CoreLibs\Convert\Color\Coordinates\HSB;
 use CoreLibs\Convert\Color\Coordinates\HWB;
 use CoreLibs\Convert\Color\Coordinates\LCH;
 use CoreLibs\Convert\Color\Coordinates\Lab;
-use CoreLibs\Convert\Color\Coordinates\XYZD65;
 
 class Color
 {
+	// MARK: general lab/lch
+
+	/**
+	 * general Lab to LCH convert
+	 *
+	 * @param  Lab   $lab
+	 * @return array{0:float,1:float,2:float} LCH values as array
+	 */
+	private static function __labToLch(Lab $lab): array
+	{
+		// cieLab to cieLch
+		$a = $lab->a;
+		$b = $lab->b;
+
+		$hue = atan2($b, $a) * 180 / pi();
+
+		return [
+			$lab->L,
+			sqrt($a ** 2 + $b ** 2),
+			$hue >= 0 ? $hue : $hue + 360,
+		];
+	}
+
+	/**
+	 * general LCH to Lab convert
+	 *
+	 * @param  LCH   $lch
+	 * @return array{0:float,1:float,2:float} Lab values as array
+	 */
+	private static function __lchToLab(LCH $lch): array
+	{
+		return [
+			$lch->L,
+			$lch->C * cos($lch->H * pi() / 180), // a
+			$lch->C * sin($lch->H * pi() / 180), // b
+		];
+	}
+
 	// MARK: RGB <-> HSL
 
 	/**
@@ -267,6 +308,40 @@ class Color
 		]);
 	}
 
+	// MARK: RGB <-> HWB
+
+	/**
+	 * Convert RGB to HWB
+	 * via rgb -> hsl -> hsb -> hwb
+	 *
+	 * @param  RGB $rgb
+	 * @return HWB
+	 */
+	public static function rgbToHwb(RGB $rgb): HWB
+	{
+		return self::hsbToHwb(
+			self::hslToHsb(
+				self::rgbToHsl($rgb)
+			)
+		);
+	}
+
+	/**
+	 * Convert HWB to RGB
+	 * via hwb -> hsb -> hsl -> rgb
+	 *
+	 * @param  HWB $hwb
+	 * @return RGB
+	 */
+	public static function hwbToRgb(HWB $hwb): RGB
+	{
+		return self::hslToRgb(
+			self::hsbToHsl(
+				self::hwbToHsb($hwb)
+			)
+		);
+	}
+
 	// MARK: HSL <-> HSB
 
 	/**
@@ -318,6 +393,38 @@ class Color
 		]);
 	}
 
+	// MARK: HSL <-> HWB
+
+	/**
+	 * Convert HSL to HWB
+	 * via hsl -> hsb -> hwb
+	 *
+	 * @param  HSL $hsl
+	 * @return HWB
+	 */
+	public static function hslToHwb(HSL $hsl): HWB
+	{
+		return self::hsbToHwb(
+			self::hslToHsb(
+				$hsl
+			)
+		);
+	}
+
+	/**
+	 * Convert HWB to HSL
+	 * via hwb -> hsb -> hsl
+	 *
+	 * @param  HWB $hwb
+	 * @return HSL
+	 */
+	public static function hwbToHsl(HWB $hwb): HSL
+	{
+		return self::hsbToHsl(
+			self::hwbToHsb($hwb)
+		);
+	}
+
 	// MARK: HSB <-> HWB
 
 	/**
@@ -366,70 +473,31 @@ class Color
 		]);
 	}
 
-	// MARK: RGB <-> HWB
+	// MARK: LAB <-> LCH
+
+	// toLch
 
 	/**
-	 * Convert RGB to HWB
-	 * via rgb -> hsl -> hsb -> hwb
+	 * CIE Lab to LCH
 	 *
-	 * @param  RGB $rgb
-	 * @return HWB
+	 * @param  Lab $lab
+	 * @return LCH
 	 */
-	public static function rgbToHwb(RGB $rgb): HWB
+	public static function labToLch(Lab $lab): LCH
 	{
-		return self::hsbToHwb(
-			self::hslToHsb(
-				self::rgbToHsl($rgb)
-			)
-		);
+		// cieLab to cieLch
+		return LCH::__constructFromArray(self::__labToLch($lab), colorspace: 'CIELab');
 	}
 
 	/**
-	 * Convert HWB to RGB
-	 * via hwb -> hsb -> hsl -> rgb
+	 * Convert CIE LCH to Lab
 	 *
-	 * @param  HWB $hwb
-	 * @return RGB
+	 * @param  LCH $lch
+	 * @return Lab
 	 */
-	public static function hwbToRgb(HWB $hwb): RGB
+	public static function lchToLab(LCH $lch): Lab
 	{
-		return self::hslToRgb(
-			self::hsbToHsl(
-				self::hwbToHsb($hwb)
-			)
-		);
-	}
-
-	// MARK: HSL <-> HWB
-
-	/**
-	 * Convert HSL to HWB
-	 * via hsl -> hsb -> hwb
-	 *
-	 * @param  HSL $hsl
-	 * @return HWB
-	 */
-	public static function hslToHwb(HSL $hsl): HWB
-	{
-		return self::hsbToHwb(
-			self::hslToHsb(
-				$hsl
-			)
-		);
-	}
-
-	/**
-	 * Convert HWB to HSL
-	 * via hwb -> hsb -> hsl
-	 *
-	 * @param  HWB $hwb
-	 * @return HSL
-	 */
-	public static function hwbToHsl(HWB $hwb): HSL
-	{
-		return self::hsbToHsl(
-			self::hwbToHsb($hwb)
-		);
+		return Lab::__constructFromArray(self::__lchToLab($lch), colorspace: 'CIELab');
 	}
 
 	// MARK: OkLch <-> OkLab
@@ -443,16 +511,7 @@ class Color
 	public static function okLabToOkLch(Lab $lab): LCH
 	{
 		// okLab\toOkLch
-		$a = $lab->a;
-		$b = $lab->b;
-
-		$hue = atan2($b, $a) * 180 / pi();
-
-		return LCH::__constructFromArray([
-			$lab->L,
-			sqrt($a ** 2 + $b ** 2),
-			$hue >= 0 ? $hue : $hue + 360,
-		]);
+		return LCH::__constructFromArray(self::__labToLch($lab), colorspace: 'OkLab');
 	}
 
 	/**
@@ -465,114 +524,7 @@ class Color
 	{
 		// oklch/toOkLab
 		// oklch to oklab
-		return Lab::__constructFromArray([
-			$lch->L,
-			$lch->C * cos($lch->H * pi() / 180), // a
-			$lch->C * sin($lch->H * pi() / 180), // b
-		], 'Oklab');
-	}
-
-	// MARK: xyzD65 <-> linearRGB
-
-	/**
-	 * convert linear RGB to xyz D65
-	 * if rgb is not flagged linear, it will be auto converted
-	 *
-	 * @param  RGB  $rgb
-	 * @return XYZD65
-	 */
-	public static function linRgbToXyzD65(RGB $rgb): XYZD65
-	{
-		// if not linear, convert to linear
-		if (!$rgb->linear) {
-			$rgb->toLinear();
-		}
-		return XYZD65::__constructFromArray(Math::multiplyMatrices(
-			[
-				[0.41239079926595934, 0.357584339383878, 0.1804807884018343],
-				[0.21263900587151027, 0.715168678767756, 0.07219231536073371],
-				[0.01933081871559182, 0.11919477979462598, 0.9505321522496607],
-			],
-			$rgb->returnAsArray()
-		));
-	}
-
-	/**
-	 * Convert xyz D65 to linear RGB
-	 *
-	 * @param  XYZD65 $xyzD65
-	 * @return RGB
-	 */
-	public static function xyzD65ToLinRgb(XYZD65 $xyzD65): RGB
-	{
-		// xyz D65 to linrgb
-		return RGB::__constructFromArray(Math::multiplyMatrices(
-			a : [
-				[  3.2409699419045226,  -1.537383177570094,   -0.4986107602930034  ],
-				[ -0.9692436362808796,   1.8759675015077202,   0.04155505740717559 ],
-				[  0.05563007969699366, -0.20397695888897652,  1.0569715142428786  ],
-			],
-			b : $xyzD65->returnAsArray()
-		), linear: true);
-	}
-
-	// MARK: xyzD65 <-> OkLab
-
-	/**
-	 * xyz D65 to OkLab
-	 *
-	 * @param  XYZD65 $xyzD65
-	 * @return Lab
-	 */
-	public static function xyzD65ToOkLab(XYZD65 $xyzD65): Lab
-	{
-		return Lab::__constructFromArray(Math::multiplyMatrices(
-			[
-				[0.2104542553, 0.7936177850, -0.0040720468],
-				[1.9779984951, -2.4285922050, 0.4505937099],
-				[0.0259040371, 0.7827717662, -0.8086757660],
-			],
-			array_map(
-				callback: fn ($v) => pow($v, 1 / 3),
-				array: Math::multiplyMatrices(
-					a: [
-						[0.8190224432164319, 0.3619062562801221, -0.12887378261216414],
-						[0.0329836671980271, 0.9292868468965546, 0.03614466816999844],
-						[0.048177199566046255, 0.26423952494422764, 0.6335478258136937],
-					],
-					b: $xyzD65->returnAsArray(),
-				),
-			)
-		), 'Oklab');
-	}
-
-	/**
-	 * xyz D65 to OkLab
-	 *
-	 * @param  Lab    $lab
-	 * @return XYZD65
-	 */
-	public static function okLabToXyzD65(Lab $lab): XYZD65
-	{
-		return XYZD65::__constructFromArray(Math::multiplyMatrices(
-			a: [
-					[1.2268798733741557, -0.5578149965554813, 0.28139105017721583],
-					[-0.04057576262431372, 1.1122868293970594, -0.07171106666151701],
-					[-0.07637294974672142, -0.4214933239627914, 1.5869240244272418],
-			],
-			b: array_map(
-				callback: fn ($v) => is_numeric($v) ? $v ** 3 : 0,
-				array: Math::multiplyMatrices(
-					a: [
-							[0.99999999845051981432, 0.39633779217376785678, 0.21580375806075880339],
-							[1.0000000088817607767, -0.1055613423236563494, -0.063854174771705903402],
-							[1.0000000546724109177, -0.089484182094965759684, -1.2914855378640917399],
-					],
-					// Divide $lightness by 100 to convert from CSS OkLab
-					b: $lab->returnAsArray(),
-				),
-			),
-		));
+		return Lab::__constructFromArray(self::__lchToLab($lch), colorspace: 'OkLab');
 	}
 
 	// MARK: rgb <-> oklab
@@ -585,9 +537,7 @@ class Color
 	 */
 	public static function rgbToOkLab(RGB $rgb): Lab
 	{
-		return self::xyzD65ToOkLab(
-			self::linRgbToXyzD65($rgb)
-		);
+		return CieXyz::rgbViaXyzD65ToOkLab($rgb);
 	}
 
 	/**
@@ -598,9 +548,7 @@ class Color
 	 */
 	public static function okLabToRgb(Lab $lab): RGB
 	{
-		return self::xyzD65ToLinRgb(
-			self::okLabToXyzD65($lab)
-		)->fromLinear();
+		return CieXyz::okLabViaXyzD65ToRgb($lab);
 	}
 
 	// MARK: rgb <-> oklch
@@ -753,7 +701,7 @@ class Color
 	 * @param  HWB $hwb
 	 * @return Lab
 	 */
-	public function hwbToOkLab(HWB $hwb): Lab
+	public static function hwbToOkLab(HWB $hwb): Lab
 	{
 		return self::rgbToOkLab(
 			self::hwbToRgb($hwb)
@@ -766,7 +714,7 @@ class Color
 	 * @param  Lab $lab
 	 * @return HWB
 	 */
-	public function okLabToHwb(Lab $lab): HWB
+	public static function okLabToHwb(Lab $lab): HWB
 	{
 		return self::rgbToHwb(
 			self::okLabToRgb($lab)
@@ -781,7 +729,7 @@ class Color
 	 * @param  HWB $hwb
 	 * @return LCH
 	 */
-	public function hwbToOkLch(HWB $hwb): LCH
+	public static function hwbToOkLch(HWB $hwb): LCH
 	{
 		return self::rgbToOkLch(
 			self::hwbToRgb($hwb)
@@ -794,10 +742,367 @@ class Color
 	 * @param  LCH $lch
 	 * @return HWB
 	 */
-	public function okLchToHwb(LCH $lch): HWB
+	public static function okLchToHwb(LCH $lch): HWB
 	{
 		return self::rgbToHwb(
 			self::okLchToRgb($lch)
+		);
+	}
+
+	// MARK: RGB <-> Lab (Cie)
+
+	/**
+	 * RGB to Lab
+	 * via RGB -> linRgb -> xyz D65 -> xyz D50 -> Lab
+	 *
+	 * @param  RGB $rgb
+	 * @return Lab
+	 */
+	public static function rgbToLab(RGB $rgb): Lab
+	{
+		return CieXyz::rgbViaXyzD65ViaXyzD50ToLab($rgb);
+		/* return CieXyz::xyzD50ToLab(
+			CieXyz::xyzD65ToXyzD50(
+				CieXyz::linRgbToXyzD65($rgb)
+			)
+		); */
+	}
+
+	/**
+	 * Lab to RGB
+	 * via Lab -> xyz D50 -> xyz D65 -> lin RGB -> RGB
+	 *
+	 * @param  Lab $lab
+	 * @return RGB
+	 */
+	public static function labToRgb(Lab $lab): RGB
+	{
+		return CieXyz::labViaXyzD50ViaXyzD65ToRgb($lab);
+		/* return CieXyz::xyzD65ToLinRgb(
+			CieXyz::xyzD50ToXyxD65(
+				CieXyz::labToXyzD50($lab)
+			)
+		)->fromLinear(); */
+	}
+
+	// MARK: RGB <-> Lch (Cie)
+
+	/**
+	 * Convert RGB to LCH (Cie)
+	 * via RGB to Lab
+	 *
+	 * @param  RGB $rgb
+	 * @return LCH
+	 */
+	public static function rgbToLch(RGB $rgb): LCH
+	{
+		// return self::rgbToL
+		return self::labToLch(
+			self::rgbToLab($rgb)
+		);
+	}
+
+	/**
+	 * Convert LCH (Cie) to RGB
+	 * via Lab to RGB
+	 *
+	 * @param  LCH $lch
+	 * @return RGB
+	 */
+	public static function lchToRgb(LCH $lch): RGB
+	{
+		return self::labToRgb(
+			self::lchToLab($lch)
+		);
+	}
+
+	// MARK: HSL <-> Lab (CIE)
+
+	/**
+	 * HSL to Lab (CIE)
+	 *
+	 * @param  HSL $hsl
+	 * @return Lab
+	 */
+	public static function hslToLab(HSL $hsl): Lab
+	{
+		return self::rgbToLab(
+			self::hslToRgb($hsl)
+		);
+	}
+
+	/**
+	 * Lab (CIE) to HSL
+	 *
+	 * @param  Lab $lab
+	 * @return HSL
+	 */
+	public static function labToHsl(Lab $lab): HSL
+	{
+		return self::rgbToHsl(
+			self::labToRgb($lab)
+		);
+	}
+
+	// MARK: HSL <-> Lch (CIE)
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  HSL $hsl
+	 * @return LCH
+	 */
+	public static function hslToLch(HSL $hsl): LCH
+	{
+		return self::rgbToLch(
+			self::hslToRgb($hsl)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  LCH $lch
+	 * @return HSL
+	 */
+	public static function lchToHsl(LCH $lch): HSL
+	{
+		return self::rgbToHsl(
+			self::lchToRgb($lch)
+		);
+	}
+
+	// MARK: HSB <-> Lab (CIE)
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  HSB $hsb
+	 * @return Lab
+	 */
+	public static function hsbToLab(HSB $hsb): Lab
+	{
+		return self::rgbToLab(
+			self::hsbToRgb($hsb)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  Lab $lab
+	 * @return HSB
+	 */
+	public static function labToHsb(Lab $lab): HSB
+	{
+		return self::rgbToHsb(
+			self::labToRgb($lab)
+		);
+	}
+
+	// MARK: HSB <-> Lch (CIE)
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  HSB $hsb
+	 * @return LCH
+	 */
+	public static function hsbToLch(HSB $hsb): LCH
+	{
+		return self::rgbToLch(
+			self::hsbToRgb($hsb)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  LCH $lch
+	 * @return HSB
+	 */
+	public static function lchToHsb(LCH $lch): HSB
+	{
+		return self::rgbToHsb(
+			self::lchToRgb($lch)
+		);
+	}
+
+	// MARK: HWB <-> Lab (CIE)
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  HWB $hwb
+	 * @return Lab
+	 */
+	public static function hwbToLab(HWB $hwb): Lab
+	{
+		return self::rgbToLab(
+			self::hwbToRgb($hwb)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  Lab $lab
+	 * @return HWB
+	 */
+	public static function labToHwb(Lab $lab): HWB
+	{
+		return self::rgbToHwb(
+			self::labToRgb($lab)
+		);
+	}
+
+	// MARK: HWB <-> Lch (CIE)
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  HWB $hwb
+	 * @return Lch
+	 */
+	public static function hwbToLch(HWB $hwb): Lch
+	{
+		return self::rgbToLch(
+			self::hwbToRgb($hwb)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  LCH $lch
+	 * @return HWB
+	 */
+	public static function lchToHweb(LCH $lch): HWB
+	{
+		return self::rgbToHwb(
+			self::lchToRgb($lch)
+		);
+	}
+
+	// MARK: Lab (Cie) <-> OkLab
+
+	/**
+	 * okLab to Lab (Cie)
+	 *
+	 * @param  Lab $lab
+	 * @return Lab
+	 */
+	public static function okLabToLab(Lab $lab): Lab
+	{
+		return CieXyz::okLabViaXyzD65ViaXyzD50ToLab($lab);
+		/* return CieXyz::xyzD50ToLab(
+			CieXyz::xyzD65ToXyzD50(
+				CieXyz::okLabToXyzD65($lab)
+			)
+		); */
+	}
+
+	/**
+	 * Lab (Cie) to okLab
+	 *
+	 * @param  Lab $lab
+	 * @return Lab
+	 */
+	public static function labToOkLab(Lab $lab): Lab
+	{
+		return CieXyz::labViaXyzD50ViaXyzD65ToOkLab($lab);
+		/* return CieXyz::xyzD65ToOkLab(
+			CieXyz::xyzD50ToXyxD65(
+				CieXyz::labToXyzD50($lab)
+			)
+		); */
+	}
+
+	// MARK: Lab (Cie) <-> Oklch
+
+	/**
+	 * OkLch to Lab (CIE)
+	 *
+	 * @param  LCH $lch
+	 * @return Lab
+	 */
+	public static function okLchToLab(LCH $lch): Lab
+	{
+		return self::okLabToLab(
+			self::okLchToOkLab($lch)
+		);
+	}
+
+	/**
+	 * Lab (CIE) to OkLch
+	 *
+	 * @param  Lab $lab
+	 * @return LCH
+	 */
+	public static function labToOkLch(Lab $lab): LCH
+	{
+		return self::okLabToOkLch(
+			self::labToOkLab($lab)
+		);
+	}
+
+	// MARK: Lch (Cie) <-> OkLch
+
+	/**
+	 * okLch to Lch (Cie)
+	 * via okLabToLab
+	 *
+	 * @param  LCH $lch
+	 * @return LCH
+	 */
+	public static function okLchToLch(LCH $lch): LCH
+	{
+		return self::labToLch(
+			self::okLabToLab(
+				self::okLchToOkLab($lch)
+			)
+		);
+	}
+
+	/**
+	 * Lch (Cie) to OkLch
+	 * via labToOkLab
+	 *
+	 * @param  LCH $lch
+	 * @return LCH
+	 */
+	public static function lchToOkLch(LCH $lch): LCH
+	{
+		return self::labToOkLch(
+			self::lchToLab($lch)
+		);
+	}
+
+	// MARK: Lch (Cie) to OkLab
+
+	/**
+	 * OkLab to Lch (CIE)
+	 *
+	 * @param  LAB $lab
+	 * @return LCH
+	 */
+	public static function okLabToLch(LAB $lab): LCH
+	{
+		return self::labToLch(
+			self::okLabToLab($lab)
+		);
+	}
+
+	/**
+	 * Lch (CIE) to OkLab
+	 *
+	 * @param  LCH $lch
+	 * @return LAB
+	 */
+	public static function lchToOkLab(LCH $lch): LAB
+	{
+		return self::labToOkLab(
+			self::lchToLab($lch)
 		);
 	}
 }
