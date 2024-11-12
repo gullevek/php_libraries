@@ -5,25 +5,25 @@
  * CREATED: 2024/11/11
  * DESCRIPTION:
  * Color Coordinate: XYZ (Cie)
- * Note, this is only for the D65 whitepoint
+ * Note, this is only for the D50 whitepoint
  * https://en.wikipedia.org/wiki/CIE_1931_color_space#Construction_of_the_CIE_XYZ_color_space_from_the_Wright%E2%80%93Guild_data
- * https://en.wikipedia.org/wiki/Standard_illuminant#D65_values
+ * https://en.wikipedia.org/wiki/Standard_illuminant#Illuminant_series_D
 */
 
 declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
-class XYZD65
+class XYZD50
 {
 	/** @var array<string> allowed colorspaces */
-	private const COLORSPACES = ['XYZ'];
+	private const COLORSPACES = ['CIEXYZ'];
 
 	/** @var float X coordinate */
 	private float $X = 0.0;
-	/** @var float Y coordinate */
+	/** @var float Y coordinate (Luminance) */
 	private float $Y = 0.0;
-	/** @var float Y coordinate */
+	/** @var float Z coordinate (blue) */
 	private float $Z = 0.0;
 
 	/** @var string color space: either ok or cie */
@@ -45,9 +45,9 @@ class XYZD65
 	 * @param  string $colorspace
 	 * @return self
 	 */
-	public static function __constructFromArray(array $colors, string $colorspace = 'XYZ'): self
+	public static function __constructFromArray(array $colors, string $colorspace = 'CieXYZ'): self
 	{
-		return (new XYZD65())->setColorspace($colorspace)->setFromArray($colors);
+		return (new XYZD50())->setColorspace($colorspace)->setFromArray($colors);
 	}
 
 	/**
