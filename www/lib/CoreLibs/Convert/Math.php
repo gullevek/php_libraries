@@ -63,9 +63,9 @@ class Math
 	 * @param  float $number Number to cubic root
 	 * @return float         Calculated value
 	 */
-	public static function cbrt(float $number): float
+	public static function cbrt(float|int $number): float
 	{
-		return pow($number, 1.0 / 3);
+		return pow((float)$number, 1.0 / 3);
 	}
 
 	/**

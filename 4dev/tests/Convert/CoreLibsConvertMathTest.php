@@ -18,7 +18,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 *
 	 * @return array<mixed>
 	 */
-	public function fceilProvider(): array
+	public function providerFceil(): array
 	{
 		return [
 			'5.5 must be 6' => [5.5, 6],
@@ -31,7 +31,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::fceil
-	 * @dataProvider fceilProvider
+	 * @dataProvider providerFceil
 	 * @testdox fceil: Input $input must be $expected
 	 *
 	 * @param float $input
@@ -51,7 +51,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 *
 	 * @return array<mixed>
 	 */
-	public function floorProvider(): array
+	public function providerFloor(): array
 	{
 		return [
 			'5123456 with -3 must be 5123000' => [5123456, -3, 5123000],
@@ -63,7 +63,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::floorp
-	 * @dataProvider floorProvider
+	 * @dataProvider providerFloor
 	 * @testdox floor: Input $input with cutoff $cutoff must be $expected
 	 *
 	 * @param int $input
@@ -84,7 +84,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 *
 	 * @return array<mixed>
 	 */
-	public function initNumericProvider(): array
+	public function providerInitNumeric(): array
 	{
 		return [
 			'5 must be 5' => [5, 5, 'int'],
@@ -98,7 +98,7 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::initNumeric
-	 * @dataProvider initNumericProvider
+	 * @dataProvider providerInitNumeric
 	 * @testdox initNumeric: Input $info $input must match $expected [$_dataName]
 	 *
 	 * @param int|float|string $input
@@ -114,7 +114,156 @@ final class CoreLibsConvertMathTest extends TestCase
 		);
 	}
 
-	// TODO: cbrt tests
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerCbrt(): array
+	{
+		return [
+			'cube root of 2' => [2, 1.25992, 5],
+			'cube root of 3' => [3, 1.44225, 5],
+			'cube root of -1' => [-1, 'NAN', 0],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::cbrt
+	 * @dataProvider providerCbrt
+	 * @testdox initNumeric: Input $input must match $expected [$_dataName]
+	 *
+	 * @param  float|int $number
+	 * @param  float     $expected
+	 * @param  int       $round_to
+	 * @return void
+	 */
+	public function testCbrt(float|int $number, float|string $expected, int $round_to): void
+	{
+		print "OUT: " . \CoreLibs\Convert\Math::cbrt($number) . "\n";
+		$this->assertEquals(
+			$expected,
+			round(\CoreLibs\Convert\Math::cbrt($number), $round_to)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerMultiplyMatrices(): array
+	{
+		return  [
+			'single' => [
+				[1, 2, 3],
+				[1, 2, 3],
+				[14]
+			],
+			'double first' => [
+				[
+					[1, 2, 3],
+					[1, 2, 3]
+				],
+				[1, 2, 3],
+				[
+					14,
+					14
+				]
+			],
+			'double both' => [
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[
+					[3, 6, 9],
+					[3, 6, 9]
+				]
+			],
+			'tripple first, single second' => [
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[1, 2, 3],
+				[
+					14,
+					14,
+					14
+				]
+			],
+			'tripple first, double second' => [
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[
+					[3, 6, 9],
+					[3, 6, 9],
+					[3, 6, 9],
+				]
+			],
+			'single first, tripple second' => [
+				[1, 2, 3],
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[
+					[6, 12, 18],
+				]
+			],
+			'double first, tripple second' => [
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[
+					[6, 12, 18],
+					[6, 12, 18],
+				]
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::multiplyMatrices
+	 * @dataProvider providerMultiplyMatrices
+	 * @testdox initNumeric: Input $input_a x $input_b must match $expected [$_dataName]
+	 *
+	 * @param  array $input_a
+	 * @param  array $input_b
+	 * @param  array $expected
+	 * @return void
+	 */
+	public function testMultiplyMatrices(array $input_a, array $input_b, array $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Convert\Math::multiplyMatrices($input_a, $input_b)
+		);
+	}
 }
 
 // __END__
