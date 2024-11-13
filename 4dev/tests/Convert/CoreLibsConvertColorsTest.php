@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * Test class for Convert\Colors
  * @coversDefaultClass \CoreLibs\Convert\Colors
- * @testdox \CoreLibs\Convert\Colors method tests
+ * @testdox \CoreLibs\Convert\Colors legacy method tests
  */
 final class CoreLibsConvertColorsTest extends TestCase
 {
@@ -21,7 +21,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function rgb2hexColorProvider(): array
+	public function providerRgb2hexColor(): array
 	{
 		return [
 			'color' => [
@@ -88,7 +88,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function hex2rgbColorProvider(): array
+	public function providerHex2rgbColor(): array
 	{
 		return [
 			'color' => [
@@ -215,7 +215,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function rgb2hsbColorProvider(): array
+	public function providerRgb2hsbColor(): array
 	{
 		$list = [];
 		foreach ($this->rgb2hslAndhsbList() as $name => $values) {
@@ -234,7 +234,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function hsb2rgbColorProvider(): array
+	public function providerHsb2rgbColor(): array
 	{
 		$list = [];
 		foreach ($this->rgb2hslAndhsbList() as $name => $values) {
@@ -253,7 +253,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function rgb2hslColorProvider(): array
+	public function providerRgb2hslColor(): array
 	{
 		$list = [];
 		foreach ($this->rgb2hslAndhsbList() as $name => $values) {
@@ -272,7 +272,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function hsl2rgbColorProvider(): array
+	public function providerHsl2rgbColor(): array
 	{
 		$list = [];
 		foreach ($this->rgb2hslAndhsbList() as $name => $values) {
@@ -291,7 +291,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * TODO: add cross convert check
 	 *
 	 * @covers ::rgb2hex
-	 * @dataProvider rgb2hexColorProvider
+	 * @dataProvider providerRgb2hexColor
 	 * @testdox rgb2hex $input_r,$input_g,$input_b will be $expected [$_dataName]
 	 *
 	 * @param int $input_r
@@ -342,7 +342,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::hex2rgb
-	 * @dataProvider hex2rgbColorProvider
+	 * @dataProvider providerHex2rgbColor
 	 * @testdox hex2rgb $input will be $expected, $expected_str str[,], $expected_str_sep str[$separator] [$_dataName]
 	 *
 	 * @param string $input
@@ -385,7 +385,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::rgb2hsb
-	 * @dataProvider rgb2hsbColorProvider
+	 * @dataProvider providerRgb2hsbColor
 	 * @testdox rgb2hsb $input_r,$input_g,$input_b will be $expected [$_dataName]
 	 *
 	 * @param integer $input_r
@@ -409,7 +409,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::hsb2rgb
-	 * @dataProvider hsb2rgbColorProvider
+	 * @dataProvider providerHsb2rgbColor
 	 * @testdox hsb2rgb $input_h,$input_s,$input_b will be $expected [$_dataName]
 	 *
 	 * @param float $input_h
@@ -434,7 +434,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::rgb2hsl
-	 * @dataProvider rgb2hslColorProvider
+	 * @dataProvider providerRgb2hslColor
 	 * @testdox rgb2hsl $input_r,$input_g,$input_b will be $expected [$_dataName]
 	 *
 	 * @param integer $input_r
@@ -458,7 +458,7 @@ final class CoreLibsConvertColorsTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::hsl2rgb
-	 * @dataProvider hsl2rgbColorProvider
+	 * @dataProvider providerHsl2rgbColor
 	 * @testdox hsl2rgb $input_h,$input_s,$input_l will be $expected [$_dataName]
 	 *
 	 * @param integer|float $input_h
