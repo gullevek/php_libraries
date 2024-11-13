@@ -354,15 +354,21 @@ class Color
 	{
 		$saturation = $hsl->S / 100;
 		$lightness = $hsl->L / 100;
-		$value  = $lightness + $saturation * min($lightness, 1 - $lightness);
+		// if lightness is 0, then we cannot return convert to hsb
+		$value = $lightness + $saturation * min($lightness, 1 - $lightness);
+		// print "Orig: " . print_r($hsl, true) . "\n";
+		// print "SAT: " . $saturation . ", Lightness: " . $lightness . ", Value: " . $value . "\n";
+		// var_dump($value);
+
 		// check for black and white
-		$saturation = ($value === 0) ?
+		$saturation = $value == 0 ?
 			0 :
 			200 * (1 - $lightness / $value);
+		$value *= 100;
 		return HSB::__constructFromArray([
 			$hsl->H,
 			$saturation,
-			$value * 100,
+			$value,
 		]);
 	}
 
@@ -377,11 +383,11 @@ class Color
 		// hsv/toHsl
 		$hue = $hsb->H;
 		$saturation = $hsb->S / 100;
-		$value = $hsb->V / 100;
+		$value = $hsb->B / 100;
 
 		$lightness = $value * (1 - $saturation / 2);
 		// check for B/W
-		$saturation = in_array($lightness, [0, 1], true) ?
+		$saturation = in_array($lightness, [0, 1]) ?
 			0 :
 			100 * ($value - $lightness) / min($lightness, 1 - $lightness)
 		;
@@ -456,6 +462,7 @@ class Color
 		$blackness = $hwb->B / 100;
 
 		$sum = $whiteness + $blackness;
+		// print "S: B/W: " . $sum . " /W: " . $whiteness . " /B: " . $blackness . "\n";
 		// for black and white
 		if ($sum >= 1) {
 			$saturation = 0;
@@ -474,8 +481,6 @@ class Color
 	}
 
 	// MARK: LAB <-> LCH
-
-	// toLch
 
 	/**
 	 * CIE Lab to LCH

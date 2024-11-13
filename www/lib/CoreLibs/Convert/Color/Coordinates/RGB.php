@@ -85,11 +85,10 @@ class RGB
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
 		}
 		// if not linear
-		if (!$this->linear && ($value < 0 || $value > 255)) {
+		if (!$this->linear && ((int)$value < 0 || (int)$value > 255)) {
 			throw new \LengthException('Argument value ' . $value . ' for color ' . $name
 				. ' is not in the range of 0 to 255', 1);
-		} elseif ($this->linear && ($value < -10E10 || $value > 1)) {
-			// not allow very very small negative numbers
+		} elseif ($this->linear && ((int)$value < 0 || (int)$value > 1)) {
 			throw new \LengthException('Argument value ' . $value . ' for color ' . $name
 				. ' is not in the range of 0 to 1 for linear rgb', 1);
 		}

@@ -62,10 +62,10 @@ class HSB
 		}
 		switch ($name) {
 			case 'H':
-				if ($value == 360) {
+				if ((int)$value == 360) {
 					$value = 0;
 				}
-				if ($value < 0 || $value > 359) {
+				if ((int)$value < 0 || (int)$value > 359) {
 					throw new \LengthException(
 						'Argument value ' . $value . ' for hue is not in the range of 0 to 359',
 						1
@@ -73,7 +73,7 @@ class HSB
 				}
 				break;
 			case 'S':
-				if ($value < 0 || $value > 100) {
+				if ((int)$value < 0 || (int)$value > 100) {
 					throw new \LengthException(
 						'Argument value ' . $value . ' for saturation is not in the range of 0 to 100',
 						2
@@ -81,7 +81,7 @@ class HSB
 				}
 				break;
 			case 'B':
-				if ($value < 0 || $value > 100) {
+				if ((int)$value < 0 || (int)$value > 100) {
 					throw new \LengthException(
 						'Argument value ' . $value . ' for brightness is not in the range of 0 to 100',
 						3

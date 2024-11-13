@@ -68,7 +68,62 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
+// out of bounds test
+
 // define a list of from to color sets for conversion test
+
+$hwb = Color::hsbToHwb(Coordinates\HSB::__constructFromArray([
+	160,
+	0,
+	50,
+]));
+print "HWB: " . DgS::printAr($hwb) . "<br>";
+$hsb = Color::hwbToHsb($hwb);
+print "HSB: " . DgS::printAr($hsb) . "<br>";
+
+$oklch = Color::rgbToOkLch(Coordinates\RGB::__constructFromArray([
+	250,
+	0,
+	0
+]));
+print "OkLch: " . DgS::printAr($oklch) . "<br>";
+$rgb = Color::okLchToRgb($oklch);
+print "OkLch -> RGB: " . DgS::printAr($rgb) . "<br>";
+
+$oklab = Color::rgbToOkLab(Coordinates\RGB::__constructFromArray([
+	250,
+	0,
+	0
+]));
+print "OkLab: " . DgS::printAr($oklab) . "<br>";
+print display($oklab->toCssString(), $oklab->toCssString(), 'Oklab');
+$rgb = Color::okLabToRgb($oklab);
+print "OkLab -> RGB: " . DgS::printAr($rgb) . "<br>";
+print display($rgb->toCssString(), $rgb->toCssString(), 'OkLab to RGB');
+
+$rgb = Coordinates\RGB::__constructFromArray([250, 100, 10])->toLinear();
+print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
+$rgb = Coordinates\RGB::__constructFromArray([0, 0, 0])->toLinear();
+print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
+
+$cie_lab = Color::okLabToLab($oklab);
+print "CieLab: " . DgS::printAr($cie_lab) . "<br>";
+print display($cie_lab->toCssString(), $cie_lab->toCssString(), 'OkLab to Cie Lab');
+
+$rgb = Coordinates\RGB::__constructFromArray([0, 0, 60]);
+$hsb = Color::rgbToHsb($rgb);
+$rgb_b = Color::hsbToRgb($hsb);
+print "RGB: " . DgS::printAr($rgb) . "<br>";
+print "RGB->HSB: " . DgS::printAr($hsb) . "<br>";
+print "HSB->RGB: " . DgS::printAr($rgb_b) . "<br>";
+
+$hsl = Coordinates\HSL::__constructFromArray([0, 20, 0]);
+$hsb = Coordinates\HSB::__constructFromArray([0, 20, 0]);
+$hsl_from_hsb = Color::hsbToHsl($hsb);
+print "HSL from HSB: " . DgS::printAr($hsl_from_hsb) . "<br>";
+
+print "<hr>";
+print "<h2>LEGACY</h2>";
 
 // A(out of bounds)
 try {
@@ -83,6 +138,7 @@ try {
 } catch (\LengthException $e) {
 	print "**Exception: " . $e->getMessage() . "<br><pre>" . print_r($e, true) . "</pre><br>";
 }
+print "<hr>";
 // B(valid)
 $rgb = [50, 20, 30];
 $hex = '#0a141e';
@@ -125,6 +181,8 @@ print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
 		Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])
 	)) . "<br>";
 
+print "<hr>";
+
 // Random text
 $h = rand(0, 359);
 $s = rand(15, 70);
@@ -134,49 +192,12 @@ print "RANDOM IN: H: " . $h . ", S: " . $s . ", B/L: " . $b . "/" . $l . "<br>";
 print "RANDOM hsb->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsb2rgb($h, $s, $b))) . "</pre><br>";
 print "RANDOM hsl->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsl2rgb($h, $s, $l))) . "</pre><br>";
 
+print "<hr>";
+
 $rgb = [0, 0, 0];
 print "rgb 0,0,0: " . Dgs::printAr($rgb) . " => " . Dgs::printAr(Colors::rgb2hsb($rgb[0], $rgb[1], $rgb[2])) . "<br>";
 
-// TODO: run compare check input must match output
-
-$hwb = Color::hsbToHwb(Coordinates\HSB::__constructFromArray([
-	160,
-	0,
-	50,
-]));
-print "HWB: " . DgS::printAr($hwb) . "<br>";
-$hsb = Color::hwbToHsb($hwb);
-print "HSB: " . DgS::printAr($hsb) . "<br>";
-
-$oklch = Color::rgbToOkLch(Coordinates\RGB::__constructFromArray([
-	250,
-	0,
-	0
-]));
-print "OkLch: " . DgS::printAr($oklch) . "<br>";
-$rgb = Color::okLchToRgb($oklch);
-print "OkLch -> RGB: " . DgS::printAr($rgb) . "<br>";
-
-$oklab = Color::rgbToOkLab(Coordinates\RGB::__constructFromArray([
-	250,
-	0,
-	0
-]));
-print "OkLab: " . DgS::printAr($oklab) . "<br>";
-print display($oklab->toCssString(), $oklab->toCssString(), 'Oklab');
-$rgb = Color::okLabToRgb($oklab);
-print "OkLab -> RGB: " . DgS::printAr($rgb) . "<br>";
-print display($rgb->toCssString(), $rgb->toCssString(), 'OkLab to RGB');
-
-$rgb = Coordinates\RGB::__constructFromArray([250, 100, 10])->toLinear();
-print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
-$rgb = Coordinates\RGB::__constructFromArray([0, 0, 0])->toLinear();
-print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
-
-$cie_lab = Color::okLabToLab($oklab);
-print "CieLab: " . DgS::printAr($cie_lab) . "<br>";
-print display($cie_lab->toCssString(), $cie_lab->toCssString(), 'OkLab to Cie Lab');
-
+print "<hr>";
 
 print "</body></html>";
 
