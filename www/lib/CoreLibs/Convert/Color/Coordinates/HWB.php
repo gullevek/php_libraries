@@ -13,7 +13,7 @@ namespace CoreLibs\Convert\Color\Coordinates;
 
 use CoreLibs\Convert\Color\Stringify;
 
-class HWB
+class HWB implements Interface\CoordinatesInterface
 {
 	/** @var array<string> allowed colorspaces */
 	private const COLORSPACES = ['sRGB'];
@@ -31,22 +31,43 @@ class HWB
 	/**
 	 * Color Coordinate: HWB
 	 * Hue/Whiteness/Blackness
+	 *
+	 * @param string|array{0:float,1:float,2:float} $colors
+	 * @param string $colorspace [default=sRGB]
+	 * @param array<string,string> $options [default=[]]
+	 * @throws \InvalidArgumentException only array colors allowed
 	 */
-	public function __construct()
+	public function __construct(string|array $colors, string $colorspace = 'sRGB', array $options = [])
 	{
+		if (!is_array($colors)) {
+			throw new \InvalidArgumentException('Only array colors allowed', 0);
+		}
+		$this->setColorspace($colorspace)->parseOptions($options)->setFromArray($colors);
 	}
 
 	/**
 	 * set from array
 	 * where 0: Hue, 1: Whiteness, 2: Blackness
 	 *
-	 * @param  array{0:float,1:float,2:float} $colors
+	 * @param  string|array{0:float,1:float,2:float} $colors
 	 * @param  string $colorspace [default=sRGB]
+	 * @param  array<string,string> $options [default=[]]
 	 * @return self
 	 */
-	public static function __constructFromArray(array $colors, string $colorspace = 'sRGB'): self
+	public static function create(string|array $colors, string $colorspace = 'sRGB', array $options = []): self
 	{
-		return (new HWB())->setColorspace($colorspace)->setFromArray($colors);
+		return new HWB($colors, $colorspace, $options);
+	}
+
+	/**
+	 * parse options
+	 *
+	 * @param  array<string,string> $options
+	 * @return self
+	 */
+	private function parseOptions(array $options): self
+	{
+		return $this;
 	}
 
 	/**
@@ -56,7 +77,7 @@ class HWB
 	 * @param  float  $value
 	 * @return void
 	 */
-	public function __set(string $name, float $value): void
+	private function set(string $name, float $value): void
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -76,7 +97,7 @@ class HWB
 			case 'W':
 				if ((int)$value < 0 || (int)$value > 100) {
 					throw new \LengthException(
-						'Argument value ' . $value . ' for saturation is not in the range of 0 to 100',
+						'Argument value ' . $value . ' for whiteness is not in the range of 0 to 100',
 						2
 					);
 				}
@@ -84,7 +105,7 @@ class HWB
 			case 'B':
 				if ((int)$value < 0 || (int)$value > 100) {
 					throw new \LengthException(
-						'Argument value ' . $value . ' for luminance is not in the range of 0 to 100',
+						'Argument value ' . $value . ' for blackness is not in the range of 0 to 100',
 						3
 					);
 				}
@@ -99,7 +120,7 @@ class HWB
 	 * @param string $name
 	 * @return float
 	 */
-	public function __get(string $name): float
+	public function __get(string $name): float|string|bool
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -140,11 +161,11 @@ class HWB
 	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setFromArray(array $colors): self
+	private function setFromArray(array $colors): self
 	{
-		$this->__set('H', $colors[0]);
-		$this->__set('W', $colors[1]);
-		$this->__set('B', $colors[2]);
+		$this->set('H', $colors[0]);
+		$this->set('W', $colors[1]);
+		$this->set('B', $colors[2]);
 		return $this;
 	}
 

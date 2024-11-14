@@ -14,7 +14,7 @@ namespace CoreLibs\Convert\Color\Coordinates;
 
 use CoreLibs\Convert\Color\Stringify;
 
-class LCH
+class LCH implements Interface\CoordinatesInterface
 {
 	/** @var array<string> allowed colorspaces */
 	private const COLORSPACES = ['OkLab', 'CIELab'];
@@ -42,22 +42,43 @@ class LCH
 	/**
 	 * Color Coordinate Lch
 	 * for oklch
+	 *
+	 * @param string|array{0:float,1:float,2:float} $colors
+	 * @param string $colorspace [default='']
+	 * @param array<string,string> $options [default=[]]
+	 * @throws \InvalidArgumentException only array colors allowed
 	 */
-	public function __construct()
+	public function __construct(string|array $colors, string $colorspace = '', array $options = [])
 	{
+		if (!is_array($colors)) {
+			throw new \InvalidArgumentException('Only array colors allowed', 0);
+		}
+		$this->setColorspace($colorspace)->parseOptions($options)->setFromArray($colors);
 	}
 
 	/**
 	 * set from array
 	 * where 0: Lightness, 1: Chroma, 2: Hue
 	 *
-	 * @param  array{0:float,1:float,2:float} $colors
-	 * @param  string $colorspace
+	 * @param  string|{0:float,1:float,2:float} $colors
+	 * @param  string $colorspace [default='']
+	 * @param  array<string,string> $options [default=[]]
 	 * @return self
 	 */
-	public static function __constructFromArray(array $colors, string $colorspace): self
+	public static function create(string|array $colors, string $colorspace = '', array $options = []): self
 	{
-		return (new LCH())->setColorspace($colorspace)->setFromArray($colors);
+		return new LCH($colors, $colorspace, $options);
+	}
+
+	/**
+	 * parse options
+	 *
+	 * @param  array<string,string> $options
+	 * @return self
+	 */
+	private function parseOptions(array $options): self
+	{
+		return $this;
 	}
 
 	/**
@@ -67,7 +88,7 @@ class LCH
 	 * @param  float  $value
 	 * @return void
 	 */
-	public function __set(string $name, float $value): void
+	private function set(string $name, float $value): void
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -124,7 +145,7 @@ class LCH
 	 * @param string $name
 	 * @return float
 	 */
-	public function __get(string $name): float
+	public function __get(string $name): float|string|bool
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -165,11 +186,11 @@ class LCH
 	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setFromArray(array $colors): self
+	private function setFromArray(array $colors): self
 	{
-		$this->__set('L', $colors[0]);
-		$this->__set('C', $colors[1]);
-		$this->__set('H', $colors[2]);
+		$this->set('L', $colors[0]);
+		$this->set('C', $colors[1]);
+		$this->set('H', $colors[2]);
 		return $this;
 	}
 

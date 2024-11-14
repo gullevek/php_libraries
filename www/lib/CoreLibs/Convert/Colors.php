@@ -40,7 +40,7 @@ class Colors
 		int $blue,
 		bool $hex_prefix = true
 	): string {
-		return Coordinates\RGB::__constructFromArray([$red, $green, $blue])->returnAsHex($hex_prefix);
+		return (new Coordinates\RGB([$red, $green, $blue]))->returnAsHex($hex_prefix);
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Colors
 	): string|array {
 		$rgbArray = [];
 		// rewrite to previous r/g/b key output
-		foreach (Coordinates\RGB::__constructFromHexString($hex_string)->returnAsArray() as $p => $el) {
+		foreach ((new Coordinates\RGB($hex_string))->returnAsArray() as $p => $el) {
 			switch ($p) {
 				case 0:
 					$k = 'r';
@@ -96,7 +96,7 @@ class Colors
 		return array_map(
 			fn ($v) => (int)round($v),
 			Color::rgbToHsb(
-				Coordinates\RGB::__constructFromArray([$red, $green, $blue])
+				new Coordinates\RGB([$red, $green, $blue])
 			)->returnAsArray()
 		);
 	}
@@ -117,7 +117,7 @@ class Colors
 		return array_map(
 			fn ($v) => (int)round($v),
 			Color::hsbToRgb(
-				Coordinates\HSB::__constructFromArray([$H, $S, $V])
+				new Coordinates\HSB([$H, $S, $V])
 			)->returnAsArray()
 		);
 	}
@@ -138,7 +138,7 @@ class Colors
 		return array_map(
 			fn ($v) => round($v, 1),
 			Color::rgbToHsl(
-				Coordinates\RGB::__constructFromArray([$red, $green, $blue])
+				new Coordinates\RGB([$red, $green, $blue])
 			)->returnAsArray()
 		);
 	}
@@ -158,7 +158,7 @@ class Colors
 		return array_map(
 			fn ($v) => round($v),
 			Color::hslToRgb(
-				Coordinates\HSL::__constructFromArray([$hue, $sat, $lum])
+				new Coordinates\HSL([$hue, $sat, $lum])
 			)->returnAsArray()
 		);
 	}

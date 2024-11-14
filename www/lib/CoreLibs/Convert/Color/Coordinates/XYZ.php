@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
-class XYZ
+class XYZ implements Interface\CoordinatesInterface
 {
 	/** @var array<string> allowed colorspaces */
 	private const COLORSPACES = ['CIEXYZ'];
@@ -35,34 +35,58 @@ class XYZ
 	/** @var string color space: either ok or cie */
 	private string $colorspace = '';
 
+	/** @var string illuminat white point: only D50 and D65 are allowed */
 	private string $whitepoint = '';
 
 	/**
 	 * Color Coordinate Lch
-	 * for oklch
+	 * for oklch conversion
+	 *
+	 * @param string|array{0:float,1:float,2:float} $colors
+	 * @param string $colorspace [default=CIEXYZ]
+	 * @param array<string,string> $options [default=[]] Only "whitepoint" option allowed
+	 * @throws \InvalidArgumentException only array colors allowed
 	 */
-	public function __construct()
-	{
+	public function __construct(
+		string|array $colors,
+		string $colorspace = 'CIEXYZ',
+		array $options = [],
+	) {
+		if (!is_array($colors)) {
+			throw new \InvalidArgumentException('Only array colors allowed', 0);
+		}
+		$this->setColorspace($colorspace)
+			->parseOptions($options)
+			->setFromArray($colors);
 	}
 
 	/**
 	 * set from array
 	 * where 0: X, 1: Y, 2: Z
 	 *
-	 * @param  array{0:float,1:float,2:float} $colors
-	 * @param  string $colorspace [default=CIEXYZ]
-	 * @param  string $whitepoint [default=''] only D65 or D50 allowed
+	 * @param array{0:float,1:float,2:float} $colors
+	 * @param string $colorspace [default=CIEXYZ]
+	 * @param array<string,string> $options [default=[]] Only "whitepoint" option allowed
 	 * @return self
 	 */
-	public static function __constructFromArray(
-		array $colors,
+	public static function create(
+		string|array $colors,
 		string $colorspace = 'CIEXYZ',
-		string $whitepoint = ''
+		array $options = [],
 	): self {
-		return (new XYZ())
-			->setColorspace($colorspace)
-			->setWhitepoint($whitepoint)
-			->setFromArray($colors);
+		return new XYZ($colors, $colorspace, $options);
+	}
+
+	/**
+	 * parse options
+	 *
+	 * @param  array<string,bool> $options
+	 * @return self
+	 */
+	private function parseOptions(array $options): self
+	{
+		$this->setWhitepoint($options['whitepoint'] ?? '');
+		return $this;
 	}
 
 	/**
@@ -72,7 +96,7 @@ class XYZ
 	 * @param  float  $value
 	 * @return void
 	 */
-	public function __set(string $name, float $value): void
+	private function set(string $name, float $value): void
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -90,7 +114,7 @@ class XYZ
 	 * @param string $name
 	 * @return float
 	 */
-	public function __get(string $name): float
+	public function __get(string $name): float|string|bool
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -150,12 +174,24 @@ class XYZ
 	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setFromArray(array $colors): self
+	private function setFromArray(array $colors): self
 	{
-		$this->__set('X', $colors[0]);
-		$this->__set('Y', $colors[1]);
-		$this->__set('Z', $colors[2]);
+		$this->set('X', $colors[0]);
+		$this->set('Y', $colors[1]);
+		$this->set('Z', $colors[2]);
 		return $this;
+	}
+
+	/**
+	 * no hsb in css
+	 *
+	 * @param  float|string|null $opacity
+	 * @return string
+	 * @throws \ErrorException
+	 */
+	public function toCssString(null|float|string $opacity = null): string
+	{
+		throw new \ErrorException('XYZ is not available as CSS color string', 0);
 	}
 }
 

@@ -13,7 +13,7 @@ namespace CoreLibs\Convert\Color\Coordinates;
 
 use CoreLibs\Convert\Color\Stringify;
 
-class RGB
+class RGB implements Interface\CoordinatesInterface
 {
 	/** @var array<string> allowed colorspaces */
 	private const COLORSPACES = ['sRGB'];
@@ -33,40 +33,47 @@ class RGB
 
 	/**
 	 * Color Coordinate RGB
+	*  @param array{0:float,1:float,2:float}|string $colors RGB color array or hex string
+	 * @param string $colorspace [default=sRGB]
+	 * @param array<string,bool> $options [default=[]] only "linear" allowed at the moment
 	 */
-	public function __construct()
+	public function __construct(string|array $colors, string $colorspace = 'sRGB', array $options = [])
 	{
+		$this->setColorspace($colorspace)->parseOptions($options);
+		if (is_array($colors)) {
+			$this->setFromArray($colors);
+		} else {
+			$this->setFromHex($colors);
+		}
 	}
 
 	/**
-	 * set from array
+	 * set from array or string
 	 * where 0: Red, 1: Green, 2: Blue
+	 * OR #ffffff or ffffff
 	 *
-	 * @param  array{0:float,1:float,2:float} $colors
+	 * @param  array{0:float,1:float,2:float}|string $colors RGB color array or hex string
 	 * @param  string $colorspace [default=sRGB]
-	 * @param  bool $linear [default=false]
+	 * @param  array<string,bool> $options [default=[]] only "linear" allowed at the moment
 	 * @return self
 	 */
-	public static function __constructFromArray(array $colors, string $colorspace = 'sRGB', bool $linear = false): self
+	public static function create(string|array $colors, string $colorspace = 'sRGB', array $options = []): self
 	{
-		return (new RGB())->setColorspace($colorspace)->flagLinear($linear)->setFromArray($colors);
+		return new RGB($colors, $colorspace, $options);
 	}
 
 	/**
-	 * Undocumented function
+	 * parse options
 	 *
-	 * @param  string $hex_string
-	 * @param  string $colorspace
-	 * @param  bool   $linear
+	 * @param  array<string,bool> $options
 	 * @return self
 	 */
-	public static function __constructFromHexString(
-		string $hex_string,
-		string $colorspace = 'sRGB',
-		bool $linear = false
-	): self {
-		return (new RGB())->setColorspace($colorspace)->flagLinear($linear)->setFromHex($hex_string);
+	private function parseOptions(array $options): self
+	{
+		$this->flagLinear($options['linear'] ?? false);
+		return $this;
 	}
+
 
 	/**
 	 * set color
@@ -75,7 +82,7 @@ class RGB
 	 * @param  float  $value
 	 * @return void
 	 */
-	public function __set(string $name, float $value): void
+	private function set(string $name, float $value): void
 	{
 		// do not allow setting linear from outside
 		if ($name == 'linear') {
@@ -90,7 +97,7 @@ class RGB
 				. ' is not in the range of 0 to 255', 1);
 		} elseif ($this->linear && ((int)$value < 0 || (int)$value > 1)) {
 			throw new \LengthException('Argument value ' . $value . ' for color ' . $name
-				. ' is not in the range of 0 to 1 for linear rgb', 1);
+				. ' is not in the range of 0 to 1 for linear rgb', 2);
 		}
 		$this->$name = $value;
 	}
@@ -101,7 +108,7 @@ class RGB
 	 * @param string $name
 	 * @return float|bool
 	 */
-	public function __get(string $name): float|bool
+	public function __get(string $name): float|string|bool
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -142,11 +149,11 @@ class RGB
 	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setFromArray(array $colors): self
+	private function setFromArray(array $colors): self
 	{
-		$this->__set('R', $colors[0]);
-		$this->__set('G', $colors[1]);
-		$this->__set('B', $colors[2]);
+		$this->set('R', $colors[0]);
+		$this->set('G', $colors[1]);
+		$this->set('B', $colors[2]);
 		return $this;
 	}
 
@@ -179,11 +186,11 @@ class RGB
 	 * @param  string $hex_string
 	 * @return self
 	 */
-	public function setFromHex(string $hex_string): self
+	private function setFromHex(string $hex_string): self
 	{
 		$hex_string = preg_replace("/[^0-9A-Fa-f]/", '', $hex_string); // Gets a proper hex string
-		if (!is_string($hex_string)) {
-			throw new \InvalidArgumentException('hex_string argument cannot be empty', 1);
+		if (empty($hex_string) || !is_string($hex_string)) {
+			throw new \InvalidArgumentException('hex_string argument cannot be empty', 3);
 		}
 		$rgbArray = [];
 		if (strlen($hex_string) == 6) {
@@ -204,7 +211,7 @@ class RGB
 			];
 		} else {
 			// Invalid hex color code
-			throw new \UnexpectedValueException('Invalid hex_string: ' . $hex_string, 2);
+			throw new \UnexpectedValueException('Invalid hex_string: ' . $hex_string, 4);
 		}
 		return $this->setFromArray($rgbArray);
 	}

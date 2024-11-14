@@ -13,7 +13,7 @@ namespace CoreLibs\Convert\Color\Coordinates;
 
 use CoreLibs\Convert\Color\Stringify;
 
-class HSL
+class HSL implements Interface\CoordinatesInterface
 {
 	/** @var array<string> allowed colorspaces */
 	private const COLORSPACES = ['sRGB'];
@@ -31,22 +31,43 @@ class HSL
 	/**
 	 * Color Coordinate HSL
 	 * Hue/Saturation/Lightness
+	 *
+	 * @param string|array{0:float,1:float,2:float} $colors
+	 * @param string $colorspace [default=sRGB]
+	 * @param array<string,string> $options [default=[]]
+	 * @throws \InvalidArgumentException only array colors allowed
 	 */
-	public function __construct()
+	public function __construct(string|array $colors, string $colorspace = 'sRGB', array $options = [])
 	{
+		if (!is_array($colors)) {
+			throw new \InvalidArgumentException('Only array colors allowed', 0);
+		}
+		$this->setColorspace($colorspace)->parseOptions($options)->setFromArray($colors);
 	}
 
 	/**
 	 * set from array
 	 * where 0: Hue, 1: Saturation, 2: Lightness
 	 *
-	 * @param  array{0:float,1:float,2:float} $colors
+	 * @param  string|array{0:float,1:float,2:float} $colors
 	 * @param  string $colorspace [default=sRGB]
+	 * @param  array<string,string> $options [default=[]]
 	 * @return self
 	 */
-	public static function __constructFromArray(array $colors, string $colorspace = 'sRGB'): self
+	public static function create(string|array $colors, string $colorspace = 'sRGB', array $options = []): self
 	{
-		return (new HSL())->setColorspace($colorspace)->setFromArray($colors);
+		return new HSL($colors, $colorspace, $options);
+	}
+
+	/**
+	 * parse options
+	 *
+	 * @param  array<string,string> $options
+	 * @return self
+	 */
+	private function parseOptions(array $options): self
+	{
+		return $this;
 	}
 
 	/**
@@ -56,7 +77,7 @@ class HSL
 	 * @param  float  $value
 	 * @return void
 	 */
-	public function __set(string $name, float $value): void
+	private function set(string $name, float $value): void
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -66,9 +87,9 @@ class HSL
 				if ((int)$value == 360) {
 					$value = 0;
 				}
-				if ((int)$value < 0 || (int)$value > 359) {
+				if ((int)$value < 0 || (int)$value > 360) {
 					throw new \LengthException(
-						'Argument value ' . $value . ' for hue is not in the range of 0 to 359',
+						'Argument value ' . $value . ' for hue is not in the range of 0 to 360',
 						1
 					);
 				}
@@ -84,7 +105,7 @@ class HSL
 			case 'L':
 				if ((int)$value < 0 || (int)$value > 100) {
 					throw new \LengthException(
-						'Argument value ' . $value . ' for luminance is not in the range of 0 to 100',
+						'Argument value ' . $value . ' for lightness is not in the range of 0 to 100',
 						3
 					);
 				}
@@ -99,7 +120,7 @@ class HSL
 	 * @param string $name
 	 * @return float
 	 */
-	public function __get(string $name): float
+	public function __get(string $name): float|string|bool
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -140,11 +161,11 @@ class HSL
 	 * @param  array{0:float,1:float,2:float} $colors
 	 * @return self
 	 */
-	public function setFromArray(array $colors): self
+	private function setFromArray(array $colors): self
 	{
-		$this->__set('H', $colors[0]);
-		$this->__set('S', $colors[1]);
-		$this->__set('L', $colors[2]);
+		$this->set('H', $colors[0]);
+		$this->set('S', $colors[1]);
+		$this->set('L', $colors[2]);
 		return $this;
 	}
 

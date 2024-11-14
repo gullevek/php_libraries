@@ -109,7 +109,7 @@ class Color
 		// achromatic
 		if ($chroma == 0) {
 			// H, S, L
-			return HSL::__constructFromArray([
+			return new HSL([
 				0.0,
 				0.0,
 				$lum * 100,
@@ -128,7 +128,7 @@ class Color
 			}
 			$hue = $hue * 60;
 			// $sat = 1 - abs(2 * $lum - 1);
-			return HSL::__constructFromArray([
+			return new HSL([
 				$hue,
 				$sat * 100,
 				$lum * 100,
@@ -158,7 +158,7 @@ class Color
 		// if saturation is 0
 		if ($sat == 0) {
 			$lum = round($lum * 255);
-			return RGB::__constructFromArray([$lum, $lum, $lum]);
+			return new RGB([$lum, $lum, $lum]);
 		} else {
 			$m2 = $lum < 0.5 ? $lum * ($sat + 1) : ($lum + $sat) - ($lum * $sat);
 			$m1 = $lum * 2 - $m2;
@@ -180,7 +180,7 @@ class Color
 				return $m1;
 			};
 
-			return RGB::__constructFromArray([
+			return new RGB([
 				255 * $hueue($hue + (1 / 3)),
 				255 * $hueue($hue),
 				255 * $hueue($hue - (1 / 3)),
@@ -212,7 +212,7 @@ class Color
 
 		// achromatic
 		if ($MAX == $MIN) {
-			return HSB::__constructFromArray([0, 0, $MAX * 100]);
+			return new HSB([0, 0, $MAX * 100]);
 		}
 		if ($red == $MAX) {
 			$HUE = fmod(($green - $blue) / $DELTA, 6);
@@ -227,7 +227,7 @@ class Color
 			$HUE += 360;
 		}
 
-		return HSB::__constructFromArray([
+		return new HSB([
 			$HUE, // Hue
 			($DELTA / $MAX) * 100, // Saturation
 			$MAX * 100, // Brightness
@@ -255,7 +255,7 @@ class Color
 
 		if ($S == 0) {
 			$V = $V * 255;
-			return RGB::__constructFromArray([$V, $V, $V]);
+			return new RGB([$V, $V, $V]);
 		}
 
 		$Hi = floor($H / 60);
@@ -301,7 +301,7 @@ class Color
 				$blue = 0;
 		}
 
-		return RGB::__constructFromArray([
+		return new RGB([
 			$red * 255,
 			$green * 255,
 			$blue * 255,
@@ -365,7 +365,7 @@ class Color
 			0 :
 			200 * (1 - $lightness / $value);
 		$value *= 100;
-		return HSB::__constructFromArray([
+		return new HSB([
 			$hsl->H,
 			$saturation,
 			$value,
@@ -392,7 +392,7 @@ class Color
 			100 * ($value - $lightness) / min($lightness, 1 - $lightness)
 		;
 
-		return HSL::__constructFromArray([
+		return new HSL([
 			$hue,
 			$saturation,
 			$lightness * 100,
@@ -442,7 +442,7 @@ class Color
 	public static function hsbToHwb(HSB $hsb): HWB
 	{
 		// hsv\Hwb
-		return HWB::__constructFromArray([
+		return new HWB([
 			$hsb->H, // hue,
 			$hsb->B * (100 - $hsb->S) / 100, // 2: brightness, 1: saturation
 			100 - $hsb->B,
@@ -473,7 +473,7 @@ class Color
 			$value *= 100;
 		}
 
-		return HSB::__constructFromArray([
+		return new HSB([
 			$hue,
 			$saturation,
 			$value,
@@ -491,7 +491,7 @@ class Color
 	public static function labToLch(Lab $lab): LCH
 	{
 		// cieLab to cieLch
-		return LCH::__constructFromArray(self::__labToLch($lab), colorspace: 'CIELab');
+		return new LCH(self::__labToLch($lab), colorspace: 'CIELab');
 	}
 
 	/**
@@ -502,7 +502,7 @@ class Color
 	 */
 	public static function lchToLab(LCH $lch): Lab
 	{
-		return Lab::__constructFromArray(self::__lchToLab($lch), colorspace: 'CIELab');
+		return new Lab(self::__lchToLab($lch), colorspace: 'CIELab');
 	}
 
 	// MARK: OkLch <-> OkLab
@@ -516,7 +516,7 @@ class Color
 	public static function okLabToOkLch(Lab $lab): LCH
 	{
 		// okLab\toOkLch
-		return LCH::__constructFromArray(self::__labToLch($lab), colorspace: 'OkLab');
+		return new LCH(self::__labToLch($lab), colorspace: 'OkLab');
 	}
 
 	/**
@@ -529,7 +529,7 @@ class Color
 	{
 		// oklch/toOkLab
 		// oklch to oklab
-		return Lab::__constructFromArray(self::__lchToLab($lch), colorspace: 'OkLab');
+		return new Lab(self::__lchToLab($lch), colorspace: 'OkLab');
 	}
 
 	// MARK: rgb <-> oklab
