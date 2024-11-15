@@ -353,7 +353,7 @@ final class CoreLibsConvertColorTest extends TestCase
 		$rgb = (new Color\Coordinates\RGB([10, 20, 30]))->toLinear();
 		$this->assertEquals(
 			true,
-			$rgb->linear,
+			$rgb->get('linear'),
 			'On create flagged linear missing'
 		);
 		$rgb_color = $rgb->returnAsArray();
@@ -366,7 +366,7 @@ final class CoreLibsConvertColorTest extends TestCase
 		$rgb->fromLinear();
 		$this->assertEquals(
 			false,
-			$rgb->linear,
+			$rgb->get('linear'),
 			'On reverse linear, flag is missing'
 		);
 		$rgb_color = $rgb->returnAsArray();
@@ -379,13 +379,13 @@ final class CoreLibsConvertColorTest extends TestCase
 		$rgb_color = $rgb->returnAsArray();
 		$this->assertEquals(
 			false,
-			$rgb->linear,
+			$rgb->get('linear'),
 			'On create without linear flag is linear'
 		);
 		$rgb->toLinear();
 		$this->assertEquals(
 			true,
-			$rgb->linear,
+			$rgb->get('linear'),
 			'On linear call flag is not linear'
 		);
 		$rgb->fromLinear();
@@ -695,7 +695,7 @@ final class CoreLibsConvertColorTest extends TestCase
 		$this->expectException(\ErrorException::class);
 		$this->expectExceptionCode(0);
 		$this->expectExceptionMessage("Creation of dynamic property is not allowed");
-		$b->g;
+		$b->get('o');
 
 		$this->expectException(\InvalidArgumentException::class);
 		$this->expectExceptionCode(0);
@@ -755,7 +755,7 @@ final class CoreLibsConvertColorTest extends TestCase
 		$this->expectException(\ErrorException::class);
 		$this->expectExceptionCode(0);
 		$this->expectExceptionMessage("Creation of dynamic property is not allowed");
-		$b->g;
+		$b->get('o');
 
 		$this->expectException(\InvalidArgumentException::class);
 		$this->expectExceptionCode(0);
@@ -815,7 +815,7 @@ final class CoreLibsConvertColorTest extends TestCase
 		$this->expectException(\ErrorException::class);
 		$this->expectExceptionCode(0);
 		$this->expectExceptionMessage("Creation of dynamic property is not allowed");
-		$b->g;
+		$b->get('o');
 
 		$this->expectException(\InvalidArgumentException::class);
 		$this->expectExceptionCode(0);
@@ -947,7 +947,7 @@ final class CoreLibsConvertColorTest extends TestCase
 		$this->expectException(\ErrorException::class);
 		$this->expectExceptionCode(0);
 		$this->expectExceptionMessage("Creation of dynamic property is not allowed");
-		$b->h;
+		$b->get('o');
 
 		$this->expectException(\InvalidArgumentException::class);
 		$this->expectExceptionCode(0);
@@ -1100,7 +1100,7 @@ final class CoreLibsConvertColorTest extends TestCase
 		$this->expectException(\ErrorException::class);
 		$this->expectExceptionCode(0);
 		$this->expectExceptionMessage("Creation of dynamic property is not allowed");
-		$b->x;
+		$b->get('o');
 
 		$this->expectException(\InvalidArgumentException::class);
 		$this->expectExceptionCode(0);
@@ -1134,7 +1134,7 @@ final class CoreLibsConvertColorTest extends TestCase
 		$this->expectException(\ErrorException::class);
 		$this->expectExceptionCode(0);
 		$this->expectExceptionMessage("Creation of dynamic property is not allowed");
-		$b->x;
+		$b->get('o');
 
 		$this->expectException(\InvalidArgumentException::class);
 		$this->expectExceptionCode(0);
@@ -1169,7 +1169,7 @@ final class CoreLibsConvertColorTest extends TestCase
 		$this->expectException(\ErrorException::class);
 		$this->expectExceptionCode(0);
 		$this->expectExceptionMessage("Creation of dynamic property is not allowed");
-		$b->x;
+		$b->get('o');
 
 		$this->expectException(\InvalidArgumentException::class);
 		$this->expectExceptionCode(0);
