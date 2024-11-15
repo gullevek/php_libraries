@@ -55,13 +55,13 @@ class Color
 	private static function __labToLch(Lab $lab): array
 	{
 		// cieLab to cieLch
-		$a = $lab->a;
-		$b = $lab->b;
+		$a = (float)$lab->get('a');
+		$b = (float)$lab->get('b');
 
 		$hue = atan2($b, $a) * 180 / pi();
 
 		return [
-			$lab->L,
+			(float)$lab->get('L'),
 			sqrt($a ** 2 + $b ** 2),
 			$hue >= 0 ? $hue : $hue + 360,
 		];
@@ -76,9 +76,9 @@ class Color
 	private static function __lchToLab(LCH $lch): array
 	{
 		return [
-			$lch->L,
-			$lch->C * cos($lch->H * pi() / 180), // a
-			$lch->C * sin($lch->H * pi() / 180), // b
+			(float)$lch->get('L'),
+			(float)$lch->get('C') * cos((float)$lch->get('H') * pi() / 180), // a
+			(float)$lch->get('C') * sin((float)$lch->get('H') * pi() / 180), // b
 		];
 	}
 
@@ -94,9 +94,9 @@ class Color
 	 */
 	public static function rgbToHsl(RGB $rgb): HSL
 	{
-		$red = $rgb->R / 255;
-		$green = $rgb->G / 255;
-		$blue = $rgb->B / 255;
+		$red = (float)$rgb->get('R') / 255;
+		$green = (float)$rgb->get('G') / 255;
+		$blue = (float)$rgb->get('B') / 255;
 
 		$min = min($red, $green, $blue);
 		$max = max($red, $green, $blue);
@@ -147,9 +147,9 @@ class Color
 	 */
 	public static function hslToRgb(HSL $hsl): RGB
 	{
-		$hue = $hsl->H;
-		$sat = $hsl->S;
-		$lum = $hsl->L;
+		$hue = (float)$hsl->get('H');
+		$sat = (float)$hsl->get('S');
+		$lum = (float)$hsl->get('L');
 		// calc to internal convert value for hue
 		$hue = (1 / 360) * $hue;
 		// convert to internal 0-1 format
@@ -201,9 +201,9 @@ class Color
 	 */
 	public static function rgbToHsb(RGB $rgb): HSB
 	{
-		$red = $rgb->R / 255;
-		$green = $rgb->G / 255;
-		$blue = $rgb->B / 255;
+		$red = (float)$rgb->get('R') / 255;
+		$green = (float)$rgb->get('G') / 255;
+		$blue = (float)$rgb->get('B') / 255;
 
 		$MAX = max($red, $green, $blue);
 		$MIN = min($red, $green, $blue);
@@ -246,9 +246,9 @@ class Color
 	 */
 	public static function hsbToRgb(HSB $hsb): RGB
 	{
-		$H = $hsb->H;
-		$S = $hsb->S;
-		$V = $hsb->B;
+		$H = (float)$hsb->get('H');
+		$S = (float)$hsb->get('S');
+		$V = (float)$hsb->get('B');
 		// convert to internal 0-1 format
 		$S /= 100;
 		$V /= 100;
@@ -352,8 +352,8 @@ class Color
 	 */
 	public static function hslToHsb(HSL $hsl): HSB
 	{
-		$saturation = $hsl->S / 100;
-		$lightness = $hsl->L / 100;
+		$saturation = (float)$hsl->get('S') / 100;
+		$lightness = (float)$hsl->get('L') / 100;
 		// if lightness is 0, then we cannot return convert to hsb
 		$value = $lightness + $saturation * min($lightness, 1 - $lightness);
 		// print "Orig: " . print_r($hsl, true) . "\n";
@@ -366,7 +366,7 @@ class Color
 			200 * (1 - $lightness / $value);
 		$value *= 100;
 		return new HSB([
-			$hsl->H,
+			(float)$hsl->get('H'),
 			$saturation,
 			$value,
 		]);
@@ -381,9 +381,9 @@ class Color
 	public static function hsbToHsl(HSB $hsb): HSL
 	{
 		// hsv/toHsl
-		$hue = $hsb->H;
-		$saturation = $hsb->S / 100;
-		$value = $hsb->B / 100;
+		$hue = (float)$hsb->get('H');
+		$saturation = (float)$hsb->get('S') / 100;
+		$value = (float)$hsb->get('B') / 100;
 
 		$lightness = $value * (1 - $saturation / 2);
 		// check for B/W
@@ -443,9 +443,9 @@ class Color
 	{
 		// hsv\Hwb
 		return new HWB([
-			$hsb->H, // hue,
-			$hsb->B * (100 - $hsb->S) / 100, // 2: brightness, 1: saturation
-			100 - $hsb->B,
+			(float)$hsb->get('H'), // hue,
+			(float)$hsb->get('B') * (100 - (float)$hsb->get('S')) / 100, // 2: brightness, 1: saturation
+			100 - (float)$hsb->get('B'),
 		]);
 	}
 
@@ -457,9 +457,9 @@ class Color
 	 */
 	public static function hwbToHsb(HWB $hwb): HSB
 	{
-		$hue = $hwb->H;
-		$whiteness = $hwb->W / 100;
-		$blackness = $hwb->B / 100;
+		$hue = (float)$hwb->get('H');
+		$whiteness = (float)$hwb->get('W') / 100;
+		$blackness = (float)$hwb->get('B') / 100;
 
 		$sum = $whiteness + $blackness;
 		// print "S: B/W: " . $sum . " /W: " . $whiteness . " /B: " . $blackness . "\n";
@@ -469,7 +469,7 @@ class Color
 			$value = $whiteness / $sum * 100;
 		} else {
 			$value = 1 - $blackness;
-			$saturation = $value === 0 ? 0 : (1 - $whiteness / $value) * 100;
+			$saturation = $value === 0.0 ? 0 : (1 - $whiteness / $value) * 100;
 			$value *= 100;
 		}
 

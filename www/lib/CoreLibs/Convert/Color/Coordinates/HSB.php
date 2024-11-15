@@ -124,7 +124,7 @@ class HSB implements Interface\CoordinatesInterface
 	 * @param string $name
 	 * @return float
 	 */
-	public function __get(string $name): float|string|bool
+	public function get(string $name): float|string|bool
 	{
 		$name = strtoupper($name);
 		if (!property_exists($this, $name)) {

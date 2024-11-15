@@ -31,7 +31,7 @@ interface CoordinatesInterface
 	 * @param string $name
 	 * @return float
 	 */
-	public function __get(string $name): float|string|bool;
+	public function get(string $name): float|string|bool;
 
 	/**
 	 * Returns the color as array

@@ -112,6 +112,21 @@ class CieXyz
 		);
 	}
 
+	// MARK: helper convert any array to array{float, float, float}
+
+	/**
+	 * This is a hack for phpstan until we write a proper matrix to class
+	 * conversion wrapper function
+	 *
+	 * @param  array<array<float|int>|float|int> $_array
+	 * @return array{0:float,1:float,2:float}
+	 */
+	private static function convertArray(array $_array): array
+	{
+		/** @var array{0:float,1:float,2:float} */
+		return [$_array[0], $_array[1], $_array[2]];
+	}
+
 	// MARK: xyzD65 <-> xyzD50
 
 	/**
@@ -122,14 +137,14 @@ class CieXyz
 	 */
 	private static function xyzD65ToXyzD50(XYZ $xyz): XYZ
 	{
-		return new XYZ(Math::multiplyMatrices(
+		return new XYZ(self::convertArray(Math::multiplyMatrices(
 			a: [
 				[1.0479298208405488, 0.022946793341019088, -0.05019222954313557],
 				[0.029627815688159344, 0.990434484573249, -0.01707382502938514],
 				[-0.009243058152591178, 0.015055144896577895, 0.7518742899580008],
 			],
 			b: $xyz->returnAsArray(),
-		), options: ["whitepoint" => 'D50']);
+		)), options: ["whitepoint" => 'D50']);
 	}
 
 	/**
@@ -140,14 +155,14 @@ class CieXyz
 	 */
 	private static function xyzD50ToXyxD65(XYZ $xyz): XYZ
 	{
-		return new XYZ(Math::multiplyMatrices(
+		return new XYZ(self::convertArray(Math::multiplyMatrices(
 			a: [
 				[0.9554734527042182, -0.023098536874261423, 0.0632593086610217],
 				[-0.028369706963208136, 1.0099954580058226, 0.021041398966943008],
 				[0.012314001688319899, -0.020507696433477912, 1.3303659366080753],
 			],
 			b: $xyz->returnAsArray()
-		), options: ["whitepoint" => 'D65']);
+		)), options: ["whitepoint" => 'D65']);
 	}
 
 	// MARK: xyzD50 <-> Lab
@@ -228,11 +243,11 @@ class CieXyz
 		];
 
 		return new XYZ(
-			array_map(
+			self::convertArray(array_map(
 				fn ($k, $v) => $v * $d50[$k],
 				array_keys($xyz),
 				array_values($xyz),
-			),
+			)),
 			options: ["whitepoint" => 'D50']
 		);
 	}
@@ -249,17 +264,17 @@ class CieXyz
 	private static function linRgbToXyzD65(RGB $rgb): XYZ
 	{
 		// if not linear, convert to linear
-		if (!$rgb->linear) {
+		if (!$rgb->get('linear')) {
 			$rgb = (new RGB($rgb->returnAsArray()))->toLinear();
 		}
-		return new XYZ(Math::multiplyMatrices(
+		return new XYZ(self::convertArray(Math::multiplyMatrices(
 			[
 				[0.41239079926595934, 0.357584339383878, 0.1804807884018343],
 				[0.21263900587151027, 0.715168678767756, 0.07219231536073371],
 				[0.01933081871559182, 0.11919477979462598, 0.9505321522496607],
 			],
 			$rgb->returnAsArray()
-		), options: ["whitepoint" => 'D65']);
+		)), options: ["whitepoint" => 'D65']);
 	}
 
 	/**
@@ -271,14 +286,14 @@ class CieXyz
 	private static function xyzD65ToLinRgb(XYZ $xyz): RGB
 	{
 		// xyz D65 to linrgb
-		return new RGB(Math::multiplyMatrices(
+		return new RGB(self::convertArray(Math::multiplyMatrices(
 			a : [
 				[  3.2409699419045226,  -1.537383177570094,   -0.4986107602930034  ],
 				[ -0.9692436362808796,   1.8759675015077202,   0.04155505740717559 ],
 				[  0.05563007969699366, -0.20397695888897652,  1.0569715142428786  ],
 			],
 			b : $xyz->returnAsArray()
-		), options: ["linear" => true]);
+		)), options: ["linear" => true]);
 	}
 
 	// MARK: xyzD65 <-> OkLab
@@ -291,14 +306,14 @@ class CieXyz
 	 */
 	private static function xyzD65ToOkLab(XYZ $xyz): Lab
 	{
-		return new Lab(Math::multiplyMatrices(
+		return new Lab(self::convertArray(Math::multiplyMatrices(
 			[
 				[0.2104542553, 0.7936177850, -0.0040720468],
 				[1.9779984951, -2.4285922050, 0.4505937099],
 				[0.0259040371, 0.7827717662, -0.8086757660],
 			],
 			array_map(
-				callback: fn ($v) => pow($v, 1 / 3),
+				callback: fn ($v) => pow((float)$v, 1 / 3),
 				array: Math::multiplyMatrices(
 					a: [
 						[0.8190224432164319, 0.3619062562801221, -0.12887378261216414],
@@ -308,7 +323,7 @@ class CieXyz
 					b: $xyz->returnAsArray(),
 				),
 			)
-		), colorspace: 'OkLab');
+		)), colorspace: 'OkLab');
 	}
 
 	/**
@@ -319,7 +334,7 @@ class CieXyz
 	 */
 	private static function okLabToXyzD65(Lab $lab): XYZ
 	{
-		return new XYZ(Math::multiplyMatrices(
+		return new XYZ(self::convertArray(Math::multiplyMatrices(
 			a: [
 					[1.2268798733741557, -0.5578149965554813, 0.28139105017721583],
 					[-0.04057576262431372, 1.1122868293970594, -0.07171106666151701],
@@ -337,7 +352,7 @@ class CieXyz
 					b: $lab->returnAsArray(),
 				),
 			),
-		), options: ["whitepoint" => 'D65']);
+		)), options: ["whitepoint" => 'D65']);
 	}
 }
 

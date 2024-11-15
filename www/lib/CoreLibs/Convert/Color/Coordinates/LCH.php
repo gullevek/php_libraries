@@ -60,7 +60,7 @@ class LCH implements Interface\CoordinatesInterface
 	 * set from array
 	 * where 0: Lightness, 1: Chroma, 2: Hue
 	 *
-	 * @param  string|{0:float,1:float,2:float} $colors
+	 * @param  string|array{0:float,1:float,2:float} $colors
 	 * @param  string $colorspace [default='']
 	 * @param  array<string,string> $options [default=[]]
 	 * @return self
@@ -145,7 +145,7 @@ class LCH implements Interface\CoordinatesInterface
 	 * @param string $name
 	 * @return float
 	 */
-	public function __get(string $name): float|string|bool
+	public function get(string $name): float|string|bool
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
@@ -214,9 +214,9 @@ class LCH implements Interface\CoordinatesInterface
 		$string .= '('
 			. $this->L
 			. ' '
-			. $this->c
+			. $this->C
 			. ' '
-			. $this->h
+			. $this->H
 			. Utils::setOpacity($opacity)
 			. ');';
 

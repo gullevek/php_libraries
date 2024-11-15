@@ -113,7 +113,6 @@ class Math
 				break;
 			case '==':
 				return self::equalWithEpsilon($value, $limit, $epsilon);
-				break;
 			case '>':
 				if ($value > ($limit + $epsilon)) {
 					return true;
@@ -148,7 +147,7 @@ class Math
 
 		if (!is_array($a[0] ?? null)) {
 			// $a is vector, convert to [[a, b, c, ...]]
-			$a = [ $a ];
+			$a = [$a];
 		}
 
 		if (!is_array($b[0])) {
@@ -164,7 +163,7 @@ class Math
 		// transpose $b:
 		$bCols = array_map(
 			callback: fn ($k) => \array_map(
-				(fn ($i) => $i[$k]),
+				(fn ($i) => is_array($i) ? $i[$k] : 0),
 				$b,
 			),
 			array: array_keys($b[0]),
@@ -176,7 +175,7 @@ class Math
 					array_reduce(
 						array: $row,
 						callback: fn ($a, $v, $i = null) => $a + $v * (
-							$col[$i ?? array_search($v, $row)] ?? 0
+							$col[$i ?? array_search($v, $row) ?: 0]
 						),
 						initial: 0,
 					) :
@@ -198,7 +197,7 @@ class Math
 		if ($p === 1) {
 			// Avoid [[a], [b], [c], ...]]:
 			return array_map(
-				callback: fn ($v) => $v[0],
+				callback: fn ($v) => $v[0] ?? 0,
 				array: $product,
 			);
 		}

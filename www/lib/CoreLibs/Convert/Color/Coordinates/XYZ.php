@@ -118,7 +118,7 @@ class XYZ implements Interface\CoordinatesInterface
 	 * @param string $name
 	 * @return float
 	 */
-	public function __get(string $name): float|string|bool
+	public function get(string $name): float|string|bool
 	{
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);

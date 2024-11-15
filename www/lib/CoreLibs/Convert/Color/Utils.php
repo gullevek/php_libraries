@@ -15,11 +15,11 @@ use CoreLibs\Convert\Math;
 
 class Utils
 {
-	/** @var int deviation allowed for valid data checks, small */
+	/** @var float deviation allowed for valid data checks, small */
 	public const EPSILON_SMALL  = 0.000000000001;
-	/** @var int deviation allowed for valid data checks, medium */
+	/** @var float deviation allowed for valid data checks, medium */
 	public const EPSILON_MEDIUM = 0.0000001;
-	/** @var int deviation allowed for valid data checks, big */
+	/** @var float deviation allowed for valid data checks, big */
 	public const ESPILON_BIG    = 0.0001;
 
 	public static function compare(float $lower, float $value, float $upper, float $epslion): bool
