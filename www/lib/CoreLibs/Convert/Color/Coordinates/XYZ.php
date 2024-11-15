@@ -82,7 +82,7 @@ class XYZ implements Interface\CoordinatesInterface
 	/**
 	 * parse options
 	 *
-	 * @param  array<string,bool> $options
+	 * @param  array<string,string> $options
 	 * @return self
 	 */
 	private function parseOptions(array $options): self

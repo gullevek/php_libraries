@@ -562,7 +562,7 @@ class Color
 	 * convert rgb to OkLch
 	 * via rgb -> linear rgb -> xyz D65 -> OkLab -> OkLch
 	 *
-	 * @param  RGB $rbh
+	 * @param  RGB $rgb
 	 * @return LCH
 	 */
 	public static function rgbToOkLch(RGB $rgb): LCH

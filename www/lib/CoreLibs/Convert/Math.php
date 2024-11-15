@@ -137,10 +137,10 @@ class Math
 	 *
 	 * It returns an array which is the product of the two number matrices passed as parameters.
 	 *
-	 * @param  array<array<int|float>> $a m x n matrice
-	 * @param  array<array<int|float>> $b n x p matrice
+	 * @param  array<float|int|array<int|float>> $a m x n matrice
+	 * @param  array<float|int|array<int|float>> $b n x p matrice
 	 *
-	 * @return array<array<int|float>>    m x p product
+	 * @return array<float|int|array<int|float>>    m x p product
 	 */
 	public static function multiplyMatrices(array $a, array $b): array
 	{

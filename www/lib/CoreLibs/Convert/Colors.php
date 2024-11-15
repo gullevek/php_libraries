@@ -62,6 +62,7 @@ class Colors
 		$rgbArray = [];
 		// rewrite to previous r/g/b key output
 		foreach ((new Coordinates\RGB($hex_string))->returnAsArray() as $p => $el) {
+			$k = '';
 			switch ($p) {
 				case 0:
 					$k = 'r';

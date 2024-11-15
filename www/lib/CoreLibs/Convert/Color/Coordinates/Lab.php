@@ -45,7 +45,7 @@ class Lab implements Interface\CoordinatesInterface
 	 * Color Coordinate: Lab
 	 * for oklab or cie
 	 *
-	 * @param string|array{0:float,1:float,2:float} $rgb
+	 * @param string|array{0:float,1:float,2:float} $colors
 	 * @param string $colorspace [default='']
 	 * @param array<string,string> $options [default=[]]
 	 * @throws \InvalidArgumentException only array colors allowed
@@ -62,7 +62,7 @@ class Lab implements Interface\CoordinatesInterface
 	 * set from array
 	 * where 0: Lightness, 1: a, 2: b
 	 *
-	 * @param array{0:float,1:float,2:float} $rgb
+	 * @param array{0:float,1:float,2:float} $colors
 	 * @param string $colorspace [default='']
 	 * @param array<string,string> $options [default=[]]
 	 * @return self
