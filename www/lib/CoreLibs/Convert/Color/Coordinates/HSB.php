@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
+use CoreLibs\Convert\Color\Utils;
+
 class HSB implements Interface\CoordinatesInterface
 {
 	/** @var array<string> allowed colorspaces */
@@ -83,10 +85,11 @@ class HSB implements Interface\CoordinatesInterface
 		}
 		switch ($name) {
 			case 'H':
-				if ((int)$value == 360) {
+				if ($value == 360.0) {
 					$value = 0;
 				}
-				if ((int)$value < 0 || (int)$value > 360) {
+				// if ($value < 0 || $value > 360) {
+				if (Utils::compare(0.0, $value, 360.0, Utils::EPSILON_SMALL)) {
 					throw new \LengthException(
 						'Argument value ' . $value . ' for hue is not in the range of 0 to 360',
 						1
@@ -94,7 +97,8 @@ class HSB implements Interface\CoordinatesInterface
 				}
 				break;
 			case 'S':
-				if ((int)$value < 0 || (int)$value > 100) {
+				// if ($value < 0 || $value > 100) {
+				if (Utils::compare(0.0, $value, 100.0, Utils::EPSILON_SMALL)) {
 					throw new \LengthException(
 						'Argument value ' . $value . ' for saturation is not in the range of 0 to 100',
 						2
@@ -102,7 +106,8 @@ class HSB implements Interface\CoordinatesInterface
 				}
 				break;
 			case 'B':
-				if ((int)$value < 0 || (int)$value > 100) {
+				// if ($value < 0 || $value > 100) {
+				if (Utils::compare(0.0, $value, 100.0, Utils::EPSILON_SMALL)) {
 					throw new \LengthException(
 						'Argument value ' . $value . ' for brightness is not in the range of 0 to 100',
 						3

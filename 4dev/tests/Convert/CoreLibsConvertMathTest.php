@@ -142,7 +142,6 @@ final class CoreLibsConvertMathTest extends TestCase
 	 */
 	public function testCbrt(float|int $number, float|string $expected, int $round_to): void
 	{
-		print "OUT: " . \CoreLibs\Convert\Math::cbrt($number) . "\n";
 		$this->assertEquals(
 			$expected,
 			round(\CoreLibs\Convert\Math::cbrt($number), $round_to)
@@ -262,6 +261,130 @@ final class CoreLibsConvertMathTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Math::multiplyMatrices($input_a, $input_b)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerEqualWithEpsilon(): array
+	{
+		return [
+			'equal' => [
+				'a' => 0.000000000000000222,
+				'b' => 0.000000000000000222,
+				'epsilon' => PHP_FLOAT_EPSILON,
+				'equal' => true,
+			],
+			'almost equal' => [
+				'a' => 0.000000000000000222,
+				'b' => 0.000000000000000232,
+				'epsilon' => PHP_FLOAT_EPSILON,
+				'equal' => true,
+			],
+			'not equal' => [
+				'a' => 0.000000000000000222,
+				'b' => 0.000000000000004222,
+				'epsilon' => PHP_FLOAT_EPSILON,
+				'equal' => false,
+			],
+			'equal, different epsilon' => [
+				'a' => 0.000000000000000222,
+				'b' => 0.000000000000004222,
+				'epsilon' => 0.0001,
+				'equal' => true,
+			],
+			'not equal, different epsilon' => [
+				'a' => 0.0001,
+				'b' => 0.0002,
+				'epsilon' => 0.0001,
+				'equal' => false,
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::equalWithEpsilon
+	 * @dataProvider providerEqualWithEpsilon
+	 * @testdox equalWithEpsilon with $a and $b and Epsilon: $epsilon must be equal: $equal [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testEqualWithEpsilon(float $a, float $b, float $epsilon, bool $equal): void
+	{
+		$this->assertEquals(
+			$equal,
+			\CoreLibs\Convert\Math::equalWithEpsilon($a, $b, $epsilon)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerCompareWithEpsilon(): array
+	{
+		return [
+			'smaller, true' => [
+				'value' => 0.0001,
+				'compare' => '<',
+				'limit' => 0.0002,
+				'epsilon' => 0.00001,
+				'match' => true,
+			],
+			'smaller, false' => [
+				'value' => 0.0001,
+				'compare' => '<',
+				'limit' => 0.0001,
+				'epsilon' => 0.00001,
+				'match' => false,
+			],
+			'bigger, true' => [
+				'value' => 0.0002,
+				'compare' => '>',
+				'limit' => 0.0001,
+				'epsilon' => 0.00001,
+				'match' => true,
+			],
+			'bigger, false' => [
+				'value' => 0.0001,
+				'compare' => '>',
+				'limit' => 0.0001,
+				'epsilon' => 0.00001,
+				'match' => false,
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::compareWithEpsilon
+	 * @dataProvider providerCompareWithEpsilon
+	 * @testdox compareWithEpsilon $value $compare $limit with $epsilon must match: $match [$_dataName]
+	 *
+	 * @param  float  $value
+	 * @param  string $compare
+	 * @param  float  $limit
+	 * @param  float  $epslion
+	 * @param  bool   $match
+	 * @return void
+	 */
+	public function testCompareWithEpsilon(
+		float $value,
+		string $compare,
+		float $limit,
+		float $epsilon,
+		bool $match
+	): void {
+		$this->assertEquals(
+			$match,
+			\CoreLibs\Convert\Math::compareWithEpsilon($value, $compare, $limit, $epsilon)
 		);
 	}
 }

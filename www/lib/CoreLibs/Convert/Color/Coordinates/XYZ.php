@@ -15,6 +15,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
+// use CoreLibs\Convert\Color\Utils;
+
 class XYZ implements Interface\CoordinatesInterface
 {
 	/** @var array<string> allowed colorspaces */
@@ -101,9 +103,11 @@ class XYZ implements Interface\CoordinatesInterface
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
 		}
-		// if ($value < 0 || $value > 255) {
+		// TODO: setup XYZ value limits
+		// X: 0 to 95.047, Y: 0 to 100, Z: 0 to 108.88
+		// if (Utils::compare(0.0, $value, 100.0, Utils::EPSILON_SMALL))) {
 		// 	throw new \LengthException('Argument value ' . $value . ' for color ' . $name
-		// 		. ' is not in the range of 0 to 255', 1);
+		// 		. ' is not in the range of 0 to 100.0', 1);
 		// }
 		$this->$name = $value;
 	}

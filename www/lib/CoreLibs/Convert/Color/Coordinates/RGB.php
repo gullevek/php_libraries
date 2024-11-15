@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
-use CoreLibs\Convert\Color\Stringify;
+use CoreLibs\Convert\Color\Utils;
 
 class RGB implements Interface\CoordinatesInterface
 {
@@ -94,8 +94,11 @@ class RGB implements Interface\CoordinatesInterface
 		// if not linear
 		if (!$this->linear && ((int)$value < 0 || (int)$value > 255)) {
 			throw new \LengthException('Argument value ' . $value . ' for color ' . $name
-				. ' is not in the range of 0 to 255', 1);
-		} elseif ($this->linear && ((int)$value < 0 || (int)$value > 1)) {
+			. ' is not in the range of 0 to 255', 1);
+		} elseif (
+			// $this->linear && ($value < 0.0 || $value > 1.0)
+			$this->linear && Utils::compare(0.0, $value, 1.0, 0.000001)
+		) {
 			throw new \LengthException('Argument value ' . $value . ' for color ' . $name
 				. ' is not in the range of 0 to 1 for linear rgb', 2);
 		}
@@ -244,6 +247,10 @@ class RGB implements Interface\CoordinatesInterface
 	 */
 	public function toLinear(): self
 	{
+		// if linear, as is
+		if ($this->linear) {
+			return $this;
+		}
 		$this->flagLinear(true)->setFromArray(array_map(
 			callback: function (int|float $v) {
 				$v = (float)($v / 255);
@@ -268,6 +275,10 @@ class RGB implements Interface\CoordinatesInterface
 	 */
 	public function fromLinear(): self
 	{
+		// if not linear, as is
+		if (!$this->linear) {
+			return $this;
+		}
 		$this->flagLinear(false)->setFromArray(array_map(
 			callback: function (int|float $v) {
 				$abs  = abs($v);
@@ -282,7 +293,6 @@ class RGB implements Interface\CoordinatesInterface
 			},
 			array: $this->returnAsArray(),
 		));
-		// $this->linear = false;
 		return $this;
 	}
 
@@ -307,7 +317,7 @@ class RGB implements Interface\CoordinatesInterface
 			. (int)round($this->G, 0)
 			. ' '
 			. (int)round($this->B, 0)
-			. Stringify::setOpacity($opacity)
+			. Utils::setOpacity($opacity)
 			. ')';
 		if ($was_linear) {
 			$this->toLinear();

@@ -72,7 +72,7 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 // define a list of from to color sets for conversion test
 
-$hwb = Color::hsbToHwb(Coordinates\HSB::__constructFromArray([
+$hwb = Color::hsbToHwb(new Coordinates\HSB([
 	160,
 	0,
 	50,
@@ -81,7 +81,7 @@ print "HWB: " . DgS::printAr($hwb) . "<br>";
 $hsb = Color::hwbToHsb($hwb);
 print "HSB: " . DgS::printAr($hsb) . "<br>";
 
-$oklch = Color::rgbToOkLch(Coordinates\RGB::__constructFromArray([
+$oklch = Color::rgbToOkLch(Coordinates\RGB::create([
 	250,
 	0,
 	0
@@ -90,7 +90,7 @@ print "OkLch: " . DgS::printAr($oklch) . "<br>";
 $rgb = Color::okLchToRgb($oklch);
 print "OkLch -> RGB: " . DgS::printAr($rgb) . "<br>";
 
-$oklab = Color::rgbToOkLab(Coordinates\RGB::__constructFromArray([
+$oklab = Color::rgbToOkLab(Coordinates\RGB::create([
 	250,
 	0,
 	0
@@ -101,24 +101,24 @@ $rgb = Color::okLabToRgb($oklab);
 print "OkLab -> RGB: " . DgS::printAr($rgb) . "<br>";
 print display($rgb->toCssString(), $rgb->toCssString(), 'OkLab to RGB');
 
-$rgb = Coordinates\RGB::__constructFromArray([250, 100, 10])->toLinear();
+$rgb = Coordinates\RGB::create([250, 100, 10])->toLinear();
 print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
-$rgb = Coordinates\RGB::__constructFromArray([0, 0, 0])->toLinear();
+$rgb = Coordinates\RGB::create([0, 0, 0])->toLinear();
 print "RGBlinear: " . DgS::printAr($rgb) . "<br>";
 
 $cie_lab = Color::okLabToLab($oklab);
 print "CieLab: " . DgS::printAr($cie_lab) . "<br>";
 print display($cie_lab->toCssString(), $cie_lab->toCssString(), 'OkLab to Cie Lab');
 
-$rgb = Coordinates\RGB::__constructFromArray([0, 0, 60]);
+$rgb = Coordinates\RGB::create([0, 0, 60]);
 $hsb = Color::rgbToHsb($rgb);
 $rgb_b = Color::hsbToRgb($hsb);
 print "RGB: " . DgS::printAr($rgb) . "<br>";
 print "RGB->HSB: " . DgS::printAr($hsb) . "<br>";
 print "HSB->RGB: " . DgS::printAr($rgb_b) . "<br>";
 
-$hsl = Coordinates\HSL::__constructFromArray([0, 20, 0]);
-$hsb = Coordinates\HSB::__constructFromArray([0, 20, 0]);
+$hsl = Coordinates\HSL::create([0, 20, 0]);
+$hsb = Coordinates\HSB::create([0, 20, 0]);
 $hsl_from_hsb = Color::hsbToHsl($hsb);
 print "HSL from HSB: " . DgS::printAr($hsl_from_hsb) . "<br>";
 

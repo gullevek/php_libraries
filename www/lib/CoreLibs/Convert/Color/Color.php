@@ -766,11 +766,6 @@ class Color
 	public static function rgbToLab(RGB $rgb): Lab
 	{
 		return CieXyz::rgbViaXyzD65ViaXyzD50ToLab($rgb);
-		/* return CieXyz::xyzD50ToLab(
-			CieXyz::xyzD65ToXyzD50(
-				CieXyz::linRgbToXyzD65($rgb)
-			)
-		); */
 	}
 
 	/**
@@ -783,11 +778,6 @@ class Color
 	public static function labToRgb(Lab $lab): RGB
 	{
 		return CieXyz::labViaXyzD50ViaXyzD65ToRgb($lab);
-		/* return CieXyz::xyzD65ToLinRgb(
-			CieXyz::xyzD50ToXyxD65(
-				CieXyz::labToXyzD50($lab)
-			)
-		)->fromLinear(); */
 	}
 
 	// MARK: RGB <-> Lch (Cie)

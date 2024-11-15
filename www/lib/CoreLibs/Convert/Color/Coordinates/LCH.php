@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
-use CoreLibs\Convert\Color\Stringify;
+use CoreLibs\Convert\Color\Utils;
 
 class LCH implements Interface\CoordinatesInterface
 {
@@ -94,43 +94,43 @@ class LCH implements Interface\CoordinatesInterface
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
 		}
 		switch ($name) {
-			// case 'L':
-			// 	if ($this->colorspace == 'cie' && ($value < 0 || $value > 100)) {
-			// 		throw new \LengthException(
-			// 			'Argument value ' . $value . ' for lightness is not in the range of '
-			// 				. '0 to 100',
-			// 			3
-			// 		);
-			// 	} elseif ($this->colorspace == 'ok' && ($value < 0 || $value > 1)) {
-			// 		throw new \LengthException(
-			// 			'Argument value ' . $value . ' for lightness is not in the range of '
-			// 				. '0 to 1',
-			// 			3
-			// 		);
-			// 	}
-			// 	break;
-			// case 'c':
-			// 	if ($this->colorspace == 'cie' && ($value < 0 || $value > 230)) {
-			// 		throw new \LengthException(
-			// 			'Argument value ' . $value . ' for chroma is not in the range of '
-			// 				. '0 to 230 with normal upper limit of 150',
-			// 			3
-			// 		);
-			// 	} elseif ($this->colorspace == 'ok' && ($value < 0 || $value > 0.5)) {
-			// 		throw new \LengthException(
-			// 			'Argument value ' . $value . ' for chroma is not in the range of '
-			// 				. '0 to 0.5 with normal upper limit of 0.5',
-			// 			3
-			// 		);
-			// 	}
-			// 	break;
-			case 'h':
-				if ($value == 360) {
-					$value = 0;
-				}
-				if ($value < 0 || $value > 360) {
+			case 'L':
+				// if ($this->colorspace == 'CIELab' && ($value < 0 || $value > 100)) {
+				if ($this->colorspace == 'CIELab' && Utils::compare(0.0, $value, 100.0, Utils::ESPILON_BIG)) {
 					throw new \LengthException(
-						'Argument value ' . $value . ' for lightness is not in the range of 0 to 360',
+						'Argument value ' . $value . ' for lightness is not in the range of 0 to 100 for CIE Lab',
+						1
+					);
+				// } elseif ($this->colorspace == 'OkLab' && ($value < 0 || $value > 1)) {
+				} elseif ($this->colorspace == 'OkLab' && Utils::compare(0.0, $value, 1.0, Utils::EPSILON_SMALL)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for lightness is not in the range of 0.0 to 1.0 for OkLab',
+						1
+					);
+				}
+				break;
+			case 'C':
+				// if ($this->colorspace == 'CIELab' && ($value < 0 || $value > 230)) {
+				if ($this->colorspace == 'CIELab' && Utils::compare(0.0, $value, 230.0, Utils::EPSILON_SMALL)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for chroma is not in the range of '
+							. '0 to 150 and a maximum of 230 for CIE Lab',
+						1
+					);
+				// } elseif ($this->colorspace == 'OkLab' && ($value < 0 || $value > 0.55)) {
+				} elseif ($this->colorspace == 'OkLab' && Utils::compare(0.0, $value, 0.55, Utils::EPSILON_SMALL)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for lightness is not in the range of '
+							. '0.0 to 0.4 and a maximum of 0.5 for OkLab',
+						1
+					);
+				}
+				break;
+			case 'H':
+				// if ($value < 0 || $value > 360) {
+				if (Utils::compare(0.0, $value, 360.0, Utils::EPSILON_SMALL)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for hue is not in the range of 0.0 to 360.0',
 						1
 					);
 				}
@@ -217,7 +217,7 @@ class LCH implements Interface\CoordinatesInterface
 			. $this->c
 			. ' '
 			. $this->h
-			. Stringify::setOpacity($opacity)
+			. Utils::setOpacity($opacity)
 			. ');';
 
 		return $string;

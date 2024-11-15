@@ -69,6 +69,66 @@ class Math
 	}
 
 	/**
+	 * use PHP_FLOAT_EPSILON to compare if two float numbers are matching
+	 *
+	 * @param  float $x
+	 * @param  float $y
+	 * @param  float $epsilon [default=PHP_FLOAT_EPSILON]
+	 * @return bool  True equal
+	 */
+	public static function equalWithEpsilon(float $x, float $y, float $epsilon = PHP_FLOAT_EPSILON): bool
+	{
+		if (abs($x - $y) < $epsilon) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Compare two value base on direction given
+	 * The default delta is PHP_FLOAT_EPSILON
+	 *
+	 * @param  float  $value
+	 * @param  string $compare
+	 * @param  float  $limit
+	 * @param  float  $epsilon [default=PHP_FLOAT_EPSILON]
+	 * @return bool   True on smaller/large or equal
+	 */
+	public static function compareWithEpsilon(
+		float $value,
+		string $compare,
+		float $limit,
+		float $epsilon = PHP_FLOAT_EPSILON
+	): bool {
+		switch ($compare) {
+			case '<':
+				if ($value < ($limit - $epsilon)) {
+					return true;
+				}
+				break;
+			case '<=':
+				if ($value <= ($limit - $epsilon)) {
+					return true;
+				}
+				break;
+			case '==':
+				return self::equalWithEpsilon($value, $limit, $epsilon);
+				break;
+			case '>':
+				if ($value > ($limit + $epsilon)) {
+					return true;
+				}
+				break;
+			case '>=':
+				if ($value >= ($limit + $epsilon)) {
+					return true;
+				}
+				break;
+		}
+		return false;
+	}
+
+	/**
 	 * This function is directly inspired by the multiplyMatrices() function in color.js
 	 * form Lea Verou and Chris Lilley.
 	 * (see https://github.com/LeaVerou/color.js/blob/main/src/multiply-matrices.js)

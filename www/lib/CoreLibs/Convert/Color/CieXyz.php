@@ -250,7 +250,7 @@ class CieXyz
 	{
 		// if not linear, convert to linear
 		if (!$rgb->linear) {
-			$rgb->toLinear();
+			$rgb = (new RGB($rgb->returnAsArray()))->toLinear();
 		}
 		return new XYZ(Math::multiplyMatrices(
 			[

@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
-use CoreLibs\Convert\Color\Stringify;
+use CoreLibs\Convert\Color\Utils;
 
 class HSL implements Interface\CoordinatesInterface
 {
@@ -84,10 +84,11 @@ class HSL implements Interface\CoordinatesInterface
 		}
 		switch ($name) {
 			case 'H':
-				if ((int)$value == 360) {
+				if ($value == 360.0) {
 					$value = 0;
 				}
-				if ((int)$value < 0 || (int)$value > 360) {
+				// if ($value < 0 || $value > 360) {
+				if (Utils::compare(0.0, $value, 360.0, Utils::EPSILON_SMALL)) {
 					throw new \LengthException(
 						'Argument value ' . $value . ' for hue is not in the range of 0 to 360',
 						1
@@ -95,7 +96,8 @@ class HSL implements Interface\CoordinatesInterface
 				}
 				break;
 			case 'S':
-				if ((int)$value < 0 || (int)$value > 100) {
+				// if ($value < 0 || $value > 100) {
+				if (Utils::compare(0.0, $value, 100.0, Utils::EPSILON_SMALL)) {
 					throw new \LengthException(
 						'Argument value ' . $value . ' for saturation is not in the range of 0 to 100',
 						2
@@ -103,7 +105,8 @@ class HSL implements Interface\CoordinatesInterface
 				}
 				break;
 			case 'L':
-				if ((int)$value < 0 || (int)$value > 100) {
+				// if ($value < 0 || $value > 100) {
+				if (Utils::compare(0.0, $value, 100.0, Utils::EPSILON_SMALL)) {
 					throw new \LengthException(
 						'Argument value ' . $value . ' for lightness is not in the range of 0 to 100',
 						3
@@ -183,7 +186,7 @@ class HSL implements Interface\CoordinatesInterface
 			. $this->S
 			. ' '
 			. $this->L
-			. Stringify::setOpacity($opacity)
+			. Utils::setOpacity($opacity)
 			. ')';
 		return $string;
 	}

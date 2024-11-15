@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert\Color\Coordinates;
 
-use CoreLibs\Convert\Color\Stringify;
+use CoreLibs\Convert\Color\Utils;
 
 class Lab implements Interface\CoordinatesInterface
 {
@@ -95,35 +95,53 @@ class Lab implements Interface\CoordinatesInterface
 		if (!property_exists($this, $name)) {
 			throw new \ErrorException('Creation of dynamic property is not allowed', 0);
 		}
-		// switch ($name) {
-		// 	case 'L':
-		// 		if ($value == 360) {
-		// 			$value = 0;
-		// 		}
-		// 		if ($value < 0 || $value > 360) {
-		// 			throw new \LengthException(
-		// 				'Argument value ' . $value . ' for lightness is not in the range of 0 to 360',
-		// 				1
-		// 			);
-		// 		}
-		// 		break;
-		// 	case 'a':
-		// 		if ($value < 0 || $value > 100) {
-		// 			throw new \LengthException(
-		// 				'Argument value ' . $value . ' for a is not in the range of 0 to 100',
-		// 				2
-		// 			);
-		// 		}
-		// 		break;
-		// 	case 'b':
-		// 		if ($value < 0 || $value > 100) {
-		// 			throw new \LengthException(
-		// 				'Argument value ' . $value . ' for b is not in the range of 0 to 100',
-		// 				3
-		// 			);
-		// 		}
-		// 		break;
-		// }
+		switch ($name) {
+			case 'L':
+				// if ($this->colorspace == 'CIELab' && ($value < 0 || $value > 100)) {
+				if ($this->colorspace == 'CIELab' && Utils::compare(0.0, $value, 100.0, Utils::ESPILON_BIG)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for lightness is not in the range of 0 to 100 for CIE Lab',
+						1
+					);
+				// } elseif ($this->colorspace == 'OkLab' && ($value < 0 || $value > 1)) {
+				} elseif ($this->colorspace == 'OkLab' && Utils::compare(0.0, $value, 1.0, Utils::EPSILON_SMALL)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for lightness is not in the range of 0.0 to 1.0 for OkLab',
+						1
+					);
+				}
+				break;
+			case 'a':
+				// if ($this->colorspace == 'CIELab' && ($value < -125 || $value > 125)) {
+				if ($this->colorspace == 'CIELab' && Utils::compare(-125.0, $value, 125.0, Utils::EPSILON_SMALL)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for a is not in the range of -125 to 125 for CIE Lab',
+						2
+					);
+				// } elseif ($this->colorspace == 'OkLab' && ($value < -0.55 || $value > 0.55)) {
+				} elseif ($this->colorspace == 'OkLab' && Utils::compare(-0.55, $value, 0.55, Utils::EPSILON_SMALL)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for a is not in the range of -0.5 to 0.5 for OkLab',
+						2
+					);
+				}
+				break;
+			case 'b':
+				// if ($this->colorspace == 'CIELab' && ($value < -125 || $value > 125)) {
+				if ($this->colorspace == 'CIELab' && Utils::compare(-125.0, $value, 125.0, Utils::EPSILON_SMALL)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for b is not in the range of -125 to 125 for CIE Lab',
+						3
+					);
+				// } elseif ($this->colorspace == 'OkLab' && ($value < -0.55 || $value > 0.55)) {
+				} elseif ($this->colorspace == 'OkLab' && Utils::compare(-0.55, $value, 0.55, Utils::EPSILON_SMALL)) {
+					throw new \LengthException(
+						'Argument value ' . $value . ' for b is not in the range of -0.5 to 0.5 for OkLab',
+						3
+					);
+				}
+				break;
+		}
 		$this->$name = $value;
 	}
 
@@ -205,7 +223,7 @@ class Lab implements Interface\CoordinatesInterface
 			. $this->a
 			. ' '
 			. $this->b
-			. Stringify::setOpacity($opacity)
+			. Utils::setOpacity($opacity)
 			. ');';
 
 		return $string;
