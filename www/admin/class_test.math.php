@@ -23,7 +23,6 @@ $log = new CoreLibs\Logging\Logging([
 	'log_file_id' => $LOG_FILE_ID,
 	'log_per_date' => true,
 ]);
-$_math = new CoreLibs\Convert\Math();
 $math_class = 'CoreLibs\Convert\Math';
 
 // define a list of from to color sets for conversion test
@@ -35,13 +34,9 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
-print "FCEIL: " . $_math->fceil(5.1234567890, 5) . "<br>";
-print "FLOORP: " . $_math->floorp(5123456, -3) . "<br>";
-print "FLOORP: " . $_math->floorp(5123456, -10) . "<br>";
-print "INITNUMERIC: " . $_math->initNumeric('123') . "<br>";
-
 print "S-FCEIL: " . $math_class::fceil(5.1234567890, 5) . "<br>";
 print "S-FLOORP: " . $math_class::floorp(5123456, -3) . "<br>";
+print "S-FLOORP: " . $math_class::floorp(5123456, -10) . "<br>";
 print "S-INITNUMERIC: " . $math_class::initNumeric(123) . "<br>";
 print "S-INITNUMERIC: " . $math_class::initNumeric(123.456) . "<br>";
 print "S-INITNUMERIC: " . $math_class::initNumeric('123') . "<br>";

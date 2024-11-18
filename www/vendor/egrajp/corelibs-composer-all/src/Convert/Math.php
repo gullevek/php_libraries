@@ -56,6 +56,178 @@ class Math
 			return (float)$number;
 		}
 	}
+
+	/**
+	 * calc cube root
+	 *
+	 * @param  float $number Number to cubic root
+	 * @return float         Calculated value
+	 */
+	public static function cbrt(float|int $number): float
+	{
+		return pow((float)$number, 1.0 / 3);
+	}
+
+	/**
+	 * use PHP_FLOAT_EPSILON to compare if two float numbers are matching
+	 *
+	 * @param  float $x
+	 * @param  float $y
+	 * @param  float $epsilon [default=PHP_FLOAT_EPSILON]
+	 * @return bool  True equal
+	 */
+	public static function equalWithEpsilon(float $x, float $y, float $epsilon = PHP_FLOAT_EPSILON): bool
+	{
+		if (abs($x - $y) < $epsilon) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Compare two value base on direction given
+	 * The default delta is PHP_FLOAT_EPSILON
+	 *
+	 * @param  float  $value
+	 * @param  string $compare
+	 * @param  float  $limit
+	 * @param  float  $epsilon [default=PHP_FLOAT_EPSILON]
+	 * @return bool   True on smaller/large or equal
+	 */
+	public static function compareWithEpsilon(
+		float $value,
+		string $compare,
+		float $limit,
+		float $epsilon = PHP_FLOAT_EPSILON
+	): bool {
+		switch ($compare) {
+			case '<':
+				if ($value < ($limit - $epsilon)) {
+					return true;
+				}
+				break;
+			case '<=':
+				if ($value <= ($limit - $epsilon)) {
+					return true;
+				}
+				break;
+			case '==':
+				return self::equalWithEpsilon($value, $limit, $epsilon);
+			case '>':
+				if ($value > ($limit + $epsilon)) {
+					return true;
+				}
+				break;
+			case '>=':
+				if ($value >= ($limit + $epsilon)) {
+					return true;
+				}
+				break;
+		}
+		return false;
+	}
+
+	/**
+	 * This function is directly inspired by the multiplyMatrices() function in color.js
+	 * form Lea Verou and Chris Lilley.
+	 * (see https://github.com/LeaVerou/color.js/blob/main/src/multiply-matrices.js)
+	 * From:
+	 * https://github.com/matthieumastadenis/couleur/blob/3842cf51c9517e77afaa0a36ec78643a0c258e0b/src/utils/utils.php#L507
+	 *
+	 * It returns an array which is the product of the two number matrices passed as parameters.
+	 *
+	 * NOTE:
+	 * if the right side (B matrix) has a missing row, this row will be fillwed with 0 instead of
+	 * throwing an error:
+	 * A:
+	 * [
+	 *   [1, 2, 3],
+	 *   [4, 5, 6],
+	 * ]
+	 * B:
+	 * [
+	 *   [7, 8, 9],
+	 *   [10, 11, 12],
+	 * ]
+	 * The B will get a third row with [0, 0, 0] added to make the multiplication work as it will be
+	 * rewritten as
+	 * B-rewrite:
+	 * [
+	 *   [7, 10, 0],
+	 *   [8, 11, 12],
+	 *   [0, 0, 0] <- automatically added
+	 * ]
+	 *
+	 * @param  array<float|int|array<int|float>> $a m x n matrice
+	 * @param  array<float|int|array<int|float>> $b n x p matrice
+	 *
+	 * @return array<float|int|array<int|float>>    m x p product
+	 */
+	public static function multiplyMatrices(array $a, array $b): array
+	{
+		$m = count($a);
+
+		if (!is_array($a[0] ?? null)) {
+			// $a is vector, convert to [[a, b, c, ...]]
+			$a = [$a];
+		}
+
+		if (!is_array($b[0])) {
+			// $b is vector, convert to [[a], [b], [c], ...]]
+			$b = array_map(
+				callback: fn ($v) => [ $v ],
+				array: $b,
+			);
+		}
+
+		$p = count($b[0]);
+
+		// transpose $b:
+		// so that we can multiply row by row
+		$bCols = array_map(
+			callback: fn ($k) => array_map(
+				(fn ($i) => is_array($i) ? $i[$k] : 0),
+				$b,
+			),
+			array: array_keys($b[0]),
+		);
+
+		$product = array_map(
+			callback: fn ($row) => array_map(
+				callback: fn ($col) => is_array($row) ?
+					array_reduce(
+						array: $row,
+						callback: fn ($a, $v, $i = null) => $a + $v * (
+							// if last entry missing for full copy add a 0 to it
+							$col[$i ?? array_search($v, $row, true)] ?? 0 /** @phpstan-ignore-line */
+						),
+						initial: 0,
+					) :
+					array_reduce(
+						array: $col,
+						callback: fn ($a, $v) => $a + $v * $row,
+						initial: 0,
+					),
+				array: $bCols,
+			),
+			array: $a,
+		);
+
+		if ($m === 1) {
+			// Avoid [[a, b, c, ...]]:
+			return $product[0];
+		}
+
+		if ($p === 1) {
+			// Avoid [[a], [b], [c], ...]]:
+			return array_map(
+				callback: fn ($v) => $v[0] ?? 0,
+				array: $product,
+			);
+		}
+
+		return $product;
+	}
 }
 
 // __END__

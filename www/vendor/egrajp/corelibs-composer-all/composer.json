@@ -20,6 +20,8 @@
         "psr/log": "^3.0@dev"
     },
     "require-dev": {
+		"phpstan/phpstan": "^1.12",
+        "phan/phan": "^5.4",
         "egrajp/smarty-extended": "^4.3",
         "gullevek/dotenv": "dev-master",
         "phpunit/phpunit": "^9"

@@ -370,6 +370,7 @@ return [
 	'file_list' => [
 		"./test/configs/config.php",
 		"./test/configs/config.other.php",
+		"./test/configs/config.path.php",
 		"./test/configs/config.master.php",
 	],
 ];

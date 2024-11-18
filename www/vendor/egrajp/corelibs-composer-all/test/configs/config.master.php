@@ -100,27 +100,6 @@ define('DEFAULT_ACL_LEVEL', 80);
 /************* LOGOUT ********************/
 // logout target
 define('LOGOUT_TARGET', '');
-// password change allowed
-define('PASSWORD_CHANGE', false);
-define('PASSWORD_FORGOT', false);
-// min/max password length
-define('PASSWORD_MIN_LENGTH', 9);
-define('PASSWORD_MAX_LENGTH', 255);
-// defines allowed special characters
-define('PASSWORD_SPECIAL_RANGE', '@$!%*?&');
-// password must have upper case, lower case, number, special
-// comment out for not mandatory
-define('PASSWORD_LOWER', '(?=.*[a-z])');
-define('PASSWORD_UPPER', '(?=.*[A-Z])');
-define('PASSWORD_NUMBER', '(?=.*\d)');
-define('PASSWORD_SPECIAL', "(?=.*[" . PASSWORD_SPECIAL_RANGE . "])");
-// define full regex
-define('PASSWORD_REGEX', "/^"
-	. (defined('PASSWORD_LOWER') ? PASSWORD_LOWER : '')
-	. (defined('PASSWORD_UPPER') ? PASSWORD_UPPER : '')
-	. (defined('PASSWORD_NUMBER') ? PASSWORD_NUMBER : '')
-	. (defined('PASSWORD_SPECIAL') ? PASSWORD_SPECIAL : '')
-	. "[A-Za-z\d" . PASSWORD_SPECIAL_RANGE . "]{" . PASSWORD_MIN_LENGTH . "," . PASSWORD_MAX_LENGTH . "}$/");
 
 /************* AJAX / ACCESS *************/
 // ajax request type
@@ -160,13 +139,6 @@ define('COMPILE_ID', 'COMPILE_' . BASE_NAME . '_' . SERVER_NAME_HASH);
 define('DEFAULT_LOCALE', 'en_US.UTF-8');
 // default web page encoding setting
 define('DEFAULT_ENCODING', 'UTF-8');
-
-/************* LOGGING *******************/
-// below two can be defined here, but they should be
-// defined in either the header file or the file itself
-// as $LOG_FILE_ID which takes presence over LOG_FILE_ID
-// see Basic class constructor
-define('LOG_FILE_ID', BASE_NAME);
 
 /************* QUEUE TABLE *************/
 // if we have a dev/live system
@@ -289,24 +261,6 @@ define('JAVASCRIPT', $_ENV['JAVASCRIPT'] ?? 'frontend.js');
 // any other global definitons in the config.other.php
 if (file_exists(BASE . CONFIGS . 'config.other.php')) {
 	require BASE . CONFIGS . 'config.other.php';
-}
-
-/************* DEBUG *******************/
-// turn off debug if debug flag is OFF
-if (defined('DEBUG') && DEBUG == false) {
-	$ECHO_ALL = false;
-	$DEBUG_ALL = false;
-	$PRINT_ALL = false;
-	$DB_DEBUG = false;
-	$ENABLE_ERROR_HANDLING = false;
-	$DEBUG_ALL_OVERRIDE = false;
-} else {
-	$ECHO_ALL = false;
-	$DEBUG_ALL = true;
-	$PRINT_ALL = true;
-	$DB_DEBUG = true;
-	$ENABLE_ERROR_HANDLING = false;
-	$DEBUG_ALL_OVERRIDE = false;
 }
 
 // __END__
