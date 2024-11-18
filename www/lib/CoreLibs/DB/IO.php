@@ -914,7 +914,7 @@ class IO
 		if ($cursor !== false) {
 			[$db_prefix, $db_error_string] = $this->db_functions->__dbPrintError($cursor);
 		}
-		if ($cursor === false && method_exists($this->db_functions, '__dbPrintError')) {
+		if ($cursor === false && method_exists($this->db_functions, '__dbPrintError')) { /** @phpstan-ignore-line */
 			[$db_prefix, $db_error_string] = $this->db_functions->__dbPrintError();
 		}
 		// prefix the master if not the same
@@ -1737,7 +1737,7 @@ class IO
 	{
 		if (
 			!empty($this->dbh) &&
-			$this->dbh instanceof \PgSql\Connection
+			$this->dbh instanceof \PgSql\Connection /** @phpstan-ignore-line future could be other */
 		) {
 			// reset any client encodings set
 			$this->dbResetEncoding();

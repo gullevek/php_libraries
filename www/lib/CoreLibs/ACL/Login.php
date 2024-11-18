@@ -960,10 +960,7 @@ class Login
 					. "AND ear.edit_access_right_id = epa.edit_access_right_id "
 					. "AND epa.enabled = 1 AND epa.edit_group_id = " . $res["edit_group_id"] . " "
 					. "ORDER BY ep.order_number";
-				while ($res = $this->db->dbReturn($q)) {
-					if (!is_array($res)) {
-						break;
-					}
+				while (is_array($res = $this->db->dbReturn($q))) {
 					// page id array for sub data readout
 					$edit_page_ids[$res['edit_page_id']] = $res['cuid'];
 					// create the array for pages
@@ -1303,11 +1300,9 @@ class Login
 	{
 		$is_valid_password = true;
 		// check for valid in regex arrays in list
-		if (is_array($this->password_valid_chars)) {
-			foreach ($this->password_valid_chars as $password_valid_chars) {
-				if (!preg_match("/$password_valid_chars/", $password)) {
-					$is_valid_password = false;
-				}
+		foreach ($this->password_valid_chars as $password_valid_chars) {
+			if (!preg_match("/$password_valid_chars/", $password)) {
+				$is_valid_password = false;
 			}
 		}
 		// check for min length

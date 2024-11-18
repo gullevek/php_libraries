@@ -425,10 +425,7 @@ class Backend
 		?string $set_content_path = null,
 		int $flag = 0,
 	): array {
-		if (
-			$set_content_path === null ||
-			!is_string($set_content_path)
-		) {
+		if ($set_content_path === null) {
 			/** @deprecated adbTopMenu missing set_content_path parameter */
 			trigger_error(
 				'Calling adbTopMenu without set_content_path parameter is deprecated',

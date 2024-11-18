@@ -599,7 +599,7 @@ class Curl implements Interface\RequestsInterface
 		// for post we set POST option
 		if ($type == "post") {
 			curl_setopt($handle, CURLOPT_POST, true);
-		} elseif (in_array($type, self::CUSTOM_REQUESTS)) {
+		} elseif (!empty($type) && in_array($type, self::CUSTOM_REQUESTS)) {
 			curl_setopt($handle, CURLOPT_CUSTOMREQUEST, strtoupper($type));
 		}
 		// set body data if not null, will send empty [] for empty data
@@ -700,12 +700,12 @@ class Curl implements Interface\RequestsInterface
 		// if we have a timeout signal
 		if (!empty($this->config['timeout'])) {
 			$timeout_requires_no_signal = $this->config['timeout'] < 1;
-			curl_setopt($handle, CURLOPT_TIMEOUT_MS, $this->config['timeout'] * 1000);
+			curl_setopt($handle, CURLOPT_TIMEOUT_MS, (int)round($this->config['timeout'] * 1000));
 		}
 		if (!empty($this->config['connection_timeout'])) {
 			$timeout_requires_no_signal = $timeout_requires_no_signal ||
 				$this->config['connection_timeout'] < 1;
-			curl_setopt($handle, CURLOPT_CONNECTTIMEOUT_MS, $this->config['connection_timeout'] * 1000);
+			curl_setopt($handle, CURLOPT_CONNECTTIMEOUT_MS, (int)round($this->config['connection_timeout'] * 1000, 1));
 		}
 		if ($timeout_requires_no_signal && strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
 			curl_setopt($handle, CURLOPT_NOSIGNAL, true);
