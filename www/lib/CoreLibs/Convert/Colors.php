@@ -33,7 +33,7 @@ class Colors
 	 * @param  bool   $hex_prefix default true, prefix with "#"
 	 * @return string             rgb in hex values with leading # if set,
 	 * @throws \LengthException If any argument is not in the range of 0~255
-	 * @deprecated v9.19.0 use: new Coordinates\RGB([$red, $green, $blue]))->returnAsHex(true/false for #)
+	 * @deprecated v9.20.0 use: new Coordinates\RGB([$red, $green, $blue]))->returnAsHex(true/false for #)
 	 */
 	public static function rgb2hex(
 		int $red,
@@ -54,7 +54,7 @@ class Colors
 	 *                                        or a string with the seperator
 	 * @throws \InvalidArgumentException if hex string is empty
 	 * @throws \UnexpectedValueException if the hex string value is not valid
-	 * @deprecated v9.19.0 use: new Coordinates\RGB($hex_string) (build string/array from return data)
+	 * @deprecated v9.20.0 use: new Coordinates\RGB($hex_string) (build string/array from return data)
 	 */
 	public static function hex2rgb(
 		string $hex_string,
@@ -93,7 +93,7 @@ class Colors
 	 * @param  int $blue        blue 0-255
 	 * @return array<int|float> Hue, Sat, Brightness/Value
 	 * @throws \LengthException If any argument is not in the range of 0~255
-	 * @deprecated v9.19.0 use: Color::rgbToHsb(...)->returnAsArray() will return float unrounded
+	 * @deprecated v9.20.0 use: Color::rgbToHsb(...)->returnAsArray() will return float unrounded
 	 */
 	public static function rgb2hsb(int $red, int $green, int $blue): array
 	{
@@ -115,7 +115,7 @@ class Colors
 	 * @param  float $V   brightness/value 0-100 (int)
 	 * @return array<int> 0 red/1 green/2 blue array as 0-255
 	 * @throws \LengthException If any argument is not in the valid range
-	 * @deprecated v9.19.0 use: Color::hsbToRgb(...)->returnAsArray() will return float unrounded
+	 * @deprecated v9.20.0 use: Color::hsbToRgb(...)->returnAsArray() will return float unrounded
 	 */
 	public static function hsb2rgb(float $H, float $S, float $V): array
 	{
@@ -137,7 +137,7 @@ class Colors
 	 * @param  int $blue    blue 0-255
 	 * @return array<float> hue/sat/luminance
 	 * @throws \LengthException If any argument is not in the range of 0~255
-	 * @deprecated v9.19.0 use: Color::rgbToHsl(...)->returnAsArray() will return float unrounded
+	 * @deprecated v9.20.0 use: Color::rgbToHsl(...)->returnAsArray() will return float unrounded
 	 */
 	public static function rgb2hsl(int $red, int $green, int $blue): array
 	{
@@ -158,7 +158,7 @@ class Colors
 	 * @param  float $lum           luminance: 0-100
 	 * @return array<int,float|int> red/blue/green 0-255 each
 	 * @throws \LengthException If any argument is not in the valid range
-	 * @deprecated v9.19.0 use: Color::hslToRgb(...)->returnAsArray() will return float unrounded
+	 * @deprecated v9.20.0 use: Color::hslToRgb(...)->returnAsArray() will return float unrounded
 	 */
 	public static function hsl2rgb(float $hue, float $sat, float $lum): array
 	{
