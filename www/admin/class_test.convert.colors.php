@@ -54,7 +54,7 @@ function display(string $color, string $text, string $text_add): string
 		["{COLOR}", "{TEXT}", "{CSS}"],
 		[
 			$color,
-			$text . ($text_add ? '<br>' . $text_add : ''),
+			$text . (!empty($text_add) ? '<br>' . $text_add : ''),
 			$css
 		],
 		$template

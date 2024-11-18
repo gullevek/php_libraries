@@ -10,7 +10,6 @@
         "phpstan/phpstan": "^1.12",
         "phan/phan": "^5.4",
         "phpstan/extension-installer": "^1.4",
-        "phpstan/phpstan-strict-rules": "^1.6",
         "phpunit/phpunit": "^9",
         "phpstan/phpstan-deprecation-rules": "^1.2",
         "yamadashy/phpstan-friendly-formatter": "^1.1"
