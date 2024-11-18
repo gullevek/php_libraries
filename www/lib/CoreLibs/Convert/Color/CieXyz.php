@@ -264,7 +264,7 @@ class CieXyz
 	private static function linRgbToXyzD65(RGB $rgb): XYZ
 	{
 		// if not linear, convert to linear
-		if (!$rgb->get('linear')) {
+		if (!(bool)$rgb->get('linear')) {
 			$rgb = (new RGB($rgb->returnAsArray()))->toLinear();
 		}
 		return new XYZ(self::convertArray(Math::multiplyMatrices(

@@ -136,6 +136,28 @@ class Math
 	 *
 	 * It returns an array which is the product of the two number matrices passed as parameters.
 	 *
+	 * NOTE:
+	 * if the right side (B matrix) has a missing row, this row will be fillwed with 0 instead of
+	 * throwing an error:
+	 * A:
+	 * [
+	 *   [1, 2, 3],
+	 *   [4, 5, 6],
+	 * ]
+	 * B:
+	 * [
+	 *   [7, 8, 9],
+	 *   [10, 11, 12],
+	 * ]
+	 * The B will get a third row with [0, 0, 0] added to make the multiplication work as it will be
+	 * rewritten as
+	 * B-rewrite:
+	 * [
+	 *   [7, 10, 0],
+	 *   [8, 11, 12],
+	 *   [0, 0, 0] <- automatically added
+	 * ]
+	 *
 	 * @param  array<float|int|array<int|float>> $a m x n matrice
 	 * @param  array<float|int|array<int|float>> $b n x p matrice
 	 *
@@ -161,8 +183,9 @@ class Math
 		$p = count($b[0]);
 
 		// transpose $b:
+		// so that we can multiply row by row
 		$bCols = array_map(
-			callback: fn ($k) => \array_map(
+			callback: fn ($k) => array_map(
 				(fn ($i) => is_array($i) ? $i[$k] : 0),
 				$b,
 			),
@@ -175,7 +198,8 @@ class Math
 					array_reduce(
 						array: $row,
 						callback: fn ($a, $v, $i = null) => $a + $v * (
-							$col[$i ?? array_search($v, $row) ?: 0]
+							// if last entry missing for full copy add a 0 to it
+							$col[$i ?? array_search($v, $row, true)] ?? 0 /** @phpstan-ignore-line */
 						),
 						initial: 0,
 					) :
@@ -191,7 +215,7 @@ class Math
 
 		if ($m === 1) {
 			// Avoid [[a, b, c, ...]]:
-			$product = $product[0];
+			return $product[0];
 		}
 
 		if ($p === 1) {

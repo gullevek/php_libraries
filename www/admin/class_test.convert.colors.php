@@ -54,7 +54,7 @@ function display(string $color, string $text, string $text_add): string
 		["{COLOR}", "{TEXT}", "{CSS}"],
 		[
 			$color,
-			$text . ($text_add ? '<br>' . $text_add : ''),
+			$text . (!empty($text_add) ? '<br>' . $text_add : ''),
 			$css
 		],
 		$template
@@ -123,22 +123,16 @@ $hsl_from_hsb = Color::hsbToHsl($hsb);
 print "HSL from HSB: " . DgS::printAr($hsl_from_hsb) . "<br>";
 
 print "<hr>";
-print "<h2>LEGACY</h2>";
 
 // A(out of bounds)
 try {
 	print "C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: "
-		. CoreLibs\Convert\Colors::rgb2hex(-1, -1, -1) . "<br>";
+		. (new Coordinates\RGB([-1, -1, -1]))->returnAsHex() . "<br>";
 } catch (\LengthException $e) {
-	print "*Exception: " . $e->getMessage() . "<br>" . $e . "<br>";
-}
-try {
-	print "\$C::S/COLOR invalid rgb->hex (gray 125): -1, -1, -1: "
-		. $color_class::rgb2hex(-1, -1, -1) . "<br>";
-} catch (\LengthException $e) {
-	print "**Exception: " . $e->getMessage() . "<br><pre>" . print_r($e, true) . "</pre><br>";
+	print "*Exception: " . $e->getMessage() . "<br><pre>" . print_r($e, true) . "</pre><br>";
 }
 print "<hr>";
+print "<h2>LEGACY</h2>";
 // B(valid)
 $rgb = [50, 20, 30];
 $hex = '#0a141e';
@@ -189,13 +183,16 @@ $s = rand(15, 70);
 $b = 100;
 $l = 50;
 print "RANDOM IN: H: " . $h . ", S: " . $s . ", B/L: " . $b . "/" . $l . "<br>";
-print "RANDOM hsb->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsb2rgb($h, $s, $b))) . "</pre><br>";
-print "RANDOM hsl->rgb: <pre>" . DgS::printAr(SetVarType::setArray(Colors::hsl2rgb($h, $s, $l))) . "</pre><br>";
+print "RANDOM hsb->rgb: <pre>"
+	. DgS::printAr(SetVarType::setArray(Color::hsbToRgb(new Coordinates\HSB([$h, $s, $b])))) . "</pre><br>";
+print "RANDOM hsl->rgb: <pre>"
+	. DgS::printAr(SetVarType::setArray(Color::hslToRgb(new Coordinates\HSL([$h, $s, $l])))) . "</pre><br>";
 
 print "<hr>";
 
 $rgb = [0, 0, 0];
-print "rgb 0,0,0: " . Dgs::printAr($rgb) . " => " . Dgs::printAr(Colors::rgb2hsb($rgb[0], $rgb[1], $rgb[2])) . "<br>";
+print "rgb 0,0,0: " . Dgs::printAr($rgb) . " => "
+	. Dgs::printAr(Color::rgbToHsb(new Coordinates\RGB([$rgb[0], $rgb[1], $rgb[2]]))) . "<br>";
 
 print "<hr>";
 

@@ -156,12 +156,32 @@ final class CoreLibsConvertMathTest extends TestCase
 	public function providerMultiplyMatrices(): array
 	{
 		return  [
-			'single' => [
+			'[3] x [3] => [3x1]' => [
 				[1, 2, 3],
 				[1, 2, 3],
 				[14]
 			],
-			'double first' => [
+			'[3] x [3x1]' => [
+				[1, 2, 3],
+				[[1], [2], [3]],
+				[14]
+			],
+			'[3] x [3x1]' => [
+				[1, 2, 3],
+				[[1], [2], [3]],
+				[14]
+			],
+			'[1x3L] x [3x1]' => [
+				[[1, 2, 3]],
+				[[1], [2], [3]],
+				[14]
+			],
+			'[1x3] x [3x1]' => [
+				[[1], [2], [3]],
+				[[1], [2], [3]],
+				[1, 2, 3]
+			],
+			'[2x3] x [3] => [3x1]' => [
 				[
 					[1, 2, 3],
 					[1, 2, 3]
@@ -172,7 +192,18 @@ final class CoreLibsConvertMathTest extends TestCase
 					14
 				]
 			],
-			'double both' => [
+			'[2x3] x [3x1]' => [
+				[
+					[1, 2, 3],
+					[1, 2, 3]
+				],
+				[[1], [2], [3]],
+				[
+					14,
+					14
+				]
+			],
+			'[2x3] x [2x3] => [3x3]' => [
 				[
 					[1, 2, 3],
 					[1, 2, 3],
@@ -186,7 +217,37 @@ final class CoreLibsConvertMathTest extends TestCase
 					[3, 6, 9]
 				]
 			],
-			'tripple first, single second' => [
+			'[2x3] x [3x3]' => [
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+					[0, 0, 0],
+				],
+				[
+					[3, 6, 9],
+					[3, 6, 9]
+				]
+			],
+			'[2x3] x [3x2]' => [
+				'a' => [
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				'b' => [
+					[1, 1],
+					[2, 2],
+					[3, 3],
+				],
+				'prod' => [
+					[14, 14],
+					[14, 14],
+				]
+			],
+			'[3x3] x [3] => [1x3]' => [
 				[
 					[1, 2, 3],
 					[1, 2, 3],
@@ -199,7 +260,7 @@ final class CoreLibsConvertMathTest extends TestCase
 					14
 				]
 			],
-			'tripple first, double second' => [
+			'[3x3] x [2x3] => [3x3]' => [
 				[
 					[1, 2, 3],
 					[1, 2, 3],
@@ -215,7 +276,24 @@ final class CoreLibsConvertMathTest extends TestCase
 					[3, 6, 9],
 				]
 			],
-			'single first, tripple second' => [
+			'[3x3] x [3x3]' => [
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+					[1, 2, 3],
+				],
+				[
+					[1, 2, 3],
+					[1, 2, 3],
+					// [0, 0, 0],
+				],
+				[
+					[3, 6, 9],
+					[3, 6, 9],
+					[3, 6, 9],
+				]
+			],
+			'[3] x [3x3]' => [
 				[1, 2, 3],
 				[
 					[1, 2, 3],
@@ -226,7 +304,7 @@ final class CoreLibsConvertMathTest extends TestCase
 					[6, 12, 18],
 				]
 			],
-			'double first, tripple second' => [
+			'[2x3] x [3x3]' => [
 				[
 					[1, 2, 3],
 					[1, 2, 3],
