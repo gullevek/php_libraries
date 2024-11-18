@@ -54,7 +54,7 @@ class Colors
 	 *                                        or a string with the seperator
 	 * @throws \InvalidArgumentException if hex string is empty
 	 * @throws \UnexpectedValueException if the hex string value is not valid
-	 * @deprecated v9.19.0] use: new Coordinates\RGB($hex_string) (build string/array from return data)
+	 * @deprecated v9.19.0 use: new Coordinates\RGB($hex_string) (build string/array from return data)
 	 */
 	public static function hex2rgb(
 		string $hex_string,
