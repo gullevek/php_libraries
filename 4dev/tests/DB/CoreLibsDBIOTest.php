@@ -160,15 +160,12 @@ final class CoreLibsDBIOTest extends TestCase
 		// create the tables
 		$db->dbExec(
 			// primary key name is table + '_id'
+				// table_with_primary_key_id SERIAL PRIMARY KEY,
 			<<<SQL
 			CREATE TABLE table_with_primary_key (
-				table_with_primary_key_id SERIAL PRIMARY KEY,
+				table_with_primary_key_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 				$base_table
 			SQL
-			/* "CREATE TABLE table_with_primary_key ("
-			// primary key name is table + '_id'
-			. "table_with_primary_key_id SERIAL PRIMARY KEY, "
-			. $base_table */
 		);
 		$db->dbExec(
 			<<<SQL
