@@ -8,7 +8,7 @@
 
 -- DROP TABLE edit_page_content;
 CREATE TABLE edit_page_content (
-    edit_page_content_id SERIAL PRIMARY KEY,
+    edit_page_content_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     edit_page_id INT NOT NULL,
     FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     edit_access_right_id INT NOT NULL,

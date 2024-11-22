@@ -7,7 +7,7 @@
 
 -- DROP TABLE edit_query_string;
 CREATE TABLE edit_query_string (
-    edit_query_string_id SERIAL PRIMARY KEY,
+    edit_query_string_id SERIAINT GENERATED ALWAYS AS IDENTITYL PRIMARY KEY,
     edit_page_id INT NOT NULL,
     FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     enabled SMALLINT NOT NULL DEFAULT 0,

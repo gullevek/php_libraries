@@ -8,7 +8,7 @@
 
 -- DROP TABLE edit_language;
 CREATE TABLE edit_language (
-    edit_language_id SERIAL PRIMARY KEY,
+    edit_language_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     enabled SMALLINT NOT NULL DEFAULT 0,
     lang_default SMALLINT NOT NULL DEFAULT 0,
     long_name VARCHAR,
