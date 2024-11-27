@@ -451,37 +451,6 @@ class PgSQL implements Interface\SqlFunctions
 			$replace = ['', ''];
 			// read from table the PK name
 			// faster primary key get
-			/* $q = <<<SQL
-			SELECT
-				pg_attribute.attname AS column_name,
-				format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type
-			FROM pg_index, pg_class, pg_attribute
-
-			SQL;
-			if ($schema) {
-				$q .= ", pg_namespace ";
-			}
-			$q .= <<<SQL
-			WHERE
-				-- regclass translates the OID to the name
-				pg_class.oid = $1::regclass AND
-				indrelid = pg_class.oid AND
-
-			SQL;
-			if ($schema) {
-				$params[] = $schema;
-				$q .= <<<SQL
-					nspname = $2 AND
-					pg_class.relnamespace = pg_namespace.oid AND
-
-				SQL;
-			}
-			$q .= <<<SQL
-				pg_attribute.attrelid = pg_class.oid AND
-				pg_attribute.attnum = any(pg_index.indkey)
-				AND indisprimary
-			SQL; */
-
 			$q = <<<SQL
 			SELECT
 				pg_attribute.attname AS column_name,
