@@ -474,7 +474,7 @@ class Generate
 					$page_name_camel_case
 			);
 		try {
-			/** @var TableArrays\Interface\TableArraysInterface|false $class */
+			/** @var TableArrays\Interface\TableArraysInterface $class */
 			$class = new $class_string($this);
 		} catch (\Throwable $t) {
 			$this->log->critical('CLASS LOADING: Failed loading: ' . $class_string . ' => ' . $t->getMessage());
@@ -1757,14 +1757,9 @@ class Generate
 				$this->dba->setTableArrayEntry($this->dba->getTableArray()[$key]['preset'], $key, 'value');
 			}
 		}
-		if (is_array($this->reference_array)) {
-			if (!is_array($this->reference_array)) {
-				$this->reference_array = [];
-			}
-			reset($this->reference_array);
-			foreach ($this->reference_array as $key => $value) {
-				unset($this->reference_array[$key]['selected']);
-			}
+		reset($this->reference_array);
+		foreach ($this->reference_array as $key => $value) {
+			unset($this->reference_array[$key]['selected']);
 		}
 		$this->warning = 1;
 		$this->msg = $this->l->__('Cleared for new Dataset!');
@@ -1787,20 +1782,15 @@ class Generate
 			$this->dba->unsetTableArrayEntry($key, 'input_value');
 		}
 
-		if (is_array($this->reference_array)) {
-			// load each reference_table
-			if (!is_array($this->reference_array)) {
-				$this->reference_array = [];
-			}
-			reset($this->reference_array);
-			foreach ($this->reference_array as $key => $value) {
-				unset($this->reference_array[$key]['selected']);
-				$q = 'SELECT ' . $this->reference_array[$key]['other_table_pk']
-					. ' FROM ' . $this->reference_array[$key]['table_name']
-					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
-				while (is_array($res = $this->dba->dbReturn($q))) {
-					$this->reference_array[$key]['selected'][] = $res[$this->reference_array[$key]['other_table_pk']];
-				}
+		// load each reference_table
+		reset($this->reference_array);
+		foreach ($this->reference_array as $key => $value) {
+			unset($this->reference_array[$key]['selected']);
+			$q = 'SELECT ' . $this->reference_array[$key]['other_table_pk']
+				. ' FROM ' . $this->reference_array[$key]['table_name']
+				. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
+			while (is_array($res = $this->dba->dbReturn($q))) {
+				$this->reference_array[$key]['selected'][] = $res[$this->reference_array[$key]['other_table_pk']];
 			}
 		}
 		$this->warning = 1;
@@ -1979,24 +1969,19 @@ class Generate
 		// write the object
 		$this->dba->dbWrite($addslashes, [], true);
 		// write reference array (s) if necessary
-		if (is_array($this->reference_array)) {
-			if (!is_array($this->reference_array)) {
-				$this->reference_array = [];
+		reset($this->reference_array);
+		foreach ($this->reference_array as $reference_array) {
+			$q = 'DELETE FROM ' . $reference_array['table_name']
+				. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
+			$this->dba->dbExec($q);
+			$q = 'INSERT INTO ' . $reference_array['table_name']
+				. ' (' . $reference_array['other_table_pk'] . ', ' . $this->int_pk_name . ') VALUES ';
+			for ($i = 0, $i_max = count($reference_array['selected']); $i < $i_max; $i++) {
+				$t_q = '(' . $reference_array['selected'][$i] . ', '
+					. $this->dba->getTableArray()[$this->int_pk_name]['value'] . ')';
+				$this->dba->dbExec($q . $t_q);
 			}
-			reset($this->reference_array);
-			foreach ($this->reference_array as $reference_array) {
-				$q = 'DELETE FROM ' . $reference_array['table_name']
-					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
-				$this->dba->dbExec($q);
-				$q = 'INSERT INTO ' . $reference_array['table_name']
-					. ' (' . $reference_array['other_table_pk'] . ', ' . $this->int_pk_name . ') VALUES ';
-				for ($i = 0, $i_max = count($reference_array['selected']); $i < $i_max; $i++) {
-					$t_q = '(' . $reference_array['selected'][$i] . ', '
-						. $this->dba->getTableArray()[$this->int_pk_name]['value'] . ')';
-					$this->dba->dbExec($q . $t_q);
-				}
-			} // foreach reference arrays
-		} // if reference arrays
+		} // foreach reference arrays
 		// write element list
 		if (!empty($this->element_list)) {
 			$type = [];
@@ -2230,16 +2215,11 @@ class Generate
 	public function formDeleteTableArray()
 	{
 		// remove any reference arrays
-		if (is_array($this->reference_array)) {
-			if (!is_array($this->reference_array)) {
-				$this->reference_array = [];
-			}
-			reset($this->reference_array);
-			foreach ($this->reference_array as $reference_array) {
-				$q = 'DELETE FROM ' . $reference_array['table_name']
-					. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
-				$this->dba->dbExec($q);
-			}
+		reset($this->reference_array);
+		foreach ($this->reference_array as $reference_array) {
+			$q = 'DELETE FROM ' . $reference_array['table_name']
+				. ' WHERE ' . $this->int_pk_name . ' = ' . $this->dba->getTableArray()[$this->int_pk_name]['value'];
+			$this->dba->dbExec($q);
 		}
 		// remove any element list references
 		if (!empty($this->element_list)) {

@@ -190,7 +190,6 @@ class GetTextReader
 	private function loadTables(): void
 	{
 		if (
-			is_array($this->cache_translations) &&
 			is_array($this->table_originals) &&
 			is_array($this->table_translations)
 		) {
@@ -318,10 +317,7 @@ class GetTextReader
 
 		if ($this->enable_cache) {
 			// Caching enabled, get translated string from cache
-			if (
-				is_array($this->cache_translations) &&
-				array_key_exists($string, $this->cache_translations)
-			) {
+			if (array_key_exists($string, $this->cache_translations)) {
 				return $this->cache_translations[$string];
 			} else {
 				return $string;
@@ -481,7 +477,7 @@ class GetTextReader
 		$key = $single . chr(0) . $plural;
 
 		if ($this->enable_cache) {
-			if (is_array($this->cache_translations) && !array_key_exists($key, $this->cache_translations)) {
+			if (!array_key_exists($key, $this->cache_translations)) {
 				return ($number != 1) ? $plural : $single;
 			} else {
 				$result = $this->cache_translations[$key];

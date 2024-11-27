@@ -38,7 +38,7 @@ class Uids
 			$uniqid_length++;
 		}
 		/** @var int<1,max> make sure that internal this is correct */
-		$random_bytes_length = ($uniqid_length - ($uniqid_length % 2)) / 2;
+		$random_bytes_length = (int)(($uniqid_length - ($uniqid_length % 2)) / 2);
 		$uniqid = bin2hex(random_bytes($random_bytes_length));
 		// if not forced shorten return next lower length
 		if (!$force_length) {

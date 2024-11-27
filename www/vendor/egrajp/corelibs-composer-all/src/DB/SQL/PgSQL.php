@@ -51,6 +51,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\DB\SQL;
 
+use CoreLibs\DB\Support\ConvertPlaceholder;
+
 // below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
 // as main system. Currently all @var sets are written as object
 /** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
@@ -102,7 +104,7 @@ class PgSQL implements Interface\SqlFunctions
 	 * SELECT foo FROM bar WHERE foobar = $1
 	 *
 	 * @param  string       $query  Query string with placeholders $1, ..
-	 * @param  array<mixed> $params Matching parameters for each placerhold
+	 * @param  array<mixed> $params Matching parameters for each placeholder
 	 * @return \PgSql\Result|false Query result
 	 */
 	public function __dbQueryParams(string $query, array $params): \PgSql\Result|false
@@ -140,7 +142,7 @@ class PgSQL implements Interface\SqlFunctions
 	 * sends an async query to the server with params
 	 *
 	 * @param  string       $query  Query string with placeholders $1, ..
-	 * @param  array<mixed> $params Matching parameters for each placerhold
+	 * @param  array<mixed> $params Matching parameters for each placeholder
 	 * @return bool         true/false Query sent successful status
 	 */
 	public function __dbSendQueryParams(string $query, array $params): bool
@@ -965,6 +967,34 @@ class PgSQL implements Interface\SqlFunctions
 	public function __dbGetEncoding(): string
 	{
 		return $this->__dbShow('client_encoding');
+	}
+
+	/**
+	 * Count placeholder queries. $ only
+	 *
+	 * @param  string $query
+	 * @return int
+	 */
+	public function __dbCountQueryParams(string $query): int
+	{
+		$matches = [];
+		// regex for params: only stand alone $number allowed
+		// exclude all '' enclosed strings, ignore all numbers [note must start with digit]
+		// can have space/tab/new line
+		// must have <> = , ( [not equal, equal, comma, opening round bracket]
+		// can have space/tab/new line
+		// $ number with 1-9 for first and 0-9 for further digits
+		// Collects also PDO ? and :named, but they are ignored
+		// /s for matching new line in . list
+		// [disabled, we don't used ^ or $] /m for multi line match
+		// Matches in 1:, must be array_filtered to remove empty, count with array_unique
+		// Regex located in the ConvertPlaceholder class
+		preg_match_all(
+			ConvertPlaceholder::REGEX_LOOKUP_PLACEHOLDERS,
+			$query,
+			$matches
+		);
+		return count(array_unique(array_filter($matches[3])));
 	}
 }
 

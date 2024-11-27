@@ -8,11 +8,11 @@
     "packages": [
         {
             "name": "egrajp/corelibs-composer-all",
-            "version": "dev-development",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "/storage/var/www/html/developers/clemens/core_data/composer-packages/CoreLibs-Composer-All",
-                "reference": "e318a4fb9a5a34894e2fbff2f110c6626c87be0e"
+                "reference": "bcc1e833c12b8c39a48e9209502e6c2b5742423d"
             },
             "require": {
                 "php": ">=8.2",
@@ -22,7 +22,9 @@
                 "egrajp/smarty-extended": "^4.3",
                 "gullevek/dotenv": "dev-master",
                 "phan/phan": "^5.4",
-                "phpstan/phpstan": "^1.12",
+                "phpstan/phpdoc-parser": "^2.0",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
                 "phpunit/phpunit": "^9"
             },
             "type": "library",
@@ -78,16 +80,16 @@
         },
         {
             "name": "gullevek/dotenv",
-            "version": "v2.1.0",
+            "version": "v2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gullevek/dotEnv.git",
-                "reference": "b9feacaded4e48effff9da7d1173752aef3dc27f"
+                "reference": "a7ade8648594c937ca24adb758eb5a702529cf70"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gullevek/dotEnv/zipball/b9feacaded4e48effff9da7d1173752aef3dc27f",
-                "reference": "b9feacaded4e48effff9da7d1173752aef3dc27f",
+                "url": "https://api.github.com/repos/gullevek/dotEnv/zipball/a7ade8648594c937ca24adb758eb5a702529cf70",
+                "reference": "a7ade8648594c937ca24adb758eb5a702529cf70",
                 "shasum": ""
             },
             "require": {
@@ -95,7 +97,9 @@
             },
             "require-dev": {
                 "phan/phan": "^5.4",
-                "phpstan/phpstan": "^1.10",
+                "phpstan/phpdoc-parser": "^2.0",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
                 "phpunit/phpunit": "^9"
             },
             "type": "library",
@@ -126,9 +130,9 @@
             ],
             "support": {
                 "issues": "https://github.com/gullevek/dotEnv/issues",
-                "source": "https://github.com/gullevek/dotEnv/tree/v2.1.0"
+                "source": "https://github.com/gullevek/dotEnv/tree/v2.1.1"
             },
-            "time": "2024-08-21T02:41:15+00:00"
+            "time": "2024-11-18T11:10:09+00:00"
         },
         {
             "name": "psr/log",
