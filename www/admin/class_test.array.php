@@ -115,9 +115,6 @@ print "ARRAYFLATFORKEY: " . DgS::printAr(ArrayHandler::arrayFlatForKey($test_arr
  */
 function rec(string $pre, string $cur, array $node = [])
 {
-	if (!is_array($node)) {
-		$node = [];
-	}
 	print "<div style='color: green;'>#### PRE: " . $pre . ", CUR: " . $cur . ", N-c: "
 		. count($node) . " [" . join('|', array_keys($node)) . "]</div>";
 	if (!$pre) {

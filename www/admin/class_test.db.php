@@ -316,7 +316,8 @@ print "EOM STRING EXEC RETURN TEST: " . print_r(
 	$db->dbReturnRowParams(
 		$query_select,
 		[$__last_insert_id]
-	)
+	),
+	true
 ) . "<br>";
 // B
 $status = $db->dbExecParams(
@@ -345,7 +346,8 @@ print "EOM STRING EXEC RETURN TEST: " . print_r(
 	$db->dbReturnRowParams(
 		$query_select,
 		[$__last_insert_id]
-	)
+	),
+	true
 ) . "<br>";
 // params > 10 for debug
 // error catcher
@@ -674,7 +676,7 @@ echo "<hr>";
 
 print "COMPOSITE ELEMENT READ<br>";
 $res = $db->dbReturnRow("SELECT item, count, (item).name, (item).price, (item).supplier_id FROM on_hand");
-print "ROW: <pre>" . print_r($res) . "</pre>";
+print "ROW: <pre>" . print_r($res, true) . "</pre>";
 var_dump($res);
 print "Field Name/Types: <pre>" . print_r($db->dbGetFieldNameTypes(), true) . "</pre>";
 echo "<hr>";

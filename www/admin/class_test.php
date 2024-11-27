@@ -73,6 +73,7 @@ $test_files = [
 	'class_test.db.query-placeholder.php' => 'Class Test: DB query placeholder convert',
 	'class_test.db.dbReturn.php' => 'Class Test: DB dbReturn',
 	'class_test.db.single.php' => 'Class Test: DB single query tests',
+	'class_test.db.convert-placeholder.php' => 'Class Test: DB convert placeholder',
 	'class_test.convert.colors.php' => 'Class Test: CONVERT COLORS',
 	'class_test.check.colors.php' => 'Class Test: CHECK COLORS',
 	'class_test.mime.php' => 'Class Test: MIME',

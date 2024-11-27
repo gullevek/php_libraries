@@ -70,8 +70,7 @@ for ($i = 1; $i <= 6; $i++) {
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
 			"<b>Bool:</b> " . Support::prBl($res) :
-			(is_array($res) ?
-				"Array: " . Support::prBl(is_array($res)) : '{-}')
+			"Array: Yes"
 		) . ", "
 		. "cursor_ext: <pre>" . Support::printAr(
 			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
@@ -89,8 +88,7 @@ for ($i = 1; $i <= 6; $i++) {
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
 			"<b>Bool:</b> " . Support::prBl($res) :
-			(is_array($res) ?
-				"Array: " . Support::prBl(is_array($res)) : '{-}')
+			"Array: Yes"
 		) . ", "
 		. "cursor_ext: <pre>" . Support::printAr(
 			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
@@ -108,8 +106,7 @@ for ($i = 1; $i <= 6; $i++) {
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
 			"<b>Bool:</b> " . Support::prBl($res) :
-			(is_array($res) ?
-				"Array: " . Support::prBl(is_array($res)) : '{-}')
+			"Array: Yes"
 		) . ", "
 		. "cursor_ext: <pre>" . Support::printAr(
 			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
@@ -127,8 +124,7 @@ for ($i = 1; $i <= 6; $i++) {
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
 			"<b>Bool:</b> " . Support::prBl($res) :
-			(is_array($res) ?
-				"Array: " . Support::prBl(is_array($res)) : '{-}')
+			"Array: Yes"
 		) . ", "
 		. "cursor_ext: <pre>" . Support::printAr(
 			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
@@ -146,8 +142,7 @@ for ($i = 1; $i <= 6; $i++) {
 	print $i . ") " . $cache_flag . ": "
 		. "res: " . (is_bool($res) ?
 			"<b>Bool:</b> " . Support::prBl($res) :
-			(is_array($res) ?
-				"Array: " . Support::prBl(is_array($res)) : '{-}')
+			"Array: Yes"
 		) . ", "
 		. "cursor_ext: <pre>" . Support::printAr(
 			SetVarType::setArray($db->dbGetCursorExt($q_db_ret))
