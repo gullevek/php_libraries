@@ -26,7 +26,7 @@ class HSB implements Interface\CoordinatesInterface
 	private float $B = 0.0;
 
 	/** @var string color space: either ok or cie */
-	private string $colorspace = '';
+	private string $colorspace = ''; /** @phpstan-ignore-line */
 
 	/**
 	 * HSB (HSV) color coordinates

@@ -25,7 +25,7 @@ class HSL implements Interface\CoordinatesInterface
 	/** @var float lightness (luminance) */
 	private float $L = 0.0;
 
-	/** @var string color space: either ok or cie */
+	/** @var string color space: either sRGB */
 	private string $colorspace = '';
 
 	/**
