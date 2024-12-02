@@ -243,6 +243,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				[
 					'EUID' => 1,
+					'ECUID' => 'abc',
 				],
 				2,
 				[],
@@ -260,6 +261,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				[
 					'EUID' => 1,
+					'ECUID' => 'abc',
 					'USER_NAME' => '',
 					'GROUP_NAME' => '',
 					'ADMIN' => 1,

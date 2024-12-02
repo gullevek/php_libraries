@@ -75,6 +75,8 @@ class Login
 {
 	/** @var ?int the user id var*/
 	private ?int $euid;
+	/** @var ?string the user cuid (note will be super seeded with uuid v4 later) */
+	private ?string $ecuid;
 	/** @var string _GET/_POST loginUserId parameter for non password login */
 	private string $login_user_id = '';
 	/** @var string source, either _GET or _POST or empty */
@@ -757,7 +759,7 @@ class Login
 		}
 		// have to get the global stuff here for setting it later
 		// we have to get the themes in here too
-		$q = "SELECT eu.edit_user_id, eu.username, eu.password, "
+		$q = "SELECT eu.edit_user_id, eu.cuid, eu.username, eu.password, "
 			. "eu.edit_group_id, "
 			. "eg.name AS edit_group_name, eu.admin, "
 			// additinal acl lists
@@ -889,6 +891,7 @@ class Login
 			// normal user processing
 			// set class var and session var
 			$_SESSION['EUID'] = $this->euid = (int)$res['edit_user_id'];
+			$_SESSION['ECUID'] = $this->ecuid = (string)$res['cuid'];
 			// check if user is okay
 			$this->loginCheckPermissions();
 			if ($this->login_error == 0) {
@@ -1132,6 +1135,8 @@ class Login
 		// username (login), group name
 		$this->acl['user_name'] = $_SESSION['USER_NAME'];
 		$this->acl['group_name'] = $_SESSION['GROUP_NAME'];
+		// edit user cuid
+		$this->acl['ecuid'] = $_SESSION['ECUID'];
 		// set additional acl
 		$this->acl['additional_acl'] = [
 			'user' => $_SESSION['USER_ADDITIONAL_ACL'],
@@ -1862,6 +1867,8 @@ HTML;
 		}
 		// if there is none, there is none, saves me POST/GET check
 		$this->euid = array_key_exists('EUID', $_SESSION) ? (int)$_SESSION['EUID'] : 0;
+		// TODO: allow load from cuid
+		// $this->ecuid = array_key_exists('ECUID', $_SESSION) ? (string)$_SESSION['ECUID'] : '';
 		// get login vars, are so, can't be changed
 		// prepare
 		// pass on vars to Object vars
@@ -2111,6 +2118,7 @@ HTML;
 		$this->session->sessionDestroy();
 		// unset euid
 		$this->euid = null;
+		$this->ecuid = null;
 		// then prints the login screen again
 		$this->permission_okay = false;
 	}
@@ -2128,11 +2136,12 @@ HTML;
 		if (empty($this->euid)) {
 			return $this->permission_okay;
 		}
+		// euid must match ecuid
 		// bail for previous wrong page match, eg if method is called twice
 		if ($this->login_error == 103) {
 			return $this->permission_okay;
 		}
-		$q = "SELECT ep.filename, "
+		$q = "SELECT ep.filename, eu.cuid, "
 			// base lock flags
 			. "eu.deleted, eu.enabled, eu.locked, "
 			// date based lock
@@ -2198,6 +2207,8 @@ HTML;
 		} else {
 			$this->login_error = 103;
 		}
+		// set ECUID
+		$_SESSION['ECUID'] = $this->ecuid = (string)$res['cuid'];
 		// if called from public, so we can check if the permissions are ok
 		return $this->permission_okay;
 	}
@@ -2502,6 +2513,16 @@ HTML;
 	public function loginGetEuid(): string
 	{
 		return (string)$this->euid;
+	}
+
+	/**
+	 * Get the current set ECUID (edit user cuid)
+	 *
+	 * @return string ECUID as string
+	 */
+	public function loginGetEcid(): string
+	{
+		return (string)$this->ecuid;
 	}
 }
 
