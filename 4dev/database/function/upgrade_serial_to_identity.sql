@@ -1,6 +1,8 @@
--- Upgrae serial to identity type
+-- Upgrade serial to identity type
 --
--- @param reclass tbl The table where the column is located
+-- Original: https://www.enterprisedb.com/blog/postgresql-10-identity-columns-explained#section-6
+--
+-- @param reclass tbl The table where the column is located, prefix with 'schema.' if different schema
 -- @param name col The column to be changed
 -- @param varchar identity_type [default=a] Allowed a, d, assigned, default
 -- @param varchar col_type [default=''] Allowed smallint, int, bigint, int2, int4, int8

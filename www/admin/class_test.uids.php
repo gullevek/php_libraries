@@ -52,6 +52,14 @@ print "S:UNIQID (512): " . Uids::uniqId(512) . "<br>";
 // uniq ids
 print "UNIQU ID SHORT : " . Uids::uniqIdShort() . "<br>";
 print "UNIQU ID LONG : " . Uids::uniqIdLong() . "<br>";
+// validate
+$uuidv4 = Uids::uuidv4();
+if (!Uids::validateUuuidv4($uuidv4)) {
+	print "Invalid UUIDv4: " . $uuidv4 . "<br>";
+}
+if (!Uids::validateUuuidv4("foobar")) {
+	print "Invalid UUIDv4: hard coded<Br>";
+}
 
 // DEPRECATED
 /* print "D/UUIDV4: ".$basic->uuidv4()."<br>";
