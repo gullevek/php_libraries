@@ -69,12 +69,17 @@ declare(strict_types=1);
 namespace CoreLibs\ACL;
 
 use CoreLibs\Security\Password;
+use CoreLibs\Create\Uids;
 use CoreLibs\Convert\Json;
 
 class Login
 {
 	/** @var ?int the user id var*/
 	private ?int $euid;
+	/** @var ?string the user cuid (note will be super seeded with uuid v4 later) */
+	private ?string $ecuid;
+	/** @var ?string UUIDv4, will superseed the ecuid and replace euid as login id */
+	private ?string $ecuuid;
 	/** @var string _GET/_POST loginUserId parameter for non password login */
 	private string $login_user_id = '';
 	/** @var string source, either _GET or _POST or empty */
@@ -192,6 +197,12 @@ class Login
 	private ?string $login_html = '';
 	/** @var bool */
 	private bool $login_is_ajax_page = false;
+
+	// logging
+	/** @var array<string> list of allowed types for edit log write */
+	private const WRITE_TYPES = ['BINARY', 'BZIP2', 'LZIP', 'STRING', 'SERIAL', 'JSON'];
+	/** @var array<string> list of available write types for log */
+	private array $write_types_available = [];
 
 	// settings
 	/** @var array<string,mixed> options */
@@ -378,6 +389,8 @@ class Login
 		// write that into the session
 		$_SESSION['DEFAULT_ACL_LIST'] = $this->default_acl_list;
 		$_SESSION['DEFAULT_ACL_LIST_TYPE'] = $this->default_acl_list_type;
+
+		$this->loginSetEditLogWriteTypeAvailable();
 
 		// this will be deprecated
 		if ($this->options['auto_login'] === true) {
@@ -757,7 +770,7 @@ class Login
 		}
 		// have to get the global stuff here for setting it later
 		// we have to get the themes in here too
-		$q = "SELECT eu.edit_user_id, eu.username, eu.password, "
+		$q = "SELECT eu.edit_user_id, eu.cuid, eu.cuuid, eu.username, eu.password, "
 			. "eu.edit_group_id, "
 			. "eg.name AS edit_group_name, eu.admin, "
 			// additinal acl lists
@@ -889,6 +902,8 @@ class Login
 			// normal user processing
 			// set class var and session var
 			$_SESSION['EUID'] = $this->euid = (int)$res['edit_user_id'];
+			$_SESSION['ECUID'] = $this->ecuid = (string)$res['cuid'];
+			$_SESSION['ECUUID'] = $this->ecuuid = (string)$res['cuuid'];
 			// check if user is okay
 			$this->loginCheckPermissions();
 			if ($this->login_error == 0) {
@@ -1132,6 +1147,9 @@ class Login
 		// username (login), group name
 		$this->acl['user_name'] = $_SESSION['USER_NAME'];
 		$this->acl['group_name'] = $_SESSION['GROUP_NAME'];
+		// edit user cuid
+		$this->acl['ecuid'] = $_SESSION['ECUID'];
+		$this->acl['ecuuid'] = $_SESSION['ECUUID'];
 		// set additional acl
 		$this->acl['additional_acl'] = [
 			'user' => $_SESSION['USER_ADDITIONAL_ACL'],
@@ -1425,7 +1443,7 @@ class Login
 			$data = 'Illegal user for password change: ' . $this->pw_username;
 		}
 		// log this password change attempt
-		$this->writeLog($event, $data, $this->login_error, $this->pw_username);
+		$this->writeEditLog($event, $data, $this->login_error, $this->pw_username);
 	}
 
 	/**
@@ -1566,7 +1584,7 @@ class Login
 					$username = $res['username'];
 				}
 			} // if euid is set, get username (or try)
-			$this->writeLog($event, '', $this->login_error, $username);
+			$this->writeEditLog($event, '', $this->login_error, $username);
 		} // write log under certain settings
 		// now close DB connection
 		// $this->error_msg = $this->_login();
@@ -1722,6 +1740,8 @@ HTML;
 		}
 	}
 
+	// MARK: LOGGING
+
 	/**
 	 * writes detailed data into the edit user log table (keep log what user does)
 	 *
@@ -1731,7 +1751,7 @@ HTML;
 	 * @param  string     $username login user username
 	 * @return void                 has no return
 	 */
-	private function writeLog(
+	private function writeEditLog(
 		string $event,
 		string $data,
 		string|int $error = '',
@@ -1749,49 +1769,190 @@ HTML;
 				'_GET' => $_GET,
 				'_POST' => $_POST,
 				'_FILES' => $_FILES,
-				'error' => $this->login_error
+				'error' => $this->login_error,
+				'data' => $data,
 		];
-		$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($_data_binary)));
-		// SQL querie for log entry
-		$q = "INSERT INTO edit_log "
-			. "(username, password, euid, event_date, event, error, data, data_binary, page, "
-			. "ip, user_agent, referer, script_name, query_string, server_name, http_host, "
-			. "http_accept, http_accept_charset, http_accept_encoding, session_id, "
-			. "action, action_id, action_yes, action_flag, action_menu, action_loaded, "
-			. "action_value, action_error) "
-			. "VALUES ('" . $this->db->dbEscapeString($username) . "', 'PASSWORD', "
-			. ($this->euid ? $this->euid : 'NULL') . ", "
-			. "NOW(), '" . $this->db->dbEscapeString($event) . "', "
-			. "'" . $this->db->dbEscapeString((string)$error) . "', "
-			. "'" . $this->db->dbEscapeString($data) . "', '" . $data_binary . "', "
-			. "'" . $this->page_name . "', ";
-		foreach (
-			[
-				'REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME',
-				'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT',
-				'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING'
-			] as $server_code
-		) {
-			if (array_key_exists($server_code, $_SERVER)) {
-				$q .= "'" . $this->db->dbEscapeString($_SERVER[$server_code]) . "', ";
-			} else {
-				$q .= "NULL, ";
-			}
+		$_action_set = [
+			'action' => $this->action,
+			'action_id' => $this->username,
+			'action_flag' => (string)$this->login_error,
+			'action_value' => (string)$this->permission_okay,
+		];
+
+		$this->writeLog($event, $_data_binary, $_action_set, $error, $username);
+	}
+
+	/**
+	 * writes all action vars plus other info into edit_log table
+	 * this is for public class
+	 *
+	 * phpcs:disable Generic.Files.LineLength
+	 * @param  string              $event [default='']        any kind of event description,
+	 * @param  string|array<mixed> $data [default='']         any kind of data related to that event
+	 * @param  array{action?:?string,action_id?:null|string|int,action_sub_id?:null|string|int,action_yes?:null|string|int|bool,action_flag?:?string,action_menu?:?string,action_loaded?:?string,action_value?:?string,action_type?:?string,action_error?:?string} $action_set [default=[]] action set names
+	 * @param  string|int          $error    error id (mostly an int)
+	 * @param  string              $write_type [default=JSON] write type can be
+	 *                                                        JSON, STRING/SERIEAL, BINARY/BZIP or ZLIB
+	 * @param  string|null         $db_schema [default=null]  override target schema
+	 * @return void
+	 * phpcs:enable Generic.Files.LineLength
+	 */
+	public function writeLog(
+		string $event = '',
+		string|array $data = '',
+		array $action_set = [],
+		string|int $error = '',
+		string $username = '',
+		string $write_type = 'JSON',
+		?string $db_schema = null
+	): void {
+		$data_binary = '';
+		$data_write = '';
+
+		// check if write type is valid, if not fallback to JSON
+		if (!in_array(strtoupper($write_type), $this->write_types_available)) {
+			$this->log->warning('Write type not in allowed array, fallback to JSON', context:[
+				"write_type" => $write_type,
+				"write_list" => $this->write_types_available,
+			]);
+			$write_type = 'JSON';
 		}
-		$q .= "'" . $this->session->getSessionId() . "', ";
-		$q .= "'" . $this->db->dbEscapeString($this->action) . "', ";
-		$q .= "'" . $this->db->dbEscapeString($this->username) . "', ";
-		$q .= "NULL, ";
-		$q .= "'" . $this->db->dbEscapeString((string)$this->login_error) . "', ";
-		$q .= "NULL, NULL, ";
-		$q .= "'" . $this->db->dbEscapeString((string)$this->permission_okay) . "', ";
-		$q .= "NULL)";
-		$this->db->dbExec($q, 'NULL');
+		switch ($write_type) {
+			case 'BINARY':
+			case 'BZIP':
+				$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($data)));
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'BZIP',
+					'message' => 'see bzip compressed data_binary field'
+				]);
+				break;
+			case 'ZLIB':
+				$data_binary = $this->db->dbEscapeBytea((string)gzcompress(serialize($data)));
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'ZLIB',
+					'message' => 'see zlib compressed data_binary field'
+				]);
+				break;
+			case 'STRING':
+			case 'SERIAL':
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'SERIAL',
+					'message' => 'see serial string data field'
+				]));
+				$data_write = serialize($data);
+				break;
+			case 'JSON':
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'JSON',
+					'message' => 'see json string data field'
+				]));
+				// must be converted to array
+				if (!is_array($data)) {
+					$data = ["data" => $data];
+				}
+				$data_write = Json::jsonConvertArrayTo($data);
+				break;
+			default:
+				$this->log->alert('Invalid type for data compression was set', context:[
+					"write_type" => $write_type
+				]);
+				break;
+		}
+
+		/** @var string $DB_SCHEMA check schema */
+		$DB_SCHEMA = 'public';
+		if ($db_schema !== null) {
+			$DB_SCHEMA = $db_schema;
+		} elseif (!empty($this->db->dbGetSchema())) {
+			$DB_SCHEMA = $this->db->dbGetSchema();
+		}
+		$q = <<<SQL
+		INSERT INTO {DB_SCHEMA}.edit_log (
+			username, euid, ecuid, ecuuid, event_date, event, error, data, data_binary, page,
+			ip, user_agent, referer, script_name, query_string, server_name, http_host,
+			http_accept, http_accept_charset, http_accept_encoding, session_id,
+			action, action_id, action_sub_id, action_yes, action_flag, action_menu, action_loaded,
+			action_value, action_type, action_error
+		) VALUES (
+			$1, $2, $3, $4, NOW(), $5, $6, $7, $8, $9,
+			$10, $11, $12, $13, $14, $15, $16,
+			$17, $18, $19, $20,
+			$21, $22, $23, $24, $25, $26, $27,
+			$28, $29, $30
+		)
+		SQL;
+		$this->db->dbExecParams(
+			str_replace(
+				['{DB_SCHEMA}'],
+				[$DB_SCHEMA],
+				$q
+			),
+			[
+				// row 1
+				empty($username) ? $_SESSION['USER_NAME'] ?? '' : $username,
+				!empty($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
+					$_SESSION['EUID'] : null,
+				!empty($_SESSION['ECUID']) && is_string($_SESSION['ECUID']) ?
+					$_SESSION['ECUID'] : null,
+				!empty($_SESSION['ECUUID']) && Uids::validateUuuidv4($_SESSION['ECUUID']) ?
+					$_SESSION['ECUUID'] : null,
+				(string)$event,
+				(string)$error,
+				$data_write,
+				$data_binary,
+				(string)$this->page_name,
+				// row 2
+				$_SERVER["REMOTE_ADDR"] ?? null,
+				$_SERVER['HTTP_USER_AGENT'] ?? null,
+				$_SERVER['HTTP_REFERER'] ?? null,
+				$_SERVER['SCRIPT_FILENAME'] ?? null,
+				$_SERVER['QUERY_STRING'] ?? null,
+				$_SERVER['SERVER_NAME'] ?? null,
+				$_SERVER['HTTP_HOST'] ?? null,
+				// row 3
+				$_SERVER['HTTP_ACCEPT'] ?? null,
+				$_SERVER['HTTP_ACCEPT_CHARSET'] ?? null,
+				$_SERVER['HTTP_ACCEPT_ENCODING'] ?? null,
+				$this->session->getSessionId() !== false ?
+					$this->session->getSessionId() : null,
+				// row 4
+				$action_set['action'] ?? null,
+				$action_set['action_id'] ?? null,
+				$action_set['action_sub_id'] ?? null,
+				$action_set['action_yes'] ?? null,
+				$action_set['action_flag'] ?? null,
+				$action_set['action_menu'] ?? null,
+				$action_set['action_loaded'] ?? null,
+				$action_set['action_value'] ?? null,
+				$action_set['action_type'] ?? null,
+				$action_set['action_error'] ?? null,
+			],
+			'NULL'
+		);
+	}
+
+	/**
+	 * set the write types that are allowed
+	 *
+	 * @return void
+	 */
+	private function loginSetEditLogWriteTypeAvailable()
+	{
+		// check what edit log data write types are allowed
+		$this->write_types_available = self::WRITE_TYPES;
+		if (!function_exists('bzcompress')) {
+			$this->write_types_available = array_diff($this->write_types_available, ['BINARY', 'BZIP']);
+		}
+		if (!function_exists('gzcompress')) {
+			$this->write_types_available = array_diff($this->write_types_available, ['LZIP']);
+		}
 	}
 
 	// *************************************************************************
 	// **** PUBLIC INTERNAL
 	// *************************************************************************
+
+	// MARK: LOGIN CALL
 
 	/**
 	 * Main call that needs to be run to actaully check for login
@@ -1862,6 +2023,9 @@ HTML;
 		}
 		// if there is none, there is none, saves me POST/GET check
 		$this->euid = array_key_exists('EUID', $_SESSION) ? (int)$_SESSION['EUID'] : 0;
+		// TODO: allow load from cuid
+		// $this->ecuid = array_key_exists('ECUID', $_SESSION) ? (string)$_SESSION['ECUID'] : '';
+		// $this->ecuuid = array_key_exists('ECUUID', $_SESSION) ? (string)$_SESSION['ECUUID'] : '';
 		// get login vars, are so, can't be changed
 		// prepare
 		// pass on vars to Object vars
@@ -1941,6 +2105,8 @@ HTML;
 		// set acls for this user/group and this page
 		$this->loginSetAcl();
 	}
+
+	// MARK: setters/getters
 
 	/**
 	 * Returns current set login_html content
@@ -2111,6 +2277,8 @@ HTML;
 		$this->session->sessionDestroy();
 		// unset euid
 		$this->euid = null;
+		$this->ecuid = null;
+		$this->ecuuid = null;
 		// then prints the login screen again
 		$this->permission_okay = false;
 	}
@@ -2128,11 +2296,12 @@ HTML;
 		if (empty($this->euid)) {
 			return $this->permission_okay;
 		}
+		// euid must match ecuid and ecuuid
 		// bail for previous wrong page match, eg if method is called twice
 		if ($this->login_error == 103) {
 			return $this->permission_okay;
 		}
-		$q = "SELECT ep.filename, "
+		$q = "SELECT ep.filename, eu.cuid, eu.cuuid, "
 			// base lock flags
 			. "eu.deleted, eu.enabled, eu.locked, "
 			// date based lock
@@ -2198,6 +2367,9 @@ HTML;
 		} else {
 			$this->login_error = 103;
 		}
+		// set ECUID
+		$_SESSION['ECUID'] = $this->ecuid = (string)$res['cuid'];
+		$_SESSION['ECUUID'] = $this->ecuuid = (string)$res['cuuid'];
 		// if called from public, so we can check if the permissions are ok
 		return $this->permission_okay;
 	}
@@ -2502,6 +2674,26 @@ HTML;
 	public function loginGetEuid(): string
 	{
 		return (string)$this->euid;
+	}
+
+	/**
+	 * Get the current set ECUID (edit user cuid)
+	 *
+	 * @return string ECUID as string
+	 */
+	public function loginGetEcuid(): string
+	{
+		return (string)$this->ecuid;
+	}
+
+	/**
+	 * Get the current set ECUUID (edit user cuuid)
+	 *
+	 * @return string ECUUID as string
+	 */
+	public function loginGetEcuuid(): string
+	{
+		return (string)$this->ecuuid;
 	}
 }
 

@@ -5,15 +5,15 @@ CREATE FUNCTION random_string(randomLength int)
 RETURNS text AS
 $$
 SELECT array_to_string(
-	ARRAY(
-		SELECT substring(
-			'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-			trunc(random() * 62)::int + 1,
-			1
-		)
-		FROM generate_series(1, randomLength) AS gs(x)
-	),
-	''
+    ARRAY(
+        SELECT substring(
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+            trunc(random() * 62)::int + 1,
+            1
+        )
+        FROM generate_series(1, randomLength) AS gs(x)
+    ),
+    ''
 )
 $$
 LANGUAGE SQL
@@ -27,15 +27,16 @@ CREATE OR REPLACE FUNCTION set_edit_generic()
 RETURNS TRIGGER AS
 $$
 DECLARE
-	random_length INT = 12; -- that should be long enough
+    random_length INT = 12; -- that should be long enough
 BEGIN
-	IF TG_OP = 'INSERT' THEN
-		NEW.date_created := 'now';
-		NEW.cuid := random_string(random_length);
-	ELSIF TG_OP = 'UPDATE' THEN
-		NEW.date_updated := 'now';
-	END IF;
-	RETURN NEW;
+    IF TG_OP = 'INSERT' THEN
+        NEW.date_created := 'now';
+        NEW.cuid := random_string(random_length);
+        NEW.cuuid := gen_random_uuid();
+    ELSIF TG_OP = 'UPDATE' THEN
+        NEW.date_updated := 'now';
+    END IF;
+    RETURN NEW;
 END;
 $$
 LANGUAGE 'plpgsql';
@@ -46,29 +47,29 @@ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION set_edit_access_uid() RETURNS TRIGGER AS
 $$
 DECLARE
-	myrec RECORD;
-	v_uid VARCHAR;
+    myrec RECORD;
+    v_uid VARCHAR;
 BEGIN
-	-- skip if NEW.name is not set
-	IF NEW.name IS NOT NULL AND NEW.name <> '' THEN
-		-- use NEW.name as base, remove all spaces
-		-- name data is already unique, so we do not need to worry about this here
-		v_uid := REPLACE(NEW.name, ' ', '');
-		IF TG_OP = 'INSERT' THEN
-			-- always set
-			NEW.uid := v_uid;
-		ELSIF TG_OP = 'UPDATE' THEN
-			-- check if not set, then set
-			SELECT INTO myrec t.* FROM edit_access t WHERE edit_access_id = NEW.edit_access_id;
-			IF FOUND THEN
-				NEW.uid := v_uid;
-			END IF;
-		END IF;
-	END IF;
-	RETURN NEW;
+    -- skip if NEW.name is not set
+    IF NEW.name IS NOT NULL AND NEW.name <> '' THEN
+        -- use NEW.name as base, remove all spaces
+        -- name data is already unique, so we do not need to worry about this here
+        v_uid := REPLACE(NEW.name, ' ', '');
+        IF TG_OP = 'INSERT' THEN
+            -- always set
+            NEW.uid := v_uid;
+        ELSIF TG_OP = 'UPDATE' THEN
+            -- check if not set, then set
+            SELECT INTO myrec t.* FROM edit_access t WHERE edit_access_id = NEW.edit_access_id;
+            IF FOUND THEN
+                NEW.uid := v_uid;
+            END IF;
+        END IF;
+    END IF;
+    RETURN NEW;
 END;
 $$
-	LANGUAGE 'plpgsql';
+    LANGUAGE 'plpgsql';
 -- END: function/edit_access_set_uid.sql
 -- START: function/edit_group_set_uid.sql
 -- add uid add for edit_group table
@@ -76,29 +77,29 @@ $$
 CREATE OR REPLACE FUNCTION set_edit_group_uid() RETURNS TRIGGER AS
 $$
 DECLARE
-	myrec RECORD;
-	v_uid VARCHAR;
+    myrec RECORD;
+    v_uid VARCHAR;
 BEGIN
-	-- skip if NEW.name is not set
-	IF NEW.name IS NOT NULL AND NEW.name <> '' THEN
-		-- use NEW.name as base, remove all spaces
-		-- name data is already unique, so we do not need to worry about this here
-		v_uid := REPLACE(NEW.name, ' ', '');
-		IF TG_OP = 'INSERT' THEN
-			-- always set
-			NEW.uid := v_uid;
-		ELSIF TG_OP = 'UPDATE' THEN
-			-- check if not set, then set
-			SELECT INTO myrec t.* FROM edit_group t WHERE edit_group_id = NEW.edit_group_id;
-			IF FOUND THEN
-				NEW.uid := v_uid;
-			END IF;
-		END IF;
-	END IF;
-	RETURN NEW;
+    -- skip if NEW.name is not set
+    IF NEW.name IS NOT NULL AND NEW.name <> '' THEN
+        -- use NEW.name as base, remove all spaces
+        -- name data is already unique, so we do not need to worry about this here
+        v_uid := REPLACE(NEW.name, ' ', '');
+        IF TG_OP = 'INSERT' THEN
+            -- always set
+            NEW.uid := v_uid;
+        ELSIF TG_OP = 'UPDATE' THEN
+            -- check if not set, then set
+            SELECT INTO myrec t.* FROM edit_group t WHERE edit_group_id = NEW.edit_group_id;
+            IF FOUND THEN
+                NEW.uid := v_uid;
+            END IF;
+        END IF;
+    END IF;
+    RETURN NEW;
 END;
 $$
-	LANGUAGE 'plpgsql';
+    LANGUAGE 'plpgsql';
 -- END: function/edit_group_set_uid.sql
 -- START: function/edit_log_partition_insert.sql
 -- AUTHOR: Clemens Schwaighofer
@@ -112,142 +113,142 @@ CREATE OR REPLACE FUNCTION edit_log_insert_trigger ()
 RETURNS TRIGGER AS
 $$
 DECLARE
-	start_date DATE := '2010-01-01';
-	end_date DATE;
-	timeformat TEXT := 'YYYY';
-	selector TEXT := 'year';
-	base_table TEXT := 'edit_log';
-	_interval INTERVAL := '1 ' || selector;
-	_interval_next INTERVAL := '2 ' || selector;
-	table_name TEXT;
-	-- compare date column
-	compare_date DATE := NEW.event_date;
-	compare_date_name TEXT := 'event_date';
-	-- the create commands
-	command_create_table TEXT := 'CREATE TABLE IF NOT EXISTS {TABLE_NAME} (CHECK({COMPARE_DATE_NAME} >= {START_DATE} AND {COMPARE_DATE_NAME} < {END_DATE})) INHERITS ({BASE_NAME})';
-	command_create_primary_key TEXT := 'ALTER TABLE {TABLE_NAME} ADD PRIMARY KEY ({BASE_TABLE}_id)';
-	command_create_foreign_key_1 TEXT := 'ALTER TABLE {TABLE_NAME} ADD CONSTRAINT {TABLE_NAME}_euid_fkey FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL';
-	command_create_trigger_1 TEXT = 'CREATE TRIGGER trg_{TABLE_NAME} BEFORE INSERT OR UPDATE ON {TABLE_NAME} FOR EACH ROW EXECUTE PROCEDURE set_edit_generic()';
+    start_date DATE := '2010-01-01';
+    end_date DATE;
+    timeformat TEXT := 'YYYY';
+    selector TEXT := 'year';
+    base_table TEXT := 'edit_log';
+    _interval INTERVAL := '1 ' || selector;
+    _interval_next INTERVAL := '2 ' || selector;
+    table_name TEXT;
+    -- compare date column
+    compare_date DATE := NEW.event_date;
+    compare_date_name TEXT := 'event_date';
+    -- the create commands
+    command_create_table TEXT := 'CREATE TABLE IF NOT EXISTS {TABLE_NAME} (CHECK({COMPARE_DATE_NAME} >= {START_DATE} AND {COMPARE_DATE_NAME} < {END_DATE})) INHERITS ({BASE_NAME})';
+    command_create_primary_key TEXT := 'ALTER TABLE {TABLE_NAME} ADD PRIMARY KEY ({BASE_TABLE}_id)';
+    command_create_foreign_key_1 TEXT := 'ALTER TABLE {TABLE_NAME} ADD CONSTRAINT {TABLE_NAME}_euid_fkey FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL';
+    command_create_trigger_1 TEXT = 'CREATE TRIGGER trg_{TABLE_NAME} BEFORE INSERT OR UPDATE ON {TABLE_NAME} FOR EACH ROW EXECUTE PROCEDURE set_edit_generic()';
 BEGIN
-	-- we are in valid start time area
-	IF (NEW.event_date >= start_date) THEN
-		-- current table name
-		table_name := base_table || '_' || to_char(NEW.event_date, timeformat);
-		BEGIN
-			EXECUTE 'INSERT INTO ' || quote_ident(table_name) || ' SELECT ($1).*' USING NEW;
-		-- if insert failed because of missing table, create new below
-		EXCEPTION
-		WHEN undefined_table THEN
-			-- another block, so in case the creation fails here too
-			BEGIN
-				-- create new table here + all indexes
-				start_date := date_trunc(selector, NEW.event_date);
-				end_date := date_trunc(selector, NEW.event_date + _interval);
-				-- creat table
-				EXECUTE format(REPLACE( -- end date
-					REPLACE( -- start date
-						REPLACE( -- compare date name
-							REPLACE( -- base name (inherit)
-								REPLACE( -- table name
-									command_create_table,
-									'{TABLE_NAME}',
-									table_name
-								),
-								'{BASE_NAME}',
-								base_table
-							),
-							'{COMPARE_DATE_NAME}',
-							compare_date_name
-						),
-						'{START_DATE}',
-						quote_literal(start_date)
-					),
-					'{END_DATE}',
-					quote_literal(end_date)
-				));
-				-- create all indexes and triggers
-				EXECUTE format(REPLACE(
-					REPLACE(
-						command_create_primary_key,
-						'{TABLE_NAME}',
-						table_name
-					),
-					'{BASE_TABLE}',
-					base_table
-				));
-				-- FK constraints
-				EXECUTE format(REPLACE(command_create_foreign_key_1, '{TABLE_NAME}', table_name));
-				-- generic trigger
-				EXECUTE format(REPLACE(command_create_trigger_1, '{TABLE_NAME}', table_name));
+    -- we are in valid start time area
+    IF (NEW.event_date >= start_date) THEN
+        -- current table name
+        table_name := base_table || '_' || to_char(NEW.event_date, timeformat);
+        BEGIN
+            EXECUTE 'INSERT INTO ' || quote_ident(table_name) || ' SELECT ($1).*' USING NEW;
+        -- if insert failed because of missing table, create new below
+        EXCEPTION
+        WHEN undefined_table THEN
+            -- another block, so in case the creation fails here too
+            BEGIN
+                -- create new table here + all indexes
+                start_date := date_trunc(selector, NEW.event_date);
+                end_date := date_trunc(selector, NEW.event_date + _interval);
+                -- creat table
+                EXECUTE format(REPLACE( -- end date
+                    REPLACE( -- start date
+                        REPLACE( -- compare date name
+                            REPLACE( -- base name (inherit)
+                                REPLACE( -- table name
+                                    command_create_table,
+                                    '{TABLE_NAME}',
+                                    table_name
+                                ),
+                                '{BASE_NAME}',
+                                base_table
+                            ),
+                            '{COMPARE_DATE_NAME}',
+                            compare_date_name
+                        ),
+                        '{START_DATE}',
+                        quote_literal(start_date)
+                    ),
+                    '{END_DATE}',
+                    quote_literal(end_date)
+                ));
+                -- create all indexes and triggers
+                EXECUTE format(REPLACE(
+                    REPLACE(
+                        command_create_primary_key,
+                        '{TABLE_NAME}',
+                        table_name
+                    ),
+                    '{BASE_TABLE}',
+                    base_table
+                ));
+                -- FK constraints
+                EXECUTE format(REPLACE(command_create_foreign_key_1, '{TABLE_NAME}', table_name));
+                -- generic trigger
+                EXECUTE format(REPLACE(command_create_trigger_1, '{TABLE_NAME}', table_name));
 
-				-- insert try again
-				EXECUTE 'INSERT INTO ' || quote_ident(table_name) || ' SELECT ($1).*' USING NEW;
-			EXCEPTION
-			WHEN OTHERS THEN
-				-- if this faled, throw it into the overflow table (so we don't loose anything)
-				INSERT INTO edit_log_overflow VALUES (NEW.*);
-			END;
-		-- other errors, insert into overlow
-		WHEN OTHERS THEN
-			-- if this faled, throw it into the overflow table (so we don't loose anything)
-			INSERT INTO edit_log_overflow VALUES (NEW.*);
-		END;
-		-- main insert run done, check if we have to create next months table
-		BEGIN
-			-- check if next month table exists
-			table_name := base_table || '_' || to_char((SELECT NEW.event_date + _interval)::DATE, timeformat);
-			-- RAISE NOTICE 'SEARCH NEXT: %', table_name;
-			IF  (SELECT to_regclass(table_name)) IS NULL THEN
-				-- move inner interval same
-				start_date := date_trunc(selector, NEW.event_date + _interval);
-				end_date := date_trunc(selector, NEW.event_date + _interval_next);
-				-- RAISE NOTICE 'CREATE NEXT: %', table_name;
-				-- create table
-				EXECUTE format(REPLACE( -- end date
-					REPLACE( -- start date
-						REPLACE( -- compare date name
-							REPLACE( -- base name (inherit)
-								REPLACE( -- table name
-									command_create_table,
-									'{TABLE_NAME}',
-									table_name
-								),
-								'{BASE_NAME}',
-								base_table
-							),
-							'{COMPARE_DATE_NAME}',
-							compare_date_name
-						),
-						'{START_DATE}',
-						quote_literal(start_date)
-					),
-					'{END_DATE}',
-					quote_literal(end_date)
-				));
-				-- create all indexes and triggers
-				EXECUTE format(REPLACE(
-					REPLACE(
-						command_create_primary_key,
-						'{TABLE_NAME}',
-						table_name
-					),
-					'{BASE_TABLE}',
-					base_table
-				));
-				-- FK constraints
-				EXECUTE format(REPLACE(command_create_foreign_key_1, '{TABLE_NAME}', table_name));
-				-- generic trigger
-				EXECUTE format(REPLACE(command_create_trigger_1, '{TABLE_NAME}', table_name));
-			END IF;
-		EXCEPTION
-		WHEN OTHERS THEN
-			RAISE NOTICE 'Failed to create next table: %', table_name;
-		END;
-	ELSE
-		-- if outside valid date, insert into overflow
-		INSERT INTO edit_log_overflow VALUES (NEW.*);
-	END IF;
-	RETURN NULL;
+                -- insert try again
+                EXECUTE 'INSERT INTO ' || quote_ident(table_name) || ' SELECT ($1).*' USING NEW;
+            EXCEPTION
+            WHEN OTHERS THEN
+                -- if this faled, throw it into the overflow table (so we don't loose anything)
+                INSERT INTO edit_log_overflow VALUES (NEW.*);
+            END;
+        -- other errors, insert into overlow
+        WHEN OTHERS THEN
+            -- if this faled, throw it into the overflow table (so we don't loose anything)
+            INSERT INTO edit_log_overflow VALUES (NEW.*);
+        END;
+        -- main insert run done, check if we have to create next months table
+        BEGIN
+            -- check if next month table exists
+            table_name := base_table || '_' || to_char((SELECT NEW.event_date + _interval)::DATE, timeformat);
+            -- RAISE NOTICE 'SEARCH NEXT: %', table_name;
+            IF  (SELECT to_regclass(table_name)) IS NULL THEN
+                -- move inner interval same
+                start_date := date_trunc(selector, NEW.event_date + _interval);
+                end_date := date_trunc(selector, NEW.event_date + _interval_next);
+                -- RAISE NOTICE 'CREATE NEXT: %', table_name;
+                -- create table
+                EXECUTE format(REPLACE( -- end date
+                    REPLACE( -- start date
+                        REPLACE( -- compare date name
+                            REPLACE( -- base name (inherit)
+                                REPLACE( -- table name
+                                    command_create_table,
+                                    '{TABLE_NAME}',
+                                    table_name
+                                ),
+                                '{BASE_NAME}',
+                                base_table
+                            ),
+                            '{COMPARE_DATE_NAME}',
+                            compare_date_name
+                        ),
+                        '{START_DATE}',
+                        quote_literal(start_date)
+                    ),
+                    '{END_DATE}',
+                    quote_literal(end_date)
+                ));
+                -- create all indexes and triggers
+                EXECUTE format(REPLACE(
+                    REPLACE(
+                        command_create_primary_key,
+                        '{TABLE_NAME}',
+                        table_name
+                    ),
+                    '{BASE_TABLE}',
+                    base_table
+                ));
+                -- FK constraints
+                EXECUTE format(REPLACE(command_create_foreign_key_1, '{TABLE_NAME}', table_name));
+                -- generic trigger
+                EXECUTE format(REPLACE(command_create_trigger_1, '{TABLE_NAME}', table_name));
+            END IF;
+        EXCEPTION
+        WHEN OTHERS THEN
+            RAISE NOTICE 'Failed to create next table: %', table_name;
+        END;
+    ELSE
+        -- if outside valid date, insert into overflow
+        INSERT INTO edit_log_overflow VALUES (NEW.*);
+    END IF;
+    RETURN NULL;
 END
 $$
 LANGUAGE 'plpgsql';
@@ -260,22 +261,22 @@ CREATE OR REPLACE FUNCTION set_login_user_id_set_date()
 RETURNS TRIGGER AS
 $$
 BEGIN
-	-- if new is not null/empty
-	-- and old one is null or old one different new one
-	-- set NOW()
-	-- if new one is NULL
-	-- set NULL
-	IF
-		NEW.login_user_id IS NOT NULL AND NEW.login_user_id <> '' AND
-		(OLD.login_user_id IS NULL OR NEW.login_user_id <> OLD.login_user_id)
-	THEN
-		NEW.login_user_id_set_date = NOW();
-		NEW.login_user_id_last_revalidate = NOW();
-	ELSIF NEW.login_user_id IS NULL OR NEW.login_user_id = '' THEN
-		NEW.login_user_id_set_date = NULL;
-		NEW.login_user_id_last_revalidate = NULL;
-	END IF;
-	RETURN NEW;
+    -- if new is not null/empty
+    -- and old one is null or old one different new one
+    -- set NOW()
+    -- if new one is NULL
+    -- set NULL
+    IF
+        NEW.login_user_id IS NOT NULL AND NEW.login_user_id <> '' AND
+        (OLD.login_user_id IS NULL OR NEW.login_user_id <> OLD.login_user_id)
+    THEN
+        NEW.login_user_id_set_date = NOW();
+        NEW.login_user_id_last_revalidate = NOW();
+    ELSIF NEW.login_user_id IS NULL OR NEW.login_user_id = '' THEN
+        NEW.login_user_id_set_date = NULL;
+        NEW.login_user_id_last_revalidate = NULL;
+    END IF;
+    RETURN NEW;
 END;
 $$
 LANGUAGE 'plpgsql';
@@ -290,8 +291,8 @@ LANGUAGE 'plpgsql';
 
 -- DROP TABLE temp_files;
 CREATE TABLE temp_files (
-	filename	VARCHAR,
-	folder	VARCHAR
+    filename VARCHAR,
+    folder VARCHAR
 );
 -- END: table/edit_temp_files.sql
 -- START: table/edit_generic.sql
@@ -304,9 +305,10 @@ CREATE TABLE temp_files (
 
 -- DROP TABLE edit_generic;
 CREATE TABLE edit_generic (
-	cuid	VARCHAR,
-	date_created	TIMESTAMP WITHOUT TIME ZONE DEFAULT clock_timestamp(),
-	date_updated	TIMESTAMP WITHOUT TIME ZONE
+    cuid VARCHAR,
+    cuuid UUID,
+    date_created TIMESTAMP WITHOUT TIME ZONE DEFAULT clock_timestamp(),
+    date_updated TIMESTAMP WITHOUT TIME ZONE
 );
 -- END: table/edit_generic.sql
 -- START: table/edit_visible_group.sql
@@ -319,9 +321,9 @@ CREATE TABLE edit_generic (
 
 -- DROP TABLE edit_visible_group;
 CREATE TABLE edit_visible_group (
-	edit_visible_group_id	SERIAL PRIMARY KEY,
-	name	VARCHAR,
-	flag	VARCHAR
+    edit_visible_group_id SERIAL PRIMARY KEY,
+    name VARCHAR,
+    flag VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_visible_group.sql
 -- START: table/edit_menu_group.sql
@@ -334,10 +336,10 @@ CREATE TABLE edit_visible_group (
 
 -- DROP TABLE edit_menu_group;
 CREATE TABLE edit_menu_group (
-	edit_menu_group_id	SERIAL PRIMARY KEY,
-	name	VARCHAR,
-	flag	VARCHAR,
-	order_number	INT NOT NULL
+    edit_menu_group_id SERIAL PRIMARY KEY,
+    name VARCHAR,
+    flag VARCHAR,
+    order_number INT NOT NULL
 ) INHERITS (edit_generic) WITHOUT OIDS;
 
 
@@ -352,18 +354,18 @@ CREATE TABLE edit_menu_group (
 
 -- DROP TABLE edit_page;
 CREATE TABLE edit_page (
-	edit_page_id	SERIAL PRIMARY KEY,
-	content_alias_edit_page_id	INT, -- alias for page content, if the page content is defined on a different page, ege for ajax backend pages
-	FOREIGN KEY (content_alias_edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE RESTRICT ON UPDATE CASCADE,
-	filename	VARCHAR,
-	name	VARCHAR UNIQUE,
-	order_number INT NOT NULL,
-	online	SMALLINT NOT NULL DEFAULT 0,
-	menu	SMALLINT NOT NULL DEFAULT 0,
-	popup	SMALLINT NOT NULL DEFAULT 0,
-	popup_x	SMALLINT,
-	popup_y SMALLINT,
-	hostname	VARCHAR
+    edit_page_id SERIAL PRIMARY KEY,
+    content_alias_edit_page_id	INT, -- alias for page content, if the page content is defined on a different page, ege for ajax backend pages
+    FOREIGN KEY (content_alias_edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE RESTRICT ON UPDATE CASCADE,
+    filename VARCHAR,
+    name VARCHAR UNIQUE,
+    order_number INT NOT NULL,
+    online SMALLINT NOT NULL DEFAULT 0,
+    menu SMALLINT NOT NULL DEFAULT 0,
+    popup SMALLINT NOT NULL DEFAULT 0,
+    popup_x SMALLINT,
+    popup_y SMALLINT,
+    hostname VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_page.sql
 -- START: table/edit_query_string.sql
@@ -376,13 +378,13 @@ CREATE TABLE edit_page (
 
 -- DROP TABLE edit_query_string;
 CREATE TABLE edit_query_string (
-	edit_query_string_id	SERIAL PRIMARY KEY,
-	edit_page_id	INT NOT NULL,
-	FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	enabled	SMALLINT NOT NULL DEFAULT 0,
-	name	VARCHAR,
-	value	VARCHAR,
-	dynamic	SMALLINT NOT NULL DEFAULT 0
+    edit_query_string_id SERIAL PRIMARY KEY,
+    edit_page_id INT NOT NULL,
+    FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    enabled SMALLINT NOT NULL DEFAULT 0,
+    name VARCHAR,
+    value VARCHAR,
+    dynamic SMALLINT NOT NULL DEFAULT 0
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_query_string.sql
 -- START: table/edit_page_visible_group.sql
@@ -395,10 +397,10 @@ CREATE TABLE edit_query_string (
 
 -- DROP TABLE edit_page_visible_group;
 CREATE TABLE edit_page_visible_group (
-	edit_page_id INT NOT NULL,
-	FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_visible_group_id INT NOT NULL,
-	FOREIGN KEY (edit_visible_group_id) REFERENCES edit_visible_group (edit_visible_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
+    edit_page_id INT NOT NULL,
+    FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_visible_group_id INT NOT NULL,
+    FOREIGN KEY (edit_visible_group_id) REFERENCES edit_visible_group (edit_visible_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
 );
 -- END: table/edit_page_visible_group.sql
 -- START: table/edit_page_menu_group.sql
@@ -411,10 +413,10 @@ CREATE TABLE edit_page_visible_group (
 
 -- DROP TABLE edit_page_menu_group;
 CREATE TABLE edit_page_menu_group (
-	edit_page_id INT NOT NULL,
-	FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_menu_group_id INT NOT NULL,
-	FOREIGN KEY (edit_menu_group_id) REFERENCES edit_menu_group (edit_menu_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
+    edit_page_id INT NOT NULL,
+    FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_menu_group_id INT NOT NULL,
+    FOREIGN KEY (edit_menu_group_id) REFERENCES edit_menu_group (edit_menu_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE
 );
 -- END: table/edit_page_menu_group.sql
 -- START: table/edit_access_right.sql
@@ -428,11 +430,11 @@ CREATE TABLE edit_page_menu_group (
 
 -- DROP TABLE edit_access_right;
 CREATE TABLE edit_access_right (
-	edit_access_right_id SERIAL PRIMARY KEY,
-	name VARCHAR,
-	level SMALLINT,
-	type VARCHAR,
-	UNIQUE (level,type)
+    edit_access_right_id SERIAL PRIMARY KEY,
+    name VARCHAR,
+    level SMALLINT,
+    type VARCHAR,
+    UNIQUE (level,type)
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_access_right.sql
 -- START: table/edit_scheme.sql
@@ -445,12 +447,12 @@ CREATE TABLE edit_access_right (
 
 -- DROP TABLE edit_scheme;
 CREATE TABLE edit_scheme (
-	edit_scheme_id	SERIAL PRIMARY KEY,
-	enabled	SMALLINT NOT NULL DEFAULT 0,
-	name	VARCHAR,
-	header_color	VARCHAR,
-	css_file	VARCHAR,
-	template	VARCHAR
+    edit_scheme_id SERIAL PRIMARY KEY,
+    enabled SMALLINT NOT NULL DEFAULT 0,
+    name VARCHAR,
+    header_color VARCHAR,
+    css_file VARCHAR,
+    template VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_scheme.sql
 -- START: table/edit_language.sql
@@ -464,13 +466,13 @@ CREATE TABLE edit_scheme (
 
 -- DROP TABLE edit_language;
 CREATE TABLE edit_language (
-	edit_language_id SERIAL PRIMARY KEY,
-	enabled SMALLINT NOT NULL DEFAULT 0,
-	lang_default SMALLINT NOT NULL DEFAULT 0,
-	long_name VARCHAR,
-	short_name VARCHAR, -- en_US, en or en_US@latin without encoding
-	iso_name VARCHAR, -- should actually be encoding
-	order_number INT
+    edit_language_id SERIAL PRIMARY KEY,
+    enabled SMALLINT NOT NULL DEFAULT 0,
+    lang_default SMALLINT NOT NULL DEFAULT 0,
+    long_name VARCHAR,
+    short_name VARCHAR, -- en_US, en or en_US@latin without encoding
+    iso_name VARCHAR, -- should actually be encoding
+    order_number INT
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_language.sql
 -- START: table/edit_group.sql
@@ -483,16 +485,16 @@ CREATE TABLE edit_language (
 
 -- DROP TABLE edit_group;
 CREATE TABLE edit_group (
-	edit_group_id	SERIAL PRIMARY KEY,
-	edit_scheme_id INT,
-	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_access_right_id INT NOT NULL,
-	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	enabled	SMALLINT NOT NULL DEFAULT 0,
-	deleted	SMALLINT DEFAULT 0,
-	uid	VARCHAR,
-	name	VARCHAR,
-	additional_acl	JSONB
+    edit_group_id SERIAL PRIMARY KEY,
+    edit_scheme_id INT,
+    FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_access_right_id INT NOT NULL,
+    FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    enabled SMALLINT NOT NULL DEFAULT 0,
+    deleted SMALLINT DEFAULT 0,
+    uid VARCHAR,
+    name VARCHAR,
+    additional_acl JSONB
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_group.sql
 -- START: table/edit_page_access.sql
@@ -505,14 +507,14 @@ CREATE TABLE edit_group (
 
 -- DROP TABLE edit_page_access;
 CREATE TABLE edit_page_access (
-	edit_page_access_id	SERIAL PRIMARY KEY,
-	edit_group_id	INT NOT NULL,
-	FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_page_id	INT NOT NULL,
-	FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_access_right_id	INT NOT NULL,
-	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	enabled	SMALLINT NOT NULL DEFAULT 0
+    edit_page_access_id SERIAL PRIMARY KEY,
+    edit_group_id INT NOT NULL,
+    FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_page_id INT NOT NULL,
+    FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_access_right_id INT NOT NULL,
+    FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    enabled SMALLINT NOT NULL DEFAULT 0
 ) INHERITS (edit_generic) WITHOUT OIDS;
 
 
@@ -528,15 +530,15 @@ CREATE TABLE edit_page_access (
 
 -- DROP TABLE edit_page_content;
 CREATE TABLE edit_page_content (
-	edit_page_content_id	SERIAL PRIMARY KEY,
-	edit_page_id	INT NOT NULL,
-	FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_access_right_id	INT NOT NULL,
-	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	uid	VARCHAR UNIQUE,
-	name	VARCHAR,
-	order_number INT NOT NULL,
-	online	SMALLINT NOT NULL DEFAULT 0
+    edit_page_content_id SERIAL PRIMARY KEY,
+    edit_page_id INT NOT NULL,
+    FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_access_right_id INT NOT NULL,
+    FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    uid VARCHAR UNIQUE,
+    name VARCHAR,
+    order_number INT NOT NULL,
+    online SMALLINT NOT NULL DEFAULT 0
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_page_content.sql
 -- START: table/edit_user.sql
@@ -549,63 +551,63 @@ CREATE TABLE edit_page_content (
 
 -- DROP TABLE edit_user;
 CREATE TABLE edit_user (
-	edit_user_id	SERIAL PRIMARY KEY,
-	connect_edit_user_id	INT, -- possible reference to other user
-	FOREIGN KEY (connect_edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_language_id INT NOT NULL,
-	FOREIGN KEY (edit_language_id) REFERENCES edit_language (edit_language_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_group_id INT NOT NULL,
-	FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_scheme_id INT,
-	FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_access_right_id INT NOT NULL,
-	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	-- username/password
-	username	VARCHAR UNIQUE,
-	password	VARCHAR,
-	-- name block
-	first_name	VARCHAR,
-	last_name	VARCHAR,
-	first_name_furigana	VARCHAR,
-	last_name_furigana	VARCHAR,
-	-- email
-	email	VARCHAR,
-	-- eanbled/deleted flag
-	enabled	SMALLINT NOT NULL DEFAULT 0,
-	deleted	SMALLINT NOT NULL DEFAULT 0,
-	-- general flags
-	strict	SMALLINT DEFAULT 0,
-	locked	SMALLINT DEFAULT 0,
-	protected SMALLINT NOT NULL DEFAULT 0,
-	-- legacy, debug flags
-	debug	SMALLINT NOT NULL DEFAULT 0,
-	db_debug	SMALLINT NOT NULL DEFAULT 0,
-	-- is admin user
-	admin	SMALLINT NOT NULL DEFAULT 0,
-	-- last login log
-	last_login	TIMESTAMP WITHOUT TIME ZONE,
-	-- login error
-	login_error_count	INT DEFAULT 0,
-	login_error_date_last	TIMESTAMP WITHOUT TIME ZONE,
-	login_error_date_first	TIMESTAMP WITHOUT TIME ZONE,
-	-- time locked
-	lock_until	TIMESTAMP WITHOUT TIME ZONE,
-	lock_after	TIMESTAMP WITHOUT TIME ZONE,
-	-- password change
-	password_change_date	TIMESTAMP WITHOUT TIME ZONE, -- only when password is first set or changed
-	password_change_interval	INTERVAL, -- null if no change is needed, or d/m/y time interval
-	password_reset_time	TIMESTAMP WITHOUT TIME ZONE, -- when the password reset was requested
-	password_reset_uid	VARCHAR, -- the uid to access the password reset page
-	-- _GET login id for direct login
-	login_user_id	VARCHAR UNIQUE, -- the loginUserId, at least 32 chars
-	login_user_id_set_date	TIMESTAMP WITHOUT TIME ZONE, -- when above uid was set
-	login_user_id_last_revalidate	TIMESTAMP WITHOUT TIME ZONE, -- when the last login was done with user name and password
-	login_user_id_valid_from	TIMESTAMP WITHOUT TIME ZONE, -- if set, from when the above uid is valid
-	login_user_id_valid_until	TIMESTAMP WITHOUT TIME ZONE, -- if set, until when the above uid is valid
-	login_user_id_revalidate_after	INTERVAL, -- user must login to revalidated loginUserId after set days, 0 for forever
-	login_user_id_locked	SMALLINT DEFAULT 0, -- lock for loginUserId, but still allow normal login
-	-- additional ACL json block
-	additional_acl	JSONB -- additional ACL as JSON string (can be set by other pages)
+    edit_user_id SERIAL PRIMARY KEY,
+    connect_edit_user_id INT, -- possible reference to other user
+    FOREIGN KEY (connect_edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_language_id INT NOT NULL,
+    FOREIGN KEY (edit_language_id) REFERENCES edit_language (edit_language_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_group_id INT NOT NULL,
+    FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_scheme_id INT,
+    FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_access_right_id INT NOT NULL,
+    FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    -- username/password
+    username VARCHAR UNIQUE,
+    password VARCHAR,
+    -- name block
+    first_name VARCHAR,
+    last_name VARCHAR,
+    first_name_furigana VARCHAR,
+    last_name_furigana VARCHAR,
+    -- email
+    email VARCHAR,
+    -- eanbled/deleted flag
+    enabled SMALLINT NOT NULL DEFAULT 0,
+    deleted SMALLINT NOT NULL DEFAULT 0,
+    -- general flags
+    strict SMALLINT DEFAULT 0,
+    locked SMALLINT DEFAULT 0,
+    protected SMALLINT NOT NULL DEFAULT 0,
+    -- legacy, debug flags
+    debug SMALLINT NOT NULL DEFAULT 0,
+    db_debug SMALLINT NOT NULL DEFAULT 0,
+    -- is admin user
+    admin SMALLINT NOT NULL DEFAULT 0,
+    -- last login log
+    last_login TIMESTAMP WITHOUT TIME ZONE,
+    -- login error
+    login_error_count INT DEFAULT 0,
+    login_error_date_last TIMESTAMP WITHOUT TIME ZONE,
+    login_error_date_first TIMESTAMP WITHOUT TIME ZONE,
+    -- time locked
+    lock_until TIMESTAMP WITHOUT TIME ZONE,
+    lock_after TIMESTAMP WITHOUT TIME ZONE,
+    -- password change
+    password_change_date TIMESTAMP WITHOUT TIME ZONE, -- only when password is first set or changed
+    password_change_interval INTERVAL, -- null if no change is needed, or d/m/y time interval
+    password_reset_time TIMESTAMP WITHOUT TIME ZONE, -- when the password reset was requested
+    password_reset_uid VARCHAR, -- the uid to access the password reset page
+    -- _GET login id for direct login
+    login_user_id VARCHAR UNIQUE, -- the loginUserId, at least 32 chars
+    login_user_id_set_date TIMESTAMP WITHOUT TIME ZONE, -- when above uid was set
+    login_user_id_last_revalidate TIMESTAMP WITHOUT TIME ZONE, -- when the last login was done with user name and password
+    login_user_id_valid_from TIMESTAMP WITHOUT TIME ZONE, -- if set, from when the above uid is valid
+    login_user_id_valid_until TIMESTAMP WITHOUT TIME ZONE, -- if set, until when the above uid is valid
+    login_user_id_revalidate_after INTERVAL, -- user must login to revalidated loginUserId after set days, 0 for forever
+    login_user_id_locked SMALLINT DEFAULT 0, -- lock for loginUserId, but still allow normal login
+    -- additional ACL json block
+    additional_acl JSONB -- additional ACL as JSON string (can be set by other pages)
 ) INHERITS (edit_generic) WITHOUT OIDS;
 
 -- create unique index
@@ -650,37 +652,40 @@ COMMENT ON COLUMN edit_user.additional_acl IS 'Additional Access Control List st
 
 -- DROP TABLE edit_log;
 CREATE TABLE edit_log (
-	edit_log_id	SERIAL PRIMARY KEY,
-	euid	INT, -- this is a foreign key, but I don't nedd to reference to it
-	FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL,
-	username	VARCHAR,
-	password	VARCHAR,
-	event_date	TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-	ip	VARCHAR,
-	error	TEXT,
-	event	TEXT,
-	data_binary	BYTEA,
-	data	TEXT,
-	page	VARCHAR,
-	action	VARCHAR,
-	action_id	VARCHAR,
-	action_yes	VARCHAR,
-	action_flag	VARCHAR,
-	action_menu	VARCHAR,
-	action_loaded	VARCHAR,
-	action_value	VARCHAR,
-	action_type	VARCHAR,
-	action_error	VARCHAR,
-	user_agent	VARCHAR,
-	referer	VARCHAR,
-	script_name	VARCHAR,
-	query_string	VARCHAR,
-	server_name	VARCHAR,
-	http_host	VARCHAR,
-	http_accept	VARCHAR,
-	http_accept_charset	VARCHAR,
-	http_accept_encoding	VARCHAR,
-	session_id	VARCHAR
+    edit_log_id SERIAL PRIMARY KEY,
+    euid INT, -- this is a foreign key, but I don't nedd to reference to it
+    ecuid VARCHAR,
+    ecuuid UUID,
+    FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL,
+    username VARCHAR,
+    password VARCHAR,
+    event_date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    ip VARCHAR,
+    error TEXT,
+    event TEXT,
+    data_binary BYTEA,
+    data TEXT,
+    page VARCHAR,
+    action VARCHAR,
+    action_id VARCHAR,
+    action_sub_id VARCHAR,
+    action_yes VARCHAR,
+    action_flag VARCHAR,
+    action_menu VARCHAR,
+    action_loaded VARCHAR,
+    action_value VARCHAR,
+    action_type VARCHAR,
+    action_error VARCHAR,
+    user_agent VARCHAR,
+    referer VARCHAR,
+    script_name VARCHAR,
+    query_string VARCHAR,
+    server_name VARCHAR,
+    http_host VARCHAR,
+    http_accept VARCHAR,
+    http_accept_charset VARCHAR,
+    http_accept_encoding VARCHAR,
+    session_id VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_log.sql
 -- START: table/edit_log_overflow.sql
@@ -707,15 +712,15 @@ ALTER TABLE edit_log_overflow ADD CONSTRAINT edit_log_overflow_euid_fkey FOREIGN
 
 -- DROP TABLE edit_access;
 CREATE TABLE edit_access (
-	edit_access_id	SERIAL PRIMARY KEY,
-	enabled	SMALLINT NOT NULL DEFAULT 0,
-	protected SMALLINT DEFAULT 0,
-	deleted	SMALLINT DEFAULT 0,
-	uid	VARCHAR,
-	name	VARCHAR UNIQUE,
-	description	VARCHAR,
-	color	VARCHAR,
-	additional_acl	JSONB
+    edit_access_id SERIAL PRIMARY KEY,
+    enabled SMALLINT NOT NULL DEFAULT 0,
+    protected SMALLINT DEFAULT 0,
+    deleted SMALLINT DEFAULT 0,
+    uid VARCHAR,
+    name VARCHAR UNIQUE,
+    description VARCHAR,
+    color VARCHAR,
+    additional_acl JSONB
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_access.sql
 -- START: table/edit_access_user.sql
@@ -728,15 +733,15 @@ CREATE TABLE edit_access (
 
 -- DROP TABLE edit_access_user;
 CREATE TABLE edit_access_user (
-	edit_access_user_id	SERIAL PRIMARY KEY,
-	edit_access_id	INT NOT NULL,
-	FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_user_id	INT NOT NULL,
-	FOREIGN KEY (edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_access_right_id	INT NOT NULL,
-	FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	edit_default	SMALLINT DEFAULT 0,
-	enabled	SMALLINT NOT NULL DEFAULT 0
+    edit_access_user_id SERIAL PRIMARY KEY,
+    edit_access_id INT NOT NULL,
+    FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_user_id INT NOT NULL,
+    FOREIGN KEY (edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_access_right_id INT NOT NULL,
+    FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    edit_default SMALLINT DEFAULT 0,
+    enabled SMALLINT NOT NULL DEFAULT 0
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_access_user.sql
 -- START: table/edit_access_data.sql
@@ -749,12 +754,12 @@ CREATE TABLE edit_access_user (
 
 -- DROP TABLE edit_access_data;
 CREATE TABLE edit_access_data (
-	edit_access_data_id	SERIAL PRIMARY KEY,
-	edit_access_id INT NOT NULL,
-	FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
-	enabled	SMALLINT NOT NULL DEFAULT 0,
-	name	VARCHAR,
-	value	VARCHAR
+    edit_access_data_id SERIAL PRIMARY KEY,
+    edit_access_id INT NOT NULL,
+    FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
+    enabled SMALLINT NOT NULL DEFAULT 0,
+    name VARCHAR,
+    value VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;
 
 -- create a unique index for each attached data block for each edit access can

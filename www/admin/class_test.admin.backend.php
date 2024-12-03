@@ -42,6 +42,20 @@ $backend = new CoreLibs\Admin\Backend(
 	$l10n,
 	DEFAULT_ACL_LEVEL
 );
+$login = new CoreLibs\ACL\Login(
+	$db,
+	$log,
+	$session,
+	[
+		'auto_login' => false,
+		'default_acl_level' => DEFAULT_ACL_LEVEL,
+		'logout_target' => '',
+		'site_locale' => SITE_LOCALE,
+		'site_domain' => SITE_DOMAIN,
+		'site_encoding' => SITE_ENCODING,
+		'locale_path' => BASE . INCLUDES . LOCALE,
+	]
+);
 use CoreLibs\Debug\Support;
 
 $PAGE_NAME = 'TEST CLASS: ADMIN BACKEND';
@@ -55,10 +69,30 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 print "SETACL[]: <br>";
 $backend->setACL(['EMPTY' => 'EMPTY']);
 print "ADBEDITLOG: <br>";
-$backend->adbEditLog('CLASSTEST-ADMIN-BINARY', 'Some info string', 'BINARY');
-$backend->adbEditLog('CLASSTEST-ADMIN-ZLIB', 'Some info string', 'ZLIB');
-$backend->adbEditLog('CLASSTEST-ADMIN-SERIAL', 'Some info string', 'SERIAL');
-$backend->adbEditLog('CLASSTEST-ADMIN-INVALID', 'Some info string', 'INVALID');
+$login->writeLog(
+	'CLASSTEST-ADMIN-BINARY',
+	'Some info string',
+	$backend->adbGetActionSet(),
+	write_type:'BINARY'
+);
+$login->writeLog(
+	'CLASSTEST-ADMIN-ZLIB',
+	'Some info string',
+	$backend->adbGetActionSet(),
+	write_type:'ZLIB'
+);
+$login->writeLog(
+	'CLASSTEST-ADMIN-SERIAL',
+	'Some info string',
+	$backend->adbGetActionSet(),
+	write_type:'SERIAL'
+);
+$login->writeLog(
+	'CLASSTEST-ADMIN-INVALID',
+	'Some info string',
+	$backend->adbGetActionSet(),
+	write_type:'INVALID'
+);
 // test with various
 $backend->action = 'TEST ACTION';
 $backend->action_id = 'TEST ACTION ID';
@@ -69,10 +103,10 @@ $backend->action_loaded = 'TEST ACTION LOADED';
 $backend->action_value = 'TEST ACTION VALUE';
 $backend->action_type = 'TEST ACTION TYPE';
 $backend->action_error = 'TEST ACTION ERROR';
-$backend->adbEditLog('CLASSTEST-ADMIN-JSON', [
+$login->writeLog('CLASSTEST-ADMIN-JSON', [
 	"_GET" => $_GET,
 	"_POST" => $_POST,
-], 'JSON');
+], $backend->adbGetActionSet(), write_type:'JSON');
 
 print "ADBTOPMENU(0): " . Support::printAr($backend->adbTopMenu(CONTENT_PATH)) . "<br>";
 print "ADBMSG: <br>";

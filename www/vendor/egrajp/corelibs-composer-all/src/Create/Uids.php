@@ -56,26 +56,6 @@ class Uids
 	 */
 	public static function uuidv4(): string
 	{
-		/* return sprintf(
-			'%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-			// 32 bits for "time_low"
-			mt_rand(0, 0xffff),
-			mt_rand(0, 0xffff),
-			// 16 bits for "time_mid"
-			mt_rand(0, 0xffff),
-			// 16 bits for "time_hi_and_version",
-			// four most significant bits holds version number 4
-			mt_rand(0, 0x0fff) | 0x4000,
-			// 16 bits, 8 bits for "clk_seq_hi_res",
-			// 8 bits for "clk_seq_low",
-			// two most significant bits holds zero and one for variant DCE1.1
-			mt_rand(0, 0x3fff) | 0x8000,
-			// 48 bits for "node"
-			mt_rand(0, 0xffff),
-			mt_rand(0, 0xffff),
-			mt_rand(0, 0xffff)
-		); */
-
 		$data = random_bytes(16);
 		assert(strlen($data) == 16);
 
@@ -91,6 +71,20 @@ class Uids
 		// 5-7: 48 bits for "node"
 
 		return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+	}
+
+	/**
+	 * regex validate uuid v4
+	 *
+	 * @param  string $uuidv4
+	 * @return bool
+	 */
+	public static function validateUuuidv4(string $uuidv4): bool
+	{
+		if (!preg_match("/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/", $uuidv4)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**

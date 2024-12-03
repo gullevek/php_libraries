@@ -58,4 +58,16 @@ echo "ACL: " . \CoreLibs\Debug\Support::printAr($login->loginGetAcl()) . "<br>";
 echo "ACL (MIN): " . \CoreLibs\Debug\Support::printAr($login->loginGetAcl()['min'] ?? []) . "<br>";
 echo "LOCALE: " . \CoreLibs\Debug\Support::printAr($login->loginGetLocale()) . "<br>";
 
+echo "ECUID: " . $login->loginGetEcuid() . "<br>";
+echo "ECUUID: " . $login->loginGetEcuuid() . "<br>";
+
+$login->writeLog(
+	'TEST LOG',
+	[
+		'test' => 'TEST A'
+	],
+	error:'No Error',
+	write_type:'JSON'
+);
+
 print "</body></html>";

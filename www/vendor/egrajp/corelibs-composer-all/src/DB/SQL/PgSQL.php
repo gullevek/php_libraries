@@ -407,17 +407,13 @@ class PgSQL implements Interface\SqlFunctions
 			}
 			// no PK name given at all
 			if (empty($pk_name)) {
-				// if name is plurar, make it singular
-				// if (preg_match("/.*s$/i", $table))
-				// 	$table = substr($table, 0, -1);
 				// set pk_name to "id"
 				$pk_name = $table . "_id";
 			}
-			$seq = ($schema ? $schema . '.' : '') . $table . "_" . $pk_name . "_seq";
-			$q = "SELECT CURRVAL('$seq') AS insert_id";
+			$q = "SELECT CURRVAL(pg_get_serial_sequence($1, $2)) AS insert_id";
 			// I have to do manually or I overwrite the original insert internal vars ...
-			if ($q = $this->__dbQuery($q)) {
-				if (is_array($res = $this->__dbFetchArray($q))) {
+			if ($cursor = $this->__dbQueryParams($q, [$table, $pk_name])) {
+				if (is_array($res = $this->__dbFetchArray($cursor))) {
 					list($id) = $res;
 				} else {
 					return false;
@@ -451,26 +447,36 @@ class PgSQL implements Interface\SqlFunctions
 					$table_prefix = $schema . '.';
 				}
 			}
+			$params = [$table_prefix . $table];
+			$replace = ['', ''];
 			// read from table the PK name
 			// faster primary key get
-			$q = "SELECT pg_attribute.attname AS column_name, "
-				. "format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type "
-				. "FROM pg_index, pg_class, pg_attribute ";
+			$q = <<<SQL
+			SELECT
+				pg_attribute.attname AS column_name,
+				format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type
+			FROM pg_index, pg_class, pg_attribute{PG_NAMESPACE}
+			WHERE
+				-- regclass translates the OID to the name
+				pg_class.oid = $1::regclass AND
+				indrelid = pg_class.oid AND
+				pg_attribute.attrelid = pg_class.oid AND
+				pg_attribute.attnum = any(pg_index.indkey) AND
+				indisprimary
+				{NSPNAME}
+			SQL;
 			if ($schema) {
-				$q .= ", pg_namespace ";
+				$params[] = $schema;
+				$replace = [
+					", pg_namespace",
+					"AND pg_class.relnamespace = pg_namespace.oid AND nspname = $2"
+				];
 			}
-			$q .= "WHERE "
-				// regclass translates the OID to the name
-				. "pg_class.oid = '" . $table_prefix . $table . "'::regclass AND "
-				. "indrelid = pg_class.oid AND ";
-			if ($schema) {
-				$q .= "nspname = '" . $schema . "' AND "
-					. "pg_class.relnamespace = pg_namespace.oid AND ";
-			}
-			$q .= "pg_attribute.attrelid = pg_class.oid AND "
-				. "pg_attribute.attnum = any(pg_index.indkey) "
-				. "AND indisprimary";
-			$cursor = $this->__dbQuery($q);
+			$cursor = $this->__dbQueryParams(str_replace(
+				['{PG_NAMESPACE}', '{NSPNAME}'],
+				$replace,
+				$q
+			), $params);
 			if ($cursor !== false) {
 				$__db_fetch_array = $this->__dbFetchArray($cursor);
 				if (!is_array($__db_fetch_array)) {
@@ -895,11 +901,13 @@ class PgSQL implements Interface\SqlFunctions
 	public function __dbSetSchema(string $db_schema): int
 	{
 		// check if schema actually exists
-		$query = "SELECT EXISTS("
-			. "SELECT 1 FROM information_schema.schemata "
-			. "WHERE schema_name = " . $this->__dbEscapeLiteral($db_schema)
-			. ")";
-		$cursor = $this->__dbQuery($query);
+		$query = <<<SQL
+		SELECT EXISTS (
+			SELECT 1 FROM information_schema.schemata
+			WHERE schema_name = $1
+		)
+		SQL;
+		$cursor = $this->__dbQueryParams($query, [$db_schema]);
 		// abort if execution fails
 		if ($cursor === false) {
 			return 1;

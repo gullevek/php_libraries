@@ -239,7 +239,7 @@ print "PREPARE INSERT PREVIOUS INSERTED: "
 
 print "PREPARE CURSOR RETURN:<br>";
 foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
-	print "KEY: " . $key . ': ' . $db->dbGetPrepareCursorValue('ins_test_foo', $key) . "<br>";
+	print "KEY: " . $key . ': ' . Support::prAr($db->dbGetPrepareCursorValue('ins_test_foo', $key)) . "<br>";
 }
 
 $query = <<<SQL
