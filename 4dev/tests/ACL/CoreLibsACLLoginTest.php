@@ -1089,9 +1089,9 @@ final class CoreLibsACLLoginTest extends TestCase
 		/** @var \CoreLibs\Create\Session&MockObject */
 		$session_mock = $this->createPartialMock(
 			\CoreLibs\Create\Session::class,
-			['startSession', 'checkActiveSession', 'sessionDestroy']
+			['getSessionId', 'checkActiveSession', 'sessionDestroy']
 		);
-		$session_mock->method('startSession')->willReturn('ACLLOGINTEST12');
+		$session_mock->method('getSessionId')->willReturn('ACLLOGINTEST12');
 		$session_mock->method('checkActiveSession')->willReturn(true);
 		$session_mock->method('sessionDestroy')->will(
 			$this->returnCallback(function () {
@@ -1792,9 +1792,9 @@ final class CoreLibsACLLoginTest extends TestCase
 		/** @var \CoreLibs\Create\Session&MockObject */
 		$session_mock = $this->createPartialMock(
 			\CoreLibs\Create\Session::class,
-			['startSession', 'checkActiveSession', 'sessionDestroy']
+			['getSessionId', 'checkActiveSession', 'sessionDestroy']
 		);
-		$session_mock->method('startSession')->willReturn('ACLLOGINTEST34');
+		$session_mock->method('getSessionId')->willReturn('ACLLOGINTEST34');
 		$session_mock->method('checkActiveSession')->willReturn(true);
 		$session_mock->method('sessionDestroy')->will(
 			$this->returnCallback(function () {
@@ -1906,9 +1906,9 @@ final class CoreLibsACLLoginTest extends TestCase
 		/** @var \CoreLibs\Create\Session&MockObject */
 		$session_mock = $this->createPartialMock(
 			\CoreLibs\Create\Session::class,
-			['startSession', 'checkActiveSession', 'sessionDestroy']
+			['getSessionId', 'checkActiveSession', 'sessionDestroy']
 		);
-		$session_mock->method('startSession')->willReturn('ACLLOGINTEST34');
+		$session_mock->method('getSessionId')->willReturn('ACLLOGINTEST34');
 		$session_mock->method('checkActiveSession')->willReturn(true);
 		$session_mock->method('sessionDestroy')->will(
 			$this->returnCallback(function () {
@@ -1994,9 +1994,9 @@ final class CoreLibsACLLoginTest extends TestCase
 		/** @var \CoreLibs\Create\Session&MockObject */
 		$session_mock = $this->createPartialMock(
 			\CoreLibs\Create\Session::class,
-			['startSession', 'checkActiveSession', 'sessionDestroy']
+			['getSessionId', 'checkActiveSession', 'sessionDestroy']
 		);
-		$session_mock->method('startSession')->willReturn('ACLLOGINTEST34');
+		$session_mock->method('getSessionId')->willReturn('ACLLOGINTEST34');
 		$session_mock->method('checkActiveSession')->willReturn(true);
 		$session_mock->method('sessionDestroy')->will(
 			$this->returnCallback(function () {
@@ -2090,9 +2090,9 @@ final class CoreLibsACLLoginTest extends TestCase
 		/** @var \CoreLibs\Create\Session&MockObject */
 		$session_mock = $this->createPartialMock(
 			\CoreLibs\Create\Session::class,
-			['startSession', 'checkActiveSession', 'sessionDestroy']
+			['getSessionId', 'checkActiveSession', 'sessionDestroy']
 		);
-		$session_mock->method('startSession')->willReturn('ACLLOGINTEST34');
+		$session_mock->method('getSessionId')->willReturn('ACLLOGINTEST34');
 		$session_mock->method('checkActiveSession')->willReturn(true);
 		$session_mock->method('sessionDestroy')->will(
 			$this->returnCallback(function () {
