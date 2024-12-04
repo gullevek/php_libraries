@@ -403,7 +403,7 @@ class Backend
 				$_SERVER['HTTP_ACCEPT'] ?? '',
 				$_SERVER['HTTP_ACCEPT_CHARSET'] ?? '',
 				$_SERVER['HTTP_ACCEPT_ENCODING'] ?? '',
-				$this->session->getSessionId() !== false ?
+				$this->session->getSessionId() !== '' ?
 					$this->session->getSessionId() : null,
 				// row 4
 				$this->action ?? '',

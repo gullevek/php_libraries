@@ -15,18 +15,26 @@ namespace CoreLibs\Create;
 
 class Session
 {
+	/** @var string current session name */
+	private string $session_name = '';
+	/** @var string current session id */
+	private string $session_id = '';
+	/** @var bool flag auto write close */
+	private bool $auto_write_close = false;
+
 	/**
 	 * init a session, if array is empty or array does not have session_name set
 	 * then no auto init is run
 	 *
 	 * @param string $session_name if set and not empty, will start session
 	 */
-	public function __construct(string $session_name = '')
+	public function __construct(string $session_name, bool $auto_write_close = false)
 	{
-		if (!empty($session_name)) {
-			$this->startSession($session_name);
-		}
+		$this->initSession($session_name);
+		$this->auto_write_close = $auto_write_close;
 	}
+
+	// MARK: private methods
 
 	/**
 	 * Start session
@@ -36,36 +44,32 @@ class Session
 	 *
 	 * @return void
 	 */
-	protected function startSessionCall(): void
+	private function startSessionCall(): void
 	{
 		session_start();
 	}
 
 	/**
-	 * check if we are in CLI, we set this, so we can mock this
-	 * Not this is just a wrapper for the static System::checkCLI call
+	 * get current set session id or false if none started
 	 *
-	 * @return bool True if we are in a CLI enviroment, or false for everything else
+	 * @return string|false
 	 */
-	public function checkCliStatus(): bool
+	public function getSessionIdCall(): string|false
 	{
-		return \CoreLibs\Get\System::checkCLI();
+		return session_id();
 	}
 
 	/**
-	 * Set session name call. If not valid session name, will return false
+	 * automatically closes a session if the auto write close flag is set
 	 *
-	 * @param  string $session_name A valid string for session name
-	 * @return bool                 True if session name is valid,
-	 *                              False if not
+	 * @return bool
 	 */
-	public function setSessionName(string $session_name): bool
+	private function closeSessionCall(): bool
 	{
-		if (!$this->checkValidSessionName($session_name)) {
-			return false;
+		if ($this->auto_write_close) {
+			return $this->writeClose();
 		}
-		session_name($session_name);
-		return true;
+		return false;
 	}
 
 	/**
@@ -93,16 +97,18 @@ class Session
 		return true;
 	}
 
+	// MARK: init session (on class start)
+
 	/**
-	 * start session with given session name if set
+	 * stinitart session with given session name if set
 	 * aborts on command line or if sessions are not enabled
 	 * also aborts if session cannot be started
 	 * On sucess returns the session id
 	 *
-	 * @param string|null $session_name
-	 * @return string|bool
+	 * @param string $session_name
+	 * @return void
 	 */
-	public function startSession(?string $session_name = null): string|bool
+	private function initSession(string $session_name): void
 	{
 		// we can't start sessions on command line
 		if ($this->checkCliStatus()) {
@@ -115,39 +121,82 @@ class Session
 		// session_status
 		// initial the session if there is no session running already
 		if (!$this->checkActiveSession()) {
-			// if session name is emtpy, check if there is a global set
-			// this is a deprecated fallback
-			$session_name = $session_name ?? $GLOBALS['SET_SESSION_NAME'] ?? '';
-			// DEPRECTED: constant SET_SESSION_NAME is no longer used
-			// if set, set special session name
-			if (!empty($session_name)) {
-				// invalid session name, abort
-				if (!$this->checkValidSessionName($session_name)) {
-					throw new \UnexpectedValueException('[SESSION] Invalid session name: ' . $session_name, 3);
-				}
-				$this->setSessionName($session_name);
+			// invalid session name, abort
+			if (!$this->checkValidSessionName($session_name)) {
+				throw new \UnexpectedValueException('[SESSION] Invalid session name: ' . $this->session_name, 3);
 			}
+			// set session name
+			$this->session_name = $session_name;
+			session_name($this->session_name);
 			// start session
 			$this->startSessionCall();
+			// if we faild to start the session
+			if (!$this->checkActiveSession()) {
+				throw new \RuntimeException('[SESSION] Failed to activate session', 5);
+			}
+		} elseif ($session_name != $this->getSessionName()) {
+			throw new \UnexpectedValueException(
+				'[SESSION] Another session exists with a different name: ' . $this->getSessionName(),
+				4
+			);
 		}
-		// if we still have no active session
+		// check session id
+		if (false === ($session_id = $this->getSessionIdCall())) {
+			throw new \UnexpectedValueException('[SESSION] getSessionId did not return a session id', 6);
+		}
+		// set session id
+		$this->session_id = $session_id;
+		// if flagged auto close, write close session
+		if ($this->auto_write_close) {
+			$this->writeClose();
+		}
+	}
+
+	// MARK: public set/get status
+
+	/**
+	 * start session, will only run after initSession
+	 *
+	 * @return bool True if started, False if alrady running
+	 */
+	public function restartSession(): bool
+	{
 		if (!$this->checkActiveSession()) {
-			throw new \RuntimeException('[SESSION] Failed to activate session', 4);
+			$this->startSessionCall();
+			return true;
 		}
-		if (false === ($session_id = $this->getSessionId())) {
-			throw new \UnexpectedValueException('[SESSION] getSessionId did not return a session id', 5);
-		}
-		return $session_id;
+		return false;
 	}
 
 	/**
-	 * get current set session id or false if none started
+	 * current set session id
 	 *
-	 * @return string|bool
+	 * @return string
 	 */
-	public function getSessionId(): string|bool
+	public function getSessionId(): string
 	{
-		return session_id();
+		return $this->session_id;
+	}
+
+	/**
+	 * set the auto write close flag
+	 *
+	 * @param  bool $flag
+	 * @return void
+	 */
+	public function setAutoWriteClose(bool $flag): void
+	{
+		$this->auto_write_close = $flag;
+	}
+
+	/**
+	 * return the auto write close flag
+	 *
+	 * @return bool
+	 */
+	public function checkAutoWriteClose(): bool
+	{
+		return $this->auto_write_close;
 	}
 
 	/**
@@ -176,6 +225,19 @@ class Session
 	}
 
 	/**
+	 * check if we are in CLI, we set this, so we can mock this
+	 * Not this is just a wrapper for the static System::checkCLI call
+	 *
+	 * @return bool True if we are in a CLI enviroment, or false for everything else
+	 */
+	public function checkCliStatus(): bool
+	{
+		return \CoreLibs\Get\System::checkCLI();
+	}
+
+	// MARK: write close session
+
+	/**
 	 * unlock the session file, so concurrent AJAX requests can be done
 	 * NOTE: after this has been called, no changes in _SESSION will be stored
 	 * NOTE: a new session with a different name can be started after this one is called
@@ -187,6 +249,8 @@ class Session
 	{
 		return session_write_close();
 	}
+
+	// MARK: session close and clean up
 
 	/**
 	 * Proper destroy a session
@@ -236,18 +300,20 @@ class Session
 		return session_status();
 	}
 
-	// _SESSION set/unset methods
+	// MARK: _SESSION set/unset methods
 
 	/**
 	 * unset all _SESSION entries
 	 *
 	 * @return void
 	 */
-	public function unsetAllS(): void
+	public function unsetAll(): void
 	{
+		$this->restartSession();
 		foreach (array_keys($_SESSION ?? []) as $name) {
 			unset($_SESSION[$name]);
 		}
+		$this->closeSessionCall();
 	}
 
 	/**
@@ -257,9 +323,11 @@ class Session
 	 * @param  mixed      $value value to set (can be anything)
 	 * @return void
 	 */
-	public function setS(string|int $name, mixed $value): void
+	public function set(string|int $name, mixed $value): void
 	{
+		$this->restartSession();
 		$_SESSION[$name] = $value;
+		$this->closeSessionCall();
 	}
 
 	/**
@@ -268,9 +336,9 @@ class Session
 	 * @param  string|int $name value key to get from _SESSION
 	 * @return mixed            value stored in _SESSION
 	 */
-	public function getS(string|int $name): mixed
+	public function get(string|int $name): mixed
 	{
-		return $_SESSION[$name] ?? '';
+		return $_SESSION[$name] ?? null;
 	}
 
 	/**
@@ -279,7 +347,7 @@ class Session
 	 * @param  string|int $name Name to check for
 	 * @return bool             True for set, False fornot set
 	 */
-	public function issetS(string|int $name): bool
+	public function isset(string|int $name): bool
 	{
 		return isset($_SESSION[$name]);
 	}
@@ -290,14 +358,17 @@ class Session
 	 * @param  string|int $name _SESSION key name to remove
 	 * @return void
 	 */
-	public function unsetS(string|int $name): void
+	public function unset(string|int $name): void
 	{
-		if (isset($_SESSION[$name])) {
-			unset($_SESSION[$name]);
+		if (!isset($_SESSION[$name])) {
+			return;
 		}
+		$this->restartSession();
+		unset($_SESSION[$name]);
+		$this->closeSessionCall();
 	}
 
-	// set/get below
+	// MARK: [DEPRECATED] __set/__get magic methods
 	// ->var = value;
 
 	/**
@@ -306,10 +377,13 @@ class Session
 	 * @param  string|int $name
 	 * @param  mixed      $value
 	 * @return void
+	 * @deprecated use ->set()
 	 */
 	public function __set(string|int $name, mixed $value): void
 	{
+		$this->restartSession();
 		$_SESSION[$name] = $value;
+		$this->closeSessionCall();
 	}
 
 	/**
@@ -317,6 +391,7 @@ class Session
 	 *
 	 * @param  string|int $name
 	 * @return mixed            If name is not found, it will return null
+	 * @deprecated use ->get()
 	 */
 	public function __get(string|int $name): mixed
 	{
@@ -331,6 +406,7 @@ class Session
 	 *
 	 * @param  string|int $name
 	 * @return bool
+	 * @deprecated use ->isset()
 	 */
 	public function __isset(string|int $name): bool
 	{
@@ -342,12 +418,16 @@ class Session
 	 *
 	 * @param  string|int $name
 	 * @return void
+	 * @deprecated use ->unset()
 	 */
 	public function __unset(string|int $name): void
 	{
-		if (isset($_SESSION[$name])) {
-			unset($_SESSION[$name]);
+		if (!isset($_SESSION[$name])) {
+			return;
 		}
+		$this->restartSession();
+		unset($_SESSION[$name]);
+		$this->closeSessionCall();
 	}
 }
 

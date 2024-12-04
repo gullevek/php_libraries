@@ -1913,7 +1913,7 @@ HTML;
 				$_SERVER['HTTP_ACCEPT'] ?? null,
 				$_SERVER['HTTP_ACCEPT_CHARSET'] ?? null,
 				$_SERVER['HTTP_ACCEPT_ENCODING'] ?? null,
-				$this->session->getSessionId() !== false ?
+				$this->session->getSessionId() !== '' ?
 					$this->session->getSessionId() : null,
 				// row 4
 				$action_set['action'] ?? null,
