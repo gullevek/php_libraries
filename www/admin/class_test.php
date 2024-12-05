@@ -205,8 +205,8 @@ print "HOST: " . HOST_NAME . " => DB HOST: " . DB_CONFIG_NAME . " => " . Support
 print "DS is: " . DIRECTORY_SEPARATOR . "<br>";
 print "SERVER HOST: " . $_SERVER['HTTP_HOST'] . "<br>";
 
-print "ECUID: " . $_SESSION['ECUID'] . "<br>";
-print "ECUUID: " . $_SESSION['ECUUID'] . "<br>";
+print "ECUID: " . $session->get('ECUID') . "<br>";
+print "ECUUID: " . $session->get('ECUUID') . "<br>";
 
 print "</body></html>";
 
