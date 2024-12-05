@@ -6,7 +6,8 @@
 -- @param name col The column to be changed
 -- @param varchar identity_type [default=a] Allowed a, d, assigned, default
 -- @param varchar col_type [default=''] Allowed smallint, int, bigint, int2, int4, int8
--- @raises EXCEPTON on column not found, no linked sequence, more than one linked sequence found
+-- @returns varchar status tring
+-- @raises EXCEPTON on column not found, no linked sequence, more than one linked sequence found, invalid col type
 --
 CREATE OR REPLACE FUNCTION upgrade_serial_to_identity(
     tbl regclass,
@@ -14,17 +15,18 @@ CREATE OR REPLACE FUNCTION upgrade_serial_to_identity(
     identity_type varchar = 'a',
     col_type varchar = ''
 )
-RETURNS void
+RETURNS varchar
 LANGUAGE plpgsql
 AS $$
 DECLARE
-colnum smallint;
-seqid oid;
-count int;
-col_type_oid int;
-col_type_len int;
-current_col_atttypid oid;
-current_col_attlen int;
+    colnum SMALLINT;
+    seqid OID;
+    count INT;
+    col_type_oid INT;
+    col_type_len INT;
+    current_col_atttypid OID;
+    current_col_attlen INT;
+    status_string VARCHAR;
 BEGIN
     -- switch between always (default) or default identiy type
     IF identity_type NOT IN ('a', 'd', 'assigned', 'default') THEN
@@ -59,6 +61,10 @@ BEGIN
         RAISE EXCEPTION 'more than one linked sequence found';
     END IF;
 
+    IF col_type <> '' AND col_type NOT IN ('smallint', 'int', 'bigint', 'int2', 'int4', 'int8') THEN
+        RAISE EXCEPTION 'Invalid col type: %', col_type;
+    END IF;
+
     -- drop the default
     EXECUTE 'ALTER TABLE ' || tbl || ' ALTER COLUMN ' || quote_ident(col) || ' DROP DEFAULT';
 
@@ -74,34 +80,31 @@ BEGIN
         SET attidentity = identity_type
         WHERE attrelid = tbl
             AND attname = col;
-    RAISE NOTICE 'Update to identity for table "%" and columen "%" with type "%"', tbl, col, identity_type;
+    status_string := 'Updated to identity for table "' || tbl || '" and columen "' || col || '" with type "' || identity_type || '"';
 
     -- set type if requested and not empty
     IF col_type <> '' THEN
-        IF col_type IN ('smallint', 'int', 'bigint', 'int2', 'int4', 'int8') THEN
-            -- rewrite smallint, int, bigint
-            IF col_type = 'smallint' THEN
-                col_type := 'int2';
-            ELSIF col_type = 'int' THEN
-                col_type := 'int4';
-            ELSIF col_type = 'bigint' THEN
-                col_type := 'int8';
-            END IF;
-            -- get the length and oid for selected
-            SELECT oid, typlen INTO col_type_oid, col_type_len FROM pg_type WHERE typname = col_type;
-            -- set only if diff or hight
-            IF current_col_atttypid <> col_type_oid AND col_type_len > current_col_attlen THEN
-                RAISE NOTICE 'Change col type: %', col_type;
-                -- update type
-                UPDATE pg_attribute
-                    SET
-                        atttypid = col_type_oid, attlen = col_type_len
-                    WHERE attrelid = tbl
-                        AND attname = col;
-            END IF;
-        ELSE
-            RAISE NOTICE 'Invalid col type: %', col_type;
+        -- rewrite smallint, int, bigint
+        IF col_type = 'smallint' THEN
+            col_type := 'int2';
+        ELSIF col_type = 'int' THEN
+            col_type := 'int4';
+        ELSIF col_type = 'bigint' THEN
+            col_type := 'int8';
+        END IF;
+        -- get the length and oid for selected
+        SELECT oid, typlen INTO col_type_oid, col_type_len FROM pg_type WHERE typname = col_type;
+        -- set only if diff or hight
+        IF current_col_atttypid <> col_type_oid AND col_type_len > current_col_attlen THEN
+            status_string := status_string || '. Change col type: ' || col_type;
+            -- update type
+            UPDATE pg_attribute
+                SET
+                    atttypid = col_type_oid, attlen = col_type_len
+                WHERE attrelid = tbl
+                    AND attname = col;
         END IF;
     END IF;
+    RETURN status_string;
 END;
 $$;
