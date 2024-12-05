@@ -14,6 +14,9 @@ parameters:
 	# 	allRules: false
 	checkMissingCallableSignature: true
 	treatPhpDocTypesAsCertain: false
+	# phpVersion:
+	# 	min: 80200 # PHP 8.2.0
+	# 	max: 80300 # PHP latest
 	paths:
 		- %currentWorkingDirectory%/www
 	bootstrapFiles:
