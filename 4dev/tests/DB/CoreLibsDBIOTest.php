@@ -17,7 +17,7 @@ Table with Primary Key: table_with_primary_key
 Table without Primary Key: table_without_primary_key
 
 Table with primary key has additional row:
-row_primary_key	SERIAL PRIMARY KEY,
+row_primary_key	INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Each table has the following rows
 row_int INT,
 row_numeric NUMERIC,
@@ -160,7 +160,6 @@ final class CoreLibsDBIOTest extends TestCase
 		// create the tables
 		$db->dbExec(
 			// primary key name is table + '_id'
-				// table_with_primary_key_id SERIAL PRIMARY KEY,
 			<<<SQL
 			CREATE TABLE table_with_primary_key (
 				table_with_primary_key_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

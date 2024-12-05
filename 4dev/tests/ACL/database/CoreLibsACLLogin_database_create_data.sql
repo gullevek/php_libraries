@@ -321,7 +321,7 @@ CREATE TABLE edit_generic (
 
 -- DROP TABLE edit_visible_group;
 CREATE TABLE edit_visible_group (
-    edit_visible_group_id SERIAL PRIMARY KEY,
+    edit_visible_group_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR,
     flag VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;
@@ -336,7 +336,7 @@ CREATE TABLE edit_visible_group (
 
 -- DROP TABLE edit_menu_group;
 CREATE TABLE edit_menu_group (
-    edit_menu_group_id SERIAL PRIMARY KEY,
+    edit_menu_group_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR,
     flag VARCHAR,
     order_number INT NOT NULL
@@ -354,7 +354,7 @@ CREATE TABLE edit_menu_group (
 
 -- DROP TABLE edit_page;
 CREATE TABLE edit_page (
-    edit_page_id SERIAL PRIMARY KEY,
+    edit_page_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     content_alias_edit_page_id	INT, -- alias for page content, if the page content is defined on a different page, ege for ajax backend pages
     FOREIGN KEY (content_alias_edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE RESTRICT ON UPDATE CASCADE,
     filename VARCHAR,
@@ -378,7 +378,7 @@ CREATE TABLE edit_page (
 
 -- DROP TABLE edit_query_string;
 CREATE TABLE edit_query_string (
-    edit_query_string_id SERIAL PRIMARY KEY,
+    edit_query_string_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     edit_page_id INT NOT NULL,
     FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     enabled SMALLINT NOT NULL DEFAULT 0,
@@ -430,7 +430,7 @@ CREATE TABLE edit_page_menu_group (
 
 -- DROP TABLE edit_access_right;
 CREATE TABLE edit_access_right (
-    edit_access_right_id SERIAL PRIMARY KEY,
+    edit_access_right_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR,
     level SMALLINT,
     type VARCHAR,
@@ -447,7 +447,7 @@ CREATE TABLE edit_access_right (
 
 -- DROP TABLE edit_scheme;
 CREATE TABLE edit_scheme (
-    edit_scheme_id SERIAL PRIMARY KEY,
+    edit_scheme_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     enabled SMALLINT NOT NULL DEFAULT 0,
     name VARCHAR,
     header_color VARCHAR,
@@ -466,7 +466,7 @@ CREATE TABLE edit_scheme (
 
 -- DROP TABLE edit_language;
 CREATE TABLE edit_language (
-    edit_language_id SERIAL PRIMARY KEY,
+    edit_language_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     enabled SMALLINT NOT NULL DEFAULT 0,
     lang_default SMALLINT NOT NULL DEFAULT 0,
     long_name VARCHAR,
@@ -485,7 +485,7 @@ CREATE TABLE edit_language (
 
 -- DROP TABLE edit_group;
 CREATE TABLE edit_group (
-    edit_group_id SERIAL PRIMARY KEY,
+    edit_group_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     edit_scheme_id INT,
     FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     edit_access_right_id INT NOT NULL,
@@ -507,7 +507,7 @@ CREATE TABLE edit_group (
 
 -- DROP TABLE edit_page_access;
 CREATE TABLE edit_page_access (
-    edit_page_access_id SERIAL PRIMARY KEY,
+    edit_page_access_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     edit_group_id INT NOT NULL,
     FOREIGN KEY (edit_group_id) REFERENCES edit_group (edit_group_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     edit_page_id INT NOT NULL,
@@ -530,7 +530,7 @@ CREATE TABLE edit_page_access (
 
 -- DROP TABLE edit_page_content;
 CREATE TABLE edit_page_content (
-    edit_page_content_id SERIAL PRIMARY KEY,
+    edit_page_content_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     edit_page_id INT NOT NULL,
     FOREIGN KEY (edit_page_id) REFERENCES edit_page (edit_page_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     edit_access_right_id INT NOT NULL,
@@ -551,7 +551,7 @@ CREATE TABLE edit_page_content (
 
 -- DROP TABLE edit_user;
 CREATE TABLE edit_user (
-    edit_user_id SERIAL PRIMARY KEY,
+    edit_user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     connect_edit_user_id INT, -- possible reference to other user
     FOREIGN KEY (connect_edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     edit_language_id INT NOT NULL,
@@ -652,11 +652,11 @@ COMMENT ON COLUMN edit_user.additional_acl IS 'Additional Access Control List st
 
 -- DROP TABLE edit_log;
 CREATE TABLE edit_log (
-    edit_log_id SERIAL PRIMARY KEY,
+    edit_log_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     euid INT, -- this is a foreign key, but I don't nedd to reference to it
+    FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL,
     ecuid VARCHAR,
     ecuuid UUID,
-    FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL,
     username VARCHAR,
     password VARCHAR,
     event_date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -712,7 +712,7 @@ ALTER TABLE edit_log_overflow ADD CONSTRAINT edit_log_overflow_euid_fkey FOREIGN
 
 -- DROP TABLE edit_access;
 CREATE TABLE edit_access (
-    edit_access_id SERIAL PRIMARY KEY,
+    edit_access_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     enabled SMALLINT NOT NULL DEFAULT 0,
     protected SMALLINT DEFAULT 0,
     deleted SMALLINT DEFAULT 0,
@@ -733,7 +733,7 @@ CREATE TABLE edit_access (
 
 -- DROP TABLE edit_access_user;
 CREATE TABLE edit_access_user (
-    edit_access_user_id SERIAL PRIMARY KEY,
+    edit_access_user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     edit_access_id INT NOT NULL,
     FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     edit_user_id INT NOT NULL,
@@ -754,7 +754,7 @@ CREATE TABLE edit_access_user (
 
 -- DROP TABLE edit_access_data;
 CREATE TABLE edit_access_data (
-    edit_access_data_id SERIAL PRIMARY KEY,
+    edit_access_data_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     edit_access_id INT NOT NULL,
     FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     enabled SMALLINT NOT NULL DEFAULT 0,
