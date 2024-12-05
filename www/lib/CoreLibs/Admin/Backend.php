@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace CoreLibs\Admin;
 
+use CoreLibs\Create\Uids;
 use CoreLibs\Convert\Json;
 
 class Backend
@@ -259,6 +260,27 @@ class Backend
 	}
 
 	/**
+	 * return all the action data, if not set, sets entry to null
+	 *
+	 * @return array{action:?string,action_id:null|string|int,action_sub_id:null|string|int,action_yes:null|string|int|bool,action_flag:?string,action_menu:?string,action_loaded:?string,action_value:?string,action_type:?string,action_error:?string}
+	 */
+	public function adbGetActionSet(): array
+	{
+		return [
+			'action' => $this->action ?? null,
+			'action_id' => $this->action_id ?? null,
+			'action_sub_id' => $this->action_sub_id ?? null,
+			'action_yes' => $this->action_yes ?? null,
+			'action_flag' => $this->action_flag ?? null,
+			'action_menu' => $this->action_menu ?? null,
+			'action_loaded' => $this->action_loaded ?? null,
+			'action_value' => $this->action_value ?? null,
+			'action_type' => $this->action_type ?? null,
+			'action_error' => $this->action_error ?? null,
+		];
+	}
+
+	/**
 	 * writes all action vars plus other info into edit_log table
 	 *
 	 * @param  string              $event [default='']        any kind of event description,
@@ -267,6 +289,7 @@ class Backend
 	 *                                                        JSON, STRING/SERIEAL, BINARY/BZIP or ZLIB
 	 * @param  string|null         $db_schema [default=null]  override target schema
 	 * @return void
+	 * @deprecated Use $login->writeLog() and set action_set from ->adbGetActionSet()
 	 */
 	public function adbEditLog(
 		string $event = '',
@@ -335,17 +358,17 @@ class Backend
 		}
 		$q = <<<SQL
 		INSERT INTO {DB_SCHEMA}.edit_log (
-			euid, event_date, event, data, data_binary, page,
+			username, euid, ecuid, ecuuid, event_date, event, error, data, data_binary, page,
 			ip, user_agent, referer, script_name, query_string, server_name, http_host,
 			http_accept, http_accept_charset, http_accept_encoding, session_id,
-			action, action_id, action_yes, action_flag, action_menu, action_loaded,
+			action, action_id, action_sub_id, action_yes, action_flag, action_menu, action_loaded,
 			action_value, action_type, action_error
 		) VALUES (
-			$1, NOW(), $2, $3, $4, $5,
-			$6, $7, $8, $9, $10, $11, $12,
-			$13, $14, $15, $16,
-			$17, $18, $19, $20, $21, $22,
-			$23, $24, $25
+			$1, $2, $3, $4, NOW(), $5, $6, $7, $8, $9,
+			$10, $11, $12, $13, $14, $15, $16,
+			$17, $18, $19, $20,
+			$21, $22, $23, $24, $25, $26, $27,
+			$28, $29, $30
 		)
 		SQL;
 		$this->db->dbExecParams(
@@ -356,9 +379,15 @@ class Backend
 			),
 			[
 				// row 1
-				isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
-					$_SESSION['EUID'] : null,
+				'',
+				is_numeric($this->session->get('EUID')) ?
+					$this->session->get('EUID') : null,
+				is_string($this->session->get('ECUID')) ?
+					$this->session->get('ECUID') : null,
+				!empty($this->session->get('ECUUID')) && Uids::validateUuuidv4($this->session->get('ECUID')) ?
+				$this->session->get('ECUID') : null,
 				(string)$event,
+				'',
 				$data_write,
 				$data_binary,
 				(string)$this->page_name,
@@ -374,11 +403,12 @@ class Backend
 				$_SERVER['HTTP_ACCEPT'] ?? '',
 				$_SERVER['HTTP_ACCEPT_CHARSET'] ?? '',
 				$_SERVER['HTTP_ACCEPT_ENCODING'] ?? '',
-				$this->session->getSessionId() !== false ?
+				$this->session->getSessionId() !== '' ?
 					$this->session->getSessionId() : null,
 				// row 4
 				$this->action ?? '',
 				$this->action_id ?? '',
+				$this->action_sub_id ?? '',
 				$this->action_yes ?? '',
 				$this->action_flag ?? '',
 				$this->action_menu ?? '',
@@ -425,10 +455,7 @@ class Backend
 		?string $set_content_path = null,
 		int $flag = 0,
 	): array {
-		if (
-			$set_content_path === null ||
-			!is_string($set_content_path)
-		) {
+		if ($set_content_path === null) {
 			/** @deprecated adbTopMenu missing set_content_path parameter */
 			trigger_error(
 				'Calling adbTopMenu without set_content_path parameter is deprecated',
@@ -441,7 +468,7 @@ class Backend
 		}
 
 		// get the session pages array
-		$PAGES = $_SESSION['PAGES'] ?? null;
+		$PAGES = $this->session->get('PAGES');
 		if (!isset($PAGES) || !is_array($PAGES)) {
 			$PAGES = [];
 		}

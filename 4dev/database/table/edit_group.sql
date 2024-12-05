@@ -7,7 +7,7 @@
 
 -- DROP TABLE edit_group;
 CREATE TABLE edit_group (
-    edit_group_id SERIAL PRIMARY KEY,
+    edit_group_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     edit_scheme_id INT,
     FOREIGN KEY (edit_scheme_id) REFERENCES edit_scheme (edit_scheme_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     edit_access_right_id INT NOT NULL,

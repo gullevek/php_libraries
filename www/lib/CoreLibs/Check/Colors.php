@@ -119,6 +119,13 @@ class Colors
 
 	/**
 	 * check if html/css color string is valid
+	 *
+	 * TODO: update check for correct validate values
+	 * - space instead of ","
+	 * - / opcatiy checks
+	 * - loose numeric values
+	 * - lab/lch,oklab/oklch validation too
+	 *
 	 * @param string $color A color string of any format
 	 * @param int $flags    defaults to ALL, else use | to combined from
 	 *                      HEX_RGB, HEX_RGBA, RGB, RGBA, HSL, HSLA
@@ -168,9 +175,9 @@ class Colors
 		if (preg_match("/$regex/", $color)) {
 			// if valid regex, we now need to check if the content is actually valid
 			// only for rgb/hsl type
-			/** @var int|false */
+			/** @var int<0, max>|false */
 			$rgb_flag = strpos($color, 'rgb');
-			/** @var int|false */
+			/** @var int<0, max>|false */
 			$hsl_flag = strpos($color, 'hsl');
 			// if both not match, return true
 			if (

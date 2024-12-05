@@ -7,7 +7,7 @@
 
 -- DROP TABLE edit_user;
 CREATE TABLE edit_user (
-    edit_user_id SERIAL PRIMARY KEY,
+    edit_user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     connect_edit_user_id INT, -- possible reference to other user
     FOREIGN KEY (connect_edit_user_id) REFERENCES edit_user (edit_user_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     edit_language_id INT NOT NULL,

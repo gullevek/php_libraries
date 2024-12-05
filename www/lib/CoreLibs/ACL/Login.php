@@ -69,12 +69,17 @@ declare(strict_types=1);
 namespace CoreLibs\ACL;
 
 use CoreLibs\Security\Password;
+use CoreLibs\Create\Uids;
 use CoreLibs\Convert\Json;
 
 class Login
 {
 	/** @var ?int the user id var*/
 	private ?int $euid;
+	/** @var ?string the user cuid (note will be super seeded with uuid v4 later) */
+	private ?string $ecuid;
+	/** @var ?string UUIDv4, will superseed the ecuid and replace euid as login id */
+	private ?string $ecuuid;
 	/** @var string _GET/_POST loginUserId parameter for non password login */
 	private string $login_user_id = '';
 	/** @var string source, either _GET or _POST or empty */
@@ -192,6 +197,12 @@ class Login
 	private ?string $login_html = '';
 	/** @var bool */
 	private bool $login_is_ajax_page = false;
+
+	// logging
+	/** @var array<string> list of allowed types for edit log write */
+	private const WRITE_TYPES = ['BINARY', 'BZIP2', 'LZIP', 'STRING', 'SERIAL', 'JSON'];
+	/** @var array<string> list of available write types for log */
+	private array $write_types_available = [];
 
 	// settings
 	/** @var array<string,mixed> options */
@@ -361,9 +372,6 @@ class Login
 			],
 		];
 
-		// init default ACL list array
-		$_SESSION['DEFAULT_ACL_LIST'] = [];
-		$_SESSION['DEFAULT_ACL_LIST_TYPE'] = [];
 		// read the current edit_access_right list into an array
 		$q = "SELECT level, type, name FROM edit_access_right "
 			. "WHERE level >= 0 ORDER BY level";
@@ -376,8 +384,12 @@ class Login
 			$this->default_acl_list_type[(string)$res['type']] = (int)$res['level'];
 		}
 		// write that into the session
-		$_SESSION['DEFAULT_ACL_LIST'] = $this->default_acl_list;
-		$_SESSION['DEFAULT_ACL_LIST_TYPE'] = $this->default_acl_list_type;
+		$this->session->setMany([
+			'DEFAULT_ACL_LIST' => $this->default_acl_list,
+			'DEFAULT_ACL_LIST_TYPE' => $this->default_acl_list_type,
+		]);
+
+		$this->loginSetEditLogWriteTypeAvailable();
 
 		// this will be deprecated
 		if ($this->options['auto_login'] === true) {
@@ -567,7 +579,7 @@ class Login
 			// set path
 			$options['locale_path'] = BASE . INCLUDES . LOCALE;
 		}
-		$_SESSION['LOCALE_PATH'] = $options['locale_path'];
+		$this->session->set('LOCALE_PATH', $options['locale_path']);
 		// LANG: LOCALE
 		if (empty($options['site_locale'])) {
 			trigger_error(
@@ -602,7 +614,7 @@ class Login
 				$options['set_domain'] = str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH);
 			}
 		}
-		$_SESSION['DEFAULT_DOMAIN'] = $options['site_domain'];
+		$this->session->set('DEFAULT_DOMAIN', $options['site_domain']);
 		// LANG: ENCODING
 		if (empty($options['site_encoding'])) {
 			trigger_error(
@@ -757,7 +769,7 @@ class Login
 		}
 		// have to get the global stuff here for setting it later
 		// we have to get the themes in here too
-		$q = "SELECT eu.edit_user_id, eu.username, eu.password, "
+		$q = "SELECT eu.edit_user_id, eu.cuid, eu.cuuid, eu.username, eu.password, "
 			. "eu.edit_group_id, "
 			. "eg.name AS edit_group_name, eu.admin, "
 			// additinal acl lists
@@ -888,7 +900,14 @@ class Login
 			}
 			// normal user processing
 			// set class var and session var
-			$_SESSION['EUID'] = $this->euid = (int)$res['edit_user_id'];
+			$this->euid = (int)$res['edit_user_id'];
+			$this->ecuid = (string)$res['cuid'];
+			$this->ecuuid = (string)$res['cuuid'];
+			$this->session->setMany([
+				'EUID' => $this->euid,
+				'ECUID' => $this->ecuid,
+				'ECUUID' => $this->ecuuid,
+			]);
 			// check if user is okay
 			$this->loginCheckPermissions();
 			if ($this->login_error == 0) {
@@ -901,27 +920,39 @@ class Login
 						. "WHERE edit_user_id = " . $this->euid;
 					$this->db->dbExec($q);
 				}
-				// now set all session vars and read page permissions
-				$_SESSION['DEBUG_ALL'] = $this->db->dbBoolean($res['debug']);
-				$_SESSION['DB_DEBUG'] = $this->db->dbBoolean($res['db_debug']);
-				// general info for user logged in
-				$_SESSION['USER_NAME'] = $res['username'];
-				$_SESSION['ADMIN'] = $res['admin'];
-				$_SESSION['GROUP_NAME'] = $res['edit_group_name'];
-				$_SESSION['USER_ACL_LEVEL'] = $res['user_level'];
-				$_SESSION['USER_ACL_TYPE'] = $res['user_type'];
-				$_SESSION['USER_ADDITIONAL_ACL'] = Json::jsonConvertToArray($res['user_additional_acl']);
-				$_SESSION['GROUP_ACL_LEVEL'] = $res['group_level'];
-				$_SESSION['GROUP_ACL_TYPE'] = $res['group_type'];
-				$_SESSION['GROUP_ADDITIONAL_ACL'] = Json::jsonConvertToArray($res['group_additional_acl']);
-				// deprecated TEMPLATE setting
-				$_SESSION['TEMPLATE'] = $res['template'] ? $res['template'] : '';
-				$_SESSION['HEADER_COLOR'] = !empty($res['second_header_color']) ?
-					$res['second_header_color'] :
-					$res['first_header_color'];
+				$locale = $res['locale'] ?? 'en';
+				$encoding = $res['encoding'] ?? 'UTF-8';
+				$this->session->setMany([
+					// now set all session vars and read page permissions
+					'DEBUG_ALL' => $this->db->dbBoolean($res['debug']),
+					'DB_DEBUG' => $this->db->dbBoolean($res['db_debug']),
+					// general info for user logged in
+					'USER_NAME' => $res['username'],
+					'ADMIN' => $res['admin'],
+					'GROUP_NAME' => $res['edit_group_name'],
+					'USER_ACL_LEVEL' => $res['user_level'],
+					'USER_ACL_TYPE' => $res['user_type'],
+					'USER_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['user_additional_acl']),
+					'GROUP_ACL_LEVEL' => $res['group_level'],
+					'GROUP_ACL_TYPE' => $res['group_type'],
+					'GROUP_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['group_additional_acl']),
+					// deprecated TEMPLATE setting
+					'TEMPLATE' => $res['template'] ? $res['template'] : '',
+					'HEADER_COLOR' => !empty($res['second_header_color']) ?
+						$res['second_header_color'] :
+						$res['first_header_color'],
+					// LANGUAGE/LOCALE/ENCODING:
+					'LANG' => $locale,
+					'DEFAULT_CHARSET' => $encoding,
+					'DEFAULT_LOCALE' => $locale . '.' . strtoupper($encoding),
+					'DEFAULT_LANG' => $locale . '_' . strtolower(str_replace('-', '', $encoding))
+				]);
 				// missing # before, this is for legacy data, will be deprecated
-				if (preg_match("/^[\dA-Fa-f]{6,8}$/", $_SESSION['HEADER_COLOR'])) {
-					$_SESSION['HEADER_COLOR'] = '#' . $_SESSION['HEADER_COLOR'];
+				if (
+					!empty($this->session->get('HEADER_COLOR')) &&
+					preg_match("/^[\dA-Fa-f]{6,8}$/", $this->session->get('HEADER_COLOR'))
+				) {
+					$this->session->set('HEADER_COLOR', '#' . $this->session->get('HEADER_COLOR'));
 				}
 				// TODO: make sure that header color is valid:
 				// # + 6 hex
@@ -930,13 +961,6 @@ class Login
 				// rgb: nnn.n for each
 				// hsl: nnn.n for first, nnn.n% for 2nd, 3rd
 				// Check\Colors::validateColor()
-				// LANGUAGE/LOCALE/ENCODING:
-				$_SESSION['LANG'] = $res['locale'] ?? 'en';
-				$_SESSION['DEFAULT_CHARSET'] = $res['encoding'] ?? 'UTF-8';
-				$_SESSION['DEFAULT_LOCALE'] = $_SESSION['LANG']
-					. '.' . strtoupper($_SESSION['DEFAULT_CHARSET']);
-				$_SESSION['DEFAULT_LANG'] = $_SESSION['LANG'] . '_'
-					. strtolower(str_replace('-', '', $_SESSION['DEFAULT_CHARSET']));
 				// reset any login error count for this user
 				if ($res['login_error_count'] > 0) {
 					$q = "UPDATE edit_user "
@@ -960,10 +984,7 @@ class Login
 					. "AND ear.edit_access_right_id = epa.edit_access_right_id "
 					. "AND epa.enabled = 1 AND epa.edit_group_id = " . $res["edit_group_id"] . " "
 					. "ORDER BY ep.order_number";
-				while ($res = $this->db->dbReturn($q)) {
-					if (!is_array($res)) {
-						break;
-					}
+				while (is_array($res = $this->db->dbReturn($q))) {
 					// page id array for sub data readout
 					$edit_page_ids[$res['edit_page_id']] = $res['cuid'];
 					// create the array for pages
@@ -1029,8 +1050,10 @@ class Login
 					];
 				}
 				// write back the pages data to the output array
-				$_SESSION['PAGES'] = $pages;
-				$_SESSION['PAGES_ACL_LEVEL'] = $pages_acl;
+				$this->session->setMany([
+					'PAGES' => $pages,
+					'PAGES_ACL_LEVEL' => $pages_acl,
+				]);
 				// load the edit_access user rights
 				$q = "SELECT ea.edit_access_id, level, type, ea.name, "
 					. "ea.color, ea.uid, edit_default, ea.additional_acl "
@@ -1042,6 +1065,7 @@ class Login
 				$unit_access = [];
 				$eauid = [];
 				$unit_acl = [];
+				$unit_uid = [];
 				while (is_array($res = $this->db->dbReturn($q))) {
 					// read edit access data fields and drop them into the unit access array
 					$q_sub = "SELECT name, value "
@@ -1065,16 +1089,19 @@ class Login
 					];
 					// set the default unit
 					if ($res['edit_default']) {
-						$_SESSION['UNIT_DEFAULT'] = (int)$res['edit_access_id'];
+						$this->session->set('UNIT_DEFAULT', (int)$res['edit_access_id']);
 					}
-					$_SESSION['UNIT_UID'][$res['uid']] = (int)$res['edit_access_id'];
+					$unit_uid[$res['uid']] = (int)$res['edit_access_id'];
 					// sub arrays for simple access
 					array_push($eauid, $res['edit_access_id']);
 					$unit_acl[$res['edit_access_id']] = $res['level'];
 				}
-				$_SESSION['UNIT'] = $unit_access;
-				$_SESSION['UNIT_ACL_LEVEL'] = $unit_acl;
-				$_SESSION['EAID'] = $eauid;
+				$this->session->setMany([
+					'UNIT_UID' => $unit_uid,
+					'UNIT' => $unit_access,
+					'UNIT_ACL_LEVEL' => $unit_acl,
+					'EAID' => $eauid,
+				]);
 			} // user has permission to THIS page
 		} // user was not enabled or other login error
 		if ($this->login_error && is_array($res)) {
@@ -1135,6 +1162,9 @@ class Login
 		// username (login), group name
 		$this->acl['user_name'] = $_SESSION['USER_NAME'];
 		$this->acl['group_name'] = $_SESSION['GROUP_NAME'];
+		// edit user cuid
+		$this->acl['ecuid'] = $_SESSION['ECUID'];
+		$this->acl['ecuuid'] = $_SESSION['ECUUID'];
 		// set additional acl
 		$this->acl['additional_acl'] = [
 			'user' => $_SESSION['USER_ADDITIONAL_ACL'],
@@ -1167,7 +1197,7 @@ class Login
 				$this->acl['base'] = (int)$_SESSION['USER_ACL_LEVEL'];
 			}
 		}
-		$_SESSION['BASE_ACL_LEVEL'] = $this->acl['base'];
+		$this->session->set('BASE_ACL_LEVEL', $this->acl['base']);
 
 		// set the current page acl
 		// start with base acl
@@ -1303,11 +1333,9 @@ class Login
 	{
 		$is_valid_password = true;
 		// check for valid in regex arrays in list
-		if (is_array($this->password_valid_chars)) {
-			foreach ($this->password_valid_chars as $password_valid_chars) {
-				if (!preg_match("/$password_valid_chars/", $password)) {
-					$is_valid_password = false;
-				}
+		foreach ($this->password_valid_chars as $password_valid_chars) {
+			if (!preg_match("/$password_valid_chars/", $password)) {
+				$is_valid_password = false;
 			}
 		}
 		// check for min length
@@ -1430,7 +1458,7 @@ class Login
 			$data = 'Illegal user for password change: ' . $this->pw_username;
 		}
 		// log this password change attempt
-		$this->writeLog($event, $data, $this->login_error, $this->pw_username);
+		$this->writeEditLog($event, $data, $this->login_error, $this->pw_username);
 	}
 
 	/**
@@ -1571,7 +1599,7 @@ class Login
 					$username = $res['username'];
 				}
 			} // if euid is set, get username (or try)
-			$this->writeLog($event, '', $this->login_error, $username);
+			$this->writeEditLog($event, '', $this->login_error, $username);
 		} // write log under certain settings
 		// now close DB connection
 		// $this->error_msg = $this->_login();
@@ -1727,6 +1755,8 @@ HTML;
 		}
 	}
 
+	// MARK: LOGGING
+
 	/**
 	 * writes detailed data into the edit user log table (keep log what user does)
 	 *
@@ -1736,7 +1766,7 @@ HTML;
 	 * @param  string     $username login user username
 	 * @return void                 has no return
 	 */
-	private function writeLog(
+	private function writeEditLog(
 		string $event,
 		string $data,
 		string|int $error = '',
@@ -1754,49 +1784,190 @@ HTML;
 				'_GET' => $_GET,
 				'_POST' => $_POST,
 				'_FILES' => $_FILES,
-				'error' => $this->login_error
+				'error' => $this->login_error,
+				'data' => $data,
 		];
-		$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($_data_binary)));
-		// SQL querie for log entry
-		$q = "INSERT INTO edit_log "
-			. "(username, password, euid, event_date, event, error, data, data_binary, page, "
-			. "ip, user_agent, referer, script_name, query_string, server_name, http_host, "
-			. "http_accept, http_accept_charset, http_accept_encoding, session_id, "
-			. "action, action_id, action_yes, action_flag, action_menu, action_loaded, "
-			. "action_value, action_error) "
-			. "VALUES ('" . $this->db->dbEscapeString($username) . "', 'PASSWORD', "
-			. ($this->euid ? $this->euid : 'NULL') . ", "
-			. "NOW(), '" . $this->db->dbEscapeString($event) . "', "
-			. "'" . $this->db->dbEscapeString((string)$error) . "', "
-			. "'" . $this->db->dbEscapeString($data) . "', '" . $data_binary . "', "
-			. "'" . $this->page_name . "', ";
-		foreach (
-			[
-				'REMOTE_ADDR', 'HTTP_USER_AGENT', 'HTTP_REFERER', 'SCRIPT_FILENAME',
-				'QUERY_STRING', 'SERVER_NAME', 'HTTP_HOST', 'HTTP_ACCEPT',
-				'HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_ENCODING'
-			] as $server_code
-		) {
-			if (array_key_exists($server_code, $_SERVER)) {
-				$q .= "'" . $this->db->dbEscapeString($_SERVER[$server_code]) . "', ";
-			} else {
-				$q .= "NULL, ";
-			}
+		$_action_set = [
+			'action' => $this->action,
+			'action_id' => $this->username,
+			'action_flag' => (string)$this->login_error,
+			'action_value' => (string)$this->permission_okay,
+		];
+
+		$this->writeLog($event, $_data_binary, $_action_set, $error, $username);
+	}
+
+	/**
+	 * writes all action vars plus other info into edit_log table
+	 * this is for public class
+	 *
+	 * phpcs:disable Generic.Files.LineLength
+	 * @param  string              $event [default='']        any kind of event description,
+	 * @param  string|array<mixed> $data [default='']         any kind of data related to that event
+	 * @param  array{action?:?string,action_id?:null|string|int,action_sub_id?:null|string|int,action_yes?:null|string|int|bool,action_flag?:?string,action_menu?:?string,action_loaded?:?string,action_value?:?string,action_type?:?string,action_error?:?string} $action_set [default=[]] action set names
+	 * @param  string|int          $error    error id (mostly an int)
+	 * @param  string              $write_type [default=JSON] write type can be
+	 *                                                        JSON, STRING/SERIEAL, BINARY/BZIP or ZLIB
+	 * @param  string|null         $db_schema [default=null]  override target schema
+	 * @return void
+	 * phpcs:enable Generic.Files.LineLength
+	 */
+	public function writeLog(
+		string $event = '',
+		string|array $data = '',
+		array $action_set = [],
+		string|int $error = '',
+		string $username = '',
+		string $write_type = 'JSON',
+		?string $db_schema = null
+	): void {
+		$data_binary = '';
+		$data_write = '';
+
+		// check if write type is valid, if not fallback to JSON
+		if (!in_array(strtoupper($write_type), $this->write_types_available)) {
+			$this->log->warning('Write type not in allowed array, fallback to JSON', context:[
+				"write_type" => $write_type,
+				"write_list" => $this->write_types_available,
+			]);
+			$write_type = 'JSON';
 		}
-		$q .= "'" . $this->session->getSessionId() . "', ";
-		$q .= "'" . $this->db->dbEscapeString($this->action) . "', ";
-		$q .= "'" . $this->db->dbEscapeString($this->username) . "', ";
-		$q .= "NULL, ";
-		$q .= "'" . $this->db->dbEscapeString((string)$this->login_error) . "', ";
-		$q .= "NULL, NULL, ";
-		$q .= "'" . $this->db->dbEscapeString((string)$this->permission_okay) . "', ";
-		$q .= "NULL)";
-		$this->db->dbExec($q, 'NULL');
+		switch ($write_type) {
+			case 'BINARY':
+			case 'BZIP':
+				$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($data)));
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'BZIP',
+					'message' => 'see bzip compressed data_binary field'
+				]);
+				break;
+			case 'ZLIB':
+				$data_binary = $this->db->dbEscapeBytea((string)gzcompress(serialize($data)));
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'ZLIB',
+					'message' => 'see zlib compressed data_binary field'
+				]);
+				break;
+			case 'STRING':
+			case 'SERIAL':
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'SERIAL',
+					'message' => 'see serial string data field'
+				]));
+				$data_write = serialize($data);
+				break;
+			case 'JSON':
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'JSON',
+					'message' => 'see json string data field'
+				]));
+				// must be converted to array
+				if (!is_array($data)) {
+					$data = ["data" => $data];
+				}
+				$data_write = Json::jsonConvertArrayTo($data);
+				break;
+			default:
+				$this->log->alert('Invalid type for data compression was set', context:[
+					"write_type" => $write_type
+				]);
+				break;
+		}
+
+		/** @var string $DB_SCHEMA check schema */
+		$DB_SCHEMA = 'public';
+		if ($db_schema !== null) {
+			$DB_SCHEMA = $db_schema;
+		} elseif (!empty($this->db->dbGetSchema())) {
+			$DB_SCHEMA = $this->db->dbGetSchema();
+		}
+		$q = <<<SQL
+		INSERT INTO {DB_SCHEMA}.edit_log (
+			username, euid, ecuid, ecuuid, event_date, event, error, data, data_binary, page,
+			ip, user_agent, referer, script_name, query_string, server_name, http_host,
+			http_accept, http_accept_charset, http_accept_encoding, session_id,
+			action, action_id, action_sub_id, action_yes, action_flag, action_menu, action_loaded,
+			action_value, action_type, action_error
+		) VALUES (
+			$1, $2, $3, $4, NOW(), $5, $6, $7, $8, $9,
+			$10, $11, $12, $13, $14, $15, $16,
+			$17, $18, $19, $20,
+			$21, $22, $23, $24, $25, $26, $27,
+			$28, $29, $30
+		)
+		SQL;
+		$this->db->dbExecParams(
+			str_replace(
+				['{DB_SCHEMA}'],
+				[$DB_SCHEMA],
+				$q
+			),
+			[
+				// row 1
+				empty($username) ? $this->session->get('USER_NAME') ?? '' : $username,
+				is_numeric($this->session->get('EUID')) ?
+					$this->session->get('EUID') : null,
+				is_string($this->session->get('ECUID')) ?
+					$this->session->get('ECUID') : null,
+				!empty($this->session->get('ECUUID')) && Uids::validateUuuidv4($this->session->get('ECUUID')) ?
+					$this->session->get('ECUUID') : null,
+				(string)$event,
+				(string)$error,
+				$data_write,
+				$data_binary,
+				(string)$this->page_name,
+				// row 2
+				$_SERVER["REMOTE_ADDR"] ?? null,
+				$_SERVER['HTTP_USER_AGENT'] ?? null,
+				$_SERVER['HTTP_REFERER'] ?? null,
+				$_SERVER['SCRIPT_FILENAME'] ?? null,
+				$_SERVER['QUERY_STRING'] ?? null,
+				$_SERVER['SERVER_NAME'] ?? null,
+				$_SERVER['HTTP_HOST'] ?? null,
+				// row 3
+				$_SERVER['HTTP_ACCEPT'] ?? null,
+				$_SERVER['HTTP_ACCEPT_CHARSET'] ?? null,
+				$_SERVER['HTTP_ACCEPT_ENCODING'] ?? null,
+				$this->session->getSessionId() !== '' ?
+					$this->session->getSessionId() : null,
+				// row 4
+				$action_set['action'] ?? null,
+				$action_set['action_id'] ?? null,
+				$action_set['action_sub_id'] ?? null,
+				$action_set['action_yes'] ?? null,
+				$action_set['action_flag'] ?? null,
+				$action_set['action_menu'] ?? null,
+				$action_set['action_loaded'] ?? null,
+				$action_set['action_value'] ?? null,
+				$action_set['action_type'] ?? null,
+				$action_set['action_error'] ?? null,
+			],
+			'NULL'
+		);
+	}
+
+	/**
+	 * set the write types that are allowed
+	 *
+	 * @return void
+	 */
+	private function loginSetEditLogWriteTypeAvailable()
+	{
+		// check what edit log data write types are allowed
+		$this->write_types_available = self::WRITE_TYPES;
+		if (!function_exists('bzcompress')) {
+			$this->write_types_available = array_diff($this->write_types_available, ['BINARY', 'BZIP']);
+		}
+		if (!function_exists('gzcompress')) {
+			$this->write_types_available = array_diff($this->write_types_available, ['LZIP']);
+		}
 	}
 
 	// *************************************************************************
 	// **** PUBLIC INTERNAL
 	// *************************************************************************
+
+	// MARK: LOGIN CALL
 
 	/**
 	 * Main call that needs to be run to actaully check for login
@@ -1866,7 +2037,10 @@ HTML;
 			}
 		}
 		// if there is none, there is none, saves me POST/GET check
-		$this->euid = array_key_exists('EUID', $_SESSION) ? (int)$_SESSION['EUID'] : 0;
+		$this->euid = (int)($this->session->get('EUID') ?? 0);
+		// TODO: allow load from cuid
+		// $this->ecuid = (string)($this->session->get('ECUID') ?? '');
+		// $this->ecuuid = (string)($this->session->get('ECUUID') ?? '');
 		// get login vars, are so, can't be changed
 		// prepare
 		// pass on vars to Object vars
@@ -1946,6 +2120,8 @@ HTML;
 		// set acls for this user/group and this page
 		$this->loginSetAcl();
 	}
+
+	// MARK: setters/getters
 
 	/**
 	 * Returns current set login_html content
@@ -2116,6 +2292,8 @@ HTML;
 		$this->session->sessionDestroy();
 		// unset euid
 		$this->euid = null;
+		$this->ecuid = null;
+		$this->ecuuid = null;
 		// then prints the login screen again
 		$this->permission_okay = false;
 	}
@@ -2133,11 +2311,12 @@ HTML;
 		if (empty($this->euid)) {
 			return $this->permission_okay;
 		}
+		// euid must match ecuid and ecuuid
 		// bail for previous wrong page match, eg if method is called twice
 		if ($this->login_error == 103) {
 			return $this->permission_okay;
 		}
-		$q = "SELECT ep.filename, "
+		$q = "SELECT ep.filename, eu.cuid, eu.cuuid, "
 			// base lock flags
 			. "eu.deleted, eu.enabled, eu.locked, "
 			// date based lock
@@ -2203,6 +2382,13 @@ HTML;
 		} else {
 			$this->login_error = 103;
 		}
+		// set ECUID
+		$this->ecuid = (string)$res['cuid'];
+		$this->ecuuid = (string)$res['cuuid'];
+		$this->session->setMany([
+			'ECUID' => $this->ecuid,
+			'ECUUID' => $this->ecuuid,
+		]);
 		// if called from public, so we can check if the permissions are ok
 		return $this->permission_okay;
 	}
@@ -2348,13 +2534,12 @@ HTML;
 	{
 		if (
 			$edit_access_id !== null &&
-			isset($_SESSION['UNIT']) &&
-			is_array($_SESSION['UNIT']) &&
-			!array_key_exists($edit_access_id, $_SESSION['UNIT'])
+			is_array($this->session->get('UNIT')) &&
+			!array_key_exists($edit_access_id, $this->session->get('UNIT'))
 		) {
 			$edit_access_id = null;
-			if (is_numeric($_SESSION['UNIT_DEFAULT'])) {
-				$edit_access_id = (int)$_SESSION['UNIT_DEFAULT'];
+			if (is_numeric($this->session->get('UNIT_DEFAULT'))) {
+				$edit_access_id = (int)$this->session->get('UNIT_DEFAULT');
 			}
 		}
 		return $edit_access_id;
@@ -2485,7 +2670,7 @@ HTML;
 	 */
 	public function loginGetHeaderColor(): ?string
 	{
-		return $_SESSION['HEADER_COLOR'] ?? null;
+		return $this->session->get('HEADER_COLOR');
 	}
 
 	/**
@@ -2496,7 +2681,7 @@ HTML;
 	public function loginGetPages(): array
 	{
 
-		return $_SESSION['PAGES'] ?? [];
+		return $this->session->get('PAGES');
 	}
 
 	/**
@@ -2507,6 +2692,26 @@ HTML;
 	public function loginGetEuid(): string
 	{
 		return (string)$this->euid;
+	}
+
+	/**
+	 * Get the current set ECUID (edit user cuid)
+	 *
+	 * @return string ECUID as string
+	 */
+	public function loginGetEcuid(): string
+	{
+		return (string)$this->ecuid;
+	}
+
+	/**
+	 * Get the current set ECUUID (edit user cuuid)
+	 *
+	 * @return string ECUUID as string
+	 */
+	public function loginGetEcuuid(): string
+	{
+		return (string)$this->ecuuid;
 	}
 }
 

@@ -8,7 +8,7 @@
 
 -- DROP TABLE edit_access_right;
 CREATE TABLE edit_access_right (
-    edit_access_right_id SERIAL PRIMARY KEY,
+    edit_access_right_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR,
     level SMALLINT,
     type VARCHAR,

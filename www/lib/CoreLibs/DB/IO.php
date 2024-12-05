@@ -284,7 +284,8 @@ class IO
 	public const ERROR_HASH_TYPE = 'adler32';
 	/** @var string regex to get returning with matches at position 1 */
 	public const REGEX_RETURNING = '/\s+returning\s+(.+\s*(?:.+\s*)+);?$/i';
-	/** @var array<string> allowed convert target for placeholder: pg or pdo (currently not available) */
+	/** @var array<string> allowed convert target for placeholder:
+	 * pg or pdo (currently not available) */
 	public const DB_CONVERT_PLACEHOLDER_TARGET = ['pg'];
 	// REGEX_SELECT
 	// REGEX_UPDATE
@@ -914,7 +915,7 @@ class IO
 		if ($cursor !== false) {
 			[$db_prefix, $db_error_string] = $this->db_functions->__dbPrintError($cursor);
 		}
-		if ($cursor === false && method_exists($this->db_functions, '__dbPrintError')) {
+		if ($cursor === false && method_exists($this->db_functions, '__dbPrintError')) { /** @phpstan-ignore-line */
 			[$db_prefix, $db_error_string] = $this->db_functions->__dbPrintError();
 		}
 		// prefix the master if not the same
@@ -1311,33 +1312,14 @@ class IO
 	}
 
 	/**
-	 * count $ leading parameters only
+	 * count placeholder entries in the query
 	 *
 	 * @param  string $query Query to check
 	 * @return int           Number of parameters found
 	 */
 	private function __dbCountQueryParams(string $query): int
 	{
-		$match = [];
-		// regex for params: only stand alone $number allowed
-		// exclude all '' enclosed strings, ignore all numbers [note must start with digit]
-		// can have space/tab/new line
-		// must have <> = , ( [not equal, equal, comma, opening round bracket]
-		// can have space/tab/new line
-		// $ number with 1-9 for first and 0-9 for further digits
-		// /s for matching new line in . list
-		// [disabled, we don't used ^ or $] /m for multi line match
-		// Matches in 1:, must be array_filtered to remove empty, count with array_unique
-		$query_split = '[(=,?-]|->|->>|#>|#>>|@>|<@|\?\|\?\&|\|\||#-';
-		preg_match_all(
-			'/'
-			. '(?:\'.*?\')?\s*(?:\?\?|<>|' . $query_split . ')\s*'
-			. '(?:\d+|(?:\'.*?\')|(\$[1-9]{1}(?:[0-9]{1,})?))'
-			. '/s',
-			$query,
-			$match
-		);
-		return count(array_unique(array_filter($match[1])));
+		return $this->db_functions->__dbCountQueryParams($query);
 	}
 
 	/**
@@ -1737,7 +1719,7 @@ class IO
 	{
 		if (
 			!empty($this->dbh) &&
-			$this->dbh instanceof \PgSql\Connection
+			$this->dbh instanceof \PgSql\Connection /** @phpstan-ignore-line future could be other */
 		) {
 			// reset any client encodings set
 			$this->dbResetEncoding();
@@ -3160,7 +3142,8 @@ class IO
 				'count' => 0,
 				'query' => '',
 				'result' =>  null,
-				'returning_id' => false
+				'returning_id' => false,
+				'placeholder_converted' => [],
 			];
 			// if this is an insert query, check if we can add a return
 			if ($this->dbCheckQueryForInsert($query, true)) {
@@ -3198,6 +3181,39 @@ class IO
 					}
 				} else {
 					$this->prepare_cursor[$stm_name]['pk_name'] = $pk_name;
+				}
+			}
+			// QUERY PARAMS: run query params check and rewrite
+			if ($this->dbGetConvertPlaceholder() === true) {
+				try {
+					$this->placeholder_converted = ConvertPlaceholder::convertPlaceholderInQuery(
+						$query,
+						null,
+						$this->dbGetConvertPlaceholderTarget()
+					);
+					// write the new queries over the old
+					if (!empty($this->placeholder_converted['query'])) {
+						$query = $this->placeholder_converted['query'];
+					}
+					$this->prepare_cursor[$stm_name]['placeholder_converted'] = $this->placeholder_converted;
+				} catch (\OutOfRangeException $e) {
+					$this->__dbError($e->getCode(), context:[
+						'statement_name' => $stm_name,
+						'query' => $query,
+						'location' => 'dbPrepare',
+						'error' => 'OutOfRangeException',
+						'exception' => $e
+					]);
+					return false;
+				} catch (\RuntimeException $e) {
+					$this->__dbError($e->getCode(), context:[
+						'statement_name' => $stm_name,
+						'query' => $query,
+						'location' => 'dbPrepare',
+						'error' => 'RuntimeException',
+						'exception' => $e
+					]);
+					return false;
 				}
 			}
 			// check prepared curser parameter count
@@ -3735,7 +3751,7 @@ class IO
 	}
 
 	/**
-	 * convert db values (set)
+	 * convert db values (set) to php matching types
 	 *
 	 * @param  Convert $convert
 	 * @return void
@@ -3746,7 +3762,7 @@ class IO
 	}
 
 	/**
-	 * unsert convert db values flag
+	 * unsert convert db values flag for converting db to php matching types
 	 *
 	 * @param  Convert $convert
 	 * @return void
@@ -3757,7 +3773,7 @@ class IO
 	}
 
 	/**
-	 * Reset to origincal config file set
+	 * Reset to original config file set for converting db to php matching type
 	 *
 	 * @return void
 	 */
@@ -3769,7 +3785,7 @@ class IO
 	}
 
 	/**
-	 * check if a conert flag is set
+	 * check if a convert flag is set for converting db to php matching type
 	 *
 	 * @param  Convert $convert
 	 * @return bool
@@ -3783,7 +3799,7 @@ class IO
 	}
 
 	/**
-	 * Set if we want to auto convert PDO/\Pg placeholders
+	 * Set if we want to auto convert to PDO/\Pg placeholders
 	 *
 	 * @param  bool $flag
 	 * @return void
@@ -4294,7 +4310,7 @@ class IO
 	 * @param string $stm_name  The name of the stored statement
 	 * @param string $key       Key field name in prepared cursor array
 	 *                          Allowed are: pk_name, count, query, returning_id
-	 * @return null|string|int|bool Entry from each of the valid keys
+	 * @return null|string|int|bool|array<string,mixed> Entry from each of the valid keys
 	 *                          Will return false on error
 	 *                          Not ethat returnin_id also can return false
 	 *                          but will not set an error entry
@@ -4302,7 +4318,7 @@ class IO
 	public function dbGetPrepareCursorValue(
 		string $stm_name,
 		string $key
-	): null|string|int|bool {
+	): null|string|int|bool|array {
 		// if no statement name
 		if (empty($stm_name)) {
 			$this->__dbError(
@@ -4313,7 +4329,7 @@ class IO
 			return false;
 		}
 		// if not a valid key
-		if (!in_array($key, ['pk_name', 'count', 'query', 'returning_id'])) {
+		if (!in_array($key, ['pk_name', 'count', 'query', 'returning_id', 'placeholder_converted'])) {
 			$this->__dbError(
 				102,
 				false,

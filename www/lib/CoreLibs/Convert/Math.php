@@ -158,6 +158,8 @@ class Math
 	 *   [0, 0, 0] <- automatically added
 	 * ]
 	 *
+	 * The same is done for unbalanced entries, they are filled with 0
+	 *
 	 * @param  array<float|int|array<int|float>> $a m x n matrice
 	 * @param  array<float|int|array<int|float>> $b n x p matrice
 	 *
@@ -186,7 +188,7 @@ class Math
 		// so that we can multiply row by row
 		$bCols = array_map(
 			callback: fn ($k) => array_map(
-				(fn ($i) => is_array($i) ? $i[$k] : 0),
+				(fn ($i) => is_array($i) ? $i[$k] ?? 0 : 0),
 				$b,
 			),
 			array: array_keys($b[0]),

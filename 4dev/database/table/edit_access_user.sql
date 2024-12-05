@@ -7,7 +7,7 @@
 
 -- DROP TABLE edit_access_user;
 CREATE TABLE edit_access_user (
-    edit_access_user_id SERIAL PRIMARY KEY,
+    edit_access_user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     edit_access_id INT NOT NULL,
     FOREIGN KEY (edit_access_id) REFERENCES edit_access (edit_access_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     edit_user_id INT NOT NULL,

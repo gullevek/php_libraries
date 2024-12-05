@@ -7,11 +7,13 @@
 
 -- DROP TABLE edit_log;
 CREATE TABLE edit_log (
-    edit_log_id SERIAL PRIMARY KEY,
+    edit_log_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     euid INT, -- this is a foreign key, but I don't nedd to reference to it
     FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL,
     username VARCHAR,
     password VARCHAR,
+    ecuid VARCHAR,
+    ecuuid UUID,
     event_date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     ip VARCHAR,
     error TEXT,
@@ -21,6 +23,7 @@ CREATE TABLE edit_log (
     page VARCHAR,
     action VARCHAR,
     action_id VARCHAR,
+    action_sub_id VARCHAR,
     action_yes VARCHAR,
     action_flag VARCHAR,
     action_menu VARCHAR,

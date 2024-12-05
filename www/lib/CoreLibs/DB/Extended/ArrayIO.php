@@ -374,7 +374,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function dbDelete(array $table_array = [], bool $acl_limit = false): array
 	{
 		// is array and has values, override set and set new
-		if (is_array($table_array) && count($table_array)) {
+		if (count($table_array)) {
 			$this->table_array = $table_array;
 		}
 		if (!$this->dbCheckPkSet()) {
@@ -440,7 +440,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function dbRead(bool $edit = false, array $table_array = []): array
 	{
 		// if array give, overrules internal array
-		if (is_array($table_array) && count($table_array)) {
+		if (count($table_array)) {
 			$this->table_array = $table_array;
 		}
 		if (!$this->dbCheckPkSet()) {

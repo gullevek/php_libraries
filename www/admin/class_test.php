@@ -73,6 +73,7 @@ $test_files = [
 	'class_test.db.query-placeholder.php' => 'Class Test: DB query placeholder convert',
 	'class_test.db.dbReturn.php' => 'Class Test: DB dbReturn',
 	'class_test.db.single.php' => 'Class Test: DB single query tests',
+	'class_test.db.convert-placeholder.php' => 'Class Test: DB convert placeholder',
 	'class_test.db.sqlite.php' => 'Class Test: DB: SqLite',
 	'class_test.convert.colors.php' => 'Class Test: CONVERT COLORS',
 	'class_test.check.colors.php' => 'Class Test: CHECK COLORS',
@@ -204,6 +205,9 @@ print "HOST: " . HOST_NAME . " => DB HOST: " . DB_CONFIG_NAME . " => " . Support
 
 print "DS is: " . DIRECTORY_SEPARATOR . "<br>";
 print "SERVER HOST: " . $_SERVER['HTTP_HOST'] . "<br>";
+
+print "ECUID: " . $session->get('ECUID') . "<br>";
+print "ECUUID: " . $session->get('ECUUID') . "<br>";
 
 print "</body></html>";
 

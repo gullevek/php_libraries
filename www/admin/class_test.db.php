@@ -228,7 +228,7 @@ print "RETURN ROW PARAMS: " . print_r(
 $db->dbPrepare("ins_test_foo", "INSERT INTO test_foo (test) VALUES ($1) RETURNING test");
 $status = $db->dbExecute("ins_test_foo", ['BAR TEST ' . time()]);
 print "PREPARE INSERT[ins_test_foo] STATUS: " . Support::printToString($status) . " |<br>"
-	. "QUERY: " . $db->dbGetPrepareCursorValue('ins_test_foo', 'query') . " |<br>"
+	. "QUERY: " . Support::printToString($db->dbGetPrepareCursorValue('ins_test_foo', 'query')) . " |<br>"
 	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -239,7 +239,7 @@ print "PREPARE INSERT PREVIOUS INSERTED: "
 
 print "PREPARE CURSOR RETURN:<br>";
 foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
-	print "KEY: " . $key . ': ' . $db->dbGetPrepareCursorValue('ins_test_foo', $key) . "<br>";
+	print "KEY: " . $key . ': ' . Support::prAr($db->dbGetPrepareCursorValue('ins_test_foo', $key)) . "<br>";
 }
 
 $query = <<<SQL
@@ -255,7 +255,7 @@ SQL;
 $db->dbPrepare("ins_test_foo_eom", $query);
 $status = $db->dbExecute("ins_test_foo_eom", ['EOM BAR TEST ' . time()]);
 print "EOM STRING PREPARE INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
-	. "QUERY: " . $db->dbGetPrepareCursorValue('ins_test_foo_eom', 'query') . " |<br>"
+	. "QUERY: " . Support::printToString($db->dbGetPrepareCursorValue('ins_test_foo_eom', 'query')) . " |<br>"
 	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -316,7 +316,8 @@ print "EOM STRING EXEC RETURN TEST: " . print_r(
 	$db->dbReturnRowParams(
 		$query_select,
 		[$__last_insert_id]
-	)
+	),
+	true
 ) . "<br>";
 // B
 $status = $db->dbExecParams(
@@ -345,7 +346,8 @@ print "EOM STRING EXEC RETURN TEST: " . print_r(
 	$db->dbReturnRowParams(
 		$query_select,
 		[$__last_insert_id]
-	)
+	),
+	true
 ) . "<br>";
 // params > 10 for debug
 // error catcher
@@ -674,7 +676,7 @@ echo "<hr>";
 
 print "COMPOSITE ELEMENT READ<br>";
 $res = $db->dbReturnRow("SELECT item, count, (item).name, (item).price, (item).supplier_id FROM on_hand");
-print "ROW: <pre>" . print_r($res) . "</pre>";
+print "ROW: <pre>" . print_r($res, true) . "</pre>";
 var_dump($res);
 print "Field Name/Types: <pre>" . print_r($db->dbGetFieldNameTypes(), true) . "</pre>";
 echo "<hr>";

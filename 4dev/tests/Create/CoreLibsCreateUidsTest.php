@@ -121,6 +121,7 @@ final class CoreLibsCreateUidsTest extends TestCase
 	 * must match 7e78fe0d-59b8-4637-af7f-e88d221a7d1e
 	 *
 	 * @covers ::uuidv4
+	 * @covers ::validateUuidv4
 	 * @testdox uuidv4 check that return is matching regex [$_dataName]
 	 *
 	 * @return void
@@ -129,13 +130,18 @@ final class CoreLibsCreateUidsTest extends TestCase
 	{
 		$uuid = \CoreLibs\Create\Uids::uuidv4();
 		$this->assertMatchesRegularExpression(
-			'/^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$/',
-			$uuid
+			'/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/',
+			$uuid,
+			'Failed regex check'
 		);
-		// $this->assertStringMatchesFormat(
-		// 	'%4s%4s-%4s-%4s-%4s-%4s%4s%4s',
-		// 	$uuid
-		// );
+		$this->assertTrue(
+			\CoreLibs\Create\Uids::validateUuuidv4($uuid),
+			'Failed validate regex method'
+		);
+		$this->assertFalse(
+			\CoreLibs\Create\Uids::validateUuuidv4('not-a-uuidv4'),
+			'Failed wrong uuid validated as true'
+		);
 	}
 
 	/**

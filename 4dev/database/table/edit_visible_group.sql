@@ -7,7 +7,7 @@
 
 -- DROP TABLE edit_visible_group;
 CREATE TABLE edit_visible_group (
-    edit_visible_group_id SERIAL PRIMARY KEY,
+    edit_visible_group_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR,
     flag VARCHAR
 ) INHERITS (edit_generic) WITHOUT OIDS;

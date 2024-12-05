@@ -2,6 +2,7 @@
 includes:
 	- phpstan-conditional.php
 	#- ./vendor/yamadashy/phpstan-friendly-formatter/extension.neon
+	# - phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
 	tmpDir: %currentWorkingDirectory%/tmp/phpstan-corelibs
 	#errorFormat: friendly
@@ -13,6 +14,9 @@ parameters:
 	# 	allRules: false
 	checkMissingCallableSignature: true
 	treatPhpDocTypesAsCertain: false
+	# phpVersion:
+	# 	min: 80200 # PHP 8.2.0
+	# 	max: 80300 # PHP latest
 	paths:
 		- %currentWorkingDirectory%/www
 	bootstrapFiles:

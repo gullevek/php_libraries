@@ -246,7 +246,7 @@ class CieXyz
 			self::convertArray(array_map(
 				fn ($k, $v) => $v * $d50[$k],
 				array_keys($xyz),
-				array_values($xyz),
+				$xyz,
 			)),
 			options: ["whitepoint" => 'D50']
 		);
