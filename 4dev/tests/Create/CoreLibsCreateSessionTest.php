@@ -272,24 +272,27 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function sessionDataProvider(): array
+	public function providerSessionData(): array
 	{
 		return [
 			'test' => [
 				'foo',
 				'bar',
 				'bar',
+				null,
 			],
 			'int key test' => [
 				123,
 				'bar',
 				'bar',
+				\UnexpectedValueException::class
 			],
 			// more complex value tests
 			'array values' => [
 				'array',
 				[1, 2, 3],
 				[1, 2, 3],
+				null,
 			]
 		];
 	}
@@ -299,21 +302,28 @@ final class CoreLibsCreateSessionTest extends TestCase
 	/**
 	 * method call test
 	 *
-	 * @covers ::setS
-	 * @covers ::getS
-	 * @covers ::issetS
-	 * @covers ::unsetS
-	 * @dataProvider sessionDataProvider
-	 * @testdox setS/getS/issetS/unsetS $name with $input is $expected [$_dataName]
+	 * @covers ::set
+	 * @covers ::get
+	 * @covers ::isset
+	 * @covers ::unset
+	 * @dataProvider providerSessionData
+	 * @testdox set/get/isset/unset $name with $input is $expected ($exception) [$_dataName]
 	 *
 	 * @param  string|int $name
 	 * @param  mixed $input
 	 * @param  mixed $expected
+	 * @param  ?mixed $exception
 	 * @return void
 	 */
-/* 	public function testMethodSetGet($name, $input, $expected): void
+	public function testMethodSetGet($name, $input, $expected, $exception): void
 	{
+		if (\CoreLibs\Get\System::checkCLI()) {
+			$this->markTestSkipped('Cannot run testMethodSetGet in CLI');
+		}
 		$session = new \CoreLibs\Create\Session('TEST_METHOD');
+		if ($expected !== null) {
+			$this->expectException($exception);
+		}
 		$session->set($name, $input);
 		$this->assertEquals(
 			$expected,
@@ -331,12 +341,80 @@ final class CoreLibsCreateSessionTest extends TestCase
 			$session->get($name),
 			'method unset assert'
 		);
-		// iset false
+		// isset false
 		$this->assertFalse(
 			$session->isset($name),
 			'method isset assert false'
 		);
-	} */
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerSessionDataMany(): array
+	{
+		return [
+			'valid set' => [
+				[
+					'foo 1' => 'bar 1',
+					'foo 2' => 'bar 1',
+				],
+				[
+					'foo 1' => 'bar 1',
+					'foo 2' => 'bar 1',
+				],
+				null,
+			],
+			'invalid entry' => [
+				[
+					'foo 1' => 'bar 1',
+					123 => 'bar 1',
+				],
+				[
+					'foo 1' => 'bar 1',
+				],
+				\UnexpectedValueException::class
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::setMany
+	 * @covers ::getMany
+	 * @dataProvider providerSessionDataMany
+	 * @testdox setMany/getMany/unsetMany $set is $expected ($exception) [$_dataName]
+	 *
+	 * @param  array<string|int,mixed> $set
+	 * @param  array<string,mixed> $expected
+	 * @param  ?mixed $exception
+	 * @return void
+	 */
+	public function testMany($set, $expected, $exception): void
+	{
+		if (\CoreLibs\Get\System::checkCLI()) {
+			$this->markTestSkipped('Cannot run testMethodSetGet in CLI');
+		}
+		$session = new \CoreLibs\Create\Session('TEST_METHOD');
+		if ($expected !== null) {
+			$this->expectException($exception);
+		}
+		$session->setMany($set);
+		$this->assertEquals(
+			$expected,
+			$session->getMany(array_keys($set)),
+			'set many failed'
+		);
+		$session->unsetMany(array_keys($set));
+		$this->assertEquals(
+			[],
+			$session->getMany(array_keys($set)),
+			'unset many failed'
+		);
+	}
 
 	/**
 	 * unset all test
@@ -346,8 +424,11 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 *
 	 * @return void
 	 */
-/* 	public function testUnsetAll(): void
+	public function testUnsetAll(): void
 	{
+		if (\CoreLibs\Get\System::checkCLI()) {
+			$this->markTestSkipped('Cannot run testUnsetAll in CLI');
+		}
 		$test_values = [
 			'foo' => 'abc',
 			'bar' => '123'
@@ -372,7 +453,7 @@ final class CoreLibsCreateSessionTest extends TestCase
 				'unsert assert: ' . $name
 			);
 		}
-	} */
+	}
 }
 
 // __END__

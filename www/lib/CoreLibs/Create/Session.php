@@ -97,6 +97,23 @@ class Session
 		return true;
 	}
 
+	/**
+	 * validate _SESSION key, must be valid variable
+	 *
+	 * @param  int|float|string $key
+	 * @return true
+	 */
+	private function checkValidSessionEntryKey(int|float|string $key): true
+	{
+		if (!is_string($key) || is_numeric($key)) {
+			throw new \UnexpectedValueException(
+				'[SESSION] Given key for _SESSION is not a valid value for a varaible: ' . $key,
+				1
+			);
+		}
+		return true;
+	}
+
 	// MARK: init session (on class start)
 
 	/**
@@ -162,6 +179,9 @@ class Session
 	public function restartSession(): bool
 	{
 		if (!$this->checkActiveSession()) {
+			if (empty($this->session_name)) {
+				throw new \RuntimeException('[SESSION] Cannot restart session without a session name', 1);
+			}
 			$this->startSessionCall();
 			return true;
 		}
@@ -235,6 +255,21 @@ class Session
 		return \CoreLibs\Get\System::checkCLI();
 	}
 
+	/**
+	 * get session status
+	 * PHP_SESSION_DISABLED if sessions are disabled.
+	 * PHP_SESSION_NONE if sessions are enabled, but none exists.
+	 * PHP_SESSION_ACTIVE if sessions are enabled, and one exists.
+	 *
+	 * https://www.php.net/manual/en/function.session-status.php
+	 *
+	 * @return int See possible return int values above
+	 */
+	public function getSessionStatus(): int
+	{
+		return session_status();
+	}
+
 	// MARK: write close session
 
 	/**
@@ -256,13 +291,14 @@ class Session
 	 * Proper destroy a session
 	 * - unset the _SESSION array
 	 * - unset cookie if cookie on and we have not strict mode
+	 * - unset session_name and session_id internal vars
 	 * - destroy session
 	 *
 	 * @return bool
 	 */
 	public function sessionDestroy(): bool
 	{
-		$_SESSION = [];
+		$this->unsetAll();
 		if (
 			ini_get('session.use_cookies') &&
 			!ini_get('session.use_strict_mode')
@@ -282,22 +318,10 @@ class Session
 				$params['httponly']
 			);
 		}
+		// unset internal vars
+		$this->session_name = '';
+		$this->session_id = '';
 		return session_destroy();
-	}
-
-	/**
-	 * get session status
-	 * PHP_SESSION_DISABLED if sessions are disabled.
-	 * PHP_SESSION_NONE if sessions are enabled, but none exists.
-	 * PHP_SESSION_ACTIVE if sessions are enabled, and one exists.
-	 *
-	 * https://www.php.net/manual/en/function.session-status.php
-	 *
-	 * @return int See possible return int values above
-	 */
-	public function getSessionStatus(): int
-	{
-		return session_status();
 	}
 
 	// MARK: _SESSION set/unset methods
@@ -310,8 +334,8 @@ class Session
 	public function unsetAll(): void
 	{
 		$this->restartSession();
-		foreach (array_keys($_SESSION ?? []) as $name) {
-			unset($_SESSION[$name]);
+		if (!empty($_SESSION)) {
+			$_SESSION = [];
 		}
 		$this->closeSessionCall();
 	}
@@ -319,35 +343,64 @@ class Session
 	/**
 	 * set _SESSION entry 'name' with any value
 	 *
-	 * @param  string|int $name  array name in _SESSION
-	 * @param  mixed      $value value to set (can be anything)
+	 * @param  string $name  array name in _SESSION
+	 * @param  mixed  $value value to set (can be anything)
 	 * @return void
 	 */
-	public function set(string|int $name, mixed $value): void
+	public function set(string $name, mixed $value): void
 	{
+		$this->checkValidSessionEntryKey($name);
 		$this->restartSession();
 		$_SESSION[$name] = $value;
 		$this->closeSessionCall();
 	}
 
 	/**
+	 * set many session entries in one set
+	 *
+	 * @param  array<string,mixed> $set key is the key in the _SESSION, value is any data to set
+	 * @return void
+	 */
+	public function setMany(array $set): void
+	{
+		$this->restartSession();
+		// skip any that are not valid
+		foreach ($set as $key => $value) {
+			$this->checkValidSessionEntryKey($key);
+			$_SESSION[$key] = $value;
+		}
+		$this->closeSessionCall();
+	}
+
+	/**
 	 * get _SESSION 'name' entry or empty string if not set
 	 *
-	 * @param  string|int $name value key to get from _SESSION
-	 * @return mixed            value stored in _SESSION
+	 * @param  string $name value key to get from _SESSION
+	 * @return mixed        value stored in _SESSION, if not found set to null
 	 */
-	public function get(string|int $name): mixed
+	public function get(string $name): mixed
 	{
 		return $_SESSION[$name] ?? null;
 	}
 
 	/**
+	 * get multiple session entries
+	 *
+	 * @param  array<string> $set
+	 * @return array<string,mixed>
+	 */
+	public function getMany(array $set): array
+	{
+		return array_intersect_key($_SESSION, array_flip($set));
+	}
+
+	/**
 	 * Check if a name is set in the _SESSION array
 	 *
-	 * @param  string|int $name Name to check for
-	 * @return bool             True for set, False fornot set
+	 * @param  string $name Name to check for
+	 * @return bool                   True for set, False fornot set
 	 */
-	public function isset(string|int $name): bool
+	public function isset(string $name): bool
 	{
 		return isset($_SESSION[$name]);
 	}
@@ -355,10 +408,10 @@ class Session
 	/**
 	 * unset one _SESSION entry 'name' if exists
 	 *
-	 * @param  string|int $name _SESSION key name to remove
+	 * @param  string $name _SESSION key name to remove
 	 * @return void
 	 */
-	public function unset(string|int $name): void
+	public function unset(string $name): void
 	{
 		if (!isset($_SESSION[$name])) {
 			return;
@@ -368,65 +421,21 @@ class Session
 		$this->closeSessionCall();
 	}
 
-	// MARK: [DEPRECATED] __set/__get magic methods
-	// ->var = value;
-
 	/**
-	 * Undocumented function
+	 * reset many session entry
 	 *
-	 * @param  string|int $name
-	 * @param  mixed      $value
+	 * @param  array<string> $set list of session keys to reset
 	 * @return void
-	 * @deprecated use ->set()
 	 */
-	public function __set(string|int $name, mixed $value): void
+	public function unsetMany(array $set): void
 	{
 		$this->restartSession();
-		$_SESSION[$name] = $value;
-		$this->closeSessionCall();
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @param  string|int $name
-	 * @return mixed            If name is not found, it will return null
-	 * @deprecated use ->get()
-	 */
-	public function __get(string|int $name): mixed
-	{
-		if (isset($_SESSION[$name])) {
-			return $_SESSION[$name];
+		foreach ($set as $key) {
+			if (!isset($_SESSION[$key])) {
+				continue;
+			}
+			unset($_SESSION[$key]);
 		}
-		return null;
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @param  string|int $name
-	 * @return bool
-	 * @deprecated use ->isset()
-	 */
-	public function __isset(string|int $name): bool
-	{
-		return isset($_SESSION[$name]);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @param  string|int $name
-	 * @return void
-	 * @deprecated use ->unset()
-	 */
-	public function __unset(string|int $name): void
-	{
-		if (!isset($_SESSION[$name])) {
-			return;
-		}
-		$this->restartSession();
-		unset($_SESSION[$name]);
 		$this->closeSessionCall();
 	}
 }

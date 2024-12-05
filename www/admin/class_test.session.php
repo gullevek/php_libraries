@@ -45,6 +45,7 @@ $log = new CoreLibs\Logging\Logging([
 	'log_file_id' => $LOG_FILE_ID,
 	'log_per_date' => true,
 ]);
+use CoreLibs\Debug\Support;
 use CoreLibs\Create\Session;
 
 $PAGE_NAME = 'TEST CLASS: SESSION';
@@ -56,7 +57,7 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $session_name = 'class-test-session';
 print "Valid session name static check for '" . $session_name . "': "
-	. \CoreLibs\Debug\Support::prBl(Session::checkValidSessionName($session_name)) . "<br>";
+	. Support::prBl(Session::checkValidSessionName($session_name)) . "<br>";
 $var = 'foo';
 $value = 'bar';
 $session = new Session($session_name);
@@ -96,13 +97,27 @@ print "[READ WRAP] Isset: " . ($session->isset('setwrap') ? 'Yes' : 'No') . "<br
 $session->unset('setwrap');
 print "[READ WRAP] unset setwrap: " . $session->get('setwrap') . "<br>";
 print "[READ WRAP] unset Isset: " . ($session->isset('setwrap') ? 'Yes' : 'No') . "<br>";
-// test __get/__set
-$session->setwrap = 'YES, magic set _SESSION var'; /** @phpstan-ignore-line GET/SETTER */
-print "[READ MAGIC] A setwrap: " . ($session->setwrap ?? '') . "<br>";
-print "[READ MAGIC] Isset: " . (isset($session->setwrap) ? 'Yes' : 'No') . "<br>";
-unset($session->setwrap);
-print "[READ MAGIC] unset setwrap: " . ($session->setwrap ?? '') . "<br>";
-print "[READ MAGIC] unset Isset: " . (isset($session->setwrap) ? 'Yes' : 'No') . "<br>";
+$session->set('foo 3', 'brause');
+// set many
+$session->setMany([
+	'foo 1' => 'bar',
+	'foo 2' => 'kamel',
+]);
+print "[READ MANY]: " . Support::printAr($session->getMany(['foo 1', 'foo 2'])) . "<br>";
+try {
+	$session->setMany([ /** @phpstan-ignore-line deliberate error */
+		'ok' => 'ok',
+		'a123' => 'bar',
+		1 => 'bar',
+	]);
+} catch (\Exception $e) {
+	print "FAILED] Session manySet failed:<br>" . $e->getMessage() . "<br><pre>" . $e . "</pre><br>";
+}
+try {
+	$session->set('123', 'illigal');
+} catch (\Exception $e) {
+	print "FAILED] Session set failed:<br>" . $e->getMessage() . "<br><pre>" . $e . "</pre><br>";
+}
 
 print "<hr>";
 // differnt session name
@@ -115,7 +130,8 @@ try {
 	print "[3 FAILED] Session start failed:<br>" . $e->getMessage() . "<br><pre>" . $e . "</pre><br>";
 }
 
-print "[ALL SESSION]: " . \CoreLibs\Debug\Support::printAr($_SESSION) . "<br>";
+
+print "[ALL SESSION]: " . Support::printAr($_SESSION) . "<br>";
 
 // close session
 $session->writeClose();
@@ -142,7 +158,7 @@ try {
 }
 $_SESSION['will_be_written_again'] = 'Full';
 
-print "[ALL SESSION]: " . \CoreLibs\Debug\Support::printAr($_SESSION) . "<br>";
+print "[ALL SESSION]: " . Support::printAr($_SESSION) . "<br>";
 
 // close session
 $session->writeClose();

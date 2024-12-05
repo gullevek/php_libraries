@@ -380,12 +380,12 @@ class Backend
 			[
 				// row 1
 				'',
-				!empty($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
-					$_SESSION['EUID'] : null,
-				!empty($_SESSION['ECUID']) && is_string($_SESSION['ECUID']) ?
-					$_SESSION['ECUID'] : null,
-				!empty($_SESSION['ECUUID']) && Uids::validateUuuidv4($_SESSION['ECUID']) ?
-					$_SESSION['ECUID'] : null,
+				is_numeric($this->session->get('EUID')) ?
+					$this->session->get('EUID') : null,
+				is_string($this->session->get('ECUID')) ?
+					$this->session->get('ECUID') : null,
+				!empty($this->session->get('ECUUID')) && Uids::validateUuuidv4($this->session->get('ECUID')) ?
+				$this->session->get('ECUID') : null,
 				(string)$event,
 				'',
 				$data_write,
@@ -468,7 +468,7 @@ class Backend
 		}
 
 		// get the session pages array
-		$PAGES = $_SESSION['PAGES'] ?? null;
+		$PAGES = $this->session->get('PAGES');
 		if (!isset($PAGES) || !is_array($PAGES)) {
 			$PAGES = [];
 		}

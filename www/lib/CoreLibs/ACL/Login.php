@@ -372,9 +372,6 @@ class Login
 			],
 		];
 
-		// init default ACL list array
-		$_SESSION['DEFAULT_ACL_LIST'] = [];
-		$_SESSION['DEFAULT_ACL_LIST_TYPE'] = [];
 		// read the current edit_access_right list into an array
 		$q = "SELECT level, type, name FROM edit_access_right "
 			. "WHERE level >= 0 ORDER BY level";
@@ -387,8 +384,10 @@ class Login
 			$this->default_acl_list_type[(string)$res['type']] = (int)$res['level'];
 		}
 		// write that into the session
-		$_SESSION['DEFAULT_ACL_LIST'] = $this->default_acl_list;
-		$_SESSION['DEFAULT_ACL_LIST_TYPE'] = $this->default_acl_list_type;
+		$this->session->setMany([
+			'DEFAULT_ACL_LIST' => $this->default_acl_list,
+			'DEFAULT_ACL_LIST_TYPE' => $this->default_acl_list_type,
+		]);
 
 		$this->loginSetEditLogWriteTypeAvailable();
 
@@ -580,7 +579,7 @@ class Login
 			// set path
 			$options['locale_path'] = BASE . INCLUDES . LOCALE;
 		}
-		$_SESSION['LOCALE_PATH'] = $options['locale_path'];
+		$this->session->set('LOCALE_PATH', $options['locale_path']);
 		// LANG: LOCALE
 		if (empty($options['site_locale'])) {
 			trigger_error(
@@ -615,7 +614,7 @@ class Login
 				$options['set_domain'] = str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH);
 			}
 		}
-		$_SESSION['DEFAULT_DOMAIN'] = $options['site_domain'];
+		$this->session->set('DEFAULT_DOMAIN', $options['site_domain']);
 		// LANG: ENCODING
 		if (empty($options['site_encoding'])) {
 			trigger_error(
@@ -901,9 +900,14 @@ class Login
 			}
 			// normal user processing
 			// set class var and session var
-			$_SESSION['EUID'] = $this->euid = (int)$res['edit_user_id'];
-			$_SESSION['ECUID'] = $this->ecuid = (string)$res['cuid'];
-			$_SESSION['ECUUID'] = $this->ecuuid = (string)$res['cuuid'];
+			$this->euid = (int)$res['edit_user_id'];
+			$this->ecuid = (string)$res['cuid'];
+			$this->ecuuid = (string)$res['cuuid'];
+			$this->session->setMany([
+				'EUID' => $this->euid,
+				'ECUID' => $this->ecuid,
+				'ECUUID' => $this->ecuuid,
+			]);
 			// check if user is okay
 			$this->loginCheckPermissions();
 			if ($this->login_error == 0) {
@@ -916,27 +920,39 @@ class Login
 						. "WHERE edit_user_id = " . $this->euid;
 					$this->db->dbExec($q);
 				}
-				// now set all session vars and read page permissions
-				$_SESSION['DEBUG_ALL'] = $this->db->dbBoolean($res['debug']);
-				$_SESSION['DB_DEBUG'] = $this->db->dbBoolean($res['db_debug']);
-				// general info for user logged in
-				$_SESSION['USER_NAME'] = $res['username'];
-				$_SESSION['ADMIN'] = $res['admin'];
-				$_SESSION['GROUP_NAME'] = $res['edit_group_name'];
-				$_SESSION['USER_ACL_LEVEL'] = $res['user_level'];
-				$_SESSION['USER_ACL_TYPE'] = $res['user_type'];
-				$_SESSION['USER_ADDITIONAL_ACL'] = Json::jsonConvertToArray($res['user_additional_acl']);
-				$_SESSION['GROUP_ACL_LEVEL'] = $res['group_level'];
-				$_SESSION['GROUP_ACL_TYPE'] = $res['group_type'];
-				$_SESSION['GROUP_ADDITIONAL_ACL'] = Json::jsonConvertToArray($res['group_additional_acl']);
-				// deprecated TEMPLATE setting
-				$_SESSION['TEMPLATE'] = $res['template'] ? $res['template'] : '';
-				$_SESSION['HEADER_COLOR'] = !empty($res['second_header_color']) ?
-					$res['second_header_color'] :
-					$res['first_header_color'];
+				$locale = $res['locale'] ?? 'en';
+				$encoding = $res['encoding'] ?? 'UTF-8';
+				$this->session->setMany([
+					// now set all session vars and read page permissions
+					'DEBUG_ALL' => $this->db->dbBoolean($res['debug']),
+					'DB_DEBUG' => $this->db->dbBoolean($res['db_debug']),
+					// general info for user logged in
+					'USER_NAME' => $res['username'],
+					'ADMIN' => $res['admin'],
+					'GROUP_NAME' => $res['edit_group_name'],
+					'USER_ACL_LEVEL' => $res['user_level'],
+					'USER_ACL_TYPE' => $res['user_type'],
+					'USER_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['user_additional_acl']),
+					'GROUP_ACL_LEVEL' => $res['group_level'],
+					'GROUP_ACL_TYPE' => $res['group_type'],
+					'GROUP_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['group_additional_acl']),
+					// deprecated TEMPLATE setting
+					'TEMPLATE' => $res['template'] ? $res['template'] : '',
+					'HEADER_COLOR' => !empty($res['second_header_color']) ?
+						$res['second_header_color'] :
+						$res['first_header_color'],
+					// LANGUAGE/LOCALE/ENCODING:
+					'LANG' => $locale,
+					'DEFAULT_CHARSET' => $encoding,
+					'DEFAULT_LOCALE' => $locale . '.' . strtoupper($encoding),
+					'DEFAULT_LANG' => $locale . '_' . strtolower(str_replace('-', '', $encoding))
+				]);
 				// missing # before, this is for legacy data, will be deprecated
-				if (preg_match("/^[\dA-Fa-f]{6,8}$/", $_SESSION['HEADER_COLOR'])) {
-					$_SESSION['HEADER_COLOR'] = '#' . $_SESSION['HEADER_COLOR'];
+				if (
+					!empty($this->session->get('HEADER_COLOR')) &&
+					preg_match("/^[\dA-Fa-f]{6,8}$/", $this->session->get('HEADER_COLOR'))
+				) {
+					$this->session->set('HEADER_COLOR', '#' . $this->session->get('HEADER_COLOR'));
 				}
 				// TODO: make sure that header color is valid:
 				// # + 6 hex
@@ -945,13 +961,6 @@ class Login
 				// rgb: nnn.n for each
 				// hsl: nnn.n for first, nnn.n% for 2nd, 3rd
 				// Check\Colors::validateColor()
-				// LANGUAGE/LOCALE/ENCODING:
-				$_SESSION['LANG'] = $res['locale'] ?? 'en';
-				$_SESSION['DEFAULT_CHARSET'] = $res['encoding'] ?? 'UTF-8';
-				$_SESSION['DEFAULT_LOCALE'] = $_SESSION['LANG']
-					. '.' . strtoupper($_SESSION['DEFAULT_CHARSET']);
-				$_SESSION['DEFAULT_LANG'] = $_SESSION['LANG'] . '_'
-					. strtolower(str_replace('-', '', $_SESSION['DEFAULT_CHARSET']));
 				// reset any login error count for this user
 				if ($res['login_error_count'] > 0) {
 					$q = "UPDATE edit_user "
@@ -1041,8 +1050,10 @@ class Login
 					];
 				}
 				// write back the pages data to the output array
-				$_SESSION['PAGES'] = $pages;
-				$_SESSION['PAGES_ACL_LEVEL'] = $pages_acl;
+				$this->session->setMany([
+					'PAGES' => $pages,
+					'PAGES_ACL_LEVEL' => $pages_acl,
+				]);
 				// load the edit_access user rights
 				$q = "SELECT ea.edit_access_id, level, type, ea.name, "
 					. "ea.color, ea.uid, edit_default, ea.additional_acl "
@@ -1054,6 +1065,7 @@ class Login
 				$unit_access = [];
 				$eauid = [];
 				$unit_acl = [];
+				$unit_uid = [];
 				while (is_array($res = $this->db->dbReturn($q))) {
 					// read edit access data fields and drop them into the unit access array
 					$q_sub = "SELECT name, value "
@@ -1077,16 +1089,19 @@ class Login
 					];
 					// set the default unit
 					if ($res['edit_default']) {
-						$_SESSION['UNIT_DEFAULT'] = (int)$res['edit_access_id'];
+						$this->session->set('UNIT_DEFAULT', (int)$res['edit_access_id']);
 					}
-					$_SESSION['UNIT_UID'][$res['uid']] = (int)$res['edit_access_id'];
+					$unit_uid[$res['uid']] = (int)$res['edit_access_id'];
 					// sub arrays for simple access
 					array_push($eauid, $res['edit_access_id']);
 					$unit_acl[$res['edit_access_id']] = $res['level'];
 				}
-				$_SESSION['UNIT'] = $unit_access;
-				$_SESSION['UNIT_ACL_LEVEL'] = $unit_acl;
-				$_SESSION['EAID'] = $eauid;
+				$this->session->setMany([
+					'UNIT_UID' => $unit_uid,
+					'UNIT' => $unit_access,
+					'UNIT_ACL_LEVEL' => $unit_acl,
+					'EAID' => $eauid,
+				]);
 			} // user has permission to THIS page
 		} // user was not enabled or other login error
 		if ($this->login_error && is_array($res)) {
@@ -1182,7 +1197,7 @@ class Login
 				$this->acl['base'] = (int)$_SESSION['USER_ACL_LEVEL'];
 			}
 		}
-		$_SESSION['BASE_ACL_LEVEL'] = $this->acl['base'];
+		$this->session->set('BASE_ACL_LEVEL', $this->acl['base']);
 
 		// set the current page acl
 		// start with base acl
@@ -1889,13 +1904,13 @@ HTML;
 			),
 			[
 				// row 1
-				empty($username) ? $_SESSION['USER_NAME'] ?? '' : $username,
-				!empty($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
-					$_SESSION['EUID'] : null,
-				!empty($_SESSION['ECUID']) && is_string($_SESSION['ECUID']) ?
-					$_SESSION['ECUID'] : null,
-				!empty($_SESSION['ECUUID']) && Uids::validateUuuidv4($_SESSION['ECUUID']) ?
-					$_SESSION['ECUUID'] : null,
+				empty($username) ? $this->session->get('USER_NAME') ?? '' : $username,
+				is_numeric($this->session->get('EUID')) ?
+					$this->session->get('EUID') : null,
+				is_string($this->session->get('ECUID')) ?
+					$this->session->get('ECUID') : null,
+				!empty($this->session->get('ECUUID')) && Uids::validateUuuidv4($this->session->get('ECUUID')) ?
+					$this->session->get('ECUUID') : null,
 				(string)$event,
 				(string)$error,
 				$data_write,
@@ -2022,10 +2037,10 @@ HTML;
 			}
 		}
 		// if there is none, there is none, saves me POST/GET check
-		$this->euid = array_key_exists('EUID', $_SESSION) ? (int)$_SESSION['EUID'] : 0;
+		$this->euid = (int)($this->session->get('EUID') ?? 0);
 		// TODO: allow load from cuid
-		// $this->ecuid = array_key_exists('ECUID', $_SESSION) ? (string)$_SESSION['ECUID'] : '';
-		// $this->ecuuid = array_key_exists('ECUUID', $_SESSION) ? (string)$_SESSION['ECUUID'] : '';
+		// $this->ecuid = (string)($this->session->get('ECUID') ?? '');
+		// $this->ecuuid = (string)($this->session->get('ECUUID') ?? '');
 		// get login vars, are so, can't be changed
 		// prepare
 		// pass on vars to Object vars
@@ -2368,8 +2383,12 @@ HTML;
 			$this->login_error = 103;
 		}
 		// set ECUID
-		$_SESSION['ECUID'] = $this->ecuid = (string)$res['cuid'];
-		$_SESSION['ECUUID'] = $this->ecuuid = (string)$res['cuuid'];
+		$this->ecuid = (string)$res['cuid'];
+		$this->ecuuid = (string)$res['cuuid'];
+		$this->session->setMany([
+			'ECUID' => $this->ecuid,
+			'ECUUID' => $this->ecuuid,
+		]);
 		// if called from public, so we can check if the permissions are ok
 		return $this->permission_okay;
 	}
@@ -2652,7 +2671,7 @@ HTML;
 	 */
 	public function loginGetHeaderColor(): ?string
 	{
-		return $_SESSION['HEADER_COLOR'] ?? null;
+		return $this->session->get('HEADER_COLOR');
 	}
 
 	/**
@@ -2663,7 +2682,7 @@ HTML;
 	public function loginGetPages(): array
 	{
 
-		return $_SESSION['PAGES'] ?? [];
+		return $this->session->get('PAGES');
 	}
 
 	/**
