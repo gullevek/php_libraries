@@ -2,6 +2,7 @@
     "name": "egrajp/development-corelibs-dev",
     "version": "dev-master",
     "description": "CoreLibs: Development package",
+    "keywords": ["corelib", "logging", "database", "templating", "tools"],
     "type": "library",
     "require": {
         "php": ">=8.3"
