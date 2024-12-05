@@ -12,5 +12,3 @@ CREATE TABLE edit_menu_group (
     flag VARCHAR,
     order_number INT NOT NULL
 ) INHERITS (edit_generic) WITHOUT OIDS;
-
-

@@ -16,5 +16,3 @@ CREATE TABLE edit_page_access (
     FOREIGN KEY (edit_access_right_id) REFERENCES edit_access_right (edit_access_right_id) MATCH FULL ON DELETE CASCADE ON UPDATE CASCADE,
     enabled SMALLINT NOT NULL DEFAULT 0
 ) INHERITS (edit_generic) WITHOUT OIDS;
-
-
