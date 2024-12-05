@@ -2534,13 +2534,12 @@ HTML;
 	{
 		if (
 			$edit_access_id !== null &&
-			isset($_SESSION['UNIT']) &&
-			is_array($_SESSION['UNIT']) &&
-			!array_key_exists($edit_access_id, $_SESSION['UNIT'])
+			is_array($this->session->get('UNIT')) &&
+			!array_key_exists($edit_access_id, $this->session->get('UNIT'))
 		) {
 			$edit_access_id = null;
-			if (is_numeric($_SESSION['UNIT_DEFAULT'])) {
-				$edit_access_id = (int)$_SESSION['UNIT_DEFAULT'];
+			if (is_numeric($this->session->get('UNIT_DEFAULT'))) {
+				$edit_access_id = (int)$this->session->get('UNIT_DEFAULT');
 			}
 		}
 		return $edit_access_id;

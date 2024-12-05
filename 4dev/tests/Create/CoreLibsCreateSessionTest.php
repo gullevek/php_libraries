@@ -444,7 +444,7 @@ final class CoreLibsCreateSessionTest extends TestCase
 			);
 		}
 		// unset all
-		$session->unsetAll();
+		$session->clear();
 		// check unset
 		foreach (array_keys($test_values) as $name) {
 			$this->assertEquals(

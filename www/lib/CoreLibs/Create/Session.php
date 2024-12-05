@@ -294,11 +294,15 @@ class Session
 	 * - unset session_name and session_id internal vars
 	 * - destroy session
 	 *
-	 * @return bool
+	 * @return bool True on successful session destroy
 	 */
 	public function sessionDestroy(): bool
 	{
-		$this->unsetAll();
+		// abort to false if not unsetable
+		if (!session_unset()) {
+			return false;
+		}
+		$this->clear();
 		if (
 			ini_get('session.use_cookies') &&
 			!ini_get('session.use_strict_mode')
@@ -331,9 +335,12 @@ class Session
 	 *
 	 * @return void
 	 */
-	public function unsetAll(): void
+	public function clear(): void
 	{
 		$this->restartSession();
+		if (!session_unset()) {
+			throw new \RuntimeException('[SESSION] Cannot unset session vars', 1);
+		}
 		if (!empty($_SESSION)) {
 			$_SESSION = [];
 		}

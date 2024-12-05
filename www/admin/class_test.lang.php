@@ -16,6 +16,8 @@ define('USE_DATABASE', false);
 require 'config.php';
 // define log file id
 $LOG_FILE_ID = 'classTest-lang';
+$SET_SESSION_NAME = EDIT_SESSION_NAME;
+$session = new CoreLibs\Create\Session($SET_SESSION_NAME);
 ob_end_flush();
 
 $PAGE_NAME = 'TEST CLASS: LANG';
@@ -70,10 +72,12 @@ print "[OVERRIDE]: " . Support::printAr($get_locale) . "<br>";
 // DEFAULT_DOMAIN
 // DEFAULT_CHARSET (should be set from DEFAULT_LOCALE)
 // LOCALE_PATH
-$_SESSION['DEFAULT_LOCALE'] = 'ja_JP.UTF-8';
-$_SESSION['DEFAULT_CHARSET'] = 'UTF-8';
-$_SESSION['DEFAULT_DOMAIN'] = 'admin';
-$_SESSION['LOCALE_PATH'] = BASE . INCLUDES . LOCALE;
+$session->setMany([
+	'DEFAULT_LOCALE' => 'ja_JP.UTF-8',
+	'DEFAULT_CHARSET' => 'UTF-8',
+	'DEFAULT_DOMAIN' => 'admin',
+	'LOCALE_PATH' => BASE . INCLUDES . LOCALE,
+]);
 $get_locale = Language\GetLocale::setLocaleFromSession(
 	SITE_LOCALE,
 	SITE_DOMAIN,
@@ -86,10 +90,12 @@ print "[SESSION SET]: " . Support::printAr($get_locale) . "<br>";
 // DEFAULT_DOMAIN
 // DEFAULT_CHARSET (should be set from DEFAULT_LOCALE)
 // LOCALE_PATH
-$_SESSION['DEFAULT_LOCALE'] = '00000#####';
-$_SESSION['DEFAULT_CHARSET'] = '';
-$_SESSION['DEFAULT_DOMAIN'] = 'admin';
-$_SESSION['LOCALE_PATH'] = BASE . INCLUDES . LOCALE;
+$session->setMany([
+	'DEFAULT_LOCALE' => '00000#####',
+	'DEFAULT_CHARSET' => '',
+	'DEFAULT_DOMAIN' => 'admin',
+	'LOCALE_PATH' => BASE . INCLUDES . LOCALE,
+]);
 $get_locale = Language\GetLocale::setLocaleFromSession(
 	SITE_LOCALE,
 	SITE_DOMAIN,
