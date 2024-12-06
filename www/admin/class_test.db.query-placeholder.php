@@ -115,6 +115,21 @@ echo "INSERT ALL COLUMN TYPES: "
 	. "ERROR: " . $db->dbGetLastError(true) . "<br>";
 echo "<hr>";
 
+print "<b>ANY call</b><br>";
+$query = <<<SQL
+SELECT test
+FROM test_foo
+WHERE string_a = ANY($1)
+SQL;
+$query_value = '{'
+	. join(',', ['STRING A'])
+. '}';
+while (is_array($res = $db->dbReturnParams($query, [$query_value]))) {
+	print "Result: " . Support::prAr($res) . "<br>";
+}
+
+echo "<hr>";
+
 // test connectors: = , <> () for query detection
 
 // convert placeholder tests

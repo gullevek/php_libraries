@@ -62,9 +62,30 @@ $backend = new CoreLibs\Admin\Backend(
 $backend->db->dbInfo(true);
 ob_end_flush();
 
-print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS</title></head>";
-print "<body>";
+print <<<HTML
+<!DOCTYPE html>
+<html><head>
+<title>TEST CLASS</title>
+<script language="JavaScript">
+function loginLogout()
+{
+	const form = document.createElement('form');
+	form.method = 'post';
+	const hiddenField = document.createElement('input');
+	hiddenField.type = 'hidden';
+	hiddenField.name = 'login_logout';
+	hiddenField.value = 'Logout';
+	form.appendChild(hiddenField);
+	document.body.appendChild(form);
+	form.submit();
+}
+</script>
+</head>
+<body>
+<div style="margin: 20px 0;">
+	<button onclick="loginLogout();" type="button">Logout</button>
+</div>
+HTML;
 
 // key: file name, value; name
 $test_files = [
