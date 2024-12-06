@@ -276,10 +276,10 @@ class Login
 				'flag' => 'e'
 			],
 			// blowfish password wrong
-			'1011' => [
+			/* '1011' => [
 				'msg' => 'Login Failed - Wrong Username or Password',
 				'flag' => 'e'
-			],
+			], */
 			// fallback md5 password wrong
 			'1012' => [
 				'msg' => 'Login Failed - Wrong Username or Password',
@@ -373,8 +373,16 @@ class Login
 		];
 
 		// read the current edit_access_right list into an array
-		$q = "SELECT level, type, name FROM edit_access_right "
-			. "WHERE level >= 0 ORDER BY level";
+		$q = <<<SQL
+		SELECT
+			level, type, name
+		FROM
+			edit_access_right
+		WHERE
+			level >= 0
+		ORDER BY
+			level
+		SQL;
 		while (is_array($res = $this->db->dbReturn($q))) {
 			// level to description format (numeric)
 			$this->default_acl_list[$res['level']] = [
@@ -398,7 +406,7 @@ class Login
 	}
 
 	// *************************************************************************
-	// **** PROTECTED INTERNAL
+	// **** MARK: PROTECTED INTERNAL
 	// *************************************************************************
 
 	/**
@@ -441,7 +449,7 @@ class Login
 	}
 
 	// *************************************************************************
-	// **** PRIVATE INTERNAL
+	// **** MARK: PRIVATE INTERNAL
 	// *************************************************************************
 
 	/**
@@ -630,6 +638,8 @@ class Login
 		return true;
 	}
 
+	// MARK: validation checks
+
 	/**
 	 * Checks for all flags and sets error codes for each
 	 * In order:
@@ -748,6 +758,8 @@ class Login
 		return $login_id_ok;
 	}
 
+	// MARK: login user action
+
 	/**
 	 * if user pressed login button this script is called,
 	 * but only if there is no preview euid set
@@ -769,74 +781,96 @@ class Login
 		}
 		// have to get the global stuff here for setting it later
 		// we have to get the themes in here too
-		$q = "SELECT eu.edit_user_id, eu.cuid, eu.cuuid, eu.username, eu.password, "
-			. "eu.edit_group_id, "
-			. "eg.name AS edit_group_name, eu.admin, "
-			// additinal acl lists
-			. "eu.additional_acl AS user_additional_acl, "
-			. "eg.additional_acl AS group_additional_acl, "
-			// login error + locked
-			. "eu.login_error_count, eu.login_error_date_last, "
-			. "eu.login_error_date_first, eu.strict, eu.locked, "
-			// date based lock
-			. "CASE WHEN ("
-			. "(eu.lock_until IS NULL "
-			. "OR (eu.lock_until IS NOT NULL AND NOW() >= eu.lock_until)) "
-			. "AND (eu.lock_after IS NULL "
-			. "OR (eu.lock_after IS NOT NULL AND NOW() <= eu.lock_after))"
-			. ") THEN 0::INT ELSE 1::INT END locked_period, "
-			// debug (legacy)
-			. "eu.debug, eu.db_debug, "
-			// enabled
-			. "eu.enabled, eu.deleted, "
-			// for checks only
-			. "eu.login_user_id, "
-			// login id validation
-			. "CASE WHEN ("
-			. "(eu.login_user_id_valid_from IS NULL "
-			. "OR (eu.login_user_id_valid_from IS NOT NULL AND NOW() >= eu.login_user_id_valid_from)) "
-			. "AND (eu.login_user_id_valid_until IS NULL "
-			. "OR (eu.login_user_id_valid_until IS NOT NULL AND NOW() <= eu.login_user_id_valid_until))"
-			. ") THEN 1::INT ELSE 0::INT END AS login_user_id_valid_date, "
-			// check if user must login
-			. "CASE WHEN eu.login_user_id_revalidate_after IS NOT NULL "
-			. "AND eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
-			. "AND (eu.login_user_id_last_revalidate + eu.login_user_id_revalidate_after)::DATE "
-			. "<= NOW()::DATE "
-			.  "THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate, "
-			. "eu.login_user_id_locked, "
-			// language
-			. "el.short_name AS locale, el.iso_name AS encoding, "
-			//  levels
-			. "eareu.level AS user_level, eareu.type AS user_type, "
-			. "eareg.level AS group_level, eareg.type AS group_type, "
-			// colors
-			. "first.header_color AS first_header_color, "
-			. "second.header_color AS second_header_color, second.template "
-			. "FROM edit_user eu "
-			. "LEFT JOIN edit_scheme second ON "
-			. "(second.edit_scheme_id = eu.edit_scheme_id AND second.enabled = 1), "
-			. "edit_language el, edit_group eg, "
-			. "edit_access_right eareu, "
-			. "edit_access_right eareg, "
-			. "edit_scheme first "
-			. "WHERE first.edit_scheme_id = eg.edit_scheme_id "
-			. "AND eu.edit_group_id = eg.edit_group_id "
-			. "AND eu.edit_language_id = el.edit_language_id "
-			. "AND eu.edit_access_right_id = eareu.edit_access_right_id "
-			. "AND eg.edit_access_right_id = eareg.edit_access_right_id "
-			. "AND "
-			// either login_user_id OR password must be given
-			. (!empty($this->login_user_id && empty($this->username)) ?
-				// check with login id if set and NO username
-				"eu.login_user_id = " . $this->db->dbEscapeLiteral($this->login_user_id) . " " :
-				// password match is done in script, against old plain or new blowfish encypted
-				"LOWER(username) = " . $this->db->dbEscapeLiteral(strtolower($this->username)) . " "
-			);
+		$q = <<<SQL
+		SELECT
+			eu.edit_user_id, eu.cuid, eu.cuuid, eu.username, eu.password,
+			eu.edit_group_id,
+			eg.name AS edit_group_name, eu.admin,
+			-- additinal acl lists
+			eu.additional_acl AS user_additional_acl,
+			eg.additional_acl AS group_additional_acl,
+			-- login error + locked
+			eu.login_error_count, eu.login_error_date_last,
+			eu.login_error_date_first, eu.strict, eu.locked,
+			-- date based lock
+			CASE WHEN (
+				(
+					eu.lock_until IS NULL
+					OR (eu.lock_until IS NOT NULL AND NOW() >= eu.lock_until)
+				)
+				AND (
+					eu.lock_after IS NULL
+					OR (eu.lock_after IS NOT NULL AND NOW() <= eu.lock_after)
+				)
+			) THEN 0::INT ELSE 1::INT END locked_period,
+			-- debug (legacy)
+			eu.debug, eu.db_debug,
+			-- enabled
+			eu.enabled, eu.deleted,
+			-- for checks only
+			eu.login_user_id,
+			-- login id validation
+			CASE WHEN (
+				(
+					eu.login_user_id_valid_from IS NULL
+					OR (eu.login_user_id_valid_from IS NOT NULL AND NOW() >= eu.login_user_id_valid_from)
+				)
+				AND (
+					eu.login_user_id_valid_until IS NULL
+					OR (eu.login_user_id_valid_until IS NOT NULL AND NOW() <= eu.login_user_id_valid_until)
+				)
+			) THEN 1::INT ELSE 0::INT END AS login_user_id_valid_date,
+			-- check if user must login
+			CASE WHEN
+				eu.login_user_id_revalidate_after IS NOT NULL
+				AND eu.login_user_id_revalidate_after > '0 days'::INTERVAL
+				AND (eu.login_user_id_last_revalidate + eu.login_user_id_revalidate_after)::DATE
+				<= NOW()::DATE
+			THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate,
+			eu.login_user_id_locked,
+			-- language
+			el.short_name AS locale, el.iso_name AS encoding,
+			-- levels
+			eareu.level AS user_level, eareu.type AS user_type,
+			eareg.level AS group_level, eareg.type AS group_type,
+			-- colors
+			first.header_color AS first_header_color,
+			second.header_color AS second_header_color, second.template
+			FROM edit_user eu
+			LEFT JOIN edit_scheme second ON
+			(second.edit_scheme_id = eu.edit_scheme_id AND second.enabled = 1),
+			edit_language el, edit_group eg,
+			edit_access_right eareu,
+			edit_access_right eareg,
+			edit_scheme first
+			WHERE first.edit_scheme_id = eg.edit_scheme_id
+			AND eu.edit_group_id = eg.edit_group_id
+			AND eu.edit_language_id = el.edit_language_id
+			AND eu.edit_access_right_id = eareu.edit_access_right_id
+			AND eg.edit_access_right_id = eareg.edit_access_right_id
+			AND {SEARCH_QUERY}
+		SQL;
+		$params = [];
+		$replace_string = '';
+		// either login_user_id OR password must be given
+		if (!empty($this->login_user_id && empty($this->username))) {
+			// check with login id if set and NO username
+			$replace_string = 'eu.login_user_id = $1';
+			$params = [$this->login_user_id];
+		} else {
+			// password match is done in script, against old plain or new blowfish encypted
+			$replace_string = 'LOWER(username) = $1';
+			$params = [strtolower($this->username)];
+		}
+		$q = str_replace(
+			'{SEARCH_QUERY}',
+			$replace_string,
+			$q
+		);
 		// reset any query data that might exist
-		$this->db->dbCacheReset($q);
+		$this->db->dbCacheReset($q, $params);
 		// never cache return data
-		$res = $this->db->dbReturn($q, $this->db::NO_CACHE);
+		$res = $this->db->dbReturnParams($q, $params, $this->db::NO_CACHE);
 		// query was not run successful
 		if (!empty($this->db->dbGetLastError())) {
 			$this->login_error = 1009;
@@ -893,10 +927,15 @@ class Login
 			//	.' => HASH: '.(Password::passwordRehashCheck($res['password']) ? 'NEW NEEDED' : 'OK'));
 			if (Password::passwordRehashCheck($res['password'])) {
 				// update password hash to new one now
-				$q = "UPDATE edit_user "
-					. "SET password = '" . $this->db->dbEscapeString(Password::passwordSet($this->password))
-					. "' WHERE edit_user_id = " . $res['edit_user_id'];
-				$this->db->dbExec($q);
+				$q = <<<SQL
+				UPDATE edit_user
+				SET password = $1
+				WHERE edit_user_id = $2
+				SQL;
+				$this->db->dbExecParams($q, [
+					Password::passwordSet($this->password),
+					$res['edit_user_id']
+				]);
 			}
 			// normal user processing
 			// set class var and session var
@@ -911,14 +950,19 @@ class Login
 			// check if user is okay
 			$this->loginCheckPermissions();
 			if ($this->login_error == 0) {
+				// set the dit group id
+				$edit_group_id = $res["edit_group_id"];
+				// update last revalidate flag
 				if (
 					!empty($res['login_user_id']) &&
 					!empty($this->username) && !empty($this->password)
 				) {
-					$q = "UPDATE edit_user SET "
-						. "login_user_id_last_revalidate = NOW() "
-						. "WHERE edit_user_id = " . $this->euid;
-					$this->db->dbExec($q);
+					$q = <<<SQL
+					UPDATE edit_user
+					SET login_user_id_last_revalidate = NOW()
+					WHERE edit_user_id = $1
+					SQL;
+					$this->db->dbExecParams($q, [$this->euid]);
 				}
 				$locale = $res['locale'] ?? 'en';
 				$encoding = $res['encoding'] ?? 'UTF-8';
@@ -963,28 +1007,37 @@ class Login
 				// Check\Colors::validateColor()
 				// reset any login error count for this user
 				if ($res['login_error_count'] > 0) {
-					$q = "UPDATE edit_user "
-						. "SET login_error_count = 0, login_error_date_last = NULL, "
-						. "login_error_date_first = NULL "
-						. "WHERE edit_user_id = " . $res['edit_user_id'];
-					$this->db->dbExec($q);
+					$q = <<<SQL
+					UPDATE edit_user
+					SET
+						login_error_count = 0, login_error_date_last = NULL,
+						login_error_date_first = NULL
+					WHERE edit_user_id = $1
+					SQL;
+					$this->db->dbExecParams($q, [$this->euid]);
 				}
 				$edit_page_ids = [];
 				$pages = [];
 				$pages_acl = [];
 				// set pages access
-				$q = "SELECT ep.edit_page_id, ep.cuid, epca.cuid AS content_alias_uid, "
-					. "ep.hostname, ep.filename, ep.name AS edit_page_name, "
-					. "ep.order_number AS edit_page_order, ep.menu, "
-					. "ep.popup, ep.popup_x, ep.popup_y, ep.online, ear.level, ear.type "
-					. "FROM edit_page ep "
-					. "LEFT JOIN edit_page epca ON (epca.edit_page_id = ep.content_alias_edit_page_id)"
-					. ", edit_page_access epa, edit_access_right ear "
-					. "WHERE ep.edit_page_id = epa.edit_page_id "
-					. "AND ear.edit_access_right_id = epa.edit_access_right_id "
-					. "AND epa.enabled = 1 AND epa.edit_group_id = " . $res["edit_group_id"] . " "
-					. "ORDER BY ep.order_number";
-				while (is_array($res = $this->db->dbReturn($q))) {
+				$q = <<<SQL
+				SELECT
+					ep.edit_page_id, ep.cuid, epca.cuid AS content_alias_uid,
+					ep.hostname, ep.filename, ep.name AS edit_page_name,
+					ep.order_number AS edit_page_order, ep.menu,
+					ep.popup, ep.popup_x, ep.popup_y, ep.online, ear.level, ear.type
+				FROM edit_page ep
+				LEFT JOIN edit_page epca ON (
+					epca.edit_page_id = ep.content_alias_edit_page_id
+				),
+				edit_page_access epa, edit_access_right ear
+				WHERE
+					ep.edit_page_id = epa.edit_page_id
+					AND ear.edit_access_right_id = epa.edit_access_right_id
+					AND epa.enabled = 1 AND epa.edit_group_id = $1
+				ORDER BY ep.order_number
+				SQL;
+				while (is_array($res = $this->db->dbReturnParams($q, [$edit_group_id]))) {
 					// page id array for sub data readout
 					$edit_page_ids[$res['edit_page_id']] = $res['cuid'];
 					// create the array for pages
@@ -1010,21 +1063,30 @@ class Login
 					// make reference filename -> level
 					$pages_acl[$res['filename']] = $res['level'];
 				} // for each page
+				// edit page id params
+				$params = ['{' . join(',', array_keys($edit_page_ids)) . '}'];
 				// get the visible groups for all pages and write them to the pages
-				$q = "SELECT epvg.edit_page_id, name, flag "
-					. "FROM edit_visible_group evp, edit_page_visible_group epvg "
-					. "WHERE evp.edit_visible_group_id = epvg.edit_visible_group_id "
-					. "AND epvg.edit_page_id IN (" . join(', ', array_keys($edit_page_ids)) . ") "
-					. "ORDER BY epvg.edit_page_id";
-				while (is_array($res = $this->db->dbReturn($q))) {
+				$q = <<<SQL
+				SELECT epvg.edit_page_id, name, flag
+				FROM edit_visible_group evp, edit_page_visible_group epvg
+				WHERE
+					evp.edit_visible_group_id = epvg.edit_visible_group_id
+					AND epvg.edit_page_id = ANY($1)
+				ORDER BY epvg.edit_page_id
+				SQL;
+				while (is_array($res = $this->db->dbReturnParams($q, $params))) {
 					$pages[$edit_page_ids[$res['edit_page_id']]]['visible'][$res['name']] = $res['flag'];
 				}
 				// get the same for the query strings
-				$q = "SELECT eqs.edit_page_id, name, value, dynamic FROM edit_query_string eqs "
-					. "WHERE enabled = 1 AND edit_page_id "
-					. "IN (" . join(', ', array_keys($edit_page_ids)) . ") "
-					. "ORDER BY eqs.edit_page_id";
-				while (is_array($res = $this->db->dbReturn($q))) {
+				$q = <<<SQL
+				SELECT eqs.edit_page_id, name, value, dynamic
+				FROM edit_query_string eqs
+				WHERE
+					enabled = 1
+					AND edit_page_id = ANY($1)
+				ORDER BY eqs.edit_page_id
+				SQL;
+				while (is_array($res = $this->db->dbReturnParams($q, $params))) {
 					$pages[$edit_page_ids[$res['edit_page_id']]]['query'][] = [
 						'name' => $res['name'],
 						'value' => $res['value'],
@@ -1032,13 +1094,17 @@ class Login
 					];
 				}
 				// get the page content and add them to the page
-				$q = "SELECT epc.edit_page_id, epc.name, epc.uid, epc.order_number, "
-					. "epc.online, ear.level, ear.type "
-					. "FROM edit_page_content epc, edit_access_right ear "
-					. "WHERE epc.edit_access_right_id = ear.edit_access_right_id AND "
-					. "epc.edit_page_id IN (" . join(', ', array_keys($edit_page_ids)) . ") "
-					. "ORDER BY epc.order_number";
-				while (is_array($res = $this->db->dbReturn($q))) {
+				$q = <<<SQL
+				SELECT
+					epc.edit_page_id, epc.name, epc.uid, epc.order_number,
+					epc.online, ear.level, ear.type
+				FROM edit_page_content epc, edit_access_right ear
+				WHERE
+					epc.edit_access_right_id = ear.edit_access_right_id
+					AND epc.edit_page_id = ANY($1)
+				ORDER BY epc.order_number
+				SQL;
+				while (is_array($res = $this->db->dbReturnParams($q, $params))) {
 					$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = [
 						'name' => $res['name'],
 						'uid' => $res['uid'],
@@ -1055,28 +1121,36 @@ class Login
 					'PAGES_ACL_LEVEL' => $pages_acl,
 				]);
 				// load the edit_access user rights
-				$q = "SELECT ea.edit_access_id, level, type, ea.name, "
-					. "ea.color, ea.uid, edit_default, ea.additional_acl "
-					. "FROM edit_access_user eau, edit_access_right ear, edit_access ea "
-					. "WHERE eau.edit_access_id = ea.edit_access_id "
-					. "AND eau.edit_access_right_id = ear.edit_access_right_id "
-					. "AND eau.enabled = 1 AND edit_user_id = " . $this->euid . " "
-					. "ORDER BY ea.name";
+				$q = <<<SQL
+				SELECT
+					ea.edit_access_id, ea.cuid, level, type, ea.name,
+					ea.color, ea.uid, edit_default, ea.additional_acl
+				FROM edit_access_user eau, edit_access_right ear, edit_access ea
+				WHERE
+					eau.edit_access_id = ea.edit_access_id
+					AND eau.edit_access_right_id = ear.edit_access_right_id
+					AND eau.enabled = 1 AND edit_user_id = $1
+				ORDER BY ea.name
+				SQL;
 				$unit_access = [];
+				$unit_cuid_lookup = [];
 				$eauid = [];
 				$unit_acl = [];
-				$unit_uid = [];
-				while (is_array($res = $this->db->dbReturn($q))) {
+				$unit_uid_kookup = [];
+				while (is_array($res = $this->db->dbReturnParams($q, [$this->euid]))) {
 					// read edit access data fields and drop them into the unit access array
-					$q_sub = "SELECT name, value "
-						. "FROM edit_access_data "
-						. "WHERE enabled = 1 AND edit_access_id = " . $res['edit_access_id'];
+					$q_sub = <<<SQL
+					SELECT name, value
+					FROM edit_access_data
+					WHERE enabled = 1 AND edit_access_id = $1
+					SQL;
 					$ea_data = [];
-					while (is_array($res_sub = $this->db->dbReturn($q_sub))) {
+					while (is_array($res_sub = $this->db->dbReturnParams($q_sub, [$res['edit_access_id']]))) {
 						$ea_data[$res_sub['name']] = $res_sub['value'];
 					}
+					$unit_cuid_lookup[$res['edit_access_id']] = $res['cuid'];
 					// build master unit array
-					$unit_access[$res['edit_access_id']] = [
+					$unit_access[$res['cuid']] = [
 						'id' => (int)$res['edit_access_id'],
 						'acl_level' => $res['level'],
 						'acl_type' => $res['type'],
@@ -1090,14 +1164,16 @@ class Login
 					// set the default unit
 					if ($res['edit_default']) {
 						$this->session->set('UNIT_DEFAULT', (int)$res['edit_access_id']);
+						$this->session->set('UNIT_DEFAULT_CUID', (int)$res['cuid']);
 					}
-					$unit_uid[$res['uid']] = (int)$res['edit_access_id'];
+					$unit_uid_kookup[$res['uid']] = (int)$res['edit_access_id'];
 					// sub arrays for simple access
 					array_push($eauid, $res['edit_access_id']);
 					$unit_acl[$res['edit_access_id']] = $res['level'];
 				}
 				$this->session->setMany([
-					'UNIT_UID' => $unit_uid,
+					'UNIT_UID' => $unit_uid_kookup,
+					'UNIT_CUID' => $unit_cuid_lookup,
 					'UNIT' => $unit_access,
 					'UNIT_ACL_LEVEL' => $unit_acl,
 					'EAID' => $eauid,
@@ -1110,11 +1186,18 @@ class Login
 				$login_error_date_first = ", login_error_date_first = NOW()";
 			}
 			// update login error count for this user
-			$q = "UPDATE edit_user "
-				. "SET login_error_count = login_error_count + 1, "
-				. "login_error_date_last = NOW() " . $login_error_date_first . " "
-				. "WHERE edit_user_id = " . $res['edit_user_id'];
-			$this->db->dbExec($q);
+			$q = <<<SQL
+			UPDATE edit_user
+			SET
+				login_error_count = login_error_count + 1,
+				login_error_date_last = NOW()
+				{LOGIN_ERROR_SQL}
+			WHERE edit_user_id = $1
+			SQL;
+			$this->db->dbExecParams(
+				str_replace('{LOGIN_ERROR_SQL}', $login_error_date_first, $q),
+				[$res['edit_user_id']]
+			);
 			// totally lock the user if error max is reached
 			if (
 				$this->max_login_error_count != -1 &&
@@ -1124,7 +1207,12 @@ class Login
 				// if strict is set, lock this user
 				// this needs manual unlocking by an admin user
 				if ($res['strict'] && !in_array($this->username, $this->lock_deny_users)) {
-					$q = "UPDATE edit_user SET locked = 1 WHERE edit_user_id = " . $res['edit_user_id'];
+					$q = <<<SQL
+					UPDATE edit_user
+					SET locked = 1
+					WHERE edit_user_id = $1
+					SQL;
+					// [$res['edit_user_id']]
 				}
 			}
 		}
@@ -1134,6 +1222,8 @@ class Login
 			$this->permission_okay = false;
 		}
 	}
+
+	// MARK: login set ACL
 
 	/**
 	 * sets all the basic ACLs
@@ -1264,6 +1354,8 @@ class Login
 		// $this->debug('ACL', $this->print_ar($this->acl));
 	}
 
+	// MARK: lgin set locale
+
 	/**
 	 * set locale
 	 * if invalid, set to empty string
@@ -1322,6 +1414,8 @@ class Login
 			'path' => $path,
 		];
 	}
+
+	// MARK: password handling
 
 	/**
 	 * checks if the password is in a valid format
@@ -1461,6 +1555,8 @@ class Login
 		$this->writeEditLog($event, $data, $this->login_error, $this->pw_username);
 	}
 
+	// MARK: set HTML login page
+
 	/**
 	 * creates the login html part if no permission (error) is set
 	 * this does not print anything yet
@@ -1570,6 +1666,8 @@ class Login
 		return $html_string;
 	}
 
+	// MARK: logout call
+
 	/**
 	 * last function called, writes log and prints out error msg and
 	 * exists script if permission 0
@@ -1593,9 +1691,13 @@ class Login
 			// prepare for log
 			if ($this->euid) {
 				// get user from user table
-				$q = "SELECT username FROM edit_user WHERE edit_user_id = " . $this->euid;
+				$q = <<<SQL
+				SELECT username
+				FROM edit_user
+				WHERE edit_user_id = $1
+				SQL;
 				$username = '';
-				if (is_array($res = $this->db->dbReturnRow($q))) {
+				if (is_array($res = $this->db->dbReturnRowParams($q, [$this->euid]))) {
 					$username = $res['username'];
 				}
 			} // if euid is set, get username (or try)
@@ -1609,6 +1711,8 @@ class Login
 			return true;
 		}
 	}
+
+	// MARK: set template for login page
 
 	/**
 	 * checks if there are external templates, if not uses internal fallback ones
@@ -1967,7 +2071,7 @@ HTML;
 	// **** PUBLIC INTERNAL
 	// *************************************************************************
 
-	// MARK: LOGIN CALL
+	// MARK: PUBLIC LOGIN CALL
 
 	/**
 	 * Main call that needs to be run to actaully check for login
@@ -2154,6 +2258,108 @@ HTML;
 	}
 
 	/**
+	 * Returns current set loginUserId or empty if unset
+	 *
+	 * @return string loginUserId or empty string for not set
+	 */
+	public function loginGetLoginUserId(): string
+	{
+		return $this->login_user_id;
+	}
+
+	/**
+	 * Returns GET/POST for where the loginUserId was set
+	 *
+	 * @return string GET or POST or empty string for not set
+	 */
+	public function loginGetLoginUserIdSource(): string
+	{
+		return $this->login_user_id_source;
+	}
+
+	/**
+	 * Returns unclear login user id state. If true then illegal characters
+	 * where present in the loginUserId parameter
+	 *
+	 * @return bool False for clear, True if illegal characters found
+	 */
+	public function loginGetLoginUserIdUnclean(): bool
+	{
+		return $this->login_user_id_unclear;
+	}
+
+	/**
+	 * Return locale settings with
+	 * locale
+	 * domain
+	 * encoding
+	 * path
+	 *
+	 * empty string if not set
+	 *
+	 * @return array<string,string> Locale settings
+	 */
+	public function loginGetLocale(): array
+	{
+		return $this->locale;
+	}
+
+	/**
+	 * return header color or null for not set
+	 *
+	 * @return string|null Header color in RGB hex with leading sharp
+	 */
+	public function loginGetHeaderColor(): ?string
+	{
+		return $this->session->get('HEADER_COLOR');
+	}
+
+	/**
+	 * Return the current loaded list of pages the user can access
+	 *
+	 * @return array<mixed>
+	 */
+	public function loginGetPages(): array
+	{
+
+		return $this->session->get('PAGES');
+	}
+
+	// MARK: logged in uid(pk)/cuid/eccuid
+
+	/**
+	 * Get the current set EUID (edit user id)
+	 *
+	 * @return string EUID as string
+	 */
+	public function loginGetEuid(): string
+	{
+		return (string)$this->euid;
+	}
+
+	/**
+	 * Get the current set ECUID (edit user cuid)
+	 *
+	 * @return string ECUID as string
+	 */
+	public function loginGetEcuid(): string
+	{
+		return (string)$this->ecuid;
+	}
+
+	/**
+	 * Get the current set ECUUID (edit user cuuid)
+	 *
+	 * @return string ECUUID as string
+	 */
+	public function loginGetEcuuid(): string
+	{
+		return (string)$this->ecuuid;
+	}
+
+	// MARK: get error messages
+
+	/**
 	 * returns the last set error code
 	 *
 	 * @return int Last set error code, 0 for no error
@@ -2198,6 +2404,8 @@ HTML;
 		}
 		return $string;
 	}
+
+	// MARK: password checks
 
 	/**
 	 * Sets the minium length and checks on valid.
@@ -2251,6 +2459,8 @@ HTML;
 		return $value;
 	}
 
+	// MARK: max login count
+
 	/**
 	 * Set the maximum login errors a user can have before getting locked
 	 * if the user has the strict lock setting turned on
@@ -2277,6 +2487,8 @@ HTML;
 		return $this->max_login_error_count;
 	}
 
+	// MARK: LGOUT USER
+
 	/**
 	 * if a user pressed on logout, destroyes session and unsets all global vars
 	 *
@@ -2298,6 +2510,8 @@ HTML;
 		$this->permission_okay = false;
 	}
 
+	// MARK: logged in user permssion check
+
 	/**
 	 * for every page the user access this script checks if he is allowed to do so
 	 *
@@ -2316,39 +2530,53 @@ HTML;
 		if ($this->login_error == 103) {
 			return $this->permission_okay;
 		}
-		$q = "SELECT ep.filename, eu.cuid, eu.cuuid, "
-			// base lock flags
-			. "eu.deleted, eu.enabled, eu.locked, "
-			// date based lock
-			. "CASE WHEN ("
-			. "(eu.lock_until IS NULL "
-			. "OR (eu.lock_until IS NOT NULL AND NOW() >= eu.lock_until)) "
-			. "AND (eu.lock_after IS NULL "
-			. "OR (eu.lock_after IS NOT NULL AND NOW() <= eu.lock_after))"
-			. ") THEN 0::INT ELSE 1::INT END locked_period, "
-			// login id validation
-			. "login_user_id, "
-			. "CASE WHEN ("
-			. "(eu.login_user_id_valid_from IS NULL "
-			. "OR (eu.login_user_id_valid_from IS NOT NULL AND NOW() >= eu.login_user_id_valid_from)) "
-			. "AND (eu.login_user_id_valid_until IS NULL "
-			. "OR (eu.login_user_id_valid_until IS NOT NULL AND NOW() <= eu.login_user_id_valid_until))"
-			. ") THEN 1::INT ELSE 0::INT END AS login_user_id_valid_date, "
-			// check if user must login
-			. "CASE WHEN eu.login_user_id_revalidate_after IS NOT NULL "
-			. "AND eu.login_user_id_revalidate_after > '0 days'::INTERVAL "
-			. "AND eu.login_user_id_last_revalidate + eu.login_user_id_revalidate_after <= NOW()::DATE "
-			.  "THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate, "
-			. "eu.login_user_id_locked "
-			//
-			. "FROM edit_page ep, edit_page_access epa, edit_group eg, edit_user eu "
-			. "WHERE ep.edit_page_id = epa.edit_page_id "
-			. "AND eg.edit_group_id = epa.edit_group_id "
-			. "AND eg.edit_group_id = eu.edit_group_id "
-			. "AND eu.edit_user_id = " . $this->euid . " "
-			. "AND ep.filename = '" . $this->page_name . "' "
-			. "AND eg.enabled = 1 AND epa.enabled = 1";
-		$res = $this->db->dbReturnRow($q);
+		$q = <<<SQL
+		SELECT
+			ep.filename, eu.cuid, eu.cuuid,
+			-- base lock flags
+			eu.deleted, eu.enabled, eu.locked,
+			-- date based lock
+			CASE WHEN (
+				(
+					eu.lock_until IS NULL
+					OR (eu.lock_until IS NOT NULL AND NOW() >= eu.lock_until)
+				)
+				AND (
+					eu.lock_after IS NULL
+					OR (eu.lock_after IS NOT NULL AND NOW() <= eu.lock_after)
+				)
+			) THEN 0::INT ELSE 1::INT END locked_period,
+			-- login id validation
+			login_user_id,
+			CASE WHEN (
+				(
+					eu.login_user_id_valid_from IS NULL
+					OR (eu.login_user_id_valid_from IS NOT NULL AND NOW() >= eu.login_user_id_valid_from)
+				)
+				AND (
+					eu.login_user_id_valid_until IS NULL
+					OR (eu.login_user_id_valid_until IS NOT NULL AND NOW() <= eu.login_user_id_valid_until)
+				)
+			) THEN 1::INT ELSE 0::INT END AS login_user_id_valid_date,
+			-- check if user must login
+			CASE WHEN
+				eu.login_user_id_revalidate_after IS NOT NULL
+				AND eu.login_user_id_revalidate_after > '0 days'::INTERVAL
+				AND eu.login_user_id_last_revalidate + eu.login_user_id_revalidate_after <= NOW()::DATE
+			THEN 1::INT ELSE 0::INT END AS login_user_id_revalidate,
+			eu.login_user_id_locked
+		--
+		FROM
+			edit_page ep, edit_page_access epa, edit_group eg, edit_user eu
+		WHERE
+			ep.edit_page_id = epa.edit_page_id
+			AND eg.edit_group_id = epa.edit_group_id
+			AND eg.edit_group_id = eu.edit_group_id
+			AND eg.enabled = 1 AND epa.enabled = 1
+			AND eu.edit_user_id = $1
+			AND ep.filename = $2
+		SQL;
+		$res = $this->db->dbReturnRowParams($q, [$this->euid, $this->page_name]);
 		if (!is_array($res)) {
 			$this->login_error = 109;
 			return $this->permission_okay;
@@ -2402,6 +2630,8 @@ HTML;
 	{
 		return $this->permission_okay;
 	}
+
+	// MARK: ACL acess check
 
 	/**
 	 * Check if source (page, base) is matching to the given min access string
@@ -2503,6 +2733,8 @@ HTML;
 		return (int)$this->default_acl_list_type[$type];
 	}
 
+	// MARK: edit access helpers
+
 	/**
 	 * checks if this edit access id is valid
 	 *
@@ -2563,6 +2795,21 @@ HTML;
 		return $_SESSION['UNIT'][$edit_access_id]['data'][$data_key];
 	}
 
+		/**
+	 * old name for loginGetEditAccessData
+	 *
+	 * @deprecated Use $login->loginGetEditAccessData()
+	 * @param  int         $edit_access_id
+	 * @param  string|int  $data_key
+	 * @return bool|string
+	 */
+	public function loginSetEditAccessData(
+		int $edit_access_id,
+		string|int $data_key
+	): bool|string {
+		return $this->loginGetEditAccessData($edit_access_id, $data_key);
+	}
+
 	/**
 	 * Return edit access primary key id from edit access uid
 	 * false on not found
@@ -2591,6 +2838,8 @@ HTML;
 		return false;
 	}
 
+	// MARK: various basic login id checks
+
 	/**
 	 * Returns true if login button was pressed
 	 *
@@ -2599,119 +2848,6 @@ HTML;
 	public function loginActionRun(): bool
 	{
 		return empty($this->login) ? false : true;
-	}
-
-	/**
-	 * Returns current set loginUserId or empty if unset
-	 *
-	 * @return string loginUserId or empty string for not set
-	 */
-	public function loginGetLoginUserId(): string
-	{
-		return $this->login_user_id;
-	}
-
-	/**
-	 * Returns GET/POST for where the loginUserId was set
-	 *
-	 * @return string GET or POST or empty string for not set
-	 */
-	public function loginGetLoginUserIdSource(): string
-	{
-		return $this->login_user_id_source;
-	}
-
-	/**
-	 * Returns unclear login user id state. If true then illegal characters
-	 * where present in the loginUserId parameter
-	 *
-	 * @return bool False for clear, True if illegal characters found
-	 */
-	public function loginGetLoginUserIdUnclean(): bool
-	{
-		return $this->login_user_id_unclear;
-	}
-
-	/**
-	 * old name for loginGetEditAccessData
-	 *
-	 * @deprecated Use $login->loginGetEditAccessData()
-	 * @param  int         $edit_access_id
-	 * @param  string|int  $data_key
-	 * @return bool|string
-	 */
-	public function loginSetEditAccessData(
-		int $edit_access_id,
-		string|int $data_key
-	): bool|string {
-		return $this->loginGetEditAccessData($edit_access_id, $data_key);
-	}
-
-	/**
-	 * Return locale settings with
-	 * locale
-	 * domain
-	 * encoding
-	 * path
-	 *
-	 * empty string if not set
-	 *
-	 * @return array<string,string> Locale settings
-	 */
-	public function loginGetLocale(): array
-	{
-		return $this->locale;
-	}
-
-	/**
-	 * return header color or null for not set
-	 *
-	 * @return string|null Header color in RGB hex with leading sharp
-	 */
-	public function loginGetHeaderColor(): ?string
-	{
-		return $this->session->get('HEADER_COLOR');
-	}
-
-	/**
-	 * Return the current loaded list of pages the user can access
-	 *
-	 * @return array<mixed>
-	 */
-	public function loginGetPages(): array
-	{
-
-		return $this->session->get('PAGES');
-	}
-
-	/**
-	 * Get the current set EUID (edit user id)
-	 *
-	 * @return string EUID as string
-	 */
-	public function loginGetEuid(): string
-	{
-		return (string)$this->euid;
-	}
-
-	/**
-	 * Get the current set ECUID (edit user cuid)
-	 *
-	 * @return string ECUID as string
-	 */
-	public function loginGetEcuid(): string
-	{
-		return (string)$this->ecuid;
-	}
-
-	/**
-	 * Get the current set ECUUID (edit user cuuid)
-	 *
-	 * @return string ECUUID as string
-	 */
-	public function loginGetEcuuid(): string
-	{
-		return (string)$this->ecuuid;
 	}
 }
 
