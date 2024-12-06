@@ -22,8 +22,12 @@ Not yet covered tests:
  */
 final class CoreLibsACLLoginTest extends TestCase
 {
-	private static $db;
-	private static $log;
+	private static \CoreLibs\DB\IO $db;
+	private static \CoreLibs\Logging\Logging $log;
+
+	private static string $edit_access_cuid;
+	private static string $edit_user_cuid;
+	private static string $edit_user_cuuid;
 
 	/**
 	 * start DB conneciton, setup DB, etc
@@ -108,13 +112,39 @@ final class CoreLibsACLLoginTest extends TestCase
 		self::$db->dbSetMaxQueryCall(-1);
 		// insert additional content for testing (locked user, etc)
 		$queries = [
-			"INSERT INTO edit_access_data "
-				. "(edit_access_id, name, value, enabled) VALUES "
-				. "((SELECT edit_access_id FROM edit_access WHERE uid = 'AdminAccess'), "
-				. "'test', 'value', 1)"
+			<<<SQL
+			INSERT INTO edit_access_data (
+				edit_access_id, name, value, enabled
+			) VALUES (
+				(SELECT edit_access_id FROM edit_access WHERE uid = 'AdminAccess'),
+				'test', 'value', 1
+			)
+			SQL
 		];
 		foreach ($queries as $query) {
 			self::$db->dbExec($query);
+		}
+		// read edit access cuid, edit user cuid and edit user cuuid
+		$row = self::$db->dbReturnRowParams(
+			"SELECT cuid FROM edit_access WHERE uid = $1",
+			["AdminAccess"]
+		);
+		self::$edit_access_cuid = $row['cuid'] ?? '';
+		if (empty(self::$edit_access_cuid)) {
+			self::markTestIncomplete(
+				'Cannot read edit access cuid for "AdminAccess".'
+			);
+		}
+		$row = self::$db->dbReturnRowParams(
+			"SELECT cuid, cuuid FROM edit_user WHERE username = $1",
+			["admin"]
+		);
+		self::$edit_user_cuid = $row['cuid'] ?? '';
+		self::$edit_user_cuuid = $row['cuuid'] ?? '';
+		if (empty(self::$edit_user_cuid) || empty(self::$edit_user_cuuid)) {
+			self::markTestIncomplete(
+				'Cannot read edit user cuid or cuuid for "admin".'
+			);
 		}
 
 		// define mandatory constant
@@ -253,6 +283,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -273,10 +304,11 @@ final class CoreLibsACLLoginTest extends TestCase
 					'USER_ADDITIONAL_ACL' => [],
 					'GROUP_ADDITIONAL_ACL' => [],
 					'UNIT_UID' => [
-						'AdminAccess' => 1,
+						'AdminAccess' => '123456789012',
 					],
 					'UNIT' => [
-						1 => [
+						'123456789012' => [
+							'id' => 1,
 							'acl_level' => 80,
 							'name' => 'Admin Access',
 							'uid' => 'AdminAccess',
@@ -297,6 +329,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -416,6 +449,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_deleted' => true
@@ -441,6 +475,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_enabled' => true
@@ -466,6 +501,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_locked' => true
@@ -491,6 +527,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_get_locked' => true,
@@ -515,6 +552,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_locked_period_until' => 'on'
@@ -540,6 +578,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -559,6 +598,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -569,6 +609,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_locked_period_after' => 'on'
@@ -594,6 +635,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_locked_period_until' => 'on',
@@ -620,6 +662,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_login_user_id_locked' => true
@@ -645,6 +688,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -663,6 +707,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -673,6 +718,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -692,6 +738,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -702,6 +749,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -721,6 +769,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -731,6 +780,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -750,6 +800,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -781,6 +832,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -804,6 +856,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -814,6 +867,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -837,6 +891,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -847,6 +902,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_login_user_id_revalidate_after' => 'on',
@@ -873,6 +929,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -893,6 +950,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -903,6 +961,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_login_user_id_valid_from' => 'on',
@@ -929,6 +988,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -949,6 +1009,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -959,6 +1020,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_login_user_id_valid_until' => 'on',
@@ -985,6 +1047,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'base_access' => 'list',
 					'page_access' => 'list',
 					'test_login_user_id_valid_from' => 'on',
@@ -1012,6 +1075,7 @@ final class CoreLibsACLLoginTest extends TestCase
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
+					'edit_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'edit_access_uid' => 'AdminAccess',
 					'edit_access_data' => 'test',
 					'base_access' => 'list',
@@ -1042,6 +1106,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'admin_flag' => true,
 					'check_access' => true,
 					'check_access_id' => 1,
+					'check_access_cuid' => 'SET_EDIT_ACCESS_CUID_IN_TEST',
 					'check_access_data' => 'value',
 					'base_access' => true,
 					'page_access' => true,
@@ -1369,6 +1434,9 @@ final class CoreLibsACLLoginTest extends TestCase
 
 		// run test
 		try {
+			// preset, we cannot set that in the provider
+			$expected['check_access_cuid'] = self::$edit_access_cuid;
+			$mock_settings['edit_access_cuid'] = self::$edit_access_cuid;
 			// if ajax call
 			// check if parameter, or globals (old type)
 			// else normal call
@@ -1427,6 +1495,25 @@ final class CoreLibsACLLoginTest extends TestCase
 				$login_mock->loginCheckAccessPage($mock_settings['page_access']),
 				'Assert page access'
 			);
+			// - loginCheckEditAccessCuid
+			$this->assertEquals(
+				$expected['check_access'],
+				$login_mock->loginCheckEditAccessCuid($mock_settings['edit_access_cuid']),
+				'Assert check access'
+			);
+			// - loginCheckEditAccessValidCuid
+			$this->assertEquals(
+				$expected['check_access_cuid'],
+				$login_mock->loginCheckEditAccessValidCuid($mock_settings['edit_access_cuid']),
+				'Assert check access cuid valid'
+			);
+			// - loginGetEditAccessCuidFromUid
+			$this->assertEquals(
+				$expected['check_access_cuid'],
+				$login_mock->loginGetEditAccessCuidFromUid($mock_settings['edit_access_uid']),
+				'Assert check access uid to cuid valid'
+			);
+			// Deprecated
 			// - loginCheckEditAccess
 			$this->assertEquals(
 				$expected['check_access'],
@@ -1449,7 +1536,7 @@ final class CoreLibsACLLoginTest extends TestCase
 			$this->assertEquals(
 				$expected['check_access_data'],
 				$login_mock->loginGetEditAccessData(
-					$mock_settings['edit_access_id'],
+					$mock_settings['edit_access_uid'],
 					$mock_settings['edit_access_data']
 				),
 				'Assert check access id data value valid'

@@ -1132,11 +1132,14 @@ class Login
 					AND eau.enabled = 1 AND edit_user_id = $1
 				ORDER BY ea.name
 				SQL;
-				$unit_access = [];
+				$unit_access_cuid = [];
+				// legacy
+				$unit_access_eaid = [];
 				$unit_cuid_lookup = [];
-				$eauid = [];
+				$eaid = [];
+				$eacuid = [];
 				$unit_acl = [];
-				$unit_uid_kookup = [];
+				$unit_uid_lookup = [];
 				while (is_array($res = $this->db->dbReturnParams($q, [$this->euid]))) {
 					// read edit access data fields and drop them into the unit access array
 					$q_sub = <<<SQL
@@ -1148,10 +1151,9 @@ class Login
 					while (is_array($res_sub = $this->db->dbReturnParams($q_sub, [$res['edit_access_id']]))) {
 						$ea_data[$res_sub['name']] = $res_sub['value'];
 					}
-					$unit_cuid_lookup[$res['edit_access_id']] = $res['cuid'];
 					// build master unit array
-					$unit_access[$res['cuid']] = [
-						'id' => (int)$res['edit_access_id'],
+					$unit_access_cuid[$res['cuid']] = [
+						'id' => (int)$res['edit_access_id'], // DEPRECATED
 						'acl_level' => $res['level'],
 						'acl_type' => $res['type'],
 						'name' => $res['name'],
@@ -1161,22 +1163,29 @@ class Login
 						'additional_acl' => Json::jsonConvertToArray($res['additional_acl']),
 						'data' => $ea_data
 					];
+					$unit_access_eaid[$res['edit_access_id']] = [
+						'cuid' => $res['cuid'],
+					];
 					// set the default unit
 					if ($res['edit_default']) {
-						$this->session->set('UNIT_DEFAULT', (int)$res['edit_access_id']);
-						$this->session->set('UNIT_DEFAULT_CUID', (int)$res['cuid']);
+						$this->session->set('UNIT_DEFAULT_EAID', (int)$res['edit_access_id']); // DEPRECATED
+						$this->session->set('UNIT_DEFAULT_EACUID', (int)$res['cuid']);
 					}
-					$unit_uid_kookup[$res['uid']] = (int)$res['edit_access_id'];
+					$unit_uid_lookup[$res['uid']] = $res['edit_access_id']; // DEPRECATED
+					$unit_cuid_lookup[$res['uid']] = $res['cuid'];
 					// sub arrays for simple access
-					array_push($eauid, $res['edit_access_id']);
-					$unit_acl[$res['edit_access_id']] = $res['level'];
+					array_push($eaid, $res['edit_access_id']);
+					array_push($eacuid, $res['cuid']);
+					$unit_acl[$res['cuid']] = $res['level'];
 				}
 				$this->session->setMany([
-					'UNIT_UID' => $unit_uid_kookup,
+					'UNIT_UID' => $unit_uid_lookup, // DEPRECATED
 					'UNIT_CUID' => $unit_cuid_lookup,
-					'UNIT' => $unit_access,
+					'UNIT' => $unit_access_cuid,
+					'UNIT_LEGACY' => $unit_access_eaid, // DEPRECATED
 					'UNIT_ACL_LEVEL' => $unit_acl,
-					'EAID' => $eauid,
+					'EAID' => $eaid, // DEPRECATED
+					'EACUID' => $eacuid,
 				]);
 			} // user has permission to THIS page
 		} // user was not enabled or other login error
@@ -1308,32 +1317,35 @@ class Login
 		$this->acl['unit_name'] = null;
 		$this->acl['unit_uid'] = null;
 		$this->acl['unit'] = [];
+		$this->acl['unit_legacy'] = [];
 		$this->acl['unit_detail'] = [];
 
 		// PER ACCOUNT (UNIT/edit access)->
-		foreach ($_SESSION['UNIT'] as $ea_id => $unit) {
+		foreach ($_SESSION['UNIT'] as $ea_cuid => $unit) {
 			// if admin flag is set, all units are set to 100
 			if (!empty($this->acl['admin'])) {
-				$this->acl['unit'][$ea_id] = $this->acl['base'];
+				$this->acl['unit'][$ea_cuid] = $this->acl['base'];
 			} else {
 				if ($unit['acl_level'] != -1) {
-					$this->acl['unit'][$ea_id] = $unit['acl_level'];
+					$this->acl['unit'][$ea_cuid] = $unit['acl_level'];
 				} else {
-					$this->acl['unit'][$ea_id] = $this->acl['base'];
+					$this->acl['unit'][$ea_cuid] = $this->acl['base'];
 				}
 			}
+			// legacy
+			$this->acl['unit_legacy'][$unit['id']] = $this->acl['unit'][$ea_cuid];
 			// detail name/level set
-			$this->acl['unit_detail'][$ea_id] = [
+			$this->acl['unit_detail'][$ea_cuid] = [
 				'name' => $unit['name'],
 				'uid' => $unit['uid'],
-				'level' => $this->default_acl_list[$this->acl['unit'][$ea_id]]['name'] ?? -1,
+				'level' => $this->default_acl_list[$this->acl['unit'][$ea_cuid]]['name'] ?? -1,
 				'default' => $unit['default'],
 				'data' => $unit['data'],
 				'additional_acl' => $unit['additional_acl']
 			];
 			// set default
 			if (!empty($unit['default'])) {
-				$this->acl['unit_id'] = $unit['id'];
+				$this->acl['unit_cuid'] = $ea_cuid;
 				$this->acl['unit_name'] = $unit['name'];
 				$this->acl['unit_uid'] = $unit['uid'];
 			}
@@ -2741,16 +2753,58 @@ HTML;
 	 * @param  int|null $edit_access_id access id pk to check
 	 * @return bool                     true/false: if the edit access is not
 	 *                                  in the valid list: false
+	 * @deprecated Please switch to using edit access cuid check with ->loginCheckEditAccessCuid()
 	 */
 	public function loginCheckEditAccess(?int $edit_access_id): bool
 	{
 		if ($edit_access_id === null) {
 			return false;
 		}
-		if (array_key_exists($edit_access_id, $this->acl['unit'])) {
+		if (array_key_exists($edit_access_id, $this->acl['unit_legacy'])) {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * check if this edit access cuid is valid
+	 *
+	 * @param  string|null $cuid
+	 * @return bool
+	 */
+	public function loginCheckEditAccessCuid(?string $cuid): bool
+	{
+		if ($cuid === null) {
+			return false;
+		}
+		if (array_key_exists($cuid, $this->acl['unit'])) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * checks that the given edit access id is valid for this user
+	 * return null if nothing set, or the edit access id
+	 *
+	 * @param  string|null $cuid edit access cuid to check
+	 * @return string|null       same edit access cuid if ok
+	 *                           or the default edit access id
+	 *                           if given one is not valid
+	 */
+	public function loginCheckEditAccessValidCuid(?string $cuid): ?string
+	{
+		if (
+			$cuid !== null &&
+			is_array($this->session->get('UNIT')) &&
+			!array_key_exists($cuid, $this->session->get('UNIT'))
+		) {
+			$cuid = null;
+			if (!empty($this->session->get('UNIT_DEFAULT_EACUID'))) {
+				$cuid = $this->session->get('UNIT_DEFAULT_EACUID');
+			}
+		}
+		return $cuid;
 	}
 
 	/**
@@ -2761,53 +2815,39 @@ HTML;
 	 * @return int|null                 same edit access id if ok
 	 *                                  or the default edit access id
 	 *                                  if given one is not valid
+	 * @deprecated Please switch to using edit access cuid check with ->loginCheckEditAccessValidCuid()
 	 */
 	public function loginCheckEditAccessId(?int $edit_access_id): ?int
 	{
 		if (
 			$edit_access_id !== null &&
-			is_array($this->session->get('UNIT')) &&
-			!array_key_exists($edit_access_id, $this->session->get('UNIT'))
+			is_array($this->session->get('UNIT_LEGACY')) &&
+			!array_key_exists($edit_access_id, $this->session->get('UNIT_LEGACY'))
 		) {
 			$edit_access_id = null;
-			if (is_numeric($this->session->get('UNIT_DEFAULT'))) {
-				$edit_access_id = (int)$this->session->get('UNIT_DEFAULT');
+			if (!empty($this->session->get('UNIT_DEFAULT_EAID'))) {
+				$edit_access_id = (int)$this->session->get('UNIT_DEFAULT_EAID');
 			}
 		}
 		return $edit_access_id;
 	}
 
 	/**
-	 * return a set entry from the UNIT session for an edit access_id
+	 * return a set entry from the UNIT session for an edit access cuid
 	 * if not found return false
 	 *
-	 * @param  int        $edit_access_id edit access id
-	 * @param  string|int $data_key       key value to search for
-	 * @return bool|string                false for not found or string for found data
+	 * @param  string     $cuid     edit access cuid
+	 * @param  string|int $data_key key value to search for
+	 * @return false|string         false for not found or string for found data
 	 */
 	public function loginGetEditAccessData(
-		int $edit_access_id,
+		string $cuid,
 		string|int $data_key
-	): bool|string {
-		if (!isset($_SESSION['UNIT'][$edit_access_id]['data'][$data_key])) {
+	): false|string {
+		if (!isset($_SESSION['UNIT'][$cuid]['data'][$data_key])) {
 			return false;
 		}
-		return $_SESSION['UNIT'][$edit_access_id]['data'][$data_key];
-	}
-
-		/**
-	 * old name for loginGetEditAccessData
-	 *
-	 * @deprecated Use $login->loginGetEditAccessData()
-	 * @param  int         $edit_access_id
-	 * @param  string|int  $data_key
-	 * @return bool|string
-	 */
-	public function loginSetEditAccessData(
-		int $edit_access_id,
-		string|int $data_key
-	): bool|string {
-		return $this->loginGetEditAccessData($edit_access_id, $data_key);
+		return $_SESSION['UNIT'][$cuid]['data'][$data_key];
 	}
 
 	/**
@@ -2815,14 +2855,29 @@ HTML;
 	 * false on not found
 	 *
 	 * @param  string   $uid Edit Access UID to look for
-	 * @return int|bool      Either primary key in int or false in bool for not found
+	 * @return int|false     Either primary key in int or false in bool for not found
+	 * @deprecated use loginGetEditAccessCuidFromUid
 	 */
-	public function loginGetEditAccessIdFromUid(string $uid): int|bool
+	public function loginGetEditAccessIdFromUid(string $uid): int|false
 	{
 		if (!isset($_SESSION['UNIT_UID'][$uid])) {
 			return false;
 		}
 		return (int)$_SESSION['UNIT_UID'][$uid];
+	}
+
+	/**
+	 * Get the edit access UID from the edit access CUID
+	 *
+	 * @param  string   $uid
+	 * @return int|false
+	 */
+	public function loginGetEditAccessCuidFromUid(string $uid): int|false
+	{
+		if (!isset($_SESSION['UNIT_CUID'][$uid])) {
+			return false;
+		}
+		return (int)$_SESSION['UNIT_CUID'][$uid];
 	}
 
 	/**
