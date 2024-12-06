@@ -265,7 +265,7 @@ final class CoreLibsACLLoginTest extends TestCase
 					'ajax_post_action' => 'login',
 				],
 			],
-			'load, session euid set only, php error' => [
+			'load, session ecuuid set only, php error' => [
 				[
 					'page_name' => 'edit_users.php',
 				],
@@ -273,8 +273,8 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				[
 					'EUID' => 1,
-					'ECUID' => 'abc',
-					'ECUUID' => '1233456-1234-1234-1234-123456789012',
+					'EUCUID' => 'abc',
+					'EUCUUID' => '1233456-1234-1234-1234-123456789012',
 				],
 				2,
 				[],
@@ -293,8 +293,8 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				[
 					'EUID' => 1,
-					'ECUID' => 'abc',
-					'ECUUID' => '1233456-1234-1234-1234-123456789012',
+					'EUCUID' => 'abc',
+					'EUCUUID' => 'SET_EUCUUID_IN_TEST',
 					'USER_NAME' => '',
 					'GROUP_NAME' => '',
 					'ADMIN' => 1,
@@ -1176,6 +1176,11 @@ final class CoreLibsACLLoginTest extends TestCase
 			$_POST[$post_var] = $post_value;
 		}
 
+		// set ingoing session cuuid if requested
+		if (isset($session['EUCUUID']) && $session['EUCUUID'] == 'SET_EUCUUID_IN_TEST') {
+			$session['EUCUUID'] = self::$edit_user_cuuid;
+		}
+
 		// set _SESSION data
 		foreach ($session as $session_var => $session_value) {
 			$_SESSION[$session_var] = $session_value;
@@ -1435,8 +1440,18 @@ final class CoreLibsACLLoginTest extends TestCase
 		// run test
 		try {
 			// preset, we cannot set that in the provider
-			$expected['check_access_cuid'] = self::$edit_access_cuid;
-			$mock_settings['edit_access_cuid'] = self::$edit_access_cuid;
+			if (
+				isset($expected['check_access_cuid']) &&
+				$expected['check_access_cuid'] == 'SET_EDIT_ACCESS_CUID_IN_TEST'
+			) {
+				$expected['check_access_cuid'] = self::$edit_access_cuid;
+			}
+			if (
+				isset($mock_settings['edit_access_cuid']) &&
+				$mock_settings['edit_access_cuid'] == 'SET_EDIT_ACCESS_CUID_IN_TEST'
+			) {
+				$mock_settings['edit_access_cuid'] = self::$edit_access_cuid;
+			}
 			// if ajax call
 			// check if parameter, or globals (old type)
 			// else normal call

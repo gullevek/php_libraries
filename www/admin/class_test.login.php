@@ -99,8 +99,8 @@ echo "ACL: " . Support::printAr($login->loginGetAcl()) . "<br>";
 echo "ACL (MIN): " . Support::printAr($login->loginGetAcl()['min'] ?? []) . "<br>";
 echo "LOCALE: " . Support::printAr($login->loginGetLocale()) . "<br>";
 
-echo "ECUID: " . $login->loginGetEcuid() . "<br>";
-echo "ECUUID: " . $login->loginGetEcuuid() . "<br>";
+echo "ECUID: " . $login->loginGetEuCuid() . "<br>";
+echo "ECUUID: " . $login->loginGetEuCuuid() . "<br>";
 
 echo "<hr>";
 // set + check edit access id

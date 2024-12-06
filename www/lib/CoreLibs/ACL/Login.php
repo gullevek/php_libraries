@@ -75,18 +75,18 @@ use CoreLibs\Convert\Json;
 class Login
 {
 	/** @var ?int the user id var*/
-	private ?int $euid;
+	private ?int $edit_user_id;
 	/** @var ?string the user cuid (note will be super seeded with uuid v4 later) */
-	private ?string $ecuid;
+	private ?string $edit_user_cuid;
 	/** @var ?string UUIDv4, will superseed the ecuid and replace euid as login id */
-	private ?string $ecuuid;
+	private ?string $edit_user_cuuid;
 	/** @var string _GET/_POST loginUserId parameter for non password login */
 	private string $login_user_id = '';
 	/** @var string source, either _GET or _POST or empty */
 	private string $login_user_id_source = '';
 	/** @var bool set to true if illegal characters where found in the login user id string */
 	private bool $login_user_id_unclear = false;
-	// is set to one if login okay, or EUID is set and user is okay to access this page
+	// is set to one if login okay, or EUCUUID is set and user is okay to access this page
 	/** @var bool */
 	private bool $permission_okay = false;
 	/** @var string pressed login */
@@ -262,7 +262,7 @@ class Login
 			],
 			// actually obsolete
 			'100' => [
-				'msg' => '[EUID] came in as GET/POST!',
+				'msg' => '[EUCUUID] came in as GET/POST!',
 				'flag' => 'e',
 			],
 			// query errors
@@ -769,7 +769,7 @@ class Login
 	private function loginLoginUser(): void
 	{
 		// if pressed login at least and is not yet loggined in
-		if ($this->euid || (!$this->login && !$this->login_user_id)) {
+		if ($this->edit_user_cuuid || (!$this->login && !$this->login_user_id)) {
 			return;
 		}
 		// if not username AND password where given
@@ -939,13 +939,13 @@ class Login
 			}
 			// normal user processing
 			// set class var and session var
-			$this->euid = (int)$res['edit_user_id'];
-			$this->ecuid = (string)$res['cuid'];
-			$this->ecuuid = (string)$res['cuuid'];
+			$this->edit_user_id = (int)$res['edit_user_id'];
+			$this->edit_user_cuid = (string)$res['cuid'];
+			$this->edit_user_cuuid = (string)$res['cuuid'];
 			$this->session->setMany([
-				'EUID' => $this->euid,
-				'ECUID' => $this->ecuid,
-				'ECUUID' => $this->ecuuid,
+				'EUID' => $this->edit_user_id, // DEPRECATED
+				'EUCUID' => $this->edit_user_cuid,
+				'EUCUUID' => $this->edit_user_cuuid,
 			]);
 			// check if user is okay
 			$this->loginCheckPermissions();
@@ -962,7 +962,7 @@ class Login
 					SET login_user_id_last_revalidate = NOW()
 					WHERE edit_user_id = $1
 					SQL;
-					$this->db->dbExecParams($q, [$this->euid]);
+					$this->db->dbExecParams($q, [$this->edit_user_id]);
 				}
 				$locale = $res['locale'] ?? 'en';
 				$encoding = $res['encoding'] ?? 'UTF-8';
@@ -1014,7 +1014,7 @@ class Login
 						login_error_date_first = NULL
 					WHERE edit_user_id = $1
 					SQL;
-					$this->db->dbExecParams($q, [$this->euid]);
+					$this->db->dbExecParams($q, [$this->edit_user_id]);
 				}
 				$edit_page_ids = [];
 				$pages = [];
@@ -1022,7 +1022,7 @@ class Login
 				// set pages access
 				$q = <<<SQL
 				SELECT
-					ep.edit_page_id, ep.cuid, epca.cuid AS content_alias_uid,
+					ep.edit_page_id, ep.cuid, ep.cuuid, epca.cuid AS content_alias_uid,
 					ep.hostname, ep.filename, ep.name AS edit_page_name,
 					ep.order_number AS edit_page_order, ep.menu,
 					ep.popup, ep.popup_x, ep.popup_y, ep.online, ear.level, ear.type
@@ -1044,6 +1044,7 @@ class Login
 					$pages[$res['cuid']] = [
 						'edit_page_id' => $res['edit_page_id'],
 						'cuid' => $res['cuid'],
+						'cuuid' => $res['cuuid'],
 						// for reference of content data on a differen page
 						'content_alias_uid' => $res['content_alias_uid'],
 						'hostname' => $res['hostname'],
@@ -1096,7 +1097,7 @@ class Login
 				// get the page content and add them to the page
 				$q = <<<SQL
 				SELECT
-					epc.edit_page_id, epc.name, epc.uid, epc.order_number,
+					epc.edit_page_id, epc.name, epc.uid, epc.cuid, epc.cuuid, epc.order_number,
 					epc.online, ear.level, ear.type
 				FROM edit_page_content epc, edit_access_right ear
 				WHERE
@@ -1108,6 +1109,8 @@ class Login
 					$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = [
 						'name' => $res['name'],
 						'uid' => $res['uid'],
+						'cuid' => $res['cuid'],
+						'cuuid' => $res['cuuid'],
 						'online' => $res['online'],
 						'order' => $res['order_number'],
 						// access name and level
@@ -1123,7 +1126,7 @@ class Login
 				// load the edit_access user rights
 				$q = <<<SQL
 				SELECT
-					ea.edit_access_id, ea.cuid, level, type, ea.name,
+					ea.edit_access_id, ea.cuid, ea.cuuid, level, type, ea.name,
 					ea.color, ea.uid, edit_default, ea.additional_acl
 				FROM edit_access_user eau, edit_access_right ear, edit_access ea
 				WHERE
@@ -1140,7 +1143,7 @@ class Login
 				$eacuid = [];
 				$unit_acl = [];
 				$unit_uid_lookup = [];
-				while (is_array($res = $this->db->dbReturnParams($q, [$this->euid]))) {
+				while (is_array($res = $this->db->dbReturnParams($q, [$this->edit_user_id]))) {
 					// read edit access data fields and drop them into the unit access array
 					$q_sub = <<<SQL
 					SELECT name, value
@@ -1154,6 +1157,7 @@ class Login
 					// build master unit array
 					$unit_access_cuid[$res['cuid']] = [
 						'id' => (int)$res['edit_access_id'], // DEPRECATED
+						'cuuid' => $res['cuuid'],
 						'acl_level' => $res['level'],
 						'acl_type' => $res['type'],
 						'name' => $res['name'],
@@ -1262,8 +1266,8 @@ class Login
 		$this->acl['user_name'] = $_SESSION['USER_NAME'];
 		$this->acl['group_name'] = $_SESSION['GROUP_NAME'];
 		// edit user cuid
-		$this->acl['ecuid'] = $_SESSION['ECUID'];
-		$this->acl['ecuuid'] = $_SESSION['ECUUID'];
+		$this->acl['eucuid'] = $_SESSION['EUCUID'];
+		$this->acl['eucuuid'] = $_SESSION['EUCUUID'];
 		// set additional acl
 		$this->acl['additional_acl'] = [
 			'user' => $_SESSION['USER_ADDITIONAL_ACL'],
@@ -1701,15 +1705,15 @@ class Login
 				$event = 'No Permission';
 			}
 			// prepare for log
-			if ($this->euid) {
+			if ($this->edit_user_cuuid) {
 				// get user from user table
 				$q = <<<SQL
 				SELECT username
 				FROM edit_user
-				WHERE edit_user_id = $1
+				WHERE cuuid = $1
 				SQL;
 				$username = '';
-				if (is_array($res = $this->db->dbReturnRowParams($q, [$this->euid]))) {
+				if (is_array($res = $this->db->dbReturnRowParams($q, [$this->edit_user_cuuid]))) {
 					$username = $res['username'];
 				}
 			} // if euid is set, get username (or try)
@@ -2023,10 +2027,10 @@ HTML;
 				empty($username) ? $this->session->get('USER_NAME') ?? '' : $username,
 				is_numeric($this->session->get('EUID')) ?
 					$this->session->get('EUID') : null,
-				is_string($this->session->get('ECUID')) ?
-					$this->session->get('ECUID') : null,
-				!empty($this->session->get('ECUUID')) && Uids::validateUuuidv4($this->session->get('ECUUID')) ?
-					$this->session->get('ECUUID') : null,
+				is_string($this->session->get('EUCUID')) ?
+					$this->session->get('EUCUID') : null,
+				!empty($this->session->get('EUCUUID')) && Uids::validateUuuidv4($this->session->get('EUCUUID')) ?
+					$this->session->get('EUCUUID') : null,
 				(string)$event,
 				(string)$error,
 				$data_write,
@@ -2153,10 +2157,8 @@ HTML;
 			}
 		}
 		// if there is none, there is none, saves me POST/GET check
-		$this->euid = (int)($this->session->get('EUID') ?? 0);
-		// TODO: allow load from cuid
-		// $this->ecuid = (string)($this->session->get('ECUID') ?? '');
-		// $this->ecuuid = (string)($this->session->get('ECUUID') ?? '');
+		// $this->euid = (int)($this->session->get('EUID') ?? 0);
+		$this->edit_user_cuuid = (string)($this->session->get('EUCUUID') ?? '');
 		// get login vars, are so, can't be changed
 		// prepare
 		// pass on vars to Object vars
@@ -2337,7 +2339,7 @@ HTML;
 		return $this->session->get('PAGES');
 	}
 
-	// MARK: logged in uid(pk)/cuid/eccuid
+	// MARK: logged in uid(pk)/cuid/ecuuid
 
 	/**
 	 * Get the current set EUID (edit user id)
@@ -2346,27 +2348,33 @@ HTML;
 	 */
 	public function loginGetEuid(): string
 	{
-		return (string)$this->euid;
+		return (string)$this->edit_user_id;
 	}
 
 	/**
-	 * Get the current set ECUID (edit user cuid)
+	 * Get the current set EUCUID (edit user cuid)
 	 *
-	 * @return string ECUID as string
+	 * @return string EUCUID as string
 	 */
-	public function loginGetEcuid(): string
+	public function loginGetEuCuid(): string
 	{
-		return (string)$this->ecuid;
+		return (string)$this->edit_user_cuid;
 	}
 
 	/**
-	 * Get the current set ECUUID (edit user cuuid)
+	 * Get the current set EUCUUID (edit user cuuid)
 	 *
-	 * @return string ECUUID as string
+	 * @return string EUCUUID as string
+	 * @deprecated Wrong name, use ->loginGetEuCuuid
 	 */
 	public function loginGetEcuuid(): string
 	{
-		return (string)$this->ecuuid;
+		return (string)$this->edit_user_cuuid;
+	}
+
+	public function loginGetEuCuuid(): string
+	{
+		return (string)$this->edit_user_cuuid;
 	}
 
 	// MARK: get error messages
@@ -2515,9 +2523,9 @@ HTML;
 		// unset session vars set/used in this login
 		$this->session->sessionDestroy();
 		// unset euid
-		$this->euid = null;
-		$this->ecuid = null;
-		$this->ecuuid = null;
+		$this->edit_user_id = null;
+		$this->edit_user_cuid = null;
+		$this->edit_user_cuuid = null;
 		// then prints the login screen again
 		$this->permission_okay = false;
 	}
@@ -2534,7 +2542,7 @@ HTML;
 		// start with not allowed
 		$this->permission_okay = false;
 		// bail for no euid (no login)
-		if (empty($this->euid)) {
+		if (empty($this->edit_user_cuuid)) {
 			return $this->permission_okay;
 		}
 		// euid must match ecuid and ecuuid
@@ -2544,7 +2552,7 @@ HTML;
 		}
 		$q = <<<SQL
 		SELECT
-			ep.filename, eu.cuid, eu.cuuid,
+			ep.filename, eu.edit_user_id, eu.cuid, eu.cuuid,
 			-- base lock flags
 			eu.deleted, eu.enabled, eu.locked,
 			-- date based lock
@@ -2585,10 +2593,10 @@ HTML;
 			AND eg.edit_group_id = epa.edit_group_id
 			AND eg.edit_group_id = eu.edit_group_id
 			AND eg.enabled = 1 AND epa.enabled = 1
-			AND eu.edit_user_id = $1
+			AND eu.cuuid = $1
 			AND ep.filename = $2
 		SQL;
-		$res = $this->db->dbReturnRowParams($q, [$this->euid, $this->page_name]);
+		$res = $this->db->dbReturnRowParams($q, [$this->edit_user_cuuid, $this->page_name]);
 		if (!is_array($res)) {
 			$this->login_error = 109;
 			return $this->permission_okay;
@@ -2622,12 +2630,14 @@ HTML;
 		} else {
 			$this->login_error = 103;
 		}
-		// set ECUID
-		$this->ecuid = (string)$res['cuid'];
-		$this->ecuuid = (string)$res['cuuid'];
+		// set all the internal vars
+		$this->edit_user_id = (int)$res['edit_user_id'];
+		$this->edit_user_cuid = (string)$res['cuid'];
+		$this->edit_user_cuuid = (string)$res['cuuid'];
 		$this->session->setMany([
-			'ECUID' => $this->ecuid,
-			'ECUUID' => $this->ecuuid,
+			'EUID' => $this->edit_user_id, // DEPRECATED
+			'EUCUID' => $this->edit_user_cuid,
+			'EUCUUID' => $this->edit_user_cuuid,
 		]);
 		// if called from public, so we can check if the permissions are ok
 		return $this->permission_okay;
