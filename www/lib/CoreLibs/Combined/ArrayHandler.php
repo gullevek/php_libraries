@@ -525,6 +525,30 @@ class ArrayHandler
 	{
 		return array_diff($array, $remove);
 	}
+
+	/**
+	 * From the array with key -> anything values return only the matching entries from key list
+	 * key list is a list[string]
+	 * if key list is empty, return array as is
+	 *
+	 * @param  array<string,mixed> $array
+	 * @param  array<string>       $key_list
+	 * @return array<string,mixed>
+	 */
+	public static function arrayReturnMatchingKeyOnly(
+		array $array,
+		array $key_list
+	): array {
+		// on empty return as is
+		if (empty($key_list)) {
+			return $array;
+		}
+		return array_filter(
+			$array,
+			fn($key) => in_array($key, $key_list),
+			ARRAY_FILTER_USE_KEY
+		);
+	}
 }
 
 // __END__
