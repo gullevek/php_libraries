@@ -265,21 +265,21 @@ final class CoreLibsACLLoginTest extends TestCase
 					'ajax_post_action' => 'login',
 				],
 			],
-			'load, session ecuuid set only, php error' => [
+			'load, session eucuuid set only, php error' => [
 				[
 					'page_name' => 'edit_users.php',
 				],
 				[],
 				[],
 				[
-					'EUID' => 1,
-					'EUCUID' => 'abc',
-					'EUCUUID' => '1233456-1234-1234-1234-123456789012',
+					'LOGIN_EUID' => 1,
+					'LOGIN_EUCUID' => 'abc',
+					'LOGIN_EUCUUID' => '1233456-1234-1234-1234-123456789012',
 				],
 				2,
 				[],
 			],
-			'load, session euid set, all set' => [
+			'load, session eucuuid set, all set' => [
 				[
 					'page_name' => 'edit_users.php',
 					'edit_access_id' => 1,
@@ -292,21 +292,21 @@ final class CoreLibsACLLoginTest extends TestCase
 				[],
 				[],
 				[
-					'EUID' => 1,
-					'EUCUID' => 'abc',
-					'EUCUUID' => 'SET_EUCUUID_IN_TEST',
-					'USER_NAME' => '',
-					'GROUP_NAME' => '',
-					'ADMIN' => 1,
-					'GROUP_ACL_LEVEL' => -1,
-					'PAGES_ACL_LEVEL' => [],
-					'USER_ACL_LEVEL' => -1,
-					'USER_ADDITIONAL_ACL' => [],
-					'GROUP_ADDITIONAL_ACL' => [],
-					'UNIT_UID' => [
+					'LOGIN_EUID' => 1,
+					'LOGIN_EUCUID' => 'abc',
+					'LOGIN_EUCUUID' => 'SET_EUCUUID_IN_TEST',
+					'LOGIN_USER_NAME' => '',
+					'LOGIN_GROUP_NAME' => '',
+					'LOGIN_ADMIN' => 1,
+					'LOGIN_GROUP_ACL_LEVEL' => -1,
+					'LOGIN_PAGES_ACL_LEVEL' => [],
+					'LOGIN_USER_ACL_LEVEL' => -1,
+					'LOGIN_USER_ADDITIONAL_ACL' => [],
+					'LOGIN_GROUP_ADDITIONAL_ACL' => [],
+					'LOGIN_UNIT_UID' => [
 						'AdminAccess' => '123456789012',
 					],
-					'UNIT' => [
+					'LOGIN_UNIT' => [
 						'123456789012' => [
 							'id' => 1,
 							'acl_level' => 80,
@@ -320,8 +320,8 @@ final class CoreLibsACLLoginTest extends TestCase
 							'additional_acl' => []
 						],
 					],
-					// 'UNIT_DEFAULT' => '',
-					// 'DEFAULT_ACL_LIST' => [],
+					// 'LOGIN_UNIT_DEFAULT' => '',
+					// 'LOGIN_DEFAULT_ACL_LIST' => [],
 				],
 				0,
 				[
@@ -1177,8 +1177,8 @@ final class CoreLibsACLLoginTest extends TestCase
 		}
 
 		// set ingoing session cuuid if requested
-		if (isset($session['EUCUUID']) && $session['EUCUUID'] == 'SET_EUCUUID_IN_TEST') {
-			$session['EUCUUID'] = self::$edit_user_cuuid;
+		if (isset($session['LOGIN_EUCUUID']) && $session['LOGIN_EUCUUID'] == 'SET_EUCUUID_IN_TEST') {
+			$session['LOGIN_EUCUUID'] = self::$edit_user_cuuid;
 		}
 
 		// set _SESSION data
@@ -1582,11 +1582,12 @@ final class CoreLibsACLLoginTest extends TestCase
 			// - loginCheckPermissions
 			// - loginGetPermissionOkay
 		} catch (\Exception $e) {
-			// print "[E]: " . $e->getCode() . ", ERROR: " . $login_mock->loginGetLastErrorCode() . "/"
-			// 	. ($expected['login_error'] ?? 0) . "\n";
-			// print "AJAX: " . $login_mock->loginGetAjaxFlag() . "\n";
-			// print "AJAX GLOBAL: " . ($GLOBALS['AJAX_PAGE'] ?? '{f}') . "\n";
-			// print "Login error expext: " . ($expected['login_error'] ?? '{0}') . "\n";
+			/* print "[E]: " . $e->getCode() . ", ERROR: " . $login_mock->loginGetLastErrorCode() . "/"
+				. ($expected['login_error'] ?? 0) . "\n";
+			print "AJAX: " . $login_mock->loginGetAjaxFlag() . "\n";
+			print "AJAX GLOBAL: " . ($GLOBALS['AJAX_PAGE'] ?? '{f}') . "\n";
+			print "Login error expext: " . ($expected['login_error'] ?? '{0}') . "\n";
+			print "POST exit: " . ($_POST['login_exit'] ?? '{0}') . "\n"; */
 			// if this is 100, then we do further error checks
 			if (
 				$e->getCode() == 100 ||

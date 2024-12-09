@@ -14,13 +14,14 @@
 *   will be a class one day
 *
 *   descrption of session_vars
-*     DEBUG_ALL - set to one, prints out error_msg var at end of php execution
-*     DB_DEBUG - prints out database debugs (query, etc)
-*     GROUP_LEVEL - the level he can access (numeric)
-*     USER_NAME - login name from user
-*     LANG - lang to show edit interface (not yet used)
+* TODO: Update session var info
+*     [DEPRECATED] DEBUG_ALL - set to one, prints out error_msg var at end of php execution
+*     [DEPRECATED] DB_DEBUG - prints out database debugs (query, etc)
+*     [REMOVED] LOGIN_GROUP_LEVEL - the level he can access (numeric)
+*     LOGIN_USER_NAME - login name from user
+*     [DEPRECATED] LANG - lang to show edit interface (not yet used)
 *     DEFAULT_CHARSET - in connection with LANG (not yet used)
-*     PAGES - array of hashes
+*     LOGIN_PAGES - array of hashes
 *       edit_page_id - ID from the edit_pages table
 *       filename - name of the file
 *       page_name - name in menu
@@ -262,7 +263,7 @@ class Login
 			],
 			// actually obsolete
 			'100' => [
-				'msg' => '[EUCUUID] came in as GET/POST!',
+				'msg' => '[EUCUUID] set from GET/POST!',
 				'flag' => 'e',
 			],
 			// query errors
@@ -393,8 +394,8 @@ class Login
 		}
 		// write that into the session
 		$this->session->setMany([
-			'DEFAULT_ACL_LIST' => $this->default_acl_list,
-			'DEFAULT_ACL_LIST_TYPE' => $this->default_acl_list_type,
+			'LOGIN_DEFAULT_ACL_LIST' => $this->default_acl_list,
+			'LOGIN_DEFAULT_ACL_LIST_TYPE' => $this->default_acl_list_type,
 		]);
 
 		$this->loginSetEditLogWriteTypeAvailable();
@@ -587,7 +588,6 @@ class Login
 			// set path
 			$options['locale_path'] = BASE . INCLUDES . LOCALE;
 		}
-		$this->session->set('LOCALE_PATH', $options['locale_path']);
 		// LANG: LOCALE
 		if (empty($options['site_locale'])) {
 			trigger_error(
@@ -622,7 +622,6 @@ class Login
 				$options['set_domain'] = str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH);
 			}
 		}
-		$this->session->set('DEFAULT_DOMAIN', $options['site_domain']);
 		// LANG: ENCODING
 		if (empty($options['site_encoding'])) {
 			trigger_error(
@@ -943,9 +942,9 @@ class Login
 			$this->edit_user_cuid = (string)$res['cuid'];
 			$this->edit_user_cuuid = (string)$res['cuuid'];
 			$this->session->setMany([
-				'EUID' => $this->edit_user_id, // DEPRECATED
-				'EUCUID' => $this->edit_user_cuid,
-				'EUCUUID' => $this->edit_user_cuuid,
+				'LOGIN_EUID' => $this->edit_user_id, // DEPRECATED
+				'LOGIN_EUCUID' => $this->edit_user_cuid,
+				'LOGIN_EUCUUID' => $this->edit_user_cuuid,
 			]);
 			// check if user is okay
 			$this->loginCheckPermissions();
@@ -968,35 +967,36 @@ class Login
 				$encoding = $res['encoding'] ?? 'UTF-8';
 				$this->session->setMany([
 					// now set all session vars and read page permissions
-					'DEBUG_ALL' => $this->db->dbBoolean($res['debug']),
-					'DB_DEBUG' => $this->db->dbBoolean($res['db_debug']),
+					// DEBUG flag is deprecated
+					// 'DEBUG_ALL' => $this->db->dbBoolean($res['debug']),
+					// 'DB_DEBUG' => $this->db->dbBoolean($res['db_debug']),
 					// general info for user logged in
-					'USER_NAME' => $res['username'],
-					'ADMIN' => $res['admin'],
-					'GROUP_NAME' => $res['edit_group_name'],
-					'USER_ACL_LEVEL' => $res['user_level'],
-					'USER_ACL_TYPE' => $res['user_type'],
-					'USER_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['user_additional_acl']),
-					'GROUP_ACL_LEVEL' => $res['group_level'],
-					'GROUP_ACL_TYPE' => $res['group_type'],
-					'GROUP_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['group_additional_acl']),
+					'LOGIN_USER_NAME' => $res['username'],
+					'LOGIN_ADMIN' => $res['admin'],
+					'LOGIN_GROUP_NAME' => $res['edit_group_name'],
+					'LOGIN_USER_ACL_LEVEL' => $res['user_level'],
+					'LOGIN_USER_ACL_TYPE' => $res['user_type'],
+					'LOGIN_USER_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['user_additional_acl']),
+					'LOGIN_GROUP_ACL_LEVEL' => $res['group_level'],
+					'LOGIN_GROUP_ACL_TYPE' => $res['group_type'],
+					'LOGIN_GROUP_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['group_additional_acl']),
 					// deprecated TEMPLATE setting
-					'TEMPLATE' => $res['template'] ? $res['template'] : '',
-					'HEADER_COLOR' => !empty($res['second_header_color']) ?
+					// 'TEMPLATE' => $res['template'] ? $res['template'] : '',
+					'LOGIN_HEADER_COLOR' => !empty($res['second_header_color']) ?
 						$res['second_header_color'] :
 						$res['first_header_color'],
 					// LANGUAGE/LOCALE/ENCODING:
-					'LANG' => $locale,
+					// 'LOGIN_LANG' => $locale,
 					'DEFAULT_CHARSET' => $encoding,
 					'DEFAULT_LOCALE' => $locale . '.' . strtoupper($encoding),
 					'DEFAULT_LANG' => $locale . '_' . strtolower(str_replace('-', '', $encoding))
 				]);
 				// missing # before, this is for legacy data, will be deprecated
 				if (
-					!empty($this->session->get('HEADER_COLOR')) &&
-					preg_match("/^[\dA-Fa-f]{6,8}$/", $this->session->get('HEADER_COLOR'))
+					!empty($this->session->get('LOGIN_HEADER_COLOR')) &&
+					preg_match("/^[\dA-Fa-f]{6,8}$/", $this->session->get('LOGIN_HEADER_COLOR'))
 				) {
-					$this->session->set('HEADER_COLOR', '#' . $this->session->get('HEADER_COLOR'));
+					$this->session->set('LOGIN_HEADER_COLOR', '#' . $this->session->get('LOGIN_HEADER_COLOR'));
 				}
 				// TODO: make sure that header color is valid:
 				// # + 6 hex
@@ -1120,8 +1120,8 @@ class Login
 				}
 				// write back the pages data to the output array
 				$this->session->setMany([
-					'PAGES' => $pages,
-					'PAGES_ACL_LEVEL' => $pages_acl,
+					'LOGIN_PAGES' => $pages,
+					'LOGIN_PAGES_ACL_LEVEL' => $pages_acl,
 				]);
 				// load the edit_access user rights
 				$q = <<<SQL
@@ -1172,8 +1172,8 @@ class Login
 					];
 					// set the default unit
 					if ($res['edit_default']) {
-						$this->session->set('UNIT_DEFAULT_EAID', (int)$res['edit_access_id']); // DEPRECATED
-						$this->session->set('UNIT_DEFAULT_EACUID', (int)$res['cuid']);
+						$this->session->set('LOGIN_UNIT_DEFAULT_EAID', (int)$res['edit_access_id']); // DEPRECATED
+						$this->session->set('LOGIN_UNIT_DEFAULT_EACUID', (int)$res['cuid']);
 					}
 					$unit_uid_lookup[$res['uid']] = $res['edit_access_id']; // DEPRECATED
 					$unit_cuid_lookup[$res['uid']] = $res['cuid'];
@@ -1183,13 +1183,13 @@ class Login
 					$unit_acl[$res['cuid']] = $res['level'];
 				}
 				$this->session->setMany([
-					'UNIT_UID' => $unit_uid_lookup, // DEPRECATED
-					'UNIT_CUID' => $unit_cuid_lookup,
-					'UNIT' => $unit_access_cuid,
-					'UNIT_LEGACY' => $unit_access_eaid, // DEPRECATED
-					'UNIT_ACL_LEVEL' => $unit_acl,
-					'EAID' => $eaid, // DEPRECATED
-					'EACUID' => $eacuid,
+					'LOGIN_UNIT_UID' => $unit_uid_lookup, // DEPRECATED
+					'LOGIN_UNIT_CUID' => $unit_cuid_lookup,
+					'LOGIN_UNIT' => $unit_access_cuid,
+					'LOGIN_UNIT_LEGACY' => $unit_access_eaid, // DEPRECATED
+					'LOGIN_UNIT_ACL_LEVEL' => $unit_acl,
+					'LOGIN_EAID' => $eaid, // DEPRECATED
+					'LOGIN_EACUID' => $eacuid,
 				]);
 			} // user has permission to THIS page
 		} // user was not enabled or other login error
@@ -1263,21 +1263,21 @@ class Login
 			return;
 		}
 		// username (login), group name
-		$this->acl['user_name'] = $_SESSION['USER_NAME'];
-		$this->acl['group_name'] = $_SESSION['GROUP_NAME'];
+		$this->acl['user_name'] = $_SESSION['LOGIN_USER_NAME'];
+		$this->acl['group_name'] = $_SESSION['LOGIN_GROUP_NAME'];
 		// edit user cuid
-		$this->acl['eucuid'] = $_SESSION['EUCUID'];
-		$this->acl['eucuuid'] = $_SESSION['EUCUUID'];
+		$this->acl['eucuid'] = $_SESSION['LOGIN_EUCUID'];
+		$this->acl['eucuuid'] = $_SESSION['LOGIN_EUCUUID'];
 		// set additional acl
 		$this->acl['additional_acl'] = [
-			'user' => $_SESSION['USER_ADDITIONAL_ACL'],
-			'group' => $_SESSION['GROUP_ADDITIONAL_ACL'],
+			'user' => $_SESSION['LOGIN_USER_ADDITIONAL_ACL'],
+			'group' => $_SESSION['LOGIN_GROUP_ADDITIONAL_ACL'],
 		];
 		// we start with the default acl
 		$this->acl['base'] = $this->default_acl_level;
 
 		// set admin flag and base to 100
-		if (!empty($_SESSION['ADMIN'])) {
+		if (!empty($_SESSION['LOGIN_ADMIN'])) {
 			$this->acl['admin'] = 1;
 			$this->acl['base'] = 100;
 		} else {
@@ -1285,36 +1285,36 @@ class Login
 			// now go throw the flow and set the correct ACL
 			// user > page > group
 			// group ACL 0
-			if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = (int)$_SESSION['GROUP_ACL_LEVEL'];
+			if ($_SESSION['LOGIN_GROUP_ACL_LEVEL'] != -1) {
+				$this->acl['base'] = (int)$_SESSION['LOGIN_GROUP_ACL_LEVEL'];
 			}
 			// page ACL 1
 			if (
-				isset($_SESSION['PAGES_ACL_LEVEL'][$this->page_name]) &&
-				$_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1
+				isset($_SESSION['LOGIN_PAGES_ACL_LEVEL'][$this->page_name]) &&
+				$_SESSION['LOGIN_PAGES_ACL_LEVEL'][$this->page_name] != -1
 			) {
-				$this->acl['base'] = (int)$_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
+				$this->acl['base'] = (int)$_SESSION['LOGIN_PAGES_ACL_LEVEL'][$this->page_name];
 			}
 			// user ACL 2
-			if ($_SESSION['USER_ACL_LEVEL'] != -1) {
-				$this->acl['base'] = (int)$_SESSION['USER_ACL_LEVEL'];
+			if ($_SESSION['LOGIN_USER_ACL_LEVEL'] != -1) {
+				$this->acl['base'] = (int)$_SESSION['LOGIN_USER_ACL_LEVEL'];
 			}
 		}
-		$this->session->set('BASE_ACL_LEVEL', $this->acl['base']);
+		$this->session->set('LOGIN_BASE_ACL_LEVEL', $this->acl['base']);
 
 		// set the current page acl
 		// start with base acl
 		// set group if not -1, overrides default
 		// set page if not -1, overrides group set
 		$this->acl['page'] = $this->acl['base'];
-		if ($_SESSION['GROUP_ACL_LEVEL'] != -1) {
-			$this->acl['page'] = $_SESSION['GROUP_ACL_LEVEL'];
+		if ($_SESSION['LOGIN_GROUP_ACL_LEVEL'] != -1) {
+			$this->acl['page'] = $_SESSION['LOGIN_GROUP_ACL_LEVEL'];
 		}
 		if (
-			isset($_SESSION['PAGES_ACL_LEVEL'][$this->page_name]) &&
-			$_SESSION['PAGES_ACL_LEVEL'][$this->page_name] != -1
+			isset($_SESSION['LOGIN_PAGES_ACL_LEVEL'][$this->page_name]) &&
+			$_SESSION['LOGIN_PAGES_ACL_LEVEL'][$this->page_name] != -1
 		) {
-			$this->acl['page'] = $_SESSION['PAGES_ACL_LEVEL'][$this->page_name];
+			$this->acl['page'] = $_SESSION['LOGIN_PAGES_ACL_LEVEL'][$this->page_name];
 		}
 
 		$this->acl['unit_id'] = null;
@@ -1325,7 +1325,7 @@ class Login
 		$this->acl['unit_detail'] = [];
 
 		// PER ACCOUNT (UNIT/edit access)->
-		foreach ($_SESSION['UNIT'] as $ea_cuid => $unit) {
+		foreach ($_SESSION['LOGIN_UNIT'] as $ea_cuid => $unit) {
 			// if admin flag is set, all units are set to 100
 			if (!empty($this->acl['admin'])) {
 				$this->acl['unit'][$ea_cuid] = $this->acl['base'];
@@ -1355,7 +1355,7 @@ class Login
 			}
 		}
 		// flag if to show extra edit access drop downs (because user has multiple groups assigned)
-		if (count($_SESSION['UNIT']) > 1) {
+		if (count($_SESSION['LOGIN_UNIT']) > 1) {
 			$this->acl['show_ea_extra'] = true;
 		} else {
 			$this->acl['show_ea_extra'] = false;
@@ -1370,7 +1370,7 @@ class Login
 		// $this->debug('ACL', $this->print_ar($this->acl));
 	}
 
-	// MARK: lgin set locale
+	// MARK: login set locale
 
 	/**
 	 * set locale
@@ -2180,13 +2180,14 @@ HTML;
 			),
 			[
 				// row 1
-				empty($username) ? $this->session->get('USER_NAME') ?? '' : $username,
-				is_numeric($this->session->get('EUID')) ?
-					$this->session->get('EUID') : null,
-				is_string($this->session->get('EUCUID')) ?
-					$this->session->get('EUCUID') : null,
-				!empty($this->session->get('EUCUUID')) && Uids::validateUuuidv4($this->session->get('EUCUUID')) ?
-					$this->session->get('EUCUUID') : null,
+				empty($username) ? $this->session->get('LOGIN_USER_NAME') ?? '' : $username,
+				is_numeric($this->session->get('LOGIN_EUID')) ?
+					$this->session->get('LOGIN_EUID') : null,
+				is_string($this->session->get('LOGIN_EUCUID')) ?
+					$this->session->get('LOGIN_EUCUID') : null,
+				!empty($this->session->get('LOGIN_EUCUUID')) &&
+				Uids::validateUuuidv4($this->session->get('LOGIN_EUCUUID')) ?
+					$this->session->get('LOGIN_EUCUUID') : null,
 				(string)$event,
 				(string)$error,
 				$data_write,
@@ -2313,8 +2314,7 @@ HTML;
 			}
 		}
 		// if there is none, there is none, saves me POST/GET check
-		// $this->euid = (int)($this->session->get('EUID') ?? 0);
-		$this->edit_user_cuuid = (string)($this->session->get('EUCUUID') ?? '');
+		$this->edit_user_cuuid = (string)($this->session->get('LOGIN_EUCUUID') ?? '');
 		// get login vars, are so, can't be changed
 		// prepare
 		// pass on vars to Object vars
@@ -2481,7 +2481,7 @@ HTML;
 	 */
 	public function loginGetHeaderColor(): ?string
 	{
-		return $this->session->get('HEADER_COLOR');
+		return $this->session->get('LOGIN_HEADER_COLOR');
 	}
 
 	/**
@@ -2492,7 +2492,7 @@ HTML;
 	public function loginGetPages(): array
 	{
 
-		return $this->session->get('PAGES');
+		return $this->session->get('LOGIN_PAGES');
 	}
 
 	// MARK: logged in uid(pk)/cuid/ecuuid
@@ -2528,6 +2528,11 @@ HTML;
 		return (string)$this->edit_user_cuuid;
 	}
 
+	/**
+	 * Get the current set EUCUUID (edit user cuuid)
+	 *
+	 * @return string EUCUUID as string
+	 */
 	public function loginGetEuCuuid(): string
 	{
 		return (string)$this->edit_user_cuuid;
@@ -2791,9 +2796,9 @@ HTML;
 		$this->edit_user_cuid = (string)$res['cuid'];
 		$this->edit_user_cuuid = (string)$res['cuuid'];
 		$this->session->setMany([
-			'EUID' => $this->edit_user_id, // DEPRECATED
-			'EUCUID' => $this->edit_user_cuid,
-			'EUCUUID' => $this->edit_user_cuuid,
+			'LOGIN_EUID' => $this->edit_user_id, // DEPRECATED
+			'LOGIN_EUCUID' => $this->edit_user_cuid,
+			'LOGIN_EUCUUID' => $this->edit_user_cuuid,
 		]);
 		// if called from public, so we can check if the permissions are ok
 		return $this->permission_okay;
@@ -2962,12 +2967,12 @@ HTML;
 	{
 		if (
 			$cuid !== null &&
-			is_array($this->session->get('UNIT')) &&
-			!array_key_exists($cuid, $this->session->get('UNIT'))
+			is_array($this->session->get('LOGIN_UNIT')) &&
+			!array_key_exists($cuid, $this->session->get('LOGIN_UNIT'))
 		) {
 			$cuid = null;
-			if (!empty($this->session->get('UNIT_DEFAULT_EACUID'))) {
-				$cuid = $this->session->get('UNIT_DEFAULT_EACUID');
+			if (!empty($this->session->get('LOGIN_UNIT_DEFAULT_EACUID'))) {
+				$cuid = $this->session->get('LOGIN_UNIT_DEFAULT_EACUID');
 			}
 		}
 		return $cuid;
@@ -2987,12 +2992,12 @@ HTML;
 	{
 		if (
 			$edit_access_id !== null &&
-			is_array($this->session->get('UNIT_LEGACY')) &&
-			!array_key_exists($edit_access_id, $this->session->get('UNIT_LEGACY'))
+			is_array($this->session->get('LOGIN_UNIT_LEGACY')) &&
+			!array_key_exists($edit_access_id, $this->session->get('LOGIN_UNIT_LEGACY'))
 		) {
 			$edit_access_id = null;
-			if (!empty($this->session->get('UNIT_DEFAULT_EAID'))) {
-				$edit_access_id = (int)$this->session->get('UNIT_DEFAULT_EAID');
+			if (!empty($this->session->get('LOGIN_UNIT_DEFAULT_EAID'))) {
+				$edit_access_id = (int)$this->session->get('LOGIN_UNIT_DEFAULT_EAID');
 			}
 		}
 		return $edit_access_id;
@@ -3010,10 +3015,10 @@ HTML;
 		string $cuid,
 		string|int $data_key
 	): false|string {
-		if (!isset($_SESSION['UNIT'][$cuid]['data'][$data_key])) {
+		if (!isset($_SESSION['LOGIN_UNIT'][$cuid]['data'][$data_key])) {
 			return false;
 		}
-		return $_SESSION['UNIT'][$cuid]['data'][$data_key];
+		return $_SESSION['LOGIN_UNIT'][$cuid]['data'][$data_key];
 	}
 
 	/**
@@ -3026,10 +3031,10 @@ HTML;
 	 */
 	public function loginGetEditAccessIdFromUid(string $uid): int|false
 	{
-		if (!isset($_SESSION['UNIT_UID'][$uid])) {
+		if (!isset($_SESSION['LOGIN_UNIT_UID'][$uid])) {
 			return false;
 		}
-		return (int)$_SESSION['UNIT_UID'][$uid];
+		return (int)$_SESSION['LOGIN_UNIT_UID'][$uid];
 	}
 
 	/**
@@ -3040,10 +3045,10 @@ HTML;
 	 */
 	public function loginGetEditAccessCuidFromUid(string $uid): int|false
 	{
-		if (!isset($_SESSION['UNIT_CUID'][$uid])) {
+		if (!isset($_SESSION['LOGIN_UNIT_CUID'][$uid])) {
 			return false;
 		}
-		return (int)$_SESSION['UNIT_CUID'][$uid];
+		return (int)$_SESSION['LOGIN_UNIT_CUID'][$uid];
 	}
 
 	/**

@@ -151,8 +151,8 @@ foreach ($test_files as $file => $name) {
 
 
 print "<br>";
-print "ECUID: " . $session->get('ECUID') . "<br>";
-print "ECUUID: " . $session->get('ECUUID') . "<br>";
+print "ECUID: " . $session->get('LOGIN_EUCUID') . "<br>";
+print "ECUUID: " . $session->get('LOGIN_EUCUUID') . "<br>";
 
 print "<hr>";
 print "LOCALE: " . Support::dumpVar($locale) . "<br>";
