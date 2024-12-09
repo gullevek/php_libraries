@@ -180,6 +180,7 @@ class Login
 	private array $login_template = [
 		'strings' => [],
 		'password_change' => '',
+		'password_forgot' => '',
 		'template' => ''
 	];
 
@@ -232,13 +233,12 @@ class Login
 	 * @param \CoreLibs\Logging\Logging  $log     Logging class
 	 * @param \CoreLibs\Create\Session $session Session interface class
 	 * @param array<string,mixed>      $options Login ACL settings
-	 * $auto_login [default true]   DEPRECATED, moved into options
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
 		\CoreLibs\Logging\Logging $log,
 		\CoreLibs\Create\Session $session,
-		array $options = []
+		array $options = [],
 	) {
 		// attach db class
 		$this->db = $db;
@@ -1601,6 +1601,10 @@ class Login
 		$this->login_template['strings']['LANGUAGE'] = $locales['lang'] ?? 'en';
 
 		// if password change is okay
+		// TODO: this should be a "forgot" password
+		// -> input email
+		// -> send to user with link + token
+		// -> validate token -> show change password
 		if ($this->password_change) {
 			$html_string_password_change = $this->login_template['password_change'];
 
@@ -1617,14 +1621,14 @@ class Login
 			// print error messagae
 			if ($this->login_error) {
 				$html_string_password_change = str_replace(
-					'{ERROR_MSG}',
-					$this->loginGetErrorMsg($this->login_error) . '<br>',
+					['{ERROR_VISIBLE}', '{ERROR_MSG}'],
+					['login-visible', $this->loginGetErrorMsg($this->login_error)],
 					$html_string_password_change
 				);
 			} else {
 				$html_string_password_change = str_replace(
-					'{ERROR_MSG}',
-					'<br>',
+					['{ERROR_VISIBLE}', '{ERROR_MSG}'],
+					['login-hidden', ''],
 					$html_string_password_change
 				);
 			}
@@ -1632,8 +1636,11 @@ class Login
 			if ($this->change_password && !$this->password_change_ok) {
 				$html_string_password_change = str_replace(
 					'{PASSWORD_CHANGE_SHOW}',
-					'<script language="JavaScript">'
-						. 'ShowHideDiv(\'pw_change_div\');</script>',
+					<<<HTML
+					<script language="JavaScript">
+					ShowHideDiv('login_pw_change_div');
+					</script>
+					HTML,
 					$html_string_password_change
 				);
 			} else {
@@ -1660,18 +1667,22 @@ class Login
 		// print error messagae
 		if ($this->login_error) {
 			$html_string = str_replace(
-				'{ERROR_MSG}',
-				$this->loginGetErrorMsg($this->login_error) . '<br>',
+				['{ERROR_VISIBLE}', '{ERROR_MSG}'],
+				['login-visible', $this->loginGetErrorMsg($this->login_error)],
 				$html_string
 			);
 		} elseif ($this->password_change_ok && $this->password_change) {
 			$html_string = str_replace(
-				'{ERROR_MSG}',
-				$this->loginGetErrorMsg(300) . '<br>',
+				['{ERROR_VISIBLE}', '{ERROR_MSG}'],
+				['login-visible', $this->loginGetErrorMsg(300)],
 				$html_string
 			);
 		} else {
-			$html_string = str_replace('{ERROR_MSG}', '<br>', $html_string);
+			$html_string = str_replace(
+				['{ERROR_VISIBLE}', '{ERROR_MSG}'],
+				['login-hidden', ''],
+				$html_string
+			);
 		}
 
 		// create the replace array context
@@ -1756,39 +1767,93 @@ class Login
 				'NEW_PASSWORD' => $this->l->__('New Password'),
 				'NEW_PASSWORD_CONFIRM' => $this->l->__('New Password confirm'),
 				'CLOSE' => $this->l->__('Close'),
-				'JS_SHOW_HIDE' => "function ShowHideDiv(id) { "
-						. "element = document.getElementById(id); "
-						. "if (element.className == 'visible' || !element.className) element.className = 'hidden'; "
-						. "else element.className = 'visible'; }",
-				'PASSWORD_CHANGE_BUTTON' => '<input type="button" name="pw_change" value="'
-					. $strings['PASSWORD_CHANGE_BUTTON_VALUE']
-					. '" OnClick="ShowHideDiv(\'pw_change_div\');">'
+				'JS_SHOW_HIDE' => <<<JAVASCRIPT
+				function ShowHideDiv(id) {
+					element = document.getElementById(id);
+					let visible = !!(
+						element.offsetWidth ||
+						element.offsetHeight ||
+						element.getClientRects().length ||
+						window.getComputedStyle(element).visibility == "hidden"
+					);
+					if (visiblee) {
+						element.className = 'login-hidden';
+					} else {
+						element.className = 'login-visible';
+					}
+				}
+				JAVASCRIPT,
+				'PASSWORD_CHANGE_BUTTON' => str_replace(
+					'{PASSWORD_CHANGE_BUTTON_VALUE}',
+					$strings['PASSWORD_CHANGE_BUTTON_VALUE'],
+					// phpcs:disable Generic.Files.LineLength
+					<<<HTML
+				<input type="button" name="pw_change" value="{PASSWORD_CHANGE_BUTTON_VALUE}" OnClick="ShowHideDiv('login_pw_change_div'); return false;">
+				HTML
+					// phpcs:enable Generic.Files.LineLength
+				),
 			]);
-			// TODO: submit or JS to set target page as ajax call
-			// NOTE: for the HTML block I ignore line lengths
-			// phpcs:disable
+			// phpcs:disable Generic.Files.LineLength
 			$this->login_template['password_change'] = <<<HTML
-<div id="pw_change_div" class="hidden" style="position: absolute; top: 30px; left: 50px; width: 400px; height: 220px; background-color: white; border: 1px solid black; padding: 25px;">
-<table>
-<tr><td class="norm" align="center" colspan="2"><h3>{TITLE_PASSWORD_CHANGE}</h3></td></tr>
-<tr><td class="norm" colspan="2">{ERROR_MSG}</td></tr>
-<tr><td class="norm" align="right">{USERNAME}</td><td><input type="text" name="pw_username" value=""></td></tr>
-<tr><td class="norm" align="right">{OLD_PASSWORD}</td>
-<td><input type="password" name="pw_old_password" value=""></td></tr>
-<tr><td class="norm" align="right">{NEW_PASSWORD}</td>
-<td><input type="password" name="pw_new_password" value=""></td></tr>
-<tr><td class="norm" align="right">{NEW_PASSWORD_CONFIRM}</td>
-<td><input type="password" name="pw_new_password_confirm" value=""></td></tr>
-<tr><td></td>
-<td><input type="submit" name="change_password" value="{PASSWORD_CHANGE_BUTTON_VALUE}">
-<input type="button" name="pw_change" value="{CLOSE}" OnClick="ShowHideDiv('pw_change_div');"></td></tr>
-</table>
+<div id="loginPasswordChangeBox" class="login-password-change login-hidden">
+	<div id="loginTitle" class="login-title">
+		{TITLE_PASSWORD_CHANGE}
+	</div>
+	<div id="loginPasswordChangeError" class="login-error {ERROR_VISIBLE}">
+		{ERROR_MSG}
+	</div>
+	<div id="loginPasswordChange" class="login-data">
+		<div class="login-data-row">
+			<div class="login-data-left">
+				{USERNAME}
+			</div>
+			<div class="login-data-right">
+				<input type="text" name="login_username" class="login-input-text">
+			</div>
+		</div>
+		<div class="login-data-row">
+			<div class="login-data-left">
+			{OLD_PASSWORD}
+			</div>
+			<div class="login-data-right">
+				<input type="password" name="login_pw_old_password" class="login-input-text">
+			</div>
+		</div>
+		<div class="login-data-row">
+			<div class="login-data-left">
+				{NEW_PASSWORD}
+			</div>
+			<div class="login-data-right">
+				<input type="password" name="login_pw_new_password" class="login-input-text">
+			</div>
+		</div>
+		<div class="login-data-row">
+			<div class="login-data-left">
+				{NEW_PASSWORD_CONFIRM}
+			</div>
+			<div class="login-data-right">
+				<input type="password" name="login_pw_new_password_confirm" class="login-input-text">
+			</div>
+		</div>
+		<div class="login-data-row login-button-row">
+			<div class="login-data-left">
+				&nbsp;
+			</div>
+			<div class="login-data-right">
+				<button type="submit" name="login_change_password" class="login-button" value="{PASSWORD_CHANGE_BUTTON_VALUE}">{PASSWORD_CHANGE_BUTTON_VALUE}</button>
+			</div>
+			<div class="login-data-button">
+				<button type="button" name="login_pw_change" class="login-button" value="{CLOSE}" OnClick="ShowHideDiv('loginPasswordChangeBox'); return false;">{CLOSE}</button>
+			</div>
+		</div>
+	</div>
 </div>
 {PASSWORD_CHANGE_SHOW}
 HTML;
-			// phpcs:enable
+			// phpcs:enable Generic.Files.LineLength
 		}
 		if ($this->password_forgot) {
+			// TODO: create a password forget request flow
 		}
 		if (!$this->password_change && !$this->password_forgot) {
 			$strings = array_merge($strings, [
@@ -1807,71 +1872,162 @@ HTML;
 		}
 
 		// now check templates
-		// TODO: submit or JS to set target page as ajax call
 		if (!$this->login_template['template']) {
+			// phpcs:disable Generic.Files.LineLength
 			$this->login_template['template'] = <<<HTML
 <!DOCTYPE html>
 <html lang="{LANGUAGE}">
 <head>
-<title>{HTML_TITLE}</title>
-<style type="text/css">
-.norm { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; line-height: 15px; color: #000000}
-h3 { font-size: 18px; }
-.visible { visibility: visible; }
-.hidden { visibility: hidden; display: none; }
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<title>{HTML_TITLE}</title>
+	<style type="text/css">
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #ffffff;
+	width: 100%;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	box-sizing: border-box;
+}
+.login-box {
+	margin: 50px 0;
+	width: 100%;
+}
+.login-title {
+	font-size: 2em;
+	padding: 1% 0 1% 10%;
+	background-color: hsl(0, 0%, 90%);
+}
+.login-error {
+	margin: 2% 5%;
+}
+.login-data {
+	margin: 0 5% 5% 5%;
+}
+.login-data-row {
+	display: flex;
+	justify-content: flex-start;
+	padding: 5px 0;
+}
+.login-data-row .login-data-left {
+	width: 10%;
+	font-size: 0.8em;
+	text-align: right;
+	padding-right: 5px;
+	margin: auto 0;
+}
+.login-data-row .login-data-right {
+	width: 20%;
+}
+.login-data-row .login-data-button {
+	width: 70%;
+	text-align: right;
+}
+input.login-input-text {
+	font-size: 1.5em;
+}
+button.login-button {
+	font-size: 1.5em;
+}
+.login-visible {
+	visibility: visible;
+}
+.login-hidden {
+	visibility: hidden;
+	display: none;
+}
+.login-password-change {
+	position: absolute;
+	top: 10%;
+	left: 10%;
+	width: 80%;
+	background-color: white;
+	border: 1px solid black;
+}
+@media only screen and ( max-width: 749px ) {
+	.login-box {
+		margin: 5% 0;
+	}
+	.login-data {
+		margin: 0 5% 5% 5%;
+	}
+	.login-error {
+		margin: 10% 5%;
+	}
+	.login-data-row {
+		display: block;
+	}
+	.login-data-row .login-data-left,
+	.login-data-row .login-data-right,
+	.login-data-row .login-data-button {
+		width: auto;
+	}
+	.login-data-row .login-data-left {
+		text-align: left;
+		margin-bottom: 2%;
+	}
+	.login-data-row .login-data-button {
+		text-align: left;
+		margin-top: 5%;
+	}
+	.login-password-change {
+		top: 5%;
+		left: 5%;
+		width: 90%;
+	}
+}
 </style>
-<script language="JavaScript">
-<!--
+	<script language="JavaScript">
 {JS_SHOW_HIDE}
-//-->
-</script>
+	</script>
 {LOGOUT_TARGET}
 </head>
 
 <body bgcolor="#FFFFFF">
-<br>
-<br>
-<br>
 <form method="post">
-<table width="500" border="0" cellpadding="2" cellspacing="1">
-<tr>
-<td class="norm" align="right">
-	<h3>{TITLE}</h3>
-</td>
-<td>&nbsp;</td>
-</tr>
-<tr>
-<td class="norm" colspan="2" align="center">
-	{ERROR_MSG}
-</td>
-</tr>
-<tr>
-<td align="right" class="norm">{USERNAME}</td>
-<td><input type="text" name="login_username"></td>
-</tr>
-<tr>
-<td align="right" class="norm">{PASSWORD}</td>
-<td><input type="password" name="login_password"></td>
-</tr>
-<tr>
-<td align="right"></td>
-<td>
-	<input type="submit" name="login_login" value="{LOGIN}">
-	{PASSWORD_CHANGE_BUTTON}
-</td>
-</tr>
-<tr>
-<td align="right">
-	<br><br>
-</td>
-<td>&nbsp;</td>
-</tr>
-</table>
-{PASSWORD_CHANGE_DIV}
+<div id="loginBox" class="login-box">
+	<div id="loginTitle" class="login-title">
+		{TITLE}
+	</div>
+	<div id="loginError" class="login-error {ERROR_VISIBLE}">
+		{ERROR_MSG}
+	</div>
+	<div id="loginData" class="login-data">
+		<div class="login-data-row">
+			<div class="login-data-left">
+				{USERNAME}
+			</div>
+			<div class="login-data-right">
+				<input type="text" name="login_username" class="login-input-text">
+			</div>
+		</div>
+		<div class="login-data-row">
+			<div class="login-data-left">
+				{PASSWORD}
+			</div>
+			<div class="login-data-right">
+				<input type="password" name="login_password" class="login-input-text">
+			</div>
+		</div>
+		<div class="login-data-row login-button-row">
+			<div class="login-data-left">
+				&nbsp;
+			</div>
+			<div class="login-data-right">
+				<button type="submit" name="login_login" class="login-button" value="{LOGIN}">{LOGIN}</button>
+				{PASSWORD_CHANGE_BUTTON}
+			</div>
+		</div>
+	</div>
+	{PASSWORD_CHANGE_DIV}
+</div>
 </form>
 </body>
 </html>
 HTML;
+			// phpcs:enable Generic.Files.LineLength
 		}
 	}
 
@@ -2167,11 +2323,11 @@ HTML;
 		$this->password = $_POST['login_password'] ?? '';
 		$this->logout = $_POST['login_logout'] ?? '';
 		// password change vars
-		$this->change_password = $_POST['change_password'] ?? '';
-		$this->pw_username = $_POST['pw_username'] ?? '';
-		$this->pw_old_password = $_POST['pw_old_password'] ?? '';
-		$this->pw_new_password = $_POST['pw_new_password'] ?? '';
-		$this->pw_new_password_confirm = $_POST['pw_new_password_confirm'] ?? '';
+		$this->change_password = $_POST['login_change_password'] ?? '';
+		$this->pw_username = $_POST['login_pw_username'] ?? '';
+		$this->pw_old_password = $_POST['login_pw_old_password'] ?? '';
+		$this->pw_new_password = $_POST['login_pw_new_password'] ?? '';
+		$this->pw_new_password_confirm = $_POST['login_pw_new_password_confirm'] ?? '';
 		// disallow user list for password change
 		$this->pw_change_deny_users = ['admin'];
 		// max login counts before error reporting
