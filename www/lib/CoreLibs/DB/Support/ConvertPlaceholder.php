@@ -20,7 +20,7 @@ class ConvertPlaceholder
 	private const PATTERN_QUERY_SPLIT =
 		',|' // for ',' mostly in INSERT
 		. '[(<>=]|' // general set for (, <, >, = in any query with any combination
-		. '(?:[\(,]\s*\-\-\s*\w*)\r?\n|' // a comment that starts after a ( or ,
+		. '(?:[\(,]\s*\-\-[\s\w]*)\r?\n|' // a comment that starts after a ( or ,
 		. '\^@|' // text search for start from text with ^@
 		. '\|\||' // concats two elements
 		. '&&|' // array overlap

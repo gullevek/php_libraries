@@ -5141,11 +5141,11 @@ final class CoreLibsDBIOTest extends TestCase
 				INSERT INTO table_with_primary_key (
 					row_int, row_numeric, row_varchar, row_varchar_literal
 				) VALUES (
-					-- comment
+					-- comment 1
 					$1, $2,
-					-- comment
+					-- comment 2
 					$3
-					-- comment
+					-- comment 3
 					, $4
 				)
 				SQL,
