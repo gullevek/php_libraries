@@ -1904,7 +1904,7 @@ body {
 	margin: 2% 5%;
 }
 .login-data {
-	margin: 0 5% 5% 5%;
+	margin: 2% 5% 5% 5%;
 }
 .login-data-row {
 	display: flex;
@@ -1951,7 +1951,7 @@ button.login-button {
 		margin: 5% 0;
 	}
 	.login-data {
-		margin: 0 5% 5% 5%;
+		margin: 5%;
 	}
 	.login-error {
 		margin: 10% 5%;
@@ -2160,16 +2160,18 @@ HTML;
 		$q = <<<SQL
 		INSERT INTO {DB_SCHEMA}.edit_log (
 			username, euid, ecuid, ecuuid, event_date, event, error, data, data_binary, page,
-			ip, user_agent, referer, script_name, query_string, server_name, http_host,
-			http_accept, http_accept_charset, http_accept_encoding, session_id,
-			action, action_id, action_sub_id, action_yes, action_flag, action_menu, action_loaded,
-			action_value, action_type, action_error
+			ip, ip_address, user_agent, referer, script_name, query_string, request_scheme, server_name,
+			http_host, http_data, session_id,
+			action_data
 		) VALUES (
+			-- ROW 1
 			$1, $2, $3, $4, NOW(), $5, $6, $7, $8, $9,
-			$10, $11, $12, $13, $14, $15, $16,
-			$17, $18, $19, $20,
-			$21, $22, $23, $24, $25, $26, $27,
-			$28, $29, $30
+			-- ROW 2
+			$10, $11, $12, $13, $14, $15, $16, $17,
+			-- ROW 3
+			$18, $19, $20,
+			-- ROW 4
+			$21
 		)
 		SQL;
 		$this->db->dbExecParams(
@@ -2186,7 +2188,7 @@ HTML;
 				is_string($this->session->get('LOGIN_EUCUID')) ?
 					$this->session->get('LOGIN_EUCUID') : null,
 				!empty($this->session->get('LOGIN_EUCUUID')) &&
-				Uids::validateUuuidv4($this->session->get('LOGIN_EUCUUID')) ?
+					Uids::validateUuuidv4($this->session->get('LOGIN_EUCUUID')) ?
 					$this->session->get('LOGIN_EUCUUID') : null,
 				(string)$event,
 				(string)$error,
@@ -2195,29 +2197,39 @@ HTML;
 				(string)$this->page_name,
 				// row 2
 				$_SERVER["REMOTE_ADDR"] ?? null,
+				[
+					'REMOTE_ADDR' => $_SERVER["REMOTE_ADDR"],
+				],
 				$_SERVER['HTTP_USER_AGENT'] ?? null,
 				$_SERVER['HTTP_REFERER'] ?? null,
 				$_SERVER['SCRIPT_FILENAME'] ?? null,
 				$_SERVER['QUERY_STRING'] ?? null,
+				$_SERVER['REQUEST_SCHEME'] ?? null,
 				$_SERVER['SERVER_NAME'] ?? null,
-				$_SERVER['HTTP_HOST'] ?? null,
 				// row 3
-				$_SERVER['HTTP_ACCEPT'] ?? null,
-				$_SERVER['HTTP_ACCEPT_CHARSET'] ?? null,
-				$_SERVER['HTTP_ACCEPT_ENCODING'] ?? null,
+				$_SERVER['HTTP_HOST'] ?? null,
+				[
+					'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'] ?? null,
+					'HTTP_ACCEPT_CHARSET' => $_SERVER['HTTP_ACCEPT_CHARSET'] ?? null,
+					'HTTP_ACCEPT_LANGUAGE' => $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null,
+					'HTTP_ACCEPT_ENCODING' => $_SERVER['HTTP_ACCEPT_ENCODING'] ?? null,
+				],
 				$this->session->getSessionId() !== '' ?
 					$this->session->getSessionId() : null,
 				// row 4
-				$action_set['action'] ?? null,
-				$action_set['action_id'] ?? null,
-				$action_set['action_sub_id'] ?? null,
-				$action_set['action_yes'] ?? null,
-				$action_set['action_flag'] ?? null,
-				$action_set['action_menu'] ?? null,
-				$action_set['action_loaded'] ?? null,
-				$action_set['action_value'] ?? null,
-				$action_set['action_type'] ?? null,
-				$action_set['action_error'] ?? null,
+				// action data as JSONB
+				[
+					'action' => $action_set['action'] ?? null,
+					'action_id' => $action_set['action_id'] ?? null,
+					'action_sub_id' => $action_set['action_sub_id'] ?? null,
+					'action_yes' => $action_set['action_yes'] ?? null,
+					'action_flag' => $action_set['action_flag'] ?? null,
+					'action_menu' => $action_set['action_menu'] ?? null,
+					'action_loaded' => $action_set['action_loaded'] ?? null,
+					'action_value' => $action_set['action_value'] ?? null,
+					'action_type' => $action_set['action_type'] ?? null,
+					'action_error' => $action_set['action_error'] ?? null,
+				]
 			],
 			'NULL'
 		);

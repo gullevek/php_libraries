@@ -119,6 +119,12 @@ if (isset($login->loginGetAcl()['unit'])) {
 }
 
 echo "<hr>";
+
+// IP check: 'REMOTE_ADDR', 'HTTP_X_FORWARDED_FOR', 'CLIENT_IP' in _SERVER
+// Agent check: 'HTTP_USER_AGENT'
+
+
+echo "<hr>";
 print "SESSION: " . Support::printAr($_SESSION) . "<br>";
 
 $login->writeLog(

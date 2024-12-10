@@ -3,6 +3,10 @@ ALTER TABLE edit_generic ADD cuuid UUID DEFAULT gen_random_uuid();
 ALTER TABLE edit_log ADD ecuid VARCHAR;
 ALTER TABLE edit_log ADD ecuuid VARCHAR;
 ALTER TABLE edit_log ADD action_sub_id VARCHAR;
+ALTER TABLE edit_log ADD http_data JSONB;
+ALTER TABLE edit_log ADD ip_address JSONB;
+ALTER TABLE edit_log ADD action_data JSONB;
+ALTER TABLE edit_log ADD request_scheme VARCHAR;
 
 -- update set_edit_gneric
 -- adds the created or updated date tags

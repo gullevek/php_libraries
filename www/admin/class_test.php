@@ -194,6 +194,9 @@ print "HOST: " . HOST_NAME . " => DB HOST: " . DB_CONFIG_NAME . " => " . Support
 print "DS is: " . DIRECTORY_SEPARATOR . "<br>";
 print "SERVER HOST: " . $_SERVER['HTTP_HOST'] . "<br>";
 
+print "<div>READ _SERVER ARRAY:</div>";
+print Support::dumpVar(array_map('htmlentities', $_SERVER));
+
 print "</body></html>";
 
 # __END__

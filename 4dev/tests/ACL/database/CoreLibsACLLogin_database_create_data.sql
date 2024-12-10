@@ -579,9 +579,6 @@ CREATE TABLE edit_user (
     strict SMALLINT DEFAULT 0,
     locked SMALLINT DEFAULT 0,
     protected SMALLINT NOT NULL DEFAULT 0,
-    -- legacy, debug flags
-    debug SMALLINT NOT NULL DEFAULT 0,
-    db_debug SMALLINT NOT NULL DEFAULT 0,
     -- is admin user
     admin SMALLINT NOT NULL DEFAULT 0,
     -- last login log
@@ -620,8 +617,6 @@ COMMENT ON COLUMN edit_user.deleted IS 'Login is deleted (master switch), overri
 COMMENT ON COLUMN edit_user.strict IS 'If too many failed logins user will be locked, default off';
 COMMENT ON COLUMN edit_user.locked IS 'Locked from too many wrong password logins';
 COMMENT ON COLUMN edit_user.protected IS 'User can only be chnaged by admin user';
-COMMENT ON COLUMN edit_user.debug IS 'Turn debug flag on (legacy)';
-COMMENT ON COLUMN edit_user.db_debug IS 'Turn DB debug flag on (legacy)';
 COMMENT ON COLUMN edit_user.admin IS 'If set, this user is SUPER admin';
 COMMENT ON COLUMN edit_user.last_login IS 'Last succesfull login tiemstamp';
 COMMENT ON COLUMN edit_user.login_error_count IS 'Number of failed logins, reset on successful login';
@@ -1015,7 +1010,7 @@ INSERT INTO edit_page_access (enabled, edit_group_id, edit_page_id, edit_access_
 -- edit user
 -- inserts admin user so basic users can be created
 DELETE FROM edit_user;
-INSERT INTO edit_user (username, password, enabled, debug, db_debug, email, protected, admin, edit_language_id, edit_group_id, edit_scheme_id, edit_access_right_id) VALUES ('admin', 'admin', 1, 1, 1, '', 1, 1,
+INSERT INTO edit_user (username, password, enabled, email, protected, admin, edit_language_id, edit_group_id, edit_scheme_id, edit_access_right_id) VALUES ('admin', 'admin', 1, 'test@tequila.jp', 1, 1,
     (SELECT edit_language_id FROM edit_language WHERE short_name = 'en_US'),
     (SELECT edit_group_id FROM edit_group WHERE name = 'Admin'),
     (SELECT edit_scheme_id FROM edit_scheme WHERE name = 'Admin'),
