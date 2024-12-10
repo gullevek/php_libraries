@@ -14,8 +14,19 @@ namespace CoreLibs\DB\Support;
 
 class ConvertPlaceholder
 {
-	/** @var string split regex */
-	private const PATTERN_QUERY_SPLIT = '[(<>=,?-]|->|->>|#>|#>>|@>|<@|\?\|\?\&|\|\||#-';
+	// NOTE for missing: range */+ are not iplemented in the regex below, but - is for now
+	// NOTE some combinations are allowed, but the query will fail before this
+	/** @var string split regex, entries before $ group */
+	private const PATTERN_QUERY_SPLIT =
+		',|' // for ',' mostly in INSERT
+		. '[(<>=]|' // general set for (, <, >, = in any query with any combination
+		. '(?:[\(,]\s*\-\-\s*\w*)\r?\n|' // a comment that starts after a ( or ,
+		. '\^@|' // text search for start from text with ^@
+		. '\|\||' // concats two elements
+		. '&&|' // array overlap
+		. '\-\|\-|' // range overlap
+		. '[^-]-{1}|' // single -, used in JSON too
+		. '->|->>|#>|#>>|@>|<@|@@|@\?|\?{1}|\?\||\?&|#-'; //JSON searches, Array searchs, etc
 	/** @var string the main regex including  the pattern query split */
 	private const PATTERN_ELEMENT = '(?:\'.*?\')?\s*(?:\?\?|' . self::PATTERN_QUERY_SPLIT . ')\s*';
 	/** @var string parts to ignore in the SQL */

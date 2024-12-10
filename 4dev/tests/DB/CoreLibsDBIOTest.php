@@ -5135,6 +5135,39 @@ final class CoreLibsDBIOTest extends TestCase
 				SQL,
 				'count' => 6,
 				'convert' => false,
+			],
+			'comments in insert' => [
+				'query' => <<<SQL
+				INSERT INTO table_with_primary_key (
+					row_int, row_numeric, row_varchar, row_varchar_literal
+				) VALUES (
+					-- comment
+					$1, $2,
+					-- comment
+					$3
+					-- comment
+					, $4
+				)
+				SQL,
+				'count' => 4,
+				'convert' => false
+			],
+			// Note some are not set
+			'a complete set of possible' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+				-- ROW
+				row_varchar = $1
+				WHERE
+				row_varchar = ANY($2) AND row_varchar <> $3
+				AND row_varchar > $4 AND row_varchar < $5
+				AND row_varchar >= $6 AND row_varchar <=$7
+				AND row_jsonb->'a' = $8 AND row_jsonb->>$9 = 'a'
+				AND row_jsonb<@$10 AND row_jsonb@>$11
+				AND row_varchar ^@ $12
+				SQL,
+				'count' => 12,
+				'convert' => false,
 			]
 		];
 	}
