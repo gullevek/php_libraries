@@ -2197,9 +2197,15 @@ HTML;
 				(string)$this->page_name,
 				// row 2
 				$_SERVER["REMOTE_ADDR"] ?? null,
-				[
+				Json::jsonConvertArrayTo([
 					'REMOTE_ADDR' => $_SERVER["REMOTE_ADDR"],
-				],
+					'HTTP_X_FORWARDED_FOR' => !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ?
+						explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])
+						: [],
+					'CLIENT_IP' => !empty($_SERVER['CLIENT_IP']) ?
+						explode(',', $_SERVER['CLIENT_IP'])
+						: [],
+				]),
 				$_SERVER['HTTP_USER_AGENT'] ?? null,
 				$_SERVER['HTTP_REFERER'] ?? null,
 				$_SERVER['SCRIPT_FILENAME'] ?? null,
@@ -2208,17 +2214,17 @@ HTML;
 				$_SERVER['SERVER_NAME'] ?? null,
 				// row 3
 				$_SERVER['HTTP_HOST'] ?? null,
-				[
+				Json::jsonConvertArrayTo([
 					'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'] ?? null,
 					'HTTP_ACCEPT_CHARSET' => $_SERVER['HTTP_ACCEPT_CHARSET'] ?? null,
 					'HTTP_ACCEPT_LANGUAGE' => $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null,
 					'HTTP_ACCEPT_ENCODING' => $_SERVER['HTTP_ACCEPT_ENCODING'] ?? null,
-				],
+				]),
 				$this->session->getSessionId() !== '' ?
 					$this->session->getSessionId() : null,
 				// row 4
 				// action data as JSONB
-				[
+				Json::jsonConvertArrayTo([
 					'action' => $action_set['action'] ?? null,
 					'action_id' => $action_set['action_id'] ?? null,
 					'action_sub_id' => $action_set['action_sub_id'] ?? null,
@@ -2229,7 +2235,7 @@ HTML;
 					'action_value' => $action_set['action_value'] ?? null,
 					'action_type' => $action_set['action_type'] ?? null,
 					'action_error' => $action_set['action_error'] ?? null,
-				]
+				])
 			],
 			'NULL'
 		);

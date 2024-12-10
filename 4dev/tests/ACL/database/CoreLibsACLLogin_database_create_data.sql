@@ -651,36 +651,43 @@ CREATE TABLE edit_log (
     euid INT, -- this is a foreign key, but I don't nedd to reference to it
     FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL,
     ecuid VARCHAR,
-    ecuuid UUID,
+    ecuuid UUID, -- this is the one we want to use, full UUIDv4 from the edit user table
     username VARCHAR,
     password VARCHAR,
     event_date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    ip VARCHAR,
+    ip VARCHAR, -- just the REMOTE_IP, full set see ip_address
+    ip_address JSONB, -- REMOTE_IP and all other IPs (X_FORWARD, etc) as JSON block
     error TEXT,
     event TEXT,
     data_binary BYTEA,
     data TEXT,
     page VARCHAR,
-    action VARCHAR,
-    action_id VARCHAR,
-    action_sub_id VARCHAR,
-    action_yes VARCHAR,
-    action_flag VARCHAR,
-    action_menu VARCHAR,
-    action_loaded VARCHAR,
-    action_value VARCHAR,
-    action_type VARCHAR,
-    action_error VARCHAR,
+    -- various info data sets
     user_agent VARCHAR,
     referer VARCHAR,
     script_name VARCHAR,
     query_string VARCHAR,
+    request_scheme VARCHAR, -- http or https
     server_name VARCHAR,
     http_host VARCHAR,
-    http_accept VARCHAR,
-    http_accept_charset VARCHAR,
-    http_accept_encoding VARCHAR,
-    session_id VARCHAR
+    http_data JSONB,
+    http_accept VARCHAR, -- in http_data
+    http_accept_charset VARCHAR, -- in http_data
+    http_accept_encoding VARCHAR, -- in http_data
+    -- session ID if set
+    session_id VARCHAR.
+    -- any action var, -> same set in action_data as JSON
+    action_data JSONB,
+    action VARCHAR, -- in action_data
+    action_id VARCHAR, -- in action_data
+    action_sub_id VARCHAR, -- in action_data
+    action_yes VARCHAR, -- in action_data
+    action_flag VARCHAR, -- in action_data
+    action_menu VARCHAR, -- in action_data
+    action_loaded VARCHAR, -- in action_data
+    action_value VARCHAR, -- in action_data
+    action_type VARCHAR, -- in action_data
+    action_error VARCHAR -- in action_data
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_log.sql
 -- START: table/edit_log_overflow.sql
