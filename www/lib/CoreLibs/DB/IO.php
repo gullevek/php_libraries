@@ -1332,7 +1332,6 @@ class IO
 	 */
 	private function __dbCheckQueryParams(string $query, array $params): bool
 	{
-		$this->log->debug('DB QUERY PARAMS REGEX', ConvertPlaceholder::REGEX_LOOKUP_PLACEHOLDERS);
 		$placeholder_count = $this->__dbCountQueryParams($query);
 		$params_count = count($params);
 		if ($params_count != $placeholder_count) {
