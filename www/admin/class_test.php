@@ -91,7 +91,7 @@ HTML;
 $test_files = [
 	'class_test.db.php' => 'Class Test: DB',
 	'class_test.db.types.php' => 'Class Test: DB column type convert',
-	'class_test.db.query-placeholder.php' => 'Class Test: DB query placeholder convert',
+	'class_test.db.query-placeholder.php' => 'Class Test: DB placeholder queries',
 	'class_test.db.dbReturn.php' => 'Class Test: DB dbReturn',
 	'class_test.db.single.php' => 'Class Test: DB single query tests',
 	'class_test.db.convert-placeholder.php' => 'Class Test: DB convert placeholder',
