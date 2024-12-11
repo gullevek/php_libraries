@@ -7,6 +7,10 @@ ALTER TABLE edit_log ADD http_data JSONB;
 ALTER TABLE edit_log ADD ip_address JSONB;
 ALTER TABLE edit_log ADD action_data JSONB;
 ALTER TABLE edit_log ADD request_scheme VARCHAR;
+ALTER TABLE edit_user ADD force_logout INT DEFAULT 0;
+COMMENT ON COLUMN edit_user.force_logout IS 'Counter for forced log out, if this one is higher than the session set one the session gets terminated';
+ALTER TABLE edit_user ADD last_login TIMESTAMP WITHOUT TIME ZONE;
+COMMENT ON COLUMN edit_user.last_login IS 'Last succesfull login tiemstamp';
 
 -- update set_edit_gneric
 -- adds the created or updated date tags

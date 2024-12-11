@@ -581,6 +581,8 @@ CREATE TABLE edit_user (
     protected SMALLINT NOT NULL DEFAULT 0,
     -- is admin user
     admin SMALLINT NOT NULL DEFAULT 0,
+    -- forced logout counter
+    force_logout INT DEFAULT 0,
     -- last login log
     last_login TIMESTAMP WITHOUT TIME ZONE,
     -- login error
@@ -697,6 +699,7 @@ CREATE TABLE edit_log (
     action_value VARCHAR, -- in action_data
     action_type VARCHAR, -- in action_data
     action_error VARCHAR -- in action_data
+) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_log.sql
 -- START: table/edit_log_overflow.sql
 -- AUTHOR: Clemens Schwaighofer

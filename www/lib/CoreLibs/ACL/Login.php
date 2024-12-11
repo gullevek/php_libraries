@@ -217,6 +217,36 @@ class Login
 		'path' => '',
 	];
 
+	// lock status bitmap (smallint, 256)
+	/** @var int enabled flag */
+	public const ENABLED = 1;
+	/** @var int deleted flag */
+	public const DELETED = 2;
+	/** @var int locked flag */
+	public const LOCKED = 4;
+	/** @var int banned/suspened flag [not implemented] */
+	public const BANNED = 8;
+	/** @var int password reset in progress [not implemented] */
+	public const RESET = 16;
+	/** @var int confirm/paending, eg waiting for confirm of email [not implemented] */
+	public const CONFIRM = 32;
+	/** @var int strict, on error lock */
+	public const STRICT = 64;
+	/** @var int proected, cannot delete */
+	public const PROTECTED = 128;
+	/** @var int master admin flag */
+	public const ADMIN = 256;
+
+	/** @var int resync interval time in minutes */
+	private const DEFAULT_AUTH_RESYNC_INTERVAL = 5 * 60;
+	/** @var int the session max garbage collection life time */
+	// private const DEFAULT_SESSION_GC_MAXLIFETIME = ;
+	private int $default_session_gc_maxlifetime;
+	/** @var int in how many minutes an auth resync is done */
+	private int $auth_resync_interval;
+	/** @var bool set the enhanced header security */
+	private bool $header_enhance_security = false;
+
 	/** @var \CoreLibs\Logging\Logging logger */
 	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\DB\IO database */
@@ -248,156 +278,19 @@ class Login
 		// attach session class
 		$this->session = $session;
 
+		$this->default_session_gc_maxlifetime = (int)ini_get("session.gc_maxlifetime");
+
 		// set and check options
 		if (false === $this->loginSetOptions($options)) {
 			// on failure, exit
 			echo "<b>Could not set options</b>";
 			$this->loginTerminate('Could not set options', 3000);
 		}
-
-		// string key, msg: string, flag: e (error), o (ok)
-		$this->login_error_msg = [
-			'0' => [
-				'msg' => 'No error',
-				'flag' => 'o'
-			],
-			// actually obsolete
-			'100' => [
-				'msg' => '[EUCUUID] set from GET/POST!',
-				'flag' => 'e',
-			],
-			// query errors
-			'1009' => [
-				'msg' => 'Login query reading failed',
-				'flag' => 'e',
-			],
-			// user not found
-			'1010' => [
-				'msg' => 'Login Failed - Wrong Username or Password',
-				'flag' => 'e'
-			],
-			// blowfish password wrong
-			/* '1011' => [
-				'msg' => 'Login Failed - Wrong Username or Password',
-				'flag' => 'e'
-			], */
-			// fallback md5 password wrong
-			'1012' => [
-				'msg' => 'Login Failed - Wrong Username or Password',
-				'flag' => 'e'
-			],
-			// new password_hash wrong
-			'1013' => [
-				'msg' => 'Login Failed - Wrong Username or Password',
-				'flag' => 'e'
-			],
-			'1101' => [
-				'msg' => 'Login Failed - Login User ID must be validated',
-				'flag' => 'e'
-			],
-			'1102' => [
-				'msg' => 'Login Failed - Login User ID is outside valid date range',
-				'flag' => 'e'
-			],
-			'102' => [
-				'msg' => 'Login Failed - Please enter username and password',
-				'flag' => 'e'
-			],
-			'103' => [
-				'msg' => 'You do not have the rights to access this Page',
-				'flag' => 'e'
-			],
-			'104' => [
-				'msg' => 'Login Failed - User not enabled',
-				'flag' => 'e'
-			],
-			'105' => [
-				'msg' => 'Login Failed - User is locked',
-				'flag' => 'e'
-			],
-			'106' => [
-				'msg' => 'Login Failed - User is deleted',
-				'flag' => 'e'
-			],
-			'107' => [
-				'msg' => 'Login Failed - User in locked via date period',
-				'flag' => 'e'
-			],
-			'108' => [
-				'msg' => 'Login Failed - User is locked via Login User ID',
-				'flag' => 'e'
-			],
-			'109' => [
-				'msg' => 'Check permission query reading failed',
-				'flag' => 'e'
-			],
-			// actually this is an illegal user, but I mask it
-			'220' => [
-				'msg' => 'Password change - The user could not be found',
-				'flag' => 'e'
-			],
-			'200' => [
-				'msg' => 'Password change - Please enter username and old password',
-				'flag' => 'e'
-			],
-			'201' => [
-				'msg' => 'Password change - The user could not be found',
-				'flag' => 'e'
-			],
-			'202' => [
-				'msg' => 'Password change - The old password is not correct',
-				'flag' => 'e'
-			],
-			'203' => [
-				'msg' => 'Password change - Please fill out both new password fields',
-				'flag' => 'e'
-			],
-			'204' => [
-				'msg' => 'Password change - The new passwords do not match',
-				'flag' => 'e'
-			],
-			// we should also not here WHAT is valid
-			'205' => [
-				'msg' => 'Password change - The new password is not in a valid format',
-				'flag' => 'e'
-			],
-			// for OK password change
-			'300' => [
-				'msg' => 'Password change successful',
-				'flag' => 'o'
-			],
-			// this is bad bad error
-			'9999' => [
-				'msg' => 'Necessary crypt engine could not be found. Login is impossible',
-				'flag' => 'e'
-			],
-		];
-
-		// read the current edit_access_right list into an array
-		$q = <<<SQL
-		SELECT
-			level, type, name
-		FROM
-			edit_access_right
-		WHERE
-			level >= 0
-		ORDER BY
-			level
-		SQL;
-		while (is_array($res = $this->db->dbReturn($q))) {
-			// level to description format (numeric)
-			$this->default_acl_list[$res['level']] = [
-				'type' => $res['type'],
-				'name' => $res['name']
-			];
-			$this->default_acl_list_type[(string)$res['type']] = (int)$res['level'];
-		}
-		// write that into the session
-		$this->session->setMany([
-			'LOGIN_DEFAULT_ACL_LIST' => $this->default_acl_list,
-			'LOGIN_DEFAULT_ACL_LIST_TYPE' => $this->default_acl_list_type,
-		]);
-
+		// init error array
+		$this->loginInitErrorMessages();
+		// acess right list
+		$this->loginLoadAccessRightList();
+		// log allowed write flags
 		$this->loginSetEditLogWriteTypeAvailable();
 
 		// this will be deprecated
@@ -425,6 +318,7 @@ class Login
 		} else {
 			$this->log->critical($message, ['code' => $code]);
 		}
+		// TODO throw error and not exit
 		exit($code);
 	}
 
@@ -577,6 +471,20 @@ class Login
 		}
 		$this->password_forgot = $options['forgot_flow'];
 
+		// sync _SESSION acl settings
+		if (
+			!isset($options['auth_resync_interval']) ||
+			!is_numeric($options['auth_resync_interval']) ||
+			$options['auth_resync_interval'] < 0 ||
+			$options['auth_resync_interval'] > $this->default_session_gc_maxlifetime
+		) {
+			// default 5 minutues
+			$options['auth_resync_interval'] = self::DEFAULT_AUTH_RESYNC_INTERVAL;
+		} else {
+			$options['auth_resync_interval'] = (int)$options['auth_resync_interval'];
+		}
+		$this->auth_resync_interval = $options['auth_resync_interval'];
+
 		// *** LANGUAGE
 		// LANG: LOCALE PATH
 		if (empty($options['locale_path'])) {
@@ -631,10 +539,208 @@ class Login
 			$options['site_encoding'] = defined('SITE_ENCODING') && !empty(SITE_ENCODING) ?
 				SITE_ENCODING : 'UTF-8';
 		}
+		// set enhancded security flag
+		if (
+			empty($options['enhanced_security']) ||
+			!is_bool($options['enhanced_security'])
+		) {
+			$options['enhanced_security'] = true;
+		}
+		$this->header_enhance_security = $options['enhanced_security'];
 
 		// write array to options
 		$this->options = $options;
 		return true;
+	}
+
+	/**
+	 * sets the login error message array
+	 *
+	 * @return void
+	 */
+	private function loginInitErrorMessages()
+	{
+		// string key, msg: string, flag: e (error), o (ok)
+		$this->login_error_msg = [
+			'0' => [
+				'msg' => 'No error',
+				'flag' => 'o'
+			],
+			// actually obsolete
+			'100' => [
+				'msg' => '[EUCUUID] set from GET/POST!',
+				'flag' => 'e',
+			],
+			// query errors
+			'1009' => [
+				'msg' => 'Login query reading failed',
+				'flag' => 'e',
+			],
+			// user not found
+			'1010' => [
+				'msg' => 'Login Failed - Wrong Username or Password',
+				'flag' => 'e'
+			],
+			// general login error
+			'1011' => [
+				'msg' => 'Login Failed - General authentication error',
+				'flag' => 'e'
+			],
+			// fallback md5 password wrong
+			'1012' => [
+				'msg' => 'Login Failed - Wrong Username or Password',
+				'flag' => 'e'
+			],
+			// new password_hash wrong
+			'1013' => [
+				'msg' => 'Login Failed - Wrong Username or Password',
+				'flag' => 'e'
+			],
+			'1101' => [
+				'msg' => 'Login Failed - Login User ID must be validated',
+				'flag' => 'e'
+			],
+			'1102' => [
+				'msg' => 'Login Failed - Login User ID is outside valid date range',
+				'flag' => 'e'
+			],
+			'102' => [
+				'msg' => 'Login Failed - Please enter username and password',
+				'flag' => 'e'
+			],
+			'103' => [
+				'msg' => 'You do not have the rights to access this Page',
+				'flag' => 'e'
+			],
+			'104' => [
+				'msg' => 'Login Failed - User not enabled',
+				'flag' => 'e'
+			],
+			'105' => [
+				'msg' => 'Login Failed - User is locked',
+				'flag' => 'e'
+			],
+			'106' => [
+				'msg' => 'Login Failed - User is deleted',
+				'flag' => 'e'
+			],
+			'107' => [
+				'msg' => 'Login Failed - User in locked via date period',
+				'flag' => 'e'
+			],
+			'108' => [
+				'msg' => 'Login Failed - User is locked via Login User ID',
+				'flag' => 'e'
+			],
+			'109' => [
+				'msg' => 'Check permission query reading failed',
+				'flag' => 'e'
+			],
+			'110' =>  [
+				'msg' => 'Forced logout',
+				'flag' => '',
+			],
+			// actually this is an illegal user, but I mask it
+			'220' => [
+				'msg' => 'Password change - The user could not be found',
+				'flag' => 'e'
+			],
+			'200' => [
+				'msg' => 'Password change - Please enter username and old password',
+				'flag' => 'e'
+			],
+			'201' => [
+				'msg' => 'Password change - The user could not be found',
+				'flag' => 'e'
+			],
+			'202' => [
+				'msg' => 'Password change - The old password is not correct',
+				'flag' => 'e'
+			],
+			'203' => [
+				'msg' => 'Password change - Please fill out both new password fields',
+				'flag' => 'e'
+			],
+			'204' => [
+				'msg' => 'Password change - The new passwords do not match',
+				'flag' => 'e'
+			],
+			// we should also not here WHAT is valid
+			'205' => [
+				'msg' => 'Password change - The new password is not in a valid format',
+				'flag' => 'e'
+			],
+			// for OK password change
+			'300' => [
+				'msg' => 'Password change successful',
+				'flag' => 'o'
+			],
+			// this is bad bad error
+			'9999' => [
+				'msg' => 'Necessary crypt engine could not be found. Login is impossible',
+				'flag' => 'e'
+			],
+		];
+	}
+
+	/**
+	 * loads the access right list from the database
+	 *
+	 * @return void
+	 */
+	private function loginLoadAccessRightList(): void
+	{
+		// read the current edit_access_right list into an array
+		$q = <<<SQL
+		SELECT
+			level, type, name
+		FROM
+			edit_access_right
+		WHERE
+			level >= 0
+		ORDER BY
+			level
+		SQL;
+		while (is_array($res = $this->db->dbReturn($q))) {
+			// level to description format (numeric)
+			$this->default_acl_list[$res['level']] = [
+				'type' => $res['type'],
+				'name' => $res['name']
+			];
+			$this->default_acl_list_type[(string)$res['type']] = (int)$res['level'];
+		}
+		// write that into the session
+		$this->session->setMany([
+			'LOGIN_DEFAULT_ACL_LIST' => $this->default_acl_list,
+			'LOGIN_DEFAULT_ACL_LIST_TYPE' => $this->default_acl_list_type,
+		]);
+	}
+
+	/**
+	 * Improves the application's security over HTTP(S) by setting specific headers
+	 *
+	 * @return void
+	 */
+	protected function loginEnhanceHttpSecurity(): void
+	{
+		// skip if not wanted
+		if (!$this->header_enhance_security) {
+			return;
+		}
+		// remove exposure of PHP version (at least where possible)
+		header_remove('X-Powered-By');
+		// if the user is signed in
+		if ($this->permission_okay) {
+			// prevent clickjacking
+			header('X-Frame-Options: sameorigin');
+			// prevent content sniffing (MIME sniffing)
+			header('X-Content-Type-Options: nosniff');
+
+			// disable caching of potentially sensitive data
+			header('Cache-Control: no-store, no-cache, must-revalidate', true);
+			header('Expires: Thu, 19 Nov 1981 00:00:00 GMT', true);
+			header('Pragma: no-cache', true);
+		}
 	}
 
 	// MARK: validation checks
@@ -649,6 +755,7 @@ class Login
 	 * @param  int  $locked               Locked because of too many invalid passwords
 	 * @param  int  $locked_period        Locked because of time period set
 	 * @param  int  $login_user_id_locked Locked from using Login User Id
+	 * @param  int  $force_logout         Force logout counter, if higher than session, permission is false
 	 * @return bool
 	 */
 	private function loginValidationCheck(
@@ -656,7 +763,8 @@ class Login
 		int $enabled,
 		int $locked,
 		int $locked_period,
-		int $login_user_id_locked
+		int $login_user_id_locked,
+		int $force_logout
 	): bool {
 		$validation = false;
 		if ($deleted) {
@@ -674,6 +782,8 @@ class Login
 		} elseif ($login_user_id_locked) {
 			// user is locked, either set or auto set
 			$this->login_error = 108;
+		} elseif ($force_logout > $this->session->get('LOGIN_FORCE_LOGOUT')) {
+			$this->login_error = 110;
 		} else {
 			$validation = true;
 		}
@@ -757,7 +867,112 @@ class Login
 		return $login_id_ok;
 	}
 
-	// MARK: login user action
+	/**
+	 * write error data for login errors
+	 *
+	 * @param  array<string,mixed> $res
+	 * @return void
+	 */
+	private function loginWriteLoginError(array $res)
+	{
+		if (!$this->login_error) {
+			return;
+		}
+		$login_error_date_first = '';
+		if ($res['login_error_count'] == 0) {
+			$login_error_date_first = ", login_error_date_first = NOW()";
+		}
+		// update login error count for this user
+		$q = <<<SQL
+		UPDATE edit_user
+		SET
+			login_error_count = login_error_count + 1,
+			login_error_date_last = NOW()
+			{LOGIN_ERROR_SQL}
+		WHERE edit_user_id = $1
+		SQL;
+		$this->db->dbExecParams(
+			str_replace('{LOGIN_ERROR_SQL}', $login_error_date_first, $q),
+			[$res['edit_user_id']]
+		);
+		// totally lock the user if error max is reached
+		if (
+			$this->max_login_error_count != -1 &&
+			$res['login_error_count'] + 1 > $this->max_login_error_count
+		) {
+			// do some alert reporting in case this error is too big
+			// if strict is set, lock this user
+			// this needs manual unlocking by an admin user
+			if ($res['strict'] && !in_array($this->username, $this->lock_deny_users)) {
+				$q = <<<SQL
+				UPDATE edit_user
+				SET locked = 1
+				WHERE edit_user_id = $1
+				SQL;
+				// [$res['edit_user_id']]
+			}
+		}
+	}
+
+	/**
+	 * set the core edit_user table id/cuid/cuuid
+	 *
+	 * @param  array<string,mixed> $res
+	 * @return void
+	 */
+	private function loginSetEditUserUidData(array $res)
+	{
+		// normal user processing
+		// set class var and session var
+		$this->edit_user_id = (int)$res['edit_user_id'];
+		$this->edit_user_cuid = (string)$res['cuid'];
+		$this->edit_user_cuuid = (string)$res['cuuid'];
+		$this->session->setMany([
+			'LOGIN_EUID' => $this->edit_user_id,
+			'LOGIN_EUCUID' => $this->edit_user_cuid,
+			'LOGIN_EUCUUID' => $this->edit_user_cuuid,
+		]);
+	}
+
+	/**
+	 * check for re-loading of ACL data after a period of time
+	 * or if any of the core session vars is not set
+	 *
+	 * @return void
+	 */
+	private function loginAuthResync()
+	{
+		if (!$this->session->get('LOGIN_LAST_AUTH_RESYNC')) {
+			$this->session->set('LOGIN_LAST_AUTH_RESYNC', 0);
+		}
+		// reauth on missing session vars and timed out re-sync interval
+		$mandatory_session_vars = [
+			'LOGIN_USER_NAME', 'LOGIN_GROUP_NAME', 'LOGIN_EUCUID', 'LOGIN_EUCUUID',
+			'LOGIN_USER_ADDITIONAL_ACL', 'LOGIN_GROUP_ADDITIONAL_ACL',
+			'LOGIN_ADMIN', 'LOGIN_GROUP_ACL_LEVEL', 'LOGIN_PAGES_ACL_LEVEL', 'LOGIN_USER_ACL_LEVEL',
+			'LOGIN_UNIT', 'LOGIN_UNIT_DEFAULT_EACUID'
+		];
+		$force_reauth = false;
+		foreach ($mandatory_session_vars as $_session_var) {
+			if (!isset($_SESSION[$_session_var])) {
+				$force_reauth = true;
+				break;
+			}
+		}
+		if (
+			$this->session->get('LOGIN_LAST_AUTH_RESYNC') + $this->auth_resync_interval <= time() &&
+			$force_reauth == false
+		) {
+			return;
+		}
+		if (($res = $this->loginLoadUserData($this->edit_user_cuuid)) === false) {
+			return;
+		}
+		// set the session vars
+		$this->loginSetSession($res);
+	}
+
+	// MARK: MAIN LOGIN ACTION
 
 	/**
 	 * if user pressed login button this script is called,
@@ -769,6 +984,10 @@ class Login
 	{
 		// if pressed login at least and is not yet loggined in
 		if ($this->edit_user_cuuid || (!$this->login && !$this->login_user_id)) {
+			// run reload user data based on re-auth timeout, but only if we got a set cuuid
+			if ($this->edit_user_cuuid) {
+				$this->loginAuthResync();
+			}
 			return;
 		}
 		// if not username AND password where given
@@ -778,16 +997,105 @@ class Login
 			$this->permission_okay = false;
 			return;
 		}
-		// have to get the global stuff here for setting it later
-		// we have to get the themes in here too
+		// load user data, abort on error
+		if (($res = $this->loginLoadUserData()) === false) {
+			return;
+		}
+		// if login errors is half of max errors and the last login error
+		// was less than 10s ago, forbid any new login try
+
+		// check flow
+		// - user is enabled
+		// - user is not locked
+		// - password is readable
+		// - encrypted password matches
+		// - plain password matches
+		if (
+			!$this->loginValidationCheck(
+				(int)$res['deleted'],
+				(int)$res['enabled'],
+				(int)$res['locked'],
+				(int)$res['locked_period'],
+				(int)$res['login_user_id_locked'],
+				(int)$res['force_logout']
+			)
+		) {
+			// error set in method (104, 105, 106, 107, 108)
+		} elseif (
+			empty($this->username) &&
+			!empty($this->login_user_id) &&
+			!$this->loginLoginUserIdCheck(
+				(int)$res['login_user_id_valid_date'],
+				(int)$res['login_user_id_revalidate']
+			)
+		) {
+			// check done in loginLoginIdCheck method
+			// aborts on must revalidate and not valid (date range)
+		} elseif (
+			!empty($this->username) &&
+			!$this->loginPasswordCheck($res['password'])
+		) {
+			// none to be set, set in login password check
+			// this is not valid password input error here
+			// all error codes are set in loginPasswordCheck method
+			// also valid if login_user_id is ok
+		} else {
+			// check if the current password is an invalid hash and do a rehash and set password
+			// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '
+			//	.($Password::passwordVerify($this->password, $res['password']) ? 'OK' : 'FAIL')
+			//	.' => HASH: '.(Password::passwordRehashCheck($res['password']) ? 'NEW NEEDED' : 'OK'));
+			if (Password::passwordRehashCheck($res['password'])) {
+				// update password hash to new one now
+				$q = <<<SQL
+				UPDATE edit_user
+				SET password = $1
+				WHERE edit_user_id = $2
+				SQL;
+				$this->db->dbExecParams($q, [
+					Password::passwordSet($this->password),
+					$res['edit_user_id']
+				]);
+			}
+			// normal user processing
+			// set class var and session var
+			$this->loginSetEditUserUidData($res);
+			// set the last login time stamp for normal login only (not for reauthenticate)
+			$this->db->dbExecParams(<<<SQL
+			UPDATE edit_user SET
+				last_login = NOW()
+			WHERE
+				edit_user_id = $1
+			SQL, [$this->edit_user_id]);
+			// set the session vars
+			$this->loginSetSession($res);
+		} // user was not enabled or other login error
+		// check for login error and write to the user
+		$this->loginWriteLoginError($res);
+		// if there was an login error, show login screen
+		if ($this->login_error) {
+			// reset the perm var, to confirm logout
+			$this->permission_okay = false;
+		}
+	}
+
+	/**
+	 * load user data and all connect4ed settings
+	 *
+	 * @param ?string $edit_user_cuuid for re-auth
+	 * @return array<string,mixed>|false
+	 */
+	private function loginLoadUserData(?string $edit_user_cuuid = null): array|false
+	{
 		$q = <<<SQL
 		SELECT
-			eu.edit_user_id, eu.cuid, eu.cuuid, eu.username, eu.password,
+			eu.edit_user_id, eu.cuid, eu.cuuid, eu.username, eu.password, eu.email,
 			eu.edit_group_id,
 			eg.name AS edit_group_name, eu.admin,
 			-- additinal acl lists
 			eu.additional_acl AS user_additional_acl,
 			eg.additional_acl AS group_additional_acl,
+			-- force logoutp counter
+			eu.force_logout,
 			-- login error + locked
 			eu.login_error_count, eu.login_error_date_last,
 			eu.login_error_date_first, eu.strict, eu.locked,
@@ -802,8 +1110,6 @@ class Login
 					OR (eu.lock_after IS NOT NULL AND NOW() <= eu.lock_after)
 				)
 			) THEN 0::INT ELSE 1::INT END locked_period,
-			-- debug (legacy)
-			eu.debug, eu.db_debug,
 			-- enabled
 			eu.enabled, eu.deleted,
 			-- for checks only
@@ -851,8 +1157,12 @@ class Login
 		SQL;
 		$params = [];
 		$replace_string = '';
-		// either login_user_id OR password must be given
-		if (!empty($this->login_user_id && empty($this->username))) {
+		// if login is OK and we have edit_user_cuuid as parameter, then this is internal re-auth
+		// else login_user_id OR password must be given
+		if (!empty($edit_user_cuuid)) {
+			$replace_string = 'eu.cuuid = $1';
+			$params = [$this->edit_user_cuuid];
+		} elseif (!empty($this->login_user_id) && empty($this->username)) {
 			// check with login id if set and NO username
 			$replace_string = 'eu.login_user_id = $1';
 			$params = [$this->login_user_id];
@@ -874,366 +1184,288 @@ class Login
 		if (!empty($this->db->dbGetLastError())) {
 			$this->login_error = 1009;
 			$this->permission_okay = false;
-			return;
+			return false;
 		} elseif (!is_array($res)) {
 			// username is wrong, but we throw for wrong username
 			// and wrong password the same error
-			$this->login_error = 1010;
+			// unless with have edit user cuuid set then we run an general ACL error
+			if (empty($edit_user_cuuid)) {
+				$this->login_error = 1010;
+			} else {
+				$this->login_error = 1011;
+			}
 			$this->permission_okay = false;
+			return false;
+		}
+		return $res;
+	}
+
+	// MARK: login set all session variables
+
+	/**
+	 * set all the _SESSION variables
+	 *
+	 * @param  array<string,mixed> $res user data loaded query result
+	 * @return void
+	 */
+	private function loginSetSession(array $res): void
+	{
+		// user has permission to THIS page
+		if ($this->login_error != 0) {
 			return;
 		}
-		// if login errors is half of max errors and the last login error
-		// was less than 10s ago, forbid any new login try
-
-		// check flow
-		// - user is enabled
-		// - user is not locked
-		// - password is readable
-		// - encrypted password matches
-		// - plain password matches
+		// set the dit group id
+		$edit_group_id = $res["edit_group_id"];
+		$edit_user_id = (int)$res['edit_user_id'];
+		// update last revalidate flag
 		if (
-			!$this->loginValidationCheck(
-				(int)$res['deleted'],
-				(int)$res['enabled'],
-				(int)$res['locked'],
-				(int)$res['locked_period'],
-				(int)$res['login_user_id_locked']
-			)
+			!empty($res['login_user_id']) &&
+			!empty($this->username) && !empty($this->password)
 		) {
-			// error set in method (104, 105, 106, 107, 108)
-		} elseif (
-			empty($this->username) &&
-			!empty($this->login_user_id) &&
-			!$this->loginLoginUserIdCheck(
-				(int)$res['login_user_id_valid_date'],
-				(int)$res['login_user_id_revalidate']
-			)
+			$q = <<<SQL
+			UPDATE edit_user
+			SET login_user_id_last_revalidate = NOW()
+			WHERE edit_user_id = $1
+			SQL;
+			$this->db->dbExecParams($q, [$edit_user_id]);
+		}
+		$locale = $res['locale'] ?? 'en';
+		$encoding = $res['encoding'] ?? 'UTF-8';
+		$this->session->setMany([
+			// now set all session vars and read page permissions
+			// DEBUG flag is deprecated
+			// 'DEBUG_ALL' => $this->db->dbBoolean($res['debug']),
+			// 'DB_DEBUG' => $this->db->dbBoolean($res['db_debug']),
+			// login timestamp
+			'LOGIN_LAST_AUTH_RESYNC' => time(),
+			// current forced logout counter
+			'LOGIN_FORCE_LOGOUT' => $res['force_logout'],
+			// general info for user logged in
+			'LOGIN_USER_NAME' => $res['username'],
+			'LOGIN_EMAIL' => $res['email'],
+			'LOGIN_ADMIN' => $res['admin'],
+			'LOGIN_GROUP_NAME' => $res['edit_group_name'],
+			'LOGIN_USER_ACL_LEVEL' => $res['user_level'],
+			'LOGIN_USER_ACL_TYPE' => $res['user_type'],
+			'LOGIN_USER_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['user_additional_acl']),
+			'LOGIN_GROUP_ACL_LEVEL' => $res['group_level'],
+			'LOGIN_GROUP_ACL_TYPE' => $res['group_type'],
+			'LOGIN_GROUP_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['group_additional_acl']),
+			// deprecated TEMPLATE setting
+			// 'TEMPLATE' => $res['template'] ? $res['template'] : '',
+			'LOGIN_HEADER_COLOR' => !empty($res['second_header_color']) ?
+				$res['second_header_color'] :
+				$res['first_header_color'],
+			// LANGUAGE/LOCALE/ENCODING:
+			// 'LOGIN_LANG' => $locale,
+			'DEFAULT_CHARSET' => $encoding,
+			'DEFAULT_LOCALE' => $locale . '.' . strtoupper($encoding),
+			'DEFAULT_LANG' => $locale . '_' . strtolower(str_replace('-', '', $encoding))
+		]);
+		// missing # before, this is for legacy data, will be deprecated
+		if (
+			!empty($this->session->get('LOGIN_HEADER_COLOR')) &&
+			preg_match("/^[\dA-Fa-f]{6,8}$/", $this->session->get('LOGIN_HEADER_COLOR'))
 		) {
-			// check done in loginLoginIdCheck method
-			// aborts on must revalidate and not valid (date range)
-		} elseif (
-			!empty($this->username) &&
-			!$this->loginPasswordCheck($res['password'])
-		) {
-			// none to be set, set in login password check
-			// this is not valid password input error here
-			// all error codes are set in loginPasswordCheck method
-			// also valid if login_user_id is ok
-		} else {
-			// check if the current password is an invalid hash and do a rehash and set password
-			// $this->debug('LOGIN', 'Hash: '.$res['password'].' -> VERIFY: '
-			//	.($Password::passwordVerify($this->password, $res['password']) ? 'OK' : 'FAIL')
-			//	.' => HASH: '.(Password::passwordRehashCheck($res['password']) ? 'NEW NEEDED' : 'OK'));
-			if (Password::passwordRehashCheck($res['password'])) {
-				// update password hash to new one now
-				$q = <<<SQL
-				UPDATE edit_user
-				SET password = $1
-				WHERE edit_user_id = $2
-				SQL;
-				$this->db->dbExecParams($q, [
-					Password::passwordSet($this->password),
-					$res['edit_user_id']
-				]);
-			}
-			// normal user processing
-			// set class var and session var
-			$this->edit_user_id = (int)$res['edit_user_id'];
-			$this->edit_user_cuid = (string)$res['cuid'];
-			$this->edit_user_cuuid = (string)$res['cuuid'];
-			$this->session->setMany([
-				'LOGIN_EUID' => $this->edit_user_id, // DEPRECATED
-				'LOGIN_EUCUID' => $this->edit_user_cuid,
-				'LOGIN_EUCUUID' => $this->edit_user_cuuid,
-			]);
-			// check if user is okay
-			$this->loginCheckPermissions();
-			if ($this->login_error == 0) {
-				// set the dit group id
-				$edit_group_id = $res["edit_group_id"];
-				// update last revalidate flag
-				if (
-					!empty($res['login_user_id']) &&
-					!empty($this->username) && !empty($this->password)
-				) {
-					$q = <<<SQL
-					UPDATE edit_user
-					SET login_user_id_last_revalidate = NOW()
-					WHERE edit_user_id = $1
-					SQL;
-					$this->db->dbExecParams($q, [$this->edit_user_id]);
-				}
-				$locale = $res['locale'] ?? 'en';
-				$encoding = $res['encoding'] ?? 'UTF-8';
-				$this->session->setMany([
-					// now set all session vars and read page permissions
-					// DEBUG flag is deprecated
-					// 'DEBUG_ALL' => $this->db->dbBoolean($res['debug']),
-					// 'DB_DEBUG' => $this->db->dbBoolean($res['db_debug']),
-					// general info for user logged in
-					'LOGIN_USER_NAME' => $res['username'],
-					'LOGIN_ADMIN' => $res['admin'],
-					'LOGIN_GROUP_NAME' => $res['edit_group_name'],
-					'LOGIN_USER_ACL_LEVEL' => $res['user_level'],
-					'LOGIN_USER_ACL_TYPE' => $res['user_type'],
-					'LOGIN_USER_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['user_additional_acl']),
-					'LOGIN_GROUP_ACL_LEVEL' => $res['group_level'],
-					'LOGIN_GROUP_ACL_TYPE' => $res['group_type'],
-					'LOGIN_GROUP_ADDITIONAL_ACL' => Json::jsonConvertToArray($res['group_additional_acl']),
-					// deprecated TEMPLATE setting
-					// 'TEMPLATE' => $res['template'] ? $res['template'] : '',
-					'LOGIN_HEADER_COLOR' => !empty($res['second_header_color']) ?
-						$res['second_header_color'] :
-						$res['first_header_color'],
-					// LANGUAGE/LOCALE/ENCODING:
-					// 'LOGIN_LANG' => $locale,
-					'DEFAULT_CHARSET' => $encoding,
-					'DEFAULT_LOCALE' => $locale . '.' . strtoupper($encoding),
-					'DEFAULT_LANG' => $locale . '_' . strtolower(str_replace('-', '', $encoding))
-				]);
-				// missing # before, this is for legacy data, will be deprecated
-				if (
-					!empty($this->session->get('LOGIN_HEADER_COLOR')) &&
-					preg_match("/^[\dA-Fa-f]{6,8}$/", $this->session->get('LOGIN_HEADER_COLOR'))
-				) {
-					$this->session->set('LOGIN_HEADER_COLOR', '#' . $this->session->get('LOGIN_HEADER_COLOR'));
-				}
-				// TODO: make sure that header color is valid:
-				// # + 6 hex
-				// # + 8 hex (alpha)
-				// rgb(), rgba(), hsl(), hsla()
-				// rgb: nnn.n for each
-				// hsl: nnn.n for first, nnn.n% for 2nd, 3rd
-				// Check\Colors::validateColor()
-				// reset any login error count for this user
-				if ($res['login_error_count'] > 0) {
-					$q = <<<SQL
-					UPDATE edit_user
-					SET
-						login_error_count = 0, login_error_date_last = NULL,
-						login_error_date_first = NULL
-					WHERE edit_user_id = $1
-					SQL;
-					$this->db->dbExecParams($q, [$this->edit_user_id]);
-				}
-				$edit_page_ids = [];
-				$pages = [];
-				$pages_acl = [];
-				// set pages access
-				$q = <<<SQL
-				SELECT
-					ep.edit_page_id, ep.cuid, ep.cuuid, epca.cuid AS content_alias_uid,
-					ep.hostname, ep.filename, ep.name AS edit_page_name,
-					ep.order_number AS edit_page_order, ep.menu,
-					ep.popup, ep.popup_x, ep.popup_y, ep.online, ear.level, ear.type
-				FROM edit_page ep
-				LEFT JOIN edit_page epca ON (
-					epca.edit_page_id = ep.content_alias_edit_page_id
-				),
-				edit_page_access epa, edit_access_right ear
-				WHERE
-					ep.edit_page_id = epa.edit_page_id
-					AND ear.edit_access_right_id = epa.edit_access_right_id
-					AND epa.enabled = 1 AND epa.edit_group_id = $1
-				ORDER BY ep.order_number
-				SQL;
-				while (is_array($res = $this->db->dbReturnParams($q, [$edit_group_id]))) {
-					// page id array for sub data readout
-					$edit_page_ids[$res['edit_page_id']] = $res['cuid'];
-					// create the array for pages
-					$pages[$res['cuid']] = [
-						'edit_page_id' => $res['edit_page_id'],
-						'cuid' => $res['cuid'],
-						'cuuid' => $res['cuuid'],
-						// for reference of content data on a differen page
-						'content_alias_uid' => $res['content_alias_uid'],
-						'hostname' => $res['hostname'],
-						'filename' => $res['filename'],
-						'page_name' => $res['edit_page_name'],
-						'order' => $res['edit_page_order'],
-						'menu' => $res['menu'],
-						'popup' => $res['popup'],
-						'popup_x' => $res['popup_x'],
-						'popup_y' => $res['popup_y'],
-						'online' => $res['online'],
-						'acl_level' => $res['level'],
-						'acl_type' => $res['type'],
-						'query' => [],
-						'visible' => []
-					];
-					// make reference filename -> level
-					$pages_acl[$res['filename']] = $res['level'];
-				} // for each page
-				// edit page id params
-				$params = ['{' . join(',', array_keys($edit_page_ids)) . '}'];
-				// get the visible groups for all pages and write them to the pages
-				$q = <<<SQL
-				SELECT epvg.edit_page_id, name, flag
-				FROM edit_visible_group evp, edit_page_visible_group epvg
-				WHERE
-					evp.edit_visible_group_id = epvg.edit_visible_group_id
-					AND epvg.edit_page_id = ANY($1)
-				ORDER BY epvg.edit_page_id
-				SQL;
-				while (is_array($res = $this->db->dbReturnParams($q, $params))) {
-					$pages[$edit_page_ids[$res['edit_page_id']]]['visible'][$res['name']] = $res['flag'];
-				}
-				// get the same for the query strings
-				$q = <<<SQL
-				SELECT eqs.edit_page_id, name, value, dynamic
-				FROM edit_query_string eqs
-				WHERE
-					enabled = 1
-					AND edit_page_id = ANY($1)
-				ORDER BY eqs.edit_page_id
-				SQL;
-				while (is_array($res = $this->db->dbReturnParams($q, $params))) {
-					$pages[$edit_page_ids[$res['edit_page_id']]]['query'][] = [
-						'name' => $res['name'],
-						'value' => $res['value'],
-						'dynamic' => $res['dynamic']
-					];
-				}
-				// get the page content and add them to the page
-				$q = <<<SQL
-				SELECT
-					epc.edit_page_id, epc.name, epc.uid, epc.cuid, epc.cuuid, epc.order_number,
-					epc.online, ear.level, ear.type
-				FROM edit_page_content epc, edit_access_right ear
-				WHERE
-					epc.edit_access_right_id = ear.edit_access_right_id
-					AND epc.edit_page_id = ANY($1)
-				ORDER BY epc.order_number
-				SQL;
-				while (is_array($res = $this->db->dbReturnParams($q, $params))) {
-					$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = [
-						'name' => $res['name'],
-						'uid' => $res['uid'],
-						'cuid' => $res['cuid'],
-						'cuuid' => $res['cuuid'],
-						'online' => $res['online'],
-						'order' => $res['order_number'],
-						// access name and level
-						'acl_type' => $res['type'],
-						'acl_level' => $res['level']
-					];
-				}
-				// write back the pages data to the output array
-				$this->session->setMany([
-					'LOGIN_PAGES' => $pages,
-					'LOGIN_PAGES_ACL_LEVEL' => $pages_acl,
-				]);
-				// load the edit_access user rights
-				$q = <<<SQL
-				SELECT
-					ea.edit_access_id, ea.cuid, ea.cuuid, level, type, ea.name,
-					ea.color, ea.uid, edit_default, ea.additional_acl
-				FROM edit_access_user eau, edit_access_right ear, edit_access ea
-				WHERE
-					eau.edit_access_id = ea.edit_access_id
-					AND eau.edit_access_right_id = ear.edit_access_right_id
-					AND eau.enabled = 1 AND edit_user_id = $1
-				ORDER BY ea.name
-				SQL;
-				$unit_access_cuid = [];
-				// legacy
-				$unit_access_eaid = [];
-				$unit_cuid_lookup = [];
-				$eaid = [];
-				$eacuid = [];
-				$unit_acl = [];
-				$unit_uid_lookup = [];
-				while (is_array($res = $this->db->dbReturnParams($q, [$this->edit_user_id]))) {
-					// read edit access data fields and drop them into the unit access array
-					$q_sub = <<<SQL
-					SELECT name, value
-					FROM edit_access_data
-					WHERE enabled = 1 AND edit_access_id = $1
-					SQL;
-					$ea_data = [];
-					while (is_array($res_sub = $this->db->dbReturnParams($q_sub, [$res['edit_access_id']]))) {
-						$ea_data[$res_sub['name']] = $res_sub['value'];
-					}
-					// build master unit array
-					$unit_access_cuid[$res['cuid']] = [
-						'id' => (int)$res['edit_access_id'], // DEPRECATED
-						'cuuid' => $res['cuuid'],
-						'acl_level' => $res['level'],
-						'acl_type' => $res['type'],
-						'name' => $res['name'],
-						'uid' => $res['uid'],
-						'color' => $res['color'],
-						'default' => $res['edit_default'],
-						'additional_acl' => Json::jsonConvertToArray($res['additional_acl']),
-						'data' => $ea_data
-					];
-					$unit_access_eaid[$res['edit_access_id']] = [
-						'cuid' => $res['cuid'],
-					];
-					// set the default unit
-					if ($res['edit_default']) {
-						$this->session->set('LOGIN_UNIT_DEFAULT_EAID', (int)$res['edit_access_id']); // DEPRECATED
-						$this->session->set('LOGIN_UNIT_DEFAULT_EACUID', (int)$res['cuid']);
-					}
-					$unit_uid_lookup[$res['uid']] = $res['edit_access_id']; // DEPRECATED
-					$unit_cuid_lookup[$res['uid']] = $res['cuid'];
-					// sub arrays for simple access
-					array_push($eaid, $res['edit_access_id']);
-					array_push($eacuid, $res['cuid']);
-					$unit_acl[$res['cuid']] = $res['level'];
-				}
-				$this->session->setMany([
-					'LOGIN_UNIT_UID' => $unit_uid_lookup, // DEPRECATED
-					'LOGIN_UNIT_CUID' => $unit_cuid_lookup,
-					'LOGIN_UNIT' => $unit_access_cuid,
-					'LOGIN_UNIT_LEGACY' => $unit_access_eaid, // DEPRECATED
-					'LOGIN_UNIT_ACL_LEVEL' => $unit_acl,
-					'LOGIN_EAID' => $eaid, // DEPRECATED
-					'LOGIN_EACUID' => $eacuid,
-				]);
-			} // user has permission to THIS page
-		} // user was not enabled or other login error
-		if ($this->login_error && is_array($res)) {
-			$login_error_date_first = '';
-			if ($res['login_error_count'] == 0) {
-				$login_error_date_first = ", login_error_date_first = NOW()";
-			}
-			// update login error count for this user
+			$this->session->set('LOGIN_HEADER_COLOR', '#' . $this->session->get('LOGIN_HEADER_COLOR'));
+		}
+		// TODO: make sure that header color is valid:
+		// # + 6 hex
+		// # + 8 hex (alpha)
+		// rgb(), rgba(), hsl(), hsla()
+		// rgb: nnn.n for each
+		// hsl: nnn.n for first, nnn.n% for 2nd, 3rd
+		// Check\Colors::validateColor()
+		// reset any login error count for this user
+		if ($res['login_error_count'] > 0) {
 			$q = <<<SQL
 			UPDATE edit_user
 			SET
-				login_error_count = login_error_count + 1,
-				login_error_date_last = NOW()
-				{LOGIN_ERROR_SQL}
+				login_error_count = 0, login_error_date_last = NULL,
+				login_error_date_first = NULL
 			WHERE edit_user_id = $1
 			SQL;
-			$this->db->dbExecParams(
-				str_replace('{LOGIN_ERROR_SQL}', $login_error_date_first, $q),
-				[$res['edit_user_id']]
-			);
-			// totally lock the user if error max is reached
-			if (
-				$this->max_login_error_count != -1 &&
-				$res['login_error_count'] + 1 > $this->max_login_error_count
-			) {
-				// do some alert reporting in case this error is too big
-				// if strict is set, lock this user
-				// this needs manual unlocking by an admin user
-				if ($res['strict'] && !in_array($this->username, $this->lock_deny_users)) {
-					$q = <<<SQL
-					UPDATE edit_user
-					SET locked = 1
-					WHERE edit_user_id = $1
-					SQL;
-					// [$res['edit_user_id']]
-				}
+			$this->db->dbExecParams($q, [$edit_user_id]);
+		}
+		$edit_page_ids = [];
+		$pages = [];
+		$pages_acl = [];
+		// set pages access
+		$q = <<<SQL
+		SELECT
+			ep.edit_page_id, ep.cuid, ep.cuuid, epca.cuid AS content_alias_uid,
+			ep.hostname, ep.filename, ep.name AS edit_page_name,
+			ep.order_number AS edit_page_order, ep.menu,
+			ep.popup, ep.popup_x, ep.popup_y, ep.online, ear.level, ear.type
+		FROM edit_page ep
+		LEFT JOIN edit_page epca ON (
+			epca.edit_page_id = ep.content_alias_edit_page_id
+		),
+		edit_page_access epa, edit_access_right ear
+		WHERE
+			ep.edit_page_id = epa.edit_page_id
+			AND ear.edit_access_right_id = epa.edit_access_right_id
+			AND epa.enabled = 1 AND epa.edit_group_id = $1
+		ORDER BY ep.order_number
+		SQL;
+		while (is_array($res = $this->db->dbReturnParams($q, [$edit_group_id]))) {
+			// page id array for sub data readout
+			$edit_page_ids[$res['edit_page_id']] = $res['cuid'];
+			// create the array for pages
+			$pages[$res['cuid']] = [
+				'edit_page_id' => $res['edit_page_id'],
+				'cuid' => $res['cuid'],
+				'cuuid' => $res['cuuid'],
+				// for reference of content data on a differen page
+				'content_alias_uid' => $res['content_alias_uid'],
+				'hostname' => $res['hostname'],
+				'filename' => $res['filename'],
+				'page_name' => $res['edit_page_name'],
+				'order' => $res['edit_page_order'],
+				'menu' => $res['menu'],
+				'popup' => $res['popup'],
+				'popup_x' => $res['popup_x'],
+				'popup_y' => $res['popup_y'],
+				'online' => $res['online'],
+				'acl_level' => $res['level'],
+				'acl_type' => $res['type'],
+				'query' => [],
+				'visible' => []
+			];
+			// make reference filename -> level
+			$pages_acl[$res['filename']] = $res['level'];
+		} // for each page
+		// edit page id params
+		$params = ['{' . join(',', array_keys($edit_page_ids)) . '}'];
+		// get the visible groups for all pages and write them to the pages
+		$q = <<<SQL
+		SELECT epvg.edit_page_id, name, flag
+		FROM edit_visible_group evp, edit_page_visible_group epvg
+		WHERE
+			evp.edit_visible_group_id = epvg.edit_visible_group_id
+			AND epvg.edit_page_id = ANY($1)
+		ORDER BY epvg.edit_page_id
+		SQL;
+		while (is_array($res = $this->db->dbReturnParams($q, $params))) {
+			$pages[$edit_page_ids[$res['edit_page_id']]]['visible'][$res['name']] = $res['flag'];
+		}
+		// get the same for the query strings
+		$q = <<<SQL
+		SELECT eqs.edit_page_id, name, value, dynamic
+		FROM edit_query_string eqs
+		WHERE
+			enabled = 1
+			AND edit_page_id = ANY($1)
+		ORDER BY eqs.edit_page_id
+		SQL;
+		while (is_array($res = $this->db->dbReturnParams($q, $params))) {
+			$pages[$edit_page_ids[$res['edit_page_id']]]['query'][] = [
+				'name' => $res['name'],
+				'value' => $res['value'],
+				'dynamic' => $res['dynamic']
+			];
+		}
+		// get the page content and add them to the page
+		$q = <<<SQL
+		SELECT
+			epc.edit_page_id, epc.name, epc.uid, epc.cuid, epc.cuuid, epc.order_number,
+			epc.online, ear.level, ear.type
+		FROM edit_page_content epc, edit_access_right ear
+		WHERE
+			epc.edit_access_right_id = ear.edit_access_right_id
+			AND epc.edit_page_id = ANY($1)
+		ORDER BY epc.order_number
+		SQL;
+		while (is_array($res = $this->db->dbReturnParams($q, $params))) {
+			$pages[$edit_page_ids[$res['edit_page_id']]]['content'][$res['uid']] = [
+				'name' => $res['name'],
+				'uid' => $res['uid'],
+				'cuid' => $res['cuid'],
+				'cuuid' => $res['cuuid'],
+				'online' => $res['online'],
+				'order' => $res['order_number'],
+				// access name and level
+				'acl_type' => $res['type'],
+				'acl_level' => $res['level']
+			];
+		}
+		// write back the pages data to the output array
+		$this->session->setMany([
+			'LOGIN_PAGES' => $pages,
+			'LOGIN_PAGES_ACL_LEVEL' => $pages_acl,
+		]);
+		// load the edit_access user rights
+		$q = <<<SQL
+		SELECT
+			ea.edit_access_id, ea.cuid, ea.cuuid, level, type, ea.name,
+			ea.color, ea.uid, edit_default, ea.additional_acl
+		FROM edit_access_user eau, edit_access_right ear, edit_access ea
+		WHERE
+			eau.edit_access_id = ea.edit_access_id
+			AND eau.edit_access_right_id = ear.edit_access_right_id
+			AND eau.enabled = 1 AND edit_user_id = $1
+		ORDER BY ea.name
+		SQL;
+		$unit_access_cuid = [];
+		// legacy
+		$unit_access_eaid = [];
+		$unit_cuid_lookup = [];
+		$eaid = [];
+		$eacuid = [];
+		$unit_acl = [];
+		$unit_uid_lookup = [];
+		while (is_array($res = $this->db->dbReturnParams($q, [$edit_user_id]))) {
+			// read edit access data fields and drop them into the unit access array
+			$q_sub = <<<SQL
+			SELECT name, value
+			FROM edit_access_data
+			WHERE enabled = 1 AND edit_access_id = $1
+			SQL;
+			$ea_data = [];
+			while (is_array($res_sub = $this->db->dbReturnParams($q_sub, [$res['edit_access_id']]))) {
+				$ea_data[$res_sub['name']] = $res_sub['value'];
 			}
+			// build master unit array
+			$unit_access_cuid[$res['cuid']] = [
+				'id' => (int)$res['edit_access_id'], // DEPRECATED
+				'cuuid' => $res['cuuid'],
+				'acl_level' => $res['level'],
+				'acl_type' => $res['type'],
+				'name' => $res['name'],
+				'uid' => $res['uid'],
+				'color' => $res['color'],
+				'default' => $res['edit_default'],
+				'additional_acl' => Json::jsonConvertToArray($res['additional_acl']),
+				'data' => $ea_data
+			];
+			$unit_access_eaid[$res['edit_access_id']] = [
+				'cuid' => $res['cuid'],
+			];
+			// set the default unit
+			$this->session->setMany([
+				'LOGIN_UNIT_DEFAULT_EAID' => null,
+				'LOGIN_UNIT_DEFAULT_EACUID' => null,
+			]);
+			if ($res['edit_default']) {
+				$this->session->set('LOGIN_UNIT_DEFAULT_EAID', (int)$res['edit_access_id']); // DEPRECATED
+				$this->session->set('LOGIN_UNIT_DEFAULT_EACUID', (int)$res['cuid']);
+			}
+			$unit_uid_lookup[$res['uid']] = $res['edit_access_id']; // DEPRECATED
+			$unit_cuid_lookup[$res['uid']] = $res['cuid'];
+			// sub arrays for simple access
+			array_push($eaid, $res['edit_access_id']);
+			array_push($eacuid, $res['cuid']);
+			$unit_acl[$res['cuid']] = $res['level'];
 		}
-		// if there was an login error, show login screen
-		if ($this->login_error) {
-			// reset the perm var, to confirm logout
-			$this->permission_okay = false;
-		}
+		$this->session->setMany([
+			'LOGIN_UNIT_UID' => $unit_uid_lookup, // DEPRECATED
+			'LOGIN_UNIT_CUID' => $unit_cuid_lookup,
+			'LOGIN_UNIT' => $unit_access_cuid,
+			'LOGIN_UNIT_LEGACY' => $unit_access_eaid, // DEPRECATED
+			'LOGIN_UNIT_ACL_LEVEL' => $unit_acl,
+			'LOGIN_EAID' => $eaid, // DEPRECATED
+			'LOGIN_EACUID' => $eacuid,
+		]);
 	}
 
 	// MARK: login set ACL
@@ -1361,7 +1593,7 @@ class Login
 			$this->acl['show_ea_extra'] = false;
 		}
 		// set the default edit access
-		$this->acl['default_edit_access'] = $_SESSION['UNIT_DEFAULT'] ?? null;
+		$this->acl['default_edit_access'] = $_SESSION['LOGIN_UNIT_DEFAULT_EACUID'];
 		// integrate the type acl list, but only for the keyword -> level
 		$this->acl['min'] = $this->default_acl_list_type;
 		// set the full acl list too (lookup level number and get level data)
@@ -2198,7 +2430,7 @@ HTML;
 				// row 2
 				$_SERVER["REMOTE_ADDR"] ?? null,
 				Json::jsonConvertArrayTo([
-					'REMOTE_ADDR' => $_SERVER["REMOTE_ADDR"],
+					'REMOTE_ADDR' => $_SERVER["REMOTE_ADDR"] ?? null,
 					'HTTP_X_FORWARDED_FOR' => !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ?
 						explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])
 						: [],
@@ -2262,7 +2494,7 @@ HTML;
 	// **** PUBLIC INTERNAL
 	// *************************************************************************
 
-	// MARK: PUBLIC LOGIN CALL
+	// MARK: MASTER PUBLIC LOGIN CALL
 
 	/**
 	 * Main call that needs to be run to actaully check for login
@@ -2355,10 +2587,12 @@ HTML;
 
 		// if username & password & !$euid start login
 		$this->loginLoginUser();
-		// checks if $euid given check if user is okay for that side
+		// checks if $euid given check if user is okay for that site
 		$this->loginCheckPermissions();
-		// logsout user
+		// logout user
 		$this->loginLogoutUser();
+		// set headers for enhanced security
+		$this->loginEnhanceHttpSecurity();
 		// ** LANGUAGE SET AFTER LOGIN **
 		$this->loginSetLocale();
 		// load translator
@@ -2731,7 +2965,7 @@ HTML;
 		}
 		$q = <<<SQL
 		SELECT
-			ep.filename, eu.edit_user_id, eu.cuid, eu.cuuid,
+			ep.filename, eu.edit_user_id, eu.cuid, eu.cuuid, eu.force_logout,
 			-- base lock flags
 			eu.deleted, eu.enabled, eu.locked,
 			-- date based lock
@@ -2786,7 +3020,8 @@ HTML;
 				(int)$res['enabled'],
 				(int)$res['locked'],
 				(int)$res['locked_period'],
-				(int)$res['login_user_id_locked']
+				(int)$res['login_user_id_locked'],
+				(int)$res['force_logout']
 			)
 		) {
 			// errors set in method
@@ -2810,14 +3045,7 @@ HTML;
 			$this->login_error = 103;
 		}
 		// set all the internal vars
-		$this->edit_user_id = (int)$res['edit_user_id'];
-		$this->edit_user_cuid = (string)$res['cuid'];
-		$this->edit_user_cuuid = (string)$res['cuuid'];
-		$this->session->setMany([
-			'LOGIN_EUID' => $this->edit_user_id, // DEPRECATED
-			'LOGIN_EUCUID' => $this->edit_user_cuid,
-			'LOGIN_EUCUUID' => $this->edit_user_cuuid,
-		]);
+		$this->loginSetEditUserUidData($res);
 		// if called from public, so we can check if the permissions are ok
 		return $this->permission_okay;
 	}

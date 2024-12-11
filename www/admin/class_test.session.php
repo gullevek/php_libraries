@@ -146,7 +146,7 @@ $_SESSION['this_will_be_written'] = 'not empty';
 // open again with same name
 $session_name = 'class-test-session';
 try {
-	$session_alt = new Session($session_name, auto_write_close:true);
+	$session_alt = new Session($session_name, ['auto_write_close' => true]);
 	print "[4 SET] Current session id: " . $session_alt->getSessionId() . "<br>";
 	print "[4 SET] Current session auto write close: " . ($session_alt->checkAutoWriteClose() ? 'Yes' : 'No') . "<br>";
 	print "[START AGAIN] Current session id: " . $session_alt->getSessionId() . "<br>";

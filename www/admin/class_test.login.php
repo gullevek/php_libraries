@@ -21,7 +21,10 @@ $SET_SESSION_NAME = EDIT_SESSION_NAME;
 use CoreLibs\Debug\Support;
 
 // init login & backend class
-$session = new CoreLibs\Create\Session($SET_SESSION_NAME);
+$session = new CoreLibs\Create\Session($SET_SESSION_NAME, [
+	'regenerate' => 'interval',
+	'regenerate_interval' => 10, // every 10 seconds
+]);
 $log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
 	'log_file_id' => $LOG_FILE_ID,
@@ -90,6 +93,8 @@ print <<<HTML
 </div>
 HTML;
 
+echo "SESSION ID: " . $session->getSessionIdCall() . "<br>";
+
 echo "CHECK PERMISSION: " . ($login->loginCheckPermissions() ? 'OK' : 'BAD') . "<br>";
 echo "IS ADMIN: " . ($login->loginIsAdmin() ? 'OK' : 'BAD') . "<br>";
 echo "MIN ACCESS BASE: " . ($login->loginCheckAccessBase('admin') ? 'OK' : 'BAD') . "<br>";
@@ -118,8 +123,7 @@ if (isset($login->loginGetAcl()['unit'])) {
 	print "Something went wrong with the login<br>";
 }
 
-echo "<hr>";
-
+// echo "<hr>";
 // IP check: 'REMOTE_ADDR', 'HTTP_X_FORWARDED_FOR', 'CLIENT_IP' in _SERVER
 // Agent check: 'HTTP_USER_AGENT'
 

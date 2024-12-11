@@ -37,6 +37,8 @@ CREATE TABLE edit_user (
     protected SMALLINT NOT NULL DEFAULT 0,
     -- is admin user
     admin SMALLINT NOT NULL DEFAULT 0,
+    -- force lgout counter
+    force_logout INT DEFAULT 0,
     -- last login log
     last_login TIMESTAMP WITHOUT TIME ZONE,
     -- login error
@@ -74,6 +76,7 @@ COMMENT ON COLUMN edit_user.strict IS 'If too many failed logins user will be lo
 COMMENT ON COLUMN edit_user.locked IS 'Locked from too many wrong password logins';
 COMMENT ON COLUMN edit_user.protected IS 'User can only be chnaged by admin user';
 COMMENT ON COLUMN edit_user.admin IS 'If set, this user is SUPER admin';
+COMMENT ON COLUMN edit_user.force_logout IS 'Counter for forced log out, if this one is higher than the session set one the session gets terminated';
 COMMENT ON COLUMN edit_user.last_login IS 'Last succesfull login tiemstamp';
 COMMENT ON COLUMN edit_user.login_error_count IS 'Number of failed logins, reset on successful login';
 COMMENT ON COLUMN edit_user.login_error_date_last IS 'Last login error date';

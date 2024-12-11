@@ -1185,7 +1185,6 @@ final class CoreLibsACLLoginTest extends TestCase
 		foreach ($session as $session_var => $session_value) {
 			$_SESSION[$session_var] = $session_value;
 		}
-
 		/** @var \CoreLibs\ACL\Login&MockObject */
 		$login_mock = $this->getMockBuilder(\CoreLibs\ACL\Login::class)
 			->setConstructorArgs([
@@ -1204,7 +1203,7 @@ final class CoreLibsACLLoginTest extends TestCase
 						. 'locale' . DIRECTORY_SEPARATOR,
 				]
 			])
-			->onlyMethods(['loginTerminate', 'loginReadPageName', 'loginPrintLogin'])
+			->onlyMethods(['loginTerminate', 'loginReadPageName', 'loginPrintLogin', 'loginEnhanceHttpSecurity'])
 			->getMock();
 		$login_mock->expects($this->any())
 			->method('loginTerminate')
@@ -1220,6 +1219,10 @@ final class CoreLibsACLLoginTest extends TestCase
 		// do not echo out any string here
 		$login_mock->expects($this->any())
 			->method('loginPrintLogin')
+			->willReturnCallback(function () {
+			});
+		$login_mock->expects($this->any())
+			->method('loginEnhanceHttpSecurity')
 			->willReturnCallback(function () {
 			});
 
