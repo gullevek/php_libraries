@@ -40,7 +40,7 @@ class Session
 	 * then no auto init is run
 	 *
 	 * @param string $session_name if set and not empty, will start session
-	 * @param  array<string,bool> $options
+	 * @param array{auto_write_close?:bool,session_strict?:bool,regenerate?:string,regenerate_interval?:int} $options
 	 */
 	public function __construct(
 		string $session_name,
@@ -55,7 +55,7 @@ class Session
 	/**
 	 * set session class options
 	 *
-	 * @param  array<string,bool> $options
+	 * @param array{auto_write_close?:bool,session_strict?:bool,regenerate?:string,regenerate_interval?:int} $options
 	 * @return void
 	 */
 	private function setOptions(array $options): void
