@@ -260,10 +260,10 @@ class Login
 	 * constructor, does ALL, opens db, works through connection checks,
 	 * finishes itself
 	 *
-	 * @param \CoreLibs\DB\IO          $db      Database connection class
-	 * @param \CoreLibs\Logging\Logging  $log     Logging class
-	 * @param \CoreLibs\Create\Session $session Session interface class
-	 * @param array<string,mixed>      $options Login ACL settings
+	 * @param \CoreLibs\DB\IO           $db      Database connection class
+	 * @param \CoreLibs\Logging\Logging $log     Logging class
+	 * @param \CoreLibs\Create\Session  $session Session interface class
+	 * @param array<string,mixed>       $options Login ACL settings
 	 */
 	public function __construct(
 		\CoreLibs\DB\IO $db,
