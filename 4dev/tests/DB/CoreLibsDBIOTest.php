@@ -5141,9 +5141,9 @@ final class CoreLibsDBIOTest extends TestCase
 				INSERT INTO table_with_primary_key (
 					row_int, row_numeric, row_varchar, row_varchar_literal
 				) VALUES (
-					-- comment 1
+					-- comment 1 かな
 					$1, $2,
-					-- comment 2
+					-- comment 2 -
 					$3
 					-- comment 3
 					, $4
@@ -5151,6 +5151,23 @@ final class CoreLibsDBIOTest extends TestCase
 				SQL,
 				'count' => 4,
 				'convert' => false
+			],
+			'comment in update' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int =
+					-- COMMENT 1
+					$1,
+					row_numeric =
+					$2 -- COMMENT 2
+					,
+					row_varchar -- COMMENT 3
+					= $3
+				WHERE
+					row_varchar = $4
+				SQL,
+				'count' => 4,
+				'convert' => false,
 			],
 			// Note some are not set
 			'a complete set of possible' => [
@@ -5167,6 +5184,17 @@ final class CoreLibsDBIOTest extends TestCase
 				AND row_varchar ^@ $12
 				SQL,
 				'count' => 12,
+				'convert' => false,
+			],
+			// all the same
+			'all the same numbered' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int = $1::INT, row_numeric = $1::NUMERIC, row_varchar = $1
+				WHERE
+					row_varchar = $1
+				SQL,
+				'count' => 1,
 				'convert' => false,
 			]
 		];
