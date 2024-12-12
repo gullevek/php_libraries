@@ -217,26 +217,6 @@ class Login
 		'path' => '',
 	];
 
-	// lock status bitmap (smallint, 256)
-	/** @var int enabled flag */
-	public const ENABLED = 1;
-	/** @var int deleted flag */
-	public const DELETED = 2;
-	/** @var int locked flag */
-	public const LOCKED = 4;
-	/** @var int banned/suspened flag [not implemented] */
-	public const BANNED = 8;
-	/** @var int password reset in progress [not implemented] */
-	public const RESET = 16;
-	/** @var int confirm/paending, eg waiting for confirm of email [not implemented] */
-	public const CONFIRM = 32;
-	/** @var int strict, on error lock */
-	public const STRICT = 64;
-	/** @var int proected, cannot delete */
-	public const PROTECTED = 128;
-	/** @var int master admin flag */
-	public const ADMIN = 256;
-
 	/** @var int resync interval time in minutes */
 	private const DEFAULT_AUTH_RESYNC_INTERVAL = 5 * 60;
 	/** @var int the session max garbage collection life time */

@@ -8,12 +8,12 @@ DECLARE
     random_length INT = 32; -- long for massive data
 BEGIN
     IF TG_OP = 'INSERT' THEN
-        NEW.date_created := 'now';
+        NEW.date_created := clock_timestamp();
         IF NEW.uid IS NULL THEN
             NEW.uid := random_string(random_length);
         END IF;
     ELSIF TG_OP = 'UPDATE' THEN
-        NEW.date_updated := 'now';
+        NEW.date_updated := clock_timestamp();
     END IF;
     RETURN NEW;
 END;
