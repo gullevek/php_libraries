@@ -36,7 +36,7 @@ final class LoginUserStatus
 	/**
 	 * Returns an array mapping the numerical role values to their descriptive names
 	 *
-	 * @return array<int,string>
+	 * @return array<int|string,string>
 	 */
 	public static function getMap()
 	{
