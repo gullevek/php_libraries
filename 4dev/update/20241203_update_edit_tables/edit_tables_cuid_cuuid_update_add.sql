@@ -33,6 +33,4 @@ END;
 $$
 LANGUAGE 'plpgsql';
 
---
-ALTER TABLE edit_log RENAME ecuid TO eucuid;
-ALTER TABLE edit_log RENAME ecuuid TO eucuuid;
+-- END --

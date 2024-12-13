@@ -2138,10 +2138,10 @@ body {
 	text-align: right;
 }
 input.login-input-text {
-	font-size: 1.5em;
+	font-size: 1.3em;
 }
 button.login-button {
-	font-size: 1.5em;
+	font-size: 1.3em;
 }
 .login-visible {
 	visibility: visible;
