@@ -527,7 +527,9 @@ class ArrayHandler
 	}
 
 	/**
-	 * From the array with key -> anything values return only the matching entries from key list
+	 * From the array with key -> mixed values,
+	 * return only the entries where the key matches the key given in the key list parameter
+	 *
 	 * key list is a list[string]
 	 * if key list is empty, return array as is
 	 *
