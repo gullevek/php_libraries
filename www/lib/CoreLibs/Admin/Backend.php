@@ -358,7 +358,7 @@ class Backend
 		}
 		$q = <<<SQL
 		INSERT INTO {DB_SCHEMA}.edit_log (
-			username, euid, ecuid, ecuuid, event_date, event, error, data, data_binary, page,
+			username, euid, eucuid, eucuuid, event_date, event, error, data, data_binary, page,
 			ip, user_agent, referer, script_name, query_string, server_name, http_host,
 			http_accept, http_accept_charset, http_accept_encoding, session_id,
 			action, action_id, action_sub_id, action_yes, action_flag, action_menu, action_loaded,
