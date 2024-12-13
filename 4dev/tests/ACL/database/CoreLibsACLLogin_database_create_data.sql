@@ -652,8 +652,8 @@ CREATE TABLE edit_log (
     edit_log_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     euid INT, -- this is a foreign key, but I don't nedd to reference to it
     FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL,
-    ecuid VARCHAR,
-    ecuuid UUID, -- this is the one we want to use, full UUIDv4 from the edit user table
+    eucuid VARCHAR,
+    eucuuid UUID, -- this is the one we want to use, full UUIDv4 from the edit user table
     -- date_created equal, but can be overridden
     event_date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     -- session ID if set
