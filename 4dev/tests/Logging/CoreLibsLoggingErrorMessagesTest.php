@@ -10,7 +10,7 @@ use CoreLibs\Logging\Logger\Level;
 /**
  * Test class for Logging
  * @coversDefaultClass \CoreLibs\Logging\ErrorMessages
- * @testdox \CoreLibs\Logging\ErrorMEssages method tests
+ * @testdox \CoreLibs\Logging\ErrorMessages method tests
  */
 final class CoreLibsLoggingErrorMessagesTest extends TestCase
 {
