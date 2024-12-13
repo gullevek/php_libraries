@@ -34,18 +34,18 @@ use CoreLibs\Debug\Support;
 echo "<br><b>LIST LOCALES</b><br>";
 
 $locale = 'en_US.UTF-8';
-$locales = L10n::listLocales($locale);
+$locales = Language\L10n::listLocales($locale);
 print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
 $locale = 'en.UTF-8';
-$locales = L10n::listLocales($locale);
+$locales = Language\L10n::listLocales($locale);
 print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
 
 echo "<br><b>PARSE LOCAL</b><br>";
 $locale = 'en_US.UTF-8';
-$locale_info = L10n::parseLocale($locale);
+$locale_info = Language\L10n::parseLocale($locale);
 print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
 $locale = 'en.UTF-8';
-$locale_info = L10n::parseLocale($locale);
+$locale_info = Language\L10n::parseLocale($locale);
 print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
 
 /* echo "<br><b>AUTO DETECT</b><br>";

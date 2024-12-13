@@ -18,7 +18,7 @@ require 'config.php';
 $LOG_FILE_ID = 'classTest-convert-colors';
 ob_end_flush();
 
-use CoreLibs\Convert\Colors;
+// use CoreLibs\Convert\Colors;
 use CoreLibs\Convert\Color\Color;
 use CoreLibs\Convert\Color\Coordinates;
 use CoreLibs\Debug\Support as DgS;
@@ -29,7 +29,6 @@ $log = new CoreLibs\Logging\Logging([
 	'log_file_id' => $LOG_FILE_ID,
 	'log_per_date' => true,
 ]);
-$color_class = 'CoreLibs\Convert\Colors';
 
 /**
  * print out a color block with info
