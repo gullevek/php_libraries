@@ -5,4 +5,9 @@
 	convertDeprecationsToExceptions="true"
 	bootstrap="4dev/tests/bootstrap.php"
 >
+	<testsuites>
+		<testsuite name="deploy">
+			<directory>4dev/tests</directory>
+		</testsuite>
+	</testsuites>
 </phpunit>

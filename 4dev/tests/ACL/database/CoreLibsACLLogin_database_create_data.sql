@@ -30,11 +30,11 @@ DECLARE
     random_length INT = 12; -- that should be long enough
 BEGIN
     IF TG_OP = 'INSERT' THEN
-        NEW.date_created := 'now';
+        NEW.date_created := clock_timestamp();
         NEW.cuid := random_string(random_length);
         NEW.cuuid := gen_random_uuid();
     ELSIF TG_OP = 'UPDATE' THEN
-        NEW.date_updated := 'now';
+        NEW.date_updated := clock_timestamp();
     END IF;
     RETURN NEW;
 END;
@@ -579,11 +579,10 @@ CREATE TABLE edit_user (
     strict SMALLINT DEFAULT 0,
     locked SMALLINT DEFAULT 0,
     protected SMALLINT NOT NULL DEFAULT 0,
-    -- legacy, debug flags
-    debug SMALLINT NOT NULL DEFAULT 0,
-    db_debug SMALLINT NOT NULL DEFAULT 0,
     -- is admin user
     admin SMALLINT NOT NULL DEFAULT 0,
+    -- forced logout counter
+    force_logout INT DEFAULT 0,
     -- last login log
     last_login TIMESTAMP WITHOUT TIME ZONE,
     -- login error
@@ -620,8 +619,6 @@ COMMENT ON COLUMN edit_user.deleted IS 'Login is deleted (master switch), overri
 COMMENT ON COLUMN edit_user.strict IS 'If too many failed logins user will be locked, default off';
 COMMENT ON COLUMN edit_user.locked IS 'Locked from too many wrong password logins';
 COMMENT ON COLUMN edit_user.protected IS 'User can only be chnaged by admin user';
-COMMENT ON COLUMN edit_user.debug IS 'Turn debug flag on (legacy)';
-COMMENT ON COLUMN edit_user.db_debug IS 'Turn DB debug flag on (legacy)';
 COMMENT ON COLUMN edit_user.admin IS 'If set, this user is SUPER admin';
 COMMENT ON COLUMN edit_user.last_login IS 'Last succesfull login tiemstamp';
 COMMENT ON COLUMN edit_user.login_error_count IS 'Number of failed logins, reset on successful login';
@@ -656,36 +653,52 @@ CREATE TABLE edit_log (
     euid INT, -- this is a foreign key, but I don't nedd to reference to it
     FOREIGN KEY (euid) REFERENCES edit_user (edit_user_id) MATCH FULL ON UPDATE CASCADE ON DELETE SET NULL,
     ecuid VARCHAR,
-    ecuuid UUID,
-    username VARCHAR,
-    password VARCHAR,
+    ecuuid UUID, -- this is the one we want to use, full UUIDv4 from the edit user table
+    -- date_created equal, but can be overridden
     event_date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    ip VARCHAR,
+    -- session ID if set
+    session_id VARCHAR,
+    -- username
+    username VARCHAR,
+    -- DEPRECATED [password]
+    password VARCHAR,
+    ip_address JSONB, -- REMOTE_IP and all other IPs (X_FORWARD, etc) as JSON block
+    -- DEPRECATED [ip]
+    ip VARCHAR, -- just the REMOTE_IP, full set see ip_address
+    -- string blocks, general
     error TEXT,
     event TEXT,
+    -- bytea or string type storage of any data
     data_binary BYTEA,
     data TEXT,
+    -- set page name only
     page VARCHAR,
-    action VARCHAR,
-    action_id VARCHAR,
-    action_sub_id VARCHAR,
-    action_yes VARCHAR,
-    action_flag VARCHAR,
-    action_menu VARCHAR,
-    action_loaded VARCHAR,
-    action_value VARCHAR,
-    action_type VARCHAR,
-    action_error VARCHAR,
+    -- various info data sets
     user_agent VARCHAR,
     referer VARCHAR,
     script_name VARCHAR,
     query_string VARCHAR,
+    request_scheme VARCHAR, -- http or https
     server_name VARCHAR,
     http_host VARCHAR,
-    http_accept VARCHAR,
-    http_accept_charset VARCHAR,
-    http_accept_encoding VARCHAR,
-    session_id VARCHAR
+    http_data JSONB,
+    -- DEPRECATED [http*]
+    http_accept VARCHAR, -- in http_data
+    http_accept_charset VARCHAR, -- in http_data
+    http_accept_encoding VARCHAR, -- in http_data
+    -- any action var, -> same set in action_data as JSON
+    action_data JSONB,
+    -- DEPRECATED [action*]
+    action VARCHAR, -- in action_data
+    action_id VARCHAR, -- in action_data
+    action_sub_id VARCHAR, -- in action_data
+    action_yes VARCHAR, -- in action_data
+    action_flag VARCHAR, -- in action_data
+    action_menu VARCHAR, -- in action_data
+    action_loaded VARCHAR, -- in action_data
+    action_value VARCHAR, -- in action_data
+    action_type VARCHAR, -- in action_data
+    action_error VARCHAR -- in action_data
 ) INHERITS (edit_generic) WITHOUT OIDS;
 -- END: table/edit_log.sql
 -- START: table/edit_log_overflow.sql
@@ -1015,7 +1028,7 @@ INSERT INTO edit_page_access (enabled, edit_group_id, edit_page_id, edit_access_
 -- edit user
 -- inserts admin user so basic users can be created
 DELETE FROM edit_user;
-INSERT INTO edit_user (username, password, enabled, debug, db_debug, email, protected, admin, edit_language_id, edit_group_id, edit_scheme_id, edit_access_right_id) VALUES ('admin', 'admin', 1, 1, 1, '', 1, 1,
+INSERT INTO edit_user (username, password, enabled, email, protected, admin, edit_language_id, edit_group_id, edit_scheme_id, edit_access_right_id) VALUES ('admin', 'admin', 1, 'test@tequila.jp', 1, 1,
     (SELECT edit_language_id FROM edit_language WHERE short_name = 'en_US'),
     (SELECT edit_group_id FROM edit_group WHERE name = 'Admin'),
     (SELECT edit_scheme_id FROM edit_scheme WHERE name = 'Admin'),

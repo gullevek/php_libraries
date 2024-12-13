@@ -415,8 +415,6 @@ class EditBase
 					$elements[] = $this->form->formCreateElement('lock_until');
 					$elements[] = $this->form->formCreateElement('lock_after');
 					$elements[] = $this->form->formCreateElement('admin');
-					$elements[] = $this->form->formCreateElement('debug');
-					$elements[] = $this->form->formCreateElement('db_debug');
 					$elements[] = $this->form->formCreateElement('edit_language_id');
 					$elements[] = $this->form->formCreateElement('edit_scheme_id');
 					$elements[] = $this->form->formCreateElementListTable('edit_access_user');
