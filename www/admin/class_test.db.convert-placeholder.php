@@ -28,7 +28,6 @@ $log = new CoreLibs\Logging\Logging([
 	'log_per_date' => true,
 ]);
 
-
 $PAGE_NAME = 'TEST CLASS: DB CONVERT PLACEHOLDER';
 print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title></head>";

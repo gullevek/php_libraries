@@ -3,6 +3,7 @@
     "description": "CoreLibs in a composer package",
     "type": "library",
     "license": "MIT",
+	"keywords": ["corelib", "logging", "database", "templating", "tools"],
     "autoload": {
         "psr-4": {
             "CoreLibs\\": "src/"

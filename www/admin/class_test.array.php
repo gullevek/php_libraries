@@ -250,6 +250,19 @@ foreach (array_keys($array) as $search) {
 }
 print "Key not exists: " . DgS::printAr(ArrayHandler::arrayGetNextKey($array, 'z')) . "<br>";
 
+print "<hr>";
+$keys = ['b', 'c', 'f'];
+print "Return only: " . DgS::printAr($keys) . ": "
+	. DgS::printAr(ArrayHandler::arrayReturnMatchingKeyOnly($array, $keys)) . "<br>";
+
+$out = array_filter($array, fn($key) => in_array($key, $keys), ARRAY_FILTER_USE_KEY);
+print "array filter: " . DgS::printAr($keys) . ": " . DgS::printAr($out) . "<br>";
+$out = array_intersect_key(
+	$array,
+	array_flip($keys)
+);
+print "array intersect key: " . DgS::printAr($keys) . ": " . DgS::printAr($out) . "<br>";
+
 print "</body></html>";
 
 // __END__

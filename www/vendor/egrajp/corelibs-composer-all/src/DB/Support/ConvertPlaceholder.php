@@ -14,10 +14,24 @@ namespace CoreLibs\DB\Support;
 
 class ConvertPlaceholder
 {
-	/** @var string split regex */
-	private const PATTERN_QUERY_SPLIT = '[(<>=,?-]|->|->>|#>|#>>|@>|<@|\?\|\?\&|\|\||#-';
+	// NOTE for missing: range */+ are not iplemented in the regex below, but - is for now
+	// NOTE some combinations are allowed, but the query will fail before this
+	/** @var string split regex, entries before $ group */
+	private const PATTERN_QUERY_SPLIT =
+		'\?\?|' // UNKNOWN: double ??, is this to avoid something?
+		. '[\(,]|' // for ',' and '(' mostly in INSERT or ANY()
+		. '[<>=]|' // general set for <, >, = in any query with any combination
+		. '\^@|' // text search for start from text with ^@
+		. '\|\||' // concats two elements
+		. '&&|' // array overlap
+		. '\-\|\-|' // range overlap for array
+		. '[^-]-{1}|' // single -, used in JSON too
+		. '->|->>|#>|#>>|@>|<@|@@|@\?|\?{1}|\?\||\?&|#-'; //JSON searches, Array searchs, etc
 	/** @var string the main regex including  the pattern query split */
-	private const PATTERN_ELEMENT = '(?:\'.*?\')?\s*(?:\?\?|' . self::PATTERN_QUERY_SPLIT . ')\s*';
+	private const PATTERN_ELEMENT = '(?:\'.*?\')?\s*(?:' . self::PATTERN_QUERY_SPLIT . ')\s*';
+	/** @var string comment regex
+	 * anything that starts with -- and ends with a line break but any character that is not line break inbetween */
+	private const PATTERN_COMMENT = '(?:\-\-[^\r\n]*?\r?\n)*\s*';
 	/** @var string parts to ignore in the SQL */
 	private const PATTERN_IGNORE =
 		// digit -> ignore
@@ -34,6 +48,7 @@ class ConvertPlaceholder
 	/** @var string replace regex for named (:...) entries */
 	public const REGEX_REPLACE_NAMED = '/'
 		. '(' . self::PATTERN_ELEMENT . ')'
+		. self::PATTERN_COMMENT
 		. '('
 		. self::PATTERN_IGNORE
 		. self::PATTERN_NAMED
@@ -42,6 +57,7 @@ class ConvertPlaceholder
 	/** @var string replace regex for question mark (?) entries */
 	public const REGEX_REPLACE_QUESTION_MARK = '/'
 		. '(' . self::PATTERN_ELEMENT . ')'
+		. self::PATTERN_COMMENT
 		. '('
 		. self::PATTERN_IGNORE
 		. self::PATTERN_QUESTION_MARK
@@ -50,6 +66,7 @@ class ConvertPlaceholder
 	/** @var string replace regex for numbered ($n) entries */
 	public const REGEX_REPLACE_NUMBERED = '/'
 		. '(' . self::PATTERN_ELEMENT . ')'
+		. self::PATTERN_COMMENT
 		. '('
 		. self::PATTERN_IGNORE
 		. self::PATTERN_NUMBERED
@@ -60,6 +77,7 @@ class ConvertPlaceholder
 		// prefix string part, must match towards
 		// seperator for ( = , ? - [and json/jsonb in pg doc section 9.15]
 		. self::PATTERN_ELEMENT
+		. self::PATTERN_COMMENT
 		// match for replace part
 		. '(?:'
 		// ignore parts

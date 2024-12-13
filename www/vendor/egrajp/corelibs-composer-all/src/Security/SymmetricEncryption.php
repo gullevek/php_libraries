@@ -49,7 +49,11 @@ class SymmetricEncryption
 	 */
 	public static function getInstance(string|null $key = null): self
 	{
-		if (empty(self::$instance)) {
+		// new if no instsance or key is different
+		if (
+			empty(self::$instance) ||
+			self::$instance->key != $key
+		) {
 			self::$instance = new self($key);
 		}
 		return self::$instance;
@@ -130,7 +134,7 @@ class SymmetricEncryption
 	 */
 	private function encryptData(string $message, ?string $key): string
 	{
-		if (empty($this->key) || $key === null) {
+		if ($key === null) {
 			throw new \UnexpectedValueException('Key not set');
 		}
 		$key = $this->createKey($key);

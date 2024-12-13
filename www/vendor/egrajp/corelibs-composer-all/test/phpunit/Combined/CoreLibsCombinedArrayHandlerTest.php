@@ -1201,6 +1201,91 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			'Find next key in array'
 		);
 	}
+
+	public function providerReturnMatchingKeyOnley(): array
+	{
+		return [
+			'limited entries' => [
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+				[
+					'a', 'b'
+				],
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+				],
+			],
+			'limited entries, with one wrong key' => [
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+				[
+					'a', 'b', 'f'
+				],
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+				],
+			],
+			'wrong keys only' => [
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+				[
+					'f', 'f'
+				],
+				[
+				],
+			],
+			'empty keys' => [
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+				[],
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::arrayReturnMatchingKeyOnly
+	 * @dataProvider providerReturnMatchingKeyOnley
+	 * @testdox arrayReturnMatchingKeyOnly get only selected key entries from array [$_dataName]
+	 *
+	 * @param  array $input
+	 * @param  array $key_list
+	 * @param  array $expected
+	 * @return void
+	 */
+	public function testArrayReturnMatchingKeyOnly(
+		array $input,
+		array $key_list,
+		array $expected
+	): void {
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\ArrayHandler::arrayReturnMatchingKeyOnly(
+				$input,
+				$key_list
+			)
+		);
+	}
 }
 
 // __END__

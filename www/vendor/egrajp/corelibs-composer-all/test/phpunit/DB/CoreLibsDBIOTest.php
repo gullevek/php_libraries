@@ -17,7 +17,7 @@ Table with Primary Key: table_with_primary_key
 Table without Primary Key: table_without_primary_key
 
 Table with primary key has additional row:
-row_primary_key	SERIAL PRIMARY KEY,
+row_primary_key	INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Each table has the following rows
 row_int INT,
 row_numeric NUMERIC,
@@ -160,7 +160,6 @@ final class CoreLibsDBIOTest extends TestCase
 		// create the tables
 		$db->dbExec(
 			// primary key name is table + '_id'
-				// table_with_primary_key_id SERIAL PRIMARY KEY,
 			<<<SQL
 			CREATE TABLE table_with_primary_key (
 				table_with_primary_key_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -5135,6 +5134,67 @@ final class CoreLibsDBIOTest extends TestCase
 					OR row_int = $5 OR row_int <> $6
 				SQL,
 				'count' => 6,
+				'convert' => false,
+			],
+			'comments in insert' => [
+				'query' => <<<SQL
+				INSERT INTO table_with_primary_key (
+					row_int, row_numeric, row_varchar, row_varchar_literal
+				) VALUES (
+					-- comment 1 かな
+					$1, $2,
+					-- comment 2 -
+					$3
+					-- comment 3
+					, $4
+				)
+				SQL,
+				'count' => 4,
+				'convert' => false
+			],
+			'comment in update' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int =
+					-- COMMENT 1
+					$1,
+					row_numeric =
+					$2 -- COMMENT 2
+					,
+					row_varchar -- COMMENT 3
+					= $3
+				WHERE
+					row_varchar = $4
+				SQL,
+				'count' => 4,
+				'convert' => false,
+			],
+			// Note some are not set
+			'a complete set of possible' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+				-- ROW
+				row_varchar = $1
+				WHERE
+				row_varchar = ANY($2) AND row_varchar <> $3
+				AND row_varchar > $4 AND row_varchar < $5
+				AND row_varchar >= $6 AND row_varchar <=$7
+				AND row_jsonb->'a' = $8 AND row_jsonb->>$9 = 'a'
+				AND row_jsonb<@$10 AND row_jsonb@>$11
+				AND row_varchar ^@ $12
+				SQL,
+				'count' => 12,
+				'convert' => false,
+			],
+			// all the same
+			'all the same numbered' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int = $1::INT, row_numeric = $1::NUMERIC, row_varchar = $1
+				WHERE
+					row_varchar = $1
+				SQL,
+				'count' => 1,
 				'convert' => false,
 			]
 		];

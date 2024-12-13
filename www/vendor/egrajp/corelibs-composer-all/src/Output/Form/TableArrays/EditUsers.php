@@ -135,30 +135,6 @@ class EditUsers implements Interface\TableArraysInterface
 					'min_edit_acl' => '100',
 					'min_show_acl' => '100',
 				],
-				'debug' => [
-					'value' => $_POST['debug'] ?? '',
-					'output_name' => 'Debug',
-					'type' => 'binary',
-					'int' => 1,
-					'element_list' => [
-						'1' => 'Yes',
-						'0' => 'No'
-					],
-					'min_edit_acl' => '100',
-					'min_show_acl' => '100',
-				],
-				'db_debug' => [
-					'value' => $_POST['db_debug'] ?? '',
-					'output_name' => 'DB Debug',
-					'type' => 'binary',
-					'int' => 1,
-					'element_list' => [
-						'1' => 'Yes',
-						'0' => 'No'
-					],
-					'min_edit_acl' => '100',
-					'min_show_acl' => '100',
-				],
 				'email' => [
 					'value' => $_POST['email'] ?? '',
 					'output_name' => 'E-Mail',
