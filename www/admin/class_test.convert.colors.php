@@ -131,7 +131,8 @@ try {
 } catch (\LengthException $e) {
 	print "*Exception: " . $e->getMessage() . "<br><pre>" . print_r($e, true) . "</pre><br>";
 }
-print "<hr>";
+
+/* print "<hr>";
 print "<h2>LEGACY</h2>";
 // B(valid)
 $rgb = [50, 20, 30];
@@ -173,7 +174,7 @@ $hsb = [0, 0, 5];
 print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
 	. DgS::printAr(SetVarType::setArray(
 		Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])
-	)) . "<br>";
+	)) . "<br>"; */
 
 print "<hr>";
 
