@@ -24,19 +24,19 @@ class SymmetricEncryption
 	/** @var SymmetricEncryption self instance */
 	private static SymmetricEncryption $instance;
 
-	/** @var string bin hex key */
-	private string $key = '';
+	/** @var ?string bin hex key */
+	private ?string $key = null;
 
 	/**
 	 * init class
 	 * if key not passed, key must be set with createKey
 	 *
-	 * @param  string|null|null $key
+	 * @param string|null $key encryption key
 	 */
 	public function __construct(
-		string|null $key = null
+		?string $key = null
 	) {
-		if ($key != null) {
+		if ($key !== null) {
 			$this->setKey($key);
 		}
 	}
@@ -45,9 +45,10 @@ class SymmetricEncryption
 	 * Returns the singleton self object.
 	 * For function wrapper use
 	 *
+	 * @param  string|null $key encryption key
 	 * @return SymmetricEncryption object
 	 */
-	public static function getInstance(string|null $key = null): self
+	public static function getInstance(?string $key = null): self
 	{
 		// new if no instsance or key is different
 		if (
@@ -59,6 +60,34 @@ class SymmetricEncryption
 		return self::$instance;
 	}
 
+	/**
+	 * clean up
+	 *
+	 * @return void
+	 */
+	public function __deconstruct()
+	{
+		if (empty($this->key)) {
+			return;
+		}
+		try {
+			// would set it to null, but we we do not want to make key null
+			sodium_memzero($this->key);
+			return;
+		} catch (SodiumException) {
+			// empty catch
+		}
+		if (is_null($this->key)) {
+			return;
+		}
+		$zero = str_repeat("\0", mb_strlen($this->key, '8bit'));
+		$this->key = $this->key ^ (
+			$zero ^ $this->key
+		);
+		unset($zero);
+		unset($this->key);
+	}
+
 	/* ************************************************************************
 	 * MARK: PRIVATE
 	 * *************************************************************************/
@@ -66,11 +95,16 @@ class SymmetricEncryption
 	/**
 	 * create key and check validity
 	 *
-	 * @param  string $key The key from which the binary key will be created
-	 * @return string      Binary key string
+	 * @param  ?string $key The key from which the binary key will be created
+	 * @return string       Binary key string
 	 */
-	private function createKey(string $key): string
-	{
+	private function createKey(
+		#[\SensitiveParameter]
+		?string $key
+	): string {
+		if (empty($key)) {
+			throw new \UnexpectedValueException('Key cannot be empty');
+		}
 		try {
 			$key = CreateKey::hex2bin($key);
 		} catch (SodiumException $e) {
@@ -95,32 +129,38 @@ class SymmetricEncryption
 	 * @throws \UnexpectedValueException
 	 * @throws \UnexpectedValueException
 	 */
-	private function decryptData(string $encrypted, ?string $key): string
-	{
-		if (empty($key)) {
-			throw new \UnexpectedValueException('Key not set');
+	private function decryptData(
+		#[\SensitiveParameter]
+		string $encrypted,
+		#[\SensitiveParameter]
+		?string $key
+	): string {
+		if (empty($encrypted)) {
+			throw new \UnexpectedValueException('Encrypted string cannot be empty');
 		}
 		$key = $this->createKey($key);
 		$decoded = base64_decode($encrypted);
 		$nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
 		$ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
 
-		$plain = false;
+		$plaintext = false;
 		try {
-			$plain = sodium_crypto_secretbox_open(
+			$plaintext = sodium_crypto_secretbox_open(
 				$ciphertext,
 				$nonce,
 				$key
 			);
 		} catch (SodiumException $e) {
+			sodium_memzero($ciphertext);
+			sodium_memzero($key);
 			throw new \UnexpectedValueException('Decipher message failed: ' . $e->getMessage());
-		}
-		if (!is_string($plain)) {
-			throw new \UnexpectedValueException('Invalid Key');
 		}
 		sodium_memzero($ciphertext);
 		sodium_memzero($key);
-		return $plain;
+		if (!is_string($plaintext)) {
+			throw new \UnexpectedValueException('Invalid Key');
+		}
+		return $plaintext;
 	}
 
 	/**
@@ -128,15 +168,16 @@ class SymmetricEncryption
 	 *
 	 * @param  string  $message Message to encrypt
 	 * @param  ?string $key     Mandatory encryption key, will throw exception if empty
-	 * @return string
+	 * @return string           Ciphered text
 	 * @throws \Exception
 	 * @throws \RangeException
 	 */
-	private function encryptData(string $message, ?string $key): string
-	{
-		if ($key === null) {
-			throw new \UnexpectedValueException('Key not set');
-		}
+	private function encryptData(
+		#[\SensitiveParameter]
+		string $message,
+		#[\SensitiveParameter]
+		?string $key
+	): string {
 		$key = $this->createKey($key);
 		$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 		try {
@@ -149,6 +190,8 @@ class SymmetricEncryption
 				)
 			);
 		} catch (SodiumException $e) {
+			sodium_memzero($message);
+			sodium_memzero($key);
 			throw new \UnexpectedValueException("Create encrypted message failed: " . $e->getMessage());
 		}
 		sodium_memzero($message);
@@ -160,19 +203,44 @@ class SymmetricEncryption
 	 * MARK: PUBLIC
 	 * *************************************************************************/
 
-
 	/**
 	 * set a new key for encryption
 	 *
 	 * @param  string $key
 	 * @return void
 	 */
-	public function setKey(string $key)
-	{
+	public function setKey(
+		#[\SensitiveParameter]
+		string $key
+	) {
 		if (empty($key)) {
 			throw new \UnexpectedValueException('Key cannot be empty');
 		}
 		$this->key = $key;
+		sodium_memzero($key);
+	}
+
+	/**
+	 * Checks if set key is equal to parameter key
+	 *
+	 * @param  string $key
+	 * @return bool
+	 */
+	public function compareKey(
+		#[\SensitiveParameter]
+		string $key
+	): bool {
+		return $key === $this->key;
+	}
+
+	/**
+	 * returns the current set key, null if not set
+	 *
+	 * @return ?string
+	 */
+	public function getKey(): ?string
+	{
+		return $this->key;
 	}
 
 	/**
@@ -187,8 +255,12 @@ class SymmetricEncryption
 	 * @throws \UnexpectedValueException
 	 * @throws \UnexpectedValueException
 	 */
-	public static function decryptKey(string $encrypted, string $key): string
-	{
+	public static function decryptKey(
+		#[\SensitiveParameter]
+		string $encrypted,
+		#[\SensitiveParameter]
+		string $key
+	): string {
 		return self::getInstance()->decryptData($encrypted, $key);
 	}
 
@@ -201,8 +273,10 @@ class SymmetricEncryption
 	 * @throws \UnexpectedValueException
 	 * @throws \UnexpectedValueException
 	 */
-	public function decrypt(string $encrypted): string
-	{
+	public function decrypt(
+		#[\SensitiveParameter]
+		string $encrypted
+	): string {
 		return $this->decryptData($encrypted, $this->key);
 	}
 
@@ -216,8 +290,12 @@ class SymmetricEncryption
 	 * @throws \Exception
 	 * @throws \RangeException
 	 */
-	public static function encryptKey(string $message, string $key): string
-	{
+	public static function encryptKey(
+		#[\SensitiveParameter]
+		string $message,
+		#[\SensitiveParameter]
+		string $key
+	): string {
 		return self::getInstance()->encryptData($message, $key);
 	}
 
@@ -229,8 +307,10 @@ class SymmetricEncryption
 	 * @throws \Exception
 	 * @throws \RangeException
 	 */
-	public function encrypt(string $message): string
-	{
+	public function encrypt(
+		#[\SensitiveParameter]
+		string $message
+	): string {
 		return $this->encryptData($message, $this->key);
 	}
 }
