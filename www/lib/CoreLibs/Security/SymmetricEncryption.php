@@ -97,6 +97,9 @@ class SymmetricEncryption
 	 *
 	 * @param  ?string $key The key from which the binary key will be created
 	 * @return string       Binary key string
+	 * @throws \UnexpectedValueException empty key
+	 * @throws \UnexpectedValueException invalid hex key
+	 * @throws \RangeException invalid length
 	 */
 	private function createKey(
 		#[\SensitiveParameter]
@@ -125,9 +128,9 @@ class SymmetricEncryption
 	 * @param  string  $encrypted Text to decrypt
 	 * @param  ?string $key       Mandatory encryption key, will throw exception if empty
 	 * @return string             Plain text
-	 * @throws \RangeException
-	 * @throws \UnexpectedValueException
-	 * @throws \UnexpectedValueException
+	 * @throws \UnexpectedValueException key cannot be empty
+	 * @throws \UnexpectedValueException decipher message failed
+	 * @throws \UnexpectedValueException invalid key
 	 */
 	private function decryptData(
 		#[\SensitiveParameter]
@@ -169,8 +172,7 @@ class SymmetricEncryption
 	 * @param  string  $message Message to encrypt
 	 * @param  ?string $key     Mandatory encryption key, will throw exception if empty
 	 * @return string           Ciphered text
-	 * @throws \Exception
-	 * @throws \RangeException
+	 * @throws \UnexpectedValueException create message failed
 	 */
 	private function encryptData(
 		#[\SensitiveParameter]
@@ -208,6 +210,7 @@ class SymmetricEncryption
 	 *
 	 * @param  string $key
 	 * @return void
+	 * @throws \UnexpectedValueException key cannot be empty
 	 */
 	public function setKey(
 		#[\SensitiveParameter]
@@ -216,6 +219,9 @@ class SymmetricEncryption
 		if (empty($key)) {
 			throw new \UnexpectedValueException('Key cannot be empty');
 		}
+		// check that this is a valid key
+		$this->createKey($key);
+		// set key
 		$this->key = $key;
 		sodium_memzero($key);
 	}
@@ -250,10 +256,6 @@ class SymmetricEncryption
 	 * @param  string $encrypted Message encrypted with safeEncrypt()
 	 * @param  string $key       Encryption key (as hex string)
 	 * @return string
-	 * @throws \Exception
-	 * @throws \RangeException
-	 * @throws \UnexpectedValueException
-	 * @throws \UnexpectedValueException
 	 */
 	public static function decryptKey(
 		#[\SensitiveParameter]
@@ -269,9 +271,6 @@ class SymmetricEncryption
 	 *
 	 * @param  string $encrypted Message encrypted with safeEncrypt()
 	 * @return string
-	 * @throws \RangeException
-	 * @throws \UnexpectedValueException
-	 * @throws \UnexpectedValueException
 	 */
 	public function decrypt(
 		#[\SensitiveParameter]
@@ -287,8 +286,6 @@ class SymmetricEncryption
 	 * @param  string $message Message to encrypt
 	 * @param  string $key     Encryption key (as hex string)
 	 * @return string
-	 * @throws \Exception
-	 * @throws \RangeException
 	 */
 	public static function encryptKey(
 		#[\SensitiveParameter]
@@ -304,8 +301,6 @@ class SymmetricEncryption
 	 *
 	 * @param  string $message Message to encrypt
 	 * @return string
-	 * @throws \Exception
-	 * @throws \RangeException
 	 */
 	public function encrypt(
 		#[\SensitiveParameter]

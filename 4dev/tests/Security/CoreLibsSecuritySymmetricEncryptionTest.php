@@ -15,6 +15,8 @@ use CoreLibs\Security\SymmetricEncryption;
  */
 final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 {
+	// MARK: key set compare
+
 	/**
 	 * Undocumented function
 	 *
@@ -64,6 +66,25 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 			'set key returned not equal to original key'
 		);
 	}
+
+	// MARK: empty encrypted string
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::decryptKey
+	 * @covers ::decrypt
+	 * @testdox Test empty encrypted string to decrypt
+	 *
+	 * @return void
+	 */
+	public function testEmptyDecryptionString(): void
+	{
+		$this->expectExceptionMessage('Encrypted string cannot be empty');
+		SymmetricEncryption::decryptKey('', CreateKey::generateRandomKey());
+	}
+
+	// MARK: encrypt/decrypt compare
 
 	/**
 	 * Undocumented function
@@ -161,6 +182,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		);
 	}
 
+	// MARK: invalid key
+
 	/**
 	 * Undocumented function
 	 *
@@ -250,6 +273,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		SymmetricEncryption::decryptKey($encrypted, $wrong_key);
 	}
 
+	// MARK: wrong key
+
 	/**
 	 * Undocumented function
 	 *
@@ -290,9 +315,7 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		$enc_key = CreateKey::generateRandomKey();
 
 		// class
-		if (empty($key)) {
-			$this->expectExceptionMessage($exception_message);
-		}
+		$this->expectExceptionMessage($exception_message);
 		$crypt = new SymmetricEncryption($key);
 		$this->expectExceptionMessage($exception_message);
 		$crypt->encrypt('test');
@@ -352,6 +375,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		$this->expectExceptionMessage($exception_message);
 		SymmetricEncryption::decryptKey($encrypted, $key);
 	}
+
+	// MARK: wrong input
 
 	/**
 	 * Undocumented function
@@ -437,21 +462,6 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		// class static
 		$this->expectExceptionMessage($exception_message);
 		SymmetricEncryption::decryptKey($input, $key);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @covers ::decryptKey
-	 * @covers ::decrypt
-	 * @testdox Test empty encrypted string to decrypt
-	 *
-	 * @return void
-	 */
-	public function testEmptyDecryptionString(): void
-	{
-		$this->expectExceptionMessage('Encrypted string cannot be empty');
-		SymmetricEncryption::decryptKey('', CreateKey::generateRandomKey());
 	}
 }
 
