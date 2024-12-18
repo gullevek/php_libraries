@@ -85,7 +85,7 @@ class SymmetricEncryption
 			$zero ^ $this->key
 		);
 		unset($zero);
-		unset($this->key);
+		unset($this->key); /** @phan-suppress-current-line PhanTypeObjectUnsetDeclaredProperty */
 	}
 
 	/* ************************************************************************

@@ -18,6 +18,7 @@ require 'config.php';
 $LOG_FILE_ID = 'classTest-encryption';
 ob_end_flush();
 
+use CoreLibs\Security\AsymmetricAnonymousEncryption;
 use CoreLibs\Security\SymmetricEncryption;
 use CoreLibs\Security\CreateKey;
 
@@ -35,6 +36,8 @@ print "<html><head><title>" . $PAGE_NAME . "</title></head>";
 print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
+
+print "<h2>Symmetric Encryption</h2>";
 
 $key = CreateKey::generateRandomKey();
 print "Secret Key: " . $key . "<br>";
@@ -104,6 +107,49 @@ try {
 // $string = "I a some deep secret";
 // $encrypted = $se->encrypt($string);
 // $decrypted = $se->decrypt($encrypted);
+
+echo "<hr>";
+print "<h2>Asymmetric Encryption</h2>";
+
+$key_pair = CreateKey::createKeyPair();
+$public_key = CreateKey::getPublicKey($key_pair);
+
+$string = "I am some asymmetric secret";
+print "Message: " . $string . "<br>";
+$encrypted = sodium_crypto_box_seal($string, CreateKey::hex2bin($public_key));
+$message = sodium_bin2base64($encrypted, SODIUM_BASE64_VARIANT_ORIGINAL);
+print "Encrypted PL: " . $message . "<br>";
+$result = sodium_base642bin($message, SODIUM_BASE64_VARIANT_ORIGINAL);
+$decrypted = sodium_crypto_box_seal_open($result, CreateKey::hex2bin($key_pair));
+print "Decrypted PL: " . $decrypted . "<br>";
+
+$encrypted = AsymmetricAnonymousEncryption::encryptKey($string, $public_key);
+print "Encrypted ST: " . $encrypted . "<br>";
+$decrypted = AsymmetricAnonymousEncryption::decryptKey($encrypted, $key_pair);
+print "Decrypted ST: " . $decrypted . "<br>";
+
+$aa_crypt = new AsymmetricAnonymousEncryption($key_pair, $public_key);
+$encrypted = $aa_crypt->encrypt($string);
+print "Encrypted: " . $encrypted . "<br>";
+$decrypted = $aa_crypt->decrypt($encrypted);
+print "Decrypted: " . $decrypted . "<br>";
+
+print "Base64 encode: " . base64_encode('Some text here') . "<Br>";
+
+/// this has to fail
+$crypt = new AsymmetricAnonymousEncryption();
+$crypt->setPublicKey(CreateKey::getPublicKey(CreateKey::createKeyPair()));
+print "Public Key: " . $crypt->getPublicKey() . "<br>";
+try {
+	$crypt->setPublicKey(CreateKey::createKeyPair());
+} catch (RangeException $e) {
+	print "Invalid range: <pre>$e</pre>";
+}
+try {
+	$crypt->setKeyPair(CreateKey::getPublicKey(CreateKey::createKeyPair()));
+} catch (RangeException $e) {
+	print "Invalid range: <pre>$e</pre>";
+}
 
 print "</body></html>";
 

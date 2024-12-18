@@ -70,7 +70,8 @@ class AsymmetricAnonymousEncryption
 		// new if no instsance or key is different
 		if (
 			empty(self::$instance) ||
-			self::$instance->key_pair != $key_pair
+			self::$instance->key_pair != $key_pair ||
+			self::$instance->public_key != $public_key
 		) {
 			self::$instance = new self($key_pair, $public_key);
 		}
@@ -100,7 +101,7 @@ class AsymmetricAnonymousEncryption
 			$zero ^ $this->key_pair
 		);
 		unset($zero);
-		unset($this->key_pair);
+		unset($this->key_pair); /** @phan-suppress-current-line PhanTypeObjectUnsetDeclaredProperty */
 	}
 
 	/* ************************************************************************
@@ -112,6 +113,9 @@ class AsymmetricAnonymousEncryption
 	 *
 	 * @param  ?string $key_pair
 	 * @return string
+	 * @throws \UnexpectedValueException key pair empty
+	 * @throws \UnexpectedValueException invalid hex key pair
+	 * @throws \UnexpectedValueException key pair not correct size
 	 */
 	private function createKeyPair(
 		#[\SensitiveParameter]
@@ -141,6 +145,9 @@ class AsymmetricAnonymousEncryption
 	 *
 	 * @param  ?string $public_key
 	 * @return string
+	 * @throws \UnexpectedValueException public key empty
+	 * @throws \UnexpectedValueException invalid hex key
+	 * @throws \UnexpectedValueException invalid key length
 	 */
 	private function createPublicKey(?string $public_key): string
 	{
@@ -169,6 +176,8 @@ class AsymmetricAnonymousEncryption
 	 * @param  string  $message
 	 * @param  ?string $public_key
 	 * @return string
+	 * @throws \UnexpectedValueException create encryption failed
+	 * @throws \UnexpectedValueException convert to base64 failed
 	 */
 	private function asymmetricEncryption(
 		#[\SensitiveParameter]
@@ -199,6 +208,10 @@ class AsymmetricAnonymousEncryption
 	 * @param  string  $message
 	 * @param  ?string $key_pair
 	 * @return string
+	 * @throws \UnexpectedValueException message string empty
+	 * @throws \UnexpectedValueException base64 decoding failed
+	 * @throws \UnexpectedValueException decryption failed
+	 * @throws \UnexpectedValueException could not decrypt message
 	 */
 	private function asymmetricDecryption(
 		#[\SensitiveParameter]
@@ -207,7 +220,7 @@ class AsymmetricAnonymousEncryption
 		?string $key_pair
 	): string {
 		if (empty($message)) {
-			throw new \UnexpectedValueException('Message string cannot be empty');
+			throw new \UnexpectedValueException('Encrypted string cannot be empty');
 		}
 		$key_pair = $this->createKeyPair($key_pair);
 		try {
@@ -224,14 +237,14 @@ class AsymmetricAnonymousEncryption
 		} catch (SodiumException $e) {
 			sodium_memzero($message);
 			sodium_memzero($key_pair);
+			sodium_memzero($result);
 			throw new \UnexpectedValueException("Decrypting message failed: " . $e->getMessage());
 		}
-		if (!is_string($plaintext)) {
-			sodium_memzero($key_pair);
-			throw new \UnexpectedValueException('Could not decrypt message');
-		}
-		sodium_memzero($result);
 		sodium_memzero($key_pair);
+		sodium_memzero($result);
+		if (!is_string($plaintext)) {
+			throw new \UnexpectedValueException('Invalid key pair');
+		}
 		return $plaintext;
 	}
 
@@ -244,6 +257,7 @@ class AsymmetricAnonymousEncryption
 	 *
 	 * @param  string $key_pair Key pair in hex
 	 * @return void
+	 * @throws \UnexpectedValueException key pair empty
 	 */
 	public function setKeyPair(
 		#[\SensitiveParameter]
@@ -252,8 +266,17 @@ class AsymmetricAnonymousEncryption
 		if (empty($key_pair)) {
 			throw new \UnexpectedValueException('Key pair cannot be empty');
 		}
+		// check if valid;
+		$this->createKeyPair($key_pair);
+		// set new key pair
 		$this->key_pair = $key_pair;
 		sodium_memzero($key_pair);
+		// set public key if not set
+		if (empty($this->public_key)) {
+			$this->public_key = CreateKey::getPublicKey($this->key_pair);
+			// check if valid
+			$this->createPublicKey($this->public_key);
+		}
 	}
 
 	/**
@@ -286,12 +309,15 @@ class AsymmetricAnonymousEncryption
 	 *
 	 * @param  string $public_key Public Key in hex
 	 * @return void
+	 * @throws \UnexpectedValueException public key empty
 	 */
 	public function setPublicKey(string $public_key)
 	{
 		if (empty($public_key)) {
 			throw new \UnexpectedValueException('Public key cannot be empty');
 		}
+		// check if valid
+		$this->createPublicKey($public_key);
 		$this->public_key = $public_key;
 		sodium_memzero($public_key);
 	}

@@ -159,8 +159,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	 * test encrypt/decrypt produce correct output
 	 *
 	 * @covers ::generateRandomKey
-	 * @covers ::encrypt
-	 * @covers ::decrypt
+	 * @covers ::encryptKey
+	 * @covers ::decryptKey
 	 * @dataProvider providerEncryptDecryptSuccess
 	 * @testdox encrypt/decrypt static $input must be $expected [$_dataName]
 	 *
@@ -253,8 +253,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	 * Test decryption with wrong key
 	 *
 	 * @covers ::generateRandomKey
-	 * @covers ::encrypt
-	 * @covers ::decrypt
+	 * @covers ::encryptKey
+	 * @covers ::decryptKey
 	 * @dataProvider providerEncryptFailed
 	 * @testdox decrypt static with wrong key $input throws $exception_message [$_dataName]
 	 *
@@ -354,8 +354,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		/**
 	 * test invalid key provided to decrypt or encrypt
 	 *
-	 * @covers ::encrypt
-	 * @covers ::decrypt
+	 * @covers ::encryptKey
+	 * @covers ::decryptKey
 	 * @dataProvider providerWrongKey
 	 * @testdox wrong key static $key throws $exception_message [$_dataName]
 	 *
@@ -424,7 +424,7 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::decrypt
+	 * @covers ::decryptKey
 	 * @dataProvider providerWrongCiphertext
 	 * @testdox too short ciphertext indirect $input throws $exception_message [$_dataName]
 	 *
@@ -448,7 +448,7 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		/**
 	 * Undocumented function
 	 *
-	 * @covers ::decrypt
+	 * @covers ::decryptKey
 	 * @dataProvider providerWrongCiphertext
 	 * @testdox too short ciphertext static $input throws $exception_message [$_dataName]
 	 *
