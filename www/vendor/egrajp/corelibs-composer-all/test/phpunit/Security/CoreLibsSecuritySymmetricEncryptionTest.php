@@ -15,6 +15,77 @@ use CoreLibs\Security\SymmetricEncryption;
  */
 final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 {
+	// MARK: key set compare
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::compareKey
+	 * @covers ::getKey
+	 * @testdox Check if init class set key matches to created key
+	 *
+	 * @return void
+	 */
+	public function testKeyInitGetCompare(): void
+	{
+		$key = CreateKey::generateRandomKey();
+		$crypt = new SymmetricEncryption($key);
+		$this->assertTrue(
+			$crypt->compareKey($key),
+			'set key not equal to original key'
+		);
+		$this->assertEquals(
+			$key,
+			$crypt->getKey(),
+			'set key returned not equal to original key'
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::setKey
+	 * @covers ::compareKey
+	 * @covers ::getKey
+	 * @testdox Check if set key after class init matches to created key
+	 *
+	 * @return void
+	 */
+	public function testKeySetGetCompare(): void
+	{
+		$key = CreateKey::generateRandomKey();
+		$crypt = new SymmetricEncryption();
+		$crypt->setKey($key);
+		$this->assertTrue(
+			$crypt->compareKey($key),
+			'set key not equal to original key'
+		);
+		$this->assertEquals(
+			$key,
+			$crypt->getKey(),
+			'set key returned not equal to original key'
+		);
+	}
+
+	// MARK: empty encrypted string
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::decryptKey
+	 * @covers ::decrypt
+	 * @testdox Test empty encrypted string to decrypt
+	 *
+	 * @return void
+	 */
+	public function testEmptyDecryptionString(): void
+	{
+		$this->expectExceptionMessage('Encrypted string cannot be empty');
+		SymmetricEncryption::decryptKey('', CreateKey::generateRandomKey());
+	}
+
+	// MARK: encrypt/decrypt compare
+
 	/**
 	 * Undocumented function
 	 *
@@ -88,8 +159,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	 * test encrypt/decrypt produce correct output
 	 *
 	 * @covers ::generateRandomKey
-	 * @covers ::encrypt
-	 * @covers ::decrypt
+	 * @covers ::encryptKey
+	 * @covers ::decryptKey
 	 * @dataProvider providerEncryptDecryptSuccess
 	 * @testdox encrypt/decrypt static $input must be $expected [$_dataName]
 	 *
@@ -110,6 +181,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 			'Static call',
 		);
 	}
+
+	// MARK: invalid key
 
 	/**
 	 * Undocumented function
@@ -180,8 +253,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	 * Test decryption with wrong key
 	 *
 	 * @covers ::generateRandomKey
-	 * @covers ::encrypt
-	 * @covers ::decrypt
+	 * @covers ::encryptKey
+	 * @covers ::decryptKey
 	 * @dataProvider providerEncryptFailed
 	 * @testdox decrypt static with wrong key $input throws $exception_message [$_dataName]
 	 *
@@ -200,6 +273,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		SymmetricEncryption::decryptKey($encrypted, $wrong_key);
 	}
 
+	// MARK: wrong key
+
 	/**
 	 * Undocumented function
 	 *
@@ -216,6 +291,10 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 				'key' => '1cabd5cba9e042f12522f4ff2de5c31d233b',
 				'excpetion_message' => 'Key is not the correct size (must be '
 			],
+			'empty key' => [
+				'key' => '',
+				'excpetion_message' => 'Key cannot be empty'
+			]
 		];
 	}
 
@@ -236,6 +315,7 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		$enc_key = CreateKey::generateRandomKey();
 
 		// class
+		$this->expectExceptionMessage($exception_message);
 		$crypt = new SymmetricEncryption($key);
 		$this->expectExceptionMessage($exception_message);
 		$crypt->encrypt('test');
@@ -244,22 +324,6 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		$this->expectExceptionMessage($exception_message);
 		$crypt->setKey($key);
 		$crypt->decrypt($encrypted);
-
-		// class instance
-		$this->expectExceptionMessage($exception_message);
-		SymmetricEncryption::getInstance($key)->encrypt('test');
-		// we must encrypt valid thing first so we can fail with the wrong key
-		$encrypted = SymmetricEncryption::getInstance($enc_key)->encrypt('test');
-		$this->expectExceptionMessage($exception_message);
-		SymmetricEncryption::getInstance($key)->decrypt($encrypted);
-
-		// class static
-		$this->expectExceptionMessage($exception_message);
-		SymmetricEncryption::encryptKey('test', $key);
-		// we must encrypt valid thing first so we can fail with the wrong key
-		$encrypted = SymmetricEncryption::encryptKey('test', $enc_key);
-		$this->expectExceptionMessage($exception_message);
-		SymmetricEncryption::decryptKey($encrypted, $key);
 	}
 
 	/**
@@ -290,8 +354,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		/**
 	 * test invalid key provided to decrypt or encrypt
 	 *
-	 * @covers ::encrypt
-	 * @covers ::decrypt
+	 * @covers ::encryptKey
+	 * @covers ::decryptKey
 	 * @dataProvider providerWrongKey
 	 * @testdox wrong key static $key throws $exception_message [$_dataName]
 	 *
@@ -311,6 +375,8 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		$this->expectExceptionMessage($exception_message);
 		SymmetricEncryption::decryptKey($encrypted, $key);
 	}
+
+	// MARK: wrong input
 
 	/**
 	 * Undocumented function
@@ -358,7 +424,7 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::decrypt
+	 * @covers ::decryptKey
 	 * @dataProvider providerWrongCiphertext
 	 * @testdox too short ciphertext indirect $input throws $exception_message [$_dataName]
 	 *
@@ -382,7 +448,7 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 		/**
 	 * Undocumented function
 	 *
-	 * @covers ::decrypt
+	 * @covers ::decryptKey
 	 * @dataProvider providerWrongCiphertext
 	 * @testdox too short ciphertext static $input throws $exception_message [$_dataName]
 	 *

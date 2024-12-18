@@ -79,7 +79,7 @@ class Login
 	private ?int $edit_user_id;
 	/** @var ?string the user cuid (note will be super seeded with uuid v4 later) */
 	private ?string $edit_user_cuid;
-	/** @var ?string UUIDv4, will superseed the ecuid and replace euid as login id */
+	/** @var ?string UUIDv4, will superseed the eucuid and replace euid as login id */
 	private ?string $edit_user_cuuid;
 	/** @var string _GET/_POST loginUserId parameter for non password login */
 	private string $login_user_id = '';
@@ -2138,10 +2138,10 @@ body {
 	text-align: right;
 }
 input.login-input-text {
-	font-size: 1.5em;
+	font-size: 1.3em;
 }
 button.login-button {
-	font-size: 1.5em;
+	font-size: 1.3em;
 }
 .login-visible {
 	visibility: visible;
@@ -2371,7 +2371,7 @@ HTML;
 		}
 		$q = <<<SQL
 		INSERT INTO {DB_SCHEMA}.edit_log (
-			username, euid, ecuid, ecuuid, event_date, event, error, data, data_binary, page,
+			username, euid, eucuid, eucuuid, event_date, event, error, data, data_binary, page,
 			ip, ip_address, user_agent, referer, script_name, query_string, request_scheme, server_name,
 			http_host, http_data, session_id,
 			action_data
@@ -2727,7 +2727,7 @@ HTML;
 		return $this->session->get('LOGIN_PAGES');
 	}
 
-	// MARK: logged in uid(pk)/cuid/ecuuid
+	// MARK: logged in uid(pk)/eucuid/eucuuid
 
 	/**
 	 * Get the current set EUID (edit user id)
@@ -2938,7 +2938,7 @@ HTML;
 		if (empty($this->edit_user_cuuid)) {
 			return $this->permission_okay;
 		}
-		// euid must match ecuid and ecuuid
+		// euid must match eucuid and eucuuid
 		// bail for previous wrong page match, eg if method is called twice
 		if ($this->login_error == 103) {
 			return $this->permission_okay;

@@ -4,4 +4,9 @@
 	verbose="true"
 	bootstrap="test/phpunit/bootstrap.php"
 >
+	<testsuites>
+		<testsuite name="deploy">
+			<directory>test/phpunit</directory>
+		</testsuite>
+	</testsuites>
 </phpunit>
