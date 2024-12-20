@@ -215,7 +215,7 @@ class SymmetricEncryption
 	public function setKey(
 		#[\SensitiveParameter]
 		string $key
-	) {
+	): SymmetricEncryption {
 		if (empty($key)) {
 			throw new \UnexpectedValueException('Key cannot be empty');
 		}
@@ -224,6 +224,7 @@ class SymmetricEncryption
 		// set key
 		$this->key = $key;
 		sodium_memzero($key);
+		return $this;
 	}
 
 	/**

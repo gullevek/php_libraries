@@ -262,7 +262,7 @@ class AsymmetricAnonymousEncryption
 	public function setKeyPair(
 		#[\SensitiveParameter]
 		string $key_pair
-	) {
+	): AsymmetricAnonymousEncryption {
 		if (empty($key_pair)) {
 			throw new \UnexpectedValueException('Key pair cannot be empty');
 		}
@@ -277,6 +277,7 @@ class AsymmetricAnonymousEncryption
 			// check if valid
 			$this->createPublicKey($this->public_key);
 		}
+		return $this;
 	}
 
 	/**
@@ -311,7 +312,7 @@ class AsymmetricAnonymousEncryption
 	 * @return void
 	 * @throws \UnexpectedValueException public key empty
 	 */
-	public function setPublicKey(string $public_key)
+	public function setPublicKey(string $public_key): AsymmetricAnonymousEncryption
 	{
 		if (empty($public_key)) {
 			throw new \UnexpectedValueException('Public key cannot be empty');
@@ -320,6 +321,7 @@ class AsymmetricAnonymousEncryption
 		$this->createPublicKey($public_key);
 		$this->public_key = $public_key;
 		sodium_memzero($public_key);
+		return $this;
 	}
 
 	/**
