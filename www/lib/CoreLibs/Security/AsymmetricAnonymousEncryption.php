@@ -115,7 +115,7 @@ class AsymmetricAnonymousEncryption
 	 * @return string
 	 * @throws \UnexpectedValueException key pair empty
 	 * @throws \UnexpectedValueException invalid hex key pair
-	 * @throws \UnexpectedValueException key pair not correct size
+	 * @throws \RangeException key pair not correct size
 	 */
 	private function createKeyPair(
 		#[\SensitiveParameter]
@@ -147,7 +147,7 @@ class AsymmetricAnonymousEncryption
 	 * @return string
 	 * @throws \UnexpectedValueException public key empty
 	 * @throws \UnexpectedValueException invalid hex key
-	 * @throws \UnexpectedValueException invalid key length
+	 * @throws \RangeException invalid key length
 	 */
 	private function createPublicKey(?string $public_key): string
 	{
