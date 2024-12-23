@@ -256,7 +256,7 @@ class AsymmetricAnonymousEncryption
 	 * sets the private key for encryption
 	 *
 	 * @param  string $key_pair Key pair in hex
-	 * @return void
+	 * @return AsymmetricAnonymousEncryption
 	 * @throws \UnexpectedValueException key pair empty
 	 */
 	public function setKeyPair(
@@ -309,7 +309,7 @@ class AsymmetricAnonymousEncryption
 	 * extract the public key from the key pair
 	 *
 	 * @param  string $public_key Public Key in hex
-	 * @return void
+	 * @return AsymmetricAnonymousEncryption
 	 * @throws \UnexpectedValueException public key empty
 	 */
 	public function setPublicKey(string $public_key): AsymmetricAnonymousEncryption

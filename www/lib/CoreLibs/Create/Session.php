@@ -363,7 +363,7 @@ class Session
 	 * set the auto write close flag
 	 *
 	 * @param  bool $flag
-	 * @return void
+	 * @return Session
 	 */
 	public function setAutoWriteClose(bool $flag): Session
 	{
@@ -514,7 +514,7 @@ class Session
 	 *
 	 * @param  string $name  array name in _SESSION
 	 * @param  mixed  $value value to set (can be anything)
-	 * @return void
+	 * @return Session
 	 */
 	public function set(string $name, mixed $value): Session
 	{
@@ -579,12 +579,12 @@ class Session
 	 * unset one _SESSION entry 'name' if exists
 	 *
 	 * @param  string $name _SESSION key name to remove
-	 * @return void
+	 * @return Session
 	 */
 	public function unset(string $name): Session
 	{
 		if (!isset($_SESSION[$name])) {
-			return;
+			return $this;
 		}
 		$this->restartSession();
 		unset($_SESSION[$name]);

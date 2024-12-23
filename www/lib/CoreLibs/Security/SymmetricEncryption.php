@@ -209,7 +209,7 @@ class SymmetricEncryption
 	 * set a new key for encryption
 	 *
 	 * @param  string $key
-	 * @return void
+	 * @return SymmetricEncryption
 	 * @throws \UnexpectedValueException key cannot be empty
 	 */
 	public function setKey(
