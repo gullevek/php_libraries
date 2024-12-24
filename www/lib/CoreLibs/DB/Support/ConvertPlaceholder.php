@@ -26,7 +26,9 @@ class ConvertPlaceholder
 		. '&&|' // array overlap
 		. '\-\|\-|' // range overlap for array
 		. '[^-]-{1}|' // single -, used in JSON too
-		. '->|->>|#>|#>>|@>|<@|@@|@\?|\?{1}|\?\||\?&|#-'; //JSON searches, Array searchs, etc
+		. '->|->>|#>|#>>|@>|<@|@@|@\?|\?{1}|\?\||\?&|#-|' // JSON searches, Array searchs, etc
+		. 'THEN|ELSE' // command parts (CASE)
+	;
 	/** @var string the main regex including  the pattern query split */
 	private const PATTERN_ELEMENT = '(?:\'.*?\')?\s*(?:' . self::PATTERN_QUERY_SPLIT . ')\s*';
 	/** @var string comment regex

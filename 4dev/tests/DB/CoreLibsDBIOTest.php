@@ -5196,6 +5196,27 @@ final class CoreLibsDBIOTest extends TestCase
 				SQL,
 				'count' => 1,
 				'convert' => false,
+			],
+			'update with case' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int = $1::INT,
+					row_varchar = CASE WHEN row_int = 1 THEN $2 ELSE 'bar'::VARCHAR END
+				WHERE
+					row_varchar = $3
+				SQL,
+				'count' => 3,
+				'convert' => false,
+			],
+			'select with case' => [
+				'query' => <<<SQL
+				SELECT row_int
+				FROM table_with_primary_key
+				WHERE
+					row_varchar = CASE WHEN row_int = 1 THEN $1 ELSE $2 END
+				SQL,
+				'count' => 2,
+				'convert' => false,
 			]
 		];
 	}

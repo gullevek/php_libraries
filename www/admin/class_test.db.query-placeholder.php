@@ -174,6 +174,26 @@ while (is_array($res = $db->dbReturnParams($query, [$query_value]))) {
 
 echo "<hr>";
 
+echo "<b>CASE part</b><br>";
+$query = <<<SQL
+UPDATE
+test_foo
+SET
+some_timestamp = NOW(),
+	-- if not 1 set, else keep at one
+	smallint_a = (CASE
+			WHEN smallint_a <> 1 THEN $1
+			ELSE 1::INT
+	END)::INT
+WHERE
+	string_a = $2
+SQL;
+echo "QUERY: <pre>" . $query . "</pre>";
+$res = $db->dbExecParams($query, [1, 'foobar']);
+print "ERROR: " . $db->dbGetLastError(true) . "<br>";
+
+echo "<hr>";
+
 // test connectors: = , <> () for query detection
 
 // convert placeholder tests
@@ -237,7 +257,7 @@ SQL,
 		SQL,
 		'params' => [1, 2, 3, 4, 5, 6],
 		'direction' => 'pg'
-	]
+	],
 ];
 
 $db->dbSetConvertPlaceholder(true);
