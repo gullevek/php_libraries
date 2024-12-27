@@ -4,6 +4,8 @@
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
 
+// FIXME: Smarty Class must be updated for PHP 8.4
+
 declare(strict_types=1);
 
 error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
