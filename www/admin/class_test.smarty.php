@@ -47,6 +47,7 @@ $adm = new CoreLibs\Admin\Backend(
 );
 $adm->DATA['adm_set'] = 'SET from admin class';
 
+
 $PAGE_NAME = 'TEST CLASS: SMARTY';
 print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title></head>";

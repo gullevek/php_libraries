@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace CoreLibs\Template;
 
 // leading slash if this is in lib\Smarty
-class SmartyExtend extends \Smarty
+class SmartyExtend extends \Smarty\Smarty
 {
 	// internal translation engine
 	/** @var \CoreLibs\Language\L10n */
