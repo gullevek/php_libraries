@@ -63,6 +63,7 @@ class EditBase
 		// smarty template engine (extended Translation version)
 		$this->smarty = new \CoreLibs\Template\SmartyExtend(
 			$l10n,
+			$log,
 			$options['cache_id'] ?? '',
 			$options['compile_id'] ?? '',
 		);
