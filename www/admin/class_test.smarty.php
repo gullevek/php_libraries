@@ -35,6 +35,7 @@ $l10n = new \CoreLibs\Language\L10n(
 );
 $smarty = new CoreLibs\Template\SmartyExtend(
 	$l10n,
+	$log,
 	CACHE_ID,
 	COMPILE_ID,
 );

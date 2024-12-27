@@ -538,8 +538,7 @@ class EditBase
 	 * builds the smarty content and runs smarty display output
 	 *
 	 * @return void
-	 * @throws Exception
-	 * @throws SmartyException
+	 * @throws \Smarty\Exception
 	 */
 	public function editBaseRun(
 		?string $template_dir = null,

@@ -51,6 +51,11 @@ print "PASSWORD REHASH: " . (string)$password_class::passwordRehashCheck($enc_pa
 // direct static
 print "S::PASSWORD VERFIY: " . (string)PwdChk::passwordVerify($password, $enc_password) . "<br>";
 
+$rehash_test = '$2y$10$EgWJ2WE73DWi.hIyFRCdpejLXTvHbmTK3LEOclO1tAvXAXUNuUS4W';
+if (PwdChk::passwordRehashCheck($rehash_test)) {
+	print "Bad password<br>";
+}
+
 print "</body></html>";
 
 // __END__
