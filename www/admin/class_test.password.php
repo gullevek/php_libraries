@@ -37,6 +37,8 @@ print "<body>";
 print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
+print "PHP Version: " . PHP_VERSION . "<br>";
+
 $password = 'something1234';
 $enc_password = $_password->passwordSet($password);
 print "PASSWORD: $password: " . $enc_password . "<br>";
@@ -51,9 +53,18 @@ print "PASSWORD REHASH: " . (string)$password_class::passwordRehashCheck($enc_pa
 // direct static
 print "S::PASSWORD VERFIY: " . (string)PwdChk::passwordVerify($password, $enc_password) . "<br>";
 
-$rehash_test = '$2y$10$EgWJ2WE73DWi.hIyFRCdpejLXTvHbmTK3LEOclO1tAvXAXUNuUS4W';
+if (PHP_VERSION_ID < 80400) {
+	$rehash_test = '$2y$10$EgWJ2WE73DWi.hIyFRCdpejLXTvHbmTK3LEOclO1tAvXAXUNuUS4W';
+	$rehash_test_throw = '$2y$12$EgWJ2WE73DWi.hIyFRCdpejLXTvHbmTK3LEOclO1tAvXAXUNuUS4W';
+} else {
+	$rehash_test = '$2y$12$EgWJ2WE73DWi.hIyFRCdpejLXTvHbmTK3LEOclO1tAvXAXUNuUS4W';
+	$rehash_test_throw = '$2y$10$EgWJ2WE73DWi.hIyFRCdpejLXTvHbmTK3LEOclO1tAvXAXUNuUS4W';
+}
 if (PwdChk::passwordRehashCheck($rehash_test)) {
-	print "Bad password<br>";
+	print "Bad password [BAD]<br>";
+}
+if (PwdChk::passwordRehashCheck($rehash_test_throw)) {
+	print "Bad password [OK]<br>";
 }
 
 print "</body></html>";
