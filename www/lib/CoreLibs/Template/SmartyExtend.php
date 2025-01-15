@@ -283,6 +283,7 @@ class SmartyExtend extends \Smarty\Smarty
 					continue;
 				}
 				try {
+					/** @phan-suppress-next-line PhanNoopNew */
 					new \ReflectionClassConstant($this, $plugin['type']);
 				} catch (\ReflectionException $e) {
 					$this->log->error('SmartyExtended plugin load failed, type is not valid', [

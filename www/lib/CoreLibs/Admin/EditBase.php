@@ -14,9 +14,6 @@ declare(strict_types=1);
 
 namespace CoreLibs\Admin;
 
-use Exception;
-use SmartyException;
-
 class EditBase
 {
 	/** @var array<mixed> */
