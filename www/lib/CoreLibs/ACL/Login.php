@@ -1478,6 +1478,8 @@ class Login
 		// username (login), group name
 		$this->acl['user_name'] = $_SESSION['LOGIN_USER_NAME'];
 		$this->acl['group_name'] = $_SESSION['LOGIN_GROUP_NAME'];
+		// DEPRECATED
+		$this->acl['euid'] = $_SESSION['LOGIN_EUID'];
 		// edit user cuid
 		$this->acl['eucuid'] = $_SESSION['LOGIN_EUCUID'];
 		$this->acl['eucuuid'] = $_SESSION['LOGIN_EUCUUID'];
