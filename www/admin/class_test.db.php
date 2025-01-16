@@ -273,8 +273,8 @@ $query_insert = <<<SQL
 INSERT INTO
 	test_foo
 (
-	test, some_bool, string_a, number_a, number_a_numeric,
-	some_time, some_timestamp, json_string
+	test, some_bool, string_a, number_a, numeric_a,
+	some_internval, some_timestamp, json_string
 ) VALUES (
 	$1, $2, $3, $4, $5,
 	$6, $7, $8
@@ -283,8 +283,8 @@ RETURNING test
 SQL;
 $query_select = <<<SQL
 SELECT
-	test, some_bool, string_a, number_a, number_a_numeric,
-	some_time, some_time, some_timestamp, json_string
+	test, some_bool, string_a, number_a, numeric_a,
+	some_time, some_internval, some_timestamp, json_string
 FROM
 	test_foo
 WHERE
@@ -554,7 +554,7 @@ print "<b>PREPARE QUERIES</b><br>";
 // READ PREPARE
 $q_prep = <<<SQL
 SELECT test_foo_id, test, some_bool, string_a, number_a,
-number_a_numeric, some_time
+numeric_a, some_time
 FROM test_foo
 WHERE test = $1
 ORDER BY test_foo_id DESC LIMIT 5
@@ -582,7 +582,7 @@ if ($db->dbPrepare('sel_test_foo', $q_prep) === false) {
 
 // sel test with ANY () type
 $q_prep = "SELECT test_foo_id, test, some_bool, string_a, number_a, "
-	. "number_a_numeric, some_time "
+	. "numeric_a, some_time "
 	. "FROM test_foo "
 	. "WHERE test = ANY($1) "
 	. "ORDER BY test_foo_id DESC LIMIT 5";
@@ -618,7 +618,7 @@ $test_bar = $db->dbEscapeLiteral('SOMETHING DIFFERENT');
 $q = <<<SQL
 SELECT test_foo_id, test, some_bool, string_a, number_a,
 -- comment
-number_a_numeric, some_time
+numeric_a, some_time
 FROM test_foo
 WHERE test = $test_bar
 ORDER BY test_foo_id DESC LIMIT 5
@@ -631,7 +631,7 @@ print "DB RETURN PARAMS<br>";
 $q = <<<SQL
 SELECT test_foo_id, test, some_bool, string_a, number_a,
 -- comment
-number_a_numeric, some_time
+numeric_a, some_time
 FROM test_foo
 WHERE test = $1
 ORDER BY test_foo_id DESC LIMIT 5
@@ -646,7 +646,7 @@ echo "<hr>";
 print "DB RETURN PARAMS LIKE<br>";
 $q = <<<SQL
 SELECT
-	test_foo_id, test, some_bool, string_a, number_a, number_a_numeric
+	test_foo_id, test, some_bool, string_a, number_a, numeric_a
 FROM test_foo
 WHERE string_a LIKE $1;
 SQL;
@@ -660,7 +660,7 @@ echo "<hr>";
 print "DB RETURN PARAMS ANY<br>";
 $q = <<<SQL
 SELECT
-	test_foo_id, test, some_bool, string_a, number_a, number_a_numeric
+	test_foo_id, test, some_bool, string_a, number_a, numeric_a
 FROM test_foo
 WHERE string_a = ANY($1);
 SQL;

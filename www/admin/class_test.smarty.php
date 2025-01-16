@@ -4,6 +4,8 @@
  * @phan-file-suppress PhanTypeSuspiciousStringExpression
  */
 
+// FIXME: Smarty Class must be updated for PHP 8.4
+
 declare(strict_types=1);
 
 error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
@@ -33,6 +35,7 @@ $l10n = new \CoreLibs\Language\L10n(
 );
 $smarty = new CoreLibs\Template\SmartyExtend(
 	$l10n,
+	$log,
 	CACHE_ID,
 	COMPILE_ID,
 );
@@ -44,6 +47,7 @@ $adm = new CoreLibs\Admin\Backend(
 	80
 );
 $adm->DATA['adm_set'] = 'SET from admin class';
+
 
 $PAGE_NAME = 'TEST CLASS: SMARTY';
 print "<!DOCTYPE html>";

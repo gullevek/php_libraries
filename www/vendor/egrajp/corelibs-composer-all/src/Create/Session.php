@@ -363,11 +363,12 @@ class Session
 	 * set the auto write close flag
 	 *
 	 * @param  bool $flag
-	 * @return void
+	 * @return Session
 	 */
-	public function setAutoWriteClose(bool $flag): void
+	public function setAutoWriteClose(bool $flag): Session
 	{
 		$this->auto_write_close = $flag;
+		return $this;
 	}
 
 	/**
@@ -513,14 +514,15 @@ class Session
 	 *
 	 * @param  string $name  array name in _SESSION
 	 * @param  mixed  $value value to set (can be anything)
-	 * @return void
+	 * @return Session
 	 */
-	public function set(string $name, mixed $value): void
+	public function set(string $name, mixed $value): Session
 	{
 		$this->checkValidSessionEntryKey($name);
 		$this->restartSession();
 		$_SESSION[$name] = $value;
 		$this->closeSessionCall();
+		return $this;
 	}
 
 	/**
@@ -577,16 +579,17 @@ class Session
 	 * unset one _SESSION entry 'name' if exists
 	 *
 	 * @param  string $name _SESSION key name to remove
-	 * @return void
+	 * @return Session
 	 */
-	public function unset(string $name): void
+	public function unset(string $name): Session
 	{
 		if (!isset($_SESSION[$name])) {
-			return;
+			return $this;
 		}
 		$this->restartSession();
 		unset($_SESSION[$name]);
 		$this->closeSessionCall();
+		return $this;
 	}
 
 	/**

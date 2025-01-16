@@ -14,9 +14,6 @@ declare(strict_types=1);
 
 namespace CoreLibs\Admin;
 
-use Exception;
-use SmartyException;
-
 class EditBase
 {
 	/** @var array<mixed> */
@@ -63,6 +60,7 @@ class EditBase
 		// smarty template engine (extended Translation version)
 		$this->smarty = new \CoreLibs\Template\SmartyExtend(
 			$l10n,
+			$log,
 			$options['cache_id'] ?? '',
 			$options['compile_id'] ?? '',
 		);
@@ -538,8 +536,7 @@ class EditBase
 	 * builds the smarty content and runs smarty display output
 	 *
 	 * @return void
-	 * @throws Exception
-	 * @throws SmartyException
+	 * @throws \Smarty\Exception
 	 */
 	public function editBaseRun(
 		?string $template_dir = null,
