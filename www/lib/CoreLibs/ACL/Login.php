@@ -1552,6 +1552,7 @@ class Login
 			$this->acl['unit_legacy'][$unit['id']] = $this->acl['unit'][$ea_cuid];
 			// detail name/level set
 			$this->acl['unit_detail'][$ea_cuid] = [
+				'id' =>  $unit['id'],
 				'name' => $unit['name'],
 				'uid' => $unit['uid'],
 				'level' => $this->default_acl_list[$this->acl['unit'][$ea_cuid]]['name'] ?? -1,
