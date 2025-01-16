@@ -1531,6 +1531,12 @@ final class CoreLibsACLLoginTest extends TestCase
 				$login_mock->loginGetEditAccessCuidFromUid($mock_settings['edit_access_uid']),
 				'Assert check access uid to cuid valid'
 			);
+			// - loginGetEditAccessCuidFromId
+			$this->assertEquals(
+				$expected['check_access_cuid'],
+				$login_mock->loginGetEditAccessCuidFromUid($mock_settings['edit_access_id']),
+				'Assert check access id to cuid valid'
+			);
 			// Deprecated
 			// - loginCheckEditAccess
 			$this->assertEquals(

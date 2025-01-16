@@ -1418,6 +1418,7 @@ class Login
 				'additional_acl' => Json::jsonConvertToArray($res['additional_acl']),
 				'data' => $ea_data
 			];
+			// LEGACY LOOKUP
 			$unit_access_eaid[$res['edit_access_id']] = [
 				'cuid' => $res['cuid'],
 			];
@@ -3277,6 +3278,20 @@ HTML;
 			return false;
 		}
 		return (int)$_SESSION['LOGIN_UNIT_CUID'][$uid];
+	}
+
+	/**
+	 * Legacy lookup for edit access id to cuid
+	 *
+	 * @param  int          $id edit access id PK
+	 * @return string|false     edit access cuid or false if not found
+	 */
+	public function loginGetEditAccessCuidFromId(int $id): string|false
+	{
+		if (!isset($_SESSION['LOGIN_UNIT_ACL_LEVEL'][$id])) {
+			return false;
+		}
+		return (string)$_SESSION['LOGIN_UNIT_ACL_LEVEL'][$id]['cuid'];
 	}
 
 	/**
