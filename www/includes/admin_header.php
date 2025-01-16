@@ -116,7 +116,7 @@ $data = [
 // log action
 // no log if login
 if (!$login->loginActionRun()) {
-	$login->writeLog('Submit', $data, $cms->adbGetActionSet(), 'BINARY');
+	$login->writeLog('Submit', $data, action_set:$cms->adbGetActionSet(), write_type:'BINARY');
 }
 //------------------------------ logging end
 

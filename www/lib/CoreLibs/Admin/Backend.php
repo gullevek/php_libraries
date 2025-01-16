@@ -289,7 +289,7 @@ class Backend
 	 *                                                        JSON, STRING/SERIEAL, BINARY/BZIP or ZLIB
 	 * @param  string|null         $db_schema [default=null]  override target schema
 	 * @return void
-	 * @deprecated Use $login->writeLog() and set action_set from ->adbGetActionSet()
+	 * @deprecated Use $login->writeLog($event, $data, action_set:$cms->adbGetActionSet(), write_type:$write_type)
 	 */
 	public function adbEditLog(
 		string $event = '',
