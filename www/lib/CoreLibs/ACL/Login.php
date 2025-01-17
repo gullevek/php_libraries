@@ -3290,10 +3290,10 @@ HTML;
 	 */
 	public function loginGetEditAccessCuidFromId(int $id): string|false
 	{
-		if (!isset($_SESSION['LOGIN_UNIT_ACL_LEVEL'][$id])) {
+		if (!isset($_SESSION['LOGIN_UNIT_LEGACY'][$id])) {
 			return false;
 		}
-		return (string)$_SESSION['LOGIN_UNIT_ACL_LEVEL'][$id]['cuid'];
+		return (string)$_SESSION['LOGIN_UNIT_LEGACY'][$id]['cuid'];
 	}
 
 	/**
@@ -3304,10 +3304,10 @@ HTML;
 	 */
 	public function loginGetEditAccessIdFromCuid(string $cuid): int|false
 	{
-		if (!isset($_SESSION['LOGIN_UNIT_LEGACY'][$cuid])) {
+		if (!isset($_SESSION['LOGIN_UNIT'][$cuid])) {
 			return false;
 		}
-		return $_SESSION['LOGIN_UNIT_LEGACY'][$cuid];
+		return $_SESSION['LOGIN_UNIT'][$cuid]['id'];
 	}
 
 	/**
