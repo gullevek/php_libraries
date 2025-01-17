@@ -1532,7 +1532,7 @@ class Login
 			$this->acl['page'] = $_SESSION['LOGIN_PAGES_ACL_LEVEL'][$this->page_name];
 		}
 
-		$this->acl['unit_id'] = null;
+		$this->acl['unit_cuid'] = null;
 		$this->acl['unit_name'] = null;
 		$this->acl['unit_uid'] = null;
 		$this->acl['unit'] = [];
@@ -3294,6 +3294,20 @@ HTML;
 			return false;
 		}
 		return (string)$_SESSION['LOGIN_UNIT_ACL_LEVEL'][$id]['cuid'];
+	}
+
+	/**
+	 * This is a Legacy lookup from the edit access id to cuid for further lookups in the normal list
+	 *
+	 * @param  string    $cuid edit access cuid
+	 * @return int|false       false on not found or edit access id PK
+	 */
+	public function loginGetEditAccessIdFromCuid(string $cuid): int|false
+	{
+		if (!isset($_SESSION['LOGIN_UNIT_LEGACY'][$cuid])) {
+			return false;
+		}
+		return $_SESSION['LOGIN_UNIT_LEGACY'][$cuid];
 	}
 
 	/**
