@@ -28,8 +28,6 @@ $log = new CoreLibs\Logging\Logging([
 $_phpv = new CoreLibs\Check\PhpVersion();
 $phpv_class = 'CoreLibs\Check\PhpVersion';
 
-// define a list of from to color sets for conversion test
-
 $PAGE_NAME = 'TEST CLASS: PHP VERSION';
 print "<!DOCTYPE html>";
 print "<html><head><title>" . $PAGE_NAME . "</title></head>";
