@@ -3217,7 +3217,7 @@ HTML;
 	 * @return int|null                 same edit access id if ok
 	 *                                  or the default edit access id
 	 *                                  if given one is not valid
-	 * @deprecated Please switch to using edit access cuid check with ->loginCheckEditAccessValidCuid()
+	 * @#deprecated Please switch to using edit access cuid check with ->loginCheckEditAccessValidCuid()
 	 */
 	public function loginCheckEditAccessId(?int $edit_access_id): ?int
 	{
