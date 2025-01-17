@@ -3692,7 +3692,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function preparedProviderValue(): array
+	public function providerDbGetPrepareCursorValue(): array
 	{
 		// 1: query (can be empty for do not set)
 		// 2: stm name
@@ -3736,7 +3736,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * test return prepare cursor errors
 	 *
 	 * @covers ::dbGetPrepareCursorValue
-	 * @dataProvider preparedProviderValue
+	 * @dataProvider providerDbGetPrepareCursorValue
 	 * @testdox prepared query $stm_name with $key expect error id $error_id [$_dataName]
 	 *
 	 * @param string $query
@@ -3767,6 +3767,94 @@ final class CoreLibsDBIOTest extends TestCase
 			$last_error,
 			'get prepare cursor value error check'
 		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerDbPreparedCursorStatus(): array
+	{
+		return [
+			'empty statement pararm' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_a',
+				'check_stm_name' => '',
+				'check_query' => '',
+				'expected' => false
+			],
+			'different stm_name' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_b',
+				'check_stm_name' => 'other_name',
+				'check_query' => '',
+				'expected' => 0
+			],
+			'same stm_name' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_c',
+				'check_stm_name' => 'test_stm_c',
+				'check_query' => '',
+				'expected' => 1
+			],
+			'same stm_name and query' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_d',
+				'check_stm_name' => 'test_stm_d',
+				'check_query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'expected' => 2
+			],
+			'same stm_name and different query' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_e',
+				'check_stm_name' => 'test_stm_e',
+				'check_query' => 'SELECT row_int, uid, row_int FROM table_with_primary_key',
+				'expected' => 1
+			],
+			'insert query test' => [
+				'query' => 'INSERT INTO table_with_primary_key (row_int, uid) VALUES ($1, $2)',
+				'stm_name' => 'test_stm_f',
+				'check_stm_name' => 'test_stm_f',
+				'check_query' => 'INSERT INTO table_with_primary_key (row_int, uid) VALUES ($1, $2)',
+				'expected' => 2
+			]
+		];
+	}
+
+	/**
+	 * test cursor status for prepared statement
+	 *
+	 * @covers ::dbPreparedCursorStatus
+	 * @dataProvider providerDbPreparedCursorStatus
+	 * @testdox Check prepared $stm_name ($check_stm_name) status is $expected [$_dataName]
+	 *
+	 * @param  string   $query
+	 * @param  string   $stm_name
+	 * @param  string   $check_stm_name
+	 * @param  string   $check_query
+	 * @param  bool|int $expected
+	 * @return void
+	 */
+	public function testDbPreparedCursorStatus(
+		string $query,
+		string $stm_name,
+		string $check_stm_name,
+		string $check_query,
+		bool|int $expected
+	): void {
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		$db->dbPrepare($stm_name, $query);
+		// $db->dbExecute($stm_name);
+		$this->assertEquals(
+			$expected,
+			$db->dbPreparedCursorStatus($check_stm_name, $check_query),
+			'check prepared stement cursor status'
+		);
+		unset($db);
 	}
 
 	// - schema set/get tests

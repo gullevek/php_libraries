@@ -707,6 +707,17 @@ if (
 } else {
 	print "[PGB] [3] pgb_sel_test_foo prepare OK<br>";
 }
+$stm_status = $db->dbPreparedCursorStatus('');
+print "[PGB] Empty statement name: " . $log->prAr($stm_status) . "<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foobar');
+print "[PGB] Prepared name not match status: $stm_status<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo');
+print "[PGB] Prepared name match status: $stm_status<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', $q_prep);
+print "[PGB] prepared exists and query match status: $stm_status<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', "SELECT * FROM test_foo");
+print "[PGB] prepared exists and query not match status: $stm_status<br>";
+
 $db_pgb->dbClose();
 
 # db write class test

@@ -57,6 +57,51 @@ fclose($fp);
 $out = \CoreLibs\DeprecatedHelper\Deprecated84::str_getcsv("A,B,C");
 print "str_getcsv: <pre>" . print_r($out, true) . "</pre>";
 
+/**
+ * temporary different CSV function, because fgetcsv seems to be broken on some systems
+ * (does not read out japanese text)
+ *
+ * @param  string $string    full line for csv split
+ * @param  string $encoding  optional, if given, converts string to the internal encoding
+ *                           before we do anything
+ * @param  string $delimiter sepperate character, default ','
+ * @param  string $enclosure string line marker, default '"'
+ * @param  string $flag      INTERN | EXTERN. if INTERN uses the PHP function, else uses explode
+ * @return array<int,string|null> array with split data from input line
+ */
+function mtParseCSV(
+	string $string,
+	string $encoding = '',
+	string $delimiter = ',',
+	string $enclosure = '"',
+	string $flag = 'INTERN'
+): array {
+	$lines = [];
+	if ($encoding) {
+		$string = \CoreLibs\Convert\Encoding::convertEncoding(
+			$string,
+			'UTF-8',
+			$encoding
+		);
+	}
+	if ($flag == 'INTERN') {
+		// split with PHP function
+		$lines = str_getcsv($string, $delimiter, $enclosure);
+	} else {
+		// split up with delimiter
+		$lines = explode(',', $string) ?: [];
+	}
+	// strip " from beginning and end of line
+	for ($i = 0; $i < count($lines); $i++) {
+		// remove line breaks
+		$lines[$i] = preg_replace("/\r\n?/", '', (string)$lines[$i]) ?? '';
+		// lingering " at the beginning and end of the line
+		$lines[$i] = preg_replace("/^\"/", '', (string)$lines[$i]) ?? '';
+		$lines[$i] = preg_replace("/\"$/", '', (string)$lines[$i]) ?? '';
+	}
+	return $lines;
+}
+
 print "</body></html>";
 
 // __END__

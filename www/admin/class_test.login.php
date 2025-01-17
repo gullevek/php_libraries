@@ -145,9 +145,12 @@ print "<h3>Legacy Lookups</h3>";
 
 $edit_access_id = 1;
 $edit_access_cuid = $login->loginGetEditAccessCuidFromId($edit_access_id);
-$edit_access_id_rev = $login->loginGetEditAccessIdFromCuid($edit_access_cuid);
+$edit_access_id_rev = null;
+if (is_string($edit_access_cuid)) {
+	$edit_access_id_rev = $login->loginGetEditAccessIdFromCuid($edit_access_cuid);
+}
 print "EA ID: " . $edit_access_id . "<br>";
-print "EA CUID: " . $edit_access_cuid . "<br>";
-print "REV EA CUID: " . $edit_access_id_rev . "<br>";
+print "EA CUID: " . $log->prAr($edit_access_cuid) . "<br>";
+print "REV EA CUID: " . $log->prAr($edit_access_id_rev) . "<br>";
 
 print "</body></html>";

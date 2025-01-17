@@ -3141,6 +3141,7 @@ class IO
 				'pk_name' => '',
 				'count' => 0,
 				'query' => '',
+				'query_raw' => $query,
 				'result' =>  null,
 				'returning_id' => false,
 				'placeholder_converted' => [],
@@ -3237,11 +3238,12 @@ class IO
 			}
 		} else {
 			// if we try to use the same statement name for a differnt query, error abort
-			if ($this->prepare_cursor[$stm_name]['query'] != $query) {
+			if ($this->prepare_cursor[$stm_name]['query_raw'] != $query) {
 				// thrown error
 				$this->__dbError(26, false, context: [
 					'statement_name' => $stm_name,
 					'prepared_query' => $this->prepare_cursor[$stm_name]['query'],
+					'prepared_query_raw' => $this->prepare_cursor[$stm_name]['query_raw'],
 					'query' => $query,
 					'pk_name' => $pk_name,
 				]);
@@ -4362,6 +4364,37 @@ class IO
 			return false;
 		}
 		return $this->prepare_cursor[$stm_name][$key];
+	}
+
+	/**
+	 * Checks if a prepared query eixsts
+	 *
+	 * @param  string $stm_name Statement to check
+	 * @param  string $query [default=''] If set then query must also match
+	 * @return false|int<0,2>             False on missing stm_name
+	 *                                    0: ok, 1: stm_name matchin, 2: stm_name and query matching
+	 */
+	public function dbPreparedCursorStatus(string $stm_name, string $query = ''): false|int
+	{
+		if (empty($stm_name)) {
+			$this->__dbError(
+				101,
+				false,
+				'No statement name given'
+			);
+			return false;
+		}
+		// does not exist
+		$return_value = 0;
+		if (!empty($this->prepare_cursor[$stm_name]['query_raw'])) {
+			// statement name eixts
+			$return_value = 1;
+			if ($this->prepare_cursor[$stm_name]['query_raw'] == $query) {
+				// query also matches
+				$return_value = 2;
+			}
+		}
+		return $return_value;
 	}
 
 	// ***************************
