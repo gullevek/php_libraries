@@ -49,7 +49,7 @@ class Deprecated84
 	 * escape parameter deprecation and recommend to set to "" for compatible with PHP 9.0
 	 *
 	 * @param mixed $stream
-	 * @param null|int $length
+	 * @param null|int<0,max> $length
 	 * @param string $separator
 	 * @param string $enclosure
 	 * @param string $escape
