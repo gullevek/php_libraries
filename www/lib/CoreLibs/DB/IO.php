@@ -2946,7 +2946,7 @@ class IO
 		$query_hash = $this->dbGetQueryHash($query, $params);
 		// clears cache for this query
 		if (empty($this->cursor_ext[$query_hash]['query'])) {
-			$this->__dbError(18, context: [
+			$this->__dbWarning(18, context: [
 				'query' => $query,
 				'params' => $params,
 				'hash' => $query_hash,
