@@ -969,7 +969,6 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			"query" => ["foo-get" => "bar"]
 		]);
 		$this->assertEquals("200", $response["code"], "multi call: get response code not matching");
-		print "PHP: " . PHP_VERSION_ID . "\n";
 		if (PHP_VERSION_ID >= 80400) {
 			$this->assertEquals(
 				'{"HEADERS":{"HTTP_HOST":"soba.egplusww.jp",'
