@@ -184,7 +184,7 @@ define('HOST_NAME', $HOST_NAME);
 // BAIL ON MISSING MASTER SITE CONFIG
 if (!isset($SITE_CONFIG[HOST_NAME]['location'])) {
 	echo 'Missing SITE_CONFIG entry for: "' . HOST_NAME . '". Contact Administrator';
-	exit;
+	exit(1);
 }
 // BAIL ON MISSING DB CONFIG:
 // we have either no db selction for this host but have db config entries
@@ -201,7 +201,7 @@ if (
 	)
 ) {
 	echo 'No matching DB config found for: "' . HOST_NAME . '". Contact Administrator';
-	exit;
+	exit(1);
 }
 // set SSL on
 $is_secure = false;

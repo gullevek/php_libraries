@@ -500,7 +500,7 @@ class IO
 			die('<!-- Cannot load db functions class for: ' . $this->db_type . ' -->');
 		}
 		// write to internal one, once OK
-		$this->db_functions = $db_functions;
+		$this->db_functions = $db_functions; /** @phan-suppress-current-line PhanPossiblyNullTypeMismatchProperty */
 
 		// connect to DB
 		if (!$this->__connectToDB()) {
