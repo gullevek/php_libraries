@@ -1560,6 +1560,7 @@ class Login
 				'uid' => $unit['uid'],
 				'cuuid' => $unit['cuuid'],
 				'level' => $this->default_acl_list[$this->acl['unit'][$ea_cuid]]['name'] ?? -1,
+				'level_number' => $this->acl['unit'][$ea_cuid],
 				'default' => $unit['default'],
 				'data' => $unit['data'],
 				'additional_acl' => $unit['additional_acl']
