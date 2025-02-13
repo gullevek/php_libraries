@@ -1,8 +1,6 @@
 /* general edit javascript */
 /* jquery version */
 
-/* jshint esversion: 11 */
-
 /* global i18n */
 
 // debug set
@@ -533,22 +531,20 @@ function errorCatch(err)
 	if (err.stack) {
 		// only FF
 		if (err.lineNumber) {
-			console.log('ERROR[%s:%s] %s', err.name, err.lineNumber, err.message);
+			console.error('ERROR[%s:%s] ', err.name, err.lineNumber, err);
 		} else if (err.line) {
 			// only Safari
-			console.log('ERROR[%s:%s] %s', err.name, err.line, err.message);
+			console.error('ERROR[%s:%s] ', err.name, err.line, err);
 		} else {
-			console.log('ERROR[%s] %s', err.name, err.message);
+			console.error('ERROR[%s] ', err.name, err);
 		}
-		// stack trace
-		console.log('ERROR[stack] %s', err.stack);
 	} else if (err.number) {
 		// IE
-		console.log('ERROR[%s:%s] %s', err.name, err.number, err.message);
-		console.log('ERROR[description] %s', err.description);
+		console.error('ERROR[%s:%s] %s', err.name, err.number, err.message);
+		console.error('ERROR[description] %s', err.description);
 	} else {
 		// the rest
-		console.log('ERROR[%s] %s', err.name, err.message);
+		console.error('ERROR[%s] %s', err.name, err.message);
 	}
 }
 
