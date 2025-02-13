@@ -1,0 +1,17 @@
+{
+	"name": "core-libraries",
+	"version": "9.26.8",
+	"main": "",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Clemens Schwaighofer",
+	"license": "",
+	"description": "Core Libraries",
+	"devDependencies": {
+		"@eslint/js": "^9.20.0",
+		"esbuild": "^0.25.0",
+		"eslint": "^9.20.1",
+		"globals": "^15.15.0"
+	}
+}
