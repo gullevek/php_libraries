@@ -3,12 +3,7 @@ import pluginJs from '@eslint/js';
 
 /*
 module.exports = {
-	'env': {
-		'browser': true,
-		'es6': true,
-		'commonjs': true,
-		'jquery': true
-	},
+	// in globals block
 	'extends': 'eslint:recommended',
 	'parserOptions': {
 		'ecmaVersion': 6
@@ -19,7 +14,12 @@ module.exports = {
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-	{languageOptions: { globals: globals.browser }},
+	{languageOptions: {
+		globals: {
+			...globals.browser,
+			...globals.jquery
+		}
+	}},
 	pluginJs.configs.recommended,
 	{
 		'rules': {
