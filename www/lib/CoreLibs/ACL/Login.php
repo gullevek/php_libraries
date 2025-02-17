@@ -2539,7 +2539,7 @@ HTML;
 				$this->login_user_id,
 				-1,
 				$login_user_id_changed
-			);
+			) ?? '';
 			// flag unclean input data
 			if ($login_user_id_changed > 0) {
 				$this->login_user_id_unclear = true;

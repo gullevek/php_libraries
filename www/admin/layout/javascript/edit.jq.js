@@ -17,6 +17,21 @@ var GL_OB_S = 100;
 var GL_OB_BASE = 100;
 
 /**
+ * Gets html element or throws an error
+ * @param {string} el_id Element ID to get
+ * @returns {HTMLElement}
+ * @throws Error
+ */
+function loadEl(el_id)
+{
+	let el = document.getElementById(el_id);
+	if (el === null) {
+		throw new Error('Cannot find: ' + el_id);
+	}
+	return el;
+}
+
+/**
  * opens a popup window with winName and given features (string)
  * @param {String} theURL   the url
  * @param {String} winName  window name
@@ -152,6 +167,18 @@ function goToPos(element, offset = 0, duration = 500, base = 'body,html') // esl
 	} catch (err) {
 		errorCatch(err);
 	}
+}
+
+/**
+ * go to element, scroll
+ * non jquery
+ * @param {string} target
+*/
+function goTo(target) // eslint-disable-line no-unused-vars
+{
+	loadEl(target).scrollIntoView({
+		behavior: 'smooth'
+	});
 }
 
 /**
@@ -400,9 +427,9 @@ function keyInObject(key, object)
 
 /**
  * returns matching key of value
- * @param  {Object} obj   object to search value in
- * @param  {Mixed}  value any value (String, Number, etc)
- * @return {String}       the key found for the first matching value
+ * @param  {Object} object object to search value in
+ * @param  {Mixed}  value  any value (String, Number, etc)
+ * @return {String}        the key found for the first matching value
  */
 function getKeyByValue(object, value) // eslint-disable-line no-unused-vars
 {
@@ -414,9 +441,9 @@ function getKeyByValue(object, value) // eslint-disable-line no-unused-vars
 
 /**
  * returns true if value is found in object with a key
- * @param  {Object}  obj   object to search value in
- * @param  {Mixed}   value any value (String, Number, etc)
- * @return {Boolean}       true on value found, false on not found
+ * @param  {Object}  object object to search value in
+ * @param  {Mixed}   value  any value (String, Number, etc)
+ * @return {Boolean}        true on value found, false on not found
  */
 function valueInObject(object, value) // eslint-disable-line no-unused-vars
 {
@@ -796,7 +823,7 @@ function showOverlayBoxLayers(el_id) // eslint-disable-line no-unused-vars
  * else just set zIndex to the new GL_OB_S value
  * @param {String} el_id Target to hide layer
  */
-function hideOverlayBoxLayers(el_id)
+function hideOverlayBoxLayers(el_id='')
 {
 	// console.log('HIDE overlaybox: %s', GL_OB_S);
 	// remove on layer
@@ -1109,7 +1136,9 @@ function phfa(list) // eslint-disable-line no-unused-vars
 function html_options(name, data, selected = '', options_only = false, return_string = false, sort = '') // eslint-disable-line no-unused-vars
 {
 	// wrapper to new call
-	return html_options_block(name, data, selected, false, options_only, return_string, sort);
+	return html_options_block(
+		name, data, selected, 0, options_only, return_string, sort
+	);
 }
 
 /**
@@ -1131,8 +1160,9 @@ function html_options(name, data, selected = '', options_only = false, return_st
  * @param  {String}  [onchange='']         onchange trigger call, default unset
  * @return {String}                        html with build options block
  */
-function html_options_block(name, data, selected = '', multiple = 0, options_only = false, return_string = false, sort = '', onchange = '')
-{
+function html_options_block(
+	name, data, selected = '', multiple = 0, options_only = false, return_string = false, sort = '', onchange = ''
+) {
 	var content = [];
 	var element_select;
 	var select_options = {};
@@ -1169,7 +1199,8 @@ function html_options_block(name, data, selected = '', multiple = 0, options_onl
 		// basic options init
 		options = {
 			'label': value,
-			'value': key
+			'value': key,
+			'selected': ''
 		};
 		// add selected if matching
 		if (multiple == 0 && !Array.isArray(selected) && selected == key) {
@@ -1180,7 +1211,7 @@ function html_options_block(name, data, selected = '', multiple = 0, options_onl
 			options.selected = '';
 		}
 		// create the element option
-		element_option = cel('option', '', value, '', options);
+		element_option = cel('option', '', value, [], options);
 		// attach it to the select element
 		ael(element_select, element_option);
 	}
@@ -1232,7 +1263,7 @@ function html_options_refill(name, data, sort = '') // eslint-disable-line no-un
 		[].forEach.call(document.querySelectorAll('#' + name + ' :checked'), function(elm) {
 			option_selected = elm.value;
 		});
-		document.getElementById(name).innerHTML = '';
+		loadEl(name).innerHTML = '';
 		for (const key of data_list) {
 			value = data[key];
 			// console.log('add [%s]  options: key: %s, value: %s', name, key, value);
@@ -1243,7 +1274,7 @@ function html_options_refill(name, data, sort = '') // eslint-disable-line no-un
 			if (key == option_selected) {
 				element_option.selected = true;
 			}
-			document.getElementById(name).appendChild(element_option);
+			loadEl(name).appendChild(element_option);
 		}
 	}
 }
@@ -1307,7 +1338,7 @@ function parseQueryString(query = '', return_key = '') // eslint-disable-line no
  *                                        all parameters are returned
  * @param  {String}        [query='']     different query string to parse, if not
  *                                        set (default) the current window href is used
- * @param  {Bool}          [single=false] if set to true then only the first found
+ * @param  {Boolean}       [single=false] if set to true then only the first found
  *                                        will be returned
  * @return {Object|Array|String}          if search is empty, object, if search is set
  *                                        and only one entry, then string, else array
@@ -1319,7 +1350,7 @@ function getQueryStringParam(search = '', query = '', single = false) // eslint-
 		query = window.location.href;
 	}
 	const url = new URL(query);
-	let param = '';
+	let param = null;
 	if (search) {
 		let _params = url.searchParams.getAll(search);
 		if (_params.length == 1 || single === true) {

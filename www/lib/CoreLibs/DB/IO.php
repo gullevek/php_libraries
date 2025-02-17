@@ -1413,10 +1413,7 @@ class IO
 						$this->pk_name_table[$table] ?
 							$this->pk_name_table[$table] : 'NULL';
 				}
-				if (
-					!preg_match(self::REGEX_RETURNING, $this->query) &&
-					$this->pk_name && $this->pk_name != 'NULL'
-				) {
+				if (!preg_match(self::REGEX_RETURNING, $this->query) && $this->pk_name != 'NULL') {
 					// check if this query has a ; at the end and remove it
 					$__query = preg_replace("/(;\s*)$/", '', $this->query);
 					// must be query, if preg replace failed, use query as before
@@ -1426,7 +1423,7 @@ class IO
 				} elseif (
 					preg_match(self::REGEX_RETURNING, $this->query, $matches)
 				) {
-					if ($this->pk_name && $this->pk_name != 'NULL') {
+					if ($this->pk_name != 'NULL') {
 						// add the primary key if it is not in the returning set
 						if (!preg_match("/$this->pk_name/", $matches[1])) {
 							$this->query .= " , " . $this->pk_name;
