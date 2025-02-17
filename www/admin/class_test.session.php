@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 /**
  * Undocumented function
@@ -45,8 +45,8 @@ $log = new CoreLibs\Logging\Logging([
 	'log_file_id' => $LOG_FILE_ID,
 	'log_per_date' => true,
 ]);
+use CoreLibs\Debug\Support;
 use CoreLibs\Create\Session;
-$session = new Session();
 
 $PAGE_NAME = 'TEST CLASS: SESSION';
 print "<!DOCTYPE html>";
@@ -56,50 +56,30 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $session_name = 'class-test-session';
+print "Valid session name static check for '" . $session_name . "': "
+	. Support::prBl(Session::checkValidSessionName($session_name)) . "<br>";
 $var = 'foo';
 $value = 'bar';
+$session = new Session($session_name);
 
 foreach (['123', '123-123', '123abc'] as $_session_name) {
-	print "[UNSET] Session Name valid for " . $_session_name . ": "
+	print "[UNSET] Session Name valid for '" . $_session_name . "': "
 		. ($session->checkValidSessionName($_session_name) ? 'Valid' : 'Invalid') . "<br>";
 }
 
 echo "Global session name: " . ($GLOBALS['SET_SESSION_NAME'] ?? '-') . "<br>";
 
-print "[UNSET] Current session id: " . $session->getSessionId() . "<br>";
-print "[UNSET] Current session name: " . $session->getSessionName() . "<br>";
-print "[UNSET] Current session active: " . ($session->checkActiveSession() ? 'Yes' : 'No') . "<br>";
-print "[UNSET] Current session status: " . getSessionStatusString($session->getSessionStatus()) . "<br>";
-if (isset($_SESSION)) {
-	print "[UNSET] _SESSION is: set<br>";
-} else {
-	print "[UNSET] _SESSION is: not set<br>";
-}
-#
-print "[UNSET] To set session name valid: "
-	. ($session->checkValidSessionName($session_name) ? 'Valid' : 'Invalid') . "<br>";
-try {
-	$session_id = $session->startSession($session_name);
-	print "[SET] Current session id: " . $session_id . "<br>";
-} catch (\Exception $e) {
-	print "[FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
-}
-// set again
-try {
-	$session_id = $session->startSession($session_name);
-	print "[2 SET] Current session id: " . $session_id . "<br>";
-} catch (\Exception $e) {
-	print "[2 FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
-}
 print "[SET] Current session id: " . $session->getSessionId() . "<br>";
 print "[SET] Current session name: " . $session->getSessionName() . "<br>";
 print "[SET] Current session active: " . ($session->checkActiveSession() ? 'Yes' : 'No') . "<br>";
+print "[SET] Current session auto write close: " . ($session->checkAutoWriteClose() ? 'Yes' : 'No') . "<br>";
 print "[SET] Current session status: " . getSessionStatusString($session->getSessionStatus()) . "<br>";
 if (isset($_SESSION)) {
 	print "[SET] _SESSION is: set<br>";
 } else {
 	print "[SET] _SESSION is: not set<br>";
 }
+#
 if (!isset($_SESSION['counter'])) {
 	$_SESSION['counter'] = 0;
 }
@@ -111,62 +91,85 @@ print "[READ] Confirm " . $var . " is " . $value . ": "
 	. (($_SESSION[$var] ?? '') == $value ? 'Matching' : 'Not matching') . "<br>";
 
 // test set wrappers methods
-$session->setS('setwrap', 'YES, method set _SESSION var');
-print "[READ WRAP] A setwrap: " . $session->getS('setwrap') . "<br>";
-print "[READ WRAP] Isset: " . ($session->issetS('setwrap') ? 'Yes' : 'No') . "<br>";
-$session->unsetS('setwrap');
-print "[READ WRAP] unset setwrap: " . $session->getS('setwrap') . "<br>";
-print "[READ WRAP] unset Isset: " . ($session->issetS('setwrap') ? 'Yes' : 'No') . "<br>";
-// test __get/__set
-$session->setwrap = 'YES, magic set _SESSION var'; /** @phpstan-ignore-line GET/SETTER */
-print "[READ MAGIC] A setwrap: " . ($session->setwrap ?? '') . "<br>";
-print "[READ MAGIC] Isset: " . (isset($session->setwrap) ? 'Yes' : 'No') . "<br>";
-unset($session->setwrap);
-print "[READ MAGIC] unset setwrap: " . ($session->setwrap ?? '') . "<br>";
-print "[READ MAGIC] unset Isset: " . (isset($session->setwrap) ? 'Yes' : 'No') . "<br>";
+$session->set('setwrap', 'YES, method set _SESSION var');
+print "[READ WRAP] A setwrap: " . $session->get('setwrap') . "<br>";
+print "[READ WRAP] Isset: " . ($session->isset('setwrap') ? 'Yes' : 'No') . "<br>";
+$session->unset('setwrap');
+print "[READ WRAP] unset setwrap: " . $session->get('setwrap') . "<br>";
+print "[READ WRAP] unset Isset: " . ($session->isset('setwrap') ? 'Yes' : 'No') . "<br>";
+$session->set('foo 3', 'brause');
+// set many
+$session->setMany([
+	'foo 1' => 'bar',
+	'foo 2' => 'kamel',
+]);
+print "[READ MANY]: " . Support::printAr($session->getMany(['foo 1', 'foo 2'])) . "<br>";
+try {
+	$session->setMany([ /** @phpstan-ignore-line deliberate error */
+		'ok' => 'ok',
+		'a123' => 'bar',
+		1 => 'bar',
+	]);
+} catch (\Exception $e) {
+	print "FAILED] Session manySet failed:<br>" . $e->getMessage() . "<br><pre>" . $e . "</pre><br>";
+}
+try {
+	$session->set('123', 'illigal');
+} catch (\Exception $e) {
+	print "FAILED] Session set failed:<br>" . $e->getMessage() . "<br><pre>" . $e . "</pre><br>";
+}
 
+print "<hr>";
 // differnt session name
 $session_name = 'class-test-session-ALT';
 try {
-	$session_id = $session->startSession($session_name);
-	print "[3 SET] Current session id: " . $session_id . "<br>";
+	$session_alt = new Session($session_name);
+	print "[3 SET] Current session id: " . $session_alt->getSessionId() . "<br>";
+	print "[SET AGAIN] Current session id: " . $session_alt->getSessionId() . "<br>";
 } catch (\Exception $e) {
-	print "[3 FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+	print "[3 FAILED] Session start failed:<br>" . $e->getMessage() . "<br><pre>" . $e . "</pre><br>";
 }
-print "[SET AGAIN] Current session id: " . $session->getSessionId() . "<br>";
 
-print "[ALL SESSION]: " . \CoreLibs\Debug\Support::printAr($_SESSION) . "<br>";
+
+print "[ALL SESSION]: " . Support::printAr($_SESSION) . "<br>";
 
 // close session
 $session->writeClose();
 // will never be written
 $_SESSION['will_never_be_written'] = 'empty';
+// auto open session if closed to write
+$session->set('auto_write_session', 'Some value');
+// restart session
+$session->restartSession();
+$_SESSION['this_will_be_written'] = 'not empty';
 
-// open again
+// open again with same name
 $session_name = 'class-test-session';
 try {
-	$session_id = $session->startSession($session_name);
-	print "[4 SET] Current session id: " . $session_id . "<br>";
+	$session_alt = new Session($session_name, ['auto_write_close' => true]);
+	print "[4 SET] Current session id: " . $session_alt->getSessionId() . "<br>";
+	print "[4 SET] Current session auto write close: " . ($session_alt->checkAutoWriteClose() ? 'Yes' : 'No') . "<br>";
+	print "[START AGAIN] Current session id: " . $session_alt->getSessionId() . "<br>";
+	$session_alt->set('alt_write_auto_close', 'set auto');
+	// below is deprecated
+	// $session_alt->do_not_do_this = 'foo bar auto set';
 } catch (\Exception $e) {
-	print "[4 FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+	print "[4 FAILED] Session start failed:<br>" . $e->getMessage() . "<br><pre>" . $e . "</pre><br>";
 }
-print "[START AGAIN] Current session id: " . $session->getSessionId() . "<br>";
 $_SESSION['will_be_written_again'] = 'Full';
+
+print "[ALL SESSION]: " . Support::printAr($_SESSION) . "<br>";
 
 // close session
 $session->writeClose();
 // invalid
 $session_name = '123';
 try {
-	$session_id = $session->startSession($session_name);
-	print "[5 SET] Current session id: " . $session_id . "<br>";
+	$session_bad = new Session($session_name);
+	print "[5 SET] Current session id: " . $session_bad->getSessionId() . "<br>";
 } catch (\Exception $e) {
-	print "[5 FAILED] Session start failed:<br>" . $e->getMessage() . "<br>" . $e . "<br>";
+	print "[5 FAILED] Session start failed:<br>" . $e->getMessage() . "<br><pre>" . $e . "</pre><br>";
 }
-print "[BAD NAME] Current session id: " . $session->getSessionId() . "<br>";
-print "[BAD NAME] Current session name: " . $session->getSessionName() . "<br>";
-print "[BAD NAME] Current session active: " . ($session->checkActiveSession() ? 'Yes' : 'No') . "<br>";
-print "[BAD NAME] Current session status: " . getSessionStatusString($session->getSessionStatus()) . "<br>";
 
 print "</body></html>";
 

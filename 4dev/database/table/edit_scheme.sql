@@ -7,7 +7,7 @@
 
 -- DROP TABLE edit_scheme;
 CREATE TABLE edit_scheme (
-    edit_scheme_id SERIAL PRIMARY KEY,
+    edit_scheme_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     enabled SMALLINT NOT NULL DEFAULT 0,
     name VARCHAR,
     header_color VARCHAR,

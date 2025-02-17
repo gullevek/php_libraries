@@ -2,7 +2,7 @@
 
 /*
  * sets a form token in the _SESSION variable
- * session must be started for this to work
+ * session must be started and running for this to work
  */
 
 declare(strict_types=1);

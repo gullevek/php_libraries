@@ -24,7 +24,7 @@
 declare(strict_types=1);
 
 ob_start();
-require 'config.php';
+require getcwd() . DIRECTORY_SEPARATOR . 'config.php';
 
 // should be utf8
 header("Content-type: text/html; charset=" . DEFAULT_ENCODING);

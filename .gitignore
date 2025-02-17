@@ -1,2 +1,7 @@
 .libs
 node_modules/
+composer.lock
+vendor/
+tools/
+www/composer.lock
+www/vendor

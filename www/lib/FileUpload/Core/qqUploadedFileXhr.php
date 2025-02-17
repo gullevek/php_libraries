@@ -46,19 +46,19 @@ class qqUploadedFileXhr implements qqUploadedFile // phpcs:ignore Squiz.Classes.
 	 */
 	public function getName(): string
 	{
-		return $_GET['qqfile'] ?? '';
+		return !empty($_GET['qqfile']) && is_string($_GET['qqfile']) ? $_GET['qqfile'] : '';
 	}
 
 	/**
 	 * Get file size from _SERVERa array, throws an error if not possible
 	 *
-	 * @return int
+	 * @return int size of the file
 	 *
 	 * @throws \Exception
 	 */
 	public function getSize(): int
 	{
-		if (isset($_SERVER['CONTENT_LENGTH'])) {
+		if (isset($_SERVER['CONTENT_LENGTH']) && is_numeric($_SERVER['CONTENT_LENGTH'])) {
 			return (int)$_SERVER['CONTENT_LENGTH'];
 		} else {
 			throw new \Exception('Getting content length is not supported.');

@@ -7,7 +7,7 @@
 declare(strict_types=1);
 
 // turn on all error reporting
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -228,7 +228,7 @@ print "RETURN ROW PARAMS: " . print_r(
 $db->dbPrepare("ins_test_foo", "INSERT INTO test_foo (test) VALUES ($1) RETURNING test");
 $status = $db->dbExecute("ins_test_foo", ['BAR TEST ' . time()]);
 print "PREPARE INSERT[ins_test_foo] STATUS: " . Support::printToString($status) . " |<br>"
-	. "QUERY: " . $db->dbGetPrepareCursorValue('ins_test_foo', 'query') . " |<br>"
+	. "QUERY: " . Support::printToString($db->dbGetPrepareCursorValue('ins_test_foo', 'query')) . " |<br>"
 	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -239,7 +239,7 @@ print "PREPARE INSERT PREVIOUS INSERTED: "
 
 print "PREPARE CURSOR RETURN:<br>";
 foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
-	print "KEY: " . $key . ': ' . $db->dbGetPrepareCursorValue('ins_test_foo', $key) . "<br>";
+	print "KEY: " . $key . ': ' . Support::prAr($db->dbGetPrepareCursorValue('ins_test_foo', $key)) . "<br>";
 }
 
 $query = <<<SQL
@@ -255,7 +255,7 @@ SQL;
 $db->dbPrepare("ins_test_foo_eom", $query);
 $status = $db->dbExecute("ins_test_foo_eom", ['EOM BAR TEST ' . time()]);
 print "EOM STRING PREPARE INSERT[ins_test_foo_eom] STATUS: " . Support::printToString($status) . " |<br>"
-	. "QUERY: " . $db->dbGetPrepareCursorValue('ins_test_foo_eom', 'query') . " |<br>"
+	. "QUERY: " . Support::printToString($db->dbGetPrepareCursorValue('ins_test_foo_eom', 'query')) . " |<br>"
 	. "PRIMARY KEY: " . Support::printToString($db->dbGetInsertPK()) . " | "
 	. "RETURNING EXT: " . print_r($db->dbGetReturningExt(), true) . " | "
 	. "RETURNING RETURN: " . print_r($db->dbGetReturningArray(), true) . "<br>";
@@ -273,8 +273,8 @@ $query_insert = <<<SQL
 INSERT INTO
 	test_foo
 (
-	test, some_bool, string_a, number_a, number_a_numeric,
-	some_time, some_timestamp, json_string
+	test, some_bool, string_a, number_a, numeric_a,
+	some_internval, some_timestamp, json_string
 ) VALUES (
 	$1, $2, $3, $4, $5,
 	$6, $7, $8
@@ -283,8 +283,8 @@ RETURNING test
 SQL;
 $query_select = <<<SQL
 SELECT
-	test, some_bool, string_a, number_a, number_a_numeric,
-	some_time, some_time, some_timestamp, json_string
+	test, some_bool, string_a, number_a, numeric_a,
+	some_time, some_internval, some_timestamp, json_string
 FROM
 	test_foo
 WHERE
@@ -316,7 +316,8 @@ print "EOM STRING EXEC RETURN TEST: " . print_r(
 	$db->dbReturnRowParams(
 		$query_select,
 		[$__last_insert_id]
-	)
+	),
+	true
 ) . "<br>";
 // B
 $status = $db->dbExecParams(
@@ -345,7 +346,8 @@ print "EOM STRING EXEC RETURN TEST: " . print_r(
 	$db->dbReturnRowParams(
 		$query_select,
 		[$__last_insert_id]
-	)
+	),
+	true
 ) . "<br>";
 // params > 10 for debug
 // error catcher
@@ -552,7 +554,7 @@ print "<b>PREPARE QUERIES</b><br>";
 // READ PREPARE
 $q_prep = <<<SQL
 SELECT test_foo_id, test, some_bool, string_a, number_a,
-number_a_numeric, some_time
+numeric_a, some_time
 FROM test_foo
 WHERE test = $1
 ORDER BY test_foo_id DESC LIMIT 5
@@ -580,7 +582,7 @@ if ($db->dbPrepare('sel_test_foo', $q_prep) === false) {
 
 // sel test with ANY () type
 $q_prep = "SELECT test_foo_id, test, some_bool, string_a, number_a, "
-	. "number_a_numeric, some_time "
+	. "numeric_a, some_time "
 	. "FROM test_foo "
 	. "WHERE test = ANY($1) "
 	. "ORDER BY test_foo_id DESC LIMIT 5";
@@ -616,7 +618,7 @@ $test_bar = $db->dbEscapeLiteral('SOMETHING DIFFERENT');
 $q = <<<SQL
 SELECT test_foo_id, test, some_bool, string_a, number_a,
 -- comment
-number_a_numeric, some_time
+numeric_a, some_time
 FROM test_foo
 WHERE test = $test_bar
 ORDER BY test_foo_id DESC LIMIT 5
@@ -629,7 +631,7 @@ print "DB RETURN PARAMS<br>";
 $q = <<<SQL
 SELECT test_foo_id, test, some_bool, string_a, number_a,
 -- comment
-number_a_numeric, some_time
+numeric_a, some_time
 FROM test_foo
 WHERE test = $1
 ORDER BY test_foo_id DESC LIMIT 5
@@ -644,7 +646,7 @@ echo "<hr>";
 print "DB RETURN PARAMS LIKE<br>";
 $q = <<<SQL
 SELECT
-	test_foo_id, test, some_bool, string_a, number_a, number_a_numeric
+	test_foo_id, test, some_bool, string_a, number_a, numeric_a
 FROM test_foo
 WHERE string_a LIKE $1;
 SQL;
@@ -658,7 +660,7 @@ echo "<hr>";
 print "DB RETURN PARAMS ANY<br>";
 $q = <<<SQL
 SELECT
-	test_foo_id, test, some_bool, string_a, number_a, number_a_numeric
+	test_foo_id, test, some_bool, string_a, number_a, numeric_a
 FROM test_foo
 WHERE string_a = ANY($1);
 SQL;
@@ -674,7 +676,7 @@ echo "<hr>";
 
 print "COMPOSITE ELEMENT READ<br>";
 $res = $db->dbReturnRow("SELECT item, count, (item).name, (item).price, (item).supplier_id FROM on_hand");
-print "ROW: <pre>" . print_r($res) . "</pre>";
+print "ROW: <pre>" . print_r($res, true) . "</pre>";
 var_dump($res);
 print "Field Name/Types: <pre>" . print_r($db->dbGetFieldNameTypes(), true) . "</pre>";
 echo "<hr>";
@@ -705,6 +707,17 @@ if (
 } else {
 	print "[PGB] [3] pgb_sel_test_foo prepare OK<br>";
 }
+$stm_status = $db->dbPreparedCursorStatus('');
+print "[PGB] Empty statement name: " . $log->prAr($stm_status) . "<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foobar');
+print "[PGB] Prepared name not match status: $stm_status<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo');
+print "[PGB] Prepared name match status: $stm_status<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', $q_prep);
+print "[PGB] prepared exists and query match status: $stm_status<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', "SELECT * FROM test_foo");
+print "[PGB] prepared exists and query not match status: $stm_status<br>";
+
 $db_pgb->dbClose();
 
 # db write class test

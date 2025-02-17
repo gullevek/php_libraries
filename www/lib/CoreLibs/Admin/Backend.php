@@ -31,6 +31,9 @@ declare(strict_types=1);
 
 namespace CoreLibs\Admin;
 
+use CoreLibs\Create\Uids;
+use CoreLibs\Convert\Json;
+
 class Backend
 {
 	// page name
@@ -42,7 +45,7 @@ class Backend
 	/** @var array<string> */
 	public array $action_list = [
 		'action', 'action_id', 'action_sub_id', 'action_yes', 'action_flag',
-		'action_menu', 'action_value', 'action_error', 'action_loaded'
+		'action_menu', 'action_value', 'action_type', 'action_error', 'action_loaded'
 	];
 	/** @var string */
 	public string $action;
@@ -61,20 +64,31 @@ class Backend
 	/** @var string */
 	public string $action_value;
 	/** @var string */
+	public string $action_type;
+	/** @var string */
 	public string $action_error;
+
 	// ACL array variable if we want to set acl data from outisde
 	/** @var array<mixed> */
 	public array $acl = [];
 	/** @var int */
 	public int $default_acl;
+
 	// queue key
 	/** @var string */
 	public string $queue_key;
+
+	/** @var array<string> list of allowed types for edit log write */
+	private const WRITE_TYPES = ['BINARY', 'BZIP2', 'LZIP', 'STRING', 'SERIAL', 'JSON'];
+	/** @var array<string> list of available write types for log */
+	private array $write_types_available = [];
+
 	// the current active edit access id
 	/** @var int|null */
 	public int|null $edit_access_id;
 	/** @var string */
 	public string $page_name;
+
 	// error/warning/info messages
 	/** @var array<mixed> */
 	public array $messages = [];
@@ -84,6 +98,7 @@ class Backend
 	public bool $warning = false;
 	/** @var bool */
 	public bool $info = false;
+
 	// internal lang & encoding vars
 	/** @var string */
 	public string $lang_dir = '';
@@ -95,6 +110,7 @@ class Backend
 	public string $domain;
 	/** @var string */
 	public string $encoding;
+
 	/** @var \CoreLibs\Logging\Logging logger */
 	public \CoreLibs\Logging\Logging $log;
 	/** @var \CoreLibs\DB\IO database */
@@ -103,6 +119,7 @@ class Backend
 	public \CoreLibs\Language\L10n $l;
 	/** @var \CoreLibs\Create\Session session class */
 	public \CoreLibs\Create\Session $session;
+
 	// smarty publics [end processing in smarty class]
 	/** @var array<mixed> */
 	public array $DATA = [];
@@ -172,9 +189,12 @@ class Backend
 		}
 
 		// queue key
-		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action)) {
+		if (preg_match("/^(add|save|delete|remove|move|up|down|push_live)$/", $this->action ?? '')) {
 			$this->queue_key = \CoreLibs\Create\RandomKey::randomKeyGen(3);
 		}
+
+		// check what edit log data write types are allowed
+		$this->adbSetEditLogWriteTypeAvailable();
 	}
 
 	/**
@@ -185,7 +205,26 @@ class Backend
 		// NO OP
 	}
 
-	// PUBLIC METHODS |=================================================>
+	// MARK: PRIVATE METHODS
+
+	/**
+	 * set the write types that are allowed
+	 *
+	 * @return void
+	 */
+	private function adbSetEditLogWriteTypeAvailable()
+	{
+		// check what edit log data write types are allowed
+		$this->write_types_available = self::WRITE_TYPES;
+		if (!function_exists('bzcompress')) {
+			$this->write_types_available = array_diff($this->write_types_available, ['BINARY', 'BZIP']);
+		}
+		if (!function_exists('gzcompress')) {
+			$this->write_types_available = array_diff($this->write_types_available, ['LZIP']);
+		}
+	}
+
+	// MARK: PUBLIC METHODS |=================================================>
 
 	/**
 	 * set internal ACL from login ACL
@@ -221,29 +260,93 @@ class Backend
 	}
 
 	/**
+	 * return all the action data, if not set, sets entry to null
+	 *
+	 * @return array{action:?string,action_id:null|string|int,action_sub_id:null|string|int,action_yes:null|string|int|bool,action_flag:?string,action_menu:?string,action_loaded:?string,action_value:?string,action_type:?string,action_error:?string}
+	 */
+	public function adbGetActionSet(): array
+	{
+		return [
+			'action' => $this->action ?? null,
+			'action_id' => $this->action_id ?? null,
+			'action_sub_id' => $this->action_sub_id ?? null,
+			'action_yes' => $this->action_yes ?? null,
+			'action_flag' => $this->action_flag ?? null,
+			'action_menu' => $this->action_menu ?? null,
+			'action_loaded' => $this->action_loaded ?? null,
+			'action_value' => $this->action_value ?? null,
+			'action_type' => $this->action_type ?? null,
+			'action_error' => $this->action_error ?? null,
+		];
+	}
+
+	/**
 	 * writes all action vars plus other info into edit_log table
 	 *
-	 * @param  string              $event      any kind of event description,
-	 * @param  string|array<mixed> $data       any kind of data related to that event
-	 * @param  string              $write_type write type can bei STRING or BINARY
-	 * @param  string|null         $db_schema  override target schema
+	 * @param  string              $event [default='']        any kind of event description,
+	 * @param  string|array<mixed> $data [default='']         any kind of data related to that event
+	 * @param  string              $write_type [default=JSON] write type can be
+	 *                                                        JSON, STRING/SERIEAL, BINARY/BZIP or ZLIB
+	 * @param  string|null         $db_schema [default=null]  override target schema
 	 * @return void
+	 * @deprecated Use $login->writeLog($event, $data, action_set:$cms->adbGetActionSet(), write_type:$write_type)
 	 */
 	public function adbEditLog(
 		string $event = '',
 		string|array $data = '',
-		string $write_type = 'STRING',
+		string $write_type = 'JSON',
 		?string $db_schema = null
 	): void {
 		$data_binary = '';
 		$data_write = '';
-		if ($write_type == 'BINARY') {
-			$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($data)));
-			$data_write = 'see bzip compressed data_binary field';
+		// check if write type is valid, if not fallback to JSON
+		if (!in_array($write_type, $this->write_types_available)) {
+			$this->log->warning('Write type not in allowed array, fallback to JSON', context:[
+				"write_type" => $write_type,
+				"write_list" => $this->write_types_available,
+			]);
+			$write_type = 'JSON';
 		}
-		if ($write_type == 'STRING') {
-			$data_binary = '';
-			$data_write = $this->db->dbEscapeString(serialize($data));
+		switch ($write_type) {
+			case 'BINARY':
+			case 'BZIP':
+				$data_binary = $this->db->dbEscapeBytea((string)bzcompress(serialize($data)));
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'BZIP',
+					'message' => 'see bzip compressed data_binary field'
+				]);
+				break;
+			case 'ZLIB':
+				$data_binary = $this->db->dbEscapeBytea((string)gzcompress(serialize($data)));
+				$data_write = Json::jsonConvertArrayTo([
+					'type' => 'ZLIB',
+					'message' => 'see zlib compressed data_binary field'
+				]);
+				break;
+			case 'STRING':
+			case 'SERIAL':
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'SERIAL',
+					'message' => 'see serial string data field'
+				]));
+				$data_write = serialize($data);
+				break;
+			case 'JSON':
+				$data_binary = $this->db->dbEscapeBytea(Json::jsonConvertArrayTo([
+					'type' => 'JSON',
+					'message' => 'see json string data field'
+				]));
+				// must be converted to array
+				if (!is_array($data)) {
+					$data = ["data" => $data];
+				}
+				$data_write = Json::jsonConvertArrayTo($data);
+				break;
+			default:
+				$this->log->alert('Invalid type for data compression was set', context:[
+					"write_type" => $write_type
+				]);
+				break;
 		}
 
 		/** @var string $DB_SCHEMA check schema */
@@ -253,44 +356,69 @@ class Backend
 		} elseif (!empty($this->db->dbGetSchema())) {
 			$DB_SCHEMA = $this->db->dbGetSchema();
 		}
-		$q = "INSERT INTO " . $DB_SCHEMA . ".edit_log "
-			. "(euid, event_date, event, data, data_binary, page, "
-			. "ip, user_agent, referer, script_name, query_string, server_name, http_host, "
-			. "http_accept, http_accept_charset, http_accept_encoding, session_id, "
-			. "action, action_id, action_yes, action_flag, action_menu, action_loaded, action_value, action_error) "
-			. "VALUES "
-			. "(" . $this->db->dbEscapeString(isset($_SESSION['EUID']) && is_numeric($_SESSION['EUID']) ?
-				$_SESSION['EUID'] :
-				'NULL')
-			. ", "
-			. "NOW(), "
-			. "'" . $this->db->dbEscapeString((string)$event) . "', "
-			. "'" . $data_write . "', "
-			. "'" . $data_binary . "', "
-			. "'" . $this->db->dbEscapeString((string)$this->page_name) . "', "
-			. "'" . ($_SERVER["REMOTE_ADDR"] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_USER_AGENT'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_REFERER'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['SCRIPT_FILENAME'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['QUERY_STRING'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['SERVER_NAME'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_HOST'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT_CHARSET'] ?? '') . "', "
-			. "'" . $this->db->dbEscapeString($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '') . "', "
-			. ($this->session->getSessionId() === false ?
-				"NULL" :
-				"'" . $this->session->getSessionId() . "'")
-			. ", "
-			. "'" . $this->db->dbEscapeString($this->action) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_id) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_yes) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_flag) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_menu) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_loaded) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_value) . "', "
-			. "'" . $this->db->dbEscapeString($this->action_error) . "')";
-		$this->db->dbExec($q, 'NULL');
+		$q = <<<SQL
+		INSERT INTO {DB_SCHEMA}.edit_log (
+			username, euid, eucuid, eucuuid, event_date, event, error, data, data_binary, page,
+			ip, user_agent, referer, script_name, query_string, server_name, http_host,
+			http_accept, http_accept_charset, http_accept_encoding, session_id,
+			action, action_id, action_sub_id, action_yes, action_flag, action_menu, action_loaded,
+			action_value, action_type, action_error
+		) VALUES (
+			$1, $2, $3, $4, NOW(), $5, $6, $7, $8, $9,
+			$10, $11, $12, $13, $14, $15, $16,
+			$17, $18, $19, $20,
+			$21, $22, $23, $24, $25, $26, $27,
+			$28, $29, $30
+		)
+		SQL;
+		$this->db->dbExecParams(
+			str_replace(
+				['{DB_SCHEMA}'],
+				[$DB_SCHEMA],
+				$q
+			),
+			[
+				// row 1
+				'',
+				is_numeric($this->session->get('EUID')) ?
+					$this->session->get('EUID') : null,
+				is_string($this->session->get('ECUID')) ?
+					$this->session->get('ECUID') : null,
+				!empty($this->session->get('ECUUID')) && Uids::validateUuuidv4($this->session->get('ECUID')) ?
+				$this->session->get('ECUID') : null,
+				(string)$event,
+				'',
+				$data_write,
+				$data_binary,
+				(string)$this->page_name,
+				// row 2
+				$_SERVER["REMOTE_ADDR"] ?? '',
+				$_SERVER['HTTP_USER_AGENT'] ?? '',
+				$_SERVER['HTTP_REFERER'] ?? '',
+				$_SERVER['SCRIPT_FILENAME'] ?? '',
+				$_SERVER['QUERY_STRING'] ?? '',
+				$_SERVER['SERVER_NAME'] ?? '',
+				$_SERVER['HTTP_HOST'] ?? '',
+				// row 3
+				$_SERVER['HTTP_ACCEPT'] ?? '',
+				$_SERVER['HTTP_ACCEPT_CHARSET'] ?? '',
+				$_SERVER['HTTP_ACCEPT_ENCODING'] ?? '',
+				$this->session->getSessionId() !== '' ?
+					$this->session->getSessionId() : null,
+				// row 4
+				$this->action ?? '',
+				$this->action_id ?? '',
+				$this->action_sub_id ?? '',
+				$this->action_yes ?? '',
+				$this->action_flag ?? '',
+				$this->action_menu ?? '',
+				$this->action_loaded ?? '',
+				$this->action_value ?? '',
+				$this->action_type ?? '',
+				$this->action_error ?? '',
+			],
+			'NULL'
+		);
 	}
 
 	/**
@@ -327,10 +455,7 @@ class Backend
 		?string $set_content_path = null,
 		int $flag = 0,
 	): array {
-		if (
-			$set_content_path === null ||
-			!is_string($set_content_path)
-		) {
+		if ($set_content_path === null) {
 			/** @deprecated adbTopMenu missing set_content_path parameter */
 			trigger_error(
 				'Calling adbTopMenu without set_content_path parameter is deprecated',
@@ -343,7 +468,7 @@ class Backend
 		}
 
 		// get the session pages array
-		$PAGES = $_SESSION['PAGES'] ?? null;
+		$PAGES = $this->session->get('PAGES');
 		if (!isset($PAGES) || !is_array($PAGES)) {
 			$PAGES = [];
 		}
@@ -540,16 +665,30 @@ class Backend
 		} elseif (!empty($this->db->dbGetSchema())) {
 			$DB_SCHEMA = $this->db->dbGetSchema();
 		}
-		$q = "INSERT INTO " . $DB_SCHEMA . ".live_queue ("
-			. "queue_key, key_value, key_name, type, target, data, group_key, action, associate, file"
-			. ") VALUES ("
-			. "'" . $this->db->dbEscapeString($queue_key) . "', '" . $this->db->dbEscapeString($key_value) . "', "
-			. "'" . $this->db->dbEscapeString($key_name) . "', '" . $this->db->dbEscapeString($type) . "', "
-			. "'" . $this->db->dbEscapeString($target) . "', '" . $this->db->dbEscapeString($data) . "', "
-			. "'" . $this->queue_key . "', '" . $this->action . "', "
-			. "'" . $this->db->dbEscapeString((string)$associate) . "', "
-			. "'" . $this->db->dbEscapeString((string)$file) . "')";
-		$this->db->dbExec($q);
+		$q = <<<SQL
+		INSERT INTO {DB_SCHEMA}.live_queue (
+			queue_key, key_value, key_name, type,
+			target, data, group_key, action, associate, file
+		) VALUES (
+			$1, $2, $3, $4,
+			$5, $6, $7, $8, $9, $10
+		)
+		SQL;
+		// $this->db->dbExec($q);
+		$this->db->dbExecParams(
+			str_replace(
+				['{DB_SCHEMA}'],
+				[$DB_SCHEMA],
+				$q
+			),
+			[
+				$queue_key, $key_value,
+				$key_name, $type,
+				$target, $data,
+				$this->queue_key, $this->action,
+				(string)$associate, (string)$file
+			]
+		);
 	}
 
 	/**

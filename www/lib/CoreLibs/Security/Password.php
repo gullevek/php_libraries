@@ -16,8 +16,10 @@ class Password
 	 * @param  string $password password
 	 * @return string           hashed password
 	 */
-	public static function passwordSet(string $password): string
-	{
+	public static function passwordSet(
+		#[\SensitiveParameter]
+		string $password
+	): string {
 		// always use the PHP default for the password
 		// password options ca be set in the password init,
 		// but should be kept as default
@@ -31,8 +33,11 @@ class Password
 	 * @param  string $hash     password hash
 	 * @return bool             true or false
 	 */
-	public static function passwordVerify(string $password, string $hash): bool
-	{
+	public static function passwordVerify(
+		#[\SensitiveParameter]
+		string $password,
+		string $hash
+	): bool {
 		if (password_verify($password, $hash)) {
 			return true;
 		} else {

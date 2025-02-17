@@ -7,7 +7,7 @@
 
 -- DROP TABLE edit_access;
 CREATE TABLE edit_access (
-    edit_access_id SERIAL PRIMARY KEY,
+    edit_access_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     enabled SMALLINT NOT NULL DEFAULT 0,
     protected SMALLINT DEFAULT 0,
     deleted SMALLINT DEFAULT 0,

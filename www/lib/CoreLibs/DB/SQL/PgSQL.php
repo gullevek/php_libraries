@@ -51,6 +51,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\DB\SQL;
 
+use CoreLibs\DB\Support\ConvertPlaceholder;
+
 // below no ignore is needed if we want to use PgSql interface checks with PHP 8.0
 // as main system. Currently all @var sets are written as object
 /** @#phan-file-suppress PhanUndeclaredTypeProperty,PhanUndeclaredTypeParameter,PhanUndeclaredTypeReturnType */
@@ -102,7 +104,7 @@ class PgSQL implements Interface\SqlFunctions
 	 * SELECT foo FROM bar WHERE foobar = $1
 	 *
 	 * @param  string       $query  Query string with placeholders $1, ..
-	 * @param  array<mixed> $params Matching parameters for each placerhold
+	 * @param  array<mixed> $params Matching parameters for each placeholder
 	 * @return \PgSql\Result|false Query result
 	 */
 	public function __dbQueryParams(string $query, array $params): \PgSql\Result|false
@@ -140,7 +142,7 @@ class PgSQL implements Interface\SqlFunctions
 	 * sends an async query to the server with params
 	 *
 	 * @param  string       $query  Query string with placeholders $1, ..
-	 * @param  array<mixed> $params Matching parameters for each placerhold
+	 * @param  array<mixed> $params Matching parameters for each placeholder
 	 * @return bool         true/false Query sent successful status
 	 */
 	public function __dbSendQueryParams(string $query, array $params): bool
@@ -405,17 +407,13 @@ class PgSQL implements Interface\SqlFunctions
 			}
 			// no PK name given at all
 			if (empty($pk_name)) {
-				// if name is plurar, make it singular
-				// if (preg_match("/.*s$/i", $table))
-				// 	$table = substr($table, 0, -1);
 				// set pk_name to "id"
 				$pk_name = $table . "_id";
 			}
-			$seq = ($schema ? $schema . '.' : '') . $table . "_" . $pk_name . "_seq";
-			$q = "SELECT CURRVAL('$seq') AS insert_id";
+			$q = "SELECT CURRVAL(pg_get_serial_sequence($1, $2)) AS insert_id";
 			// I have to do manually or I overwrite the original insert internal vars ...
-			if ($q = $this->__dbQuery($q)) {
-				if (is_array($res = $this->__dbFetchArray($q))) {
+			if ($cursor = $this->__dbQueryParams($q, [$table, $pk_name])) {
+				if (is_array($res = $this->__dbFetchArray($cursor))) {
 					list($id) = $res;
 				} else {
 					return false;
@@ -449,26 +447,36 @@ class PgSQL implements Interface\SqlFunctions
 					$table_prefix = $schema . '.';
 				}
 			}
+			$params = [$table_prefix . $table];
+			$replace = ['', ''];
 			// read from table the PK name
 			// faster primary key get
-			$q = "SELECT pg_attribute.attname AS column_name, "
-				. "format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type "
-				. "FROM pg_index, pg_class, pg_attribute ";
+			$q = <<<SQL
+			SELECT
+				pg_attribute.attname AS column_name,
+				format_type(pg_attribute.atttypid, pg_attribute.atttypmod) AS type
+			FROM pg_index, pg_class, pg_attribute{PG_NAMESPACE}
+			WHERE
+				-- regclass translates the OID to the name
+				pg_class.oid = $1::regclass AND
+				indrelid = pg_class.oid AND
+				pg_attribute.attrelid = pg_class.oid AND
+				pg_attribute.attnum = any(pg_index.indkey) AND
+				indisprimary
+				{NSPNAME}
+			SQL;
 			if ($schema) {
-				$q .= ", pg_namespace ";
+				$params[] = $schema;
+				$replace = [
+					", pg_namespace",
+					"AND pg_class.relnamespace = pg_namespace.oid AND nspname = $2"
+				];
 			}
-			$q .= "WHERE "
-				// regclass translates the OID to the name
-				. "pg_class.oid = '" . $table_prefix . $table . "'::regclass AND "
-				. "indrelid = pg_class.oid AND ";
-			if ($schema) {
-				$q .= "nspname = '" . $schema . "' AND "
-					. "pg_class.relnamespace = pg_namespace.oid AND ";
-			}
-			$q .= "pg_attribute.attrelid = pg_class.oid AND "
-				. "pg_attribute.attnum = any(pg_index.indkey) "
-				. "AND indisprimary";
-			$cursor = $this->__dbQuery($q);
+			$cursor = $this->__dbQueryParams(str_replace(
+				['{PG_NAMESPACE}', '{NSPNAME}'],
+				$replace,
+				$q
+			), $params);
 			if ($cursor !== false) {
 				$__db_fetch_array = $this->__dbFetchArray($cursor);
 				if (!is_array($__db_fetch_array)) {
@@ -893,11 +901,13 @@ class PgSQL implements Interface\SqlFunctions
 	public function __dbSetSchema(string $db_schema): int
 	{
 		// check if schema actually exists
-		$query = "SELECT EXISTS("
-			. "SELECT 1 FROM information_schema.schemata "
-			. "WHERE schema_name = " . $this->__dbEscapeLiteral($db_schema)
-			. ")";
-		$cursor = $this->__dbQuery($query);
+		$query = <<<SQL
+		SELECT EXISTS (
+			SELECT 1 FROM information_schema.schemata
+			WHERE schema_name = $1
+		)
+		SQL;
+		$cursor = $this->__dbQueryParams($query, [$db_schema]);
 		// abort if execution fails
 		if ($cursor === false) {
 			return 1;
@@ -965,6 +975,34 @@ class PgSQL implements Interface\SqlFunctions
 	public function __dbGetEncoding(): string
 	{
 		return $this->__dbShow('client_encoding');
+	}
+
+	/**
+	 * Count placeholder queries. $ only
+	 *
+	 * @param  string $query
+	 * @return int
+	 */
+	public function __dbCountQueryParams(string $query): int
+	{
+		$matches = [];
+		// regex for params: only stand alone $number allowed
+		// exclude all '' enclosed strings, ignore all numbers [note must start with digit]
+		// can have space/tab/new line
+		// must have <> = , ( [not equal, equal, comma, opening round bracket]
+		// can have space/tab/new line
+		// $ number with 1-9 for first and 0-9 for further digits
+		// Collects also PDO ? and :named, but they are ignored
+		// /s for matching new line in . list
+		// [disabled, we don't used ^ or $] /m for multi line match
+		// Matches in 1:, must be array_filtered to remove empty, count with array_unique
+		// Regex located in the ConvertPlaceholder class
+		preg_match_all(
+			ConvertPlaceholder::REGEX_LOOKUP_PLACEHOLDERS,
+			$query,
+			$matches
+		);
+		return count(array_unique(array_filter($matches[3])));
 	}
 }
 

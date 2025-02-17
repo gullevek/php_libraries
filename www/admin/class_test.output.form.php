@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -29,15 +29,17 @@ $table_arrays = [];
 $table_arrays[\CoreLibs\Get\System::getPageName(1)] = [
 	// form fields mtaching up with db fields
 	'table_array' => [
+		'foo',
+		'bar'
 	],
 	// laod query
-	'load_query' => '',
+	'load_query' => 'SELECT uuid_nr, foo, bar FROM test',
 	// database table to load from
-	'table_name' => '',
+	'table_name' => 'test',
 	// for load dro pdown, format output
 	'show_fields' => [
 		[
-			'name' => 'name'
+			'name' => 'foo'
 		],
 		[
 			'name' => 'enabled',

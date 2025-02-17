@@ -22,7 +22,6 @@ final class CoreLibsCreateSessionTest extends TestCase
 	public function sessionProvider(): array
 	{
 		// 0: session name as parameter or for GLOBAL value
-		// 1: type p: parameter, g: global, d: php.ini default
 		// 2: mock data as array
 		//    checkCliStatus: true/false,
 		//    getSessionStatus: PHP_SESSION_DISABLED for abort,
@@ -31,13 +30,10 @@ final class CoreLibsCreateSessionTest extends TestCase
 		//    checkActiveSession: true/false, [1st call, 2nd call]
 		//    getSessionId: string or false
 		// 3: exepcted name (session)]
-		// 4: Exception thrown on error
-		// 5: exception code, null for none
-		// 6: expected error string
+		// 4: auto write close flag
 		return [
 			'session parameter' => [
 				'sessionNameParameter',
-				'p',
 				[
 					'checkCliStatus' => false,
 					'getSessionStatus' => PHP_SESSION_NONE,
@@ -47,12 +43,9 @@ final class CoreLibsCreateSessionTest extends TestCase
 				],
 				'sessionNameParameter',
 				null,
-				null,
-				'',
 			],
 			'session globals' => [
 				'sessionNameGlobals',
-				'g',
 				[
 					'checkCliStatus' => false,
 					'getSessionStatus' => PHP_SESSION_NONE,
@@ -61,13 +54,12 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'sessionNameGlobals',
-				null,
-				null,
-				'',
+				[
+					'auto_write_close' => false,
+				],
 			],
-			'session name default' => [
-				'',
-				'd',
+			'auto write close' => [
+				'sessionNameAutoWriteClose',
 				[
 					'checkCliStatus' => false,
 					'getSessionStatus' => PHP_SESSION_NONE,
@@ -75,109 +67,10 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'checkActiveSession' => [false, true],
 					'getSessionId' => '1234abcd4567'
 				],
-				'',
-				null,
-				null,
-				'',
-			],
-			// error checks
-			// 1: we are in cli
-			'on cli error' => [
-				'',
-				'd',
+				'sessionNameAutoWriteClose',
 				[
-					'checkCliStatus' => true,
-					'getSessionStatus' => PHP_SESSION_NONE,
-					'setSessionName' => true,
-					'checkActiveSession' => [false, true],
-					'getSessionId' => '1234abcd4567'
+					'auto_write_close' => true,
 				],
-				'',
-				'RuntimeException',
-				1,
-				'[SESSION] No sessions in php cli'
-			],
-			// 2: session disabled
-			'session disabled error' => [
-				'',
-				'd',
-				[
-					'checkCliStatus' => false,
-					'getSessionStatus' => PHP_SESSION_DISABLED,
-					'setSessionName' => true,
-					'checkActiveSession' => [false, true],
-					'getSessionId' => '1234abcd4567'
-				],
-				'',
-				'RuntimeException',
-				2,
-				'[SESSION] Sessions are disabled'
-			],
-			// 3: invalid session name: string
-			'invalid name chars error' => [
-				'1invalid$session#;',
-				'p',
-				[
-					'checkCliStatus' => false,
-					'getSessionStatus' => PHP_SESSION_NONE,
-					'setSessionName' => false,
-					'checkActiveSession' => [false, true],
-					'getSessionId' => '1234abcd4567'
-				],
-				'',
-				'UnexpectedValueException',
-				3,
-				'[SESSION] Invalid session name: 1invalid$session#;'
-			],
-			// 3: invalid session name: only numbers
-			'invalid name numbers only error' => [
-				'123',
-				'p',
-				[
-					'checkCliStatus' => false,
-					'getSessionStatus' => PHP_SESSION_NONE,
-					'setSessionName' => false,
-					'checkActiveSession' => [false, true],
-					'getSessionId' => '1234abcd4567'
-				],
-				'',
-				'UnexpectedValueException',
-				3,
-				'[SESSION] Invalid session name: 123'
-			],
-			// 3: invalid session name: invalid name short
-			// 3: invalid session name: too long (128)
-			// 4: failed to start session (2nd false on check active session)
-			'invalid name numbers only error' => [
-				'',
-				'd',
-				[
-					'checkCliStatus' => false,
-					'getSessionStatus' => PHP_SESSION_NONE,
-					'setSessionName' => true,
-					'checkActiveSession' => [false, false],
-					'getSessionId' => '1234abcd4567'
-				],
-				'',
-				'RuntimeException',
-				4,
-				'[SESSION] Failed to activate session'
-			],
-			// 5: get session id return false
-			'invalid name numbers only error' => [
-				'',
-				'd',
-				[
-					'checkCliStatus' => false,
-					'getSessionStatus' => PHP_SESSION_NONE,
-					'setSessionName' => true,
-					'checkActiveSession' => [false, true],
-					'getSessionId' => false
-				],
-				'',
-				'UnexpectedValueException',
-				5,
-				'[SESSION] getSessionId did not return a session id'
 			],
 		];
 	}
@@ -190,32 +83,24 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 * @testdox startSession $input name for $type will be $expected (error: $expected_error) [$_dataName]
 	 *
 	 * @param string $input
-	 * @param string $type
 	 * @param array<mixed> $mock_data
 	 * @param string $expected
-	 * @param string|null $exception
-	 * @param string $expected_error
+	 * @param array<string,mixed> $options
 	 * @return void
 	 */
 	public function testStartSession(
 		string $input,
-		string $type,
 		array $mock_data,
 		string $expected,
-		?string $exception,
-		?int $exception_code,
-		string $expected_error
+		?array $options,
 	): void {
-		// override expected
-		if ($type == 'd') {
-			$expected = ini_get('session.name');
-		}
 		/** @var \CoreLibs\Create\Session&MockObject $session_mock */
 		$session_mock = $this->createPartialMock(
 			\CoreLibs\Create\Session::class,
 			[
-				'checkCliStatus', 'getSessionStatus', 'checkActiveSession',
-				'setSessionName', 'startSessionCall', 'getSessionId',
+				'checkCliStatus',
+				'getSessionStatus', 'checkActiveSession',
+				'getSessionId',
 				'getSessionName'
 			]
 		);
@@ -234,12 +119,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 				$mock_data['checkActiveSession'][0],
 				$mock_data['checkActiveSession'][1],
 			);
-		// dummy set for session name
-		$session_mock->method('setSessionName')->with($input)->willReturn($mock_data['setSessionName']);
 		// set session name & return bsed on request data
 		$session_mock->method('getSessionName')->willReturn($expected);
-		// will not return anything
-		$session_mock->method('startSessionCall');
 		// in test case only return string
 		// false: will return false
 		$session_mock->method('getSessionId')->willReturn($mock_data['getSessionId']);
@@ -247,25 +128,7 @@ final class CoreLibsCreateSessionTest extends TestCase
 		// regex for session id
 		$ression_id_regex = "/^\w+$/";
 
-		if ($exception !== null) {
-			$this->expectException($exception);
-			$this->expectExceptionCode($exception_code);
-		}
-
-		unset($GLOBALS['SET_SESSION_NAME']);
-		$session_id = '';
-		switch ($type) {
-			case 'p':
-				$session_id = $session_mock->startSession($input);
-				break;
-			case 'g':
-				$GLOBALS['SET_SESSION_NAME'] = $input;
-				$session_id = $session_mock->startSession();
-				break;
-			case 'd':
-				$session_id = $session_mock->startSession();
-				break;
-		}
+		$session_id = $session_mock->getSessionId();
 		// asert checks
 		if (!empty($session_id)) {
 			$this->assertMatchesRegularExpression(
@@ -282,6 +145,79 @@ final class CoreLibsCreateSessionTest extends TestCase
 				$session_mock->getSessionName()
 			);
 		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerSessionException(): array
+	{
+		return [
+			'not cli' => [
+				'TEST_EXCEPTION',
+				\RuntimeException::class,
+				1,
+				'/^\[SESSION\] No sessions in php cli$/',
+			],
+			/* 'session disabled ' => [
+				'TEST_EXCEPTION',
+				\RuntimeException::class,
+				2,
+				'/^\[SESSION\] Sessions are disabled/'
+			],
+			'invalid session name' => [
+				'--#as^-292p-',
+				\UnexpectedValueException::class,
+				3,
+				'/^\[SESSION\] Invalid session name: /'
+			],
+			'failed to activate session' => [
+				'TEST_EXCEPTION',
+				\RuntimeException::class,
+				4,
+				'/^\[SESSION\] Failed to activate session/'
+			],
+			'expired session' => [
+				\RuntimeException::class,
+				5,
+				'/^\[SESSION\] Expired session found/'
+			],
+			'not a valid session id returned' => [
+				\UnexpectedValueException::class,
+				6,
+				'/^\[SESSION\] getSessionId did not return a session id/'
+			], */
+		];
+	}
+
+	/**
+	 * exception checks
+	 *
+	 * @covers ::initSession
+	 * @dataProvider providerSessionException
+	 * @testdox create session $session_name with exception $exception ($exception_code) [$_dataName]
+	 *
+	 * @param  string $session_name
+	 * @param  string $exception
+	 * @param  int    $exception_code
+	 * @param  string $expected_error
+	 * @return void
+	 */
+	public function testSessionException(
+		string $session_name,
+		string $exception,
+		int $exception_code,
+		string $expected_error,
+	): void {
+		//
+		// throws only on new Object creation
+		$this->expectException($exception);
+		$this->expectExceptionCode($exception_code);
+		$this->expectExceptionMessageMatches($expected_error);
+		// cannot set ini after header sent, plus we are on command line there are no headers
+		new \CoreLibs\Create\Session($session_name, ['session_strict' => false]);
 	}
 
 	/**
@@ -347,109 +283,147 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function sessionDataProvider(): array
+	public function providerSessionData(): array
 	{
 		return [
 			'test' => [
 				'foo',
 				'bar',
 				'bar',
+				null,
 			],
 			'int key test' => [
 				123,
 				'bar',
 				'bar',
+				\UnexpectedValueException::class
 			],
 			// more complex value tests
 			'array values' => [
 				'array',
 				[1, 2, 3],
 				[1, 2, 3],
+				null,
 			]
 		];
 	}
 
+	// NOTE: with auto start session, we cannot test this in the command line
+
 	/**
 	 * method call test
 	 *
-	 * @covers ::setS
-	 * @covers ::getS
-	 * @covers ::issetS
-	 * @covers ::unsetS
-	 * @dataProvider sessionDataProvider
-	 * @testdox setS/getS/issetS/unsetS $name with $input is $expected [$_dataName]
+	 * @covers ::set
+	 * @covers ::get
+	 * @covers ::isset
+	 * @covers ::unset
+	 * @dataProvider providerSessionData
+	 * @testdox set/get/isset/unset $name with $input is $expected ($exception) [$_dataName]
 	 *
 	 * @param  string|int $name
 	 * @param  mixed $input
 	 * @param  mixed $expected
+	 * @param  ?mixed $exception
 	 * @return void
 	 */
-	public function testMethodSetGet($name, $input, $expected): void
+	public function testMethodSetGet($name, $input, $expected, $exception): void
 	{
-		$session = new \CoreLibs\Create\Session();
-		$session->setS($name, $input);
+		if (\CoreLibs\Get\System::checkCLI()) {
+			$this->markTestSkipped('Cannot run testMethodSetGet in CLI');
+		}
+		$session = new \CoreLibs\Create\Session('TEST_METHOD');
+		if ($expected !== null) {
+			$this->expectException($exception);
+		}
+		$session->set($name, $input);
 		$this->assertEquals(
 			$expected,
-			$session->getS($name),
+			$session->get($name),
 			'method set assert'
 		);
 		// isset true
 		$this->assertTrue(
-			$session->issetS($name),
+			$session->isset($name),
 			'method isset assert ok'
 		);
-		$session->unsetS($name);
+		$session->unset($name);
 		$this->assertEquals(
 			'',
-			$session->getS($name),
+			$session->get($name),
 			'method unset assert'
 		);
-		// iset false
+		// isset false
 		$this->assertFalse(
-			$session->issetS($name),
+			$session->isset($name),
 			'method isset assert false'
 		);
 	}
 
 	/**
-	 * magic call test
+	 * Undocumented function
 	 *
-	 * @covers ::__set
-	 * @covers ::__get
-	 * @covers ::__isset
-	 * @covers ::__unset
-	 * @dataProvider sessionDataProvider
-	 * @testdox __set/__get/__iseet/__unset $name with $input is $expected [$_dataName]
+	 * @return array
+	 */
+	public function providerSessionDataMany(): array
+	{
+		return [
+			'valid set' => [
+				[
+					'foo 1' => 'bar 1',
+					'foo 2' => 'bar 1',
+				],
+				[
+					'foo 1' => 'bar 1',
+					'foo 2' => 'bar 1',
+				],
+				null,
+			],
+			'invalid entry' => [
+				[
+					'foo 1' => 'bar 1',
+					123 => 'bar 1',
+				],
+				[
+					'foo 1' => 'bar 1',
+				],
+				\UnexpectedValueException::class
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
 	 *
-	 * @param  string|int $name
-	 * @param  mixed $input
-	 * @param  mixed $expected
+	 * @covers ::setMany
+	 * @covers ::getMany
+	 * @dataProvider providerSessionDataMany
+	 * @testdox setMany/getMany/unsetMany $set is $expected ($exception) [$_dataName]
+	 *
+	 * @param  array<string|int,mixed> $set
+	 * @param  array<string,mixed> $expected
+	 * @param  ?mixed $exception
 	 * @return void
 	 */
-	public function testMagicSetGet($name, $input, $expected): void
+	public function testMany($set, $expected, $exception): void
 	{
-		$session = new \CoreLibs\Create\Session();
-		$session->$name = $input;
+		if (\CoreLibs\Get\System::checkCLI()) {
+			$this->markTestSkipped('Cannot run testMethodSetGet in CLI');
+		}
+		$session = new \CoreLibs\Create\Session('TEST_METHOD');
+		if ($expected !== null) {
+			$this->expectException($exception);
+		}
+		$session->setMany($set);
 		$this->assertEquals(
 			$expected,
-			$session->$name,
-			'magic set assert'
+			$session->getMany(array_keys($set)),
+			'set many failed'
 		);
-		// isset true
-		$this->assertTrue(
-			isset($session->$name),
-			'magic isset assert ok'
-		);
-		unset($session->$name);
+		$session->unsetMany(array_keys($set));
 		$this->assertEquals(
-			'',
-			$session->$name,
-			'magic unset assert'
-		);
-		// isset true
-		$this->assertFalse(
-			isset($session->$name),
-			'magic isset assert false'
+			[],
+			$session->getMany(array_keys($set)),
+			'unset many failed'
 		);
 	}
 
@@ -463,27 +437,30 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 */
 	public function testUnsetAll(): void
 	{
+		if (\CoreLibs\Get\System::checkCLI()) {
+			$this->markTestSkipped('Cannot run testUnsetAll in CLI');
+		}
 		$test_values = [
 			'foo' => 'abc',
 			'bar' => '123'
 		];
-		$session = new \CoreLibs\Create\Session();
+		$session = new \CoreLibs\Create\Session('TEST_UNSET');
 		foreach ($test_values as $name => $value) {
-			$session->setS($name, $value);
+			$session->set($name, $value);
 			// confirm set
 			$this->assertEquals(
 				$value,
-				$session->getS($name),
+				$session->get($name),
 				'set assert: ' . $name
 			);
 		}
 		// unset all
-		$session->unsetAllS();
+		$session->clear();
 		// check unset
 		foreach (array_keys($test_values) as $name) {
 			$this->assertEquals(
 				'',
-				$session->getS($name),
+				$session->get($name),
 				'unsert assert: ' . $name
 			);
 		}

@@ -509,6 +509,48 @@ class ArrayHandler
 		}
 		return $array;
 	}
+
+	/**
+	 * Remove entries from a simple array, will not keep key order
+	 *
+	 * any array content is allowed
+	 *
+	 * https://stackoverflow.com/a/369608
+	 *
+	 * @param  array<mixed> $array  Array where elements are located
+	 * @param  array<mixed> $remove Elements to remove
+	 * @return array<mixed>         Array with $remove elements removed
+	 */
+	public static function arrayRemoveEntry(array $array, array $remove): array
+	{
+		return array_diff($array, $remove);
+	}
+
+	/**
+	 * From the array with key -> mixed values,
+	 * return only the entries where the key matches the key given in the key list parameter
+	 *
+	 * key list is a list[string]
+	 * if key list is empty, return array as is
+	 *
+	 * @param  array<string,mixed> $array
+	 * @param  array<string>       $key_list
+	 * @return array<string,mixed>
+	 */
+	public static function arrayReturnMatchingKeyOnly(
+		array $array,
+		array $key_list
+	): array {
+		// on empty return as is
+		if (empty($key_list)) {
+			return $array;
+		}
+		return array_filter(
+			$array,
+			fn($key) => in_array($key, $key_list),
+			ARRAY_FILTER_USE_KEY
+		);
+	}
 }
 
 // __END__

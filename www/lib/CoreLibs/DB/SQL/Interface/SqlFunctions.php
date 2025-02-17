@@ -288,9 +288,32 @@ interface SqlFunctions
 	/**
 	 * Undocumented function
 	 *
+	 * @param  string $parameter
+	 * @param  bool   $strip
+	 * @return string
+	 */
+	public function __dbVersionInfo(string $parameter, bool $strip = true): string;
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array<mixed>
+	 */
+	public function __dbVersionInfoParameterList(): array;
+
+	/**
+	 * Undocumented function
+	 *
 	 * @return string
 	 */
 	public function __dbVersion(): string;
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return int
+	 */
+	public function __dbVersionNumeric(): int;
 
 	/**
 	 * Undocumented function
@@ -305,6 +328,14 @@ interface SqlFunctions
 		int $start = 0,
 		?int &$end = null
 	): ?array;
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string      $parameter
+	 * @return string|bool
+	 */
+	public function __dbParameter(string $parameter): string|bool;
 
 	/**
 	 * Undocumented function
@@ -343,6 +374,14 @@ interface SqlFunctions
 	 * @return string
 	 */
 	public function __dbGetEncoding(): string;
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param  string $query
+	 * @return int
+	 */
+	public function __dbCountQueryParams(string $query): int;
 }
 
 // __END__

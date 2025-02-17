@@ -568,6 +568,9 @@ final class CoreLibsDebugSupportTest extends TestCase
 					'assert expected 12'
 				);
 				break;
+			default:
+				$this->assertTrue(true, 'Default fallback as true');
+				break;
 		}
 	}
 

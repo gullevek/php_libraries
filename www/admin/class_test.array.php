@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -115,9 +115,6 @@ print "ARRAYFLATFORKEY: " . DgS::printAr(ArrayHandler::arrayFlatForKey($test_arr
  */
 function rec(string $pre, string $cur, array $node = [])
 {
-	if (!is_array($node)) {
-		$node = [];
-	}
 	print "<div style='color: green;'>#### PRE: " . $pre . ", CUR: " . $cur . ", N-c: "
 		. count($node) . " [" . join('|', array_keys($node)) . "]</div>";
 	if (!$pre) {
@@ -252,6 +249,19 @@ foreach (array_keys($array) as $search) {
 		. "<br>";
 }
 print "Key not exists: " . DgS::printAr(ArrayHandler::arrayGetNextKey($array, 'z')) . "<br>";
+
+print "<hr>";
+$keys = ['b', 'c', 'f'];
+print "Return only: " . DgS::printAr($keys) . ": "
+	. DgS::printAr(ArrayHandler::arrayReturnMatchingKeyOnly($array, $keys)) . "<br>";
+
+$out = array_filter($array, fn($key) => in_array($key, $keys), ARRAY_FILTER_USE_KEY);
+print "array filter: " . DgS::printAr($keys) . ": " . DgS::printAr($out) . "<br>";
+$out = array_intersect_key(
+	$array,
+	array_flip($keys)
+);
+print "array intersect key: " . DgS::printAr($keys) . ": " . DgS::printAr($out) . "<br>";
 
 print "</body></html>";
 

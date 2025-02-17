@@ -17,7 +17,7 @@ Table with Primary Key: table_with_primary_key
 Table without Primary Key: table_without_primary_key
 
 Table with primary key has additional row:
-row_primary_key	SERIAL PRIMARY KEY,
+row_primary_key	INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Each table has the following rows
 row_int INT,
 row_numeric NUMERIC,
@@ -37,8 +37,9 @@ namespace tests;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use CoreLibs\Logging\Logger\Level;
+use CoreLibs\Logging;
 use CoreLibs\DB\Options\Convert;
+use CoreLibs\DB\Support\ConvertPlaceholder;
 
 /**
  * Test class for DB\IO + DB\SQL\PgSQL
@@ -117,7 +118,7 @@ final class CoreLibsDBIOTest extends TestCase
 			);
 		}
 		// define basic connection set valid and one invalid
-		self::$log = new \CoreLibs\Logging\Logging([
+		self::$log = new Logging\Logging([
 			// 'log_folder' => __DIR__ . DIRECTORY_SEPARATOR . 'log',
 			'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
 			'log_file_id' => 'CoreLibs-DB-IO-Test',
@@ -161,13 +162,9 @@ final class CoreLibsDBIOTest extends TestCase
 			// primary key name is table + '_id'
 			<<<SQL
 			CREATE TABLE table_with_primary_key (
-				table_with_primary_key_id SERIAL PRIMARY KEY,
+				table_with_primary_key_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 				$base_table
 			SQL
-			/* "CREATE TABLE table_with_primary_key ("
-			// primary key name is table + '_id'
-			. "table_with_primary_key_id SERIAL PRIMARY KEY, "
-			. $base_table */
 		);
 		$db->dbExec(
 			<<<SQL
@@ -570,11 +567,11 @@ final class CoreLibsDBIOTest extends TestCase
 		);
 		$db->dbClose();
 		// second conenction with log set NOT debug
-		$log = new \CoreLibs\Logging\Logging([
+		$log = new Logging\Logging([
 			// 'log_folder' => __DIR__ . DIRECTORY_SEPARATOR . 'log',
 			'log_folder' => DIRECTORY_SEPARATOR . 'tmp',
 			'log_file_id' => 'CoreLibs-DB-IO-Test',
-			'log_level' => \CoreLibs\Logging\Logger\Level::Notice,
+			'log_level' => Logging\Logger\Level::Notice,
 		]);
 		$db = new \CoreLibs\DB\IO(
 			self::$db_config[$connection],
@@ -3293,6 +3290,7 @@ final class CoreLibsDBIOTest extends TestCase
 					'query' =>  'INSERT INTO table_with_primary_key (row_int, uid) '
 						. 'VALUES ($1, $2) RETURNING table_with_primary_key_id',
 					'returning_id' => true,
+					'placeholder_converted' => [],
 				],
 			],
 			// update
@@ -3327,6 +3325,7 @@ final class CoreLibsDBIOTest extends TestCase
 					'query' => 'UPDATE table_with_primary_key SET row_int = $1, '
 						. 'row_varchar = $2 WHERE uid = $3',
 					'returning_id' => false,
+					'placeholder_converted' => [],
 				],
 			],
 			// select
@@ -3356,6 +3355,7 @@ final class CoreLibsDBIOTest extends TestCase
 					'count' => 1,
 					'query' => 'SELECT row_int, uid FROM table_with_primary_key WHERE uid = $1',
 					'returning_id' => false,
+					'placeholder_converted' => [],
 				],
 			],
 			// any query but with no parameters
@@ -3388,6 +3388,7 @@ final class CoreLibsDBIOTest extends TestCase
 					'count' => 0,
 					'query' => 'SELECT row_int, uid FROM table_with_primary_key',
 					'returning_id' => false,
+					'placeholder_converted' => [],
 				],
 			],
 			// no statement name (25)
@@ -3411,6 +3412,7 @@ final class CoreLibsDBIOTest extends TestCase
 					'count' => 0,
 					'query' => '',
 					'returning_id' => false,
+					'placeholder_converted' => [],
 				],
 			],
 			// no query (prepare 11)
@@ -3435,6 +3437,7 @@ final class CoreLibsDBIOTest extends TestCase
 					'count' => 0,
 					'query' => '',
 					'returning_id' => false,
+					'placeholder_converted' => [],
 				],
 			],
 			// no db connection (prepare/execute 16)
@@ -3464,6 +3467,7 @@ final class CoreLibsDBIOTest extends TestCase
 					'count' => 0,
 					'query' => 'SELECT row_int, uid FROM table_with_primary_key',
 					'returning_id' => false,
+					'placeholder_converted' => [],
 				],
 			],
 			// prepare with different statement name
@@ -3489,6 +3493,7 @@ final class CoreLibsDBIOTest extends TestCase
 					'count' => 0,
 					'query' => 'SELECT row_int, uid FROM table_with_primary_key',
 					'returning_id' => false,
+					'placeholder_converted' => [],
 				],
 			],
 			// insert wrong data count compared to needed (execute 23)
@@ -3514,10 +3519,12 @@ final class CoreLibsDBIOTest extends TestCase
 					'query' => 'INSERT INTO table_with_primary_key (row_int, uid) VALUES '
 						. '($1, $2) RETURNING table_with_primary_key_id',
 					'returning_id' => true,
+					'placeholder_converted' => [],
 				],
 			],
 			// execute does not return a result (22)
 			// TODO execute does not return a result
+			// TODO prepared statement with placeholder params auto convert
 		];
 	}
 
@@ -3662,7 +3669,7 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 
 			// check dbGetPrepareCursorValue
-			foreach (['pk_name', 'count', 'query', 'returning_id'] as $key) {
+			foreach (['pk_name', 'count', 'query', 'returning_id', 'placeholder_converted'] as $key) {
 				$this->assertEquals(
 					$prepare_cursor[$key],
 					$db->dbGetPrepareCursorValue($stm_name, $key),
@@ -3685,7 +3692,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function preparedProviderValue(): array
+	public function providerDbGetPrepareCursorValue(): array
 	{
 		// 1: query (can be empty for do not set)
 		// 2: stm name
@@ -3729,7 +3736,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * test return prepare cursor errors
 	 *
 	 * @covers ::dbGetPrepareCursorValue
-	 * @dataProvider preparedProviderValue
+	 * @dataProvider providerDbGetPrepareCursorValue
 	 * @testdox prepared query $stm_name with $key expect error id $error_id [$_dataName]
 	 *
 	 * @param string $query
@@ -3760,6 +3767,94 @@ final class CoreLibsDBIOTest extends TestCase
 			$last_error,
 			'get prepare cursor value error check'
 		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerDbPreparedCursorStatus(): array
+	{
+		return [
+			'empty statement pararm' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_a',
+				'check_stm_name' => '',
+				'check_query' => '',
+				'expected' => false
+			],
+			'different stm_name' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_b',
+				'check_stm_name' => 'other_name',
+				'check_query' => '',
+				'expected' => 0
+			],
+			'same stm_name' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_c',
+				'check_stm_name' => 'test_stm_c',
+				'check_query' => '',
+				'expected' => 1
+			],
+			'same stm_name and query' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_d',
+				'check_stm_name' => 'test_stm_d',
+				'check_query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'expected' => 2
+			],
+			'same stm_name and different query' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_e',
+				'check_stm_name' => 'test_stm_e',
+				'check_query' => 'SELECT row_int, uid, row_int FROM table_with_primary_key',
+				'expected' => 1
+			],
+			'insert query test' => [
+				'query' => 'INSERT INTO table_with_primary_key (row_int, uid) VALUES ($1, $2)',
+				'stm_name' => 'test_stm_f',
+				'check_stm_name' => 'test_stm_f',
+				'check_query' => 'INSERT INTO table_with_primary_key (row_int, uid) VALUES ($1, $2)',
+				'expected' => 2
+			]
+		];
+	}
+
+	/**
+	 * test cursor status for prepared statement
+	 *
+	 * @covers ::dbPreparedCursorStatus
+	 * @dataProvider providerDbPreparedCursorStatus
+	 * @testdox Check prepared $stm_name ($check_stm_name) status is $expected [$_dataName]
+	 *
+	 * @param  string   $query
+	 * @param  string   $stm_name
+	 * @param  string   $check_stm_name
+	 * @param  string   $check_query
+	 * @param  bool|int $expected
+	 * @return void
+	 */
+	public function testDbPreparedCursorStatus(
+		string $query,
+		string $stm_name,
+		string $check_stm_name,
+		string $check_query,
+		bool|int $expected
+	): void {
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		$db->dbPrepare($stm_name, $query);
+		// $db->dbExecute($stm_name);
+		$this->assertEquals(
+			$expected,
+			$db->dbPreparedCursorStatus($check_stm_name, $check_query),
+			'check prepared stement cursor status'
+		);
+		unset($db);
 	}
 
 	// - schema set/get tests
@@ -5031,8 +5126,233 @@ final class CoreLibsDBIOTest extends TestCase
 		$db->dbClose();
 	}
 
-	// query placeholder convert
+	// MARK: QUERY PLACEHOLDERS
 
+	// test query placeholder detection for all possible sets
+	// ::dbPrepare
+
+	/**
+	 * placeholder sql
+	 *
+	 * @return array
+	 */
+	public function providerDbCountQueryParams(): array
+	{
+		return [
+			'one place holder' => [
+				'query' => 'SELECT row_varchar FROM table_with_primary_key WHERE row_varchar = $1',
+				'count' => 1,
+				'convert' => false,
+			],
+			'one place holder, json call' => [
+				'query' => "SELECT row_varchar FROM table_with_primary_key WHERE row_jsonb->>'data' = $1",
+				'count' => 1,
+				'convert' => false,
+			],
+			'one place holder, <> compare' => [
+				'query' => "SELECT row_varchar FROM table_with_primary_key WHERE row_varchar <> $1",
+				'count' => 1,
+				'convert' => false,
+			],
+			'one place holder, named' => [
+				'query' => "SELECT row_varchar FROM table_with_primary_key WHERE row_varchar <> :row_varchar",
+				'count' => 1,
+				'convert' => true,
+			],
+			'no replacement' => [
+				'query' => "SELECT row_varchar FROM table_with_primary_key WHERE row_varchar = '$1'",
+				'count' => 0,
+				'convert' => false,
+			],
+			'insert' => [
+				'query' => "INSERT INTO table_with_primary_key (row_varchar, row_jsonb, row_int) VALUES ($1, $2, $3)",
+				'count' => 3,
+				'convert' => false,
+			],
+			'update' => [
+				'query' => "UPDATE table_with_primary_key SET row_varchar = $1, row_jsonb = $2, row_int = $3 WHERE row_numeric = $4",
+				'count' => 4,
+				'convert' => false,
+			],
+			'multiple, multline' => [
+				'query' => <<<SQL
+				SELECT
+					row_varchar
+				FROM
+					table_with_primary_key
+				WHERE
+					row_varchar = $1 AND row_int = $2
+					AND row_numeric = ANY($3)
+				SQL,
+				'count' => 3,
+				'convert' => false,
+			],
+			'two digit numbers' => [
+				'query' => <<<SQL
+				INSERT INTO table_with_primary_key (
+					row_int, row_numeric, row_varchar, row_varchar_literal, row_json,
+					row_jsonb, row_bytea, row_timestamp, row_date, row_interval
+				) VALUES (
+					$1, $2, $3, $4, $5,
+					$6, $7, $8, $9, $10
+				)
+				SQL,
+				'count' => 10,
+				'convert' => false,
+			],
+			'things in brackets' => [
+				'query' => <<<SQL
+				SELECT row_varchar
+				FROM table_with_primary_key
+				WHERE
+					row_varchar = $1 AND
+					(row_int = ANY($2) OR row_int = $3)
+					AND row_varchar_literal = $4
+				SQL,
+				'count' => 4,
+				'convert' => false,
+			],
+			'number compare' => [
+				'query' => <<<SQL
+				SELECT row_varchar
+				FROM table_with_primary_key
+				WHERE
+					row_int >= $1 OR row_int <= $2 OR
+					row_int > $3 OR row_int < $4
+					OR row_int = $5 OR row_int <> $6
+				SQL,
+				'count' => 6,
+				'convert' => false,
+			],
+			'comments in insert' => [
+				'query' => <<<SQL
+				INSERT INTO table_with_primary_key (
+					row_int, row_numeric, row_varchar, row_varchar_literal
+				) VALUES (
+					-- comment 1 かな
+					$1, $2,
+					-- comment 2 -
+					$3
+					-- comment 3
+					, $4
+				)
+				SQL,
+				'count' => 4,
+				'convert' => false
+			],
+			'comment in update' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int =
+					-- COMMENT 1
+					$1,
+					row_numeric =
+					$2 -- COMMENT 2
+					,
+					row_varchar -- COMMENT 3
+					= $3
+				WHERE
+					row_varchar = $4
+				SQL,
+				'count' => 4,
+				'convert' => false,
+			],
+			// Note some are not set
+			'a complete set of possible' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+				-- ROW
+				row_varchar = $1
+				WHERE
+				row_varchar = ANY($2) AND row_varchar <> $3
+				AND row_varchar > $4 AND row_varchar < $5
+				AND row_varchar >= $6 AND row_varchar <=$7
+				AND row_jsonb->'a' = $8 AND row_jsonb->>$9 = 'a'
+				AND row_jsonb<@$10 AND row_jsonb@>$11
+				AND row_varchar ^@ $12
+				SQL,
+				'count' => 12,
+				'convert' => false,
+			],
+			// all the same
+			'all the same numbered' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int = $1::INT, row_numeric = $1::NUMERIC, row_varchar = $1
+				WHERE
+					row_varchar = $1
+				SQL,
+				'count' => 1,
+				'convert' => false,
+			],
+			'update with case' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int = $1::INT,
+					row_varchar = CASE WHEN row_int = 1 THEN $2 ELSE 'bar'::VARCHAR END
+				WHERE
+					row_varchar = $3
+				SQL,
+				'count' => 3,
+				'convert' => false,
+			],
+			'select with case' => [
+				'query' => <<<SQL
+				SELECT row_int
+				FROM table_with_primary_key
+				WHERE
+					row_varchar = CASE WHEN row_int = 1 THEN $1 ELSE $2 END
+				SQL,
+				'count' => 2,
+				'convert' => false,
+			]
+		];
+	}
+
+	/**
+	 * Placeholder check and convert tests
+	 *
+	 * @covers ::dbPrepare
+	 * @covers ::__dbCountQueryParams
+	 * @onvers ::convertPlaceholderInQuery
+	 * @dataProvider providerDbCountQueryParams
+	 * @testdox Query replacement count test [$_dataName]
+	 *
+	 * @param  string $query
+	 * @param  int    $count
+	 * @return void
+	 */
+	public function testDbCountQueryParams(string $query, int $count, bool $convert): void
+	{
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		$id = sha1($query);
+		$db->dbSetConvertPlaceholder($convert);
+		$db->dbPrepare($id, $query);
+		// print "\n**\n";
+		// print "PCount: " . $db->dbGetPrepareCursorValue($id, 'count') . "\n";
+		// print "\n**\n";
+		$this->assertEquals(
+			$count,
+			$db->dbGetPrepareCursorValue($id, 'count'),
+			'DB count params'
+		);
+		$placeholder = ConvertPlaceholder::convertPlaceholderInQuery($query, null, 'pg');
+		// print "RES: " . print_r($placeholder, true) . "\n";
+		$this->assertEquals(
+			$count,
+			$placeholder['needed'],
+			'convert params'
+		);
+	}
+
+	/**
+	 * query placeholder convert
+	 *
+	 * @return array
+	 */
 	public function queryPlaceholderReplaceProvider(): array
 	{
 		// 				WHERE row_varchar = $1
@@ -5076,7 +5396,9 @@ final class CoreLibsDBIOTest extends TestCase
 				WHERE row_varchar = $1
 				SQL,
 				'expected_params' => ['string a'],
-			]
+			],
+			// TODO: test with multiple entries
+			// TODO: test with same entry ($1, $1, :var, :var)
 		];
 	}
 
@@ -5177,6 +5499,8 @@ final class CoreLibsDBIOTest extends TestCase
 	//   dbWriteData, dbWriteDataExt
 	// - data debug
 	//   dbDumpData
+
+	// MARK: ASYNC
 
 	// ASYNC at the end because it has 1s timeout
 	// - asynchronous executions

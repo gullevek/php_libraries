@@ -256,8 +256,8 @@ class Image
 			}
 			// check resize parameters
 			if ($inc_width > $thumb_width || $inc_height > $thumb_height) {
-				$thumb_width_r = 0;
-				$thumb_height_r = 0;
+				$thumb_width_r = 1;
+				$thumb_height_r = 1;
 				// we need to keep the aspect ration on longest side
 				if (
 					($inc_height > $inc_width &&
@@ -288,6 +288,12 @@ class Image
 					!file_exists($thumbnail_write_path . $thumbnail)
 				) {
 					// image, copy source image, offset in image, source x/y, new size, source image size
+					if ($thumb_width_r < 1) {
+						$thumb_width_r = 1;
+					}
+					if ($thumb_height_r < 1) {
+						$thumb_height_r = 1;
+					}
 					$thumb = imagecreatetruecolor($thumb_width_r, $thumb_height_r);
 					if ($thumb === false) {
 						throw new \RuntimeException(
@@ -380,9 +386,7 @@ class Image
 				}
 			}
 			// add output path
-			if ($thumbnail !== false) {
-				$thumbnail = $thumbnail_web_path . $thumbnail;
-			}
+			$thumbnail = $thumbnail_web_path . $thumbnail;
 		} elseif ($create_dummy === true) {
 			// create dummy image in the thumbnail size
 			// if one side is missing, use the other side to create a square
@@ -399,10 +403,10 @@ class Image
 				!file_exists($thumbnail_write_path . $thumbnail)
 			) {
 				// if both are unset, set to 250
-				if ($thumb_height == 0) {
+				if ($thumb_height < 1) {
 					$thumb_height = 250;
 				}
-				if ($thumb_width == 0) {
+				if ($thumb_width < 1) {
 					$thumb_width = 250;
 				}
 				$thumb = imagecreatetruecolor($thumb_width, $thumb_height);

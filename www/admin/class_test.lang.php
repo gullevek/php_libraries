@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -16,6 +16,8 @@ define('USE_DATABASE', false);
 require 'config.php';
 // define log file id
 $LOG_FILE_ID = 'classTest-lang';
+$SET_SESSION_NAME = EDIT_SESSION_NAME;
+$session = new CoreLibs\Create\Session($SET_SESSION_NAME);
 ob_end_flush();
 
 $PAGE_NAME = 'TEST CLASS: LANG';
@@ -32,22 +34,21 @@ use CoreLibs\Debug\Support;
 echo "<br><b>LIST LOCALES</b><br>";
 
 $locale = 'en_US.UTF-8';
-$locales = L10n::listLocales($locale);
+$locales = Language\L10n::listLocales($locale);
 print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
 $locale = 'en.UTF-8';
-$locales = L10n::listLocales($locale);
+$locales = Language\L10n::listLocales($locale);
 print "[" . $locale . "] LOCALES: " . Support::printAr($locales) . "<br>";
 
 echo "<br><b>PARSE LOCAL</b><br>";
 $locale = 'en_US.UTF-8';
-$locale_info = L10n::parseLocale($locale);
+$locale_info = Language\L10n::parseLocale($locale);
 print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
 $locale = 'en.UTF-8';
-$locale_info = L10n::parseLocale($locale);
+$locale_info = Language\L10n::parseLocale($locale);
 print "[" . $locale . "] INFO: " . Support::printAr($locale_info) . "<br>";
 
-echo "<br><b>AUTO DETECT</b><br>";
-
+/* echo "<br><b>AUTO DETECT</b><br>";
 // DEPRECATED
 // $get_locale = Language\GetLocale::setLocale();
 // print "[AUTO, DEPRECATED]: " . Support::printAr($get_locale) . "<br>";
@@ -70,10 +71,12 @@ print "[OVERRIDE]: " . Support::printAr($get_locale) . "<br>";
 // DEFAULT_DOMAIN
 // DEFAULT_CHARSET (should be set from DEFAULT_LOCALE)
 // LOCALE_PATH
-$_SESSION['DEFAULT_LOCALE'] = 'ja_JP.UTF-8';
-$_SESSION['DEFAULT_CHARSET'] = 'UTF-8';
-$_SESSION['DEFAULT_DOMAIN'] = 'admin';
-$_SESSION['LOCALE_PATH'] = BASE . INCLUDES . LOCALE;
+$session->setMany([
+	'DEFAULT_LOCALE' => 'ja_JP.UTF-8',
+	'DEFAULT_CHARSET' => 'UTF-8',
+	'DEFAULT_DOMAIN' => 'admin',
+	'LOCALE_PATH' => BASE . INCLUDES . LOCALE,
+]);
 $get_locale = Language\GetLocale::setLocaleFromSession(
 	SITE_LOCALE,
 	SITE_DOMAIN,
@@ -86,10 +89,12 @@ print "[SESSION SET]: " . Support::printAr($get_locale) . "<br>";
 // DEFAULT_DOMAIN
 // DEFAULT_CHARSET (should be set from DEFAULT_LOCALE)
 // LOCALE_PATH
-$_SESSION['DEFAULT_LOCALE'] = '00000#####';
-$_SESSION['DEFAULT_CHARSET'] = '';
-$_SESSION['DEFAULT_DOMAIN'] = 'admin';
-$_SESSION['LOCALE_PATH'] = BASE . INCLUDES . LOCALE;
+$session->setMany([
+	'DEFAULT_LOCALE' => '00000#####',
+	'DEFAULT_CHARSET' => '',
+	'DEFAULT_DOMAIN' => 'admin',
+	'LOCALE_PATH' => BASE . INCLUDES . LOCALE,
+]);
 $get_locale = Language\GetLocale::setLocaleFromSession(
 	SITE_LOCALE,
 	SITE_DOMAIN,
@@ -97,6 +102,7 @@ $get_locale = Language\GetLocale::setLocaleFromSession(
 	BASE . INCLUDES . LOCALE
 );
 print "[SESSION SET INVALID]: " . Support::printAr($get_locale) . "<br>";
+ */
 
 // try to load non existing
 echo "<br><b>NEW TYPE</b><br>";

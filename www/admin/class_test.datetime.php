@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -268,7 +268,9 @@ foreach ($compare_datetimes as $compare_datetime) {
 	print "COMPAREDATE: $compare_datetime[0] = $compare_datetime[1]: "
 		. (string)DateTime::compareDateTime($compare_datetime[0], $compare_datetime[1]) . "<br>";
 }
+
 print "<hr>";
+print "<h2>calcDaysInterval</h2>";
 $compare_dates = [
 	[ '2021-05-01', '2021-05-10', ],
 	[ '2021-05-10', '2021-05-01', ],
@@ -279,9 +281,21 @@ foreach ($compare_dates as $compare_date) {
 	print "CALCDAYSINTERVAL: $compare_date[0] = $compare_date[1]: "
 		. DgS::printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1])) . "<br>";
 	print "CALCDAYSINTERVAL(named): $compare_date[0] = $compare_date[1]: "
-		. DgS::printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1], true)) . "<br>";
+		. DgS::printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1], return_named:true)) . "<br>";
+	print "CALCDAYSINTERVAL(EXCLUDE END): $compare_date[0] = $compare_date[1]: "
+		. Dgs::printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1], include_end_date:false));
+	print "CALCDAYSINTERVAL(EXCLUDE START): $compare_date[0] = $compare_date[1]: "
+		. Dgs::printAr(DateTime::calcDaysInterval($compare_date[0], $compare_date[1], exclude_start_date:true));
+	print "CALCDAYSINTERVAL(EXCLUDE END, EXCLUDE START): $compare_date[0] = $compare_date[1]: "
+		. Dgs::printAr(DateTime::calcDaysInterval(
+			$compare_date[0],
+			$compare_date[1],
+			include_end_date:false,
+			exclude_start_date:true
+		));
 }
 print "<hr>";
+print "<h2>setWeekdayNameFromIsoDow</h2>";
 // test date conversion
 $dow = 2;
 print "DOW[$dow]: " . DateTime::setWeekdayNameFromIsoDow($dow) . "<br>";
@@ -297,26 +311,25 @@ $date = '2022-70-242';
 print "DATE-dow[$date];invalid: " . DateTime::setWeekdayNameFromDate($date) . "<br>";
 print "DATE-dow[$date],long;invalid: " . DateTime::setWeekdayNameFromDate($date, true) . "<br>";
 print "DOW-date[$date];invalid: " . DateTime::setWeekdayNumberFromDate($date) . "<br>";
-print "<hr>";
-// check date range includes a weekend
-// does not:
-$start_date = '2023-07-03';
-$end_date = '2023-07-05';
-print "Has Weekend: " . $start_date . " ~ " . $end_date . ": "
-	. Dgs::prBl(DateTime::dateRangeHasWeekend($start_date, $end_date)) . "<br>";
-$start_date = '2023-07-03';
-$end_date = '2023-07-10';
-print "Has Weekend: " . $start_date . " ~ " . $end_date . ": "
-	. Dgs::prBl(DateTime::dateRangeHasWeekend($start_date, $end_date)) . "<br>";
-$start_date = '2023-07-03';
-$end_date = '2023-07-31';
-print "Has Weekend: " . $start_date . " ~ " . $end_date . ": "
-	. Dgs::prBl(DateTime::dateRangeHasWeekend($start_date, $end_date)) . "<br>";
-$start_date = '2023-07-01';
-$end_date = '2023-07-03';
-print "Has Weekend: " . $start_date . " ~ " . $end_date . ": "
-	. Dgs::prBl(DateTime::dateRangeHasWeekend($start_date, $end_date)) . "<br>";
 
+print "<hr>";
+print "<h2>dateRangeHasWeekend</h2>";
+// check date range includes a weekend
+$has_weekend_list = [
+	['2023-07-03', '2023-07-05'],
+	['2023-07-03', '2023-07-10'],
+	['2023-07-03', '2023-07-31'],
+	['2023-07-01', '2023-07-03'],
+	['2023-07-01', '2023-07-01'],
+	['2023-07-01', '2023-07-02'],
+	['2023-06-30', '2023-07-01'],
+	['2023-06-30', '2023-06-30'],
+	['2023-07-01', '2023-06-30'],
+];
+foreach ($has_weekend_list as $days) {
+	print "Has Weekend: " . $days[0] . " ~ " . $days[1] . ": "
+		. Dgs::prBl(DateTime::dateRangeHasWeekend($days[0], $days[1])) . "<br>";
+}
 
 print "</body></html>";
 

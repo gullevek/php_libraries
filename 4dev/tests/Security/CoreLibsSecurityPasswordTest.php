@@ -13,6 +13,11 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsSecurityPasswordTest extends TestCase
 {
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function passwordProvider(): array
 	{
 		return [
@@ -21,6 +26,11 @@ final class CoreLibsSecurityPasswordTest extends TestCase
 		];
 	}
 
+	/**
+	 * Note: we need different hash types for PHP versions
+	 *
+	 * @return array
+	 */
 	public function passwordRehashProvider(): array
 	{
 		return [
@@ -63,6 +73,10 @@ final class CoreLibsSecurityPasswordTest extends TestCase
 	 */
 	public function testPasswordRehashCheck(string $input, bool $expected): void
 	{
+		// in PHP 8.4 the length is $12
+		if (PHP_VERSION_ID > 80400) {
+			$input = str_replace('$2y$10$', '$2y$12$', $input);
+		}
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Security\Password::passwordRehashCheck($input)

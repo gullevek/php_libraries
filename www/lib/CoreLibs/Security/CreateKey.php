@@ -36,13 +36,38 @@ class CreateKey
 	}
 
 	/**
+	 * creates a sodium cyptobox keypair as hex string
+	 *
+	 * @return string hex string for the keypair
+	 */
+	public static function createKeyPair(): string
+	{
+		return self::bin2hex(sodium_crypto_box_keypair());
+	}
+
+	/**
+	 * extracts the public key and returns it as hex string from the hex keypari
+	 *
+	 * @param  string $hex_keypair hex encoded keypair
+	 * @return string              hex encoded public key
+	 */
+	public static function getPublicKey(
+		#[\SensitiveParameter]
+		string $hex_keypair
+	): string {
+		return self::bin2hex(sodium_crypto_box_publickey(self::hex2bin($hex_keypair)));
+	}
+
+	/**
 	 * convert binary key to hex string
 	 *
 	 * @param  string $hex_key Convert binary key string to hex
 	 * @return string
 	 */
-	public static function bin2hex(string $hex_key): string
-	{
+	public static function bin2hex(
+		#[\SensitiveParameter]
+		string $hex_key
+	): string {
 		return sodium_bin2hex($hex_key);
 	}
 
@@ -52,8 +77,10 @@ class CreateKey
 	 * @param  string $string_key Convery hex key string to binary
 	 * @return string
 	 */
-	public static function hex2bin(string $string_key): string
-	{
+	public static function hex2bin(
+		#[\SensitiveParameter]
+		string $string_key
+	): string {
 		return sodium_hex2bin($string_key);
 	}
 }
