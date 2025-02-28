@@ -10,5 +10,6 @@ $_SERVER['HTTP_HOST'] = 'soba.tokyo.tequila.jp';
 define('BASE_NAME', '');
 define('SITE_DOMAIN', '');
 define('HOST_NAME', 'soba.tokyo.tequila.jp');
+define('DEFAULT_ENCODING', 'en_US.UTF-8');
 
 // __END__

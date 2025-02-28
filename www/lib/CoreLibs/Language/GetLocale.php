@@ -96,7 +96,7 @@ class GetLocale
 				$encoding = defined('SITE_ENCODING') && !empty(SITE_ENCODING) ?
 					SITE_ENCODING :
 					// or default encoding, if not 'UTF-8'
-					(defined('DEFAULT_ENCODING') && !empty(DEFAULT_ENCODING) ?
+					(defined('DEFAULT_ENCODING') ?
 						DEFAULT_ENCODING : 'UTF-8');
 			}
 		}
