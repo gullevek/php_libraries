@@ -423,14 +423,9 @@ class Login
 
 		// LOGOUT TARGET
 		if (!isset($options['logout_target'])) {
-			if (defined('LOGOUT_TARGET')) {
-				trigger_error(
-					'loginMainCall: LOGOUT_TARGET should not be used',
-					E_USER_DEPRECATED
-				);
-				$options['logout_target'] = LOGOUT_TARGET;
-				$this->logout_target = $options['logout_target'];
-			}
+			// defaults to ''
+			$options['logout_target'] = '';
+			$this->logout_target = $options['logout_target'];
 		}
 
 		// *** PASSWORD SETTINGS

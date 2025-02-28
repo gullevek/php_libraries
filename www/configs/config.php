@@ -53,6 +53,11 @@ for (
 		\gullevek\dotEnv\DotEnv::readEnvFile(
 			$__DIR__PATH . $CONFIG_PATH_PREFIX . CONFIG_PATH
 		);
+		// load target file if it exists
+		\gullevek\dotEnv\DotEnv::readEnvFile(
+			$__DIR__PATH . $CONFIG_PATH_PREFIX . CONFIG_PATH,
+			'.target'
+		);
 		// load master config file that loads all other config files
 		require $__DIR__PATH . $CONFIG_PATH_PREFIX . CONFIG_PATH . 'config.master.php';
 		break;

@@ -152,7 +152,6 @@ final class CoreLibsACLLoginTest extends TestCase
 		// TARGET
 		define('TARGET', 'test');
 		// LOGIN DB SCHEMA
-		// define('LOGIN_DB_SCHEMA', '');
 
 		// SHOULD SET
 		// DEFAULT_ACL_LEVEL (d80)
