@@ -107,7 +107,7 @@ define('COMPILE_ID', 'COMPILE_' . BASE_NAME . '_' . SERVER_NAME_HASH);
 // default lang + encoding
 define('DEFAULT_LOCALE', $_ENV['LOCALE'] ?? 'en_US.UTF-8');
 // default web page encoding setting
-define('DEFAULT_ENCODING', array_pad(explode('.', DEFAULT_LOCALE, 2), 2, 'UTF-8'));
+define('DEFAULT_ENCODING', (string)array_pad(explode('.', DEFAULT_LOCALE, 2), 2, 'UTF-8')[1]);
 
 /************* HOST NAME *****************/
 // get the name without the port
