@@ -206,27 +206,55 @@ function __(string)
 if (!String.prototype.format) {
 	String.prototype.format = function()
 	{
-		var args = arguments;
-		return this.replace(/{(\d+)}/g, function(match, number)
-		{
-			return typeof args[number] != 'undefined' ?
-				args[number] :
-				match
-			;
-		});
+		console.error('[DEPRECATED] use formatString');
+		return formatString(this, arguments);
 	};
 }
 
 /**
+ * simple sprintf formater for replace
+ * usage: "{0} is cool, {1} is not".format("Alpha", "Beta");
+ * First, checks if it isn't implemented yet.
+ * @param  {String} string String with {..} entries
+ * @param  {...any} args   List of replacement
+ * @returns {String}       Escaped string
+ */
+function formatString(string, ...args)
+{
+	return string.replace(/{(\d+)}/g, function(match, number)
+	{
+		return typeof args[number] != 'undefined' ?
+			args[number] :
+			match
+		;
+	});
+}
+
+/**
  * round to digits (float)
- * @param  {Float}  Number.prototype.round Float type number to round
+ * @param  {Number}  Number.prototype.round Float type number to round
  * @param  {Number} prec                   Precision to round to
  * @return {Float}                         Rounded number
  */
 if (Number.prototype.round) {
 	Number.prototype.round = function (prec) {
-		return Math.round(this * Math.pow(10, prec)) / Math.pow(10, prec);
+		console.error('[DEPRECATED] use roundPrecision');
+		return roundPrecision(this, prec);
 	};
+}
+
+/**
+ * round to digits (float)
+ * @param  {Number} number    Float type number to round
+ * @param  {Number} precision Precision to round to
+ * @return {Number}           Rounded number
+ */
+function roundPrecision(number, precision)
+{
+	if (!isNaN(number) || !isNaN(precision)) {
+		return number;
+	}
+	return Math.round(number * Math.pow(10, precision)) / Math.pow(10, precision);
 }
 
 /**
@@ -253,46 +281,68 @@ function convertLBtoBR(string) // eslint-disable-line no-unused-vars
 
 /**
  * escape HTML string
- * @param  {String} !String.prototype.escapeHTML HTML data string to be escaped
- * @return {String}                              escaped string
+ * @param  {String} String.prototype.escapeHTML HTML data string to be escaped
+ * @return {String}                             escaped string
  */
 if (!String.prototype.escapeHTML) {
 	String.prototype.escapeHTML = function() {
-		return this.replace(/[&<>"'/]/g, function (s) {
-			var entityMap = {
-				'&': '&amp;',
-				'<': '&lt;',
-				'>': '&gt;',
-				'"': '&quot;',
-				'\'': '&#39;',
-				'/': '&#x2F;'
-			};
-
-			return entityMap[s];
-		});
+		console.error('[DEPRECATED] use escapeHtml');
+		return escapeHtml(this);
 	};
 }
 
 /**
  * unescape a HTML encoded string
- * @param  {String} !String.prototype.unescapeHTML data with escaped entries
- * @return {String}                                HTML formated string
+ * @param  {String} String.prototype.unescapeHTML data with escaped entries
+ * @return {String}                               HTML formated string
  */
 if (!String.prototype.unescapeHTML) {
 	String.prototype.unescapeHTML = function() {
-		return this.replace(/&[#\w]+;/g, function (s) {
-			var entityMap = {
-				'&amp;': '&',
-				'&lt;': '<',
-				'&gt;': '>',
-				'&quot;': '"',
-				'&#39;': '\'',
-				'&#x2F;': '/'
-			};
-
-			return entityMap[s];
-		});
+		console.error('[DEPRECATED] use unescapeHtml');
+		return unescapeHtml(this);
 	};
+}
+
+/**
+ * Escapes HTML in string
+ * @param {String} string Text to escape HTML in
+ * @returns {String}
+ */
+function escapeHtml(string)
+{
+	return string.replace(/[&<>"'/]/g, function (s) {
+		var entityMap = {
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;',
+			'"': '&quot;',
+			'\'': '&#39;',
+			'/': '&#x2F;'
+		};
+
+		return entityMap[s];
+	});
+}
+
+/**
+ * Unescape a HTML encoded string
+ * @param {String} string Text to unescape HTML in
+ * @returns {String}
+ */
+function unescapeHtml(string)
+{
+	return string.replace(/&[#\w]+;/g, function (s) {
+		var entityMap = {
+			'&amp;': '&',
+			'&lt;': '<',
+			'&gt;': '>',
+			'&quot;': '"',
+			'&#39;': '\'',
+			'&#x2F;': '/'
+		};
+
+		return entityMap[s];
+	});
 }
 
 /**
