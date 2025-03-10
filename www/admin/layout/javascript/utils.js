@@ -1,4 +1,4 @@
-// www/admin/layout/js-dev/utils/JavaScriptHelpers.mjs
+// src/utils/JavaScriptHelpers.mjs
 function errorCatch(err) {
   if (err.stack) {
     if (err.lineNumber) {
@@ -41,15 +41,24 @@ function isObject(val) {
   return typeof val === "function" || typeof val === "object";
 }
 function getObjectCount(object) {
+  if (!isObject(object)) {
+    return -1;
+  }
   return Object.keys(object).length;
 }
 function keyInObject(key, object) {
+  return objectKeyExists(object, key);
+}
+function objectKeyExists(object, key) {
   return Object.prototype.hasOwnProperty.call(object, key) ? true : false;
 }
 function getKeyByValue(object, value) {
   return Object.keys(object).find((key) => object[key] === value) ?? "";
 }
 function valueInObject(object, value) {
+  return objectValueExists(object, value);
+}
+function objectValueExists(object, value) {
   return Object.keys(object).find((key) => object[key] === value) ? true : false;
 }
 function deepCopyFunction(inObject) {
@@ -65,7 +74,7 @@ function deepCopyFunction(inObject) {
   return outObject;
 }
 
-// www/admin/layout/js-dev/utils/DomHelpers.mjs
+// src/utils/DomHelpers.mjs
 function loadEl(el_id) {
   let el = document.getElementById(el_id);
   if (el === null) {
@@ -103,7 +112,7 @@ function exists(id) {
   return $("#" + id).length > 0 ? true : false;
 }
 
-// www/admin/layout/js-dev/utils/HtmlElementCreator.mjs
+// src/utils/HtmlElementCreator.mjs
 var HtmlElementCreator = class {
   /**
    * reates object for DOM element creation flow
@@ -324,7 +333,7 @@ var HtmlElementCreator = class {
   }
 };
 
-// www/admin/layout/js-dev/utils/HtmlHelpers.mjs
+// src/utils/HtmlHelpers.mjs
 var dom = new HtmlElementCreator();
 function escapeHtml(string) {
   return string.replace(/[&<>"'/]/g, function(s) {
@@ -453,9 +462,9 @@ function html_options_refill(name, data, sort = "") {
   }
 }
 
-// www/admin/layout/js-dev/utils/MathHelpers.mjs
+// src/utils/MathHelpers.mjs
 function dec2hex(dec) {
-  return ("0" + dec.toString(16)).substring(-2);
+  return ("0x" + dec.toString(16)).substring(-2);
 }
 function getRandomIntInclusive(min, max) {
   min = Math.ceil(min);
@@ -463,13 +472,13 @@ function getRandomIntInclusive(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 function roundPrecision(number, precision) {
-  if (!isNaN(number) || !isNaN(precision)) {
+  if (isNaN(number) || isNaN(precision)) {
     return number;
   }
   return Math.round(number * Math.pow(10, precision)) / Math.pow(10, precision);
 }
 
-// www/admin/layout/js-dev/utils/StringHelpers.mjs
+// src/utils/StringHelpers.mjs
 function formatString(string, ...args) {
   return string.replace(/{(\d+)}/g, function(match, number) {
     return typeof args[number] != "undefined" ? args[number] : match;
@@ -484,13 +493,13 @@ function convertLBtoBR(string) {
   return string.replace(/(?:\r\n|\r|\n)/g, "<br>");
 }
 
-// www/admin/layout/js-dev/utils/DateTimeHelpers.mjs
+// src/utils/DateTimeHelpers.mjs
 function getTimestamp() {
   var date = /* @__PURE__ */ new Date();
   return date.getTime();
 }
 
-// www/admin/layout/js-dev/utils/UniqIdGenerators.mjs
+// src/utils/UniqIdGenerators.mjs
 function generateId(len) {
   var arr = new Uint8Array((len || 40) / 2);
   (window.crypto || // @ts-ignore
@@ -501,7 +510,7 @@ function randomIdF() {
   return Math.random().toString(36).substring(2);
 }
 
-// www/admin/layout/js-dev/utils/ResizingAndMove.mjs
+// src/utils/ResizingAndMove.mjs
 function getWindowSize() {
   var width, height;
   width = window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth);
@@ -570,9 +579,12 @@ function goTo(target) {
   });
 }
 
-// www/admin/layout/js-dev/utils/FormatBytes.mjs
+// src/utils/FormatBytes.mjs
 function formatBytes(bytes) {
   var i = -1;
+  if (typeof bytes === "bigint") {
+    bytes = Number(bytes);
+  }
   do {
     bytes = bytes / 1024;
     i++;
@@ -580,14 +592,22 @@ function formatBytes(bytes) {
   return Math.round(bytes * Math.pow(10, 2)) / Math.pow(10, 2) + ["kB", "MB", "GB", "TB", "PB", "EB"][i];
 }
 function formatBytesLong(bytes) {
+  if (typeof bytes === "bigint") {
+    bytes = Number(bytes);
+  }
   if (isNaN(bytes)) {
     return bytes.toString();
   }
+  let negative = false;
+  if (bytes < 0) {
+    negative = true;
+    bytes *= -1;
+  }
   var i = Math.floor(Math.log(bytes) / Math.log(1024));
   var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-  return ((bytes / Math.pow(1024, i)).toFixed(2) + " " + sizes[i]).toString();
+  return (negative ? "-" : "") + ((bytes / Math.pow(1024, i)).toFixed(2) + " " + sizes[i]).toString();
 }
-function stringByteFormat(bytes) {
+function stringByteFormat(bytes, raw = false) {
   if (!(typeof bytes === "string" || bytes instanceof String)) {
     return bytes.toString();
   }
@@ -601,10 +621,13 @@ function stringByteFormat(bytes) {
       bytes = m1 * Math.pow(1024, valid_units.indexOf(m2));
     }
   }
-  return bytes;
+  if (raw) {
+    return bytes;
+  }
+  return Math.round(bytes);
 }
 
-// www/admin/layout/js-dev/utils/UrlParser.mjs
+// src/utils/UrlParser.mjs
 function parseQueryString(query = "", return_key = "") {
   if (!query) {
     query = window.location.search.substring(1);
@@ -662,30 +685,7 @@ function getQueryStringParam(search = "", query = "", single = false) {
   return param;
 }
 
-// www/admin/layout/js-dev/utils/l10nTranslation.mjs
-var l10nTranslation = class {
-  #i18n = {};
-  constructor(i18n2) {
-    this.#i18n = i18n2;
-  }
-  /**
-   * uses the i18n object created in the translation template
-   * that is filled from gettext in PHP
-   * @param  {String} string text to translate
-   * @return {String}        translated text (based on PHP selected language)
-   */
-  __(string) {
-    if (typeof this.#i18n !== "undefined" && isObject(this.#i18n) && this.#i18n[string]) {
-      return this.#i18n[string];
-    } else {
-      return string;
-    }
-  }
-};
-
-// www/admin/layout/js-dev/utils/LoginMenu.mjs
-var hec = new HtmlElementCreator();
-var l10n = new l10nTranslation(i18n ?? {});
+// src/utils/LoginLogout.mjs
 function loginLogout() {
   const form = document.createElement("form");
   form.method = "post";
@@ -697,58 +697,8 @@ function loginLogout() {
   document.body.appendChild(form);
   form.submit();
 }
-function createLoginRow(login_string, header_id = "mainHeader") {
-  if (exists(header_id)) {
-    if (!exists("loginRow")) {
-      $("#" + header_id).html(hec.phfo(hec.cel("div", "loginRow", "", ["loginRow", "flx-spbt"])));
-    }
-    $("#loginRow").html(hec.phfo(hec.cel("div", "loginRow-name", login_string)));
-    $("#loginRow").append(hec.phfo(hec.cel("div", "loginRow-info", "")));
-    $("#loginRow").append(hec.phfo(
-      hec.aelx(
-        // outer div
-        hec.cel("div", "loginRow-logout"),
-        // inner element
-        hec.cel("input", "logout", "", [], {
-          value: l10n.__("Logout"),
-          type: "button",
-          onClick: "loginLogout()"
-        })
-      )
-    ));
-  }
-}
-function createNavMenu(nav_menu, header_id = "mainHeader") {
-  if (isObject(nav_menu) && getObjectCount(nav_menu) > 1) {
-    if (!exists("menuRow")) {
-      $("#" + header_id).html(hec.phfo(hec.cel("div", "menuRow", "", ["menuRow", "flx-s"])));
-    }
-    var content = [];
-    $.each(nav_menu, function(key, item) {
-      if (key != 0) {
-        content.push(hec.phfo(hec.cel("div", "", "&middot;", ["pd-2"])));
-      }
-      if (item.enabled) {
-        if (window.location.href.indexOf(item.url) != -1) {
-          item.selected = 1;
-        }
-        content.push(hec.phfo(
-          hec.aelx(
-            hec.cel("div"),
-            hec.cel("a", "", item.name, ["pd-2"].concat(item.selected ? "highlight" : ""), {
-              href: item.url
-            })
-          )
-        ));
-      }
-    });
-    $("#menuRow").html(content.join(""));
-  } else {
-    $("#menuRow").hide();
-  }
-}
 
-// www/admin/layout/js-dev/utils/ActionIndicatorOverlayBox.mjs
+// src/utils/ActionIndicatorOverlayBox.mjs
 function actionIndicator(loc, overlay = true) {
   if ($("#indicator").is(":visible")) {
     this.actionIndicatorHide(loc, overlay);
@@ -919,7 +869,28 @@ var ActionIndicatorOverlayBox = class {
   }
 };
 
-// www/admin/layout/js-dev/utils/ActionBox.mjs
+// src/utils/l10nTranslation.mjs
+var l10nTranslation = class {
+  #i18n = {};
+  constructor(i18n2) {
+    this.#i18n = i18n2;
+  }
+  /**
+   * uses the i18n object created in the translation template
+   * that is filled from gettext in PHP
+   * @param  {String} string text to translate
+   * @return {String}        translated text (based on PHP selected language)
+   */
+  __(string) {
+    if (typeof this.#i18n !== "undefined" && isObject(this.#i18n) && this.#i18n[string]) {
+      return this.#i18n[string];
+    } else {
+      return string;
+    }
+  }
+};
+
+// src/utils/ActionBox.mjs
 var ActionBox = class {
   // open overlay boxes counter for z-index
   zIndex = {
@@ -941,9 +912,9 @@ var ActionBox = class {
    * @param {Object} hec  HtmlElementCreator
    * @param {Object} l10n l10nTranslation
    */
-  constructor(hec3, l10n3) {
-    this.hec = hec3;
-    this.l10n = l10n3;
+  constructor(hec2, l10n2) {
+    this.hec = hec2;
+    this.l10n = l10n2;
   }
   /**
    * Show an action box
@@ -1269,11 +1240,92 @@ var ActionBox = class {
   }
 };
 
-// www/admin/layout/js-dev/utilsAll.mjs
+// src/utils/LoginNavMenu.mjs
+var LoginNavMenu = class {
+  hec;
+  l10n;
+  /**
+   * action box creator
+   * @param {Object} hec  HtmlElementCreator
+   * @param {Object} l10n l10nTranslation
+   */
+  constructor(hec2, l10n2) {
+    this.hec = hec2;
+    this.l10n = l10n2;
+  }
+  /**
+   * create login string and logout button elements
+   * @param {String} login_string             the login string to show on the left
+   * @param {String} [header_id='mainHeader'] the target for the main element block
+   *                                          if not set mainHeader is assumed
+   *                                          this is the target div for the "loginRow"
+   */
+  createLoginRow(login_string, header_id = "mainHeader") {
+    if (exists(header_id)) {
+      if (!exists("loginRow")) {
+        $("#" + header_id).html(this.hec.phfo(this.hec.cel("div", "loginRow", "", ["loginRow", "flx-spbt"])));
+      }
+      $("#loginRow").html(this.hec.phfo(this.hec.cel("div", "loginRow-name", login_string)));
+      $("#loginRow").append(this.hec.phfo(this.hec.cel("div", "loginRow-info", "")));
+      $("#loginRow").append(this.hec.phfo(
+        this.hec.aelx(
+          // outer div
+          this.hec.cel("div", "loginRow-logout"),
+          // inner element
+          this.hec.cel("input", "logout", "", [], {
+            value: this.l10n.__("Logout"),
+            type: "button",
+            onClick: "loginLogout()"
+          })
+        )
+      ));
+    }
+  }
+  /**
+   * create the top nav menu that switches physical between pages
+   * (edit access data based)
+   * @param {Object} nav_menu                 the built nav menu with highlight info
+   * @param {String} [header_id='mainHeader'] the target for the main element block
+   *                                          if not set mainHeader is assumed
+   *                                          this is the target div for the "menuRow"
+   */
+  createNavMenu(nav_menu, header_id = "mainHeader") {
+    if (isObject(nav_menu) && getObjectCount(nav_menu) > 1) {
+      if (!exists("menuRow")) {
+        $("#" + header_id).html(this.hec.phfo(this.hec.cel("div", "menuRow", "", ["menuRow", "flx-s"])));
+      }
+      var content = [];
+      $.each(nav_menu, function(key, item) {
+        if (key != 0) {
+          content.push(this.hec.phfo(this.hec.cel("div", "", "&middot;", ["pd-2"])));
+        }
+        if (item.enabled) {
+          if (window.location.href.indexOf(item.url) != -1) {
+            item.selected = 1;
+          }
+          content.push(this.hec.phfo(
+            this.hec.aelx(
+              this.hec.cel("div"),
+              this.hec.cel("a", "", item.name, ["pd-2"].concat(item.selected ? "highlight" : ""), {
+                href: item.url
+              })
+            )
+          ));
+        }
+      });
+      $("#menuRow").html(content.join(""));
+    } else {
+      $("#menuRow").hide();
+    }
+  }
+};
+
+// src/utils.mjs
 var aiob = new ActionIndicatorOverlayBox();
-var hec2 = new HtmlElementCreator();
-var l10n2 = new l10nTranslation(i18n ?? {});
-var ab = new ActionBox(hec2, l10n2);
+var hec = new HtmlElementCreator();
+var l10n = new l10nTranslation(typeof i18n === "undefined" ? {} : i18n);
+var ab = new ActionBox(hec, l10n);
+var lnm = new LoginNavMenu(hec, l10n);
 if (!String.prototype.format) {
   String.prototype.format = function() {
     console.error("[DEPRECATED] use StringHelpers.formatString");
@@ -1338,7 +1390,7 @@ function goTo2(target) {
   goTo(target);
 }
 function __(string) {
-  return l10n2.__(string);
+  return l10n.__(string);
 }
 function numberWithCommas2(x) {
   return numberWithCommas(x);
@@ -1443,34 +1495,34 @@ function clearCallActionBox() {
   aiob.clearCallActionBox();
 }
 function cel(tag, id = "", content = "", css = [], options = {}) {
-  return hec2.cel(tag, id, content, css, options);
+  return hec.cel(tag, id, content, css, options);
 }
 function ael(base, attach, id = "") {
-  return hec2.ael(base, attach, id);
+  return hec.ael(base, attach, id);
 }
 function aelx(base, ...attach) {
-  return hec2.aelx(base, attach);
+  return hec.aelx(base, attach);
 }
 function aelxar(base, attach) {
-  return hec2.aelxar(base, attach);
+  return hec.aelxar(base, attach);
 }
 function rel(base) {
-  return hec2.rel(base);
+  return hec.rel(base);
 }
 function rcssel(_element, css) {
-  return hec2.rcssel(_element, css);
+  return hec.rcssel(_element, css);
 }
 function acssel(_element, css) {
-  return hec2.acssel(_element, css);
+  return hec.acssel(_element, css);
 }
 function scssel(_element, rcss, acss) {
-  hec2.scssel(_element, rcss, acss);
+  hec.scssel(_element, rcss, acss);
 }
 function phfo(tree) {
-  return hec2.phfo(tree);
+  return hec.phfo(tree);
 }
 function phfa(list) {
-  return hec2.phfa(list);
+  return hec.phfa(list);
 }
 function html_options2(name, data, selected = "", options_only = false, return_string = false, sort = "") {
   return html_options(name, data, selected, options_only, return_string, sort);
@@ -1499,11 +1551,11 @@ function getQueryStringParam2(search = "", query = "", single = false) {
 function loginLogout2() {
   loginLogout();
 }
-function createLoginRow2(login_string, header_id = "mainHeader") {
-  createLoginRow(login_string, header_id);
+function createLoginRow(login_string, header_id = "mainHeader") {
+  lnm.createLoginRow(login_string, header_id);
 }
-function createNavMenu2(nav_menu, header_id = "mainHeader") {
-  createNavMenu(nav_menu, header_id);
+function createNavMenu(nav_menu, header_id = "mainHeader") {
+  lnm.createNavMenu(nav_menu, header_id);
 }
 function showFillActionBox(target_id = "actionBox", content = "", action_box_css = [], override = 0, content_override = 0) {
   ab.showFillActionBox(target_id, content, action_box_css, override, content_override);

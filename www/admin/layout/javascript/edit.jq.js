@@ -1,5 +1,9 @@
-/* general edit javascript */
-/* jquery version */
+/*
+general edit javascript
+jquery version
+*/
+
+/** @deprecated Do not use this anymore, use utils.js or utils.min.js */
 
 /* global i18n */
 
@@ -21,6 +25,7 @@ var GL_OB_BASE = 100;
  * @param {string} el_id Element ID to get
  * @returns {HTMLElement}
  * @throws Error
+ * @deprecated use utils.js
  */
 function loadEl(el_id)
 {
@@ -36,6 +41,7 @@ function loadEl(el_id)
  * @param {String} theURL   the url
  * @param {String} winName  window name
  * @param {Object} features popup features
+ * @deprecated use utils.js
  */
 function pop(theURL, winName, features) // eslint-disable-line no-unused-vars
 {
@@ -46,6 +52,7 @@ function pop(theURL, winName, features) // eslint-disable-line no-unused-vars
 /**
  * automatically resize a text area based on the amount of lines in it
  * @param {string} ta_id element id
+ * @deprecated use utils.js
  */
 function expandTA(ta_id) // eslint-disable-line no-unused-vars
 {
@@ -71,6 +78,7 @@ function expandTA(ta_id) // eslint-disable-line no-unused-vars
 /**
  * wrapper to get the real window size for the current browser window
  * @return {Object} object with width/height
+ * @deprecated use utils.js
  */
 function getWindowSize()
 {
@@ -86,6 +94,7 @@ function getWindowSize()
 /**
  * wrapper to get the correct scroll offset
  * @return {Object} object with x/y px
+ * @deprecated use utils.js
  */
 function getScrollOffset()
 {
@@ -101,6 +110,7 @@ function getScrollOffset()
 /**
  * wrapper to get the correct scroll offset for opener page (from popup)
  * @return {Object} object with x/y px
+ * @deprecated use utils.js
  */
 function getScrollOffsetOpener() // eslint-disable-line no-unused-vars
 {
@@ -118,6 +128,7 @@ function getScrollOffsetOpener() // eslint-disable-line no-unused-vars
  * @param {String}  id   element to center
  * @param {Boolean} left if true centers to the middle from the left
  * @param {Boolean} top  if true centers to the middle from the top
+ * @deprecated use utils.js
  */
 function setCenter(id, left, top)
 {
@@ -155,6 +166,7 @@ function setCenter(id, left, top)
  * @param {Number} [offset=0]         offset from top, default is 0 (px)
  * @param {Number} [duration=500]     animation time, default 500ms
  * @param {String} [base='body,html'] base element for offset scroll
+ * @deprecated use utils.js
  */
 function goToPos(element, offset = 0, duration = 500, base = 'body,html') // eslint-disable-line no-unused-vars
 {
@@ -173,6 +185,7 @@ function goToPos(element, offset = 0, duration = 500, base = 'body,html') // esl
  * go to element, scroll
  * non jquery
  * @param {string} target
+ * @deprecated use utils.js
 */
 function goTo(target) // eslint-disable-line no-unused-vars
 {
@@ -186,6 +199,7 @@ function goTo(target) // eslint-disable-line no-unused-vars
  * that is filled from gettext in PHP
  * @param  {String} string text to translate
  * @return {String}        translated text (based on PHP selected language)
+ * @deprecated use utils.js
  */
 function __(string)
 {
@@ -202,6 +216,7 @@ function __(string)
  * First, checks if it isn't implemented yet.
  * @param  {String} String.prototype.format string with elements to be replaced
  * @return {String}                         Formated string
+ * @deprecated use utils.js
  */
 if (!String.prototype.format) {
 	String.prototype.format = function()
@@ -218,6 +233,7 @@ if (!String.prototype.format) {
  * @param  {String} string String with {..} entries
  * @param  {...any} args   List of replacement
  * @returns {String}       Escaped string
+ * @deprecated use utils.js
  */
 function formatString(string, ...args)
 {
@@ -235,6 +251,7 @@ function formatString(string, ...args)
  * @param  {Number}  Number.prototype.round Float type number to round
  * @param  {Number} prec                   Precision to round to
  * @return {Float}                         Rounded number
+ * @deprecated use utils.js
  */
 if (Number.prototype.round) {
 	Number.prototype.round = function (prec) {
@@ -248,6 +265,7 @@ if (Number.prototype.round) {
  * @param  {Number} number    Float type number to round
  * @param  {Number} precision Precision to round to
  * @return {Number}           Rounded number
+ * @deprecated use utils.js
  */
 function roundPrecision(number, precision)
 {
@@ -261,6 +279,7 @@ function roundPrecision(number, precision)
  * formats flat number 123456 to 123,456
  * @param  {Number} x number to be formated
  * @return {String}   formatted with , in thousands
+ * @deprecated use utils.js
  */
 function numberWithCommas(x) // eslint-disable-line no-unused-vars
 {
@@ -273,6 +292,7 @@ function numberWithCommas(x) // eslint-disable-line no-unused-vars
  * converts line breaks to br
  * @param  {String} string any string
  * @return {String}        string with <br>
+ * @deprecated use utils.js
  */
 function convertLBtoBR(string) // eslint-disable-line no-unused-vars
 {
@@ -283,6 +303,7 @@ function convertLBtoBR(string) // eslint-disable-line no-unused-vars
  * escape HTML string
  * @param  {String} String.prototype.escapeHTML HTML data string to be escaped
  * @return {String}                             escaped string
+ * @deprecated use utils.js
  */
 if (!String.prototype.escapeHTML) {
 	String.prototype.escapeHTML = function() {
@@ -295,6 +316,7 @@ if (!String.prototype.escapeHTML) {
  * unescape a HTML encoded string
  * @param  {String} String.prototype.unescapeHTML data with escaped entries
  * @return {String}                               HTML formated string
+ * @deprecated use utils.js
  */
 if (!String.prototype.unescapeHTML) {
 	String.prototype.unescapeHTML = function() {
@@ -307,6 +329,7 @@ if (!String.prototype.unescapeHTML) {
  * Escapes HTML in string
  * @param {String} string Text to escape HTML in
  * @returns {String}
+ * @deprecated use utils.js
  */
 function escapeHtml(string)
 {
@@ -328,6 +351,7 @@ function escapeHtml(string)
  * Unescape a HTML encoded string
  * @param {String} string Text to unescape HTML in
  * @returns {String}
+ * @deprecated use utils.js
  */
 function unescapeHtml(string)
 {
@@ -348,6 +372,7 @@ function unescapeHtml(string)
 /**
  * returns current timestamp (unix timestamp)
  * @return {Number} timestamp (in milliseconds)
+ * @deprecated use utils.js
  */
 function getTimestamp() // eslint-disable-line no-unused-vars
 {
@@ -360,6 +385,7 @@ function getTimestamp() // eslint-disable-line no-unused-vars
  * i.e. 0-255 -> '00'-'ff'
  * @param  {Number} dec decimal string
  * @return {String}     hex encdoded number
+ * @deprecated use utils.js
  */
 function dec2hex(dec)
 {
@@ -371,6 +397,7 @@ function dec2hex(dec)
  * only works on mondern browsers
  * @param  {Number} len length of unique id string
  * @return {String}     random string in length of len
+ * @deprecated use utils.js
  */
 function generateId(len) // eslint-disable-line no-unused-vars
 {
@@ -384,6 +411,7 @@ function generateId(len) // eslint-disable-line no-unused-vars
  * works on all browsers
  * after many runs it will create duplicates
  * @return {String} not true random string
+ * @deprecated use utils.js
  */
 function randomIdF() // eslint-disable-line no-unused-vars
 {
@@ -397,6 +425,7 @@ function randomIdF() // eslint-disable-line no-unused-vars
  * @param  {Number} min minimum int number inclusive
  * @param  {Number} max maximumg int number inclusive
  * @return {Number}     Random number
+ * @deprecated use utils.js
  */
 function getRandomIntInclusive(min, max) // eslint-disable-line no-unused-vars
 {
@@ -410,6 +439,7 @@ function getRandomIntInclusive(min, max) // eslint-disable-line no-unused-vars
  * check if name is a function
  * @param  {string}  name Name of function to check if exists
  * @return {Boolean}      true/false
+ * @deprecated use utils.js
  */
 function isFunction(name) // eslint-disable-line no-unused-vars
 {
@@ -429,6 +459,7 @@ function isFunction(name) // eslint-disable-line no-unused-vars
  * @param  {mixed}  context      context (window or first namespace)
  *                               hidden next are all the arguments
  * @return {mixed}               Return values from functon
+ * @deprecated use utils.js
  */
 function executeFunctionByName(functionName, context /*, args */) // eslint-disable-line no-unused-vars
 {
@@ -445,6 +476,7 @@ function executeFunctionByName(functionName, context /*, args */) // eslint-disa
  * checks if a variable is an object
  * @param  {Mixed}   val possible object
  * @return {Boolean}     true/false if it is an object or not
+ * @deprecated use utils.js
  */
 function isObject(val)
 {
@@ -458,6 +490,7 @@ function isObject(val)
  * get the length of an object (entries)
  * @param  {Object} object object to check
  * @return {Number} number of entry
+ * @deprecated use utils.js
  */
 function getObjectCount(object)
 {
@@ -469,6 +502,7 @@ function getObjectCount(object)
  * @param  {String}  key    key name
  * @param  {Object}  object object to search key in
  * @return {Boolean}        true/false if key exists in object
+ * @deprecated use utils.js
  */
 function keyInObject(key, object)
 {
@@ -480,6 +514,7 @@ function keyInObject(key, object)
  * @param  {Object} object object to search value in
  * @param  {Mixed}  value  any value (String, Number, etc)
  * @return {String}        the key found for the first matching value
+ * @deprecated use utils.js
  */
 function getKeyByValue(object, value) // eslint-disable-line no-unused-vars
 {
@@ -494,6 +529,7 @@ function getKeyByValue(object, value) // eslint-disable-line no-unused-vars
  * @param  {Object}  object object to search value in
  * @param  {Mixed}   value  any value (String, Number, etc)
  * @return {Boolean}        true on value found, false on not found
+ * @deprecated use utils.js
  */
 function valueInObject(object, value) // eslint-disable-line no-unused-vars
 {
@@ -509,6 +545,7 @@ function valueInObject(object, value) // eslint-disable-line no-unused-vars
  * or if JSON.parse(JSON.stringify(obj)) is failing
  * @param  {Object} inObject Object to copy
  * @return {Object}          Copied Object
+ * @deprecated use utils.js
  */
 function deepCopyFunction(inObject)
 {
@@ -532,6 +569,7 @@ function deepCopyFunction(inObject)
  * checks if a DOM element actually exists
  * @param  {String}  id Element id to check for
  * @return {Boolean}    true if element exists, false on failure
+ * @deprecated use utils.js
  */
 function exists(id)
 {
@@ -543,6 +581,7 @@ function exists(id)
  * currently precision is fixed, if dynamic needs check for max/min precision
  * @param  {Number} bytes bytes in int
  * @return {String}       string in GB/MB/KB
+ * @deprecated use utils.js
  */
 function formatBytes(bytes) // eslint-disable-line no-unused-vars
 {
@@ -559,6 +598,7 @@ function formatBytes(bytes) // eslint-disable-line no-unused-vars
  * like formatBytes, but returns bytes for <1KB and not 0.n KB
  * @param  {Number} bytes bytes in int
  * @return {String}       string in GB/MB/KB
+ * @deprecated use utils.js
  */
 function formatBytesLong(bytes) // eslint-disable-line no-unused-vars
 {
@@ -571,6 +611,7 @@ function formatBytesLong(bytes) // eslint-disable-line no-unused-vars
  * Convert a string with B/K/M/etc into a byte number
  * @param  {String|Number} bytes Any string with B/K/M/etc
  * @return {String|Number}       A byte number, or original string as is
+ * @deprecated use utils.js
  */
 function stringByteFormat(bytes) // eslint-disable-line no-unused-vars
 {
@@ -601,6 +642,7 @@ function stringByteFormat(bytes) // eslint-disable-line no-unused-vars
 /**
  * prints out error messages based on data available from the browser
  * @param {Object} err error from try/catch block
+ * @deprecated use utils.js
  */
 function errorCatch(err)
 {
@@ -644,6 +686,7 @@ function errorCatch(err)
  * @param {String}  loc            location name for action indicator
  *                                 default empty. for console.log
  * @param {Boolean} [overlay=true] override the auto hide/show over the overlay div block
+ * @deprecated use utils.js
  */
 function actionIndicator(loc, overlay = true) // eslint-disable-line no-unused-vars
 {
@@ -660,6 +703,7 @@ function actionIndicator(loc, overlay = true) // eslint-disable-line no-unused-v
  * @param {String}  loc            location name for action indicator
  *                                 default empty. for console.log
  * @param {Boolean} [overlay=true] override the auto hide/show over the overlay div block
+ * @deprecated use utils.js
  */
 function actionIndicatorShow(loc, overlay = true)
 {
@@ -682,6 +726,7 @@ function actionIndicatorShow(loc, overlay = true)
  * @param {String}  loc            location name for action indicator
  *                                 default empty. for console.log
  * @param {Boolean} [overlay=true] override the auto hide/show over the overlay div block
+ * @deprecated use utils.js
  */
 function actionIndicatorHide(loc, overlay = true)
 {
@@ -694,6 +739,7 @@ function actionIndicatorHide(loc, overlay = true)
 
 /**
  * shows the overlay box or if already visible, bumps the zIndex to 100
+ * @deprecated use utils.js
  */
 function overlayBoxShow()
 {
@@ -708,6 +754,7 @@ function overlayBoxShow()
 
 /**
  * hides the overlay box or if zIndex is 100 bumps it down to previous level
+ * @deprecated use utils.js
  */
 function overlayBoxHide()
 {
@@ -721,6 +768,7 @@ function overlayBoxHide()
 
 /**
  * position the overlay block box and shows it
+ * @deprecated use utils.js
  */
 function setOverlayBox() // eslint-disable-line no-unused-vars
 {
@@ -731,6 +779,7 @@ function setOverlayBox() // eslint-disable-line no-unused-vars
 
 /**
  * opposite of set, always hides overlay box
+ * @deprecated use utils.js
  */
 function hideOverlayBox() // eslint-disable-line no-unused-vars
 {
@@ -741,6 +790,7 @@ function hideOverlayBox() // eslint-disable-line no-unused-vars
 
 /**
  * the abort call, clears the action box and hides it and the overlay box
+ * @deprecated use utils.js
  */
 function ClearCall() // eslint-disable-line no-unused-vars
 {
@@ -762,6 +812,7 @@ function ClearCall() // eslint-disable-line no-unused-vars
  *   zIndex of 1000
  * - indicator is page centered
  * @param {String} loc ID string, only used for console log
+ * @deprecated use utils.js
  */
 function showActionIndicator(loc) // eslint-disable-line no-unused-vars
 {
@@ -800,6 +851,7 @@ function showActionIndicator(loc) // eslint-disable-line no-unused-vars
  * the overlayBox is not hidden but the zIndex
  * is set to this value
  * @param {String} loc ID string, only used for console log
+ * @deprecated use utils.js
  */
 function hideActionIndicator(loc) // eslint-disable-line no-unused-vars
 {
@@ -823,6 +875,7 @@ function hideActionIndicator(loc) // eslint-disable-line no-unused-vars
 /**
  * checks if overlayBox exists, if not it is
  * added as hidden item at the body end
+ * @deprecated use utils.js
  */
 function checkOverlayExists()
 {
@@ -840,6 +893,7 @@ function checkOverlayExists()
  * if not visible show and set zIndex to 10 (GL_OB_BASE)
  * if visible, add +1 to the GL_OB_S variable and
  * up zIndex by this value
+ * @deprecated use utils.js
  */
 function showOverlayBoxLayers(el_id) // eslint-disable-line no-unused-vars
 {
@@ -872,6 +926,7 @@ function showOverlayBoxLayers(el_id) // eslint-disable-line no-unused-vars
  * and set zIndex and GL_OB_S to 0
  * else just set zIndex to the new GL_OB_S value
  * @param {String} el_id Target to hide layer
+ * @deprecated use utils.js
  */
 function hideOverlayBoxLayers(el_id='')
 {
@@ -897,6 +952,7 @@ function hideOverlayBoxLayers(el_id='')
 
 /**
  * only for single action box
+ * @deprecated use utils.js
  */
 function clearCallActionBox() // eslint-disable-line no-unused-vars
 {
@@ -914,6 +970,7 @@ function clearCallActionBox() // eslint-disable-line no-unused-vars
  * @param  {Array}  [css=[]]     array for css tags
  * @param  {Object} [options={}] anything else (value, placeholder, OnClick, style)
  * @return {Object}              created element as an object
+ * @deprecated use utils.js
  */
 function cel(tag, id = '', content = '', css = [], options = {})
 {
@@ -934,6 +991,7 @@ function cel(tag, id = '', content = '', css = [], options = {})
  * @param  {Object} attach  the object to be attached
  * @param  {String} [id=''] optional id, if given search in base for this id and attach there
  * @return {Object}         "none", technically there is no return needed as it is global attach
+ * @deprecated use utils.js
  */
 function ael(base, attach, id = '')
 {
@@ -964,6 +1022,7 @@ function ael(base, attach, id = '')
  * @param  {Object}    base   object to where we attach the elements
  * @param  {...Object} attach attach 1..n: attach directly to the base element those attachments
  * @return {Object}           "none", technically there is no return needed, global attach
+ * @deprecated use utils.js
  */
 function aelx(base, ...attach)
 {
@@ -980,6 +1039,7 @@ function aelx(base, ...attach)
  * @param  {Object} base   object to where we attach the elements
  * @param  {Array}  attach array of objects to attach
  * @return {Object}        "none", technically there is no return needed, global attach
+ * @deprecated use utils.js
  */
 function aelxar(base, attach) // eslint-disable-line no-unused-vars
 {
@@ -994,6 +1054,7 @@ function aelxar(base, attach) // eslint-disable-line no-unused-vars
  * resets the sub elements of the base element given
  * @param  {Object} base cel created element
  * @return {Object}      returns reset base element
+ * @deprecated use utils.js
  */
 function rel(base) // eslint-disable-line no-unused-vars
 {
@@ -1006,6 +1067,7 @@ function rel(base) // eslint-disable-line no-unused-vars
  * @param  {Object} _element element to work one
  * @param  {String} css      style sheet to remove (name)
  * @return {Object}          returns full element
+ * @deprecated use utils.js
  */
 function rcssel(_element, css)
 {
@@ -1021,6 +1083,7 @@ function rcssel(_element, css)
  * @param  {Object} _element element to work on
  * @param  {String} css      style sheet to add (name)
  * @return {Object}         returns full element
+ * @deprecated use utils.js
  */
 function acssel(_element, css)
 {
@@ -1038,6 +1101,7 @@ function acssel(_element, css)
  * @param  {String} rcss     style to remove (name)
  * @param  {String} acss     style to add (name)
  * @return {Object}          returns full element
+ * @deprecated use utils.js
  */
 function scssel(_element, rcss, acss) // eslint-disable-line no-unused-vars
 {
@@ -1050,6 +1114,7 @@ function scssel(_element, rcss, acss) // eslint-disable-line no-unused-vars
  * that can be inserted into the page
  * @param  {Object} tree object tree with dom element declarations
  * @return {String}      HTML string that can be used as innerHTML
+ * @deprecated use utils.js
  */
 function phfo(tree)
 {
@@ -1156,6 +1221,7 @@ function phfo(tree)
  * Is like tree.sub call
  * @param  {Array}  list Array of cel created objects
  * @return {String}      HTML String
+ * @deprecated use utils.js
  */
 function phfa(list) // eslint-disable-line no-unused-vars
 {
@@ -1182,6 +1248,7 @@ function phfa(list) // eslint-disable-line no-unused-vars
  * @param  {String}  [sort='']             if empty as is, else allowed 'keys',
  *                                         'values' all others are ignored
  * @return {String}                        html with build options block
+ * @deprecated use utils.js
  */
 function html_options(name, data, selected = '', options_only = false, return_string = false, sort = '') // eslint-disable-line no-unused-vars
 {
@@ -1209,6 +1276,7 @@ function html_options(name, data, selected = '', options_only = false, return_st
  *                                         'values' all others are ignored
  * @param  {String}  [onchange='']         onchange trigger call, default unset
  * @return {String}                        html with build options block
+ * @deprecated use utils.js
  */
 function html_options_block(
 	name, data, selected = '', multiple = 0, options_only = false, return_string = false, sort = '', onchange = ''
@@ -1291,6 +1359,7 @@ function html_options_block(
  * @param {String} name      name/id
  * @param {Object} data      array of options
  * @param {String} [sort=''] if empty as is, else allowed 'keys', 'values'
+ * @deprecated use utils.js
  *                            all others are ignored
  */
 function html_options_refill(name, data, sort = '') // eslint-disable-line no-unused-vars
@@ -1339,6 +1408,7 @@ function html_options_refill(name, data, sort = '') // eslint-disable-line no-un
  * @param  {String}        [return_key=''] if set only returns this key entry
  *                                         or empty for none
  * @return {Object|String}                 parameter entry list
+ * @deprecated use utils.js
  */
 function parseQueryString(query = '', return_key = '') // eslint-disable-line no-unused-vars
 {
@@ -1393,6 +1463,7 @@ function parseQueryString(query = '', return_key = '') // eslint-disable-line no
  * @return {Object|Array|String}          if search is empty, object, if search is set
  *                                        and only one entry, then string, else array
  *                                        unless single is true
+ * @deprecated use utils.js
  */
 function getQueryStringParam(search = '', query = '', single = false) // eslint-disable-line no-unused-vars
 {
@@ -1430,6 +1501,7 @@ function getQueryStringParam(search = '', query = '', single = false) // eslint-
 // *** MASTER logout call
 /**
  * submits basic data for form logout
+ * @deprecated use utils.js
  */
 function loginLogout() // eslint-disable-line no-unused-vars
 {
@@ -1450,6 +1522,7 @@ function loginLogout() // eslint-disable-line no-unused-vars
  * @param {String} [header_id='mainHeader'] the target for the main element block
  *                                          if not set mainHeader is assumed
  *                                          this is the target div for the "loginRow"
+ * @deprecated use utils.js
  */
 function createLoginRow(login_string, header_id = 'mainHeader') // eslint-disable-line no-unused-vars
 {
@@ -1485,6 +1558,7 @@ function createLoginRow(login_string, header_id = 'mainHeader') // eslint-disabl
  * @param {String} [header_id='mainHeader'] the target for the main element block
  *                                          if not set mainHeader is assumed
  *                                          this is the target div for the "menuRow"
+ * @deprecated use utils.js
  */
 function createNavMenu(nav_menu, header_id = 'mainHeader') // eslint-disable-line no-unused-vars
 {
