@@ -127,8 +127,8 @@ var HtmlElementCreator = class {
     return {
       tag,
       id,
+      // override name if set, else id is used. Only for input/button
       name: options.name,
-      // override name if set [name gets ignored in tree build anyway]
       content,
       css,
       options,
@@ -230,6 +230,7 @@ var HtmlElementCreator = class {
   scssel(_element, rcss, acss) {
     this.rcssel(_element, rcss);
     this.acssel(_element, acss);
+    return _element;
   }
   /**
    * parses the object tree created with cel/ael and converts it into an HTML string
@@ -585,6 +586,9 @@ function formatBytes(bytes) {
   if (typeof bytes === "bigint") {
     bytes = Number(bytes);
   }
+  if (isNaN(bytes)) {
+    return bytes.toString();
+  }
   do {
     bytes = bytes / 1024;
     i++;
@@ -628,37 +632,8 @@ function stringByteFormat(bytes, raw = false) {
 }
 
 // src/utils/UrlParser.mjs
-function parseQueryString(query = "", return_key = "") {
-  if (!query) {
-    query = window.location.search.substring(1);
-  }
-  var vars = query.split("&");
-  var query_string = {};
-  for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split("=");
-    var key = decodeURIComponent(pair[0]);
-    var value = decodeURIComponent(pair[1]);
-    if (!key || value === "undefined") {
-      continue;
-    }
-    if (typeof query_string[key] === "undefined") {
-      query_string[key] = decodeURIComponent(value);
-    } else if (typeof query_string[key] === "string") {
-      var arr = [query_string[key], decodeURIComponent(value)];
-      query_string[key] = arr;
-    } else {
-      query_string[key].push(decodeURIComponent(value));
-    }
-  }
-  if (return_key) {
-    if (keyInObject(return_key, query_string)) {
-      return query_string[return_key];
-    } else {
-      return "";
-    }
-  } else {
-    return query_string;
-  }
+function parseQueryString(query = "", return_key = "", single = false) {
+  return getQueryStringParam(return_key, query, single);
 }
 function getQueryStringParam(search = "", query = "", single = false) {
   if (!query) {
@@ -1357,7 +1332,7 @@ function roundPrecision2(number, prec) {
   return roundPrecision(number, prec);
 }
 function formatString2(string, ...args) {
-  return formatString(string, args);
+  return formatString(string, ...args);
 }
 function unescapeHtml2(string) {
   return unescapeHtml(string);
@@ -1501,7 +1476,7 @@ function ael(base, attach, id = "") {
   return hec.ael(base, attach, id);
 }
 function aelx(base, ...attach) {
-  return hec.aelx(base, attach);
+  return hec.aelx(base, ...attach);
 }
 function aelxar(base, attach) {
   return hec.aelxar(base, attach);
