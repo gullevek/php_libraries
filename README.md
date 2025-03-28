@@ -114,3 +114,11 @@ Add `.libs` to the master .gitingore
 ### Update phpunit
 
 On a version update the old phpunit folder in .libs has to be removed and the new version extracted again
+
+## Javascript
+
+The original edit.js javascript functions are now in utils.js or utils.min.js.
+
+The development for thos files is located in a different repository
+
+https://[service]/CodeBlocks/javascript-utils
