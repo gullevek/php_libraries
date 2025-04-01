@@ -715,6 +715,66 @@ class DateTime
 	}
 
 	/**
+	 * wrapper for calcDaysInterval with numeric return only
+	 *
+	 * @param  string $start_date   valid start date (y/m/d)
+	 * @param  string $end_date     valid end date (y/m/d)
+	 * @param  bool   $include_end_date [default=true] include end date in calc
+	 * @param  bool   $exclude_start_date [default=false] include end date in calc
+	 * @return array{0:int,1:int,2:int,3:bool}
+	 */
+	public static function calcDaysIntervalNumIndex(
+		string $start_date,
+		string $end_date,
+		bool $include_end_date = true,
+		bool $exclude_start_date = false
+	): array {
+		$values = self::calcDaysInterval(
+			$start_date,
+			$end_date,
+			false,
+			$include_end_date,
+			$exclude_start_date
+		);
+		return [
+			$values[0],
+			$values[1],
+			$values[2],
+			$values[3],
+		];
+	}
+
+	/**
+	 * wrapper for calcDaysInterval with named return only
+	 *
+	 * @param  string $start_date   valid start date (y/m/d)
+	 * @param  string $end_date     valid end date (y/m/d)
+	 * @param  bool   $include_end_date [default=true] include end date in calc
+	 * @param  bool   $exclude_start_date [default=false] include end date in calc
+	 * @return array{overall:int,weekday:int,weekend:int,reverse:bool}
+	 */
+	public static function calcDaysIntervalNamedIndex(
+		string $start_date,
+		string $end_date,
+		bool $include_end_date = true,
+		bool $exclude_start_date = false
+	): array {
+		$values = self::calcDaysInterval(
+			$start_date,
+			$end_date,
+			true,
+			$include_end_date,
+			$exclude_start_date
+		);
+		return [
+			'overall' => $values['overall'],
+			'weekday' => $values['weekday'],
+			'weekend' => $values['weekend'],
+			'reverse' => $values['reverse'],
+		];
+	}
+
+	/**
 	 * check if a weekend day (sat/sun) is in the given date range
 	 * Can have time too, but is not needed
 	 *

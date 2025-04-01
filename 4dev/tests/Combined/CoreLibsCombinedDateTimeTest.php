@@ -1068,8 +1068,32 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				return_named:$return_named,
 				include_end_date:$include_end_date,
 				exclude_start_date:$exclude_start_date
-			)
+			),
+			'call calcDaysInterval'
 		);
+		if ($return_named) {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Combined\DateTime::calcDaysIntervalNamedIndex(
+					$input_a,
+					$input_b,
+					include_end_date:$include_end_date,
+					exclude_start_date:$exclude_start_date
+				),
+				'call calcDaysIntervalNamedIndex'
+			);
+		} else {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Combined\DateTime::calcDaysIntervalNumIndex(
+					$input_a,
+					$input_b,
+					include_end_date:$include_end_date,
+					exclude_start_date:$exclude_start_date
+				),
+				'call calcDaysIntervalNamedIndex'
+			);
+		}
 	}
 
 	/**
