@@ -737,10 +737,10 @@ class DateTime
 			$exclude_start_date
 		);
 		return [
-			$values[0],
-			$values[1],
-			$values[2],
-			$values[3],
+			$values[0] ?? 0,
+			$values[1] ?? 0,
+			$values[2] ?? 0,
+			$values[3] ?? false,
 		];
 	}
 
@@ -767,10 +767,10 @@ class DateTime
 			$exclude_start_date
 		);
 		return [
-			'overall' => $values['overall'],
-			'weekday' => $values['weekday'],
-			'weekend' => $values['weekend'],
-			'reverse' => $values['reverse'],
+			'overall' => $values['overall'] ?? 0,
+			'weekday' => $values['weekday'] ?? 0,
+			'weekend' => $values['weekend'] ?? 0,
+			'reverse' => $values['reverse'] ?? false,
 		];
 	}
 

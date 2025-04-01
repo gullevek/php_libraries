@@ -86,8 +86,10 @@ if (!isset($_SESSION['counter'])) {
 $_SESSION['counter']++;
 print "[READ] A " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 $_SESSION[$var] = $value;
+/** @phpstan-ignore-next-line nullCoalesce.offset */
 print "[READ] B " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 print "[READ] Confirm " . $var . " is " . $value . ": "
+/** @phpstan-ignore-next-line equal.alwaysTrue, nullCoalesce.offset */
 	. (($_SESSION[$var] ?? '') == $value ? 'Matching' : 'Not matching') . "<br>";
 
 // test set wrappers methods

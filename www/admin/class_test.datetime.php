@@ -473,7 +473,10 @@ function intervalStringFormatDeprecated(
 		// print "-> V: $value | $part, $time_name | I: " . is_int($value) . " | F: " . is_float($value)
 		// 	. " | " . ($value != 0 ? 'Not zero' : 'ZERO') . "<br>";
 		// var_dump($skip_last_zero);
-		if ($value != 0 || $skip_zero === false || $skip_last_zero === false) {
+		if (
+			is_numeric($value) &&
+			($value != 0 || $skip_zero === false || $skip_last_zero === false)
+		) {
 			if ($part == 'f') {
 				if ($truncate_nanoseconds === true) {
 					$value = round($value, 3);
