@@ -1024,8 +1024,12 @@ class Basic
 	 */
 	public function __sha1Short(string $string, bool $use_sha = false): string
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\Hash::__sha1Short()', E_USER_DEPRECATED);
-		return \CoreLibs\Create\Hash::__sha1Short($string, $use_sha);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\Hash::sha1Short() or ::__crc32b()', E_USER_DEPRECATED);
+		if ($use_sha) {
+			return \CoreLibs\Create\Hash::sha1Short($string);
+		} else {
+			return \CoreLibs\Create\Hash::__crc32b($string);
+		}
 	}
 
 	/**
@@ -1040,8 +1044,8 @@ class Basic
 	 */
 	public function __hash(string $string, string $hash_type = 'adler32'): string
 	{
-		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\Hash::__hash()', E_USER_DEPRECATED);
-		return \CoreLibs\Create\Hash::__hash($string, $hash_type);
+		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\Hash::hash()', E_USER_DEPRECATED);
+		return \CoreLibs\Create\Hash::hash($string, $hash_type);
 	}
 
 	// *** HASH FUNCTIONS END

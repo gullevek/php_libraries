@@ -4056,7 +4056,7 @@ class IO
 	 */
 	public function dbGetQueryHash(string $query, array $params = []): string
 	{
-		return Hash::__hashLong(
+		return Hash::hashLong(
 			$query . (
 				$params !== [] ?
 					'#' . json_encode($params) : ''
