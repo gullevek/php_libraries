@@ -38,9 +38,11 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 $to_crc = 'Some text block';
 // static
-print "S::__CRC32B: $to_crc: " . $hash_class::__crc32b($to_crc) . "<br>";
-print "S::__SHA1SHORT(off): $to_crc: " . $hash_class::__sha1short($to_crc) . "<br>";
-print "S::__SHA1SHORT(on): $to_crc: " . $hash_class::__sha1short($to_crc, true) . "<br>";
+print "S::__CRC32B: $to_crc: " . Hash::__crc32b($to_crc) . "<br>";
+print "S::__SHA1SHORT(off): $to_crc: " . Hash::__sha1short($to_crc) . "<br>";
+print "S::hashShort(__sha1Short replace): $to_crc: " . Hash::hashShort($to_crc) . "<br>";
+print "S::__SHA1SHORT(on): $to_crc: " . Hash::__sha1short($to_crc, true) . "<br>";
+print "S::sha1Short(__sha1Short replace): $to_crc: " . Hash::sha1Short($to_crc, true) . "<br>";
 print "S::__hash(d): " . $to_crc . "/"
 	. Hash::STANDARD_HASH_SHORT . ": " . $hash_class::__hash($to_crc) . "<br>";
 foreach (['adler32', 'fnv132', 'fnv1a32', 'joaat', 'sha512'] as $__hash_c) {
@@ -53,13 +55,16 @@ echo "<hr>";
 $text = 'Some String Text';
 $type = 'crc32b';
 print "Hash: " . $type . ": " . hash($type, $text) . "<br>";
-print "Class: " . $type . ": " . Hash::__hash($text, $type) . "<br>";
+print "Class (old): " . $type . ": " . Hash::__hash($text, $type) . "<br>";
+print "Class (new): " . $type . ": " . Hash::hash($text, $type) . "<br>";
 
 echo "<hr>";
-print "<br>CURRENT STANDARD_HASH_SHORT: " . Hash::STANDARD_HASH_SHORT . "<br>";
-print "<br>CURRENT STANDARD_HASH_LONG: " . Hash::STANDARD_HASH_LONG . "<br>";
-print "HASH SHORT: " . $to_crc . ": " . Hash::__hash($to_crc) . "<br>";
-print "HASH LONG: " . $to_crc . ": " . Hash::__hashLong($to_crc) . "<br>";
+print "CURRENT STANDARD_HASH_SHORT: " . Hash::STANDARD_HASH_SHORT . "<br>";
+print "CURRENT STANDARD_HASH_LONG: " . Hash::STANDARD_HASH_LONG . "<br>";
+print "CURRENT STANDARD_HASH: " . Hash::STANDARD_HASH . "<br>";
+print "HASH SHORT: " . $to_crc . ": " . Hash::hashShort($to_crc) . "<br>";
+print "HASH LONG: " . $to_crc . ": " . Hash::hashLong($to_crc) . "<br>";
+print "HASH DEFAULT: " . $to_crc . ": " . Hash::hashStd($to_crc) . "<br>";
 
 // print "UNIQU ID SHORT : " . Hash::__uniqId() . "<br>";
 // print "UNIQU ID LONG : " . Hash::__uniqIdLong() . "<br>";

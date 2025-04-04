@@ -117,6 +117,22 @@ final class CoreLibsCreateHashTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @return array
+	 */
+	public function hashStandardProvider(): array
+	{
+		$hash_source = 'Some String Text';
+		return [
+			'Long Hash check: ' . \CoreLibs\Create\Hash::STANDARD_HASH => [
+				$hash_source,
+				hash(\CoreLibs\Create\Hash::STANDARD_HASH, $hash_source)
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
 	 * @covers ::__crc32b
 	 * @dataProvider crc32bProvider
 	 * @testdox __crc32b $input will be $expected [$_dataName]
@@ -136,9 +152,13 @@ final class CoreLibsCreateHashTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * phpcs:disable Generic.Files.LineLength
 	 * @covers ::__sha1Short
+	 * @covers ::__crc32b
+	 * @covers ::sha1Short
 	 * @dataProvider sha1ShortProvider
-	 * @testdox __sha1Short $input will be $expected (crc32b) and $expected_sha1 (sha1 short) [$_dataName]
+	 * @testdox __sha1Short/__crc32b/sha1short $input will be $expected (crc32b) and $expected_sha1 (sha1 short) [$_dataName]
+	 * phpcs:enable Generic.Files.LineLength
 	 *
 	 * @param string $input
 	 * @param string $expected
@@ -149,16 +169,29 @@ final class CoreLibsCreateHashTest extends TestCase
 		// uses crc32b
 		$this->assertEquals(
 			$expected,
-			\CoreLibs\Create\Hash::__sha1Short($input)
+			\CoreLibs\Create\Hash::__sha1Short($input),
+			'__sha1Short depreacted'
 		);
 		$this->assertEquals(
 			$expected,
-			\CoreLibs\Create\Hash::__sha1Short($input, false)
+			\CoreLibs\Create\Hash::__sha1Short($input, false),
+			'__sha1Short (false) depreacted'
+		);
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Create\Hash::__crc32b($input),
+			'__crc32b'
 		);
 		// sha1 type
 		$this->assertEquals(
 			$expected_sha1,
-			\CoreLibs\Create\Hash::__sha1Short($input, true)
+			\CoreLibs\Create\Hash::__sha1Short($input, true),
+			'__sha1Short (true) depreacted'
+		);
+		$this->assertEquals(
+			$expected_sha1,
+			\CoreLibs\Create\Hash::sha1Short($input),
+			'sha1Short'
 		);
 	}
 
@@ -166,8 +199,10 @@ final class CoreLibsCreateHashTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::__hash
+	 * @covers ::hashShort
+	 * @covers ::hashShort
 	 * @dataProvider hashProvider
-	 * @testdox __hash $input with $hash_type will be $expected [$_dataName]
+	 * @testdox __hash/hashShort/hash $input with $hash_type will be $expected [$_dataName]
 	 *
 	 * @param string $input
 	 * @param string|null $hash_type
@@ -179,12 +214,24 @@ final class CoreLibsCreateHashTest extends TestCase
 		if ($hash_type === null) {
 			$this->assertEquals(
 				$expected,
-				\CoreLibs\Create\Hash::__hash($input)
+				\CoreLibs\Create\Hash::__hash($input),
+				'__hash'
+			);
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Create\Hash::hashShort($input),
+				'hashShort'
 			);
 		} else {
 			$this->assertEquals(
 				$expected,
-				\CoreLibs\Create\Hash::__hash($input, $hash_type)
+				\CoreLibs\Create\Hash::__hash($input, $hash_type),
+				'__hash with hash type'
+			);
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Create\Hash::hash($input, $hash_type),
+				'hash with hash type'
 			);
 		}
 	}
@@ -193,8 +240,9 @@ final class CoreLibsCreateHashTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @covers ::__hashLong
+	 * @covers ::hashLong
 	 * @dataProvider hashLongProvider
-	 * @testdox __hashLong $input will be $expected [$_dataName]
+	 * @testdox __hashLong/hashLong $input will be $expected [$_dataName]
 	 *
 	 * @param string $input
 	 * @param string $expected
@@ -205,6 +253,52 @@ final class CoreLibsCreateHashTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Create\Hash::__hashLong($input)
+		);
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Create\Hash::hashLong($input)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::hash
+	 * @covers ::hashStd
+	 * @dataProvider hashStandardProvider
+	 * @testdox hash/hashStd $input will be $expected [$_dataName]
+	 *
+	 * @param string $input
+	 * @param string $expected
+	 * @return void
+	 */
+	public function testHashStandard(string $input, string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Create\Hash::hashStd($input)
+		);
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Create\Hash::hash($input)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::hash
+	 * @testdox hash with invalid type [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testInvalidHashType(): void
+	{
+		$hash_source = 'Some String Text';
+		$expected = hash(\CoreLibs\Create\Hash::STANDARD_HASH, $hash_source);
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Create\Hash::hash($hash_source, 'DOES_NOT_EXIST')
 		);
 	}
 }
