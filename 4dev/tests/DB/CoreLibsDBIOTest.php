@@ -135,6 +135,7 @@ final class CoreLibsDBIOTest extends TestCase
 		}
 		// check if they already exist, drop them
 		if ($db->dbShowTableMetaData('table_with_primary_key') !== false) {
+			$db->dbExec("CREATE EXTENSION IF NOT EXISTS pgcrypto");
 			$db->dbExec("DROP TABLE table_with_primary_key");
 			$db->dbExec("DROP TABLE table_without_primary_key");
 			$db->dbExec("DROP TABLE test_meta");
@@ -5309,6 +5310,38 @@ final class CoreLibsDBIOTest extends TestCase
 				'count' => 2,
 				'convert' => false,
 			],
+			// special $$ string case
+			'text string, with $ placehoders that could be seen as $$ string' => [
+				'query' => <<<SQL
+				SELECT row_int
+				FROM table_with_primary_key
+				WHERE
+					row_bytea = digest($3::VARCHAR, $4) OR
+					row_varchar = encode(digest($3, $4), 'hex') OR
+					row_bytea = hmac($3, $5, $4) OR
+					row_varchar = encode(hmac($3, $5, $4), 'hex') OR
+					row_bytea = pgp_sym_encrypt($3, $6) OR
+					row_varchar = encode(pgp_sym_encrypt($1, $6), 'hex') OR
+					row_varchar = CASE WHEN row_int = 1 THEN $1 ELSE $2 END
+				SQL,
+				'count' => 6,
+				'convert' => false,
+			],
+			// NOTE, in SQL heredoc we cannot write $$ strings parts
+			'text string, with $ placehoders are in $$ strings' => [
+				'query' => '
+				SELECT row_int
+				FROM table_with_primary_key
+				WHERE
+					row_varchar = $$some string$$ OR
+					row_varchar = $tag$some string$tag$ OR
+					row_varchar = $btag$some $1 string$btag$ OR
+					row_varchar = $btag$some $1 $subtag$ something $subtag$string$btag$ OR
+					row_varchar = $1
+				',
+				'count' => 1,
+				'convert' => false,
+			],
 			// a text string with escaped quite
 			'text string, with escaped quote' => [
 				'query' => <<<SQL
@@ -5324,6 +5357,9 @@ final class CoreLibsDBIOTest extends TestCase
 				'convert' => false,
 			]
 		];
+		$string = <<<SQL
+		'''
+		SQL;
 	}
 
 	/**

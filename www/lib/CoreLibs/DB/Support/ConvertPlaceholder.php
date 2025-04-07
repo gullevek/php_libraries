@@ -21,7 +21,7 @@ class ConvertPlaceholder
 	/** @var string text block in SQL, dollar quoted
 	 * NOTE: if this is added everything shifts by one lookup number
 	*/
-	private const PATTERN_TEXT_BLOCK_DOLLAR = '(?:\$([^$]*)\$.*?\$\1\$)';
+	private const PATTERN_TEXT_BLOCK_DOLLAR = '(?:\$(\w*)\$.*?\$\1\$)';
 	/** @var string comment regex
 	 * anything that starts with -- and ends with a line break but any character that is not line break inbetween
 	 * this is the FIRST thing in the line and will skip any further lookups */
