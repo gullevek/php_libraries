@@ -91,7 +91,7 @@ $db->dbExecParams(
 	]
 );
 $cuuid = $db->dbGetReturningExt('cuuid');
-print "INSERTED: $cuuid<br>";
+print "INSERTED: " . print_r($cuuid, true) . "<br>";
 print "LAST ERROR: " . $db->dbGetLastError(true) . "<br>";
 
 // read back

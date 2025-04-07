@@ -4744,7 +4744,7 @@ final class CoreLibsDBIOTest extends TestCase
 		$res = $db->dbReturnRowParams($query_select, ['CONVERT_TYPE_TEST']);
 		// all hast to be string
 		foreach ($res as $key => $value) {
-			$this->assertIsString($value, 'Aseert string for column: ' . $key);
+			$this->assertIsString($value, 'Assert string for column: ' . $key);
 		}
 		// convert base only
 		$db->dbSetConvertFlag(Convert::on);
@@ -4757,10 +4757,10 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 			switch ($type_layout[$name]) {
 				case 'int':
-					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					$this->assertIsInt($value, 'Assert int for column: ' . $key . '/' . $name);
 					break;
 				default:
-					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					$this->assertIsString($value, 'Assert string for column: ' . $key  . '/' . $name);
 					break;
 			}
 		}
@@ -4774,13 +4774,13 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 			switch ($type_layout[$name]) {
 				case 'int':
-					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					$this->assertIsInt($value, 'Assert int for column: ' . $key . '/' . $name);
 					break;
 				case 'float':
-					$this->assertIsFloat($value, 'Aseert float for column: ' . $key . '/' . $name);
+					$this->assertIsFloat($value, 'Assert float for column: ' . $key . '/' . $name);
 					break;
 				default:
-					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					$this->assertIsString($value, 'Assert string for column: ' . $key  . '/' . $name);
 					break;
 			}
 		}
@@ -4794,17 +4794,17 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 			switch ($type_layout[$name]) {
 				case 'int':
-					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					$this->assertIsInt($value, 'Assert int for column: ' . $key . '/' . $name);
 					break;
 				case 'float':
-					$this->assertIsFloat($value, 'Aseert float for column: ' . $key . '/' . $name);
+					$this->assertIsFloat($value, 'Assert float for column: ' . $key . '/' . $name);
 					break;
 				case 'json':
 				case 'jsonb':
-					$this->assertIsArray($value, 'Aseert array for column: ' . $key . '/' . $name);
+					$this->assertIsArray($value, 'Assert array for column: ' . $key . '/' . $name);
 					break;
 				default:
-					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					$this->assertIsString($value, 'Assert string for column: ' . $key  . '/' . $name);
 					break;
 			}
 		}
@@ -4818,25 +4818,25 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 			switch ($type_layout[$name]) {
 				case 'int':
-					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					$this->assertIsInt($value, 'Assert int for column: ' . $key . '/' . $name);
 					break;
 				case 'float':
-					$this->assertIsFloat($value, 'Aseert float for column: ' . $key . '/' . $name);
+					$this->assertIsFloat($value, 'Assert float for column: ' . $key . '/' . $name);
 					break;
 				case 'json':
 				case 'jsonb':
-					$this->assertIsArray($value, 'Aseert array for column: ' . $key . '/' . $name);
+					$this->assertIsArray($value, 'Assert array for column: ' . $key . '/' . $name);
 					break;
 				case 'bytea':
 					// for hex types it must not start with \x
 					$this->assertStringStartsNotWith(
 						'\x',
 						$value,
-						'Aseert bytes not starts with \x for column: ' . $key . '/' . $name
+						'Assert bytes not starts with \x for column: ' . $key . '/' . $name
 					);
 					break;
 				default:
-					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					$this->assertIsString($value, 'Assert string for column: ' . $key  . '/' . $name);
 					break;
 			}
 		}
@@ -5235,6 +5235,9 @@ final class CoreLibsDBIOTest extends TestCase
 					$3
 					-- comment 3
 					, $4
+					-- ignore $5, $6
+					-- $7, $8
+					-- digest($9, 10)
 				)
 				SQL,
 				'count' => 4,
@@ -5301,6 +5304,20 @@ final class CoreLibsDBIOTest extends TestCase
 				SELECT row_int
 				FROM table_with_primary_key
 				WHERE
+					row_varchar = CASE WHEN row_int = 1 THEN $1 ELSE $2 END
+				SQL,
+				'count' => 2,
+				'convert' => false,
+			],
+			// a text string with escaped quite
+			'text string, with escaped quote' => [
+				'query' => <<<SQL
+				SELECT row_int
+				FROM table_with_primary_key
+				WHERE
+					row_varchar = 'foo bar bar baz $5' OR
+					row_varchar = 'foo bar '' barbar $6' OR
+					row_varchar = E'foo bar \' barbar $7' OR
 					row_varchar = CASE WHEN row_int = 1 THEN $1 ELSE $2 END
 				SQL,
 				'count' => 2,

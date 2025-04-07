@@ -978,12 +978,12 @@ class PgSQL implements Interface\SqlFunctions
 	}
 
 	/**
-	 * Count placeholder queries. $ only
+	 * Get the all the $ params, unique list
 	 *
 	 * @param  string $query
-	 * @return int
+	 * @return array<string>
 	 */
-	public function __dbCountQueryParams(string $query): int
+	public function __dbGetQueryParams(string $query): array
 	{
 		$matches = [];
 		// regex for params: only stand alone $number allowed
@@ -998,11 +998,22 @@ class PgSQL implements Interface\SqlFunctions
 		// Matches in 1:, must be array_filtered to remove empty, count with array_unique
 		// Regex located in the ConvertPlaceholder class
 		preg_match_all(
-			ConvertPlaceholder::REGEX_LOOKUP_PLACEHOLDERS,
+			ConvertPlaceholder::REGEX_LOOKUP_NUMBERED,
 			$query,
 			$matches
 		);
-		return count(array_unique(array_filter($matches[3])));
+		return array_unique(array_filter($matches[ConvertPlaceholder::MATCHING_POS]));
+	}
+
+	/**
+	 * Count placeholder queries. $ only
+	 *
+	 * @param  string $query
+	 * @return int
+	 */
+	public function __dbCountQueryParams(string $query): int
+	{
+		return count($this->__dbGetQueryParams($query));
 	}
 }
 

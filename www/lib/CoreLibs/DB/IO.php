@@ -4284,6 +4284,17 @@ class IO
 	}
 
 	/**
+	 * get all the $ placeholders
+	 *
+	 * @param  string $query
+	 * @return array<string>
+	 */
+	public function dbGetQueryParamPlaceholders(string $query): array
+	{
+		return $this->db_functions->__dbGetQueryParams($query);
+	}
+
+	/**
 	 * Return a field type for a field name or pos,
 	 * will return false if field is not found in list
 	 *
