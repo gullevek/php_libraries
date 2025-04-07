@@ -19,6 +19,7 @@ $LOG_FILE_ID = 'classTest-hash';
 ob_end_flush();
 
 use CoreLibs\Create\Hash;
+use CoreLibs\Security\CreateKey;
 
 $log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
@@ -53,10 +54,14 @@ print "U-S::__CRC32B: $to_crc: " . Hash::__crc32b($to_crc) . "<br>";
 
 echo "<hr>";
 $text = 'Some String Text';
+// $text = 'any string';
 $type = 'crc32b';
 print "Hash: " . $type . ": " . hash($type, $text) . "<br>";
 // print "Class (old): " . $type . ": " . Hash::__hash($text, $type) . "<br>";
 print "Class (new): " . $type . ": " . Hash::hash($text, $type) . "<br>";
+print "Class: sha256: " . Hash::hash($text) . "<br>";
+$type = 'ripemd160';
+print "Class: " . $type . ": " . Hash::hash($text, $type) . "<br>";
 
 echo "<hr>";
 print "CURRENT STANDARD_HASH_SHORT: " . Hash::STANDARD_HASH_SHORT . "<br>";
@@ -65,6 +70,31 @@ print "CURRENT STANDARD_HASH: " . Hash::STANDARD_HASH . "<br>";
 print "HASH SHORT: " . $to_crc . ": " . Hash::hashShort($to_crc) . "<br>";
 print "HASH LONG: " . $to_crc . ": " . Hash::hashLong($to_crc) . "<br>";
 print "HASH DEFAULT: " . $to_crc . ": " . Hash::hashStd($to_crc) . "<br>";
+
+echo "<hr>";
+$key = CreateKey::generateRandomKey();
+$key = "FIX KEY";
+print "Secret Key: " . $key . "<br>";
+print "HASHMAC DEFAULT (fix): " . $to_crc . ": " . Hash::hashHmac($to_crc, $key) . "<br>";
+$key = CreateKey::generateRandomKey();
+print "Secret Key: " . $key . "<br>";
+print "HASHMAC DEFAULT (random): " . $to_crc . ": " . Hash::hashHmac($to_crc, $key) . "<br>";
+
+echo "<hr>";
+$hash_types = ['crc32b', 'sha256', 'invalid'];
+foreach ($hash_types as $hash_type) {
+	echo "<b>Checking $hash_type:</b><br>";
+	if (Hash::isValidHashType($hash_type)) {
+		echo "hash type: $hash_type is valid<br>";
+	} else {
+		echo "hash type: $hash_type is INVALID<br>";
+	}
+	if (Hash::isValidHashHmacType($hash_type)) {
+		echo "hash hmac type: $hash_type is valid<br>";
+	} else {
+		echo "hash hmac type: $hash_type is INVALID<br>";
+	}
+}
 
 // print "UNIQU ID SHORT : " . Hash::__uniqId() . "<br>";
 // print "UNIQU ID LONG : " . Hash::__uniqIdLong() . "<br>";

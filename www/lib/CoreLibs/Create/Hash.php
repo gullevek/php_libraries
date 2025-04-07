@@ -49,7 +49,7 @@ class Hash
 	 * replacement for __crc32b call
 	 *
 	 * @param  string $string  string to hash
-	 * @param  bool   $use_sha use sha1 instead of crc32b (default false)
+	 * @param  bool   $use_sha [default=false] use sha1 instead of crc32b
 	 * @return string          hash of the string
 	 * @deprecated use __crc32b() for drop in replacement with default, or sha1Short() for use sha true
 	 */
@@ -81,7 +81,7 @@ class Hash
 	 * all that create 8 char long hashes
 	 *
 	 * @param  string $string    string to hash
-	 * @param  string $hash_type hash type (default adler32)
+	 * @param  string $hash_type [default=STANDARD_HASH_SHORT] hash type (default adler32)
 	 * @return string            hash of the string
 	 * @deprecated use hashShort() of short hashes with adler 32 or hash() for other hash types
 	 */
@@ -93,11 +93,39 @@ class Hash
 	}
 
 	/**
+	 * check if hash type is valid, returns false if not
+	 *
+	 * @param  string $hash_type
+	 * @return bool
+	 */
+	public static function isValidHashType(string $hash_type): bool
+	{
+		if (!in_array($hash_type, hash_algos())) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * check if hash hmac type is valid, returns false if not
+	 *
+	 * @param  string $hash_hmac_type
+	 * @return bool
+	 */
+	public static function isValidHashHmacType(string $hash_hmac_type): bool
+	{
+		if (!in_array($hash_hmac_type, hash_hmac_algos())) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * creates a hash over string if any valid hash given.
 	 * if no hash type set use sha256
 	 *
-	 * @param  string $string    string to ash
-	 * @param  string $hash_type hash type (default sha256)
+	 * @param  string $string    string to hash
+	 * @param  string $hash_type [default=STANDARD_HASH] hash type (default sha256)
 	 * @return string            hash of the string
 	 */
 	public static function hash(
@@ -108,10 +136,34 @@ class Hash
 			empty($hash_type) ||
 			!in_array($hash_type, hash_algos())
 		) {
-			// fallback to default hash type if none set or invalid
+			// fallback to default hash type if empty or invalid
 			$hash_type = self::STANDARD_HASH;
 		}
 		return hash($hash_type, $string);
+	}
+
+	/**
+	 * creates a hash mac key
+	 *
+	 * @param  string $string    string to hash mac
+	 * @param  string $key       key to use
+	 * @param  string $hash_type [default=STANDARD_HASH]
+	 * @return string            hash mac string
+	 */
+	public static function hashHmac(
+		string $string,
+		#[\SensitiveParameter]
+		string $key,
+		string $hash_type = self::STANDARD_HASH
+	): string {
+		if (
+			empty($hash_type) ||
+			!in_array($hash_type, hash_hmac_algos())
+		) {
+			// fallback to default hash type if e or invalid
+			$hash_type = self::STANDARD_HASH;
+		}
+		return hash_hmac($hash_type, $string, $key);
 	}
 
 	/**
