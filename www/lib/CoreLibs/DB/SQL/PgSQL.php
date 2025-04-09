@@ -978,7 +978,7 @@ class PgSQL implements Interface\SqlFunctions
 	}
 
 	/**
-	 * Get the all the $ params, unique list
+	 * Get the all the $ params, as a unique list
 	 *
 	 * @param  string $query
 	 * @return array<string>
@@ -1003,17 +1003,6 @@ class PgSQL implements Interface\SqlFunctions
 			$matches
 		);
 		return array_unique(array_filter($matches[ConvertPlaceholder::MATCHING_POS]));
-	}
-
-	/**
-	 * Count placeholder queries. $ only
-	 *
-	 * @param  string $query
-	 * @return int
-	 */
-	public function __dbCountQueryParams(string $query): int
-	{
-		return count($this->__dbGetQueryParams($query));
 	}
 }
 

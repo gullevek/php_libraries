@@ -5009,8 +5009,8 @@ final class CoreLibsDBIOTest extends TestCase
 				)
 			),
 			($params === null ?
-				$db->dbGetQueryHash($query) :
-				$db->dbGetQueryHash($query, $params)
+				$db->dbBuildQueryHash($query) :
+				$db->dbBuildQueryHash($query, $params)
 			),
 			'Failed assertdbGetQueryHash '
 		);

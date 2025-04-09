@@ -42,7 +42,10 @@ print '<div><a href="class_test.php">Class Test Master</a></div>';
 print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 // encryption key
-$key = CreateKey::generateRandomKey();
+$key_new = CreateKey::generateRandomKey();
+print "Secret Key NEW: " . $key_new . "<br>";
+// for reproducable test results
+$key = 'e475c19b9a3c8363feb06b51f5b73f1dc9b6f20757d4ab89509bf5cc70ed30ec';
 print "Secret Key: " . $key . "<br>";
 
 // test text
@@ -105,20 +108,35 @@ $res = $db->dbReturnRowParams(
 		-- in DB encryption
 		pg_digest_bytea, pg_digest_text,
 		pg_hmac_bytea, pg_hmac_text,
-		pg_crypt_bytea, pg_crypt_text
+		pg_crypt_bytea, pg_crypt_text,
+		encode(pg_crypt_bytea, 'hex') AS pg_crypt_bytea_hex,
+		pgp_sym_decrypt(pg_crypt_bytea, $2) AS from_pg_crypt_bytea,
+		pgp_sym_decrypt(decode(pg_crypt_text, 'hex'), $2) AS from_pg_crypt_text
 	FROM
 		test_encryption
 	WHERE
 		cuuid = $1
 	SQL,
 	[
-		$cuuid
+		$cuuid, $key
 	]
 );
 
 print "RES: <pre>" . Support::prAr($res) . "</pre><br>";
 
-// do compare
+if ($res === false) {
+	echo "Failed to run query<br>";
+} else {
+	if (hash_equals($string_hashed, $res['pg_digest_text'])) {
+		print "libsodium and pgcrypto hash match<br>";
+	}
+	if (hash_equals($string_hmac, $res['pg_hmac_text'])) {
+		print "libsodium and pgcrypto hash hmac match<br>";
+	}
+}
+
+
+// do compare for PHP and pgcrypto settings
 
 print "</body></html>";
 

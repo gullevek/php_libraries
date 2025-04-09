@@ -303,6 +303,8 @@ class IO
 	private string $query = '';
 	/** @var array<mixed> current params for query */
 	private array $params = [];
+	/** @var string current hash build from query and params */
+	private string $query_hash = '';
 	// if we do have a convert call, store the convert data in here, else it will be empty
 	/** @var array{}|array{original:array{query:string,params:array<mixed>},type:''|'named'|'numbered'|'question_mark',found:int,matches:array<string>,params_lookup:array<mixed>,query:string,params:array<mixed>} */
 	private array $placeholder_converted = [];
@@ -1319,7 +1321,7 @@ class IO
 	 */
 	private function __dbCountQueryParams(string $query): int
 	{
-		return $this->db_functions->__dbCountQueryParams($query);
+		return count($this->db_functions->__dbGetQueryParams($query));
 	}
 
 	/**
@@ -1382,6 +1384,8 @@ class IO
 		$this->query = $query;
 		// current params
 		$this->params = $params;
+		// empty on new
+		$this->query_hash = '';
 		// no query set
 		if (empty($this->query)) {
 			$this->__dbError(11);
@@ -1441,7 +1445,7 @@ class IO
 			$this->returning_id = true;
 		}
 		// import protection, hash needed
-		$query_hash = $this->dbGetQueryHash($this->query, $this->params);
+		$query_hash = $this->dbBuildQueryHash($this->query, $this->params);
 		// QUERY PARAMS: run query params check and rewrite
 		if ($this->dbGetConvertPlaceholder() === true) {
 			try {
@@ -1475,7 +1479,8 @@ class IO
 				return false;
 			}
 		}
-
+		// set query hash
+		$this->query_hash = $query_hash;
 		// $this->debug('DB IO', 'Q: ' . $this->query . ', RETURN: ' . $this->returning_id);
 		// for DEBUG, only on first time ;)
 		$this->__dbDebug(
@@ -1959,7 +1964,7 @@ class IO
 	{
 		// set start array
 		if ($query) {
-			$array = $this->cursor_ext[$this->dbGetQueryHash($query)] ?? [];
+			$array = $this->cursor_ext[$this->dbBuildQueryHash($query)] ?? [];
 		} else {
 			$array = $this->cursor_ext;
 		}
@@ -2361,7 +2366,7 @@ class IO
 			return false;
 		}
 		// create hash from query ...
-		$query_hash = $this->dbGetQueryHash($query, $params);
+		$query_hash = $this->dbBuildQueryHash($query, $params);
 		// pre declare array
 		if (!isset($this->cursor_ext[$query_hash])) {
 			$this->cursor_ext[$query_hash] = [
@@ -2940,7 +2945,7 @@ class IO
 	public function dbCacheReset(string $query, array $params = []): bool
 	{
 		$this->__dbErrorReset();
-		$query_hash = $this->dbGetQueryHash($query, $params);
+		$query_hash = $this->dbBuildQueryHash($query, $params);
 		// clears cache for this query
 		if (empty($this->cursor_ext[$query_hash]['query'])) {
 			$this->__dbWarning(18, context: [
@@ -2982,7 +2987,7 @@ class IO
 		if ($query === null) {
 			return $this->cursor_ext;
 		}
-		$query_hash = $this->dbGetQueryHash($query, $params);
+		$query_hash = $this->dbBuildQueryHash($query, $params);
 		if (
 			!empty($this->cursor_ext) &&
 			isset($this->cursor_ext[$query_hash])
@@ -3012,7 +3017,7 @@ class IO
 			$this->__dbError(11);
 			return false;
 		}
-		$query_hash = $this->dbGetQueryHash($query, $params);
+		$query_hash = $this->dbBuildQueryHash($query, $params);
 		if (
 			!empty($this->cursor_ext) &&
 			isset($this->cursor_ext[$query_hash])
@@ -3038,7 +3043,7 @@ class IO
 			$this->__dbError(11);
 			return false;
 		}
-		$query_hash = $this->dbGetQueryHash($query, $params);
+		$query_hash = $this->dbBuildQueryHash($query, $params);
 		if (
 			!empty($this->cursor_ext) &&
 			isset($this->cursor_ext[$query_hash])
@@ -3064,7 +3069,7 @@ class IO
 	 */
 	public function dbResetQueryCalled(string $query, array $params = []): void
 	{
-		$this->query_called[$this->dbGetQueryHash($query, $params)] = 0;
+		$this->query_called[$this->dbBuildQueryHash($query, $params)] = 0;
 	}
 
 	/**
@@ -3077,7 +3082,7 @@ class IO
 	 */
 	public function dbGetQueryCalled(string $query, array $params = []): int
 	{
-		$query_hash = $this->dbGetQueryHash($query, $params);
+		$query_hash = $this->dbBuildQueryHash($query, $params);
 		if (!empty($this->query_called[$query_hash])) {
 			return $this->query_called[$query_hash];
 		} else {
@@ -4046,7 +4051,7 @@ class IO
 	}
 
 	/**
-	 * Returns hash for query
+	 * Creates hash for query and parameters
 	 * Hash is used in all internal storage systems for return data
 	 *
 	 * @param  string       $query  The query to create the hash from
@@ -4054,7 +4059,7 @@ class IO
 	 *                              data to create a unique call one, optional
 	 * @return string               Hash, as set by hash long
 	 */
-	public function dbGetQueryHash(string $query, array $params = []): string
+	public function dbBuildQueryHash(string $query, array $params = []): string
 	{
 		return Hash::hashLong(
 			$query . (
@@ -4102,6 +4107,26 @@ class IO
 	public function dbResetParams(): void
 	{
 		$this->params = [];
+	}
+
+	/**
+	 * get the current set query hash
+	 *
+	 * @return string Current Query hash
+	 */
+	public function dbGetQueryHash(): string
+	{
+		return $this->query_hash;
+	}
+
+	/**
+	 * reset query hash
+	 *
+	 * @return void
+	 */
+	public function dbResetQueryHash(): void
+	{
+		$this->query_hash = '';
 	}
 
 	/**
