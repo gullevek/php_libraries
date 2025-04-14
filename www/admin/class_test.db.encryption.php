@@ -15,6 +15,8 @@ ob_start();
 define('USE_DATABASE', true);
 // sample config
 require 'config.php';
+// for testing encryption compare
+use OpenPGP\OpenPGP;
 // define log file id
 $LOG_FILE_ID = 'classTest-db-query-encryption';
 ob_end_flush();
@@ -50,6 +52,7 @@ print "Secret Key: " . $key . "<br>";
 
 // test text
 $text_string = "I a some deep secret";
+$text_string = "I a some deep secret ABC";
 //
 $crypt = new SymmetricEncryption($key);
 $encrypted = $crypt->encrypt($text_string);
@@ -133,6 +136,28 @@ if ($res === false) {
 	if (hash_equals($string_hmac, $res['pg_hmac_text'])) {
 		print "libsodium and pgcrypto hash hmac match<br>";
 	}
+}
+$encryptedMessage_template = <<<TEXT
+-----BEGIN PGP MESSAGE-----
+
+{BASE64}
+-----END PGP MESSAGE-----
+TEXT;
+$base64_string = base64_encode(hex2bin($res['pg_crypt_text']));
+$encryptedMessage = str_replace(
+	'{BASE64}',
+	$base64_string,
+	$encryptedMessage_template
+);
+try {
+	$literalMessage = OpenPGP::decryptMessage($encryptedMessage, passwords: [$key]);
+	$decrypted = $literalMessage->getLiteralData()->getData();
+	print "Pg decrypted PHP: " . $decrypted . "<br>";
+	if ($decrypted == $text_string) {
+		print "Decryption worked<br>";
+	}
+} catch (\Exception $e) {
+	print "Error decrypting message: " . $e->getMessage() . "<br>";
 }
 
 
