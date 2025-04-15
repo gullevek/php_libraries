@@ -182,6 +182,7 @@ class EditUsers implements Interface\TableArraysInterface
 					'type' => 'text',
 					'error_check' => 'unique|custom',
 					'error_regex' => "/^[A-Za-z0-9]+$/",
+					'error_example' => "ABCdef123",
 					'emptynull' => 1,'min_edit_acl' => '100',
 					'min_show_acl' => '100',
 				],
