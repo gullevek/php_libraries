@@ -50,7 +50,8 @@ class EditUsers implements Interface\TableArraysInterface
 					'HIDDEN_value' => $_POST['HIDDEN_password'] ?? '',
 					'CONFIRM_value' => $_POST['CONFIRM_password'] ?? '',
 					'output_name' => 'Password',
-					'mandatory' => 1,
+					// make it not mandatory to create dummy accounts that can only login via login url id
+					'mandatory' => 0,
 					'type' => 'password', // later has to be password for encryption in database
 					'update' => [ // connected field updates, and update data
 						'password_change_date' => [ // db row to update
