@@ -924,7 +924,9 @@ class Login
 		$mandatory_session_vars = [
 			'LOGIN_USER_NAME', 'LOGIN_GROUP_NAME', 'LOGIN_EUCUID', 'LOGIN_EUCUUID',
 			'LOGIN_USER_ADDITIONAL_ACL', 'LOGIN_GROUP_ADDITIONAL_ACL',
-			'LOGIN_ADMIN', 'LOGIN_GROUP_ACL_LEVEL', 'LOGIN_PAGES_ACL_LEVEL', 'LOGIN_USER_ACL_LEVEL',
+			'LOGIN_ADMIN', 'LOGIN_GROUP_ACL_LEVEL',
+			'LOGIN_PAGES', 'LOGIN_PAGES_LOOKUP', 'LOGIN_PAGES_ACL_LEVEL',
+			'LOGIN_USER_ACL_LEVEL',
 			'LOGIN_UNIT', 'LOGIN_UNIT_DEFAULT_EACUID'
 		];
 		$force_reauth = false;
@@ -1264,6 +1266,7 @@ class Login
 		}
 		$edit_page_ids = [];
 		$pages = [];
+		$pages_lookup = [];
 		$pages_acl = [];
 		// set pages access
 		$q = <<<SQL
@@ -1307,6 +1310,7 @@ class Login
 				'query' => [],
 				'visible' => []
 			];
+			$pages_lookup[$res['filename']] = $res['cuid'];
 			// make reference filename -> level
 			$pages_acl[$res['filename']] = $res['level'];
 		} // for each page
@@ -1367,6 +1371,7 @@ class Login
 		// write back the pages data to the output array
 		$this->session->setMany([
 			'LOGIN_PAGES' => $pages,
+			'LOGIN_PAGES_LOOKUP' => $pages_lookup,
 			'LOGIN_PAGES_ACL_LEVEL' => $pages_acl,
 		]);
 		// load the edit_access user rights
@@ -1526,6 +1531,8 @@ class Login
 		) {
 			$this->acl['page'] = $_SESSION['LOGIN_PAGES_ACL_LEVEL'][$this->page_name];
 		}
+		$this->acl['pages_detail'] = $_SESSION['LOGIN_PAGES'];
+		$this->acl['pages_lookup_cuid'] = $_SESSION['LOGIN_PAGES_LOOKUP'];
 
 		$this->acl['unit_cuid'] = null;
 		$this->acl['unit_name'] = null;
@@ -2726,6 +2733,31 @@ HTML;
 	{
 
 		return $this->session->get('LOGIN_PAGES');
+	}
+
+	/**
+	 * Return the current loaded list of pages the user can access
+	 *
+	 * @return array<mixed>
+	 */
+	public function loginGetPageLookupList(): array
+	{
+		return $this->session->get('LOGIN_PAGES_LOOKUP');
+	}
+
+	/**
+	 * Check access to a file in the pages list
+	 *
+	 * @param  string $filename File name to check
+	 * @return bool             True if page in list and anything other than None access, False if failed
+	 */
+	public function loginPageAccessAllowed(string $filename): bool
+	{
+		return (
+			$this->session->get('LOGIN_PAGES')[
+				$this->session->get('LOGIN_PAGES_LOOKUP')[$filename] ?? ''
+			] ?? 0
+		) != 0 ? true : false;
 	}
 
 	// MARK: logged in uid(pk)/eucuid/eucuuid

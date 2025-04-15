@@ -127,6 +127,12 @@ if (isset($login->loginGetAcl()['unit'])) {
 // IP check: 'REMOTE_ADDR', 'HTTP_X_FORWARDED_FOR', 'CLIENT_IP' in _SERVER
 // Agent check: 'HTTP_USER_AGENT'
 
+print "<hr>";
+print "PAGE lookup:<br>";
+$file_name = 'test_edit_base.php';
+print "Access to '$file_name': " . $log->prAr($login->loginPageAccessAllowed($file_name)) . "<br>";
+$file_name = 'i_do_not_exists.php';
+print "Access to '$file_name': " . $log->prAr($login->loginPageAccessAllowed($file_name)) . "<br>";
 
 echo "<hr>";
 print "SESSION: " . Support::printAr($_SESSION) . "<br>";

@@ -12,6 +12,8 @@ Not yet covered tests:
 - loginGetLocale
 - loginGetHeaderColor
 - loginGetPages
+- loginGetPageLookupList
+- loginPageAccessAllowed
 - loginGetEuid
 */
 
