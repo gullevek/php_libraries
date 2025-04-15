@@ -136,32 +136,30 @@ if ($res === false) {
 	if (hash_equals($string_hmac, $res['pg_hmac_text'])) {
 		print "libsodium and pgcrypto hash hmac match<br>";
 	}
-}
-$encryptedMessage_template = <<<TEXT
------BEGIN PGP MESSAGE-----
+	// do compare for PHP and pgcrypto settings
+	$encryptedMessage_template = <<<TEXT
+	-----BEGIN PGP MESSAGE-----
 
-{BASE64}
------END PGP MESSAGE-----
-TEXT;
-$base64_string = base64_encode(hex2bin($res['pg_crypt_text']));
-$encryptedMessage = str_replace(
-	'{BASE64}',
-	$base64_string,
-	$encryptedMessage_template
-);
-try {
-	$literalMessage = OpenPGP::decryptMessage($encryptedMessage, passwords: [$key]);
-	$decrypted = $literalMessage->getLiteralData()->getData();
-	print "Pg decrypted PHP: " . $decrypted . "<br>";
-	if ($decrypted == $text_string) {
-		print "Decryption worked<br>";
+	{BASE64}
+	-----END PGP MESSAGE-----
+	TEXT;
+	$base64_string = base64_encode(hex2bin($res['pg_crypt_text']) ?: '');
+	$encryptedMessage = str_replace(
+		'{BASE64}',
+		$base64_string,
+		$encryptedMessage_template
+	);
+	try {
+		$literalMessage = OpenPGP::decryptMessage($encryptedMessage, passwords: [$key]);
+		$decrypted = $literalMessage->getLiteralData()->getData();
+		print "Pg decrypted PHP: " . $decrypted . "<br>";
+		if ($decrypted == $text_string) {
+			print "Decryption worked<br>";
+		}
+	} catch (\Exception $e) {
+		print "Error decrypting message: " . $e->getMessage() . "<br>";
 	}
-} catch (\Exception $e) {
-	print "Error decrypting message: " . $e->getMessage() . "<br>";
 }
-
-
-// do compare for PHP and pgcrypto settings
 
 print "</body></html>";
 
