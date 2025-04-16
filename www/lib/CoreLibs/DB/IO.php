@@ -2942,12 +2942,14 @@ class IO
 	 *                              data to create a unique call one, optional
 	 * @return bool                 False if query not found, true if success
 	 */
-	public function dbCacheReset(string $query, array $params = []): bool
+	public function dbCacheReset(string $query, array $params = [], bool $show_warning = true): bool
 	{
-		$this->__dbErrorReset();
 		$query_hash = $this->dbBuildQueryHash($query, $params);
 		// clears cache for this query
-		if (empty($this->cursor_ext[$query_hash]['query'])) {
+		if (
+			$show_warning &&
+			empty($this->cursor_ext[$query_hash]['query'])
+		) {
 			$this->__dbWarning(18, context: [
 				'query' => $query,
 				'params' => $params,

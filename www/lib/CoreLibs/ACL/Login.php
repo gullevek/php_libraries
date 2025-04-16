@@ -1154,7 +1154,7 @@ class Login
 			$q
 		);
 		// reset any query data that might exist
-		$this->db->dbCacheReset($q, $params);
+		$this->db->dbCacheReset($q, $params, show_warning:false);
 		// never cache return data
 		$res = $this->db->dbReturnParams($q, $params, $this->db::NO_CACHE);
 		// query was not run successful
