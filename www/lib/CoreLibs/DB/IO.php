@@ -2544,7 +2544,10 @@ class IO
 		} // only go if NO cursor exists
 
 		// if cursor exists ...
-		if ($this->cursor_ext[$query_hash]['cursor']) {
+		if (
+			$this->cursor_ext[$query_hash]['cursor'] instanceof \PgSql\Result ||
+			$this->cursor_ext[$query_hash]['cursor'] == 1
+		) {
 			if ($first_call === true) {
 				$this->cursor_ext[$query_hash]['log'][] = 'First call';
 				// count the rows returned (if select)
