@@ -263,6 +263,8 @@ $out = array_intersect_key(
 );
 print "array intersect key: " . DgS::printAr($keys) . ": " . DgS::printAr($out) . "<br>";
 
+print "array + suffix: " . DgS::printAr(ArrayHandler::arrayModifyKey($array, key_mod_suffix:'_attached')) . "<br>";
+
 print "</body></html>";
 
 // __END__
