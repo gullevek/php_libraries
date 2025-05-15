@@ -5,3 +5,5 @@ vendor/
 tools/
 www/composer.lock
 www/vendor
+**/.env
+**/.target

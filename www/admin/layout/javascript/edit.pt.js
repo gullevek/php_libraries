@@ -1,5 +1,11 @@
-/* general edit javascript */
-/* prototype version */
+/*
+general edit javascript
+prototype version
+*/
+
+/** @deprecated Do not use this anymore, use utils.js */
+
+throw new Error("Prototype Support is deprected, please switch to jquery and utils.js/utils.min.js");
 
 /* jshint esversion: 6 */
 
@@ -25,7 +31,7 @@ function pop(theURL, winName, features) {
 
 /**
  * automatically resize a text area based on the amount of lines in it
- * @param {[string} ta_id element id
+ * @param {string} ta_id element id
  */
 function expandTA(ta_id) {
 	var ta;

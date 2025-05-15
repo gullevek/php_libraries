@@ -418,9 +418,7 @@ class ProgressBar
 		// if this is percent, we ignore anything, it is auto positioned
 		if ($this->label[$name]['type'] != 'percent') {
 			foreach (['top', 'left', 'width', 'height'] as $pos_name) {
-				if ($$pos_name !== false) {
-					$this->label[$name][$pos_name] = intval($$pos_name);
-				}
+				$this->label[$name][$pos_name] = intval($$pos_name);
 			}
 
 			if ($align != '') {

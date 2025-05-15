@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 /**
  * Undocumented function
@@ -86,8 +86,10 @@ if (!isset($_SESSION['counter'])) {
 $_SESSION['counter']++;
 print "[READ] A " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 $_SESSION[$var] = $value;
+/** @phpstan-ignore-next-line nullCoalesce.offset */
 print "[READ] B " . $var . ": " . ($_SESSION[$var] ?? '{UNSET}') . "<br>";
 print "[READ] Confirm " . $var . " is " . $value . ": "
+/** @phpstan-ignore-next-line equal.alwaysTrue, nullCoalesce.offset */
 	. (($_SESSION[$var] ?? '') == $value ? 'Matching' : 'Not matching') . "<br>";
 
 // test set wrappers methods
@@ -146,7 +148,7 @@ $_SESSION['this_will_be_written'] = 'not empty';
 // open again with same name
 $session_name = 'class-test-session';
 try {
-	$session_alt = new Session($session_name, auto_write_close:true);
+	$session_alt = new Session($session_name, ['auto_write_close' => true]);
 	print "[4 SET] Current session id: " . $session_alt->getSessionId() . "<br>";
 	print "[4 SET] Current session auto write close: " . ($session_alt->checkAutoWriteClose() ? 'Yes' : 'No') . "<br>";
 	print "[START AGAIN] Current session id: " . $session_alt->getSessionId() . "<br>";

@@ -21,20 +21,106 @@ class Session
 	private string $session_id = '';
 	/** @var bool flag auto write close */
 	private bool $auto_write_close = false;
+	/** @var string regenerate option, default never */
+	private string $regenerate = 'never';
+	/** @var int regenerate interval either 1 to 100 for random or 0 to 3600 for interval */
+	private int $regenerate_interval = 0;
+
+	/** @var array<string> allowed session id regenerate (rotate) options */
+	private const ALLOWED_REGENERATE_OPTIONS = ['none', 'random', 'interval'];
+	/** @var int default random interval */
+	public const DEFAULT_REGENERATE_RANDOM = 100;
+	/** @var int default rotate internval in minutes */
+	public const DEFAULT_REGENERATE_INTERVAL = 5 * 60;
+	/** @var int maximum time for regenerate interval is one hour */
+	public const MAX_REGENERATE_INTERAL = 60 * 60;
 
 	/**
 	 * init a session, if array is empty or array does not have session_name set
 	 * then no auto init is run
 	 *
 	 * @param string $session_name if set and not empty, will start session
+	 * @param array{auto_write_close?:bool,session_strict?:bool,regenerate?:string,regenerate_interval?:int} $options
 	 */
-	public function __construct(string $session_name, bool $auto_write_close = false)
-	{
+	public function __construct(
+		string $session_name,
+		array $options = []
+	) {
+		$this->setOptions($options);
 		$this->initSession($session_name);
-		$this->auto_write_close = $auto_write_close;
 	}
 
 	// MARK: private methods
+
+	/**
+	 * set session class options
+	 *
+	 * @param array{auto_write_close?:bool,session_strict?:bool,regenerate?:string,regenerate_interval?:int} $options
+	 * @return void
+	 */
+	private function setOptions(array $options): void
+	{
+		if (
+			!isset($options['auto_write_close']) ||
+			!is_bool($options['auto_write_close'])
+		) {
+			$options['auto_write_close'] = false;
+		}
+		$this->auto_write_close = $options['auto_write_close'];
+		if (
+			!isset($options['session_strict']) ||
+			!is_bool($options['session_strict'])
+		) {
+			$options['session_strict'] = true;
+		}
+		// set strict options, on not started sessiononly
+		if (
+			$options['session_strict'] &&
+			$this->getSessionStatus() === PHP_SESSION_NONE
+		) {
+			// use cookies to store session IDs
+			ini_set('session.use_cookies', 1);
+			// use cookies only (do not send session IDs in URLs)
+			ini_set('session.use_only_cookies', 1);
+			// do not send session IDs in URLs
+			ini_set('session.use_trans_sid', 0);
+		}
+		// session regenerate id options
+		if (
+			empty($options['regenerate']) ||
+			!in_array($options['regenerate'], self::ALLOWED_REGENERATE_OPTIONS)
+		) {
+			$options['regenerate'] = 'never';
+		}
+		$this->regenerate = (string)$options['regenerate'];
+		// for regenerate: 'random' (default 100)
+		// regenerate_interval must be between (1 = always) and 100 (1 in 100)
+		// for regenerate: 'interval' (default 5min)
+		// regenerate_interval must be 0 = always, to 3600 (every hour)
+		if (
+			$options['regenerate'] == 'random' &&
+			(
+				!isset($options['regenerate_interval']) ||
+				!is_numeric($options['regenerate_interval']) ||
+				$options['regenerate_interval'] < 0 ||
+				$options['regenerate_interval'] > 100
+			)
+		) {
+			$options['regenerate_interval'] = self::DEFAULT_REGENERATE_RANDOM;
+		}
+		if (
+			$options['regenerate'] == 'interval' &&
+			(
+				!isset($options['regenerate_interval']) ||
+				!is_numeric($options['regenerate_interval']) ||
+				$options['regenerate_interval'] < 1 ||
+				$options['regenerate_interval'] > self::MAX_REGENERATE_INTERAL
+			)
+		) {
+			$options['regenerate_interval'] = self::DEFAULT_REGENERATE_INTERVAL;
+		}
+		$this->regenerate_interval = (int)($options['regenerate_interval'] ?? 0);
+	}
 
 	/**
 	 * Start session
@@ -71,6 +157,72 @@ class Session
 		}
 		return false;
 	}
+
+	// MARK: regenerate session
+
+	/**
+	 * auto rotate session id
+	 *
+	 * @return void
+	 * @throws \RuntimeException failure to regenerate session id
+	 * @throws \UnexpectedValueException failed to get new session id
+	 * @throws \RuntimeException failed to set new sesson id
+	 * @throws \UnexpectedValueException new session id generated does not match the new set one
+	 */
+	private function sessionRegenerateSessionId()
+	{
+		// never
+		if ($this->regenerate == 'never') {
+			return;
+		}
+		// regenerate
+		if (
+			!(
+				// is not session obsolete
+				empty($_SESSION['SESSION_REGENERATE_OBSOLETE']) &&
+				(
+					(
+						// random
+						$this->regenerate == 'random' &&
+						mt_rand(1, $this->regenerate_interval) == 1
+					) || (
+						// interval type
+						$this->regenerate == 'interval' &&
+						($_SESSION['SESSION_REGENERATE_TIMESTAMP'] ?? 0) + $this->regenerate_interval < time()
+					)
+				)
+			)
+		) {
+			return;
+		}
+		// Set current session to expire in 1 minute
+		$_SESSION['SESSION_REGENERATE_OBSOLETE'] = true;
+		$_SESSION['SESSION_REGENERATE_EXPIRES'] = time() + 60;
+		$_SESSION['SESSION_REGENERATE_TIMESTAMP'] = time();
+		// Create new session without destroying the old one
+		if (session_regenerate_id(false) === false) {
+			throw new \RuntimeException('[SESSION] Session id regeneration failed', 1);
+		}
+		// Grab current session ID and close both sessions to allow other scripts to use them
+		if (false === ($new_session_id = $this->getSessionIdCall())) {
+			throw new \UnexpectedValueException('[SESSION] getSessionIdCall did not return a session id', 2);
+		}
+		$this->writeClose();
+		// Set session ID to the new one, and start it back up again
+		if (($get_new_session_id = session_id($new_session_id)) === false) {
+			throw new \RuntimeException('[SESSION] set session_id failed', 3);
+		}
+		if ($get_new_session_id != $new_session_id) {
+			throw new \UnexpectedValueException('[SESSION] new session id does not match the new set one', 4);
+		}
+		$this->session_id = $new_session_id;
+		$this->startSessionCall();
+		// Don't want this one to expire
+		unset($_SESSION['SESSION_REGENERATE_OBSOLETE']);
+		unset($_SESSION['SESSION_REGENERATE_EXPIRES']);
+	}
+
+	// MARK: session validation
 
 	/**
 	 * check if session name is valid
@@ -151,6 +303,13 @@ class Session
 			if (!$this->checkActiveSession()) {
 				throw new \RuntimeException('[SESSION] Failed to activate session', 5);
 			}
+			if (
+				!empty($_SESSION['SESSION_REGENERATE_OBSOLETE']) &&
+				!empty($_SESSION['SESSION_REGENERATE_EXPIRES']) && $_SESSION['SESSION_REGENERATE_EXPIRES'] < time()
+			) {
+				$this->sessionDestroy();
+				throw new \RuntimeException('[SESSION] Expired session found', 6);
+			}
 		} elseif ($session_name != $this->getSessionName()) {
 			throw new \UnexpectedValueException(
 				'[SESSION] Another session exists with a different name: ' . $this->getSessionName(),
@@ -159,10 +318,12 @@ class Session
 		}
 		// check session id
 		if (false === ($session_id = $this->getSessionIdCall())) {
-			throw new \UnexpectedValueException('[SESSION] getSessionId did not return a session id', 6);
+			throw new \UnexpectedValueException('[SESSION] getSessionIdCall did not return a session id', 7);
 		}
 		// set session id
 		$this->session_id = $session_id;
+		// run session id re-create from time to time
+		$this->sessionRegenerateSessionId();
 		// if flagged auto close, write close session
 		if ($this->auto_write_close) {
 			$this->writeClose();
@@ -202,11 +363,12 @@ class Session
 	 * set the auto write close flag
 	 *
 	 * @param  bool $flag
-	 * @return void
+	 * @return Session
 	 */
-	public function setAutoWriteClose(bool $flag): void
+	public function setAutoWriteClose(bool $flag): Session
 	{
 		$this->auto_write_close = $flag;
+		return $this;
 	}
 
 	/**
@@ -352,14 +514,15 @@ class Session
 	 *
 	 * @param  string $name  array name in _SESSION
 	 * @param  mixed  $value value to set (can be anything)
-	 * @return void
+	 * @return Session
 	 */
-	public function set(string $name, mixed $value): void
+	public function set(string $name, mixed $value): Session
 	{
 		$this->checkValidSessionEntryKey($name);
 		$this->restartSession();
 		$_SESSION[$name] = $value;
 		$this->closeSessionCall();
+		return $this;
 	}
 
 	/**
@@ -416,16 +579,17 @@ class Session
 	 * unset one _SESSION entry 'name' if exists
 	 *
 	 * @param  string $name _SESSION key name to remove
-	 * @return void
+	 * @return Session
 	 */
-	public function unset(string $name): void
+	public function unset(string $name): Session
 	{
 		if (!isset($_SESSION[$name])) {
-			return;
+			return $this;
 		}
 		$this->restartSession();
 		unset($_SESSION[$name]);
 		$this->closeSessionCall();
+		return $this;
 	}
 
 	/**

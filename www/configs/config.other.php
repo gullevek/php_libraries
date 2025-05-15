@@ -15,6 +15,12 @@ define('EDIT_BASE_STYLESHEET', 'edit.css');
 
 // define('SOME_ID', <SOME VALUE>);
 
+/************* QUEUE TABLE *************/
+// if we have a dev/live system
+// set_live is a per page/per item
+// live_queue is a global queue system
+// define('QUEUE', 'live_queue');
+
 /************* CONVERT *******************/
 // this only needed if the external thumbnail create is used
 $paths = [

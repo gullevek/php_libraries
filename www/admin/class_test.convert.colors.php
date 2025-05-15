@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -18,7 +18,7 @@ require 'config.php';
 $LOG_FILE_ID = 'classTest-convert-colors';
 ob_end_flush();
 
-use CoreLibs\Convert\Colors;
+// use CoreLibs\Convert\Colors;
 use CoreLibs\Convert\Color\Color;
 use CoreLibs\Convert\Color\Coordinates;
 use CoreLibs\Debug\Support as DgS;
@@ -29,7 +29,6 @@ $log = new CoreLibs\Logging\Logging([
 	'log_file_id' => $LOG_FILE_ID,
 	'log_per_date' => true,
 ]);
-$color_class = 'CoreLibs\Convert\Colors';
 
 /**
  * print out a color block with info
@@ -131,7 +130,8 @@ try {
 } catch (\LengthException $e) {
 	print "*Exception: " . $e->getMessage() . "<br><pre>" . print_r($e, true) . "</pre><br>";
 }
-print "<hr>";
+
+/* print "<hr>";
 print "<h2>LEGACY</h2>";
 // B(valid)
 $rgb = [50, 20, 30];
@@ -173,7 +173,7 @@ $hsb = [0, 0, 5];
 print "S::COLOR hsb->rgb: $hsb[0], $hsb[1], $hsb[2]: "
 	. DgS::printAr(SetVarType::setArray(
 		Colors::hsb2rgb($hsb[0], $hsb[1], $hsb[2])
-	)) . "<br>";
+	)) . "<br>"; */
 
 print "<hr>";
 

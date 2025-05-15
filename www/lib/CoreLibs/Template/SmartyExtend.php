@@ -19,12 +19,13 @@ declare(strict_types=1);
 
 namespace CoreLibs\Template;
 
-// leading slash if this is in lib\Smarty
-class SmartyExtend extends \Smarty
+class SmartyExtend extends \Smarty\Smarty
 {
 	// internal translation engine
-	/** @var \CoreLibs\Language\L10n */
+	/** @var \CoreLibs\Language\L10n language class */
 	public \CoreLibs\Language\L10n $l10n;
+	/** @var \CoreLibs\Logging\Logging $log logging class */
+	public \CoreLibs\Logging\Logging $log;
 
 	// lang & encoding
 	/** @var string */
@@ -157,14 +158,18 @@ class SmartyExtend extends \Smarty
 	 * calls L10 for pass on internaly in smarty
 	 * also registers the getvar caller plugin
 	 *
-	 * @param \CoreLibs\Language\L10n $l10n l10n language class
-	 * @param string|null             $cache_id
-	 * @param string|null             $compile_id
+	 * @param \CoreLibs\Language\L10n   $l10n l10n language class
+	 * @param \CoreLibs\Logging\Logging $log Logger class
+	 * @param string|null               $cache_id [default=null]
+	 * @param string|null               $compile_id [default=null]
+	 * @param array<string,mixed>       $options [default=[]]
 	 */
 	public function __construct(
 		\CoreLibs\Language\L10n $l10n,
+		\CoreLibs\Logging\Logging $log,
 		?string $cache_id = null,
-		?string $compile_id = null
+		?string $compile_id = null,
+		array $options = []
 	) {
 		// trigger deprecation
 		if (
@@ -177,14 +182,33 @@ class SmartyExtend extends \Smarty
 				E_USER_DEPRECATED
 			);
 		}
-		// set variables (to be deprecated)
-		$cache_id = $cache_id ??
-			(defined('CACHE_ID') ? CACHE_ID : '');
-		$compile_id = $compile_id ??
-			(defined('COMPILE_ID') ? COMPILE_ID : '');
+		// set variables from global constants (deprecated)
+		if ($cache_id === null && defined('CACHE_ID')) {
+			trigger_error(
+				'SmartyExtended: No cache_id set and CACHE_ID constant set, this is deprecated',
+				E_USER_DEPRECATED
+			);
+			$cache_id = CACHE_ID;
+		}
+		if ($compile_id === null && defined('COMPILE_ID')) {
+			trigger_error(
+				'SmartyExtended: No compile_id set and COMPILE_ID constant set, this is deprecated',
+				E_USER_DEPRECATED
+			);
+			$compile_id = COMPILE_ID;
+		}
+		if (empty($cache_id)) {
+			throw new \BadMethodCallException('cache_id parameter is not set');
+		}
+		if (empty($compile_id)) {
+			throw new \BadMethodCallException('compile_id parameter is not set');
+		}
+
 		// call basic smarty
-		// or Smarty::__construct();
 		parent::__construct();
+
+		$this->log = $log;
+
 		// init lang
 		$this->l10n = $l10n;
 		// parse and read, legacy stuff
@@ -194,7 +218,6 @@ class SmartyExtend extends \Smarty
 		$this->lang_short = $locale['lang_short'];
 		$this->domain = $locale['domain'];
 		$this->lang_dir = $locale['path'];
-
 		// opt load functions so we can use legacy init for smarty run perhaps
 		\CoreLibs\Language\L10n::loadFunctions();
 		_setlocale(LC_MESSAGES, $locale['locale']);
@@ -203,7 +226,6 @@ class SmartyExtend extends \Smarty
 		_bind_textdomain_codeset($this->domain, $this->encoding);
 
 		// register smarty variable
-		// $this->registerPlugin(\Smarty\Smarty::PLUGIN_MODIFIER, 'getvar', [&$this, 'getTemplateVars']);
 		$this->registerPlugin(self::PLUGIN_MODIFIER, 'getvar', [&$this, 'getTemplateVars']);
 
 		$this->page_name = \CoreLibs\Get\System::getPageName();
@@ -211,6 +233,77 @@ class SmartyExtend extends \Smarty
 		// set internal settings
 		$this->CACHE_ID = $cache_id;
 		$this->COMPILE_ID = $compile_id;
+		// set options
+		$this->setOptions($options);
+	}
+
+	/**
+	 * set options
+	 *
+	 * @param  array<string,mixed> $options
+	 * @return void
+	 */
+	private function setOptions(array $options): void
+	{
+		// set escape html if option is set
+		if (!empty($options['escape_html'])) {
+			$this->setEscapeHtml(true);
+		}
+		// load plugins
+		// plugin array:
+		// 'file': string, path to plugin content to load
+		// 'type': a valid smarty type see Smarty PLUGIN_ constants for correct names
+		// 'tag': the smarty tag
+		// 'callback': the function to call in 'file'
+		if (!empty($options['plugins'])) {
+			foreach ($options['plugins'] as $plugin) {
+				// file is readable
+				if (
+					empty($plugin['file']) ||
+					!is_file($plugin['file']) ||
+					!is_readable($plugin['file'])
+				) {
+					$this->log->warning('SmartyExtended plugin load failed, file not accessable', [
+						'plugin' => $plugin,
+					]);
+					continue;
+				}
+				// tag is alphanumeric
+				if (!preg_match("/^\w+$/", $plugin['tag'] ?? '')) {
+					$this->log->warning('SmartyExtended plugin load failed, invalid tag', [
+						'plugin' => $plugin,
+					]);
+					continue;
+				}
+				// callback is alphanumeric
+				if (!preg_match("/^\w+$/", $plugin['callback'] ?? '')) {
+					$this->log->warning('SmartyExtended plugin load failed, invalid callback', [
+						'plugin' => $plugin,
+					]);
+					continue;
+				}
+				try {
+					/** @phan-suppress-next-line PhanNoopNew */
+					new \ReflectionClassConstant($this, $plugin['type']);
+				} catch (\ReflectionException $e) {
+					$this->log->error('SmartyExtended plugin load failed, type is not valid', [
+						'message' => $e->getMessage(),
+						'plugin' => $plugin,
+					]);
+					continue;
+				}
+				try {
+					require $plugin['file'];
+					$this->registerPlugin($plugin['type'], $plugin['tag'], $plugin['callback']);
+				} catch (\Smarty\Exception $e) {
+					$this->log->error('SmartyExtended plugin load failed with exception', [
+						'message' => $e->getMessage(),
+						'plugin' => $plugin,
+					]);
+					continue;
+				}
+			}
+		}
 	}
 
 	/**

@@ -7,7 +7,7 @@
 declare(strict_types=1);
 
 // turn on all error reporting
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -21,13 +21,13 @@ ob_end_flush();
 
 use CoreLibs\Debug\Support;
 use CoreLibs\DB\Support\ConvertPlaceholder;
+use CoreLibs\Convert\Html;
 
 $log = new CoreLibs\Logging\Logging([
 	'log_folder' => BASE . LOG,
 	'log_file_id' => $LOG_FILE_ID,
 	'log_per_date' => true,
 ]);
-
 
 $PAGE_NAME = 'TEST CLASS: DB CONVERT PLACEHOLDER';
 print "<!DOCTYPE html>";
@@ -39,10 +39,12 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 print "LOGFILE NAME: " . $log->getLogFile() . "<br>";
 print "LOGFILE ID: " . $log->getLogFileId() . "<br>";
 
-print "Lookup Regex: <pre>" . ConvertPlaceholder::REGEX_LOOKUP_PLACEHOLDERS . "</pre>";
-print "Replace Named Regex: <pre>" . ConvertPlaceholder::REGEX_REPLACE_NAMED . "</pre>";
-print "Replace Named Regex: <pre>" . ConvertPlaceholder::REGEX_REPLACE_QUESTION_MARK . "</pre>";
-print "Replace Named Regex: <pre>" . ConvertPlaceholder::REGEX_REPLACE_NUMBERED . "</pre>";
+print "Lookup Regex: <pre>" . Html::htmlent(ConvertPlaceholder::REGEX_LOOKUP_PLACEHOLDERS) . "</pre>";
+print "Lookup Numbered Regex: <pre>" . Html::htmlent(ConvertPlaceholder::REGEX_LOOKUP_NUMBERED) . "</pre>";
+print "Replace Named Regex: <pre>" . Html::htmlent(ConvertPlaceholder::REGEX_REPLACE_NAMED) . "</pre>";
+print "Replace Question Mark Regex: <pre>"
+	. Html::htmlent(ConvertPlaceholder::REGEX_REPLACE_QUESTION_MARK) . "</pre>";
+print "Replace Numbered Regex: <pre>" . Html::htmlent(ConvertPlaceholder::REGEX_REPLACE_NUMBERED) . "</pre>";
 
 $uniqid = \CoreLibs\Create\Uids::uniqIdShort();
 // $binary_data = $db->dbEscapeBytea(file_get_contents('class_test.db.php') ?: '');
@@ -92,40 +94,63 @@ RETURNING
 	some_binary
 SQL;
 
-print "[ALL] Convert: "
+print "<b>[ALL] Convert</b>: "
 	. Support::printAr(ConvertPlaceholder::convertPlaceholderInQuery($query, $params))
 	. "<br>";
 echo "<hr>";
 
 $query = "SELECT foo FROM bar WHERE baz = :baz AND buz = :baz AND biz = :biz AND boz = :bez";
 $params = [':baz' => 'SETBAZ', ':bez' => 'SETBEZ', ':biz' => 'SETBIZ'];
-print "[NO PARAMS] Convert: "
+print "<b>[NO PARAMS] Convert</b>: "
 	. Support::printAr(ConvertPlaceholder::convertPlaceholderInQuery($query, $params))
 	. "<br>";
 echo "<hr>";
 
 $query = "SELECT foo FROM bar WHERE baz = :baz AND buz = :baz AND biz = :biz AND boz = :bez";
 $params = null;
-print "[NO PARAMS] Convert: "
+print "<b>[NO PARAMS] Convert</b>: "
 	. Support::printAr(ConvertPlaceholder::convertPlaceholderInQuery($query, $params))
 	. "<br>";
 echo "<hr>";
 
 $query = "SELECT row_varchar FROM table_with_primary_key WHERE row_varchar <> :row_varchar";
 $params = null;
-print "[NO PARAMS] Convert: "
+print "<b>[NO PARAMS] Convert</b>: "
 	. Support::printAr(ConvertPlaceholder::convertPlaceholderInQuery($query, $params))
 	. "<br>";
 echo "<hr>";
 
 $query = "SELECT row_varchar, row_varchar_literal, row_int, row_date FROM table_with_primary_key";
 $params = null;
-print "[NO PARAMS] TEST: "
+print "<b>[NO PARAMS] TEST</b>: "
 	. Support::printAr(ConvertPlaceholder::convertPlaceholderInQuery($query, $params))
 	. "<br>";
 echo "<hr>";
 
-print "[P-CONV]: "
+$query = <<<SQL
+UPDATE table_with_primary_key SET
+	row_int = $1::INT, row_numeric = $1::NUMERIC, row_varchar = $1
+WHERE
+	row_varchar = $1
+SQL;
+$params = [1];
+print "<b>[All the same params] TEST</b>: "
+	. Support::printAr(ConvertPlaceholder::convertPlaceholderInQuery($query, $params))
+	. "<br>";
+echo "<hr>";
+
+$query = <<<SQL
+SELECT row_varchar, row_varchar_literal, row_int, row_date
+FROM table_with_primary_key
+WHERE row_varchar = :row_varchar
+SQL;
+$params = [':row_varchar' => 1];
+print "<b>[: param] TEST</b>: "
+	. Support::printAr(ConvertPlaceholder::convertPlaceholderInQuery($query, $params))
+	. "<br>";
+echo "<hr>";
+
+print "<b>[P-CONV]</b>: "
 	. Support::printAr(
 		ConvertPlaceholder::updateParamList([
 			'original' => [
@@ -187,6 +212,13 @@ SQL,
 		'params' => [\CoreLibs\Create\Uids::uniqIdShort(), 'string A-1', 1234],
 		'direction' => 'pg',
 	],
+	'b?' => [
+		'query' => <<<SQL
+SELECT test FROM test_foo = ?
+SQL,
+		'params' => [1234],
+		'direction' => 'pg',
+	],
 	'b:' => [
 		'query' => <<<SQL
 INSERT INTO test_foo (
@@ -221,7 +253,7 @@ foreach ($test_queries as $info => $data) {
 	$query = $data['query'];
 	$params = $data['params'];
 	$direction = $data['direction'];
-	print "[$info] Convert: "
+	print "<b>[$info] Convert</b>: "
 		. Support::printAr(ConvertPlaceholder::convertPlaceholderInQuery($query, $params, $direction))
 		. "<br>";
 	echo "<hr>";

@@ -525,6 +525,62 @@ class ArrayHandler
 	{
 		return array_diff($array, $remove);
 	}
+
+	/**
+	 * From the array with key -> mixed values,
+	 * return only the entries where the key matches the key given in the key list parameter
+	 *
+	 * key list is a list[string]
+	 * if key list is empty, return array as is
+	 *
+	 * @param  array<string,mixed> $array
+	 * @param  array<string>       $key_list
+	 * @return array<string,mixed>
+	 */
+	public static function arrayReturnMatchingKeyOnly(
+		array $array,
+		array $key_list
+	): array {
+		// on empty return as is
+		if (empty($key_list)) {
+			return $array;
+		}
+		return array_filter(
+			$array,
+			fn($key) => in_array($key, $key_list),
+			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
+	 * Modifieds the key of an array with a prefix and/or suffix and returns it with the original value
+	 * does not change order in array
+	 *
+	 * @param  array<string|int,mixed> $in_array
+	 * @param  string                  $key_mod_prefix [default=''] key prefix string
+	 * @param  string                  $key_mod_suffix [default=''] key suffix string
+	 * @return array<string|int,mixed>
+	 */
+	public static function arrayModifyKey(
+		array $in_array,
+		string $key_mod_prefix = '',
+		string $key_mod_suffix = ''
+	): array {
+		// skip if array is empty or neither prefix or suffix are set
+		if (
+			$in_array == [] ||
+			($key_mod_prefix == '' && $key_mod_suffix == '')
+		) {
+			return $in_array;
+		}
+		return array_combine(
+			array_map(
+				fn($key) => $key_mod_prefix . $key . $key_mod_suffix,
+				array_keys($in_array)
+			),
+			array_values($in_array)
+		);
+	}
 }
 
 // __END__

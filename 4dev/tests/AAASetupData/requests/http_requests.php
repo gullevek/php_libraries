@@ -48,7 +48,7 @@ header("Content-Type: application/json; charset=UTF-8");
 if (!empty($http_headers['HTTP_AUTHORIZATION']) && !empty($http_headers['HTTP_RUNAUTHTEST'])) {
 	header("HTTP/1.1 401 Unauthorized");
 	print buildContent($http_headers, '{"code": 401, "content": {"Error": "Not Authorized"}}');
-	exit;
+	exit(1);
 }
 
 // if server request type is get set file_get to null -> no body
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 } elseif (($file_get = file_get_contents('php://input')) === false) {
 	header("HTTP/1.1 404 Not Found");
 	print buildContent($http_headers, '{"code": 404, "content": {"Error": "file_get_contents failed"}}');
-	exit;
+	exit(1);
 }
 
 print buildContent($http_headers, $file_get);

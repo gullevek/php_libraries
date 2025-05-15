@@ -14,9 +14,6 @@ declare(strict_types=1);
 
 namespace CoreLibs\Admin;
 
-use Exception;
-use SmartyException;
-
 class EditBase
 {
 	/** @var array<mixed> */
@@ -63,6 +60,7 @@ class EditBase
 		// smarty template engine (extended Translation version)
 		$this->smarty = new \CoreLibs\Template\SmartyExtend(
 			$l10n,
+			$log,
 			$options['cache_id'] ?? '',
 			$options['compile_id'] ?? '',
 		);
@@ -78,7 +76,7 @@ class EditBase
 		);
 		if ($this->form->mobile_phone) {
 			echo "I am sorry, but this page cannot be viewed by a mobile phone";
-			exit;
+			exit(1);
 		}
 		// $this->log->debug('POST', $this->log->prAr($_POST));
 	}
@@ -415,8 +413,6 @@ class EditBase
 					$elements[] = $this->form->formCreateElement('lock_until');
 					$elements[] = $this->form->formCreateElement('lock_after');
 					$elements[] = $this->form->formCreateElement('admin');
-					$elements[] = $this->form->formCreateElement('debug');
-					$elements[] = $this->form->formCreateElement('db_debug');
 					$elements[] = $this->form->formCreateElement('edit_language_id');
 					$elements[] = $this->form->formCreateElement('edit_scheme_id');
 					$elements[] = $this->form->formCreateElementListTable('edit_access_user');
@@ -540,8 +536,7 @@ class EditBase
 	 * builds the smarty content and runs smarty display output
 	 *
 	 * @return void
-	 * @throws Exception
-	 * @throws SmartyException
+	 * @throws \Smarty\Exception
 	 */
 	public function editBaseRun(
 		?string $template_dir = null,

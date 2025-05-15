@@ -40,7 +40,7 @@ final class CoreLibsConvertByteTest extends TestCase
 				4 => '1.00 KB',
 				5 => '1.02KiB',
 			],
-			'invalud string number' => [
+			'invalid string number' => [
 				0 => '1024 MB',
 				1 => '1024 MB',
 				2 => '1024 MB',

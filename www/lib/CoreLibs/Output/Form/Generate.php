@@ -1371,7 +1371,7 @@ class Generate
 							) {
 								$this->msg .= sprintf(
 									$this->l->__('Please enter a valid (%s) input for the <b>%s</b> Field!<br>'),
-									$this->dba->getTableArray()[$key]['error_example'],
+									$this->dba->getTableArray()[$key]['error_example'] ?? '[MISSING]',
 									$this->dba->getTableArray()[$key]['output_name']
 								);
 							}
@@ -2602,7 +2602,7 @@ class Generate
 			}
 		}
 		// add lost error ones
-		$this->log->error('P: ' . $data['prefix'] . ', '
+		$this->log->error('Prefix: ' . $data['prefix'] . ', '
 			. Support::prAr($_POST['ERROR'][$data['prefix']] ?? []));
 		if ($this->error && !empty($_POST['ERROR'][$data['prefix']])) {
 			$prfx = $data['prefix']; // short

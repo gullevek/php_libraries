@@ -30,6 +30,10 @@ class Logging
 {
 	/** @var int minimum size for a max file size, so we don't set 1 byte, 10kb */
 	public const MIN_LOG_MAX_FILESIZE = 10 * 1024;
+	/** @var string log file extension, not changeable */
+	private const LOG_FILE_NAME_EXT = "log";
+	/** @var string log file block separator, not changeable */
+	private const LOG_FILE_BLOCK_SEPARATOR = '.';
 
 	// NOTE: the second party array{} hs some errors
 	/** @var array<string,array<string,string|bool|Level>>|array{string:array{type:string,type_info?:string,mandatory:true,alias?:string,default:string|bool|Level,deprecated:bool,use?:string}} */
@@ -104,8 +108,6 @@ class Logging
 	private string $log_folder = '';
 	/** @var string a alphanumeric name that has to be set as global definition */
 	private string $log_file_id = '';
-	/** @var string log file name extension */
-	private string $log_file_name_ext = 'log';
 	/** @var string log file name with folder, for actual writing */
 	private string $log_file_name = '';
 	/** @var int set in bytes */
@@ -431,7 +433,7 @@ class Logging
 	private function buildLogFileName(Level $level, string $group_id = ''): string
 	{
 		// init base file path
-		$fn = $this->log_print_file . '.' . $this->log_file_name_ext;
+		$fn = $this->log_print_file . '.' . self::LOG_FILE_NAME_EXT;
 		// log ID prefix settings, if not valid, replace with empty
 		if (!empty($this->log_file_id)) {
 			$rpl_string = $this->log_file_id;
@@ -440,14 +442,15 @@ class Logging
 		}
 		$fn = str_replace('{LOGID}', $rpl_string, $fn); // log id (like a log file prefix)
 
-		$rpl_string = !$this->getLogFlag(Flag::per_level) ? '' :
-			'_' . $level->getName();
+		$rpl_string = $this->getLogFlag(Flag::per_level) ?
+			self::LOG_FILE_BLOCK_SEPARATOR . $level->getName() :
+			'';
 		$fn = str_replace('{LEVEL}', $rpl_string, $fn); // create output filename
 
 		// write per level
-		$rpl_string = !$this->getLogFlag(Flag::per_group) ? '' :
+		$rpl_string = $this->getLogFlag(Flag::per_group) ?
 			// normalize level, replace all non alphanumeric characters with -
-			'_' . (
+			self::LOG_FILE_BLOCK_SEPARATOR . (
 				// if return is only - then set error string
 				preg_match(
 					"/^-+$/",
@@ -455,25 +458,29 @@ class Logging
 				) ?
 					'INVALID-LEVEL-STRING' :
 					$level_string
-			);
+			) :
+			'';
 		$fn = str_replace('{GROUP}', $rpl_string, $fn); // create output filename
 		// set per class, but don't use get_class as we will only get self
-		$rpl_string = !$this->getLogFlag(Flag::per_class) ? '' : '_'
-			// set sub class settings
-			. str_replace('\\', '-', Support::getCallerTopLevelClass());
+		$rpl_string = $this->getLogFlag(Flag::per_class) ?
+				// set sub class settings
+				self::LOG_FILE_BLOCK_SEPARATOR . str_replace('\\', '-', Support::getCallerTopLevelClass()) :
+			'';
 		$fn = str_replace('{CLASS}', $rpl_string, $fn); // create output filename
 
 		// if request to write to one file
-		$rpl_string = !$this->getLogFlag(Flag::per_page) ?
-			'' :
-			'_' . System::getPageName(System::NO_EXTENSION);
+		$rpl_string = $this->getLogFlag(Flag::per_page) ?
+			self::LOG_FILE_BLOCK_SEPARATOR . System::getPageName(System::NO_EXTENSION) :
+			'';
 		$fn = str_replace('{PAGENAME}', $rpl_string, $fn); // create output filename
 
 		// if run id, we auto add ymd, so we ignore the log file date
 		if ($this->getLogFlag(Flag::per_run)) {
-			$rpl_string = '_' . $this->getLogUniqueId(); // add 8 char unique string
+			// add 8 char unique string and date block with time
+			$rpl_string = self::LOG_FILE_BLOCK_SEPARATOR . $this->getLogUniqueId();
 		} elseif ($this->getLogFlag(Flag::per_date)) {
-			$rpl_string = '_' . $this->getLogDate(); // add date to file
+			// add date to file
+			$rpl_string = self::LOG_FILE_BLOCK_SEPARATOR . $this->getLogDate();
 		} else {
 			$rpl_string = '';
 		}
@@ -739,7 +746,10 @@ class Logging
 	{
 		if (empty($this->log_file_unique_id) || $override == true) {
 			$this->log_file_unique_id =
-				date('Y-m-d_His') . '_U_'
+				date('Y-m-d_His')
+					. self::LOG_FILE_BLOCK_SEPARATOR
+					. 'U_'
+					// this doesn't have to be unique for everything, just for this logging purpose
 					. substr(hash(
 						'sha1',
 						random_bytes(63)

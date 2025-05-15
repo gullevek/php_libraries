@@ -50,7 +50,8 @@ class EditUsers implements Interface\TableArraysInterface
 					'HIDDEN_value' => $_POST['HIDDEN_password'] ?? '',
 					'CONFIRM_value' => $_POST['CONFIRM_password'] ?? '',
 					'output_name' => 'Password',
-					'mandatory' => 1,
+					// make it not mandatory to create dummy accounts that can only login via login url id
+					'mandatory' => 0,
 					'type' => 'password', // later has to be password for encryption in database
 					'update' => [ // connected field updates, and update data
 						'password_change_date' => [ // db row to update
@@ -135,30 +136,6 @@ class EditUsers implements Interface\TableArraysInterface
 					'min_edit_acl' => '100',
 					'min_show_acl' => '100',
 				],
-				'debug' => [
-					'value' => $_POST['debug'] ?? '',
-					'output_name' => 'Debug',
-					'type' => 'binary',
-					'int' => 1,
-					'element_list' => [
-						'1' => 'Yes',
-						'0' => 'No'
-					],
-					'min_edit_acl' => '100',
-					'min_show_acl' => '100',
-				],
-				'db_debug' => [
-					'value' => $_POST['db_debug'] ?? '',
-					'output_name' => 'DB Debug',
-					'type' => 'binary',
-					'int' => 1,
-					'element_list' => [
-						'1' => 'Yes',
-						'0' => 'No'
-					],
-					'min_edit_acl' => '100',
-					'min_show_acl' => '100',
-				],
 				'email' => [
 					'value' => $_POST['email'] ?? '',
 					'output_name' => 'E-Mail',
@@ -206,6 +183,7 @@ class EditUsers implements Interface\TableArraysInterface
 					'type' => 'text',
 					'error_check' => 'unique|custom',
 					'error_regex' => "/^[A-Za-z0-9]+$/",
+					'error_example' => "ABCdef123",
 					'emptynull' => 1,'min_edit_acl' => '100',
 					'min_show_acl' => '100',
 				],

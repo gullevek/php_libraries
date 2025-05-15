@@ -50,7 +50,6 @@ class GetLocale
 				$locale = defined('SITE_LOCALE') && !empty(SITE_LOCALE) ?
 					SITE_LOCALE :
 					// else parse from default, if not 'en'
-					/** @phpstan-ignore-next-line DEFAULT_LOCALE could be empty */
 					(defined('DEFAULT_LOCALE') && !empty(DEFAULT_LOCALE) ?
 						DEFAULT_LOCALE : 'en');
 			}
@@ -97,8 +96,7 @@ class GetLocale
 				$encoding = defined('SITE_ENCODING') && !empty(SITE_ENCODING) ?
 					SITE_ENCODING :
 					// or default encoding, if not 'UTF-8'
-					/** @phpstan-ignore-next-line DEFAULT_LOCALE could be empty */
-					(defined('DEFAULT_ENCODING') && !empty(DEFAULT_ENCODING) ?
+					(defined('DEFAULT_ENCODING') ?
 						DEFAULT_ENCODING : 'UTF-8');
 			}
 		}

@@ -639,16 +639,26 @@ class DateTime
 	 *
 	 * @param  string $start_date   valid start date (y/m/d)
 	 * @param  string $end_date     valid end date (y/m/d)
-	 * @param  bool   $return_named return array type, false (default), true for named
-	 * @return array<mixed>         0/overall, 1/weekday, 2/weekend
+	 * @param  bool   $return_named [default=false] return array type, false (default), true for named
+	 * @param  bool   $include_end_date [default=true] include end date in calc
+	 * @param  bool   $exclude_start_date [default=false] include end date in calc
+	 * @return array{0:int,1:int,2:int,3:bool}|array{overall:int,weekday:int,weekend:int,reverse:bool}
+	 *                0/overall, 1/weekday, 2/weekend, 3/reverse
 	 */
 	public static function calcDaysInterval(
 		string $start_date,
 		string $end_date,
-		bool $return_named = false
+		bool $return_named = false,
+		bool $include_end_date = true,
+		bool $exclude_start_date = false
 	): array {
 		// pos 0 all, pos 1 weekday, pos 2 weekend
-		$days = [];
+		$days = [
+			0 => 0,
+			1 => 0,
+			2 => 0,
+			3 => false,
+		];
 		// if anything invalid, return 0,0,0
 		try {
 			$start = new \DateTime($start_date);
@@ -659,19 +669,30 @@ class DateTime
 					'overall' => 0,
 					'weekday' => 0,
 					'weekend' => 0,
+					'reverse' => false
 				];
 			} else {
-				return [0, 0, 0];
+				return $days;
 			}
 		}
 		// so we include the last day too, we need to add +1 second in the time
-		$end->setTime(0, 0, 1);
-		// if end date before start date, only this will be filled
-		$days[0] = $end->diff($start)->days;
-		$days[1] = 0;
-		$days[2] = 0;
+		// if start is before end, switch dates and flag
+		$days[3] = false;
+		if ($start > $end) {
+			$new_start = $end;
+			$end = $start;
+			$start = $new_start;
+			$days[3] = true;
+		}
 		// get period for weekends/weekdays
-		$period = new \DatePeriod($start, new \DateInterval('P1D'), $end);
+		$options = 0;
+		if ($include_end_date) {
+			$options |= \DatePeriod::INCLUDE_END_DATE;
+		}
+		if ($exclude_start_date) {
+			$options |= \DatePeriod::EXCLUDE_START_DATE;
+		}
+		$period = new \DatePeriod($start, new \DateInterval('P1D'), $end, $options);
 		foreach ($period as $dt) {
 			$curr = $dt->format('D');
 			if ($curr == 'Sat' || $curr == 'Sun') {
@@ -679,16 +700,78 @@ class DateTime
 			} else {
 				$days[1]++;
 			}
+			$days[0]++;
 		}
 		if ($return_named === true) {
 			return [
 				'overall' => $days[0],
 				'weekday' => $days[1],
 				'weekend' => $days[2],
+				'reverse' => $days[3],
 			];
 		} else {
 			return $days;
 		}
+	}
+
+	/**
+	 * wrapper for calcDaysInterval with numeric return only
+	 *
+	 * @param  string $start_date   valid start date (y/m/d)
+	 * @param  string $end_date     valid end date (y/m/d)
+	 * @param  bool   $include_end_date [default=true] include end date in calc
+	 * @param  bool   $exclude_start_date [default=false] include end date in calc
+	 * @return array{0:int,1:int,2:int,3:bool}
+	 */
+	public static function calcDaysIntervalNumIndex(
+		string $start_date,
+		string $end_date,
+		bool $include_end_date = true,
+		bool $exclude_start_date = false
+	): array {
+		$values = self::calcDaysInterval(
+			$start_date,
+			$end_date,
+			false,
+			$include_end_date,
+			$exclude_start_date
+		);
+		return [
+			$values[0] ?? 0,
+			$values[1] ?? 0,
+			$values[2] ?? 0,
+			$values[3] ?? false,
+		];
+	}
+
+	/**
+	 * wrapper for calcDaysInterval with named return only
+	 *
+	 * @param  string $start_date   valid start date (y/m/d)
+	 * @param  string $end_date     valid end date (y/m/d)
+	 * @param  bool   $include_end_date [default=true] include end date in calc
+	 * @param  bool   $exclude_start_date [default=false] include end date in calc
+	 * @return array{overall:int,weekday:int,weekend:int,reverse:bool}
+	 */
+	public static function calcDaysIntervalNamedIndex(
+		string $start_date,
+		string $end_date,
+		bool $include_end_date = true,
+		bool $exclude_start_date = false
+	): array {
+		$values = self::calcDaysInterval(
+			$start_date,
+			$end_date,
+			true,
+			$include_end_date,
+			$exclude_start_date
+		);
+		return [
+			'overall' => $values['overall'] ?? 0,
+			'weekday' => $values['weekday'] ?? 0,
+			'weekend' => $values['weekend'] ?? 0,
+			'reverse' => $values['reverse'] ?? false,
+		];
 	}
 
 	/**
@@ -705,6 +788,13 @@ class DateTime
 	): bool {
 		$dd_start = new \DateTime($start_date);
 		$dd_end = new \DateTime($end_date);
+		// flip if start is after end
+		if ($dd_start > $dd_end) {
+			$new_start = $dd_end;
+			$dd_end = $dd_start;
+			$dd_start = $new_start;
+		}
+		// if start > end, flip
 		if (
 			// starts with a weekend
 			$dd_start->format('N') >= 6 ||

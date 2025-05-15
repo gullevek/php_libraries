@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<head>
+	<title>JavaScript Test</title>
+	<script type="text/javascript" src="layout/javascript/jquery.min.js"></script>
+	<script type="text/javascript" src="layout/javascript/translateTest-ja_JP.UTF-8.js"></script>
+	<script type="text/javascript" src="layout/javascript/utils.min.js"></script>
+</head>
+<body>
+<div>
+	<h1>JavaScript tests</h1>
+	<div id="test-div">
+	</div>
+</div>
+</body>
+<script languagae="JavaScript">
+document.addEventListener('DOMContentLoaded', function() {
+	console.log('MAIN PAGE LOADED');
+	// console.log('Random: %o', mh.randomIdF());
+	console.log('Random: %o', randomIdF());
+	console.log("GW: %o", getWindowSize());
+	let bytes = 1021152;
+	console.log('FB: %o', formatBytes(bytes));
+	console.log('FBL: %o', formatBytesLong(bytes));
+	console.log('TR: %s', l10n.__('Original'));
+	console.log('TR: %s', l10n.__('Not exists'));
+
+	setCenter('test-div', true, true);
+	ClearCall();
+	overlayBoxShow();
+	actionIndicatorShow('testSmarty');
+	setTimeout(function() {
+		console.log('Waiting dummy ...');
+		actionIndicatorHide('testSmarty');
+		ClearCall();
+	}, 2000);
+});
+</script>

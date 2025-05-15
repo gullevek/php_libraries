@@ -17,7 +17,7 @@ Table with Primary Key: table_with_primary_key
 Table without Primary Key: table_without_primary_key
 
 Table with primary key has additional row:
-row_primary_key	SERIAL PRIMARY KEY,
+row_primary_key	INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Each table has the following rows
 row_int INT,
 row_numeric NUMERIC,
@@ -135,6 +135,7 @@ final class CoreLibsDBIOTest extends TestCase
 		}
 		// check if they already exist, drop them
 		if ($db->dbShowTableMetaData('table_with_primary_key') !== false) {
+			$db->dbExec("CREATE EXTENSION IF NOT EXISTS pgcrypto");
 			$db->dbExec("DROP TABLE table_with_primary_key");
 			$db->dbExec("DROP TABLE table_without_primary_key");
 			$db->dbExec("DROP TABLE test_meta");
@@ -160,7 +161,6 @@ final class CoreLibsDBIOTest extends TestCase
 		// create the tables
 		$db->dbExec(
 			// primary key name is table + '_id'
-				// table_with_primary_key_id SERIAL PRIMARY KEY,
 			<<<SQL
 			CREATE TABLE table_with_primary_key (
 				table_with_primary_key_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -3693,7 +3693,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function preparedProviderValue(): array
+	public function providerDbGetPrepareCursorValue(): array
 	{
 		// 1: query (can be empty for do not set)
 		// 2: stm name
@@ -3737,7 +3737,7 @@ final class CoreLibsDBIOTest extends TestCase
 	 * test return prepare cursor errors
 	 *
 	 * @covers ::dbGetPrepareCursorValue
-	 * @dataProvider preparedProviderValue
+	 * @dataProvider providerDbGetPrepareCursorValue
 	 * @testdox prepared query $stm_name with $key expect error id $error_id [$_dataName]
 	 *
 	 * @param string $query
@@ -3768,6 +3768,94 @@ final class CoreLibsDBIOTest extends TestCase
 			$last_error,
 			'get prepare cursor value error check'
 		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerDbPreparedCursorStatus(): array
+	{
+		return [
+			'empty statement pararm' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_a',
+				'check_stm_name' => '',
+				'check_query' => '',
+				'expected' => false
+			],
+			'different stm_name' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_b',
+				'check_stm_name' => 'other_name',
+				'check_query' => '',
+				'expected' => 0
+			],
+			'same stm_name' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_c',
+				'check_stm_name' => 'test_stm_c',
+				'check_query' => '',
+				'expected' => 1
+			],
+			'same stm_name and query' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_d',
+				'check_stm_name' => 'test_stm_d',
+				'check_query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'expected' => 2
+			],
+			'same stm_name and different query' => [
+				'query' => 'SELECT row_int, uid FROM table_with_primary_key',
+				'stm_name' => 'test_stm_e',
+				'check_stm_name' => 'test_stm_e',
+				'check_query' => 'SELECT row_int, uid, row_int FROM table_with_primary_key',
+				'expected' => 1
+			],
+			'insert query test' => [
+				'query' => 'INSERT INTO table_with_primary_key (row_int, uid) VALUES ($1, $2)',
+				'stm_name' => 'test_stm_f',
+				'check_stm_name' => 'test_stm_f',
+				'check_query' => 'INSERT INTO table_with_primary_key (row_int, uid) VALUES ($1, $2)',
+				'expected' => 2
+			]
+		];
+	}
+
+	/**
+	 * test cursor status for prepared statement
+	 *
+	 * @covers ::dbPreparedCursorStatus
+	 * @dataProvider providerDbPreparedCursorStatus
+	 * @testdox Check prepared $stm_name ($check_stm_name) status is $expected [$_dataName]
+	 *
+	 * @param  string   $query
+	 * @param  string   $stm_name
+	 * @param  string   $check_stm_name
+	 * @param  string   $check_query
+	 * @param  bool|int $expected
+	 * @return void
+	 */
+	public function testDbPreparedCursorStatus(
+		string $query,
+		string $stm_name,
+		string $check_stm_name,
+		string $check_query,
+		bool|int $expected
+	): void {
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		$db->dbPrepare($stm_name, $query);
+		// $db->dbExecute($stm_name);
+		$this->assertEquals(
+			$expected,
+			$db->dbPreparedCursorStatus($check_stm_name, $check_query),
+			'check prepared stement cursor status'
+		);
+		unset($db);
 	}
 
 	// - schema set/get tests
@@ -4657,7 +4745,7 @@ final class CoreLibsDBIOTest extends TestCase
 		$res = $db->dbReturnRowParams($query_select, ['CONVERT_TYPE_TEST']);
 		// all hast to be string
 		foreach ($res as $key => $value) {
-			$this->assertIsString($value, 'Aseert string for column: ' . $key);
+			$this->assertIsString($value, 'Assert string for column: ' . $key);
 		}
 		// convert base only
 		$db->dbSetConvertFlag(Convert::on);
@@ -4670,10 +4758,10 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 			switch ($type_layout[$name]) {
 				case 'int':
-					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					$this->assertIsInt($value, 'Assert int for column: ' . $key . '/' . $name);
 					break;
 				default:
-					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					$this->assertIsString($value, 'Assert string for column: ' . $key  . '/' . $name);
 					break;
 			}
 		}
@@ -4687,13 +4775,13 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 			switch ($type_layout[$name]) {
 				case 'int':
-					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					$this->assertIsInt($value, 'Assert int for column: ' . $key . '/' . $name);
 					break;
 				case 'float':
-					$this->assertIsFloat($value, 'Aseert float for column: ' . $key . '/' . $name);
+					$this->assertIsFloat($value, 'Assert float for column: ' . $key . '/' . $name);
 					break;
 				default:
-					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					$this->assertIsString($value, 'Assert string for column: ' . $key  . '/' . $name);
 					break;
 			}
 		}
@@ -4707,17 +4795,17 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 			switch ($type_layout[$name]) {
 				case 'int':
-					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					$this->assertIsInt($value, 'Assert int for column: ' . $key . '/' . $name);
 					break;
 				case 'float':
-					$this->assertIsFloat($value, 'Aseert float for column: ' . $key . '/' . $name);
+					$this->assertIsFloat($value, 'Assert float for column: ' . $key . '/' . $name);
 					break;
 				case 'json':
 				case 'jsonb':
-					$this->assertIsArray($value, 'Aseert array for column: ' . $key . '/' . $name);
+					$this->assertIsArray($value, 'Assert array for column: ' . $key . '/' . $name);
 					break;
 				default:
-					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					$this->assertIsString($value, 'Assert string for column: ' . $key  . '/' . $name);
 					break;
 			}
 		}
@@ -4731,25 +4819,25 @@ final class CoreLibsDBIOTest extends TestCase
 			}
 			switch ($type_layout[$name]) {
 				case 'int':
-					$this->assertIsInt($value, 'Aseert int for column: ' . $key . '/' . $name);
+					$this->assertIsInt($value, 'Assert int for column: ' . $key . '/' . $name);
 					break;
 				case 'float':
-					$this->assertIsFloat($value, 'Aseert float for column: ' . $key . '/' . $name);
+					$this->assertIsFloat($value, 'Assert float for column: ' . $key . '/' . $name);
 					break;
 				case 'json':
 				case 'jsonb':
-					$this->assertIsArray($value, 'Aseert array for column: ' . $key . '/' . $name);
+					$this->assertIsArray($value, 'Assert array for column: ' . $key . '/' . $name);
 					break;
 				case 'bytea':
 					// for hex types it must not start with \x
 					$this->assertStringStartsNotWith(
 						'\x',
 						$value,
-						'Aseert bytes not starts with \x for column: ' . $key . '/' . $name
+						'Assert bytes not starts with \x for column: ' . $key . '/' . $name
 					);
 					break;
 				default:
-					$this->assertIsString($value, 'Aseert string for column: ' . $key  . '/' . $name);
+					$this->assertIsString($value, 'Assert string for column: ' . $key  . '/' . $name);
 					break;
 			}
 		}
@@ -4921,8 +5009,8 @@ final class CoreLibsDBIOTest extends TestCase
 				)
 			),
 			($params === null ?
-				$db->dbGetQueryHash($query) :
-				$db->dbGetQueryHash($query, $params)
+				$db->dbBuildQueryHash($query) :
+				$db->dbBuildQueryHash($query, $params)
 			),
 			'Failed assertdbGetQueryHash '
 		);
@@ -5136,8 +5224,142 @@ final class CoreLibsDBIOTest extends TestCase
 				SQL,
 				'count' => 6,
 				'convert' => false,
+			],
+			'comments in insert' => [
+				'query' => <<<SQL
+				INSERT INTO table_with_primary_key (
+					row_int, row_numeric, row_varchar, row_varchar_literal
+				) VALUES (
+					-- comment 1 かな
+					$1, $2,
+					-- comment 2 -
+					$3
+					-- comment 3
+					, $4
+					-- ignore $5, $6
+					-- $7, $8
+					-- digest($9, 10)
+				)
+				SQL,
+				'count' => 4,
+				'convert' => false
+			],
+			'comment in update' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int =
+					-- COMMENT 1
+					$1,
+					row_numeric =
+					$2 -- COMMENT 2
+					,
+					row_varchar -- COMMENT 3
+					= $3
+				WHERE
+					row_varchar = $4
+				SQL,
+				'count' => 4,
+				'convert' => false,
+			],
+			// Note some are not set
+			'a complete set of possible' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+				-- ROW
+				row_varchar = $1
+				WHERE
+				row_varchar = ANY($2) AND row_varchar <> $3
+				AND row_varchar > $4 AND row_varchar < $5
+				AND row_varchar >= $6 AND row_varchar <=$7
+				AND row_jsonb->'a' = $8 AND row_jsonb->>$9 = 'a'
+				AND row_jsonb<@$10 AND row_jsonb@>$11
+				AND row_varchar ^@ $12
+				SQL,
+				'count' => 12,
+				'convert' => false,
+			],
+			// all the same
+			'all the same numbered' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int = $1::INT, row_numeric = $1::NUMERIC, row_varchar = $1
+				WHERE
+					row_varchar = $1
+				SQL,
+				'count' => 1,
+				'convert' => false,
+			],
+			'update with case' => [
+				'query' => <<<SQL
+				UPDATE table_with_primary_key SET
+					row_int = $1::INT,
+					row_varchar = CASE WHEN row_int = 1 THEN $2 ELSE 'bar'::VARCHAR END
+				WHERE
+					row_varchar = $3
+				SQL,
+				'count' => 3,
+				'convert' => false,
+			],
+			'select with case' => [
+				'query' => <<<SQL
+				SELECT row_int
+				FROM table_with_primary_key
+				WHERE
+					row_varchar = CASE WHEN row_int = 1 THEN $1 ELSE $2 END
+				SQL,
+				'count' => 2,
+				'convert' => false,
+			],
+			// special $$ string case
+			'text string, with $ placehoders that could be seen as $$ string' => [
+				'query' => <<<SQL
+				SELECT row_int
+				FROM table_with_primary_key
+				WHERE
+					row_bytea = digest($3::VARCHAR, $4) OR
+					row_varchar = encode(digest($3, $4), 'hex') OR
+					row_bytea = hmac($3, $5, $4) OR
+					row_varchar = encode(hmac($3, $5, $4), 'hex') OR
+					row_bytea = pgp_sym_encrypt($3, $6) OR
+					row_varchar = encode(pgp_sym_encrypt($1, $6), 'hex') OR
+					row_varchar = CASE WHEN row_int = 1 THEN $1 ELSE $2 END
+				SQL,
+				'count' => 6,
+				'convert' => false,
+			],
+			// NOTE, in SQL heredoc we cannot write $$ strings parts
+			'text string, with $ placehoders are in $$ strings' => [
+				'query' => '
+				SELECT row_int
+				FROM table_with_primary_key
+				WHERE
+					row_varchar = $$some string$$ OR
+					row_varchar = $tag$some string$tag$ OR
+					row_varchar = $btag$some $1 string$btag$ OR
+					row_varchar = $btag$some $1 $subtag$ something $subtag$string$btag$ OR
+					row_varchar = $1
+				',
+				'count' => 1,
+				'convert' => false,
+			],
+			// a text string with escaped quite
+			'text string, with escaped quote' => [
+				'query' => <<<SQL
+				SELECT row_int
+				FROM table_with_primary_key
+				WHERE
+					row_varchar = 'foo bar bar baz $5' OR
+					row_varchar = 'foo bar '' barbar $6' OR
+					row_varchar = E'foo bar \' barbar $7' OR
+					row_varchar = CASE WHEN row_int = 1 THEN $1 ELSE $2 END
+				SQL,
+				'count' => 2,
+				'convert' => false,
 			]
 		];
+		$string = <<<SQL
+		'''
+		SQL;
 	}
 
 	/**

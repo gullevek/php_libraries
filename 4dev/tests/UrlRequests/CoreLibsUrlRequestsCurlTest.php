@@ -969,44 +969,76 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			"query" => ["foo-get" => "bar"]
 		]);
 		$this->assertEquals("200", $response["code"], "multi call: get response code not matching");
-		$this->assertEquals(
-			'{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1",'
-			. '"HTTP_FIRST_CALL":"get","HTTP_ACCEPT":"*\/*",'
-			. '"HTTP_HOST":"soba.egplusww.jp"},'
-			. '"REQUEST_TYPE":"GET",'
-			. '"PARAMS":{"foo-get":"bar"},"BODY":null}',
-			$response['content'],
-			'multi call: get content not matching'
-		);
+		if (PHP_VERSION_ID >= 80400) {
+			$this->assertEquals(
+				'{"HEADERS":{"HTTP_HOST":"soba.egplusww.jp",'
+				. '"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1","HTTP_FIRST_CALL":"get",'
+				. '"HTTP_ACCEPT":"*\/*"},"REQUEST_TYPE":"GET","PARAMS":{"foo-get":"bar"},"BODY":null}',
+				$response['content'],
+				'multi call: get content not matching'
+			);
+		} else {
+			$this->assertEquals(
+				'{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1",'
+				. '"HTTP_FIRST_CALL":"get","HTTP_ACCEPT":"*\/*",'
+				. '"HTTP_HOST":"soba.egplusww.jp"},'
+				. '"REQUEST_TYPE":"GET",'
+				. '"PARAMS":{"foo-get":"bar"},"BODY":null}',
+				$response['content'],
+				'multi call: get content not matching'
+			);
+		}
 		// post
 		$response = $curl->post($this->url_basic, [
 			"headers" => ["second-call" => "post"],
 			"body" => ["foo-post" => "baz"]
 		]);
 		$this->assertEquals("200", $response["code"], "multi call: post response code not matching");
-		$this->assertEquals(
-			'{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1",'
-			. '"HTTP_SECOND_CALL":"post","HTTP_ACCEPT":"*\/*",'
-			. '"HTTP_HOST":"soba.egplusww.jp"},'
-			. '"REQUEST_TYPE":"POST",'
-			. '"PARAMS":[],"BODY":{"foo-post":"baz"}}',
-			$response['content'],
-			'multi call: post content not matching'
-		);
+		if (PHP_VERSION_ID >= 80400) {
+			$this->assertEquals(
+				'{"HEADERS":{"HTTP_HOST":"soba.egplusww.jp",'
+				. '"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1",'
+				. '"HTTP_SECOND_CALL":"post","HTTP_ACCEPT":"*\/*"},'
+				. '"REQUEST_TYPE":"POST","PARAMS":[],"BODY":{"foo-post":"baz"}}',
+				$response['content'],
+				'multi call: post content not matching'
+			);
+		} else {
+			$this->assertEquals(
+				'{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1",'
+				. '"HTTP_SECOND_CALL":"post","HTTP_ACCEPT":"*\/*",'
+				. '"HTTP_HOST":"soba.egplusww.jp"},'
+				. '"REQUEST_TYPE":"POST",'
+				. '"PARAMS":[],"BODY":{"foo-post":"baz"}}',
+				$response['content'],
+				'multi call: post content not matching'
+			);
+		}
 		// delete
 		$response = $curl->delete($this->url_basic, [
 			"headers" => ["third-call" => "delete"],
 		]);
 		$this->assertEquals("200", $response["code"], "multi call: delete response code not matching");
-		$this->assertEquals(
-			'{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1",'
-			. '"HTTP_THIRD_CALL":"delete","HTTP_ACCEPT":"*\/*",'
-			. '"HTTP_HOST":"soba.egplusww.jp"},'
-			. '"REQUEST_TYPE":"DELETE",'
-			. '"PARAMS":[],"BODY":[]}',
-			$response['content'],
-			'multi call: delete content not matching'
-		);
+		if (PHP_VERSION_ID >= 80400) {
+			$this->assertEquals(
+				'{"HEADERS":{"HTTP_HOST":"soba.egplusww.jp",'
+				. '"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1",'
+				. '"HTTP_THIRD_CALL":"delete","HTTP_ACCEPT":"*\/*"},'
+				. '"REQUEST_TYPE":"DELETE","PARAMS":[],"BODY":[]}',
+				$response['content'],
+				'multi call: delete content not matching'
+			);
+		} else {
+			$this->assertEquals(
+				'{"HEADERS":{"HTTP_USER_AGENT":"CoreLibsUrlRequestCurl\/1",'
+				. '"HTTP_THIRD_CALL":"delete","HTTP_ACCEPT":"*\/*",'
+				. '"HTTP_HOST":"soba.egplusww.jp"},'
+				. '"REQUEST_TYPE":"DELETE",'
+				. '"PARAMS":[],"BODY":[]}',
+				$response['content'],
+				'multi call: delete content not matching'
+			);
+		}
 	}
 
 	// MARK: auth header set via config

@@ -1201,6 +1201,203 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			'Find next key in array'
 		);
 	}
+
+	public function providerReturnMatchingKeyOnley(): array
+	{
+		return [
+			'limited entries' => [
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+				[
+					'a', 'b'
+				],
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+				],
+			],
+			'limited entries, with one wrong key' => [
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+				[
+					'a', 'b', 'f'
+				],
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+				],
+			],
+			'wrong keys only' => [
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+				[
+					'f', 'f'
+				],
+				[
+				],
+			],
+			'empty keys' => [
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+				[],
+				[
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar'
+				],
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::arrayReturnMatchingKeyOnly
+	 * @dataProvider providerReturnMatchingKeyOnley
+	 * @testdox arrayReturnMatchingKeyOnly get only selected key entries from array [$_dataName]
+	 *
+	 * @param  array $input
+	 * @param  array $key_list
+	 * @param  array $expected
+	 * @return void
+	 */
+	public function testArrayReturnMatchingKeyOnly(
+		array $input,
+		array $key_list,
+		array $expected
+	): void {
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Combined\ArrayHandler::arrayReturnMatchingKeyOnly(
+				$input,
+				$key_list
+			)
+		);
+	}
+
+	/**
+	 * provider for arrayModifyKey
+	 *
+	 * @return array<string,array<mixed>>
+	 */
+	public function providerArrayModifyKey(): array
+	{
+		return [
+			'prefix and suffix add' => [
+				'array' => [
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar',
+				],
+				'prefix' => 'Prefix: ',
+				'suffix' => '.suffix',
+				'expected' => [
+					'Prefix: a.suffix' => 'foo',
+					'Prefix: b.suffix' => 'bar',
+					'Prefix: c.suffix' => 'foobar',
+				],
+			],
+			'prefix add only' => [
+				'array' => [
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar',
+				],
+				'prefix' => 'Prefix: ',
+				'suffix' => '',
+				'expected' => [
+					'Prefix: a' => 'foo',
+					'Prefix: b' => 'bar',
+					'Prefix: c' => 'foobar',
+				],
+			],
+			'suffix add only' => [
+				'array' => [
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar',
+				],
+				'prefix' => '',
+				'suffix' => '.suffix',
+				'expected' => [
+					'a.suffix' => 'foo',
+					'b.suffix' => 'bar',
+					'c.suffix' => 'foobar',
+				],
+			],
+			'empty array' => [
+				'array' => [],
+				'prefix' => '',
+				'suffix' => '.suffix',
+				'expected' => [],
+			],
+			'no suffix or prefix' => [
+				'array' => [
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar',
+				],
+				'prefix' => '',
+				'suffix' => '',
+				'expected' => [
+					'a' => 'foo',
+					'b' => 'bar',
+					'c' => 'foobar',
+				],
+			],
+			'integer index mixed' => [
+				'array' => [
+					'a' => 'foo',
+					'b' => 'bar',
+					3 => 'foobar',
+				],
+				'prefix' => '',
+				'suffix' => '.suffix',
+				'expected' => [
+					'a.suffix' => 'foo',
+					'b.suffix' => 'bar',
+					'3.suffix' => 'foobar',
+				],
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::arrayModifyKey
+	 * @dataProvider providerArrayModifyKey
+	 * @testdox arrayModifyKey check that key is correctly modified with $key_mod_prefix and $key_mod_suffix [$_dataName]
+	 *
+	 * @param  array<mixed>  $in_array
+	 * @param  string $key_mod_prefix
+	 * @param  string $key_mod_suffix
+	 * @param  array<mixed>  $expected
+	 * @return void
+	 */
+	public function testArrayModifyKey(
+		array $in_array,
+		string $key_mod_prefix,
+		string $key_mod_suffix,
+		array $expected
+	): void {
+		$this->assertEquals(
+			\CoreLibs\Combined\ArrayHandler::arrayModifyKey($in_array, $key_mod_prefix, $key_mod_suffix),
+			$expected
+		);
+	}
 }
 
 // __END__

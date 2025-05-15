@@ -54,7 +54,9 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'sessionNameGlobals',
-				false,
+				[
+					'auto_write_close' => false,
+				],
 			],
 			'auto write close' => [
 				'sessionNameAutoWriteClose',
@@ -66,7 +68,9 @@ final class CoreLibsCreateSessionTest extends TestCase
 					'getSessionId' => '1234abcd4567'
 				],
 				'sessionNameAutoWriteClose',
-				true,
+				[
+					'auto_write_close' => true,
+				],
 			],
 		];
 	}
@@ -81,13 +85,14 @@ final class CoreLibsCreateSessionTest extends TestCase
 	 * @param string $input
 	 * @param array<mixed> $mock_data
 	 * @param string $expected
+	 * @param array<string,mixed> $options
 	 * @return void
 	 */
 	public function testStartSession(
 		string $input,
 		array $mock_data,
 		string $expected,
-		?bool $auto_write_close,
+		?array $options,
 	): void {
 		/** @var \CoreLibs\Create\Session&MockObject $session_mock */
 		$session_mock = $this->createPartialMock(
@@ -174,9 +179,14 @@ final class CoreLibsCreateSessionTest extends TestCase
 				4,
 				'/^\[SESSION\] Failed to activate session/'
 			],
+			'expired session' => [
+				\RuntimeException::class,
+				5,
+				'/^\[SESSION\] Expired session found/'
+			],
 			'not a valid session id returned' => [
 				\UnexpectedValueException::class,
-				5,
+				6,
 				'/^\[SESSION\] getSessionId did not return a session id/'
 			], */
 		];
@@ -206,7 +216,8 @@ final class CoreLibsCreateSessionTest extends TestCase
 		$this->expectException($exception);
 		$this->expectExceptionCode($exception_code);
 		$this->expectExceptionMessageMatches($expected_error);
-		new \CoreLibs\Create\Session($session_name);
+		// cannot set ini after header sent, plus we are on command line there are no headers
+		new \CoreLibs\Create\Session($session_name, ['session_strict' => false]);
 	}
 
 	/**

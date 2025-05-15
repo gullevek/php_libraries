@@ -35,4 +35,9 @@ define('CONTENT_PATH', $folder . DIRECTORY_SEPARATOR);
 	],
 ];*/
 
+// paths
+// define('CSV_PATH', $PATHS[TARGET]['csv_path'] ?? '');
+// define('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin'] ?? '');
+// define('REDIRECT_URL', $PATHS[TARGET]['redirect_url'] ?? '');
+
 // __END__

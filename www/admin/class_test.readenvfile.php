@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -34,10 +34,12 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 
 print "ALREADY from config.php: " . \CoreLibs\Debug\Support::printAr($_ENV) . "<br>";
 
+// This is now in \gullevek\dotenv\DotEnv::readEnvFile(...)
+
 // test .env in local
-$status = \CoreLibs\Get\DotEnv::readEnvFile('.', 'test.env');
+/* $status = \CoreLibs\Get\DotEnv::readEnvFile('.', 'test.env');
 print "test.env: STATUS: " . $status . "<br>";
-print "AFTER reading test.env file: " . \CoreLibs\Debug\Support::printAr($_ENV) . "<br>";
+print "AFTER reading test.env file: " . \CoreLibs\Debug\Support::printAr($_ENV) . "<br>"; */
 
 print "</body></html>";
 // ;;

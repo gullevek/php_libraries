@@ -926,48 +926,114 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	public function daysIntervalProvider(): array
 	{
 		return [
-			'valid interval /, not named array' => [
-				'2020/1/1',
-				'2020/1/30',
-				false,
-				[29, 22, 8],
+			// normal and format tests
+			'valid interval / not named array' => [
+				'input_a' => '2020/1/1',
+				'input_b' => '2020/1/30',
+				'return_named' => false, // return_named
+				'include_end_date' => true, // include_end_date
+				'exclude_start_date' => false, // exclude_start_date
+				'expected' => [30, 22, 8, false],
 			],
-			'valid interval /, named array' => [
-				'2020/1/1',
-				'2020/1/30',
-				true,
-				['overall' => 29, 'weekday' => 22, 'weekend' => 8],
+			'valid interval / named array' => [
+				'input_a' => '2020/1/1',
+				'input_b' => '2020/1/30',
+				'return_named' => true,
+				'include_end_date' => true,
+				'exclude_start_date' => false,
+				'expected' => ['overall' => 30, 'weekday' => 22, 'weekend' => 8, 'reverse' => false],
 			],
-			'valid interval -' => [
-				'2020-1-1',
-				'2020-1-30',
-				false,
-				[29, 22, 8],
-			],
-			'valid interval switched' => [
-				'2020/1/30',
-				'2020/1/1',
-				false,
-				[28, 0, 0],
+			'valid interval with "-"' => [
+				'input_a' => '2020-1-1',
+				'input_b' => '2020-1-30',
+				'return_named' => false,
+				'include_end_date' => true,
+				'exclude_start_date' => false,
+				'expected' => [30, 22, 8, false],
 			],
 			'valid interval with time' => [
-				'2020/1/1 12:12:12',
-				'2020/1/30 13:13:13',
-				false,
-				[28, 21, 8],
+				'input_a' => '2020/1/1 12:12:12',
+				'input_b' => '2020/1/30 13:13:13',
+				'return_named' => false,
+				'include_end_date' => true,
+				'exclude_start_date' => false,
+				'expected' => [30, 22, 8, false],
 			],
+			// invalid
 			'invalid dates' => [
-				'abc',
-				'xyz',
-				false,
-				[0, 0, 0]
+				'input_a' => 'abc',
+				'input_b' => 'xyz',
+				'return_named' => false,
+				'include_end_date' => true,
+				'exclude_start_date' => false,
+				'expected' => [0, 0, 0, false]
 			],
-			// this test will take a long imte
+			// this test will take a long time
 			'out of bound dates' => [
-				'1900-1-1',
-				'9999-12-31',
-				false,
-				[2958463,2113189,845274],
+				'input_a' => '1900-1-1',
+				'input_b' => '9999-12-31',
+				'return_named' => false,
+				'include_end_date' => true,
+				'exclude_start_date' => false,
+				'expected' => [2958463, 2113189, 845274, false],
+			],
+			// tests for include/exclude
+			'exclude end date' => [
+				'input_b' => '2020/1/1',
+				'input_a' => '2020/1/30',
+				'return_named' => false,
+				'include_end_date' => false,
+				'exclude_start_date' => false,
+				'expected' => [29, 21, 8, false],
+			],
+			'exclude start date' => [
+				'input_b' => '2020/1/1',
+				'input_a' => '2020/1/30',
+				'return_named' => false,
+				'include_end_date' => true,
+				'exclude_start_date' => true,
+				'expected' => [29, 21, 8, false],
+			],
+			'exclude start and end date' => [
+				'input_b' => '2020/1/1',
+				'input_a' => '2020/1/30',
+				'return_named' => false,
+				'include_end_date' => false,
+				'exclude_start_date' => true,
+				'expected' => [28, 20, 8, false],
+			],
+			// reverse
+			'reverse: valid interval' => [
+				'input_a' => '2020/1/30',
+				'input_b' => '2020/1/1',
+				'return_named' => false,
+				'include_end_date' => true,
+				'exclude_start_date' => false,
+				'expected' => [30, 22, 8, true],
+			],
+			'reverse: exclude end date' => [
+				'input_a' => '2020/1/30',
+				'input_b' => '2020/1/1',
+				'return_named' => false,
+				'include_end_date' => false,
+				'exclude_start_date' => false,
+				'expected' => [29, 21, 8, true],
+			],
+			'reverse: exclude start date' => [
+				'input_a' => '2020/1/30',
+				'input_b' => '2020/1/1',
+				'return_named' => false,
+				'include_end_date' => true,
+				'exclude_start_date' => true,
+				'expected' => [29, 21, 8, true],
+			],
+			'reverse: exclude start and end date' => [
+				'input_a' => '2020/1/30',
+				'input_b' => '2020/1/1',
+				'return_named' => false,
+				'include_end_date' => false,
+				'exclude_start_date' => true,
+				'expected' => [28, 20, 8, true],
 			],
 		];
 	}
@@ -982,20 +1048,52 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	 *
 	 * @param string $input_a
 	 * @param string $input_b
-	 * @param bool   $flag
-	 * @param array $expected
+	 * @param bool   $return_named
+	 * @param array  $expected
 	 * @return void
 	 */
 	public function testCalcDaysInterval(
 		string $input_a,
 		string $input_b,
-		bool $flag,
+		bool $return_named,
+		bool $include_end_date,
+		bool $exclude_start_date,
 		$expected
 	): void {
 		$this->assertEquals(
 			$expected,
-			\CoreLibs\Combined\DateTime::calcDaysInterval($input_a, $input_b, $flag)
+			\CoreLibs\Combined\DateTime::calcDaysInterval(
+				$input_a,
+				$input_b,
+				return_named:$return_named,
+				include_end_date:$include_end_date,
+				exclude_start_date:$exclude_start_date
+			),
+			'call calcDaysInterval'
 		);
+		if ($return_named) {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Combined\DateTime::calcDaysIntervalNamedIndex(
+					$input_a,
+					$input_b,
+					include_end_date:$include_end_date,
+					exclude_start_date:$exclude_start_date
+				),
+				'call calcDaysIntervalNamedIndex'
+			);
+		} else {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Combined\DateTime::calcDaysIntervalNumIndex(
+					$input_a,
+					$input_b,
+					include_end_date:$include_end_date,
+					exclude_start_date:$exclude_start_date
+				),
+				'call calcDaysIntervalNamedIndex'
+			);
+		}
 	}
 
 	/**
@@ -1187,7 +1285,38 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'2023-07-03',
 				'2023-07-27',
 				true
-			]
+			],
+			// reverse
+			'reverse: no weekend' => [
+				'2023-07-04',
+				'2023-07-03',
+				false
+			],
+			'reverse: start weekend sat' => [
+				'2023-07-04',
+				'2023-07-01',
+				true
+			],
+			'reverse: start weekend sun' => [
+				'2023-07-04',
+				'2023-07-02',
+				true
+			],
+			'reverse: end weekend sat' => [
+				'2023-07-08',
+				'2023-07-03',
+				true
+			],
+			'reverse: end weekend sun' => [
+				'2023-07-09',
+				'2023-07-03',
+				true
+			],
+			'reverse: long period > 6 days' => [
+				'2023-07-27',
+				'2023-07-03',
+				true
+			],
 		];
 	}
 

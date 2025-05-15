@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-error_reporting(E_ALL | E_STRICT | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
+error_reporting(E_ALL | E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 
 ob_start();
 
@@ -62,19 +62,40 @@ $backend = new CoreLibs\Admin\Backend(
 $backend->db->dbInfo(true);
 ob_end_flush();
 
-print "<!DOCTYPE html>";
-print "<html><head><title>TEST CLASS</title></head>";
-print "<body>";
+print <<<HTML
+<!DOCTYPE html>
+<html><head>
+<title>TEST CLASS</title>
+<script language="JavaScript">
+function loginLogout()
+{
+	const form = document.createElement('form');
+	form.method = 'post';
+	const hiddenField = document.createElement('input');
+	hiddenField.type = 'hidden';
+	hiddenField.name = 'login_logout';
+	hiddenField.value = 'Logout';
+	form.appendChild(hiddenField);
+	document.body.appendChild(form);
+	form.submit();
+}
+</script>
+</head>
+<body>
+<div style="margin: 20px 0;">
+	<button onclick="loginLogout();" type="button">Logout</button>
+</div>
+HTML;
 
 // key: file name, value; name
 $test_files = [
 	'class_test.db.php' => 'Class Test: DB',
 	'class_test.db.types.php' => 'Class Test: DB column type convert',
-	'class_test.db.query-placeholder.php' => 'Class Test: DB query placeholder convert',
+	'class_test.db.query-placeholder.php' => 'Class Test: DB placeholder queries',
 	'class_test.db.dbReturn.php' => 'Class Test: DB dbReturn',
 	'class_test.db.single.php' => 'Class Test: DB single query tests',
 	'class_test.db.convert-placeholder.php' => 'Class Test: DB convert placeholder',
-	'class_test.db.sqlite.php' => 'Class Test: DB: SqLite',
+	'class_test.db.encryption.php' => 'Class Test: DB pgcrypto',
 	'class_test.convert.colors.php' => 'Class Test: CONVERT COLORS',
 	'class_test.check.colors.php' => 'Class Test: CHECK COLORS',
 	'class_test.mime.php' => 'Class Test: MIME',
@@ -121,6 +142,7 @@ $test_files = [
 	'class_test.error_msg.php' => 'Class Test: ERROR MSG',
 	'class_test.url-requests.curl.php' => 'Class Test: URL REQUESTS: CURL',
 	'subfolder/class_test.config.direct.php' => 'Class Test: CONFIG DIRECT SUB',
+	'class_test.deprecated.helper.php' => 'Class Test: DEPRECATED HELPERS',
 ];
 
 asort($test_files);
@@ -129,33 +151,20 @@ foreach ($test_files as $file => $name) {
 	print '<div><a href="' . $file . '">' . $name . '</a></div>';
 }
 
+
+print "<br>";
+print "ECUID: " . $session->get('LOGIN_EUCUID') . "<br>";
+print "ECUUID: " . $session->get('LOGIN_EUCUUID') . "<br>";
+
 print "<hr>";
-print "L: " . Support::dumpVar($locale) . "<br>";
+print "LOCALE: " . Support::dumpVar($locale) . "<br>";
 // print all _ENV vars set
 print "<div>READ _ENV ARRAY:</div>";
 print Support::dumpVar(array_map('htmlentities', $_ENV));
-// set + check edit access id
-$edit_access_id = 3;
-if (isset($login->loginGetAcl()['unit'])) {
-	print "ACL UNIT: " . print_r(array_keys($login->loginGetAcl()['unit']), true) . "<br>";
-	print "ACCESS CHECK: " . (string)$login->loginCheckEditAccess($edit_access_id) . "<br>";
-	if ($login->loginCheckEditAccess($edit_access_id)) {
-		$backend->edit_access_id = $edit_access_id;
-	} else {
-		$backend->edit_access_id = $login->loginGetAcl()['unit_id'];
-	}
-} else {
-	print "Something went wrong with the login<br>";
-}
 
 //	$backend->log->debug('SESSION', \CoreLibs\Debug\Support::dumpVar($_SESSION));
 
-print '<form method="post" name="loginlogout">';
-print '<a href="javascript:document.loginlogout.login_logout.value=\'Logou\';'
-	. 'document.loginlogout.submit();">Logout</a>';
-print '<input type="hidden" name="login_logout" value="">';
-print '</form>';
-
+print "<br>";
 print "Log Level: " . $backend->log->getLoggingLevel()->getName() . "<br>";
 print "Log ID: " . $backend->log->getLogFileId() . "<br>";
 print "Log Date: " . $backend->log->getLogDate() . "<br>";
@@ -177,26 +186,7 @@ foreach (
 
 $log->debug('SOME MARK', 'Some error output');
 
-// INTERNAL SET
-print "EDIT ACCESS ID: " . $backend->edit_access_id . "<br>";
-//	print "ACL: <br>".$backend->print_ar($login->loginGetAcl())."<br>";
-// $log->debug('ACL', "ACL: " . \CoreLibs\Debug\Support::dumpVar($login->loginGetAcl()));
-//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
-//	print "DEFAULT ACL: <br>".$backend->print_ar($login->default_acl_list)."<br>";
-// $result = array_flip(
-// 	array_filter(
-// 		array_flip($login->default_acl_list),
-// 		function ($key) {
-// 			if (is_numeric($key)) {
-// 				return $key;
-// 			}
-// 		}
-// 	)
-// );
-//	print "DEFAULT ACL: <br>".$backend->print_ar($result)."<br>";
-// DEPRICATED CALL
-//	$backend->adbSetACL($login->loginGetAcl());
-
+print "<br>";
 print "THIS HOST: " . HOST_NAME . ", with PROTOCOL: " . HOST_PROTOCOL . " is running SSL: " . HOST_SSL . "<br>";
 print "DIR: " . DIR . "<br>";
 print "BASE: " . BASE . "<br>";
@@ -206,8 +196,8 @@ print "HOST: " . HOST_NAME . " => DB HOST: " . DB_CONFIG_NAME . " => " . Support
 print "DS is: " . DIRECTORY_SEPARATOR . "<br>";
 print "SERVER HOST: " . $_SERVER['HTTP_HOST'] . "<br>";
 
-print "ECUID: " . $session->get('ECUID') . "<br>";
-print "ECUUID: " . $session->get('ECUUID') . "<br>";
+print "<div>READ _SERVER ARRAY:</div>";
+print Support::dumpVar(array_map('htmlentities', $_SERVER));
 
 print "</body></html>";
 

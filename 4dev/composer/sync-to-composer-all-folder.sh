@@ -13,7 +13,7 @@ if [ "${GO}" != "go" ]; then
 fi;
 
 BASE="/storage/var/www/html/developers/clemens/core_data/";
-SOURCE="${BASE}php_libraries/trunk/"
+SOURCE="${BASE}php_libraries/master/"
 TARGET="${BASE}composer-packages/CoreLibs-Composer-All/"
 
 rsync ${DRY_RUN}-Plzvrupt --stats --delete ${SOURCE}4dev/tests/ ${TARGET}test/phpunit/

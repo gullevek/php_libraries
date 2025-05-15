@@ -91,7 +91,7 @@ $l10n = new \CoreLibs\Language\L10n(
 );
 
 // create smarty object
-$smarty = new \CoreLibs\Template\SmartyExtend($l10n, CACHE_ID, COMPILE_ID);
+$smarty = new \CoreLibs\Template\SmartyExtend($l10n, $log, CACHE_ID, COMPILE_ID);
 // create new Backend class with db and loger attached
 $cms = new \CoreLibs\Admin\Backend($db, $log, $session, $l10n, DEFAULT_ACL_LEVEL);
 // the menu show flag (what menu to show)
@@ -116,7 +116,7 @@ $data = [
 // log action
 // no log if login
 if (!$login->loginActionRun()) {
-	$login->writeLog('Submit', $data, $cms->adbGetActionSet(), 'BINARY');
+	$login->writeLog('Submit', $data, action_set:$cms->adbGetActionSet(), write_type:'BINARY');
 }
 //------------------------------ logging end
 

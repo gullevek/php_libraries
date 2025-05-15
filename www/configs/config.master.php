@@ -78,42 +78,11 @@ define('TEMPLATES_C', 'templates_c' . DIRECTORY_SEPARATOR);
 // template base
 define('TEMPLATES', 'templates' . DIRECTORY_SEPARATOR);
 
-/************* HASH / ACL DEFAULT / ERROR SETTINGS / SMARTY *************/
+/************* HASH / ACL DEFAULT *************/
 // default hash type
 define('DEFAULT_HASH', 'sha256');
 // default acl level
-define('DEFAULT_ACL_LEVEL', 80);
-// SSL host name
-// define('SSL_HOST', $_ENV['SSL_HOST'] ?? '');
-// error page strictness, Default is 3
-// 1: only show error page as the last mesure if really no mid & aid can be loaded and found at all
-// 2: if template not found, do not search, show error template
-// 3: if default template is not found, show error template, do not fall back to default tree
-// 4: very strict, even on normal fixable errors through error
-// define('ERROR_STRICT', 3);
-// allow page caching in general, set to 'false' if you do debugging or development!
-// define('ALLOW_SMARTY_CACHE', false);
-// cache life time, in second', default here is 2 days (172800s)
-// -1 is never expire cache
-// define('SMARTY_CACHE_LIFETIME', -1);
-
-/************* LOGOUT ********************/
-// logout target
-define('LOGOUT_TARGET', '');
-
-/************* AJAX / ACCESS *************/
-// ajax request type
-define('AJAX_REQUEST_TYPE', 'POST');
-// what AJAX type to use
-define('USE_PROTOTYPE', false);
-define('USE_SCRIPTACULOUS', false);
-define('USE_JQUERY', true);
-
-/************* LAYOUT WIDTHS *************/
-define('PAGE_WIDTH', '100%');
-define('CONTENT_WIDTH', '100%');
-// the default template name
-define('MASTER_TEMPLATE_NAME', 'main_body.tpl');
+define('DEFAULT_ACL_LEVEL', $ENV['DEFAULT_ACL_LEVEL'] ?? 80);
 
 /************* OVERALL CONTROL NAMES *************/
 // BELOW has HAS to be changed
@@ -136,24 +105,15 @@ define('COMPILE_ID', 'COMPILE_' . BASE_NAME . '_' . SERVER_NAME_HASH);
 
 /************* LANGUAGE / ENCODING *******/
 // default lang + encoding
-define('DEFAULT_LOCALE', 'en_US.UTF-8');
+define('DEFAULT_LOCALE', $_ENV['LOCALE'] ?? 'en_US.UTF-8');
 // default web page encoding setting
-define('DEFAULT_ENCODING', 'UTF-8');
+define('DEFAULT_ENCODING', (string)array_pad(explode('.', DEFAULT_LOCALE, 2), 2, 'UTF-8')[1]);
 
-/************* QUEUE TABLE *************/
-// if we have a dev/live system
-// set_live is a per page/per item
-// live_queue is a global queue system
-// define('QUEUE', 'live_queue');
-
-/************* DB PATHS (PostgreSQL) *****************/
-// schema names, can also be defined per <DB INFO>
-define('PUBLIC_SCHEMA', 'public');
-define('DEV_SCHEMA', 'public');
-define('TEST_SCHEMA', 'public');
-define('LIVE_SCHEMA', 'public');
-define('GLOBAL_DB_SCHEMA', '');
-define('LOGIN_DB_SCHEMA', '');
+/************* HOST NAME *****************/
+// get the name without the port
+list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
+// set HOST name
+define('HOST_NAME', $HOST_NAME);
 
 /************* CORE HOST SETTINGS *****************/
 if (file_exists(BASE . CONFIGS . 'config.host.php')) {
@@ -162,6 +122,14 @@ if (file_exists(BASE . CONFIGS . 'config.host.php')) {
 if (!isset($SITE_CONFIG)) {
 	$SITE_CONFIG = [];
 }
+// BAIL ON MISSING MASTER SITE CONFIG
+if (!isset($SITE_CONFIG[HOST_NAME]['location'])) {
+	throw new \InvalidArgumentException(
+		'Missing SITE_CONFIG entry for: "' . HOST_NAME . '". Contact Administrator'
+	);
+}
+// set target first
+define('TARGET', $_ENV['TARGET'] ?? $SITE_CONFIG[HOST_NAME]['location'] ?? 'test');
 /************* DB ACCESS *****************/
 if (file_exists(BASE . CONFIGS . 'config.db.php')) {
 	require BASE . CONFIGS . 'config.db.php';
@@ -175,17 +143,6 @@ if (file_exists(BASE . CONFIGS . 'config.path.php')) {
 }
 
 /************* MASTER INIT *****************/
-// live frontend pages
-// ** missing live domains **
-// get the name without the port
-[$HOST_NAME] = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
-// set HOST name
-define('HOST_NAME', $HOST_NAME);
-// BAIL ON MISSING MASTER SITE CONFIG
-if (!isset($SITE_CONFIG[HOST_NAME]['location'])) {
-	echo 'Missing SITE_CONFIG entry for: "' . HOST_NAME . '". Contact Administrator';
-	exit;
-}
 // BAIL ON MISSING DB CONFIG:
 // we have either no db selction for this host but have db config entries
 // or we have a db selection but no db config as array or empty
@@ -200,8 +157,9 @@ if (
 		empty($DB_CONFIG[$SITE_CONFIG[HOST_NAME]['db_host']]))
 	)
 ) {
-	echo 'No matching DB config found for: "' . HOST_NAME . '". Contact Administrator';
-	exit;
+	throw new \InvalidArgumentException(
+		'No matching DB config found for: "' . HOST_NAME . '". Contact Administrator'
+	);
 }
 // set SSL on
 $is_secure = false;
@@ -235,35 +193,31 @@ define('DB_CONFIG', $DB_CONFIG[DB_CONFIG_NAME] ?? [
 ]);
 // because we can't change constant, but we want to for db debug flag
 $GLOBALS['DB_CONFIG_SET'] = DB_CONFIG;
-// define('DB_CONFIG_TARGET', SITE_CONFIG[$HOST_NAME]['db_host_target']);
-// define('DB_CONFIG_OTHER', SITE_CONFIG[$HOST_NAME]['db_host_other']);
-// override for login and global schemas
-// where the edit* tables are
-// define('LOGIN_DB_SCHEMA', PUBLIC_SCHEMA);
-// where global tables are that are used by all schemas (eg queue tables for online, etc)
-// define('GLOBAL_DB_SCHEMA', PUBLIC_SCHEMA);
 // debug settings, site lang, etc
-define('TARGET', $SITE_CONFIG[HOST_NAME]['location'] ?? 'test');
 define('DEBUG_LEVEL', $SITE_CONFIG[HOST_NAME]['debug_level'] ?? 'debug');
 define('SITE_LOCALE', $SITE_CONFIG[HOST_NAME]['site_locale'] ?? DEFAULT_LOCALE);
 define('SITE_DOMAIN', str_replace(DIRECTORY_SEPARATOR, '', CONTENT_PATH));
 define('SITE_ENCODING', $SITE_CONFIG[HOST_NAME]['site_encoding'] ?? DEFAULT_ENCODING);
 define('LOGIN_ENABLED', $SITE_CONFIG[HOST_NAME]['login_enabled'] ?? false);
 define('AUTH', $SITE_CONFIG[HOST_NAME]['auth'] ?? false);
-// paths
-// define('CSV_PATH', $PATHS[TARGET]['csv_path'] ?? '');
-// define('EXPORT_SCRIPT', $PATHS[TARGET]['perl_bin'] ?? '');
-// define('REDIRECT_URL', $PATHS[TARGET]['redirect_url'] ?? '');
 
+// NOTE: everything below is smarty related and should be removed from here
 /************* GENERAL PAGE TITLE ********/
 define('G_TITLE', $_ENV['G_TITLE'] ?? '');
-
+/************* LAYOUT WIDTHS *************/
+define('PAGE_WIDTH', $_ENV['SMARTY.PAGE_WIDTH'] ?? '100%');
+define('CONTENT_WIDTH', $_ENV['SMARTY.CONTENT_WIDTH'] ?? '100%');
+// the default template name
+define('MASTER_TEMPLATE_NAME', $_ENV['MASTER_TEMPLATE_NAME'] ?? 'main_body.tpl');
+/************* JS LIBRARIES *************/
+define('USE_PROTOTYPE', false);
+define('USE_SCRIPTACULOUS', false);
+define('USE_JQUERY', true);
 /************ STYLE SHEETS / JS **********/
-define('ADMIN_STYLESHEET', 'edit.css');
-define('ADMIN_JAVASCRIPT', 'edit.js');
+define('ADMIN_STYLESHEET', $_ENV['ADMIN.STYLESHEET'] ?? 'edit.css');
+define('ADMIN_JAVASCRIPT', $_ENV['ADMIN.JAVASCRIPT'] ?? 'edit.js');
 define('STYLESHEET', $_ENV['STYLESHEET'] ?? 'frontend.css');
 define('JAVASCRIPT', $_ENV['JAVASCRIPT'] ?? 'frontend.js');
-
 // anything optional
 /************* INTERNAL ******************/
 // any other global definitons in the config.other.php
