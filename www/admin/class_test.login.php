@@ -31,6 +31,7 @@ $log = new CoreLibs\Logging\Logging([
 	'log_per_date' => true,
 ]);
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
+$log->setLogFileId('classTest-login-override');
 $login = new CoreLibs\ACL\Login(
 	$db,
 	$log,
@@ -45,6 +46,7 @@ $login = new CoreLibs\ACL\Login(
 		'locale_path' => BASE . INCLUDES . LOCALE,
 	]
 );
+$log->setLogFileId($LOG_FILE_ID);
 ob_end_flush();
 $login->loginMainCall();
 
@@ -158,5 +160,6 @@ if (is_string($edit_access_cuid)) {
 print "EA ID: " . $edit_access_id . "<br>";
 print "EA CUID: " . $log->prAr($edit_access_cuid) . "<br>";
 print "REV EA CUID: " . $log->prAr($edit_access_id_rev) . "<br>";
+$log->info('This is a test');
 
 print "</body></html>";
