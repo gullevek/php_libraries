@@ -62,6 +62,32 @@ class RandomKey
 	}
 
 	/**
+	 * sets a different character range
+	 *
+	 * @param  array<array{0:string,1:string}> $ranges
+	 * @return bool
+	 */
+	public static function setRandomKeyCharacters(array ...$ranges): bool
+	{
+		// each range must be an arary of start end range
+		$character_range = [];
+		foreach ($ranges as $range) {
+			if (count($range) != 2) {
+				throw new \ArgumentCountError(__FUNCTION__ . ' array must have two range entries');
+			}
+			$character_range = array_merge($character_range, range($range[0], $range[1]));
+		}
+		self::$key_range = join('', $character_range);
+		self::$one_key_length = strlen(self::$key_range);
+		if (
+			self::$one_key_length == 0
+		) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * sets the key length and checks that they key given is valid
 	 * if failed it will not change the default key length and return false
 	 *

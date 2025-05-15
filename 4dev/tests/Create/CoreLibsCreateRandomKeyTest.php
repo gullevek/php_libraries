@@ -200,6 +200,47 @@ final class CoreLibsCreateRandomKeyTest extends TestCase
 			\CoreLibs\Create\RandomKey::getRandomKeyLength()
 		);
 	}
+
+	/**
+	 * 1
+	 *
+	 * @return array
+	 */
+	public function setRandomKeyCharactersProvider(): array
+	{
+		return [
+			'lower case characters' => [
+				0 => "/^[a-z]+$/",
+				1 => ["a", "z"],
+			],
+			'lower case and upper case' => [
+				0 => "/^[A-Za-z]+$/",
+				1 => ["A", "Z"],
+				1 => ["a", "z"],
+			],
+			'alphanumeric' => [
+				0 => "/^[A-Za-z0-9]+$/",
+				1 => ["A", "Z"],
+				1 => ["a", "z"],
+				1 => ["0", "9"],
+			]
+		];
+	}
+
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::setRandomKeyCharacters
+	 * @dataProvider setRandomKeyCharactersProvider
+	 * @testdox check setRandomKeyCharacters [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testSetRandomKeyCharacters(string $expected_regex, array ...$random_keys): void
+	{
+
+	}
 }
 
 // __END__

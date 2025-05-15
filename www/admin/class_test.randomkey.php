@@ -43,8 +43,10 @@ print "S::RANDOMKEYGEN($key_length): " . RandomKey::randomKeyGen() . "<br>";
 print "S::RANDOMKEYGEN($key_length_b): " . RandomKey::randomKeyGen($key_length_b) . "<br>";
 print "S::RANDOMKEYGEN($key_length): " . RandomKey::randomKeyGen() . "<br>";
 print "S::RANDOMKEYGEN($key_lenght_long): " . RandomKey::randomKeyGen($key_lenght_long) . "<br>";
-$_array = new CoreLibs\Create\RandomKey();
-print "C->RANDOMKEYGEN(auto): " . $_array->randomKeyGen() . "<br>";
+$random_key = new CoreLibs\Create\RandomKey();
+print "C->RANDOMKEYGEN(auto): " . $random_key->randomKeyGen() . "<br>";
+$random_key->setRandomKeyCharacters(['a', 'z']);
+print "C->RANDOMKEYGEN(Fixed set): " . $random_key->randomKeyGen() . "<br>";
 
 print "</body></html>";
 
