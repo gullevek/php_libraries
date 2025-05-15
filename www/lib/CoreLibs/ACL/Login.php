@@ -197,8 +197,10 @@ class Login
 	// login html, if we are on an ajax page
 	/** @var string|null */
 	private ?string $login_html = '';
-	/** @var bool */
+	/** @var bool flag set on run */
 	private bool $login_is_ajax_page = false;
+	/** @var bool flag set on load */
+	private bool $login_is_ajax_page_option = false;
 
 	// logging
 	/** @var array<string> list of allowed types for edit log write */
@@ -268,8 +270,6 @@ class Login
 		}
 		// init error array
 		$this->loginInitErrorMessages();
-		// acess right list
-		$this->loginLoadAccessRightList();
 		// log allowed write flags
 		$this->loginSetEditLogWriteTypeAvailable();
 
@@ -342,6 +342,7 @@ class Login
 	 * locale_path <string>: absolue path to the locale folder
 	 * site_locale <string>: what locale to load
 	 * site_domain <string>: what domain (locale file name) to use
+	 * ajax_page <bool>: if we are loading from an AJAX page (eg backend)
 	 *
 	 * @param  array<string,mixed> $options Options array from class load
 	 * @return bool                         True on ok, False on failure
@@ -360,6 +361,15 @@ class Login
 		) {
 			$options['debug'] = false;
 		}
+
+		// AUTO LOGIN
+		if (
+			!isset($options['ajax_page']) ||
+			!is_bool($options['ajax_page'])
+		) {
+			$options['ajax_page'] = false;
+		}
+		$this->login_is_ajax_page_option = $options['ajax_page'];
 
 		// AUTO LOGIN
 		if (
@@ -689,6 +699,34 @@ class Login
 			'LOGIN_DEFAULT_ACL_LIST' => $this->default_acl_list,
 			'LOGIN_DEFAULT_ACL_LIST_TYPE' => $this->default_acl_list_type,
 		]);
+	}
+
+	/**
+	 * get the default ACL list type
+	 * if not set loads it from DB
+	 *
+	 * @return array<string,int>
+	 */
+	private function loginGetAccessRightListType(): array
+	{
+		if (empty($this->default_acl_list_type)) {
+			$this->loginLoadAccessRightList();
+		}
+		return $this->default_acl_list_type;
+	}
+
+	/**
+	 * get the default ACL list
+	 * if not set loads from DB
+	 *
+	 * @return array<string|int, mixed>
+	 */
+	private function loginGetAccessRightList(): array
+	{
+		if (empty($this->default_acl_list)) {
+			$this->loginLoadAccessRightList();
+		}
+		return $this->default_acl_list;
 	}
 
 	/**
@@ -1540,6 +1578,10 @@ class Login
 		$this->acl['unit'] = [];
 		$this->acl['unit_legacy'] = [];
 		$this->acl['unit_detail'] = [];
+		// integrate the type acl list, but only for the keyword -> level
+		$this->acl['min'] = $this->loginGetAccessRightListType();
+		// set the full acl list too (lookup level number and get level data)
+		$this->acl['acl_list'] = $this->loginGetAccessRightList();
 
 		// PER ACCOUNT (UNIT/edit access)->
 		foreach ($_SESSION['LOGIN_UNIT'] as $ea_cuid => $unit) {
@@ -1561,7 +1603,7 @@ class Login
 				'name' => $unit['name'],
 				'uid' => $unit['uid'],
 				'cuuid' => $unit['cuuid'],
-				'level' => $this->default_acl_list[$this->acl['unit'][$ea_cuid]]['name'] ?? -1,
+				'level' => $this->acl['acl_list'][$this->acl['unit'][$ea_cuid]]['name'] ?? -1,
 				'level_number' => $this->acl['unit'][$ea_cuid],
 				'default' => $unit['default'],
 				'data' => $unit['data'],
@@ -1582,10 +1624,6 @@ class Login
 		}
 		// set the default edit access
 		$this->acl['default_edit_access'] = $_SESSION['LOGIN_UNIT_DEFAULT_EACUID'];
-		// integrate the type acl list, but only for the keyword -> level
-		$this->acl['min'] = $this->default_acl_list_type;
-		// set the full acl list too (lookup level number and get level data)
-		$this->acl['acl_list'] = $this->default_acl_list;
 		// debug
 		// $this->debug('ACL', $this->print_ar($this->acl));
 	}
@@ -2519,7 +2557,12 @@ HTML;
 		// or need to pass it back
 		// to the continue AJAX class for output back to the user
 		$this->login_is_ajax_page = false;
-		if ($ajax_page === true || !empty($GLOBALS['AJAX_PAGE'])) {
+		if (
+			$ajax_page === true ||
+			$this->login_is_ajax_page_option == true ||
+			// this is deprecated
+			!empty($GLOBALS['AJAX_PAGE'])
+		) {
 			$this->login_is_ajax_page = true;
 		}
 
@@ -3147,6 +3190,8 @@ HTML;
 	 */
 	public function loginGetAclList(?int $level = null): array
 	{
+		// make sure it is loaded
+		$this->loginGetAccessRightList();
 		// if no level given, return full list
 		if (empty($level)) {
 			return $this->default_acl_list;
@@ -3169,6 +3214,9 @@ HTML;
 	 */
 	public function loginGetAclListFromType(string $type): int|bool
 	{
+		// make sure it is loaded
+		$this->loginGetAccessRightListType();
+		// if not et return false
 		if (!isset($this->default_acl_list_type[$type])) {
 			return false;
 		}
