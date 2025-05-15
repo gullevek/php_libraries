@@ -54,7 +54,7 @@ if (($dbh = $db->dbGetDbh()) instanceof \PgSql\Connection) {
 	print "NO DB HANDLER<br>";
 }
 // REGEX for placeholder count
-print "Placeholder regex: <pre>" . CoreLibs\DB\Support\ConvertPlaceholder::REGEX_LOOKUP_PLACEHOLDERS . "</pre>";
+print "Placeholder lookup regex: <pre>" . CoreLibs\DB\Support\ConvertPlaceholder::REGEX_LOOKUP_NUMBERED . "</pre>";
 
 // turn on debug replace for placeholders
 $db->dbSetDebugReplacePlaceholder(true);
@@ -148,6 +148,7 @@ RETURNING
 	bigint_a, number_real, number_double, numeric_3,
 	uuid_var
 SQL;
+print "Placeholders: <pre>" . print_r($db->dbGetQueryParamPlaceholders($query_insert), true) . "<pre>";
 $status = $db->dbExecParams($query_insert, $query_params);
 echo "<b>*</b><br>";
 echo "INSERT ALL COLUMN TYPES: "
@@ -326,6 +327,7 @@ SQL,
 ) {
 	print "RES: " . Support::prAr($res) . "<br>";
 }
+print "PL: " . Support::PrAr($db->dbGetPlaceholderConverted()) . "<br>";
 print "ERROR: " . $db->dbGetLastError(true) . "<br>";
 
 print "</body></html>";

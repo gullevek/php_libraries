@@ -14,76 +14,57 @@ namespace CoreLibs\DB\Support;
 
 class ConvertPlaceholder
 {
-	// NOTE for missing: range */+ are not iplemented in the regex below, but - is for now
-	// NOTE some combinations are allowed, but the query will fail before this
-	/** @var string split regex, entries before $ group */
-	private const PATTERN_QUERY_SPLIT =
-		'\?\?|' // UNKNOWN: double ??, is this to avoid something?
-		. '[\(,]|' // for ',' and '(' mostly in INSERT or ANY()
-		. '[<>=]|' // general set for <, >, = in any query with any combination
-		. '\^@|' // text search for start from text with ^@
-		. '\|\||' // concats two elements
-		. '&&|' // array overlap
-		. '\-\|\-|' // range overlap for array
-		. '[^-]-{1}|' // single -, used in JSON too
-		. '->|->>|#>|#>>|@>|<@|@@|@\?|\?{1}|\?\||\?&|#-|' // JSON searches, Array searchs, etc
-		. 'THEN|ELSE' // command parts (CASE)
-	;
-	/** @var string the main regex including  the pattern query split */
-	private const PATTERN_ELEMENT = '(?:\'.*?\')?\s*(?:' . self::PATTERN_QUERY_SPLIT . ')\s*';
+	/** @var string text block in SQL, single quited
+	 * Note that does not include $$..$$ strings or anything with token name or nested ones
+	*/
+	private const PATTERN_TEXT_BLOCK_SINGLE_QUOTE = '(?:\'(?:[^\'\\\\]|\\\\.)*\')';
+	/** @var string text block in SQL, dollar quoted
+	 * NOTE: if this is added everything shifts by one lookup number
+	*/
+	private const PATTERN_TEXT_BLOCK_DOLLAR = '(?:\$(\w*)\$.*?\$\1\$)';
 	/** @var string comment regex
-	 * anything that starts with -- and ends with a line break but any character that is not line break inbetween */
-	private const PATTERN_COMMENT = '(?:\-\-[^\r\n]*?\r?\n)*\s*';
-	/** @var string parts to ignore in the SQL */
-	private const PATTERN_IGNORE =
-		// digit -> ignore
-		'\d+|'
-		// other string -> ignore
-		. '(?:\'.*?\')|';
-	/** @var string named parameters */
-	private const PATTERN_NAMED = '(:\w+)';
-	/** @var string question mark parameters */
-	private const PATTERN_QUESTION_MARK = '(?:(?:\?\?)?\s*(\?{1}))';
-	/** @var string numbered parameters */
+	 * anything that starts with -- and ends with a line break but any character that is not line break inbetween
+	 * this is the FIRST thing in the line and will skip any further lookups */
+	private const PATTERN_COMMENT = '(?:\-\-[^\r\n]*?\r?\n)';
+	// below are the params lookups
+	/** @var string named parameters, must start with single : */
+	private const PATTERN_NAMED = '((?<!:):(?:\w+))';
+	/** @var string question mark parameters, will catch any */
+	private const PATTERN_QUESTION_MARK = '(\?{1})';
+	/** @var string numbered parameters, can only start 1 to 9, second and further digits can be 0-9
+	 * This ignores the $$ ... $$ escape syntax. If we find something like this will fail
+	 * It is recommended to use proper string escape quiting for writing data to the DB
+	*/
 	private const PATTERN_NUMBERED = '(\$[1-9]{1}(?:[0-9]{1,})?)';
 	// below here are full regex that will be used
 	/** @var string replace regex for named (:...) entries */
 	public const REGEX_REPLACE_NAMED = '/'
-		. '(' . self::PATTERN_ELEMENT . ')'
-		. self::PATTERN_COMMENT
-		. '('
-		. self::PATTERN_IGNORE
+		. self::PATTERN_COMMENT . '|'
+		. self::PATTERN_TEXT_BLOCK_SINGLE_QUOTE . '|'
+		. self::PATTERN_TEXT_BLOCK_DOLLAR . '|'
 		. self::PATTERN_NAMED
-		. ')'
 		. '/s';
 	/** @var string replace regex for question mark (?) entries */
 	public const REGEX_REPLACE_QUESTION_MARK = '/'
-		. '(' . self::PATTERN_ELEMENT . ')'
-		. self::PATTERN_COMMENT
-		. '('
-		. self::PATTERN_IGNORE
+		. self::PATTERN_COMMENT . '|'
+		. self::PATTERN_TEXT_BLOCK_SINGLE_QUOTE . '|'
+		. self::PATTERN_TEXT_BLOCK_DOLLAR . '|'
 		. self::PATTERN_QUESTION_MARK
-		. ')'
 		. '/s';
 	/** @var string replace regex for numbered ($n) entries */
 	public const REGEX_REPLACE_NUMBERED = '/'
-		. '(' . self::PATTERN_ELEMENT . ')'
-		. self::PATTERN_COMMENT
-		. '('
-		. self::PATTERN_IGNORE
+		. self::PATTERN_COMMENT . '|'
+		. self::PATTERN_TEXT_BLOCK_SINGLE_QUOTE . '|'
+		. self::PATTERN_TEXT_BLOCK_DOLLAR . '|'
 		. self::PATTERN_NUMBERED
-		. ')'
 		. '/s';
 	/** @var string the main lookup query for all placeholders */
 	public const REGEX_LOOKUP_PLACEHOLDERS = '/'
-		// prefix string part, must match towards
-		// seperator for ( = , ? - [and json/jsonb in pg doc section 9.15]
-		. self::PATTERN_ELEMENT
-		. self::PATTERN_COMMENT
+		. self::PATTERN_COMMENT . '|'
+		. self::PATTERN_TEXT_BLOCK_SINGLE_QUOTE . '|'
+		. self::PATTERN_TEXT_BLOCK_DOLLAR . '|'
 		// match for replace part
 		. '(?:'
-		// ignore parts
-		. self::PATTERN_IGNORE
 		// :name named part (PDO) [1]
 		. self::PATTERN_NAMED . '|'
 		// ? question mark part (PDO) [2]
@@ -94,6 +75,26 @@ class ConvertPlaceholder
 		. ')'
 		// single line -> add line break to matches in "."
 		. '/s';
+	/** @var string lookup for only numbered placeholders */
+	public const REGEX_LOOKUP_NUMBERED = '/'
+		. self::PATTERN_COMMENT . '|'
+		. self::PATTERN_TEXT_BLOCK_SINGLE_QUOTE . '|'
+		. self::PATTERN_TEXT_BLOCK_DOLLAR . '|'
+		// match for replace part
+		. '(?:'
+		// $n numbered part (\PG php) [1]
+		. self::PATTERN_NUMBERED
+		// end match
+		. ')'
+		. '/s';
+	/** @var int position for regex in full placeholder lookup: named */
+	public const LOOOKUP_NAMED_POS = 2;
+	/** @var int position for regex in full placeholder lookup: question mark */
+	public const LOOOKUP_QUESTION_MARK_POS = 3;
+	/** @var int position for regex in full placeholder lookup: numbered */
+	public const LOOOKUP_NUMBERED_POS = 4;
+	/** @var int matches position for replacement and single lookup */
+	public const MATCHING_POS = 2;
 
 	/**
 	 * Convert PDO type query with placeholders to \PG style and vica versa
@@ -132,11 +133,12 @@ class ConvertPlaceholder
 			$found = -1;
 		}
 		/** @var array<string> 1: named */
-		$named_matches = array_filter($matches[1]);
+		$named_matches = array_filter($matches[self::LOOOKUP_NAMED_POS]);
 		/** @var array<string> 2: open ? */
-		$qmark_matches = array_filter($matches[2]);
+		$qmark_matches = array_filter($matches[self::LOOOKUP_QUESTION_MARK_POS]);
 		/** @var array<string> 3: $n matches */
-		$numbered_matches = array_filter($matches[3]);
+		$numbered_matches = array_filter($matches[self::LOOOKUP_NUMBERED_POS]);
+		// print "**MATCHES**: <pre>" . print_r($matches, true) . "</pre>";
 		// count matches
 		$count_named = count(array_unique($named_matches));
 		$count_qmark = count($qmark_matches);
@@ -235,38 +237,37 @@ class ConvertPlaceholder
 		$empty_params = $converted_placeholders['original']['empty_params'];
 		switch ($converted_placeholders['type']) {
 			case 'named':
-				// 0: full
-				// 0: full
-				// 1: pre part
-				// 2: keep part UNLESS '3' is set
-				// 3: replace part :named
+				// 1: replace part :named
 				$pos = 0;
 				$query_new = preg_replace_callback(
 					self::REGEX_REPLACE_NAMED,
 					function ($matches) use (&$pos, &$params_new, &$params_lookup, $params, $empty_params) {
-						// only count up if $match[3] is not yet in lookup table
-						if (!empty($matches[3]) && empty($params_lookup[$matches[3]])) {
+						if (!isset($matches[self::MATCHING_POS])) {
+							throw new \RuntimeException(
+								'Cannot lookup ' . self::MATCHING_POS . ' in matches list',
+								209
+							);
+						}
+						$match = $matches[self::MATCHING_POS];
+						// only count up if $match[1] is not yet in lookup table
+						if (empty($params_lookup[$match])) {
 							$pos++;
-							$params_lookup[$matches[3]] = '$' . $pos;
+							$params_lookup[$match] = '$' . $pos;
 							// skip params setup if param list is empty
 							if (!$empty_params) {
-								$params_new[] = $params[$matches[3]] ??
+								$params_new[] = $params[$match] ??
 									throw new \RuntimeException(
-										'Cannot lookup ' . $matches[3] . ' in params list',
+										'Cannot lookup ' . $match . ' in params list',
 										210
 									);
 							}
 						}
 						// add the connectors back (1), and the data sets only if no replacement will be done
-						return $matches[1] . (
-							empty($matches[3]) ?
-								$matches[2] :
-								$params_lookup[$matches[3]] ??
-									throw new \RuntimeException(
-										'Cannot lookup ' . $matches[3] . ' in params lookup list',
-										211
-									)
-						);
+						return $params_lookup[$match] ??
+							throw new \RuntimeException(
+								'Cannot lookup ' . $match . ' in params lookup list',
+								211
+							);
 					},
 					$converted_placeholders['original']['query']
 				);
@@ -276,61 +277,61 @@ class ConvertPlaceholder
 					// order and data stays the same
 					$params_new = $params ?? [];
 				}
-				// 0: full
-				// 1: pre part
-				// 2: keep part UNLESS '3' is set
-				// 3: replace part ?
+				// 1: replace part ?
 				$pos = 0;
 				$query_new = preg_replace_callback(
 					self::REGEX_REPLACE_QUESTION_MARK,
 					function ($matches) use (&$pos, &$params_lookup) {
+						if (!isset($matches[self::MATCHING_POS])) {
+							throw new \RuntimeException(
+								'Cannot lookup ' . self::MATCHING_POS . ' in matches list',
+								229
+							);
+						}
+						$match = $matches[self::MATCHING_POS];
 						// only count pos up for actual replacements we will do
-						if (!empty($matches[3])) {
+						if (!empty($match)) {
 							$pos++;
 							$params_lookup[] = '$' . $pos;
 						}
 						// add the connectors back (1), and the data sets only if no replacement will be done
-						return $matches[1] . (
-							empty($matches[3]) ?
-								$matches[2] :
-								'$' . $pos
-						);
+						return '$' . $pos;
 					},
 					$converted_placeholders['original']['query']
 				);
 				break;
 			case 'numbered':
-				// 0: full
-				// 1: pre part
-				// 2: keep part UNLESS '3' is set
-				// 3: replace part $numbered
+				// 1: replace part $numbered
 				$pos = 0;
 				$query_new = preg_replace_callback(
 					self::REGEX_REPLACE_NUMBERED,
 					function ($matches) use (&$pos, &$params_new, &$params_lookup, $params, $empty_params) {
-						// only count up if $match[3] is not yet in lookup table
-						if (!empty($matches[3]) && empty($params_lookup[$matches[3]])) {
+						if (!isset($matches[self::MATCHING_POS])) {
+							throw new \RuntimeException(
+								'Cannot lookup ' . self::MATCHING_POS . ' in matches list',
+								239
+							);
+						}
+						$match = $matches[self::MATCHING_POS];
+						// only count up if $match[1] is not yet in lookup table
+						if (empty($params_lookup[$match])) {
 							$pos++;
-							$params_lookup[$matches[3]] = ':' . $pos . '_named';
+							$params_lookup[$match] = ':' . $pos . '_named';
 							// skip params setup if param list is empty
 							if (!$empty_params) {
 								$params_new[] = $params[($pos - 1)] ??
 									throw new \RuntimeException(
 										'Cannot lookup ' . ($pos - 1) . ' in params list',
-										220
+										230
 									);
 							}
 						}
 						// add the connectors back (1), and the data sets only if no replacement will be done
-						return $matches[1] . (
-							empty($matches[3]) ?
-								$matches[2] :
-								$params_lookup[$matches[3]] ??
-								throw new \RuntimeException(
-									'Cannot lookup ' . $matches[3] . ' in params lookup list',
-									221
-								)
-						);
+						return $params_lookup[$match]  ??
+							throw new \RuntimeException(
+								'Cannot lookup ' . $match . ' in params lookup list',
+								231
+							);
 					},
 					$converted_placeholders['original']['query']
 				);

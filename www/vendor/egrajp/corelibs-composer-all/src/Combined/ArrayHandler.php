@@ -551,6 +551,36 @@ class ArrayHandler
 			ARRAY_FILTER_USE_KEY
 		);
 	}
+
+	/**
+	 * Modifieds the key of an array with a prefix and/or suffix and returns it with the original value
+	 * does not change order in array
+	 *
+	 * @param  array<string|int,mixed> $in_array
+	 * @param  string                  $key_mod_prefix [default=''] key prefix string
+	 * @param  string                  $key_mod_suffix [default=''] key suffix string
+	 * @return array<string|int,mixed>
+	 */
+	public static function arrayModifyKey(
+		array $in_array,
+		string $key_mod_prefix = '',
+		string $key_mod_suffix = ''
+	): array {
+		// skip if array is empty or neither prefix or suffix are set
+		if (
+			$in_array == [] ||
+			($key_mod_prefix == '' && $key_mod_suffix == '')
+		) {
+			return $in_array;
+		}
+		return array_combine(
+			array_map(
+				fn($key) => $key_mod_prefix . $key . $key_mod_suffix,
+				array_keys($in_array)
+			),
+			array_values($in_array)
+		);
+	}
 }
 
 // __END__

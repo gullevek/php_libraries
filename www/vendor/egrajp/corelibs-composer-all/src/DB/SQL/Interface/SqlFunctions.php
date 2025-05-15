@@ -379,9 +379,9 @@ interface SqlFunctions
 	 * Undocumented function
 	 *
 	 * @param  string $query
-	 * @return int
+	 * @return array<string>
 	 */
-	public function __dbCountQueryParams(string $query): int;
+	public function __dbGetQueryParams(string $query): array;
 }
 
 // __END__

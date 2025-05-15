@@ -31,6 +31,7 @@ $log = new CoreLibs\Logging\Logging([
 	'log_per_date' => true,
 ]);
 $db = new CoreLibs\DB\IO(DB_CONFIG, $log);
+$log->setLogFileId('classTest-login-override');
 $login = new CoreLibs\ACL\Login(
 	$db,
 	$log,
@@ -45,6 +46,7 @@ $login = new CoreLibs\ACL\Login(
 		'locale_path' => BASE . INCLUDES . LOCALE,
 	]
 );
+$log->setLogFileId($LOG_FILE_ID);
 ob_end_flush();
 $login->loginMainCall();
 
@@ -117,7 +119,7 @@ if (isset($login->loginGetAcl()['unit'])) {
 	if ($login->loginCheckEditAccessCuid($edit_access_cuid)) {
 		print "Set new:" . $edit_access_cuid . "<br>";
 	} else {
-		print "Load default unit id: " . $login->loginGetAcl()['unit_id'] . "<br>";
+		print "Load default unit id: " . $login->loginGetAcl()['unit_cuid'] . "<br>";
 	}
 } else {
 	print "Something went wrong with the login<br>";
@@ -127,6 +129,12 @@ if (isset($login->loginGetAcl()['unit'])) {
 // IP check: 'REMOTE_ADDR', 'HTTP_X_FORWARDED_FOR', 'CLIENT_IP' in _SERVER
 // Agent check: 'HTTP_USER_AGENT'
 
+print "<hr>";
+print "PAGE lookup:<br>";
+$file_name = 'test_edit_base.php';
+print "Access to '$file_name': " . $log->prAr($login->loginPageAccessAllowed($file_name)) . "<br>";
+$file_name = 'i_do_not_exists.php';
+print "Access to '$file_name': " . $log->prAr($login->loginPageAccessAllowed($file_name)) . "<br>";
 
 echo "<hr>";
 print "SESSION: " . Support::printAr($_SESSION) . "<br>";
@@ -139,5 +147,19 @@ $login->writeLog(
 	error:'No Error',
 	write_type:'JSON'
 );
+
+echo "<hr>";
+print "<h3>Legacy Lookups</h3>";
+
+$edit_access_id = 1;
+$edit_access_cuid = $login->loginGetEditAccessCuidFromId($edit_access_id);
+$edit_access_id_rev = null;
+if (is_string($edit_access_cuid)) {
+	$edit_access_id_rev = $login->loginGetEditAccessIdFromCuid($edit_access_cuid);
+}
+print "EA ID: " . $edit_access_id . "<br>";
+print "EA CUID: " . $log->prAr($edit_access_cuid) . "<br>";
+print "REV EA CUID: " . $log->prAr($edit_access_id_rev) . "<br>";
+$log->info('This is a test');
 
 print "</body></html>";

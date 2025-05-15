@@ -12,6 +12,8 @@ Not yet covered tests:
 - loginGetLocale
 - loginGetHeaderColor
 - loginGetPages
+- loginGetPageLookupList
+- loginPageAccessAllowed
 - loginGetEuid
 */
 
@@ -152,7 +154,6 @@ final class CoreLibsACLLoginTest extends TestCase
 		// TARGET
 		define('TARGET', 'test');
 		// LOGIN DB SCHEMA
-		// define('LOGIN_DB_SCHEMA', '');
 
 		// SHOULD SET
 		// DEFAULT_ACL_LEVEL (d80)
@@ -1530,6 +1531,12 @@ final class CoreLibsACLLoginTest extends TestCase
 				$expected['check_access_cuid'],
 				$login_mock->loginGetEditAccessCuidFromUid($mock_settings['edit_access_uid']),
 				'Assert check access uid to cuid valid'
+			);
+			// - loginGetEditAccessCuidFromId
+			$this->assertEquals(
+				$expected['check_access_cuid'],
+				$login_mock->loginGetEditAccessCuidFromUid($mock_settings['edit_access_id']),
+				'Assert check access id to cuid valid'
 			);
 			// Deprecated
 			// - loginCheckEditAccess

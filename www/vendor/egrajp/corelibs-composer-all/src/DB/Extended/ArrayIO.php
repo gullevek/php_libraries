@@ -39,9 +39,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 {
 	// main calss variables
 	/** @var array<mixed> */
-	private array $table_array; // the array from the table to work on
+	private array $table_array = []; // the array from the table to work on
 	/** @var string */
-	private string $table_name; // the table_name
+	private string $table_name = ''; // the table_name
 	/** @var string */
 	private string $pk_name = ''; // the primary key from this table
 	/** @var int|string|null */
@@ -127,9 +127,9 @@ class ArrayIO extends \CoreLibs\DB\IO
 	public function getTableArray(bool $reset = false): array
 	{
 		if (!$reset) {
-			return $this->table_array ?? [];
+			return $this->table_array;
 		}
-		$table_array = $this->table_array ?? [];
+		$table_array = $this->table_array;
 		reset($table_array);
 		return $table_array;
 	}
@@ -194,7 +194,7 @@ class ArrayIO extends \CoreLibs\DB\IO
 	 */
 	public function getTableName(): string
 	{
-		return $this->table_name ?? '';
+		return $this->table_name;
 	}
 
 	/**

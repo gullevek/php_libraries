@@ -423,14 +423,9 @@ class Login
 
 		// LOGOUT TARGET
 		if (!isset($options['logout_target'])) {
-			if (defined('LOGOUT_TARGET')) {
-				trigger_error(
-					'loginMainCall: LOGOUT_TARGET should not be used',
-					E_USER_DEPRECATED
-				);
-				$options['logout_target'] = LOGOUT_TARGET;
-				$this->logout_target = $options['logout_target'];
-			}
+			// defaults to ''
+			$options['logout_target'] = '';
+			$this->logout_target = $options['logout_target'];
 		}
 
 		// *** PASSWORD SETTINGS
@@ -929,7 +924,9 @@ class Login
 		$mandatory_session_vars = [
 			'LOGIN_USER_NAME', 'LOGIN_GROUP_NAME', 'LOGIN_EUCUID', 'LOGIN_EUCUUID',
 			'LOGIN_USER_ADDITIONAL_ACL', 'LOGIN_GROUP_ADDITIONAL_ACL',
-			'LOGIN_ADMIN', 'LOGIN_GROUP_ACL_LEVEL', 'LOGIN_PAGES_ACL_LEVEL', 'LOGIN_USER_ACL_LEVEL',
+			'LOGIN_ADMIN', 'LOGIN_GROUP_ACL_LEVEL',
+			'LOGIN_PAGES', 'LOGIN_PAGES_LOOKUP', 'LOGIN_PAGES_ACL_LEVEL',
+			'LOGIN_USER_ACL_LEVEL',
 			'LOGIN_UNIT', 'LOGIN_UNIT_DEFAULT_EACUID'
 		];
 		$force_reauth = false;
@@ -1157,7 +1154,7 @@ class Login
 			$q
 		);
 		// reset any query data that might exist
-		$this->db->dbCacheReset($q, $params);
+		$this->db->dbCacheReset($q, $params, show_warning:false);
 		// never cache return data
 		$res = $this->db->dbReturnParams($q, $params, $this->db::NO_CACHE);
 		// query was not run successful
@@ -1269,6 +1266,7 @@ class Login
 		}
 		$edit_page_ids = [];
 		$pages = [];
+		$pages_lookup = [];
 		$pages_acl = [];
 		// set pages access
 		$q = <<<SQL
@@ -1312,6 +1310,7 @@ class Login
 				'query' => [],
 				'visible' => []
 			];
+			$pages_lookup[$res['filename']] = $res['cuid'];
 			// make reference filename -> level
 			$pages_acl[$res['filename']] = $res['level'];
 		} // for each page
@@ -1372,6 +1371,7 @@ class Login
 		// write back the pages data to the output array
 		$this->session->setMany([
 			'LOGIN_PAGES' => $pages,
+			'LOGIN_PAGES_LOOKUP' => $pages_lookup,
 			'LOGIN_PAGES_ACL_LEVEL' => $pages_acl,
 		]);
 		// load the edit_access user rights
@@ -1418,6 +1418,7 @@ class Login
 				'additional_acl' => Json::jsonConvertToArray($res['additional_acl']),
 				'data' => $ea_data
 			];
+			// LEGACY LOOKUP
 			$unit_access_eaid[$res['edit_access_id']] = [
 				'cuid' => $res['cuid'],
 			];
@@ -1477,6 +1478,8 @@ class Login
 		// username (login), group name
 		$this->acl['user_name'] = $_SESSION['LOGIN_USER_NAME'];
 		$this->acl['group_name'] = $_SESSION['LOGIN_GROUP_NAME'];
+		// DEPRECATED
+		$this->acl['euid'] = $_SESSION['LOGIN_EUID'];
 		// edit user cuid
 		$this->acl['eucuid'] = $_SESSION['LOGIN_EUCUID'];
 		$this->acl['eucuuid'] = $_SESSION['LOGIN_EUCUUID'];
@@ -1528,8 +1531,10 @@ class Login
 		) {
 			$this->acl['page'] = $_SESSION['LOGIN_PAGES_ACL_LEVEL'][$this->page_name];
 		}
+		$this->acl['pages_detail'] = $_SESSION['LOGIN_PAGES'];
+		$this->acl['pages_lookup_cuid'] = $_SESSION['LOGIN_PAGES_LOOKUP'];
 
-		$this->acl['unit_id'] = null;
+		$this->acl['unit_cuid'] = null;
 		$this->acl['unit_name'] = null;
 		$this->acl['unit_uid'] = null;
 		$this->acl['unit'] = [];
@@ -1552,9 +1557,12 @@ class Login
 			$this->acl['unit_legacy'][$unit['id']] = $this->acl['unit'][$ea_cuid];
 			// detail name/level set
 			$this->acl['unit_detail'][$ea_cuid] = [
+				'id' =>  $unit['id'],
 				'name' => $unit['name'],
 				'uid' => $unit['uid'],
+				'cuuid' => $unit['cuuid'],
 				'level' => $this->default_acl_list[$this->acl['unit'][$ea_cuid]]['name'] ?? -1,
+				'level_number' => $this->acl['unit'][$ea_cuid],
 				'default' => $unit['default'],
 				'data' => $unit['data'],
 				'additional_acl' => $unit['additional_acl']
@@ -2533,7 +2541,7 @@ HTML;
 				$this->login_user_id,
 				-1,
 				$login_user_id_changed
-			);
+			) ?? '';
 			// flag unclean input data
 			if ($login_user_id_changed > 0) {
 				$this->login_user_id_unclear = true;
@@ -2725,6 +2733,31 @@ HTML;
 	{
 
 		return $this->session->get('LOGIN_PAGES');
+	}
+
+	/**
+	 * Return the current loaded list of pages the user can access
+	 *
+	 * @return array<mixed>
+	 */
+	public function loginGetPageLookupList(): array
+	{
+		return $this->session->get('LOGIN_PAGES_LOOKUP');
+	}
+
+	/**
+	 * Check access to a file in the pages list
+	 *
+	 * @param  string $filename File name to check
+	 * @return bool             True if page in list and anything other than None access, False if failed
+	 */
+	public function loginPageAccessAllowed(string $filename): bool
+	{
+		return (
+			$this->session->get('LOGIN_PAGES')[
+				$this->session->get('LOGIN_PAGES_LOOKUP')[$filename] ?? ''
+			] ?? 0
+		) != 0 ? true : false;
 	}
 
 	// MARK: logged in uid(pk)/eucuid/eucuuid
@@ -3212,7 +3245,7 @@ HTML;
 	 * @return int|null                 same edit access id if ok
 	 *                                  or the default edit access id
 	 *                                  if given one is not valid
-	 * @deprecated Please switch to using edit access cuid check with ->loginCheckEditAccessValidCuid()
+	 * @#deprecated Please switch to using edit access cuid check with ->loginCheckEditAccessValidCuid()
 	 */
 	public function loginCheckEditAccessId(?int $edit_access_id): ?int
 	{
@@ -3275,6 +3308,34 @@ HTML;
 			return false;
 		}
 		return (int)$_SESSION['LOGIN_UNIT_CUID'][$uid];
+	}
+
+	/**
+	 * Legacy lookup for edit access id to cuid
+	 *
+	 * @param  int          $id edit access id PK
+	 * @return string|false     edit access cuid or false if not found
+	 */
+	public function loginGetEditAccessCuidFromId(int $id): string|false
+	{
+		if (!isset($_SESSION['LOGIN_UNIT_LEGACY'][$id])) {
+			return false;
+		}
+		return (string)$_SESSION['LOGIN_UNIT_LEGACY'][$id]['cuid'];
+	}
+
+	/**
+	 * This is a Legacy lookup from the edit access id to cuid for further lookups in the normal list
+	 *
+	 * @param  string    $cuid edit access cuid
+	 * @return int|false       false on not found or edit access id PK
+	 */
+	public function loginGetEditAccessIdFromCuid(string $cuid): int|false
+	{
+		if (!isset($_SESSION['LOGIN_UNIT'][$cuid])) {
+			return false;
+		}
+		return $_SESSION['LOGIN_UNIT'][$cuid]['id'];
 	}
 
 	/**

@@ -25,7 +25,7 @@
 		"phpstan/phpdoc-parser": "^2.0",
 		"phpstan/phpstan-deprecation-rules": "^2.0",
         "phan/phan": "^5.4",
-        "egrajp/smarty-extended": "^4.3",
+        "egrajp/smarty-extended": "^5.4",
         "gullevek/dotenv": "dev-master",
         "phpunit/phpunit": "^9"
     },

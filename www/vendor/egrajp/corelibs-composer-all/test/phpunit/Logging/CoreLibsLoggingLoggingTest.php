@@ -395,7 +395,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 		}
 		$per_run_id = $log->getLogUniqueId();
 		$this->assertMatchesRegularExpression(
-			"/^\d{4}-\d{2}-\d{2}_\d{6}_U_[a-z0-9]{8}$/",
+			"/^\d{4}-\d{2}-\d{2}_\d{6}\.U_[a-z0-9]{8}$/",
 			$per_run_id,
 			'assert per log run id 1st'
 		);
@@ -403,7 +403,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 			$log->setLogUniqueId(true);
 			$per_run_id_2nd = $log->getLogUniqueId();
 			$this->assertMatchesRegularExpression(
-				"/^\d{4}-\d{2}-\d{2}_\d{6}_U_[a-z0-9]{8}$/",
+				"/^\d{4}-\d{2}-\d{2}_\d{6}\.U_[a-z0-9]{8}$/",
 				$per_run_id_2nd,
 				'assert per log run id 2nd'
 			);
@@ -824,13 +824,13 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 		$this->assertTrue($log_ok, 'assert ::log (debug) OK');
 		$this->assertEquals(
 			$log->getLogFile(),
-			$log->getLogFileId() . '_DEBUG.log'
+			$log->getLogFileId() . '.DEBUG.log'
 		);
 		$log_ok = $log->log(Level::Info, 'INFO', group_id: 'GROUP_ID', prefix: 'PREFIX:');
 		$this->assertTrue($log_ok, 'assert ::log (info) OK');
 		$this->assertEquals(
 			$log->getLogFile(),
-			$log->getLogFileId() . '_INFO.log'
+			$log->getLogFileId() . '.INFO.log'
 		);
 	}
 

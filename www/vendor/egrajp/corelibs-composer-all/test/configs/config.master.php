@@ -183,8 +183,9 @@ list($HOST_NAME) = array_pad(explode(':', $_SERVER['HTTP_HOST'], 2), 2, null);
 define('HOST_NAME', $HOST_NAME);
 // BAIL ON MISSING MASTER SITE CONFIG
 if (!isset($SITE_CONFIG[HOST_NAME]['location'])) {
-	echo 'Missing SITE_CONFIG entry for: "' . HOST_NAME . '". Contact Administrator';
-	exit;
+	throw new \InvalidArgumentException(
+		'Missing SITE_CONFIG entry for: "' . HOST_NAME . '". Contact Administrator'
+	);
 }
 // BAIL ON MISSING DB CONFIG:
 // we have either no db selction for this host but have db config entries
@@ -200,8 +201,9 @@ if (
 		empty($DB_CONFIG[$SITE_CONFIG[HOST_NAME]['db_host']]))
 	)
 ) {
-	echo 'No matching DB config found for: "' . HOST_NAME . '". Contact Administrator';
-	exit;
+	throw new \InvalidArgumentException(
+		'No matching DB config found for: "' . HOST_NAME . '". Contact Administrator'
+	);
 }
 // set SSL on
 $is_secure = false;

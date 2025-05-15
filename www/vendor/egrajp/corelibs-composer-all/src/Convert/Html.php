@@ -10,8 +10,15 @@ namespace CoreLibs\Convert;
 
 class Html
 {
+	/** @var int */
 	public const SELECTED = 0;
+	/** @var int */
 	public const CHECKED = 1;
+
+	// TODO: check for not valid htmlentites encoding
+	// as of PHP 8.4: https://www.php.net/manual/en/function.htmlentities.php
+	/** @#var array<string> */
+	// public const VALID_HTMLENT_ENCODINGS = [];
 
 	/**
 	 * full wrapper for html entities
@@ -22,14 +29,19 @@ class Html
 	 * encodes in UTF-8
 	 * does not double encode
 	 *
-	 * @param  mixed $string string to html encode
-	 * @param  int   $flags [default: ENT_QUOTES | ENT_HTML5]
+	 * @param  mixed  $string string to html encode
+	 * @param  int    $flags [default=ENT_QUOTES | ENT_HTML5]
+	 * @param  string $encoding [default=UTF-8]
 	 * @return mixed         if string, encoded, else as is (eg null)
 	 */
-	public static function htmlent(mixed $string, int $flags = ENT_QUOTES | ENT_HTML5): mixed
-	{
+	public static function htmlent(
+		mixed $string,
+		int $flags = ENT_QUOTES | ENT_HTML5,
+		string $encoding = 'UTF-8'
+	): mixed {
 		if (is_string($string)) {
-			return htmlentities($string, $flags, 'UTF-8', false);
+			// if not a valid encoding this will throw a warning and use UTF-8
+			return htmlentities($string, $flags, $encoding, false);
 		}
 		return $string;
 	}
@@ -37,7 +49,7 @@ class Html
 	/**
 	 * strips out all line breaks or replaced with given string
 	 * @param  string $string  string
-	 * @param  string $replace replace character, default ' '
+	 * @param  string $replace [default=' '] replace character
 	 * @return string          cleaned string without any line breaks
 	 */
 	public static function removeLB(string $string, string $replace = ' '): string

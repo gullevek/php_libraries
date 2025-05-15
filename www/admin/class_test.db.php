@@ -76,41 +76,41 @@ $db->dbResetEncoding();
 
 // empty calls, none of the below should fail
 //
-$db->dbGetCursor();
+$foo = $db->dbGetCursor();
 //
-$db->dbGetCursorExt();
+$foo = $db->dbGetCursorExt();
 //
-$db->dbGetCursorPos('SELECT foo', ['bar']);
+$foo = $db->dbGetCursorPos('SELECT foo', ['bar']);
 //
-$db->dbGetCursorNumRows('SELECT foo', ['bar']);
+$foo = $db->dbGetCursorNumRows('SELECT foo', ['bar']);
 //
-$db->dbGetInsertPKName();
+$foo = $db->dbGetInsertPKName();
 //
-$db->dbGetInsertPK();
+$foo = $db->dbGetInsertPK();
 //
-$db->dbGetReturningExt();
-$db->dbGetReturningExt('foo');
-$db->dbGetReturningExt('foo', 0);
-$db->dbGetReturningExt(pos:0);
+$foo = $db->dbGetReturningExt();
+$foo = $db->dbGetReturningExt('foo');
+$foo = $db->dbGetReturningExt('foo', 0);
+$foo = $db->dbGetReturningExt(pos:0);
 //
-$db->dbGetReturningArray();
+$foo = $db->dbGetReturningArray();
 //
-$db->dbGetNumRows();
+$foo = $db->dbGetNumRows();
 //
-$db->dbGetNumFields();
+$foo = $db->dbGetNumFields();
 //
-$db->dbGetFieldNames();
+$foo = $db->dbGetFieldNames();
 //
-$db->dbGetFieldTypes();
+$foo = $db->dbGetFieldTypes();
 //
-$db->dbGetFieldNameTypes();
+$foo = $db->dbGetFieldNameTypes();
 //
-$db->dbGetFieldName(0);
+$foo = $db->dbGetFieldName(0);
 //
-$db->dbGetFieldType(0);
-$db->dbGetFieldType('foo');
+$foo = $db->dbGetFieldType(0);
+$foo = $db->dbGetFieldType('foo');
 //
-$db->dbGetPrepareCursorValue('foo', 'bar');
+$foo = $db->dbGetPrepareCursorValue('foo', 'bar');
 
 // TEST CACHE READS
 
@@ -707,6 +707,17 @@ if (
 } else {
 	print "[PGB] [3] pgb_sel_test_foo prepare OK<br>";
 }
+$stm_status = $db->dbPreparedCursorStatus('');
+print "[PGB] Empty statement name: " . $log->prAr($stm_status) . "<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foobar');
+print "[PGB] Prepared name not match status: $stm_status<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo');
+print "[PGB] Prepared name match status: $stm_status<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', $q_prep);
+print "[PGB] prepared exists and query match status: $stm_status<br>";
+$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', "SELECT * FROM test_foo");
+print "[PGB] prepared exists and query not match status: $stm_status<br>";
+
 $db_pgb->dbClose();
 
 # db write class test

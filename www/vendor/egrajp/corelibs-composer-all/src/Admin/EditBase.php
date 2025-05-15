@@ -76,7 +76,7 @@ class EditBase
 		);
 		if ($this->form->mobile_phone) {
 			echo "I am sorry, but this page cannot be viewed by a mobile phone";
-			exit;
+			exit(1);
 		}
 		// $this->log->debug('POST', $this->log->prAr($_POST));
 	}
