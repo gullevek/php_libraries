@@ -60,6 +60,8 @@ echo "ARRAYSEARCHRECURSIVE(email, [array], type): "
 	. DgS::printAr(ArrayHandler::arraySearchRecursive('email', $test_array, 'type')) . "<br>";
 echo "ARRAYSEARCHRECURSIVE(email, [array]['input'], type): "
 	. DgS::printAr(ArrayHandler::arraySearchRecursive('email', $test_array['input'], 'type')) . "<br>";
+echo "ARRAYSEARCHRECURSIVE(email, [array]['input'], wrong): "
+	. DgS::printAr(ArrayHandler::arraySearchRecursive('email', $test_array['input'], 'wrong')) . "<br>";
 // all return
 echo "ARRAYSEARCHRECURSIVEALL(email, [array], type): "
 	. Dgs::printAr((array)ArrayHandler::arraySearchRecursiveAll('email', $test_array, 'type')) . "<br>";
@@ -168,6 +170,31 @@ $data = [
 $search = ['image', 'result_image', 'nothing', 'EMPTY'];
 $result = ArrayHandler::arraySearchKey($data, $search);
 print "ARRAYSEARCHKEY: Search: " . DgS::printAr($search) . ", Found: " . DgS::printAr($result) . "<br>";
+$result = ArrayHandler::arraySearchKey($data, $search, true);
+print "ARRAYSEARCHKEY: FLAT: Search: " . DgS::printAr($search) . ", Found: " . DgS::printAr($result) . "<br>";
+$result = ArrayHandler::arraySearchKey($data, $search, true, true);
+print "ARRAYSEARCHKEY: FLAT:PREFIX: Search: " . DgS::printAr($search) . ", Found: " . DgS::printAr($result) . "<br>";
+$result = ArrayHandler::arraySearchKey($data, ["EMPTY"], true);
+print "ARRAYSEARCHKEY: FLAT:PREFIX: Search: " . DgS::printAr(["EMPTY"]) . ", Found: " . DgS::printAr($result) . "<br>";
+
+// $data = [
+// 	[
+// 		[name] => qrc_apcd,
+// 		[value] => 5834367225,
+// 	],
+// 	[
+// 		[name] => qrc_other,
+// 		[value] => test,
+// 	],
+// 	[
+// 		[name] => qrc_car_type,
+// 		[value] => T33P17,
+// 	],
+// 	[
+// 		[name] => qrc_deaer_store,
+// 		[value] => 9990:001,
+// 	]
+// ]
 
 // $test = [
 // 	'A' => [
