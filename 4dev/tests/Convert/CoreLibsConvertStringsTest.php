@@ -621,6 +621,48 @@ final class CoreLibsConvertStringsTest extends TestCase
 			\CoreLibs\Convert\Strings::removeDuplicates($input)
 		);
 	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function isValidRegexSimpleProvider(): array
+	{
+		return [
+			'valid regex' => [
+				'/^[A-z]$/',
+				true
+			],
+			'invalid regex A' => [
+				'/^[A-z]$',
+				false
+			],
+			'invalid regex B' => [
+				'/^[A-z$',
+				false
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::isValidRegexSimple
+	 * @dataProvider isValidRegexSimpleProvider
+	 * @testdox isValidRegexSimple make $input unqiue to $expected [$_dataName]
+	 *
+	 * @param  string $input
+	 * @param  bool $expected
+	 * @return void
+	 */
+	public function testIsValidRegexSimple(string $input, bool $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Convert\Strings::isValidRegexSimple($input)
+		);
+	}
 }
 
 // __END__
