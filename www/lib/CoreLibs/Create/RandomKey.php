@@ -30,6 +30,8 @@ class RandomKey
 
 	/**
 	 * if launched as class, init random key data first
+	 *
+	 * @param  array<string>  ...$key_range
 	 */
 	public function __construct(array ...$key_range)
 	{
@@ -39,7 +41,7 @@ class RandomKey
 	/**
 	 * internal key range validation
 	 *
-	 * @param  array<array<string>>  ...$key_range
+	 * @param  array<string>  ...$key_range
 	 * @return string
 	 */
 	private static function validateRandomKeyData(array ...$key_range): string
@@ -54,7 +56,7 @@ class RandomKey
 	/**
 	 * sets the random key range with the default values
 	 *
-	 * @param  array<array<string>> $key_range a list of key ranges as array
+	 * @param  array<string> $key_range a list of key ranges as array
 	 * @return void has no return
 	 * @throws \LengthException If the string length is only 1 abort
 	 */
@@ -150,11 +152,11 @@ class RandomKey
 	 * if override key length is set, it will check on valid key and use this
 	 * this will not set the class key length variable
 	 *
-	 * @param  int                  $key_length [default=-1] key length override,
-	 *                                          if not set use default [LEGACY]
-	 * @param  array<array<string>> $key_range  a list of key ranges as array,
-	 *                                          if not set use previous set data
-	 * @return string                           random key
+	 * @param  int           $key_length [default=-1] key length override,
+	 *                                   if not set use default [LEGACY]
+	 * @param  array<string> $key_range  a list of key ranges as array,
+	 *                                   if not set use previous set data
+	 * @return string                    random key
 	 */
 	public static function randomKeyGen(
 		int $key_length = self::KEY_LENGTH_DEFAULT,

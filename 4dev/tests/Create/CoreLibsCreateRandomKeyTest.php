@@ -64,12 +64,19 @@ final class CoreLibsCreateRandomKeyTest extends TestCase
 	}
 
 	// Alternative more efficient version using strpos
-	private function allCharsInSet(string $input, string $allowedChars): bool
+	/**
+	 * check if all characters are in set
+	 *
+	 * @param  string $input
+	 * @param  string $allowed_chars
+	 * @return bool
+	 */
+	private function allCharsInSet(string $input, string $allowed_chars): bool
 	{
 		$inputLength = strlen($input);
 
 		for ($i = 0; $i < $inputLength; $i++) {
-			if (strpos($allowedChars, $input[$i]) === false) {
+			if (strpos($allowed_chars, $input[$i]) === false) {
 				return false;
 			}
 		}
