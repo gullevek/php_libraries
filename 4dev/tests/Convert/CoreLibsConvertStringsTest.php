@@ -24,116 +24,82 @@ final class CoreLibsConvertStringsTest extends TestCase
 	{
 		// 0: input
 		// 1: format
-		// 2: split characters as string, null for default
 		// 3: expected
 		return [
 			'all empty string' => [
 				'',
 				'',
-				null,
 				''
 			],
 			'empty input string' => [
 				'',
 				'2-2',
-				null,
 				''
 			],
 			'empty format string string' => [
 				'1234',
 				'',
-				null,
 				'1234'
 			],
 			'string format match' => [
 				'1234',
 				'2-2',
-				null,
 				'12-34'
 			],
 			'string format trailing match' => [
 				'1234',
 				'2-2-',
-				null,
 				'12-34'
 			],
 			'string format leading match' => [
 				'1234',
 				'-2-2',
-				null,
 				'12-34'
 			],
 			'string format double inside match' => [
 				'1234',
 				'2--2',
-				null,
 				'12--34',
 			],
 			'string format short first' => [
 				'1',
 				'2-2',
-				null,
 				'1'
 			],
 			'string format match first' => [
 				'12',
 				'2-2',
-				null,
 				'12'
 			],
 			'string format short second' => [
 				'123',
 				'2-2',
-				null,
 				'12-3'
 			],
 			'string format too long' => [
 				'1234567',
 				'2-2',
-				null,
 				'12-34-567'
-			],
-			'string format invalid format string' => [
-				'1234',
-				'2_2',
-				null,
-				'1234'
 			],
 			'different split character' => [
 				'1234',
 				'2_2',
-				'_',
 				'12_34'
 			],
 			'mixed split characters' => [
 				'123456',
 				'2-2_2',
-				'-_',
 				'12-34_56'
 			],
 			'length mixed' => [
 				'ABCD12345568ABC13',
 				'2-4_5-2#4',
-				'-_#',
 				'AB-CD12_34556-8A#BC13'
 			],
 			'split with split chars in string' => [
 				'12-34',
 				'2-2',
-				null,
 				'12--3-4'
-			],
-			'mutltibyte string' => [
-				'あいうえ',
-				'2-2',
-				null,
-				'あいうえ'
-			],
-			'mutltibyte split string' => [
-				'1234',
-				'２-２',
-				null,
-				'1234'
 			],
 		];
 	}
@@ -143,29 +109,132 @@ final class CoreLibsConvertStringsTest extends TestCase
 	 *
 	 * @covers ::splitFormatString
 	 * @dataProvider splitFormatStringProvider
-	 * @testdox splitFormatString $input with format $format and splitters $split_characters will be $expected [$_dataName]
+	 * @testdox splitFormatString $input with format $format will be $expected [$_dataName]
 	 *
 	 * @param  string      $input
 	 * @param  string      $format
-	 * @param  string|null $split_characters
 	 * @param  string      $expected
 	 * @return void
 	 */
 	public function testSplitFormatString(
 		string $input,
 		string $format,
+		string $expected
+	): void {
+		$output = \CoreLibs\Convert\Strings::splitFormatString(
+			$input,
+			$format,
+		);
+		$this->assertEquals(
+			$expected,
+			$output
+		);
+	}
+
+	/** check exceptions */
+	public function splitFormatStringExceptionProvider(): array
+	{
+		return [
+			'invalid format string' => [
+				'1234',
+				'2あ2',
+			],
+			'mutltibyte string' => [
+				'あいうえ',
+				'2-2',
+			],
+			'mutltibyte split string' => [
+				'1234',
+				'２-２',
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::splitFormatStringFixed
+	 * @dataProvider splitFormatStringExceptionProvider
+	 * @testdox splitFormatString Exception catch checks for $input with $format[$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testSplitFormatStringExceptions(string $input, string $format): void
+	{
+		// catch exception
+		$this->expectException(\InvalidArgumentException::class);
+		\CoreLibs\Convert\Strings::splitFormatString($input, $format);
+	}
+
+	/**
+	 * test for split Format string fixed length
+	 *
+	 * @return array
+	 */
+	public function splitFormatStringFixedProvider(): array
+	{
+		return [
+			'normal split, default split char' => [
+				'abcdefg',
+				4,
+				null,
+				'abcd-efg'
+			],
+			'noraml split, other single split char' => [
+				'abcdefg',
+				4,
+				"=",
+				'abcd=efg'
+			],
+			'noraml split, other multiple split char' => [
+				'abcdefg',
+				4,
+				"-=-",
+				'abcd-=-efg'
+			],
+			'non ascii characters' => [
+				'あいうえお',
+				2,
+				"-",
+				'あい-うえ-お'
+			],
+			'empty string' => [
+				'',
+				4,
+				"-",
+				''
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::splitFormatStringFixed
+	 * @dataProvider splitFormatStringFixedProvider
+	 * @testdox splitFormatStringFixed $input with length $split_length and split chars $split_characters will be $expected [$_dataName]
+	 *
+	 * @param  string      $input
+	 * @param  int         $split_length
+	 * @param  string|null $split_characters
+	 * @param  string      $expected
+	 * @return void
+	 */
+	public function testSplitFormatStringFixed(
+		string $input,
+		int $split_length,
 		?string $split_characters,
 		string $expected
 	): void {
 		if ($split_characters === null) {
-			$output = \CoreLibs\Convert\Strings::splitFormatString(
+			$output = \CoreLibs\Convert\Strings::splitFormatStringFixed(
 				$input,
-				$format
+				$split_length
 			);
 		} else {
-			$output = \CoreLibs\Convert\Strings::splitFormatString(
+			$output = \CoreLibs\Convert\Strings::splitFormatStringFixed(
 				$input,
-				$format,
+				$split_length,
 				$split_characters
 			);
 		}
@@ -173,6 +242,36 @@ final class CoreLibsConvertStringsTest extends TestCase
 			$expected,
 			$output
 		);
+	}
+
+	public function splitFormatStringFixedExceptionProvider(): array
+	{
+		return [
+			'split length too short' => [
+				'abcdefg',
+				-1,
+			],
+			'split length longer than string' => [
+				'abcdefg',
+				20,
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::splitFormatStringFixed
+	 * @dataProvider splitFormatStringFixedExceptionProvider
+	 * @testdox splitFormatStringFixed Exception catch checks for $input with $length [$_dataName]
+	 *
+	 * @return void
+	 */
+	public function testSplitFormatStringFixedExceptions(string $input, int $length): void
+	{
+		// catch exception
+		$this->expectException(\InvalidArgumentException::class);
+		\CoreLibs\Convert\Strings::splitFormatStringFixed($input, $length);
 	}
 
 	/**
@@ -376,6 +475,150 @@ final class CoreLibsConvertStringsTest extends TestCase
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Strings::stripUTF8BomBytes($file)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function allCharsInSetProvider(): array
+	{
+		return [
+			'find' => [
+				'abc',
+				'abcdef',
+				true
+			],
+			'not found' => [
+				'abcz',
+				'abcdef',
+				false
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::allCharsInSet
+	 * @dataProvider allCharsInSetProvider
+	 * @testdox allCharsInSet $input in $haystack with expected $expected [$_dataName]
+	 *
+	 * @param  string $needle
+	 * @param  string $haystack
+	 * @param  bool   $expected
+	 * @return void
+	 */
+	public function testAllCharsInSet(string $needle, string $haystack, bool $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Convert\Strings::allCharsInSet($needle, $haystack)
+		);
+	}
+
+	public function buildCharStringFromListsProvider(): array
+	{
+		return [
+			'test a' => [
+				'abc',
+				['a', 'b', 'c'],
+			],
+			'test b' => [
+				'abc123',
+				['a', 'b', 'c'],
+				['1', '2', '3'],
+			],
+			'test c: no params' => [
+				'',
+			],
+			'test c: empty 1' => [
+				'',
+				[]
+			],
+			'test nested' => [
+				'abc',
+				[['a'], ['b'], ['c']],
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::buildCharStringFromLists
+	 * @dataProvider buildCharStringFromListsProvider
+	 * @testdox buildCharStringFromLists all $input convert to $expected [$_dataName]
+	 *
+	 * @param  string $expected
+	 * @param  array  ...$input
+	 * @return void
+	 */
+	public function testBuildCharStringFromLists(string $expected, array ...$input): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Convert\Strings::buildCharStringFromLists(...$input)
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function removeDuplicatesProvider(): array
+	{
+		return [
+			'test no change' => [
+				'ABCDEFG',
+				'ABCDEFG',
+			],
+			'test simple' => [
+				'aa',
+				'a'
+			],
+			'test keep lower and uppwer case' => [
+				'AaBbCc',
+				'AaBbCc'
+			],
+			'test unqiue' => [
+				'aabbcc',
+				'abc'
+			],
+			'test multibyte no change' => [
+				'あいうえお',
+				'あいうえお',
+			],
+			'test multibyte' => [
+				'ああいいううええおお',
+				'あいうえお',
+			],
+			'test multibyte special' => [
+				'あぁいぃうぅえぇおぉ',
+				'あぁいぃうぅえぇおぉ',
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::removeDuplicates
+	 * @dataProvider removeDuplicatesProvider
+	 * @testdox removeDuplicates make $input unqiue to $expected [$_dataName]
+	 *
+	 * @param  string $input
+	 * @param  string $expected
+	 * @return void
+	 */
+	public function testRemoveDuplicates(string $input, string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Convert\Strings::removeDuplicates($input)
 		);
 	}
 }
