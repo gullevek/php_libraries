@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\Create;
 
+use CoreLibs\Convert\Strings;
+
 class RandomKey
 {
 	/** @var int set the default key length it nothing else is set */
@@ -44,7 +46,7 @@ class RandomKey
 	 */
 	private static function validateRandomKeyData(array ...$key_range): string
 	{
-		$key_character_range = join('', array_unique(array_merge(...$key_range)));
+		$key_character_range = Strings::buildCharStringFromLists(...$key_range);
 		if (strlen(self::$key_character_range) <= 1) {
 			return '';
 		}
