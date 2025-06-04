@@ -67,6 +67,8 @@ print "J/S::E-JSON ERROR: " . $json_class::jsonGetLastError() . ": " . $json_cla
 $array = ['foo' => 'bar'];
 $output = Json::jsonConvertArrayTo($array);
 print "S::JSON: " . DgS::printAr($array) . " => " . $output . "<br>";
+$array = ['foo' => 'bar', 'sub' => ['other' => 'this', 'foo' => 'bar', 'set' => [12, 34, true]]];
+print "Pretty: <pre>" . Json::jsonPrettyPrint($array) . "</pre><br>";
 
 print "</body></html>";
 
