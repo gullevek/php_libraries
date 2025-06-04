@@ -252,6 +252,23 @@ class Strings
 			)
 		));
 	}
+
+	/**
+	 * Check if a regex is valid. Does not return the detail regex parser error
+	 *
+	 * @param  string $pattern Any regex string
+	 * @return bool            False on invalid regex
+	 */
+	public static function isValidRegexSimple(string $pattern): bool
+	{
+		try {
+			$var = '';
+			@preg_match($pattern, $var);
+			return preg_last_error() === PREG_NO_ERROR;
+		} catch (\Error $e) {
+			return false;
+		}
+	}
 }
 
 // __END__

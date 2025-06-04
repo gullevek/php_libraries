@@ -10,6 +10,8 @@ namespace CoreLibs\Combined;
 
 class ArrayHandler
 {
+	public const string DATA_SEPARATOR = '#';
+
 	/**
 	 * searches key = value in an array / array
 	 * only returns the first one found
@@ -148,18 +150,22 @@ class ArrayHandler
 	 * array search simple. looks for key, value combination, if found, returns true
 	 * on default does not strict check, so string '4' will match int 4 and vica versa
 	 *
-	 * @param  array<mixed>    $array search in as array
-	 * @param  string|int      $key    key (key to search in)
-	 * @param  string|int|bool $value  value (what to find)
-	 * @param  bool            $strict [false], if set to true, will strict check key/value
-	 * @return bool            true on found, false on not found
+	 * @param  array<mixed>           $array search in as array
+	 * @param  string|int             $key    key (key to search in)
+	 * @param  string|int|bool|array<string|int|bool> $value  values list (what to find)
+	 * @param  bool                   $strict [false], if set to true, will strict check key/value
+	 * @return bool                   true on found, false on not found
 	 */
 	public static function arraySearchSimple(
 		array $array,
 		string|int $key,
-		string|int|bool $value,
+		string|int|bool|array $value,
 		bool $strict = false
 	): bool {
+		// convert to array
+		if (!is_array($value)) {
+			$value = [$value];
+		}
 		foreach ($array as $_key => $_value) {
 			// if value is an array, we search
 			if (is_array($_value)) {
@@ -167,9 +173,9 @@ class ArrayHandler
 				if (($result = self::arraySearchSimple($_value, $key, $value, $strict)) !== false) {
 					return $result;
 				}
-			} elseif ($strict === false && $_key == $key && $_value == $value) {
+			} elseif ($strict === false && $_key == $key && in_array($_value, $value)) {
 				return true;
-			} elseif ($strict === true && $_key === $key && $_value === $value) {
+			} elseif ($strict === true && $_key === $key && in_array($_value, $value, true)) {
 				return true;
 			}
 		}
@@ -234,6 +240,95 @@ class ArrayHandler
 			}
 		}
 		return $hit_list;
+	}
+
+	/**
+	 * TODO: move to CoreLibs
+	 * Search in an array for value and check in the same array block for the required key
+	 * If not found return an array with the array block there the required key is missing,
+	 * the path as string with seperator block set and the missing key entry
+	 *
+	 * @param  array<mixed>          $array
+	 * @param  string|int|float|bool $search_value
+	 * @param  string                $required_key
+	 * @param  string                $current_path
+	 * @return array<array{content?:array<mixed>,path?:string,missing_key?:string}>
+	 */
+	public static function findArraysMissingKey(
+		array $array,
+		string|int|float|bool $search_value,
+		string $required_key,
+		string $current_path = ''
+	): array {
+		$results = [];
+
+		foreach ($array as $key => $value) {
+			$path = $current_path ? $current_path . self::DATA_SEPARATOR . $key : $key;
+
+			if (is_array($value)) {
+				// Check if this array contains the search value
+				$containsValue = in_array($search_value, $value, true);
+
+				// If it contains the value but doesn't have the required key
+				if ($containsValue && !array_key_exists($required_key, $value)) {
+					$results[] = [
+						'content' => $value,
+						'path' => $path,
+						'missing_key' => $required_key
+					];
+				}
+
+				// Recursively search nested arrays
+				$results = array_merge(
+					$results,
+					self::findArraysMissingKey($value, $search_value, $required_key, $path)
+				);
+			}
+		}
+
+		return $results;
+	}
+
+	/**
+	 * TODO: move to CoreLibs
+	 * currenly only over one level, find key => value entry and return set with key
+	 * for all matching
+	 *
+	 * @param  array<mixed>          $array
+	 * @param  string                $lookup
+	 * @param  int|string|float|bool $search
+	 * @param  bool                  $strict [default=false]
+	 * @param  bool                  $case_senstivie [default=false]
+	 * @return array<mixed>
+	 */
+	public static function selectArrayFromOption(
+		array $array,
+		string $lookup,
+		int|string|float|bool $search,
+		bool $strict = false,
+		bool $case_senstivie = false,
+	): array {
+		$result = [];
+		if ($case_senstivie && is_string($search)) {
+			$search = strtolower($search);
+		}
+		foreach ($array as $key => $value) {
+			// skip on not set
+			if (!isset($value[$lookup])) {
+				continue;
+			}
+			if ($case_senstivie && is_string($value[$value])) {
+				$value[$lookup] = strtolower($value[$value]);
+			}
+			if (
+				($strict && $search === $value[$lookup]) ||
+				(!$strict && $search == $value[$lookup])
+			) {
+				$result[$key] = $value;
+				continue;
+			}
+		}
+		return $result;
 	}
 
 	/**
@@ -553,7 +648,8 @@ class ArrayHandler
 	}
 
 	/**
-	 * Modifieds the key of an array with a prefix and/or suffix and returns it with the original value
+	 * Modifieds the key of an array with a prefix and/or suffix and
+	 * returns it with the original value
 	 * does not change order in array
 	 *
 	 * @param  array<string|int,mixed> $in_array
@@ -580,6 +676,41 @@ class ArrayHandler
 			),
 			array_values($in_array)
 		);
+	}
+
+	/**
+	 * sort array and return in same call
+	 * sort ascending, value
+	 *
+	 * @param  array<mixed> $array array to sort by values
+	 * @param  int          $params sort flags
+	 * @return array<mixed>
+	 */
+	public function sortArray(array $array, int $params = SORT_REGULAR): array
+	{
+		return sort($array, $params) ? $array : $array;
+	}
+
+	/**
+	 * sort by key ascending and return
+	 *
+	 * @param  array<mixed> $array
+	 * @param  bool         $lower_case [default=false]
+	 * @return array<mixed>
+	 */
+	public static function ksortArray(array $array, bool $lower_case = false): array
+	{
+		$fk_sort_lower_case = function (string $a, string $b): int {
+			return strtolower($a) <=> strtolower($b);
+		};
+		$fk_sort = function (string $a, string $b): int {
+			return $a <=> $b;
+		};
+		uksort(
+			$array,
+			$lower_case ? $fk_sort_lower_case : $fk_sort
+		);
+		return $array;
 	}
 }
 

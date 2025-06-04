@@ -127,6 +127,13 @@ $input_string = "AaBbCc";
 print "Unique: " . Strings::removeDuplicates($input_string) . "<br>";
 print "Unique: " . Strings::removeDuplicates(strtolower($input_string)) . "<br>";
 
+$regex_string = "/^[A-z]$/";
+print "Regex valid: " . $regex_string . ": "
+	. DgS::prBl(Strings::isValidRegexSimple($regex_string)) . "<br>";
+$regex_string = "/^[A-z";
+print "Regex valid: " . $regex_string . ": "
+	. DgS::prBl(Strings::isValidRegexSimple($regex_string)) . "<br>";
+
 print "</body></html>";
 
 // __END__
