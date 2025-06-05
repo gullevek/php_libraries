@@ -51,6 +51,9 @@ $test_array = [
 		'element_c' => [
 			'type' => 'email'
 		],
+		'element_d' => [
+			'type' => 'butter'
+		],
 	],
 ];
 
@@ -70,7 +73,15 @@ echo "ARRAYSEARCHRECURSIVEALL(email, [array], type): "
 
 // simple search
 echo "ARRAYSEARCHSIMPLE([array], type, email): "
-	. (string)ArrayHandler::arraySearchSimple($test_array, 'type', 'email') . "<br>";
+	. Dgs::prBl(ArrayHandler::arraySearchSimple($test_array, 'type', 'email')) . "<br>";
+echo "ARRAYSEARCHSIMPLE([array], type, not): "
+	. Dgs::prBl(ArrayHandler::arraySearchSimple($test_array, 'type', 'not')) . "<br>";
+echo "ARRAYSEARCHSIMPLE([array], type, [email,butter]): "
+	. Dgs::prBl(ArrayHandler::arraySearchSimple($test_array, 'type', ['email', 'butter'])) . "<br>";
+echo "ARRAYSEARCHSIMPLE([array], type, [email,not]): "
+	. Dgs::prBl(ArrayHandler::arraySearchSimple($test_array, 'type', ['email', 'not'])) . "<br>";
+echo "ARRAYSEARCHSIMPLE([array], type, [never,not]): "
+	. Dgs::prBl(ArrayHandler::arraySearchSimple($test_array, 'type', ['never', 'not'])) . "<br>";
 
 $array_1 = [
 	'foo' => 'bar'
@@ -291,6 +302,231 @@ $out = array_intersect_key(
 print "array intersect key: " . DgS::printAr($keys) . ": " . DgS::printAr($out) . "<br>";
 
 print "array + suffix: " . DgS::printAr(ArrayHandler::arrayModifyKey($array, key_mod_suffix:'_attached')) . "<br>";
+
+print "<hr>";
+$unsorted = [9, 5, 'A', 4, 'B', 6, 'c', 'C', 'a'];
+$unsorted_keys = [
+	'A' => 9, 'B' => 5, 'C' => 'A', 'D' => 4, 'E' => 'B', 'F' => 6, 'G' => 'c',
+	'H1' => 'D', 'B1' => 'd', 'H' => 'C', 'I' => 'a'
+];
+print "Unsorted: " . DgS::printAr($unsorted) . "<br>";
+print "(sort): " . DgS::printAr(ArrayHandler::sortArray($unsorted)) . "<br>";
+print "(sort, lower): " . DgS::printAr(ArrayHandler::sortArray($unsorted, case_insensitive:true)) . "<br>";
+print "(sort, reverse): " . DgS::printAr(ArrayHandler::sortArray($unsorted, reverse:true)) . "<br>";
+print "(sort, lower, reverse): "
+	. DgS::printAr(ArrayHandler::sortArray($unsorted, case_insensitive:true, reverse:true)) . "<br>";
+print "(sort, keys): " . DgS::printAr(ArrayHandler::sortArray($unsorted_keys, maintain_keys:true)) . "<br>";
+print "(sort, keys, lower): "
+	. DgS::printAr(ArrayHandler::sortArray($unsorted_keys, maintain_keys:true, case_insensitive:true)) . "<br>";
+
+print "<hr>";
+$unsorted = [9 => 'A', 5 => 'B', 'A' => 'C', 4 => 'D', 'B' => 'E', 6 => 'F', 'c' => 'G', 'C' => 'H', 'a' => 'I'];
+print "Unsorted Keys: " . DgS::printAr($unsorted) . "<br>";
+print "(sort): " . DgS::printAr(ArrayHandler::sortArray($unsorted)) . "<br>";
+print "(sort, keys): " . DgS::printAr(ArrayHandler::sortArray($unsorted, maintain_keys:true)) . "<br>";
+print "(kosrt): " . DgS::printAr(ArrayHandler::ksortArray($unsorted)) . "<br>";
+print "(kosrt, reverse): " . DgS::printAr(ArrayHandler::ksortArray($unsorted, reverse:true)) . "<br>";
+print "(kosrt, lower case, reverse): "
+	. DgS::printAr(ArrayHandler::ksortArray($unsorted, case_insensitive:true, reverse:true)) . "<br>";
+
+
+print "<hr>";
+$nested = [
+	'B' => 'foo', 'a', '0', 9,
+	1 => ['z', 'b', 'a'],
+	'd' => ['zaip', 'bar', 'baz']
+];
+print "Nested: " . DgS::printAr($nested) . "<br>";
+print "(sort): " . DgS::printAr(ArrayHandler::sortArray($nested)) . "<br>";
+print "(ksort): " . DgS::printAr(ArrayHandler::ksortArray($nested)) . "<br>";
+
+print "<hr>";
+
+$search_array = [
+	'table_lookup' => [
+		'match' => [
+			['param' => 'access_d_cd', 'data' => 'a_cd', 'time_validation' => 'on_load',],
+			['param' => 'other_block', 'data' => 'b_cd'],
+			['pflaume' => 'other_block', 'data' => 'c_cd'],
+			['param' => 'third_block', 'data' => 'd_cd', 'time_validation' => 'cool'],
+			['special' => 'other_block', 'data' => 'e_cd', 'time_validation' => 'other'],
+		]
+	]
+];
+print "Search: " . DgS::printAr($search_array) . "<br>";
+print "Result (all): " . Dgs::printAr(ArrayHandler::findArraysMissingKey(
+	$search_array,
+	'other_block',
+	'time_validation'
+)) . "<br>";
+print "Result (key): " . Dgs::printAr(ArrayHandler::findArraysMissingKey(
+	$search_array,
+	'other_block',
+	'time_validation',
+	'pflaume'
+)) . "<br>";
+print "Result (key): " . Dgs::printAr(ArrayHandler::findArraysMissingKey(
+	$search_array,
+	'other_block',
+	['data', 'time_validation'],
+	'pflaume'
+)) . "<br>";
+
+print "<hr>";
+
+$search_array = [
+	'a' => [
+		'lookup' => 1,
+		'value' => 'Foo',
+		'other' => 'Bar',
+	],
+	'b' => [
+		'lookup' => 1,
+		'value' => 'AAA',
+		'other' => 'Other',
+	],
+	'c' => [
+		'lookup' => 0,
+		'value' => 'CCC',
+		'other' => 'OTHER',
+	],
+	'd' => [
+		'd-1' => [
+			'lookup' => 1,
+			'value' => 'D SUB 1',
+			'other' => 'Other B',
+		],
+		'd-2' => [
+			'lookup' => 0,
+			'value' => 'D SUB 2',
+			'other' => 'Other C',
+		],
+		'more' => [
+			'lookup' => 1,
+			'd-more-1' => [
+				'lookup' => 1,
+				'value' => 'D MORE SUB 1',
+				'other' => 'Other C',
+			],
+			'd-more-2' => [
+				'lookup' => 0,
+				'value' => 'D MORE SUB 0',
+				'other' => 'Other C',
+			],
+		]
+	]
+];
+
+print "Search: " . DgS::printAr($search_array) . "<br>";
+print "Result: " . DgS::printAr(ArrayHandler::selectArrayFromOption(
+	$search_array,
+	'lookup',
+	1,
+)) . "<br>";
+print "Result: " . DgS::printAr(ArrayHandler::selectArrayFromOption(
+	$search_array,
+	'lookup',
+	1,
+	recursive:true
+)) . "<br>";
+print "Result: " . DgS::printAr(ArrayHandler::selectArrayFromOption(
+	$search_array,
+	'lookup',
+	1,
+	recursive:true,
+	flat_separator:'-=-'
+)) . "<br>";
+print "Result: " . DgS::printAr(ArrayHandler::selectArrayFromOption(
+	$search_array,
+	'lookup',
+	1,
+	recursive:true,
+	flat_result:false
+)) . "<br>";
+print "Result: " . DgS::printAr(ArrayHandler::selectArrayFromOption(
+	$search_array,
+	'other',
+	'Other',
+	case_insensitive:false,
+)) . "<br>";
+
+$nestedTestData = [
+	'level1_a' => [
+		'name' => 'Level1A',
+		'type' => 'parent',
+		'children' => [
+			'child1' => [
+				'name' => 'Child1',
+				'type' => 'child',
+				'active' => true
+			],
+			'child2' => [
+				'name' => 'Child2',
+				'type' => 'child',
+				'active' => false
+			]
+		]
+	],
+	'level1_b' => [
+		'name' => 'Level1B',
+		'type' => 'parent',
+		'children' => [
+			'child3' => [
+				'name' => 'Child3',
+				'type' => 'child',
+				'active' => true,
+				'nested' => [
+					'deep1' => [
+						'name' => 'Deep1',
+						'type' => 'deep',
+						'active' => true
+					]
+				]
+			]
+		]
+	],
+	'item5' => [
+		'name' => 'Direct',
+		'type' => 'child',
+		'active' => false
+	]
+];
+
+$result = ArrayHandler::selectArrayFromOption(
+	$nestedTestData,
+	'type',
+	'child',
+	false,
+	false,
+	true,
+	true,
+	':*'
+);
+print "*1*Result: " . DgS::printAr($result) . "<br>";
+$data = [
+	'parent1' => [
+		'name' => 'Parent1',
+		'status' => 'ACTIVE',
+		'children' => [
+			'child1' => [
+				'name' => 'Child1',
+				'status' => 'active'
+			]
+		]
+	]
+];
+
+$result = ArrayHandler::selectArrayFromOption(
+	$data,
+	'status',
+	'active',
+	false,      // not strict
+	true,       // case insensitive
+	true,       // recursive
+	true,       // flat result
+	'|'         // custom separator
+);
+print "*2*Result: " . DgS::printAr($result) . "<br>";
 
 print "</body></html>";
 
