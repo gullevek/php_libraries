@@ -632,15 +632,33 @@ final class CoreLibsConvertStringsTest extends TestCase
 		return [
 			'valid regex' => [
 				'/^[A-z]$/',
-				true
+				true,
+				[
+					'valid' => true,
+					'preg_error' => 0,
+					'error' => null,
+					'pcre_error' => null
+				],
 			],
 			'invalid regex A' => [
 				'/^[A-z]$',
-				false
+				false,
+				[
+					'valid' => false,
+					'preg_error' => 1,
+					'error' => 'Internal PCRE error',
+					'pcre_error' => 'Internal error'
+				],
 			],
 			'invalid regex B' => [
 				'/^[A-z$',
-				false
+				false,
+				[
+					'valid' => false,
+					'preg_error' => 1,
+					'error' => 'Internal PCRE error',
+					'pcre_error' => 'Internal error'
+				],
 			],
 		];
 	}
@@ -656,11 +674,23 @@ final class CoreLibsConvertStringsTest extends TestCase
 	 * @param  bool $expected
 	 * @return void
 	 */
-	public function testIsValidRegexSimple(string $input, bool $expected): void
+	public function testIsValidRegexSimple(string $input, bool $expected, array $expected_extended): void
 	{
 		$this->assertEquals(
 			$expected,
-			\CoreLibs\Convert\Strings::isValidRegexSimple($input)
+			\CoreLibs\Convert\Strings::isValidRegex($input),
+			'Regex is not valid'
+		);
+		$this->assertEquals(
+			$expected_extended,
+			\CoreLibs\Convert\Strings::validateRegex($input),
+			'Validation of regex failed'
+		);
+		$this->assertEquals(
+			// for true null is set, so we get here No Error
+			$expected_extended['error'] ?? \CoreLibs\Convert\Strings::PREG_ERROR_MESSAGES[0],
+			\CoreLibs\Convert\Strings::getLastRegexErrorString(),
+			'Cannot match last preg error string'
 		);
 	}
 }

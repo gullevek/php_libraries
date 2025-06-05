@@ -1,5 +1,7 @@
 <?php
 
+// This code was created by Claude Sonnet 4
+
 declare(strict_types=1);
 
 namespace tests;

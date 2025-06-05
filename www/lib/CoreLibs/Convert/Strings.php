@@ -12,6 +12,16 @@ use CoreLibs\Combined\ArrayHandler;
 
 class Strings
 {
+	/** @var array<int,string> all the preg error messages */
+	public const array PREG_ERROR_MESSAGES = [
+		PREG_NO_ERROR => 'No error',
+		PREG_INTERNAL_ERROR => 'Internal PCRE error',
+		PREG_BACKTRACK_LIMIT_ERROR => 'Backtrack limit exhausted',
+		PREG_RECURSION_LIMIT_ERROR => 'Recursion limit exhausted',
+		PREG_BAD_UTF8_ERROR => 'Malformed UTF-8 data',
+		PREG_BAD_UTF8_OFFSET_ERROR => 'Bad UTF-8 offset',
+		PREG_JIT_STACKLIMIT_ERROR => 'JIT stack limit exhausted'
+	];
 	/**
 	 * return the number of elements in the split list
 	 * 0 if nothing / invalid split
@@ -259,8 +269,9 @@ class Strings
 	 * @param  string $pattern Any regex string
 	 * @return bool            False on invalid regex
 	 */
-	public static function isValidRegexSimple(string $pattern): bool
+	public static function isValidRegex(string $pattern): bool
 	{
+		preg_last_error();
 		try {
 			$var = '';
 			@preg_match($pattern, $var);
@@ -268,6 +279,41 @@ class Strings
 		} catch (\Error $e) {
 			return false;
 		}
+	}
+
+	/**
+	 * Returns the last preg error messages as string
+	 * all messages are defined in PREG_ERROR_MESSAGES
+	 *
+	 * @return string
+	 */
+	public static function getLastRegexErrorString(): string
+	{
+		return self::PREG_ERROR_MESSAGES[preg_last_error()] ?? 'Unknown error';
+	}
+
+	/**
+	 * check if a regex is invalid, returns array with flag and error string
+	 *
+	 * @param  string $pattern
+	 * @return array{valid:bool,preg_error:0,error:null|string,pcre_error:null|string}
+	 */
+	public static function validateRegex(string $pattern): array
+	{
+		// Clear any previous PCRE errors
+		preg_last_error();
+		$var = '';
+		if (@preg_match($pattern, $var) === false) {
+			$error = preg_last_error();
+			return [
+				'valid' => false,
+				'preg_error' => $error,
+				'error' => self::PREG_ERROR_MESSAGES[$error] ?? 'Unknown error',
+				'pcre_error' => preg_last_error_msg(),
+			];
+		}
+
+		return ['valid' => true, 'preg_error' => PREG_NO_ERROR, 'error' => null, 'pcre_error' => null];
 	}
 }
 

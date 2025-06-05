@@ -1,6 +1,6 @@
 <?php
 
-// This code was create by Claude Sonnet 4
+// This code was created by Claude Sonnet 4
 // modification for value checks with assertEqualsCanonicalizing
 
 declare(strict_types=1);

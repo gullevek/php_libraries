@@ -128,11 +128,17 @@ print "Unique: " . Strings::removeDuplicates($input_string) . "<br>";
 print "Unique: " . Strings::removeDuplicates(strtolower($input_string)) . "<br>";
 
 $regex_string = "/^[A-z]$/";
-print "Regex valid: " . $regex_string . ": "
-	. DgS::prBl(Strings::isValidRegexSimple($regex_string)) . "<br>";
+print "Regex is: " . $regex_string . ": " . DgS::prBl(Strings::isValidRegex($regex_string)) . "<br>";
+$regex_string = "'//test{//'";
+print "Regex is: " . $regex_string . ": " . DgS::prBl(Strings::isValidRegex($regex_string)) . "<br>";
+print "Regex is: " . $regex_string . ": " . DgS::printAr(Strings::validateRegex($regex_string)) . "<br>";
 $regex_string = "/^[A-z";
-print "Regex valid: " . $regex_string . ": "
-	. DgS::prBl(Strings::isValidRegexSimple($regex_string)) . "<br>";
+print "Regex is: " . $regex_string . ": " . DgS::prBl(Strings::isValidRegex($regex_string)) . "<br>";
+print "[A] LAST PREGE ERROR: " . preg_last_error() . " -> "
+	. (Strings::PREG_ERROR_MESSAGES[preg_last_error()] ?? '-') . "<br>";
+$preg_error = Strings::isValidRegex($regex_string);
+print "[B] LAST PREGE ERROR: " . preg_last_error() . " -> "
+	. Strings::getLastRegexErrorString() . " -> " . preg_last_error_msg() . "<br>";
 
 print "</body></html>";
 

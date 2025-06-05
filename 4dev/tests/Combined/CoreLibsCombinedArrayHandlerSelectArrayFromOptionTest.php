@@ -1,6 +1,6 @@
 <?php
 
-// create by Claude Sonnet 4
+// created by Claude Sonnet 4
 
 // testRecursiveSearchWithFlatResult had wrong retunr count
 
