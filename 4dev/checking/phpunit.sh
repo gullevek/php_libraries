@@ -23,7 +23,7 @@ EOF
 }
 
 # set base variables
-BASE_PATH="/storage/var/www/html/developers/clemens/core_data/php_libraries/trunk/";
+BASE_PATH=$(pwd)"/";
 PHPUNIT_CONFIG="${BASE_PATH}phpunit.xml";
 PHP_BIN_PATH=$(which php);
 if [ -z "${PHP_BIN_PATH}" ]; then
