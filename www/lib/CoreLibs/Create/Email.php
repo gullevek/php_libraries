@@ -38,6 +38,7 @@ class Email
 	 * @param  string $encoding   Encoding, if not set UTF-8
 	 * @param  bool   $kv_folding If set to true and a valid encoding, do KV folding
 	 * @return string             Correctly encoded and build email string
+	 * @throws \IntlException if email name cannot be converted to UTF-8
 	 */
 	public static function encodeEmailName(
 		string $email,
@@ -51,6 +52,10 @@ class Email
 		// if encoding is not UTF-8 then we convert
 		if ($encoding != 'UTF-8') {
 			$email_name = mb_convert_encoding($email_name, $encoding, 'UTF-8');
+		}
+		// if we cannot transcode the name, return just the email
+		if ($email_name === false) {
+			throw new \IntlException('Cannot convert email_name to UTF-8');
 		}
 		$email_name =
 			mb_encode_mimeheader(
@@ -77,6 +82,8 @@ class Email
 	 * @param  bool                 $kv_folding If set to true and a valid encoding,
 	 *                                          do KV folding
 	 * @return array<string>                    Pos 0: Subject, Pos 1: Body
+	 * @throws \IntlException if subject cannot be converted to UTF-8
+	 * @throws \IntlException if body cannot be converted to UTF-8
 	 */
 	private static function replaceContent(
 		string $subject,
@@ -101,6 +108,12 @@ class Email
 		if ($encoding != 'UTF-8') {
 			$subject = mb_convert_encoding($subject, $encoding, 'UTF-8');
 			$body = mb_convert_encoding($body, $encoding, 'UTF-8');
+		}
+		if ($subject === false) {
+			throw new \IntlException('Cannot convert subject to UTF-8');
+		}
+		if ($body === false) {
+			throw new \IntlException('Cannot convert body to UTF-8');
 		}
 		// we need to encodde the subject
 		$subject = mb_encode_mimeheader(

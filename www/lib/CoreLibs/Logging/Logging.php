@@ -35,6 +35,7 @@ class Logging
 	/** @var string log file block separator, not changeable */
 	private const LOG_FILE_BLOCK_SEPARATOR = '.';
 
+	// MARK: OPTION array
 	// NOTE: the second party array{} hs some errors
 	/** @var array<string,array<string,string|bool|Level>>|array{string:array{type:string,type_info?:string,mandatory:true,alias?:string,default:string|bool|Level,deprecated:bool,use?:string}} */
 	private const OPTIONS = [
@@ -50,12 +51,21 @@ class Logging
 			'type' => 'string', 'mandatory' => false,
 			'default' => '', 'deprecated' => true, 'use' => 'log_file_id'
 		],
+		// log level
 		'log_level' => [
 			'type' => 'instance',
 			'type_info' => '\CoreLibs\Logging\Logger\Level',
 			'mandatory' => false,
 			'default' => Level::Debug,
 			'deprecated' => false
+		],
+		// level to trigger write to error_log
+		'error_log_write_level' => [
+			'type' => 'instance',
+			'type_info' => '\CoreLibs\Logging\Logger\Level',
+			'mandatory' => false,
+			'default' => Level::Emergency,
+			'deprecated' => false,
 		],
 		// options
 		'log_per_run' => [
@@ -92,8 +102,10 @@ class Logging
 	/** @var array<mixed> */
 	private array $options = [];
 
-	/** @var Level set level */
+	/** @var Level set logging level */
 	private Level $log_level;
+	/** @var Level set level for writing to error_log, will not write if log level lower than error log write level */
+	private Level $error_log_write_level;
 
 	// page and host name
 	/** @var string */
@@ -145,12 +157,13 @@ class Logging
 	];
 
 	/**
-	 * Init logger
+	 * MARK: Init logger
 	 *
 	 * options array layout
 	 * - log_folder:
 	 * - log_file_id / file_id (will be deprecated):
 	 * - log_level:
+	 * - error_log_write_level: at what level we write to error_log
 	 *
 	 * - log_per_run:
 	 * - log_per_date: (was print_file_date)
@@ -172,6 +185,8 @@ class Logging
 
 		// set log level
 		$this->initLogLevel();
+		// set error log write level
+		$this->initErrorLogWriteLevel();
 		// set log folder from options
 		$this->initLogFolder();
 		// set per run UID for logging
@@ -190,8 +205,10 @@ class Logging
 	// PRIVATE METHODS
 	// *********************************************************************
 
+	// MARK: options check
+
 	/**
-	 * Undocumented function
+	 * validate options
 	 *
 	 * @param  array<mixed> $options
 	 * @return bool
@@ -263,6 +280,8 @@ class Logging
 		return true;
 	}
 
+	// MARK: init log elvels
+
 	/**
 	 * init log level, just a wrapper to auto set from options
 	 *
@@ -279,6 +298,24 @@ class Logging
 		}
 		$this->setLoggingLevel($this->options['log_level']);
 	}
+
+	/**
+	 * init error log write level
+	 *
+	 * @return void
+	 */
+	private function initErrorLogWriteLevel()
+	{
+		if (
+			empty($this->options['error_log_write_level']) ||
+			!$this->options['error_log_write_level'] instanceof Level
+		) {
+			$this->options['error_log_write_level'] = Level::Emergency;
+		}
+		$this->setErrorLogWriteLevel($this->options['error_log_write_level']);
+	}
+
+	// MARK: set log folder
 
 	/**
 	 * Set the log folder
@@ -321,6 +358,8 @@ class Logging
 		return $status;
 	}
 
+	// MARK: set host name
+
 	/**
 	 * Set the hostname and port
 	 * If port is not defaul 80 it will be added to the host name
@@ -336,6 +375,8 @@ class Logging
 			$this->host_name .= ':' . (string)$this->host_port;
 		}
 	}
+
+	// MARK: set log file id (file)
 
 	/**
 	 * set log file prefix id
@@ -395,6 +436,8 @@ class Logging
 		return $status;
 	}
 
+	// MARK init log flags and levels
+
 	/**
 	 * set flags from options and option flags connection internal settings
 	 *
@@ -422,6 +465,19 @@ class Logging
 	{
 		return $this->log_level->includes($level);
 	}
+
+	/**
+	 * Checks that given level is matchins error_log write level
+	 *
+	 * @param  Level $level
+	 * @return bool
+	 */
+	private function checkErrorLogWriteLevel(Level $level): bool
+	{
+		return $this->error_log_write_level->includes($level);
+	}
+
+	// MARK: build log ifle name
 
 	/**
 	 * Build the file name for writing
@@ -490,6 +546,8 @@ class Logging
 		return $fn;
 	}
 
+	// MARK: master write log to file
+
 	/**
 	 * writes error msg data to file for current level
 	 *
@@ -506,6 +564,10 @@ class Logging
 		// only write if write is requested
 		if (!$this->checkLogLevel($level)) {
 			return false;
+		}
+		// if we match level then write to error_log
+		if ($this->checkErrorLogWriteLevel($level)) {
+			error_log((string)$message);
 		}
 
 		// build logging file name
@@ -530,6 +592,8 @@ class Logging
 		fclose($fp);
 		return true;
 	}
+
+	// MARK: master prepare log
 
 	/**
 	 * Prepare the log message with all needed info blocks:
@@ -610,6 +674,7 @@ class Logging
 	// PUBLIC STATIC METHJODS
 	// *********************************************************************
 
+	// MARK: set log level
 	/**
 	 * set the log level
 	 *
@@ -670,7 +735,7 @@ class Logging
 
 	// **** GET/SETTER
 
-	// log level set and get
+	// MARK: log level
 
 	/**
 	 * set new log level
@@ -705,7 +770,30 @@ class Logging
 		);
 	}
 
-	// log file id set (file name prefix)
+	// MARK: error log write level
+
+	/**
+	 * set the error_log write level
+	 *
+	 * @param  string|int|Level $level
+	 * @return void
+	 */
+	public function setErrorLogWriteLevel(string|int|Level $level): void
+	{
+		$this->error_log_write_level = $this->processLogLevel($level);
+	}
+
+	/**
+	 * get the current level for error_log write
+	 *
+	 * @return Level
+	 */
+	public function getErrorLogWriteLevel(): Level
+	{
+		return $this->error_log_write_level;
+	}
+
+	// MARK: log file id set (file name prefix)
 
 	/**
 	 * sets the internal log file prefix id
@@ -733,7 +821,7 @@ class Logging
 		return $this->log_file_id;
 	}
 
-	// log unique id set (for per run)
+	// MARK: log unique id set (for per run)
 
 	/**
 	 * Sets a unique id based on current date (y/m/d, h:i:s) and a unique id (8 chars)
@@ -768,7 +856,7 @@ class Logging
 		return $this->log_file_unique_id;
 	}
 
-	// general log date
+	// MARK: general log date
 
 	/**
 	 * set the log file date to Y-m-d
@@ -791,7 +879,7 @@ class Logging
 		return $this->log_file_date;
 	}
 
-	// general flag set
+	// MARK: general flag set
 
 	/**
 	 * set one of the basic flags
@@ -846,7 +934,7 @@ class Logging
 		return $this->log_flags;
 	}
 
-	// log folder/file
+	// MARK: log folder/file
 
 	/**
 	 * set new log folder, check that folder is writeable
@@ -890,7 +978,7 @@ class Logging
 		return $this->log_file_name;
 	}
 
-	// max log file size
+	// MARK: max log file size
 
 	/**
 	 * set mag log file size
@@ -921,7 +1009,7 @@ class Logging
 	}
 
 	// *********************************************************************
-	// OPTIONS CALLS
+	// MARK: OPTIONS CALLS
 	// *********************************************************************
 
 	/**
@@ -938,6 +1026,8 @@ class Logging
 	// *********************************************************************
 	// MAIN CALLS
 	// *********************************************************************
+
+	// MARK: main log call
 
 	/**
 	 * Commong log interface
@@ -976,7 +1066,7 @@ class Logging
 	}
 
 	/**
-	 * DEBUG: 100
+	 * MARK: DEBUG: 100
 	 *
 	 * write debug data to error_msg array
 	 *
@@ -1008,7 +1098,7 @@ class Logging
 	}
 
 	/**
-	 * INFO: 200
+	 * MARK: INFO: 200
 	 *
 	 * @param  string|Stringable $message
 	 * @param  mixed[] $context
@@ -1027,7 +1117,7 @@ class Logging
 	}
 
 	/**
-	 * NOTICE: 250
+	 * MARK: NOTICE: 250
 	 *
 	 * @param  string|Stringable $message
 	 * @param  mixed[] $context
@@ -1046,7 +1136,7 @@ class Logging
 	}
 
 	/**
-	 * WARNING: 300
+	 * MARK: WARNING: 300
 	 *
 	 * @param  string|Stringable $message
 	 * @param  mixed[] $context
@@ -1065,7 +1155,7 @@ class Logging
 	}
 
 	/**
-	 * ERROR: 400
+	 * MARK: ERROR: 400
 	 *
 	 * @param  string|Stringable $message
 	 * @param  mixed[] $context
@@ -1084,7 +1174,7 @@ class Logging
 	}
 
 	/**
-	 * CTRITICAL: 500
+	 * MARK: CTRITICAL: 500
 	 *
 	 * @param  string|Stringable $message
 	 * @param  mixed[] $context
@@ -1103,7 +1193,7 @@ class Logging
 	}
 
 	/**
-	 * ALERT: 550
+	 * MARK: ALERT: 550
 	 *
 	 * @param  string|Stringable $message
 	 * @param  mixed[] $context
@@ -1122,7 +1212,7 @@ class Logging
 	}
 
 	/**
-	 * EMERGENCY: 600
+	 * MARK: EMERGENCY: 600
 	 *
 	 * @param  string|Stringable $message
 	 * @param  mixed[] $context
@@ -1141,7 +1231,7 @@ class Logging
 	}
 
 	// *********************************************************************
-	// DEPRECATED SUPPORT CALLS
+	// MARK: DEPRECATED SUPPORT CALLS
 	// *********************************************************************
 
 	// legacy, but there are too many implemented
@@ -1199,7 +1289,7 @@ class Logging
 	}
 
 	// *********************************************************************
-	// DEPRECATED METHODS
+	// MARK: DEPRECATED METHODS
 	// *********************************************************************
 
 	/**
@@ -1365,7 +1455,7 @@ class Logging
 	}
 
 	// *********************************************************************
-	// DEBUG METHODS
+	// MARK: DEBUG METHODS
 	// *********************************************************************
 
 	/**
@@ -1398,6 +1488,7 @@ class Logging
 		}
 		// back to options level
 		$this->initLogLevel();
+		$this->initErrorLogWriteLevel();
 		print "OPT set level: " . $this->getLoggingLevel()->getName() . "<br>";
 	}
 }
