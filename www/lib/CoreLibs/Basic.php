@@ -383,7 +383,8 @@ class Basic
 	public function initRandomKeyLength(int $key_length): bool
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\RandomKey::setRandomKeyLength()', E_USER_DEPRECATED);
-		return \CoreLibs\Create\RandomKey::setRandomKeyLength($key_length);
+		// no op, we do no longer pre set the random key length
+		return true;
 	}
 
 	/**
