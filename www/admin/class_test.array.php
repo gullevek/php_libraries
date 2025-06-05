@@ -333,7 +333,7 @@ print "(kosrt, lower case, reverse): "
 print "<hr>";
 $nested = [
 	'B' => 'foo', 'a', '0', 9,
-	1 => ['z', 'b', 'a'],
+	'1' => ['z', 'b', 'a'],
 	'd' => ['zaip', 'bar', 'baz']
 ];
 print "Nested: " . DgS::printAr($nested) . "<br>";
