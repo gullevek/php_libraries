@@ -83,6 +83,9 @@ function mtParseCSV(
 			'UTF-8',
 			$encoding
 		);
+		if ($string === false) {
+			return $lines;
+		}
 	}
 	if ($flag == 'INTERN') {
 		// split with PHP function

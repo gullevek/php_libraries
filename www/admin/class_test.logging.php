@@ -82,6 +82,7 @@ $log->error('Cannot process data', ['error' => 'log']);
 $log->critical('Critical message', ['critical' => 'log']);
 $log->alert('Alert message', ['Alert' => 'log']);
 $log->emergency('Emergency message', ['Emergency' => 'log']);
+error_log('TRIGGER ERROR LOG MANUAL: Emergency');
 print "Log File: " . $log->getLogFile() . "<br>";
 
 $log->setLogFlag(Flag::per_run);
