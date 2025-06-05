@@ -85,7 +85,12 @@ class Strings
 			);
 		}
 		// get the split characters that are not numerical and check they are ascii
-		$split_characters = self::removeDuplicates(preg_replace('/[0-9]/', '', $split_format));
+		$split_characters = self::removeDuplicates(preg_replace('/[0-9]/', '', $split_format) ?: '');
+		if (empty($split_characters)) {
+			throw new \InvalidArgumentException(
+				"A split character must exist in the format string: " . $split_format
+			);
+		}
 		if (preg_match('/[^\x20-\x7e]/', $split_characters)) {
 			throw new \InvalidArgumentException(
 				"The split character has to be a valid ascii character: " . $split_characters
@@ -296,7 +301,7 @@ class Strings
 	 * check if a regex is invalid, returns array with flag and error string
 	 *
 	 * @param  string $pattern
-	 * @return array{valid:bool,preg_error:0,error:null|string,pcre_error:null|string}
+	 * @return array{valid:bool,preg_error:int,error:null|string,pcre_error:null|string}
 	 */
 	public static function validateRegex(string $pattern): array
 	{

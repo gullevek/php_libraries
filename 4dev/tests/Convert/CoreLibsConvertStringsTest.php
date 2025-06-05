@@ -135,6 +135,11 @@ final class CoreLibsConvertStringsTest extends TestCase
 	public function splitFormatStringExceptionProvider(): array
 	{
 		return [
+			'string format with no splitter match' => [
+				'1234',
+				'22',
+				'12-34'
+			],
 			'invalid format string' => [
 				'1234',
 				'2あ2',
