@@ -383,7 +383,8 @@ class Basic
 	public function initRandomKeyLength(int $key_length): bool
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Create\RandomKey::setRandomKeyLength()', E_USER_DEPRECATED);
-		return \CoreLibs\Create\RandomKey::setRandomKeyLength($key_length);
+		// no op, we do no longer pre set the random key length
+		return true;
 	}
 
 	/**
@@ -988,10 +989,10 @@ class Basic
 	 * @param  bool   $auto_check      default true, if source encoding is set
 	 *                                 check that the source is actually matching
 	 *                                 to what we sav the source is
-	 * @return string                  encoding converted string
+	 * @return string|false            encoding converted string
 	 * @deprecated use \CoreLibs\Convert\Encoding::convertEncoding() instead
 	 */
-	public static function convertEncoding(string $string, string $to_encoding, string $source_encoding = '', bool $auto_check = true): string
+	public static function convertEncoding(string $string, string $to_encoding, string $source_encoding = '', bool $auto_check = true): string|false
 	{
 		trigger_error('Method ' . __METHOD__ . ' is deprecated, use \CoreLibs\Convert\Encoding::convertEncoding()', E_USER_DEPRECATED);
 		return \CoreLibs\Convert\Encoding::convertEncoding($string, $to_encoding, $source_encoding, $auto_check);

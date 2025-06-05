@@ -34,6 +34,17 @@ function executeFunctionByName(functionName, context) {
   }
   return context[func].apply(context, args);
 }
+function runFunction(name) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  runFunctionArgsArray(name, args);
+}
+function runFunctionArgsArray(name, args) {
+  var fn = window[name];
+  if (typeof fn !== "function") {
+    return;
+  }
+  fn.apply(window, args);
+}
 function isObject(val) {
   if (val === null) {
     return false;
@@ -659,6 +670,31 @@ function getQueryStringParam(search = "", query = "", single = false) {
   }
   return param;
 }
+function hasUrlParameter(key) {
+  var urlParams = new URLSearchParams(window.location.search);
+  return urlParams.has(key);
+}
+function getUrlParameter(key) {
+  var urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(key);
+}
+function updateUrlParameter(key, value, reload = false) {
+  const url = new URL(window.location.href);
+  url.searchParams.set(key, value);
+  const newUrl = url.toString();
+  window.history.pushState({ path: newUrl }, "", newUrl);
+  if (reload) {
+    window.location.reload();
+  }
+}
+function removeUrlParameter(key, reload = false) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete(key);
+  window.history.pushState({}, "", url.toString());
+  if (reload) {
+    window.location.reload();
+  }
+}
 
 // src/utils/LoginLogout.mjs
 function loginLogout() {
@@ -979,7 +1015,7 @@ var ActionBox = class {
       $("#overlayBox").css("zIndex", this.zIndex.base);
     }
     $("#overlayBox").show();
-    if (!keyInObject(target_id, this.zIndex.boxes)) {
+    if (!objectKeyExists(this.zIndex.boxes, target_id)) {
       this.zIndex.boxes[target_id] = this.zIndex.max;
       this.zIndex.max += 10;
     } else if (this.zIndex.boxes[target_id] + 10 < this.zIndex.max) {
@@ -1005,7 +1041,7 @@ var ActionBox = class {
     if (!exists(target_id)) {
       return;
     }
-    if (keyInObject(target_id, this.action_box_storage) && clean === true) {
+    if (objectKeyExists(this.action_box_storage, target_id) && clean === true) {
       this.action_box_storage[target_id] = {};
     }
     if (clean === true) {
@@ -1043,15 +1079,15 @@ var ActionBox = class {
    * @param {Object}  [settings={}]     Optional settings, eg style sheets
    */
   createActionBox(target_id = "actionBox", title = "", contents = {}, headers = {}, settings = {}, show_close = true) {
-    if (!keyInObject(target_id, this.action_box_storage)) {
+    if (!objectKeyExists(this.action_box_storage, target_id)) {
       this.action_box_storage[target_id] = {};
     }
     let header_css = [];
-    if (keyInObject("header_css", settings)) {
+    if (objectKeyExists(settings, "header_css")) {
       header_css = settings.header_css;
     }
     let action_box_css = [];
-    if (keyInObject("action_box_css", settings)) {
+    if (objectKeyExists(settings, "action_box_css")) {
       action_box_css = settings.action_box_css;
     }
     let elements = [];
@@ -1082,14 +1118,14 @@ var ActionBox = class {
       )
     ));
     if (getObjectCount(headers) > 0) {
-      if (keyInObject("raw_string", headers)) {
+      if (objectKeyExists(headers, "raw_string")) {
         elements.push(headers.raw_string);
       } else {
         elements.push(this.hec.phfo(headers));
       }
     }
     if (getObjectCount(contents) > 0) {
-      if (keyInObject("raw_string", contents)) {
+      if (objectKeyExists(contents, "raw_string")) {
         elements.push(contents.raw_string);
       } else {
         elements.push(this.hec.phfo(contents));
@@ -1517,11 +1553,23 @@ function html_options_block2(name, data, selected = "", multiple = 0, options_on
 function html_options_refill2(name, data, sort = "") {
   html_options_refill(name, data, sort);
 }
-function parseQueryString2(query = "", return_key = "") {
-  return parseQueryString(query, return_key);
+function parseQueryString2(query = "", return_key = "", single = false) {
+  return parseQueryString(query, return_key, single);
 }
 function getQueryStringParam2(search = "", query = "", single = false) {
   return getQueryStringParam(search, query, single);
+}
+function updateUrlParameter2(key, value, reload = false) {
+  return updateUrlParameter(key, value, reload);
+}
+function removeUrlParameter2(key, reload = false) {
+  return removeUrlParameter(key, reload);
+}
+function hasUrlParameter2(key) {
+  return hasUrlParameter(key);
+}
+function getUrlParameter2(key) {
+  return getUrlParameter(key);
 }
 function loginLogout2() {
   loginLogout();

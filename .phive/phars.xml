@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phive xmlns="https://phar.io/phive">
-  <phar name="phpunit" version="^10.3.5" installed="10.3.5" location="./tools/phpunit" copy="false"/>
-  <phar name="phpcbf" version="^3.7.2" installed="3.10.3" location="./tools/phpcbf" copy="false"/>
-  <phar name="phpcs" version="^3.10.3" installed="3.10.3" location="./tools/phpcs" copy="false"/>
-  <phar name="phpstan" version="^2.0" installed="2.0.4" location="./tools/phpstan" copy="false"/>
+  <phar name="phpunit" version="^10.3.5" installed="10.5.46" location="./tools/phpunit" copy="false"/>
+  <phar name="phpcbf" version="^3.7.2" installed="3.13.0" location="./tools/phpcbf" copy="false"/>
+  <phar name="phpcs" version="^3.10.3" installed="3.13.0" location="./tools/phpcs" copy="false"/>
+  <phar name="phpstan" version="^2.0" installed="2.1.17" location="./tools/phpstan" copy="false"/>
   <phar name="phan" version="^5.4.3" installed="5.4.3" location="./tools/phan" copy="false"/>
   <phar name="psalm" version="^5.15.0" installed="5.24.0" location="./tools/psalm" copy="false"/>
   <phar name="phpdox" version="^0.12.0" installed="0.12.0" location="./tools/phpdox" copy="false"/>

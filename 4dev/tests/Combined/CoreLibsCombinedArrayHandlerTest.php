@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace tests;
 
-use Exception;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -25,7 +24,11 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			'same' => 'same',
 			3 => 'foobar',
 			'foobar' => 4,
+			'barbaz' => 5,
+			'zapzap' => '6',
+			'zipzip' => 7,
 			'true' => true,
+			'more' => 'other',
 		],
 		'd',
 		4,
@@ -37,7 +40,10 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			'sub' => [
 				'nested' => 'bar',
 				'same' => 'same',
-				'more' => 'test'
+				'more' => 'test',
+				'barbaz' => '5',
+				'zapzap' => '6',
+				'zipzip' => 7,
 			]
 		]
 	];
@@ -184,7 +190,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		0: array $input,
 		1: $key,
 		2: $value,
-		3: bool $flag,
+		3: bool $strict,
 		4: bool $expected
 		*/
 		return [
@@ -285,6 +291,91 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 				2 => 'true',
 				3 => true,
 				4 => false,
+			],
+			// array tyep search
+			'array type, both exist' => [
+				0 => self::$array,
+				1 => 'more',
+				2 => ['other', 'test'],
+				3 => false,
+				4 => true,
+			],
+			'array type, one exist' => [
+				0 => self::$array,
+				1 => 'more',
+				2 => ['other', 'not'],
+				3 => false,
+				4 => true,
+			],
+			'array type, none exist' => [
+				0 => self::$array,
+				1 => 'more',
+				2 => ['never', 'not'],
+				3 => false,
+				4 => false,
+			],
+			'array type, both exist, not strict, int and string' => [
+				0 => self::$array,
+				1 => 'barbaz',
+				2 => [5, '5'],
+				3 => false,
+				4 => true,
+			],
+			'array type, both exist, not strict, both string' => [
+				0 => self::$array,
+				1 => 'barbaz',
+				2 => ['5', '5'],
+				3 => false,
+				4 => true,
+			],
+			'array type, both exist, not strict, int and int' => [
+				0 => self::$array,
+				1 => 'barbaz',
+				2 => [5, 5],
+				3 => false,
+				4 => true,
+			],
+			'array type, both exist, strict, int and string' => [
+				0 => self::$array,
+				1 => 'barbaz',
+				2 => [5, '5'],
+				3 => true,
+				4 => true,
+			],
+			'array type, both exist, strict, both string' => [
+				0 => self::$array,
+				1 => 'barbaz',
+				2 => ['5', '5'],
+				3 => true,
+				4 => true,
+			],
+			'array type, both exist, strict, int and int' => [
+				0 => self::$array,
+				1 => 'barbaz',
+				2 => [5, 5],
+				3 => true,
+				4 => true,
+			],
+			'array type, both exist, strict, int and int to string and string' => [
+				0 => self::$array,
+				1 => 'zapzap',
+				2 => [6, 6],
+				3 => true,
+				4 => false,
+			],
+			'array type, both exist, strict, string and string to string and string' => [
+				0 => self::$array,
+				1 => 'zapzap',
+				2 => ['6', '6'],
+				3 => true,
+				4 => true,
+			],
+			'array type, both exist, not strict, int and int to string and string' => [
+				0 => self::$array,
+				1 => 'zapzap',
+				2 => [6, 6],
+				3 => false,
+				4 => true,
 			],
 		];
 	}
@@ -842,13 +933,13 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	 * @dataProvider arraySearchRecursiveAllProvider
 	 * @testdox arraySearchRecursiveAll $needle (key $key_search_for) in $input and will be $expected (old: $flag) [$_dataName]
 	 *
-	 * @param string|null $needle
+	 * @param string|int|null $needle
 	 * @param array $input
-	 * @param string|null $key_search_for
+	 * @param string|int|null $key_search_for
 	 * @param bool $flag
 	 * @return void
 	 */
-	public function testArraySearchRecursiveAll($needle, array $input, ?string $key_search_for, bool $flag, array $expected): void
+	public function testArraySearchRecursiveAll(string|int|null $needle, array $input, string|int|null $key_search_for, bool $flag, array $expected): void
 	{
 		$this->assertEquals(
 			$expected,
@@ -865,15 +956,16 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	 *
 	 * @param array $input
 	 * @param string|int $key
-	 * @param string|int|bool $value
+	 * @param string|int|bool|array<string|int|bool> $value
+	 * @param bool $strict
 	 * @param bool $expected
 	 * @return void
 	 */
-	public function testArraySearchSimple(array $input, $key, $value, bool $flag, bool $expected): void
+	public function testArraySearchSimple(array $input, string|int $key, string|int|bool|array $value, bool $strict, bool $expected): void
 	{
 		$this->assertEquals(
 			$expected,
-			\CoreLibs\Combined\ArrayHandler::arraySearchSimple($input, $key, $value, $flag)
+			\CoreLibs\Combined\ArrayHandler::arraySearchSimple($input, $key, $value, $strict)
 		);
 	}
 
@@ -1394,8 +1486,896 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		array $expected
 	): void {
 		$this->assertEquals(
-			\CoreLibs\Combined\ArrayHandler::arrayModifyKey($in_array, $key_mod_prefix, $key_mod_suffix),
-			$expected
+			$expected,
+			\CoreLibs\Combined\ArrayHandler::arrayModifyKey($in_array, $key_mod_prefix, $key_mod_suffix)
+		);
+	}
+
+	/**
+	 * sort
+	 *
+	 * @return array
+	 */
+	public function providerSortArray(): array
+	{
+		$unsorted = [9, 5, 'A', 4, 'B', 6, 'c', 'C', 'a'];
+		// for lower case the initial order of the elmenet is important:
+		// A, a => A, a
+		// d, D => d, D
+		$unsorted_keys = ['A' => 9, 'B' => 5, 'C' => 'A', 'D' => 4, 'E' => 'B', 'F' => 6, 'G' => 'c', 'H' => 'C', 'I' => 'a'];
+		return [
+			// sort default
+			'sort default' => [
+				$unsorted,
+				null,
+				null,
+				null,
+				[4, 5, 6, 9, 'A', 'B', 'C', 'a', 'c'],
+			],
+			// sort param set
+			'sort param set' => [
+				$unsorted,
+				false,
+				false,
+				false,
+				[4, 5, 6, 9, 'A', 'B', 'C', 'a', 'c'],
+			],
+			// sort lower case
+			'sort lower case' => [
+				$unsorted,
+				true,
+				false,
+				false,
+				[4, 5, 6, 9, 'A', 'a', 'B', 'c', 'C'],
+			],
+			// sort reverse
+			'sort reverse' => [
+				$unsorted,
+				false,
+				true,
+				false,
+				['c', 'a', 'C', 'B', 'A', 9, 6, 5, 4],
+			],
+			// sort lower case + reverse
+			'sort lower case + reverse' => [
+				$unsorted,
+				true,
+				true,
+				false,
+				['c', 'C', 'B', 'A', 'a', 9, 6, 5, 4],
+			],
+			// keys, do not maintain, default
+			'keys, do not maintain, default' => [
+				$unsorted_keys,
+				false,
+				false,
+				false,
+				[4, 5, 6, 9, 'A', 'B', 'C', 'a', 'c'],
+			],
+			// sort maintain keys
+			'sort maintain keys' => [
+				$unsorted_keys,
+				false,
+				false,
+				true,
+				[
+					'D' => 4,
+					'B' => 5,
+					'F' => 6,
+					'A' => 9,
+					'C' => 'A',
+					'E' => 'B',
+					'H' => 'C',
+					'I' => 'a',
+					'G' => 'c'
+				],
+			],
+			// sort maintain keys + lower case
+			'sort maintain keys + lower case' => [
+				$unsorted_keys,
+				true,
+				false,
+				true,
+				[
+					'D' => 4,
+					'B' => 5,
+					'F' => 6,
+					'A' => 9,
+					'C' => 'A',
+					'I' => 'a',
+					'E' => 'B',
+					'H' => 'C',
+					'G' => 'c'
+				],
+			],
+			// sort maintain keys + reverse
+			'sort maintain keys + reverse' => [
+				$unsorted_keys,
+				false,
+				true,
+				true,
+				[
+					'G' => 'c',
+					'H' => 'C',
+					'E' => 'B',
+					'I' => 'a',
+					'C' => 'A',
+					'A' => 9,
+					'F' => 6,
+					'B' => 5,
+					'D' => 4,
+				],
+			],
+			// sort maintain keys + lower case + reverse
+			'sort maintain keys + lower case + reverse' => [
+				$unsorted_keys,
+				true,
+				true,
+				true,
+				[
+					'G' => 'c',
+					'H' => 'C',
+					'E' => 'B',
+					'I' => 'a',
+					'C' => 'A',
+					'A' => 9,
+					'F' => 6,
+					'B' => 5,
+					'D' => 4,
+				],
+			],
+			// emtpy
+			'empty' => [
+				[],
+				false,
+				false,
+				false,
+				[]
+			],
+			// with nulls
+			'null entries' => [
+				['d', null, 'a', null, 1],
+				false,
+				false,
+				false,
+				[null, null, 1, 'a', 'd'],
+			],
+			// double entries
+			'double entries' => [
+				[1, 2, 2, 1, 'B', 'A', 'a', 'b', 'A', 'B', 'b', 'a'],
+				false,
+				false,
+				false,
+				[1, 1, 2, 2, 'A', 'A', 'B', 'B', 'a', 'a', 'b', 'b'],
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::sortArray
+	 * @dataProvider providerSortArray
+	 * @testdox sortArray sort $input with lower case $lower_case, reverse $reverse, maintain keys $maintain_keys with expeted $expected [$_dataName]
+	 *
+	 * @param  array $input
+	 * @param  ?bool $lower_case
+	 * @param  ?bool $reverse
+	 * @param  ?bool $maintain_keys
+	 * @param  array $expected
+	 * @return void
+	 */
+	public function testSortArray(array $input, ?bool $lower_case, ?bool $reverse, ?bool $maintain_keys, array $expected): void
+	{
+		$original = $input;
+		if ($lower_case === null && $reverse === null && $maintain_keys === null) {
+			$sorted_array = \CoreLibs\Combined\ArrayHandler::sortArray($input);
+		} else {
+			$sorted_array = \CoreLibs\Combined\ArrayHandler::sortArray($input, $lower_case, $reverse, $maintain_keys);
+		}
+		$expected_count = count($expected);
+		$this->assertIsArray(
+			$sorted_array,
+			'sortArray: result not array'
+		);
+		$this->assertCount(
+			$expected_count,
+			$sorted_array,
+			'sortArray: count not matching'
+		);
+		$this->assertEquals(
+			$expected,
+			$sorted_array,
+			'sortArray: result not matching'
+		);
+		$this->assertEquals(
+			$original,
+			$input,
+			'sortArray: original - input was modified'
+		);
+		if ($maintain_keys) {
+			$this->assertEqualsCanonicalizing(
+				array_keys($input),
+				array_keys($sorted_array),
+				'sortArray: keys are not modified',
+			);
+		}
+		if ($input != []) {
+			// we only care about array values
+			$this->assertNotEquals(
+				array_values($input),
+				array_values($sorted_array),
+				'sortArray: output - input was modified'
+			);
+		}
+	}
+
+/**
+	 * sort
+	 *
+	 * @return array
+	 */
+	public function providerKsortArray(): array
+	{
+		// for lower case the initial order of the elmenet is important:
+		// A, a => A, a
+		// d, D => d, D
+		$unsorted_keys = [
+			9 => 'A',
+			5 => 'B',
+			'A' => 'C',
+			4 => 'D',
+			'B' => 'E',
+			6 => 'F',
+			'c' => 'G',
+			'C' => 'H',
+			'a' => 'I',
+		];
+		return [
+			// sort keys
+			'sort keys' => [
+				$unsorted_keys,
+				false,
+				false,
+				[
+					4 => 'D',
+					5 => 'B',
+					6 => 'F',
+					9 => 'A',
+					'A' => 'C',
+					'B' => 'E',
+					'C' => 'H',
+					'a' => 'I',
+					'c' => 'G',
+				],
+			],
+			// sort keys + lower case
+			'sort keys + lower case' => [
+				$unsorted_keys,
+				true,
+				false,
+				[
+					4 => 'D',
+					5 => 'B',
+					6 => 'F',
+					9 => 'A',
+					'A' => 'C',
+					'a' => 'I',
+					'B' => 'E',
+					'c' => 'G',
+					'C' => 'H',
+				],
+			],
+			// sort keys + reverse
+			'sort keys + reverse' => [
+				$unsorted_keys,
+				false,
+				true,
+				[
+					'c' => 'G',
+					'a' => 'I',
+					'C' => 'H',
+					'B' => 'E',
+					'A' => 'C',
+					9 => 'A',
+					6 => 'F',
+					5 => 'B',
+					4 => 'D',
+				],
+			],
+			// sort keys + lower case + reverse
+			'sort keys + lower case + reverse' => [
+				$unsorted_keys,
+				true,
+				true,
+				[
+					'C' => 'H',
+					'c' => 'G',
+					'B' => 'E',
+					'a' => 'I',
+					'A' => 'C',
+					9 => 'A',
+					6 => 'F',
+					5 => 'B',
+					4 => 'D',
+				],
+			],
+			// emtpy
+			'empty' => [
+				[],
+				false,
+				false,
+				[]
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::ksortArray
+	 * @dataProvider providerKsortArray
+	 * @testdox ksortArray sort $input with lower case $lower_case, reverse $reverse with expeted $expected [$_dataName]
+	 *
+	 * @param  array $input
+	 * @param  ?bool $lower_case
+	 * @param  ?bool $reverse
+	 * @param  array $expected
+	 * @return void
+	 */
+	public function testKsortArray(array $input, ?bool $lower_case, ?bool $reverse, array $expected): void
+	{
+		$original = $input;
+		if ($lower_case === null && $reverse === null) {
+			$sorted_array = \CoreLibs\Combined\ArrayHandler::ksortArray($input);
+		} else {
+			$sorted_array = \CoreLibs\Combined\ArrayHandler::ksortArray($input, $lower_case, $reverse);
+		}
+		$expected_count = count($expected);
+		$this->assertIsArray(
+			$sorted_array,
+			'ksortArray: result not array'
+		);
+		$this->assertCount(
+			$expected_count,
+			$sorted_array,
+			'ksortArray: count not matching'
+		);
+		$this->assertEquals(
+			$expected,
+			$sorted_array,
+			'ksortArray: result not matching'
+		);
+		$this->assertEquals(
+			$original,
+			$input,
+			'ksortArray: original - input was modified'
+		);
+		$this->assertEqualsCanonicalizing(
+			array_values($original),
+			array_values($sorted_array),
+			'ksortArray: values are not modified'
+		);
+		if ($input != []) {
+			// we only care about array keys
+			$this->assertNotEquals(
+				array_keys($input),
+				array_keys($sorted_array),
+				'sortArray: output - input was modified'
+			);
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerFindArraysMissingKey(): array
+	{
+		$search_array = [
+			'table_lookup' => [
+				'match' => [
+					['param' => 'access_d_cd', 'data' => 'a_cd', 'time_validation' => 'on_load',],
+					['param' => 'other_block', 'data' => 'b_cd'],
+					['pflaume' => 'other_block', 'data' => 'c_cd'],
+					['param' => 'third_block', 'data' => 'd_cd', 'time_validation' => 'cool'],
+					['special' => 'other_block', 'data' => 'e_cd', 'time_validation' => 'other'],
+				]
+			]
+		];
+		return [
+			'find, no key set' => [
+				$search_array,
+				'other_block',
+				'time_validation',
+				null,
+				null,
+				[
+					[
+						'content' => [
+							'param' => 'other_block',
+							'data' => 'b_cd',
+						],
+						'path' => 'table_lookup:match:1',
+						'missing_key' => ['time_validation'],
+					],
+					[
+						'content' => [
+							'data' => 'c_cd',
+							'pflaume' => 'other_block',
+						],
+						'path' => 'table_lookup:match:2',
+						'missing_key' => ['time_validation'],
+					],
+				]
+			],
+			'find, key set' => [
+				$search_array,
+				'other_block',
+				'time_validation',
+				'pflaume',
+				null,
+				[
+					[
+						'content' => [
+							'data' => 'c_cd',
+							'pflaume' => 'other_block',
+						],
+						'path' => 'table_lookup:match:2',
+						'missing_key' => ['time_validation'],
+					],
+				]
+			],
+			'find, key set, different separator' => [
+				$search_array,
+				'other_block',
+				'time_validation',
+				'pflaume',
+				'#',
+				[
+					[
+						'content' => [
+							'data' => 'c_cd',
+							'pflaume' => 'other_block',
+						],
+						'path' => 'table_lookup#match#2',
+						'missing_key' => ['time_validation'],
+					],
+				]
+			],
+			'find, key set, multiple check' => [
+				$search_array,
+				'other_block',
+				['data', 'time_validation'],
+				'pflaume',
+				null,
+				[
+					[
+						'content' => [
+							'data' => 'c_cd',
+							'pflaume' => 'other_block',
+						],
+						'path' => 'table_lookup:match:2',
+						'missing_key' => ['time_validation'],
+					],
+				]
+			],
+			'has set' => [
+				$search_array,
+				'access_d_cd',
+				'time_validation',
+				null,
+				null,
+				[]
+			],
+			'not found' => [
+				$search_array,
+				'not_found',
+				'value',
+				null,
+				null,
+				[]
+			],
+			'empty' => [
+				[],
+				'something',
+				'other',
+				null,
+				null,
+				[]
+			]
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::findArraysMissingKey
+	 * @dataProvider providerFindArraysMissingKey
+	 * @testdox findArraysMissingKey $input find $search_value with $search_key and missing $required_key [$_dataName]
+	 *
+	 * @param  array<mixed>          $input
+	 * @param  string|int|float|bool $search_value
+	 * @param  string|array<string>  $required_key
+	 * @param  string|null           $search_key
+	 * @param  string|null           $path_separator
+	 * @param  array<mixed>          $expected
+	 * @return void
+	 */
+	public function testFindArraysMissingKey(
+		array $input,
+		string|int|float|bool $search_value,
+		string|array $required_key,
+		?string $search_key,
+		?string $path_separator,
+		array $expected
+	): void {
+		if ($path_separator === null) {
+			$result = \CoreLibs\Combined\ArrayHandler::findArraysMissingKey(
+				$input,
+				$search_value,
+				$required_key,
+				$search_key
+			);
+		} else {
+			$result = \CoreLibs\Combined\ArrayHandler::findArraysMissingKey(
+				$input,
+				$search_value,
+				$required_key,
+				$search_key,
+				$path_separator
+			);
+		}
+		$this->assertEquals(
+			$expected,
+			$result
+		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function providerSelectArrayFromOption(): array
+	{
+		$search_array = [
+			'a' => [
+				'lookup' => 1,
+				'value' => 'Foo',
+				'other' => 'Bar',
+				'strict' => '2',
+			],
+			'b' => [
+				'lookup' => 1,
+				'value' => 'AAA',
+				'other' => 'Other',
+				'strict' => 2,
+			],
+			'c' => [
+				'lookup' => 0,
+				'value' => 'CCC',
+				'other' => 'OTHER',
+			],
+			'd' => [
+				'd-1' => [
+					'lookup' => 1,
+					'value' => 'D SUB 1',
+					'other' => 'Other B',
+				],
+				'd-2' => [
+					'lookup' => 0,
+					'value' => 'D SUB 2',
+					'other' => 'Other B',
+				],
+				'more' => [
+					'd-more-1' => [
+						'lookup' => 1,
+						'value' => 'D MORE SUB 1',
+						'other' => 'Other C',
+					],
+					'd-more-2' => [
+						'lookup' => 0,
+						'value' => 'D MORE SUB 0',
+						'other' => 'Other C',
+					],
+				]
+			]
+		];
+		/*
+		0: input
+		1: lookup
+		2: search
+		3: strict [false]
+		4: case insensitive [false]
+		5: recursive [false]
+		6: flat_result [true]
+		7: flat_separator [:]
+		8: expected
+		*/
+		return [
+			'search, flat with found' => [
+				$search_array,
+				'lookup' => 'lookup',
+				'search' => 1,
+				'strict' => false,
+				'case_insenstivie' => false,
+				'recursive' => false,
+				'flat_result' => true,
+				'flag_separator' => null,
+				[
+					'a' => [
+						'lookup' => 1,
+						'value' => 'Foo',
+						'other' => 'Bar',
+						'strict' => '2',
+					],
+					'b' => [
+						'lookup' => 1,
+						'value' => 'AAA',
+						'other' => 'Other',
+						'strict' => 2,
+					],
+				]
+			],
+			'search, recusrive with found' => [
+				$search_array,
+				'lookup' => 'lookup',
+				'search' => 1,
+				'strict' => false,
+				'case_insenstivie' => false,
+				'recursive' => true,
+				'flat_result' => true,
+				'flag_separator' => null,
+				[
+					'a' => [
+						'lookup' => 1,
+						'value' => 'Foo',
+						'other' => 'Bar',
+						'strict' => '2',
+					],
+					'b' => [
+						'lookup' => 1,
+						'value' => 'AAA',
+						'other' => 'Other',
+						'strict' => 2,
+					],
+					'd:d-1' => [
+						'lookup' => 1,
+						'value' => 'D SUB 1',
+						'other' => 'Other B',
+					],
+					'd:more:d-more-1' => [
+						'lookup' => 1,
+						'value' => 'D MORE SUB 1',
+						'other' => 'Other C',
+					],
+				]
+			],
+			'search, recusrive with found, other separator' => [
+				$search_array,
+				'lookup' => 'lookup',
+				'search' => 1,
+				'strict' => false,
+				'case_insenstivie' => false,
+				'recursive' => true,
+				'flat_result' => true,
+				'flag_separator' => '+',
+				[
+					'a' => [
+						'lookup' => 1,
+						'value' => 'Foo',
+						'other' => 'Bar',
+						'strict' => '2',
+					],
+					'b' => [
+						'lookup' => 1,
+						'value' => 'AAA',
+						'other' => 'Other',
+						'strict' => 2,
+					],
+					'd+d-1' => [
+						'lookup' => 1,
+						'value' => 'D SUB 1',
+						'other' => 'Other B',
+					],
+					'd+more+d-more-1' => [
+						'lookup' => 1,
+						'value' => 'D MORE SUB 1',
+						'other' => 'Other C',
+					],
+				]
+			],
+			'search, recusrive with found, not flat result' => [
+				$search_array,
+				'lookup' => 'lookup',
+				'search' => 1,
+				'strict' => false,
+				'case_insenstivie' => false,
+				'recursive' => true,
+				'flat_result' => false,
+				'flag_separator' => null,
+				[
+					'a' => [
+						'lookup' => 1,
+						'value' => 'Foo',
+						'other' => 'Bar',
+						'strict' => '2',
+					],
+					'b' => [
+						'lookup' => 1,
+						'value' => 'AAA',
+						'other' => 'Other',
+						'strict' => 2,
+					],
+					'd' => [
+						'd-1' => [
+							'lookup' => 1,
+							'value' => 'D SUB 1',
+							'other' => 'Other B',
+						],
+						'more' => [
+							'd-more-1' => [
+								'lookup' => 1,
+								'value' => 'D MORE SUB 1',
+								'other' => 'Other C',
+							],
+						],
+					],
+				],
+			],
+			'search case insensitive' => [
+				$search_array,
+				'lookup' => 'other',
+				'search' => 'Other',
+				'strict' => false,
+				'case_insenstivie' => true,
+				'recursive' => false,
+				'flat_result' => true,
+				'flag_separator' => null,
+				[
+					'b' => [
+						'lookup' => 1,
+						'value' => 'AAA',
+						'other' => 'Other',
+						'strict' => 2,
+					],
+					'c' => [
+						'lookup' => 0,
+						'value' => 'CCC',
+						'other' => 'OTHER',
+					],
+				]
+			],
+			'search case sensitiv' => [
+				$search_array,
+				'lookup' => 'other',
+				'search' => 'Other',
+				'strict' => false,
+				'case_insenstivie' => false,
+				'recursive' => false,
+				'flat_result' => true,
+				'flag_separator' => null,
+				[
+					'b' => [
+						'lookup' => 1,
+						'value' => 'AAA',
+						'other' => 'Other',
+						'strict' => 2,
+					],
+				]
+			],
+			'search strict' => [
+				$search_array,
+				'lookup' => 'strict',
+				'search' => '2',
+				'strict' => true,
+				'case_insenstivie' => false,
+				'recursive' => false,
+				'flat_result' => true,
+				'flag_separator' => null,
+				[
+					'a' => [
+						'lookup' => 1,
+						'value' => 'Foo',
+						'other' => 'Bar',
+						'strict' => '2',
+					],
+				]
+			],
+			'search not strict' => [
+				$search_array,
+				'lookup' => 'strict',
+				'search' => '2',
+				'strict' => false,
+				'case_insenstivie' => false,
+				'recursive' => false,
+				'flat_result' => true,
+				'flag_separator' => null,
+				[
+					'a' => [
+						'lookup' => 1,
+						'value' => 'Foo',
+						'other' => 'Bar',
+						'strict' => '2',
+					],
+					'b' => [
+						'lookup' => 1,
+						'value' => 'AAA',
+						'other' => 'Other',
+						'strict' => 2,
+					],
+				]
+			],
+			'empty' => [
+				[],
+				'something',
+				'NOT_SET_AT_ALL',
+				false,
+				false,
+				false,
+				true,
+				null,
+				[]
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::selectArrayFromOption
+	 * @dataProvider providerSelectArrayFromOption
+	 * @testdox selectArrayFromOption $input find $lookup with $search, strict: $strict, case sensitive: $case_sensitive, recursive: $recursive, flag result: $flag_result, flag separator: $flat_separator amd expected $expected [$_dataName]
+	 *
+	 * @param  array                 $input
+	 * @param  string                $lookup
+	 * @param  int|string|float|bool $search
+	 * @param  bool                  $strict
+	 * @param  bool                  $case_sensitive
+	 * @param  bool                  $recursive
+	 * @param  bool                  $flat_result
+	 * @param  string|null           $flat_separator
+	 * @param  array                 $expected
+	 * @return void
+	 */
+	public function testSelectArrayFromOption(
+		array $input,
+		string $lookup,
+		int|string|float|bool $search,
+		bool $strict,
+		bool $case_sensitive,
+		bool $recursive,
+		bool $flat_result,
+		?string $flat_separator,
+		array $expected
+	): void {
+		if ($flat_separator === null) {
+			$result = \CoreLibs\Combined\ArrayHandler::selectArrayFromOption(
+				$input,
+				$lookup,
+				$search,
+				$strict,
+				$case_sensitive,
+				$recursive,
+				$flat_result
+			);
+		} else {
+			$result = \CoreLibs\Combined\ArrayHandler::selectArrayFromOption(
+				$input,
+				$lookup,
+				$search,
+				$strict,
+				$case_sensitive,
+				$recursive,
+				$flat_result,
+				$flat_separator
+			);
+		}
+		$this->assertEquals(
+			$expected,
+			$result
 		);
 	}
 }

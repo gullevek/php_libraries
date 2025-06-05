@@ -119,6 +119,23 @@ class Json
 		}
 		return $return_string === true ? $json_error_string : self::$json_last_error;
 	}
+
+	/**
+	 * wrapper to call convert array to json with pretty print
+	 *
+	 * @param  array<mixed>  $data
+	 * @return string
+	 */
+	public static function jsonPrettyPrint(array $data): string
+	{
+		return self::jsonConvertArrayTo(
+			$data,
+			JSON_PRETTY_PRINT |
+			JSON_UNESCAPED_LINE_TERMINATORS |
+			JSON_UNESCAPED_SLASHES |
+			JSON_UNESCAPED_UNICODE
+		);
+	}
 }
 
 // __END__
