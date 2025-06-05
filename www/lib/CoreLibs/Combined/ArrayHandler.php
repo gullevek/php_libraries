@@ -251,10 +251,10 @@ class ArrayHandler
 	 * @param  array<mixed>          $array
 	 * @param  string|int|float|bool $search_value
 	 * @param  string|array<string>  $required_key
-	 * @param  ?string               $serach_key [null]
+	 * @param  ?string               $search_key [null]
 	 * @param  string                $path_separator [DATA_SEPARATOR]
 	 * @param  string                $current_path
-	 * @return array<array{content?:array<mixed>,path?:string,missing_key?:string}>
+	 * @return array<array{content?:array<mixed>,path?:string,missing_key?:array<string>}>
 	 */
 	public static function findArraysMissingKey(
 		array $array,
