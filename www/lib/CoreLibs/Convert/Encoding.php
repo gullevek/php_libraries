@@ -23,14 +23,14 @@ class Encoding
 	 * @param  bool   $auto_check      default true, if source encoding is set
 	 *                                 check that the source is actually matching
 	 *                                 to what we sav the source is
-	 * @return string                  encoding converted string
+	 * @return string|false            encoding converted string or false on error
 	 */
 	public static function convertEncoding(
 		string $string,
 		string $to_encoding,
 		string $source_encoding = '',
 		bool $auto_check = true
-	): string {
+	): string|false {
 		// set if not given
 		if (!$source_encoding) {
 			$source_encoding = mb_detect_encoding($string);

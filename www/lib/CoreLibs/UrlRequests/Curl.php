@@ -599,7 +599,7 @@ class Curl implements Interface\RequestsInterface
 		// for post we set POST option
 		if ($type == "post") {
 			curl_setopt($handle, CURLOPT_POST, true);
-		} elseif (!empty($type) && in_array($type, self::CUSTOM_REQUESTS)) {
+		} elseif (in_array($type, self::CUSTOM_REQUESTS)) {
 			curl_setopt($handle, CURLOPT_CUSTOMREQUEST, strtoupper($type));
 		}
 		// set body data if not null, will send empty [] for empty data

@@ -56,7 +56,11 @@ class Encoding
 	{
 		// return mb_substitute_character();
 		if ($return_substitute_func === true) {
-			return mb_substitute_character();
+			// if false abort with error
+			if (($return = mb_substitute_character()) === false) {
+				return self::$mb_error_char;
+			}
+			return $return;
 		} else {
 			return self::$mb_error_char;
 		}
@@ -88,7 +92,13 @@ class Encoding
 	): array|false {
 		// convert to target encoding and convert back
 		$temp = mb_convert_encoding($string, $to_encoding, $from_encoding);
+		if ($temp === false) {
+			return false;
+		}
 		$compare = mb_convert_encoding($temp, $from_encoding, $to_encoding);
+		if ($compare === false) {
+			return false;
+		}
 		// if string does not match anymore we have a convert problem
 		if ($string == $compare) {
 			return false;
