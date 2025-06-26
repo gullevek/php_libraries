@@ -748,8 +748,11 @@ class ArrayHandler
 	 * sort ascending or descending with or without lower case convert
 	 * value only, will loose key connections unless preserve_keys is set to true
 	 *
-	 * @param  array<mixed> $array array to sort by values
-	 * @param  int          $params sort flags
+	 * @param  array<mixed> $array                    Array to sort by values
+	 * @param  bool         $case_insensitive [false] Sort case insensitive
+	 * @param  bool         $reverse [false]          Reverse sort
+	 * @param  bool         $maintain_keys [false]    Maintain keys
+	 * @param  int          $flag [SORT_REGULAR]      Sort flags
 	 * @return array<mixed>
 	 */
 	public static function sortArray(
@@ -757,7 +760,7 @@ class ArrayHandler
 		bool $case_insensitive = false,
 		bool $reverse = false,
 		bool $maintain_keys = false,
-		int $params = SORT_REGULAR
+		int $flag = SORT_REGULAR
 	): array {
 		$fk_sort_lower_case = function (string $a, string $b): int {
 			return strtolower($a) <=> strtolower($b);
@@ -772,8 +775,8 @@ class ArrayHandler
 		) :
 		(
 			$maintain_keys ?
-				($reverse ? arsort($array, $params) : asort($array, $params)) :
-				($reverse ? rsort($array, $params) : sort($array, $params))
+				($reverse ? arsort($array, $flag) : asort($array, $flag)) :
+				($reverse ? rsort($array, $flag) : sort($array, $flag))
 		);
 		return $array;
 	}
@@ -781,9 +784,9 @@ class ArrayHandler
 	/**
 	 * sort by key ascending or descending and return
 	 *
-	 * @param  array<mixed> $array
-	 * @param  bool         $case_insensitive [false]
-	 * @param  bool         $reverse [false]
+	 * @param  array<mixed> $array                    Array to srt
+	 * @param  bool         $case_insensitive [false] Sort keys case insenstive
+	 * @param  bool         $reverse [false]          Reverse key sort
 	 * @return array<mixed>
 	 */
 	public static function ksortArray(array $array, bool $case_insensitive = false, bool $reverse = false): array
