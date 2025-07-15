@@ -1475,14 +1475,15 @@ class Logging
 				Level::Error, Level::Critical, Level::Alert, Level::Emergency
 			] as $l
 		) {
+			print "Check: " . $this->log_level->getName() . " | " . $l->getName() . "<br>";
 			if ($this->log_level->isHigherThan($l)) {
-				print "L: " . $this->log_level->getName() . " > " .  $l->getName() . "<br>";
+				print "L(gt): " . $this->log_level->getName() . " > " .  $l->getName() . "<br>";
 			}
 			if ($this->log_level->includes($l)) {
-				print "L: " . $this->log_level->getName() . " <= " .  $l->getName() . "<br>";
+				print "L(le): " . $this->log_level->getName() . " <= " .  $l->getName() . "<br>";
 			}
 			if ($this->log_level->isLowerThan($l)) {
-				print "L: " . $this->log_level->getName() . " < " .  $l->getName() . "<br>";
+				print "L(lt): " . $this->log_level->getName() . " < " .  $l->getName() . "<br>";
 			}
 			echo "<br>";
 		}

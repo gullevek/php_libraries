@@ -112,7 +112,7 @@ enum Level: int
 	}
 
 	/**
-	 * Returns true if the passed $level is higher or equal to $this
+	 * Returns true if the passed $level is included in set level
 	 *
 	 * @param  Level $level
 	 * @return bool

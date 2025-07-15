@@ -10,12 +10,16 @@ class Email
 	/** @var array<int,string> */
 	private static array $email_regex_check = [
 		0 => "^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@"
-			. "[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$", // MASTER
+			// . "[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$", // MASTER
+			// fixed pattern matching for domain
+			. "(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.[a-zA-Z]{2,6}$", // MASTER
 		1 => "@(.*)@(.*)", // double @
 		2 => "^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@", // wrong part before @
-		3 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$", // wrong part after @
-		4 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.", // wrong domain name part
-		5 => "\.([a-zA-Z]{2,6}){1}$", // wrong top level part
+		// 3 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$", // wrong part after @
+		3 => "@(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.[a-zA-Z]{2,6}$", // wrong part after @
+		// 4 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.", // wrong domain name part
+		4 => "@@(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.", // wrong domain name part
+		5 => "\.[a-zA-Z]{2,6}$", // wrong top level part
 		6 => "@(.*)\.{2,}", // double .. in domain name part
 		7 => "@.*\.$" // ends with a dot, top level, domain missing
 	];
