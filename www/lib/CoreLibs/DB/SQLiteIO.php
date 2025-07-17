@@ -174,10 +174,10 @@ class SqLite implements SQL\Interface\DatabaseInterface
 					sqlite_schema AS m,
 					pragma_index_list(m.name) AS il,
 					pragma_index_info(il.name) AS ii
-				WHERE m.name = ?1
+				WHERE m.name = ?
 			) AS il_ii ON (ti.cid = il_ii.tbl_cid)
 		WHERE
-			m.name = ?1
+			m.name = ?
 		SQL;
 		while (is_array($row = $this->dbReturnArray($query, [$table]))) {
 			$table_info[] = [
