@@ -151,7 +151,8 @@ class SqLite implements SQL\Interface\DatabaseInterface
 
 	/**
 	 * Table meta data
-	 * Note that if columns have multi
+	 * Note that if columns have multi entries multiple lines are returned
+	 * ?1 is equal to $1 in this query
 	 *
 	 * @param  string      $table
 	 * @return array<array<string,mixed>>|false
