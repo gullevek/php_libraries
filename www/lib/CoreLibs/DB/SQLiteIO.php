@@ -416,7 +416,7 @@ class SqLite implements SQL\Interface\DatabaseInterface
 		return $row;
 	}
 
-	// MARK other interface
+	// MARK: other interface
 
 	/**
 	 * get current db handler
