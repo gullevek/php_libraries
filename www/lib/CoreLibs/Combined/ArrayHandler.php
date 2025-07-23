@@ -150,14 +150,14 @@ class ArrayHandler
 	 * array search simple. looks for key, value combination, if found, returns true
 	 * on default does not strict check, so string '4' will match int 4 and vica versa
 	 *
-	 * @param  array<mixed>           $array search in as array
+	 * @param  array<mixed>           $in_array search in as array
 	 * @param  string|int             $key   key (key to search in)
 	 * @param  string|int|bool|array<string|int|bool> $value  values list (what to find)
 	 * @param  bool                   $strict [false], if set to true, will strict check key/value
 	 * @return bool                   true on found, false on not found
 	 */
 	public static function arraySearchSimple(
-		array $array,
+		array $in_array,
 		string|int $key,
 		string|int|bool|array $value,
 		bool $strict = false
@@ -166,7 +166,7 @@ class ArrayHandler
 		if (!is_array($value)) {
 			$value = [$value];
 		}
-		foreach ($array as $_key => $_value) {
+		foreach ($in_array as $_key => $_value) {
 			// if value is an array, we search
 			if (is_array($_value)) {
 				// call recursive, and return result if it is true, else continue
@@ -189,19 +189,19 @@ class ArrayHandler
 	 * If prefix is turned on each found group will be prefixed with the
 	 * search key
 	 *
-	 * @param  array<mixed> $array   array to search in
+	 * @param  array<mixed> $in_array   array to search in
 	 * @param  array<mixed> $needles keys to find in array
 	 * @param  bool         $flat    [false] Turn on flat output
 	 * @param  bool         $prefix  [false] Prefix found with needle key
 	 * @return array<mixed>          Found values
 	 */
 	public static function arraySearchKey(
-		array $array,
+		array $in_array,
 		array $needles,
 		bool $flat = false,
 		bool $prefix = false
 	): array {
-		$iterator  = new \RecursiveArrayIterator($array);
+		$iterator  = new \RecursiveArrayIterator($in_array);
 		$recursive = new \RecursiveIteratorIterator(
 			$iterator,
 			\RecursiveIteratorIterator::SELF_FIRST
@@ -248,7 +248,7 @@ class ArrayHandler
 	 * If not found return an array with the array block there the required key is missing,
 	 * the path as string with seperator block set and the missing key entry
 	 *
-	 * @param  array<mixed>          $array
+	 * @param  array<mixed>          $in_array
 	 * @param  string|int|float|bool $search_value
 	 * @param  string|array<string>  $required_key
 	 * @param  ?string               $search_key [null]
@@ -257,7 +257,7 @@ class ArrayHandler
 	 * @return array<array{content?:array<mixed>,path?:string,missing_key?:array<string>}>
 	 */
 	public static function findArraysMissingKey(
-		array $array,
+		array $in_array,
 		string|int|float|bool $search_value,
 		string|array $required_key,
 		?string $search_key = null,
@@ -265,7 +265,7 @@ class ArrayHandler
 		string $current_path = ''
 	): array {
 		$results = [];
-		foreach ($array as $key => $value) {
+		foreach ($in_array as $key => $value) {
 			$path = $current_path ? $current_path . $path_separator . $key : $key;
 
 			if (is_array($value)) {
@@ -321,7 +321,7 @@ class ArrayHandler
 	 * Find key => value entry and return set with key for all matching
 	 * Can search recursively through nested arrays if recursive flag is set
 	 *
-	 * @param  array<mixed> $array
+	 * @param  array<mixed> $in_array
 	 * @param  string $lookup
 	 * @param  int|string|float|bool $search
 	 * @param  bool $strict [false]
@@ -332,7 +332,7 @@ class ArrayHandler
 	 * @return array<mixed>
 	 */
 	public static function selectArrayFromOption(
-		array $array,
+		array $in_array,
 		string $lookup,
 		int|string|float|bool $search,
 		bool $strict = false,
@@ -342,7 +342,7 @@ class ArrayHandler
 		string $flat_separator = self::DATA_SEPARATOR
 	): array {
 		// skip on empty
-		if ($array == []) {
+		if ($in_array == []) {
 			return [];
 		}
 		// init return result
@@ -352,7 +352,7 @@ class ArrayHandler
 			$search = strtolower($search);
 		}
 
-		foreach ($array as $key => $value) {
+		foreach ($in_array as $key => $value) {
 			// Handle current level search
 			if (isset($value[$lookup])) {
 				$compareValue = $value[$lookup];
@@ -399,14 +399,14 @@ class ArrayHandler
 	/**
 	 * main wrapper function for next/prev key
 	 *
-	 * @param  array<mixed>    $array array to search in
+	 * @param  array<mixed>    $in_array array to search in
 	 * @param  int|string      $key   key for next/prev
 	 * @param  bool            $next  [=true] if to search next or prev
 	 * @return int|string|null        Next/prev key or null for end/first
 	 */
-	private static function arrayGetKey(array $array, int|string $key, bool $next = true): int|string|null
+	private static function arrayGetKey(array $in_array, int|string $key, bool $next = true): int|string|null
 	{
-		$keys = array_keys($array);
+		$keys = array_keys($in_array);
 		if (($position = array_search($key, $keys, true)) === false) {
 			return null;
 		}
@@ -422,26 +422,26 @@ class ArrayHandler
 	 * Get previous array key from an array
 	 * null on not found
 	 *
-	 * @param  array<mixed>    $array
+	 * @param  array<mixed>    $in_array
 	 * @param  int|string      $key
 	 * @return int|string|null        Next key, or null for not found
 	 */
-	public static function arrayGetPrevKey(array $array, int|string $key): int|string|null
+	public static function arrayGetPrevKey(array $in_array, int|string $key): int|string|null
 	{
-		return self::arrayGetKey($array, $key, false);
+		return self::arrayGetKey($in_array, $key, false);
 	}
 
 	/**
 	 * Get next array key from an array
 	 * null on not found
 	 *
-	 * @param  array<mixed>    $array
+	 * @param  array<mixed>    $in_array
 	 * @param  int|string      $key
 	 * @return int|string|null        Next key, or null for not found
 	 */
-	public static function arrayGetNextKey(array $array, int|string $key): int|string|null
+	public static function arrayGetNextKey(array $in_array, int|string $key): int|string|null
 	{
-		return self::arrayGetKey($array, $key, true);
+		return self::arrayGetKey($in_array, $key, true);
 	}
 
 	/**
@@ -463,27 +463,27 @@ class ArrayHandler
 		}
 		// default key is not string
 		$key_is_string = false;
-		$arrays = func_get_args();
+		$in_arrays = func_get_args();
 		// if last is not array, then assume it is trigger for key is always string
-		if (!is_array(end($arrays))) {
-			if (array_pop($arrays)) {
+		if (!is_array(end($in_arrays))) {
+			if (array_pop($in_arrays)) {
 				$key_is_string = true;
 			}
 		}
 		// check that arrays count is at least two, else we don't have enough to do anything
-		if (count($arrays) < 2) {
+		if (count($in_arrays) < 2) {
 			throw new \ArgumentCountError(__FUNCTION__ . ' needs two or more array arguments');
 		}
 		$merged = [];
-		while ($arrays) {
-			$array = array_shift($arrays);
-			if (!is_array($array)) {
+		while ($in_arrays) {
+			$in_array = array_shift($in_arrays);
+			if (!is_array($in_array)) {
 				throw new \TypeError(__FUNCTION__ . ' encountered a non array argument');
 			}
-			if (!$array) {
+			if (!$in_array) {
 				continue;
 			}
-			foreach ($array as $key => $value) {
+			foreach ($in_array as $key => $value) {
 				// if string or if key is assumed to be string do key match
 				// else add new entry
 				if (is_string($key) || $key_is_string === false) {
@@ -589,14 +589,14 @@ class ArrayHandler
 	 * converts multi dimensional array to a flat array
 	 * does NOT preserve keys
 	 *
-	 * @param  array<mixed> $array multi dimensionial array
+	 * @param  array<mixed> $in_array multi dimensionial array
 	 * @return array<mixed>        flattened array
 	 */
-	public static function flattenArray(array $array): array
+	public static function flattenArray(array $in_array): array
 	{
 		$return = [];
 		array_walk_recursive(
-			$array,
+			$in_array,
 			function ($value) use (&$return) {
 				$return[] = $value;
 			}
@@ -607,13 +607,13 @@ class ArrayHandler
 	/**
 	 * will loop through an array recursivly and write the array keys back
 	 *
-	 * @param  array<mixed> $array  multidemnsional array to flatten
+	 * @param  array<mixed> $in_array  multidemnsional array to flatten
 	 * @param  array<mixed> $return recoursive pass on array of keys
 	 * @return array<mixed>         flattened keys array
 	 */
-	public static function flattenArrayKey(array $array, array $return = []): array
+	public static function flattenArrayKey(array $in_array, array $return = []): array
 	{
-		foreach ($array as $key => $sub) {
+		foreach ($in_array as $key => $sub) {
 			$return[] = $key;
 			if (is_array($sub) && count($sub) > 0) {
 				$return = self::flattenArrayKey($sub, $return);
@@ -626,14 +626,14 @@ class ArrayHandler
 	 * as above will flatten an array, but in this case only the outmost
 	 * leave nodes, all other keyswill be skipped
 	 *
-	 * @param  array<mixed> $array multidemnsional array to flatten
+	 * @param  array<mixed> $in_array multidemnsional array to flatten
 	 * @return array<mixed>        flattened keys array
 	 */
-	public static function flattenArrayKeyLeavesOnly(array $array): array
+	public static function flattenArrayKeyLeavesOnly(array $in_array): array
 	{
 		$return = [];
 		array_walk_recursive(
-			$array,
+			$in_array,
 			function ($value, $key) use (&$return) {
 				$return[] = $key;
 			}
@@ -645,14 +645,14 @@ class ArrayHandler
 	 * searches for key -> value in an array tree and writes the value one level up
 	 * this will remove this leaf will all other values
 	 *
-	 * @param  array<mixed> $array  nested array
+	 * @param  array<mixed> $in_array  nested array
 	 * @param  string|int   $search key to find that has no sub leaf
 	 *                              and will be pushed up
 	 * @return array<mixed>         modified, flattened array
 	 */
-	public static function arrayFlatForKey(array $array, string|int $search): array
+	public static function arrayFlatForKey(array $in_array, string|int $search): array
 	{
-		foreach ($array as $key => $value) {
+		foreach ($in_array as $key => $value) {
 			// if it is not an array do just nothing
 			if (!is_array($value)) {
 				continue;
@@ -660,14 +660,14 @@ class ArrayHandler
 			// probe it has search key
 			if (isset($value[$search])) {
 				// set as current
-				$array[$key] = $value[$search];
+				$in_array[$key] = $value[$search];
 			} else {
 				// call up next node down
-				// $array[$key] = call_user_func(__METHOD__, $value, $search);
-				$array[$key] = self::arrayFlatForKey($value, $search);
+				// $in_array[$key] = call_user_func(__METHOD__, $value, $search);
+				$in_array[$key] = self::arrayFlatForKey($value, $search);
 			}
 		}
-		return $array;
+		return $in_array;
 	}
 
 	/**
@@ -677,13 +677,13 @@ class ArrayHandler
 	 *
 	 * https://stackoverflow.com/a/369608
 	 *
-	 * @param  array<mixed> $array  Array where elements are located
+	 * @param  array<mixed> $in_array  Array where elements are located
 	 * @param  array<mixed> $remove Elements to remove
 	 * @return array<mixed>         Array with $remove elements removed
 	 */
-	public static function arrayRemoveEntry(array $array, array $remove): array
+	public static function arrayRemoveEntry(array $in_array, array $remove): array
 	{
-		return array_diff($array, $remove);
+		return array_diff($in_array, $remove);
 	}
 
 	/**
@@ -693,20 +693,20 @@ class ArrayHandler
 	 * key list is a list[string]
 	 * if key list is empty, return array as is
 	 *
-	 * @param  array<string,mixed> $array
+	 * @param  array<string,mixed> $in_array
 	 * @param  array<string>       $key_list
 	 * @return array<string,mixed>
 	 */
 	public static function arrayReturnMatchingKeyOnly(
-		array $array,
+		array $in_array,
 		array $key_list
 	): array {
 		// on empty return as is
 		if (empty($key_list)) {
-			return $array;
+			return $in_array;
 		}
 		return array_filter(
-			$array,
+			$in_array,
 			fn($key) => in_array($key, $key_list),
 			ARRAY_FILTER_USE_KEY
 		);
@@ -748,7 +748,7 @@ class ArrayHandler
 	 * sort ascending or descending with or without lower case convert
 	 * value only, will loose key connections unless preserve_keys is set to true
 	 *
-	 * @param  array<mixed> $array                    Array to sort by values
+	 * @param  array<mixed> $in_array                    Array to sort by values
 	 * @param  bool         $case_insensitive [false] Sort case insensitive
 	 * @param  bool         $reverse [false]          Reverse sort
 	 * @param  bool         $maintain_keys [false]    Maintain keys
@@ -756,7 +756,7 @@ class ArrayHandler
 	 * @return array<mixed>
 	 */
 	public static function sortArray(
-		array $array,
+		array $in_array,
 		bool $case_insensitive = false,
 		bool $reverse = false,
 		bool $maintain_keys = false,
@@ -770,26 +770,26 @@ class ArrayHandler
 		};
 		$case_insensitive ? (
 			$maintain_keys ?
-				(uasort($array, $reverse ? $fk_sort_lower_case_reverse : $fk_sort_lower_case)) :
-				(usort($array, $reverse ? $fk_sort_lower_case_reverse : $fk_sort_lower_case))
+				(uasort($in_array, $reverse ? $fk_sort_lower_case_reverse : $fk_sort_lower_case)) :
+				(usort($in_array, $reverse ? $fk_sort_lower_case_reverse : $fk_sort_lower_case))
 		) :
 		(
 			$maintain_keys ?
-				($reverse ? arsort($array, $flag) : asort($array, $flag)) :
-				($reverse ? rsort($array, $flag) : sort($array, $flag))
+				($reverse ? arsort($in_array, $flag) : asort($in_array, $flag)) :
+				($reverse ? rsort($in_array, $flag) : sort($in_array, $flag))
 		);
-		return $array;
+		return $in_array;
 	}
 
 	/**
 	 * sort by key ascending or descending and return
 	 *
-	 * @param  array<mixed> $array                    Array to srt
+	 * @param  array<mixed> $in_array                    Array to srt
 	 * @param  bool         $case_insensitive [false] Sort keys case insenstive
 	 * @param  bool         $reverse [false]          Reverse key sort
 	 * @return array<mixed>
 	 */
-	public static function ksortArray(array $array, bool $case_insensitive = false, bool $reverse = false): array
+	public static function ksortArray(array $in_array, bool $case_insensitive = false, bool $reverse = false): array
 	{
 		$fk_sort_lower_case = function (string $a, string $b): int {
 			return strtolower($a) <=> strtolower($b);
@@ -804,12 +804,12 @@ class ArrayHandler
 			return $b <=> $a;
 		};
 		uksort(
-			$array,
+			$in_array,
 			$case_insensitive ?
 				($reverse ? $fk_sort_lower_case_reverse : $fk_sort_lower_case) :
 				($reverse ? $fk_sort_reverse : $fk_sort)
 		);
-		return $array;
+		return $in_array;
 	}
 }
 
