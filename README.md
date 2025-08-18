@@ -119,6 +119,8 @@ On a version update the old phpunit folder in .libs has to be removed and the ne
 
 The original edit.js javascript functions are now in utils.js or utils.min.js.
 
-The development for thos files is located in a different repository
+The development for those files is located in a different repository
 
-https://[service]/CodeBlocks/javascript-utils
+General: <https://[service]/CodeBlocks/JavaScript.utils>
+
+Org: <https://[serverice]/[org]/Code-Blocks.JavaScript.utils>
