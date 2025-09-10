@@ -40,6 +40,8 @@ print "Log ERROR: " . $log->prAr($em->getFlagLogError()) . "<br>";
 print "FN: " . ml::fromName('Affe')->name . "<br>";
 print "NU: " . ml::fromValue(100)->name . "<br>";
 print "NU: " . ml::fromValue(1000)->name . "<br>";
+print "OK.: " . ml::ok->name . "<br>";
+print "OK^: " . ml::fromName('OK')->name . "<br>";
 
 $em->setErrorMsg('123', 'error', 'msg this is bad, auto logged if debug');
 $em->setErrorMsg('123', 'error', 'msg this is bad, auto logged if debug', 'target-id', 'other-style');

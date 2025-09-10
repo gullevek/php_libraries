@@ -31,14 +31,14 @@ enum MessageLevel: int
 	public static function fromName(string $name): self
 	{
 		return match (strtolower($name)) {
-			'ok', 'OK' => self::ok,
-			'success', 'SUCCESS' => self::success,
-			'info', 'INFO' => self::info,
-			'notice', 'NOTICE' => self::notice,
-			'warn', 'warning', 'WARN', 'WARNING' => self::warn,
-			'error', 'ERROR' => self::error,
-			'abort', 'ABORT' => self::abort,
-			'crash', 'CRASH' => self::crash,
+			'ok' => self::ok,
+			'success' => self::success,
+			'info' => self::info,
+			'notice' => self::notice,
+			'warn', 'warning' => self::warn,
+			'error' => self::error,
+			'abort' => self::abort,
+			'crash' => self::crash,
 			default => self::unknown,
 		};
 	}
