@@ -34,6 +34,36 @@ class Support
 	}
 
 	/**
+	 * print ISO type datetime with microseconds and timezone
+	 * Y-m-dTH:i:s.uP
+	 * if no micro time the ".u" part is omitted
+	 *
+	 * @param  bool   $set_micro_time
+	 * @return string
+	 */
+	public static function printIsoTime(bool $set_micro_time = true): string
+	{
+		$datetime = new \DateTime();
+
+		// Format the DateTime object to ISO 8601 with microseconds
+		// 'Y-m-d\TH:i:s.uP' is the format string:
+		// Y: Full year (e.g., 2025)
+		// m: Month (01-12)
+		// d: Day of the month (01-31)
+		// T: Literal 'T' to separate date and time (escaped with a backslash)
+		// H: Hour (00-23)
+		// i: Minute (00-59)
+		// s: Second (00-59)
+		// u: Microseconds (e.g., 654321)
+		// P: Difference to Greenwich time (GMT) with colon (e.g., +09:00)
+		if ($set_micro_time) {
+			return $datetime->format('Y-m-d\TH:i:s.uP');
+		} else {
+			return $datetime->format('Y-m-d\TH:i:sP');
+		}
+	}
+
+	/**
 	 * prints a html formatted (pre) data
 	 *
 	 * @param  mixed  $data    any data

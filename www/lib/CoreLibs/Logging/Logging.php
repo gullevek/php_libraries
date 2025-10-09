@@ -96,6 +96,11 @@ class Logging
 			'type' => 'bool', 'mandatory' => false,
 			'default' => false, 'deprecated' => true, 'use' => 'log_per_date'
 		],
+		// if turned off uses old time format without time zone
+		'log_time_format_iso' => [
+			'type' => 'bool', 'mandatory' => false,
+			'default' => true
+		]
 	];
 
 	// options
@@ -646,7 +651,11 @@ class Logging
 		}
 		// print "CLASS: " . $class . "<br>";
 		// get timestamp
-		$timestamp = Support::printTime();
+		if (!empty($this->options['log_time_format_iso'])) {
+			$timestamp = Support::printIsoTime();
+		} else {
+			$timestamp = Support::printTime();
+		}
 
 		// if group id is empty replace it with current level
 		$group_str = $level->getName();

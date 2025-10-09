@@ -68,6 +68,14 @@ function test2(): array
 	return DebugSupport::getCallerMethodList(1);
 }
 
+// date stueff
+print "printTime(-1): " . DebugSupport::printTime() . "<br>";
+print "printTime(2): " . DebugSupport::printTime(2) . "<br>";
+print "printTime(3): " . DebugSupport::printTime(3) . "<br>";
+print "printTime(5): " . DebugSupport::printTime(5) . "<br>";
+print "printIsoTime(): " . DebugSupport::printIsoTime() . "<br>";
+print "printIsoTime(false): " . DebugSupport::printIsoTime(false) . "<br>";
+
 print "S::GETCALLERMETHOD: " . DebugSupport::getCallerMethod(0) . "<br>";
 print "S::GETCALLERMETHOD: " . test() . "<br>";
 print "S::GETCALLERMETHODLIST: <pre>" . print_r(test2(), true) . "</pre><br>";
@@ -146,7 +154,7 @@ print "LOG LEVEL: " .  DebugSupport::printAr(\CoreLibs\Convert\SetVarType::setAr
 	$new_log->getLogLevel('debug', 'on')
 )) . "<br>";
 
-echo "<b>CLASS DEBUG CALL</b><br>";
+echo "<b>CLASS DEBUG CALL LEGACY</b><br>";
 
 // @codingStandardsIgnoreLine
 class TestL
