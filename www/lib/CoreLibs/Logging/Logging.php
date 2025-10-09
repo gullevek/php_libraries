@@ -99,7 +99,7 @@ class Logging
 		// if turned off uses old time format without time zone
 		'log_time_format_iso' => [
 			'type' => 'bool', 'mandatory' => false,
-			'default' => true
+			'default' => true, 'deprecated' => false
 		]
 	];
 

@@ -263,11 +263,11 @@ class ConvertPlaceholder
 							}
 						}
 						// add the connectors back (1), and the data sets only if no replacement will be done
-						return $params_lookup[$match] ??
+						return $params_lookup[$match]/* ??
 							throw new \RuntimeException(
 								'Cannot lookup ' . $match . ' in params lookup list',
 								211
-							);
+							)*/;
 					},
 					$converted_placeholders['original']['query']
 				);
@@ -327,11 +327,11 @@ class ConvertPlaceholder
 							}
 						}
 						// add the connectors back (1), and the data sets only if no replacement will be done
-						return $params_lookup[$match]  ??
+						return $params_lookup[$match]/* ??
 							throw new \RuntimeException(
 								'Cannot lookup ' . $match . ' in params lookup list',
 								231
-							);
+							)*/;
 					},
 					$converted_placeholders['original']['query']
 				);

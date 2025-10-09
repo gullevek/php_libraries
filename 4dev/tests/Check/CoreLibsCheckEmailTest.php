@@ -24,12 +24,12 @@ final class CoreLibsCheckEmailTest extends TestCase
 			'get email regex invalid -1, will be 0' => [
 				-1,
 				"^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@"
-					. "[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$"
+					. "(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.[a-zA-Z]{2,6}$"
 			],
 			'get email regex invalid 10, will be 0' => [
 				10,
 				"^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@"
-					. "[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$"
+					. "(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.[a-zA-Z]{2,6}$"
 			],
 			'get email regex valid 1, will be 1' => [
 				1,
@@ -157,7 +157,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 					'error' => 0,
 					'message' => 'Invalid email address',
 					'regex' => "^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~][A-Za-z0-9!#$%:\(\)&'*+\-\/=?^_`{|}~\.]{0,63}@"
-						. "[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]{1,})*\.([a-zA-Z]{2,}){1}$"
+						. "(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.[a-zA-Z]{2,6}$"
 				]
 			],
 			'error 1 will return double @ error' => [
@@ -181,7 +181,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 				[
 					'error' => 3,
 					'message' => 'Invalid domain part after @ sign',
-					'regex' => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$"
+					'regex' => "@(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.[a-zA-Z]{2,6}$"
 				]
 			],
 			'error 4 will be invalid domain' => [
@@ -189,7 +189,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 				[
 					'error' => 4,
 					'message' => 'Invalid domain name part',
-					'regex' => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\."
+					'regex' => "@(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\."
 				]
 			],
 			'error 5 will be invalid domain top level only' => [
@@ -197,7 +197,7 @@ final class CoreLibsCheckEmailTest extends TestCase
 				[
 					'error' => 5,
 					'message' => 'Wrong domain top level part',
-					'regex' => "\.([a-zA-Z]{2,6}){1}$"
+					'regex' => "\.[a-zA-Z]{2,6}$"
 				]
 			],
 			'error 6 will be domain double dot' => [

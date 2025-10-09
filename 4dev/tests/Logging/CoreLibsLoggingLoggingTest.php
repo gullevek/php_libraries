@@ -18,7 +18,7 @@ use CoreLibs\Logging\Logger\Flag;
 final class CoreLibsLoggingLoggingTest extends TestCase
 {
 	private const LOG_FOLDER = __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR;
-	private const REGEX_BASE = "\[[\d\-\s\.:]+\]\s{1}" // date
+	private const REGEX_BASE = "\[[\d\-\s\.:+T]+\]\s{1}" // date, just basic checks
 		. "\[[\w\.]+(:\d+)?\]\s{1}" // host:port
 		. "\[(phar:\/\/)?[\w\-\.\/]+:\d+\]\s{1}" // folder/file [note phar:// is for phpunit]
 		. "\[\w+\]\s{1}" // run id

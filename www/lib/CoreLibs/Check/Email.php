@@ -18,7 +18,7 @@ class Email
 		// 3 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.([a-zA-Z]{2,}){1}$", // wrong part after @
 		3 => "@(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.[a-zA-Z]{2,6}$", // wrong part after @
 		// 4 => "@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]{1,})*\.", // wrong domain name part
-		4 => "@@(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.", // wrong domain name part
+		4 => "@(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63}(?<!-))*\.", // wrong domain name part
 		5 => "\.[a-zA-Z]{2,6}$", // wrong top level part
 		6 => "@(.*)\.{2,}", // double .. in domain name part
 		7 => "@.*\.$" // ends with a dot, top level, domain missing

@@ -199,15 +199,17 @@ class Math
 				callback: fn ($col) => is_array($row) ?
 					array_reduce(
 						array: $row,
-						callback: fn ($a, $v, $i = null) => $a + $v * (
+						// TODO check that v is not an array
+						callback: fn ($a, $v, $i = null) => $a + $v * ( /** @phpstan-ignore-line Possible array + int */
 							// if last entry missing for full copy add a 0 to it
-							$col[$i ?? array_search($v, $row, true)] ?? 0 /** @phpstan-ignore-line */
+							$col[$i ?? array_search($v, $row, true)] ?? 0
 						),
 						initial: 0,
 					) :
 					array_reduce(
 						array: $col,
-						callback: fn ($a, $v) => $a + $v * $row,
+						// TODO check that v is not an array
+						callback: fn ($a, $v) => $a + $v * $row, /** @phpstan-ignore-line Possible array + int */
 						initial: 0,
 					),
 				array: $bCols,
