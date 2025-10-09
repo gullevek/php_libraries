@@ -105,11 +105,15 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 			'log_folder' => self::LOG_FOLDER,
 			'log_level' => Level::Error,
 		]);
+		$errorLogTmpfile = tmpfile();
+		$errorLogLocationBackup = ini_set('error_log', stream_get_meta_data($errorLogTmpfile)['uri']);
 		$em = new \CoreLibs\Logging\ErrorMessage($log);
 		$em->setMessage(
 			$level,
 			$str
 		);
+		// for exceptions if log level is set to catch them
+		$error_log_content = stream_get_contents($errorLogTmpfile);
 		$this->assertEquals(
 			[
 				'level' => $expected,
@@ -377,6 +381,8 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 		?bool $log_warning,
 		string $expected
 	): void {
+		$errorLogTmpfile = tmpfile();
+		$errorLogLocationBackup = ini_set('error_log', stream_get_meta_data($errorLogTmpfile)['uri']);
 		$log = new \CoreLibs\Logging\Logging([
 			'log_file_id' => 'testErrorMessagesLogError',
 			'log_folder' => self::LOG_FOLDER,
@@ -392,6 +398,9 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 			log_error: $log_error,
 			log_warning: $log_warning
 		);
+		ini_set('error_log', $errorLogLocationBackup);
+		// for exceptions if log level is set to catch them
+		$error_log_content = stream_get_contents($errorLogTmpfile);
 		$file_content = '';
 		if (is_file($log->getLogFolder() . $log->getLogFile())) {
 			$file_content = file_get_contents(
@@ -447,6 +456,8 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 			'log_level' => Level::Debug,
 			'log_per_run' => true
 		]);
+		$errorLogTmpfile = tmpfile();
+		$errorLogLocationBackup = ini_set('error_log', stream_get_meta_data($errorLogTmpfile)['uri']);
 		$em = new \CoreLibs\Logging\ErrorMessage($log);
 		$em->setErrorMsg(
 			$id,
@@ -456,6 +467,9 @@ final class CoreLibsLoggingErrorMessagesTest extends TestCase
 			log_error: $log_error,
 			log_warning: $log_warning
 		);
+		ini_set('error_log', $errorLogLocationBackup);
+		// for exceptions if log level is set to catch them
+		$error_log_content = stream_get_contents($errorLogTmpfile);
 		$file_content = '';
 		if (is_file($log->getLogFolder() . $log->getLogFile())) {
 			$file_content = file_get_contents(
