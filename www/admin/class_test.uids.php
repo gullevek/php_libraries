@@ -56,6 +56,8 @@ print "UNIQU ID LONG : " . Uids::uniqIdLong() . "<br>";
 $uuidv4 = Uids::uuidv4();
 if (!Uids::validateUuuidv4($uuidv4)) {
 	print "Invalid UUIDv4: " . $uuidv4 . "<br>";
+} else {
+	print "Valid UUIDv4: " . $uuidv4 . "<br>";
 }
 if (!Uids::validateUuuidv4("foobar")) {
 	print "Invalid UUIDv4: hard coded<Br>";
