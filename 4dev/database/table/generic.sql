@@ -9,5 +9,6 @@
 CREATE TABLE generic (
     date_created TIMESTAMP WITHOUT TIME ZONE DEFAULT clock_timestamp(),
     date_updated TIMESTAMP WITHOUT TIME ZONE,
+    uuid UUID DEFAULT gen_random_uuid(),
     uid VARCHAR
 );

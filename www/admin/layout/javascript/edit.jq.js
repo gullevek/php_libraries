@@ -134,8 +134,8 @@ function setCenter(id, left, top)
 {
 	// get size of id
 	var dimensions = {
-		height: $('#' + id).height(),
-		width: $('#' + id).width()
+		height: $('#' + id).height() ?? 0,
+		width: $('#' + id).width() ?? 0
 	};
 	var type = $('#' + id).css('position');
 	var viewport = getWindowSize();
@@ -146,14 +146,14 @@ function setCenter(id, left, top)
 	// console.log('Left: %s, Top: %s (%s)', parseInt((viewport.width / 2) - (dimensions.width / 2) + offset.left), parseInt((viewport.height / 2) - (dimensions.height / 2) + offset.top), parseInt((viewport.height / 2) - (dimensions.height / 2)));
 	if (left) {
 		$('#' + id).css({
-			left: parseInt((viewport.width / 2) - (dimensions.width / 2) + offset.left) + 'px'
+			left: ((viewport.width / 2) - (dimensions.width / 2) + offset.left) + 'px'
 		});
 	}
 	if (top) {
 		// if we have fixed, we do not add the offset, else it moves out of the screen
 		var top_pos = type == 'fixed' ?
-			parseInt((viewport.height / 2) - (dimensions.height / 2)) :
-			parseInt((viewport.height / 2) - (dimensions.height / 2) + offset.top);
+			(viewport.height / 2) - (dimensions.height / 2) :
+			(viewport.height / 2) - (dimensions.height / 2) + offset.top;
 		$('#' + id).css({
 			top: top_pos + 'px'
 		});
