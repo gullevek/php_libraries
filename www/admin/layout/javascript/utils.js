@@ -46,10 +46,15 @@ function runFunctionArgsArray(name, args) {
   fn.apply(window, args);
 }
 function isObject(val) {
-  if (val === null) {
-    return false;
-  }
-  return typeof val === "function" || typeof val === "object";
+  return val !== null && typeof val === "object" && !Array.isArray(val);
+}
+function isArray(val) {
+  return val !== null && Array.isArray(val);
+}
+function isIterable(val) {
+  if (val == null) return false;
+  if (typeof val[Symbol.iterator] === "function" && typeof val !== "string") return true;
+  return typeof val === "object" && val.constructor === Object;
 }
 function getObjectCount(object) {
   if (!isObject(object)) {
@@ -158,7 +163,7 @@ var HtmlElementCreator = class {
       if (base.id == id) {
         base.sub.push(deepCopyFunction(attach));
       } else {
-        if (isObject(base.sub) && base.sub.length > 0) {
+        if (isArray(base.sub) && base.sub.length > 0) {
           for (var i = 0; i < base.sub.length; i++) {
             this.ael(base.sub[i], attach, id);
           }
@@ -297,7 +302,7 @@ var HtmlElementCreator = class {
         line += ' name="' + (tree.name ? tree.name : tree.id) + '"';
       }
     }
-    if (isObject(tree.css) && tree.css.length > 0) {
+    if (isArray(tree.css) && tree.css.length > 0) {
       line += ' class="';
       for (i = 0; i < tree.css.length; i++) {
         line += tree.css[i] + " ";
@@ -314,7 +319,7 @@ var HtmlElementCreator = class {
     }
     line += ">";
     content.push(line);
-    if (isObject(tree.sub) && tree.sub.length > 0) {
+    if (isArray(tree.sub) && tree.sub.length > 0) {
       if (tree.content) {
         content.push(tree.content);
       }
@@ -1331,6 +1336,17 @@ var LoginNavMenu = class {
   }
 };
 
+// src/utils/BrowserDetect.mjs
+function isWebkit() {
+  return "GestureEvent" in window;
+}
+function isMobileWebKit() {
+  return "ongesturechange" in window;
+}
+function isDesktopWebKit() {
+  return typeof window !== "undefined" && "safari" in window && "pushNotification" in window.safari;
+}
+
 // src/utils.mjs
 var aiob = new ActionIndicatorOverlayBox();
 var hec = new HtmlElementCreator();
@@ -1432,6 +1448,12 @@ function executeFunctionByName2(functionName, context) {
 }
 function isObject2(val) {
   return isObject(val);
+}
+function isArray2(val) {
+  return isArray(val);
+}
+function isIterable2(val) {
+  return isIterable(val);
 }
 function getObjectCount2(object) {
   return getObjectCount(object);
@@ -1612,4 +1634,13 @@ function createActionBox(target_id = "actionBox", title = "", contents = {}, hea
 }
 function adjustActionBoxHeight(target_id = "actionBox", override = 0, content_override = 0) {
   ab.adjustActionBoxHeight(target_id, override, content_override);
+}
+function isWebkit2() {
+  return isWebkit();
+}
+function isMobileWebKit2() {
+  return isMobileWebKit();
+}
+function isDesktopWebKit2() {
+  return isDesktopWebKit();
 }

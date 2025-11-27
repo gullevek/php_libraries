@@ -58,6 +58,14 @@ $em->setErrorMsg('100-2', 'error', 'Input wring', jump_target:['target' => 'foo-
 $em->setMessage('error', 'I have no id set', jump_target:['target' => 'bar-123', 'info' => 'Jump Bar']);
 $em->setMessage('error', 'Jump empty', jump_target:['target' => 'bar-empty']);
 
+function inLine(\CoreLibs\Logging\ErrorMessage $em): void
+{
+	$em->log->error('Direct log before from ', context:['function' => __FUNCTION__]);
+	$em->setMessage('error', 'Inline call', context:['test' => 'inLine Function']);
+	$em->log->error('Direct log from ', context:['function' => __FUNCTION__]);
+}
+inLine($em);
+
 print "ErrorsLast: <pre>" . $log->prAr($em->getLastErrorMsg()) . "</pre>";
 print "ErrorsIds: <pre>" . $log->prAr($em->getErrorIds()) . "</pre>";
 print "Errors: <pre>" . $log->prAr($em->getErrorMsg()) . "</pre>";

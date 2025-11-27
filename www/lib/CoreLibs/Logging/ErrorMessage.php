@@ -131,6 +131,7 @@ class ErrorMessage
 		// set a jump target
 		$this->setJumpTarget($jump_target['target'] ?? null, $jump_target['info'] ?? null, $level);
 		// write to log for abort/crash
+		$this->log->setErrorMessageCallSetErrorMsg();
 		switch ($level) {
 			case 'notice':
 				$this->log->notice($message ?? $str, array_merge([
@@ -210,6 +211,7 @@ class ErrorMessage
 		?bool $log_error = null,
 		?bool $log_warning = null,
 	): void {
+		$this->log->setErrorMessageCallSetMessage();
 		$this->setErrorMsg(
 			$error_id ?? '',
 			$level,

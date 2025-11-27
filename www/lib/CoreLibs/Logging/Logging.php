@@ -29,11 +29,19 @@ use Stringable;
 class Logging
 {
 	/** @var int minimum size for a max file size, so we don't set 1 byte, 10kb */
-	public const MIN_LOG_MAX_FILESIZE = 10 * 1024;
+	public const int MIN_LOG_MAX_FILESIZE = 10 * 1024;
 	/** @var string log file extension, not changeable */
-	private const LOG_FILE_NAME_EXT = "log";
+	private const string LOG_FILE_NAME_EXT = "log";
 	/** @var string log file block separator, not changeable */
-	private const LOG_FILE_BLOCK_SEPARATOR = '.';
+	private const string LOG_FILE_BLOCK_SEPARATOR = '.';
+	/** @var int the base stack trace level for the line number */
+	private const int DEFAULT_STACK_TRACE_LEVEL_LINE = 1;
+
+	/** @var array<string,int> */
+	private const array STACK_OVERRIDE_CHECK = [
+		'setErrorMsg' => 2,
+		'setMessage' => 3,
+	];
 
 	// MARK: OPTION array
 	// NOTE: the second party array{} hs some errors
@@ -137,6 +145,12 @@ class Logging
 	private string $log_file_unique_id = '';
 	/** @var string Y-m-d file in file name */
 	private string $log_file_date = '';
+
+	// speical flags for ErrorMessage calls
+	/** @var bool Flag to set if called from ErrorMessage::setErrorMsg */
+	private bool $error_message_call_set_error_msg = false;
+	/** @var bool Flag to set if called from ErrorMessage::setMessage */
+	private bool $error_message_call_set_message = false;
 
 	/**
 	 *  1: create a new log file per run (time stamp + unique ID)
@@ -627,25 +641,55 @@ class Logging
 		$file_line = '';
 		$caller_class_method = '-';
 		$traces = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-		// print "[" . $level->getName() . "] [$message] prepareLog:<br>" . Support::printAr($traces);
-		// file + line: call not this but one before (the one that calls this)
-		// start from this level, if unset fall down until we are at null
-		$start_trace_level = 2;
-		for ($trace_level = $start_trace_level; $trace_level >= 0; $trace_level--) {
-			if (isset($traces[$trace_level])) {
-				$file_line = ($traces[$trace_level]['file'] ?? $traces[$trace_level]['function'])
-					. ':' . ($traces[$trace_level]['line'] ?? '-');
-				// as namespace\class->method
-				$caller_class_method =
-					// get the last call before we are in the Logging class
-					($traces[$trace_level]['class'] ?? '')
-					// connector, if unkown use ==
-					. ($traces[$trace_level]['type'] ?? '')
-					// method/function: prepareLog->(debug|info|...)->[THIS]
-					. $traces[$trace_level]['function'];
-				break;
+		$stack_trace_start_level_line = self::DEFAULT_STACK_TRACE_LEVEL_LINE;
+		// set stack trace level +1 if called from ErrorMessage::setMessage
+		if ($this->error_message_call_set_message) {
+			$stack_trace_start_level_line = 3;
+		} elseif ($this->error_message_call_set_error_msg) {
+			$stack_trace_start_level_line = 2;
+		}
+		// if we have line > default, then check if valid, else reset to default
+		if ($stack_trace_start_level_line > self::DEFAULT_STACK_TRACE_LEVEL_LINE) {
+			// check if function at level is one of the override checks
+			$fn_check = $traces[$stack_trace_start_level_line]['function'] ?? '';
+			if (
+				!isset(self::STACK_OVERRIDE_CHECK[$fn_check]) ||
+				self::STACK_OVERRIDE_CHECK[$fn_check] != $stack_trace_start_level_line
+			) {
+				$stack_trace_start_level_line = self::DEFAULT_STACK_TRACE_LEVEL_LINE;
 			}
 		}
+		$this->error_message_call_set_message = false;
+		$this->error_message_call_set_error_msg = false;
+		// set stack trace level +1 if called from ErrorMessage::setMessage
+		// print "[" . $level->getName() . "] [$message] [" . $stack_trace_start_level_line . "] "
+		// 	. "prepareLog:<br>" . Support::printAr($traces);
+		// file + line: call not this but one before (the one that calls this)
+		// start from this level, if unset fall down until we are at null
+		// NOTE this has to be pushed to 3 for setMessage wrap calls
+		for ($trace_level = $stack_trace_start_level_line; $trace_level >= 0; $trace_level--) {
+			if (!isset($traces[$trace_level])) {
+				continue;
+			}
+			$file_line = ($traces[$trace_level]['file'] ?? $traces[$trace_level]['function'])
+				. ':' . ($traces[$trace_level]['line'] ?? '-');
+			// call function is one stack level above
+			$trace_level++;
+			// skip setting if we are in the top level already
+			if (!isset($traces[$trace_level])) {
+				break;
+			}
+			// as namespace\class->method
+			$caller_class_method =
+				// get the last call before we are in the Logging class
+				($traces[$trace_level]['class'] ?? '')
+				// connector, if unkown use ==
+				. ($traces[$trace_level]['type'] ?? '')
+				// method/function: prepareLog->(debug|info|...)->[THIS]
+				. $traces[$trace_level]['function'];
+			break;
+		}
+		// if not line is set
 		if (empty($file_line)) {
 			$file_line = System::getPageName(System::FULL_PATH);
 		}
@@ -1015,6 +1059,30 @@ class Logging
 	public function getLogMaxFileSize(): int
 	{
 		return $this->log_max_filesize;
+	}
+
+	// *********************************************************************
+	// MARK: ErrorMessage class overrides
+	// *********************************************************************
+
+	/**
+	 * call if called from Error Message setMessage wrapper
+	 *
+	 * @return void
+	 */
+	public function setErrorMessageCallSetMessage(): void
+	{
+		$this->error_message_call_set_message = true;
+	}
+
+	/**
+	 * call if called from Error Message setMessage wrapper
+	 *
+	 * @return void
+	 */
+	public function setErrorMessageCallSetErrorMsg(): void
+	{
+		$this->error_message_call_set_error_msg = true;
 	}
 
 	// *********************************************************************
