@@ -7,3 +7,4 @@ www/composer.lock
 www/vendor
 **/.env
 **/.target
+ package-lock.json
