@@ -291,7 +291,7 @@ class ErrorMessage
 	 */
 	public function getLastErrorMsg(): array
 	{
-		return $this->error_str[array_key_last($this->error_str)] ?? [
+		return $this->error_str[array_key_last($this->error_str) ?? -1] ?? [
 			'level' => '',
 			'str' => '',
 			'id' => '',

@@ -122,9 +122,9 @@ final class CoreLibsConvertMathTest extends TestCase
 	public function providerCbrt(): array
 	{
 		return [
-			'cube root of 2' => [2, 1.25992, 5],
-			'cube root of 3' => [3, 1.44225, 5],
-			'cube root of -1' => [-1, 'NAN', 0],
+			'cube root of 2' => [2, 1.25992, 5, null],
+			'cube root of 3' => [3, 1.44225, 5, null],
+			'cube root of -1' => [-1, 'NAN', 0, \InvalidArgumentException::class],
 		];
 	}
 
@@ -138,10 +138,14 @@ final class CoreLibsConvertMathTest extends TestCase
 	 * @param  float|int $number
 	 * @param  float     $expected
 	 * @param  int       $round_to
+	 * @param  ?string   $exception
 	 * @return void
 	 */
-	public function testCbrt(float|int $number, float|string $expected, int $round_to): void
+	public function testCbrt(float|int $number, float|string $expected, int $round_to, ?string $exception): void
 	{
+		if ($exception !== null) {
+			$this->expectException($exception);
+		}
 		$this->assertEquals(
 			$expected,
 			round(\CoreLibs\Convert\Math::cbrt($number), $round_to)

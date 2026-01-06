@@ -114,7 +114,7 @@ class Encoding
 				(($char != $r_char && (!self::$mb_error_char ||
 				in_array(self::$mb_error_char, ['none', 'long', 'entity']))) ||
 				($char != $r_char && $r_char == self::$mb_error_char && self::$mb_error_char)) &&
-				ord($char) != 194
+				ord($char[0]) != 194
 			) {
 				$failed[] = $char;
 			}

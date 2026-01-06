@@ -14,6 +14,7 @@ class Byte
 	public const BYTE_FORMAT_NOSPACE = 1;
 	public const BYTE_FORMAT_ADJUST = 2;
 	public const BYTE_FORMAT_SI = 4;
+	public const RETURN_AS_STRING = 8;
 
 	/**
 	 * This function replaces the old byteStringFormat
@@ -119,7 +120,9 @@ class Byte
 	 * @param  int              $flags  bitwise flag with use space turned on
 	 *                                  BYTE_FORMAT_SI: use 1000 instead of 1024
 	 * @return string|int|float         converted value or original value
-	 * @throws \InvalidArgumentException 1: no valid flag set
+	 * @throws \InvalidArgumentException no valid flag set
+	 * @throws \LengthException          number too large to convert to int
+	 * @throws \RuntimeException		 BCMath extension not loaded if flag is set to string
 	 */
 	public static function stringByteFormat(string|int|float $number, int $flags = 0): string|int|float
 	{
@@ -129,7 +132,12 @@ class Byte
 		} else {
 			$si = false;
 		}
-		if ($flags != 0 && $flags != 4) {
+		if ($flags & self::RETURN_AS_STRING) {
+			$return_as_string = true;
+		} else {
+			$return_as_string = false;
+		}
+		if ($flags != 0 && $flags != 4 && $flags != 8 && $flags != 12) {
 			throw new \InvalidArgumentException("Invalid flags parameter: $flags", 1);
 		}
 		// matches in regex
@@ -142,6 +150,10 @@ class Byte
 			strtolower((string)$number),
 			$matches
 		);
+		$number_negative = false;
+		if (!empty($matches[1])) {
+			$number_negative = true;
+		}
 		if (isset($matches[2]) && isset($matches[3])) {
 			// remove all non valid characters from the number
 			$number = preg_replace('/[^0-9\.]/', '', $matches[2]);
@@ -152,11 +164,47 @@ class Byte
 			if ($unit) {
 				$number = $number * pow($si ? 1000 : 1024, stripos($valid_units_, $unit[0]) ?: 0);
 			}
+			// if the number is too large, we cannot convert to int directly
+			if ($number <= PHP_INT_MIN || $number >= PHP_INT_MAX) {
+				// if we do not want to convert to string
+				if (!$return_as_string) {
+					throw new \LengthException(
+						'Number too large be converted to int: ' . (string)$number
+					);
+				}
+				// for string, check if bcmath is loaded, if not this will not work
+				if (!extension_loaded('bcmath')) {
+					throw new \RuntimeException(
+						'Number too large be converted to int and BCMath extension not loaded: ' . (string)$number
+					);
+				}
+			}
+			// string return
+			if ($return_as_string) {
+				// return as string to avoid overflow
+				// $number = (string)round($number);
+				$number = bcmul(number_format(
+					$number,
+					12,
+					'.',
+					''
+				), "1");
+				if ($number_negative) {
+					$number = '-' . $number;
+				}
+				return $number;
+			}
 			// convert to INT to avoid +E output
 			$number = (int)round($number);
 			// if negative input, keep nnegative
-			if (!empty($matches[1])) {
+			if ($number_negative) {
 				$number *= -1;
+			}
+			// check if number is negative but should be, this is Lenght overflow
+			if (!$number_negative && $number < 0) {
+				throw new \LengthException(
+					'Number too large be converted to int: ' . (string)$number
+				);
 			}
 		}
 		// if not matching return as is

@@ -79,16 +79,24 @@ if [ ! -f "${php_bin}" ]; then
 	echo "Set php ${php_bin} does not exist";
 	exit;
 fi;
-php_bin="${php_bin} ";
 
 # Note 4dev/tests/bootstrap.php has to be set as bootstrap file in phpunit.xml
-phpunit_call="${php_bin}${BASE_PATH}vendor/bin/phpunit ${opt_testdox} ${opt_verbose} -c ${PHPUNIT_CONFIG} ${BASE_PATH}4dev/tests/";
-
-${phpunit_call};
+PHPUNIT_CALL=(
+	"${php_bin}"
+	"${BASE_PATH}vendor/bin/phpunit"
+	"${opt_testdox}"
+	"${opt_verbose}"
+	"-c" "${PHPUNIT_CONFIG}"
+	"${BASE_PATH}4dev/tests/"
+)
+# phpunit_call="${php_bin}${BASE_PATH}vendor/bin/phpunit ${opt_testdox} ${opt_verbose} -c ${PHPUNIT_CONFIG} ${BASE_PATH}4dev/tests/";
+# ${phpunit_call};
+"${PHPUNIT_CALL[@]}" || exit;
 
 echo -e "\nPHPUnit Config: ${PHPUNIT_CONFIG}";
 if [ "${no_php_version}" -eq 0 ]; then
-	echo "CALLED WITH PHP: ${php_bin}$(${php_bin} --version)";
+	echo "*** CALLED WITH PHP ${php_bin} ***";
+	${php_bin} --version;
 else
 	echo "Default PHP used: $(php --version)";
 fi;

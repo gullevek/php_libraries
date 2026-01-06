@@ -62,10 +62,15 @@ class Math
 	 *
 	 * @param  float $number Number to cubic root
 	 * @return float         Calculated value
+	 * @throws \InvalidArgumentException if $number is negative
 	 */
 	public static function cbrt(float|int $number): float
 	{
-		return pow((float)$number, 1.0 / 3);
+		$value = pow((float)$number, 1.0 / 3);
+		if (is_nan($value)) {
+			throw new \InvalidArgumentException('cube root from this number is not supported: ' . $number);
+		}
+		return $value;
 	}
 
 	/**

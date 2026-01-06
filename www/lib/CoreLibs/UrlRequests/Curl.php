@@ -614,8 +614,6 @@ class Curl implements Interface\RequestsInterface
 		// print "CURLINFO_HEADER_OUT: <pre>" . curl_getinfo($handle, CURLINFO_HEADER_OUT) . "</pre>";
 		// get response code and bail on not authorized
 		$http_response = $this->handleCurlResponse($handle, $http_result, $options['http_errors']);
-		// close handler
-		$this->handleCurlClose($handle);
 		// return response and result
 		return [
 			'code' => (string)$http_response,
@@ -836,17 +834,6 @@ class Curl implements Interface\RequestsInterface
 			]),
 			$err
 		);
-	}
-
-	/**
-	 * close the current curl handle
-	 *
-	 * @param  \CurlHandle $handle
-	 * @return void
-	 */
-	private function handleCurlClose(\CurlHandle $handle): void
-	{
-		curl_close($handle);
 	}
 
 	// *********************************************************************

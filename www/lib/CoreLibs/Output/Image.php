@@ -365,9 +365,6 @@ class Image
 								imagepng($thumb, $thumbnail_write_path . $thumbnail);
 								break;
 						}
-						// free up resources (in case we are called in a loop)
-						imagedestroy($source);
-						imagedestroy($thumb);
 					} else {
 						throw new \RuntimeException(
 							'Invalid source image file. Only JPEG/PNG are allowed: ' . $filename,
@@ -543,8 +540,6 @@ class Image
 				imagepng($img, $filename);
 				break;
 		}
-		// clean up image if we have an image
-		imagedestroy($img);
 	}
 }
 
