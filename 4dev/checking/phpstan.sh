@@ -16,6 +16,7 @@ Available options:
 
 -h, --help        Print this help and exit
 -p, --php VERSION Chose PHP version in the form of "N.N", if not found will exit
+-c, --composer    Use composer version and not the default phives bundle
 EOF
 	exit
 }
@@ -33,10 +34,15 @@ if [ -z "${DEFAULT_PHP_VERSION}" ]; then
 fi;
 php_version="";
 no_php_version=0;
+use_composer=0;
 while [ -n "${1-}" ]; do
 	case "${1}" in
 		-p | --php)
 			php_version="${2-}";
+			shift
+			;;
+		-c | --composer)
+			use_composer=1;
 			shift
 			;;
 		-h | --help)
@@ -55,6 +61,11 @@ if [ -z "${php_version}" ]; then
 fi;
 php_bin="${PHP_BIN_PATH}${php_version}";
 echo "Use PHP Version: ${php_version}";
+if [ "${use_composer}" -eq 1 ]; then
+	echo "Use composer installed phan";
+else
+	echo "Use phan installed via phives";
+fi;
 
 if [ ! -f "${php_bin}" ]; then
 	echo "Set php ${php_bin} does not exist";
@@ -65,8 +76,12 @@ BASE_PATH=$(pwd)"/";
 cd "$BASE_PATH" || exit;
 PHPSTAN_CALL=(
 	"${php_bin}"
-	"${BASE_PATH}tools/phpstan"
 );
+if [ "${use_composer}" -eq 1 ]; then
+	PHPSTAN_CALL+=("${BASE_PATH}vendor/bin/phpstan");
+else
+	PHPSTAN_CALL+=("${BASE_PATH}tools/phpstan");
+fi;
 "${PHPSTAN_CALL[@]}";
 if [ "${no_php_version}" -eq 0 ]; then
 	echo "*** CALLED WITH PHP ${php_bin} ***";

@@ -15,8 +15,9 @@ If -p is not set, the default intalled PHP is used.
 Available options:
 
 -h, --help        Print this help and exit
--t, --testdox     Enable testdox output for phpunit
+-t, --testdox     Enable testdox output for PHPunit
 -v, --verbose     Enable verbose output for PHPunit
+-c, --composer    Use composer version and not the default phives bundle
 -p, --php VERSION Chose PHP version in the form of "N.N", if not found will exit
 EOF
 	exit
@@ -45,6 +46,7 @@ opt_testdox="";
 opt_verbose="";
 php_version="";
 no_php_version=0;
+use_composer=0;
 while [ -n "${1-}" ]; do
 	case "${1}" in
 		-t | --testdox)
@@ -52,6 +54,10 @@ while [ -n "${1-}" ]; do
 			;;
 		-v | --verbose)
 			opt_verbose="--verbose";
+			;;
+		-c | --composer)
+			use_composer=1;
+			shift
 			;;
 		-p | --php)
 			php_version="${2-}";
@@ -74,6 +80,11 @@ if [ -z "${php_version}" ]; then
 fi;
 php_bin="${PHP_BIN_PATH}${php_version}";
 echo "Use PHP Version: ${php_version}";
+if [ "${use_composer}" -eq 1 ]; then
+	echo "Use composer installed phan";
+else
+	echo "Use phan installed via phives";
+fi;
 
 if [ ! -f "${php_bin}" ]; then
 	echo "Set php ${php_bin} does not exist";
@@ -83,14 +94,18 @@ fi;
 # Note 4dev/tests/bootstrap.php has to be set as bootstrap file in phpunit.xml
 PHPUNIT_CALL=(
 	"${php_bin}"
-	"${BASE_PATH}vendor/bin/phpunit"
+);
+if [ "${use_composer}" -eq 1 ]; then
+	PHPUNIT_CALL+=("${BASE_PATH}vendor/bin/phpunit");
+else
+	PHPUNIT_CALL+=("${BASE_PATH}tools/phpunit");
+fi;
+PHPUNIT_CALL+=(
 	"${opt_testdox}"
 	"${opt_verbose}"
 	"-c" "${PHPUNIT_CONFIG}"
 	"${BASE_PATH}4dev/tests/"
-)
-# phpunit_call="${php_bin}${BASE_PATH}vendor/bin/phpunit ${opt_testdox} ${opt_verbose} -c ${PHPUNIT_CONFIG} ${BASE_PATH}4dev/tests/";
-# ${phpunit_call};
+);
 "${PHPUNIT_CALL[@]}" || exit;
 
 echo -e "\nPHPUnit Config: ${PHPUNIT_CONFIG}";
