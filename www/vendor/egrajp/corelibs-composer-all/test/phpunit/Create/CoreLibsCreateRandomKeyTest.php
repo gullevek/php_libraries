@@ -18,138 +18,70 @@ final class CoreLibsCreateRandomKeyTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function keyLenghtProvider(): array
-	{
-		return [
-			'valid key length' => [
-				0 => 6,
-				1 => true,
-				2 => 6,
-			],
-			'negative key length' => [
-				0 => -1,
-				1 => false,
-				2 => 4,
-			],
-			'tpp big key length' => [
-				0 => 300,
-				1 => false,
-				2 => 4,
-			],
-		];
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @return array
-	 */
 	public function randomKeyGenProvider(): array
 	{
 		return [
-			'default key length' => [
+			// just key length
+			'default key length, default char set' => [
 				0 => null,
-				1 => 4
+				1 => \CoreLibs\Create\RandomKey::KEY_LENGTH_DEFAULT
 			],
-			'set -1 key length default' => [
+			'set -1 key length, default char set' => [
 				0 => -1,
-				1 => 4,
+				1 => \CoreLibs\Create\RandomKey::KEY_LENGTH_DEFAULT,
 			],
-			'set too large key length' => [
+			'set 0 key length, default char set' => [
+				0 => -1,
+				1 => \CoreLibs\Create\RandomKey::KEY_LENGTH_DEFAULT,
+			],
+			'set too large key length, default char set' => [
 				0 => 300,
-				1 => 4,
+				1 => \CoreLibs\Create\RandomKey::KEY_LENGTH_DEFAULT,
 			],
-			'set override key lenght' => [
+			'set override key lenght, default char set' => [
 				0 => 6,
 				1 => 6,
+			],
+			// just character set
+			'default key length, different char set A' => [
+				0 => \CoreLibs\Create\RandomKey::KEY_LENGTH_DEFAULT,
+				1 => \CoreLibs\Create\RandomKey::KEY_LENGTH_DEFAULT,
+				2 => [
+					'A', 'B', 'C'
+				],
+			],
+			'different key length, different char set B' => [
+				0 => 16,
+				1 => 16,
+				2 => [
+					'A', 'B', 'C'
+				],
+				3 => [
+					'1', '2', '3'
+				]
 			],
 		];
 	}
 
+	// Alternative more efficient version using strpos
 	/**
-	 * 1
+	 * check if all characters are in set
 	 *
-	 * @return array
+	 * @param  string $input
+	 * @param  string $allowed_chars
+	 * @return bool
 	 */
-	public function keepKeyLengthProvider(): array
+	private function allCharsInSet(string $input, string $allowed_chars): bool
 	{
-		return [
-			'set too large' => [
-				0 => 6,
-				1 => 300,
-				2 => 6,
-			],
-			'set too small' => [
-				0 => 8,
-				1 => -2,
-				2 => 8,
-			],
-			'change valid' => [
-				0 => 10,
-				1 => 6,
-				2 => 6,
-			]
-		];
-	}
+		$inputLength = strlen($input);
 
-	/**
-	 * run before each test and reset to default 4
-	 *
-	 * @before
-	 *
-	 * @return void
-	 */
-	public function resetKeyLength(): void
-	{
-		\CoreLibs\Create\RandomKey::setRandomKeyLength(4);
-	}
-
-	/**
-	 * check that first length is 4
-	 *
-	 * @covers ::getRandomKeyLength
-	 * @testWith [4]
-	 * @testdox getRandomKeyLength on init will be $expected [$_dataName]
-	 *
-	 * @param integer $expected
-	 * @return void
-	 */
-	public function testGetRandomKeyLengthInit(int $expected): void
-	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Create\RandomKey::getRandomKeyLength()
-		);
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @covers ::setRandomKeyLength
-	 * @covers ::getRandomKeyLength
-	 * @dataProvider keyLenghtProvider
-	 * @testdox setRandomKeyLength $input will be $expected, compare to $compare [$_dataName]
-	 *
-	 * @param integer $input
-	 * @param boolean $expected
-	 * @param integer $compare
-	 * @return void
-	 */
-	public function testSetRandomKeyLength(int $input, bool $expected, int $compare): void
-	{
-		// set
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Create\RandomKey::setRandomKeyLength($input)
-		);
-		// read test, if false, use compare check
-		if ($expected === false) {
-			$input = $compare;
+		for ($i = 0; $i < $inputLength; $i++) {
+			if (strpos($allowed_chars, $input[$i]) === false) {
+				return false;
+			}
 		}
-		$this->assertEquals(
-			$input,
-			\CoreLibs\Create\RandomKey::getRandomKeyLength()
-		);
+
+		return true;
 	}
 
 	/**
@@ -163,42 +95,40 @@ final class CoreLibsCreateRandomKeyTest extends TestCase
 	 * @param integer $expected
 	 * @return void
 	 */
-	public function testRandomKeyGen(?int $input, int $expected): void
+	public function testRandomKeyGen(?int $input, int $expected, array ...$key_range): void
 	{
+		$__key_data = \CoreLibs\Create\RandomKey::KEY_CHARACTER_RANGE_DEFAULT;
+		if (count($key_range)) {
+			$__key_data = join('', array_unique(array_merge(...$key_range)));
+		}
 		if ($input === null) {
 			$this->assertEquals(
 				$expected,
 				strlen(\CoreLibs\Create\RandomKey::randomKeyGen())
 			);
-		} else {
+		} elseif ($input !== null && !count($key_range)) {
+			$random_key = \CoreLibs\Create\RandomKey::randomKeyGen($input);
+			$this->assertTrue(
+				$this->allCharsInSet($random_key, $__key_data),
+				'Characters not valid'
+			);
 			$this->assertEquals(
 				$expected,
-				strlen(\CoreLibs\Create\RandomKey::randomKeyGen($input))
+				strlen($random_key),
+				'String length not matching'
+			);
+		} elseif (count($key_range)) {
+			$random_key = \CoreLibs\Create\RandomKey::randomKeyGen($input, ...$key_range);
+			$this->assertTrue(
+				$this->allCharsInSet($random_key, $__key_data),
+				'Characters not valid'
+			);
+			$this->assertEquals(
+				$expected,
+				strlen($random_key),
+				'String length not matching'
 			);
 		}
-	}
-
-	/**
-	 * Check that if set to n and then invalid, it keeps the previous one
-	 * or if second change valid, second will be shown
-	 *
-	 * @covers ::setRandomKeyLength
-	 * @dataProvider keepKeyLengthProvider
-	 * @testdox keep setRandomKeyLength set with $input_valid and then $input_invalid will be $expected [$_dataName]
-	 *
-	 * @param integer $input_valid
-	 * @param integer $input_invalid
-	 * @param integer $expected
-	 * @return void
-	 */
-	public function testKeepKeyLength(int $input_valid, int $input_invalid, int $expected): void
-	{
-		\CoreLibs\Create\RandomKey::setRandomKeyLength($input_valid);
-		\CoreLibs\Create\RandomKey::setRandomKeyLength($input_invalid);
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Create\RandomKey::getRandomKeyLength()
-		);
 	}
 }
 

@@ -332,7 +332,7 @@ print "(kosrt, lower case, reverse): "
 
 print "<hr>";
 $nested = [
-	'B' => 'foo', 'a', '0', 9,
+	'B' => 'foo', 'a', '0', 9, /** @phpstan-ignore-line This is a test for wrong index */
 	'1' => ['z', 'b', 'a'],
 	'd' => ['zaip', 'bar', 'baz']
 ];

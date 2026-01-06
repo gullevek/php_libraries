@@ -8,8 +8,20 @@ declare(strict_types=1);
 
 namespace CoreLibs\Convert;
 
+use CoreLibs\Combined\ArrayHandler;
+
 class Strings
 {
+	/** @var array<int,string> all the preg error messages */
+	public const array PREG_ERROR_MESSAGES = [
+		PREG_NO_ERROR => 'No error',
+		PREG_INTERNAL_ERROR => 'Internal PCRE error',
+		PREG_BACKTRACK_LIMIT_ERROR => 'Backtrack limit exhausted',
+		PREG_RECURSION_LIMIT_ERROR => 'Recursion limit exhausted',
+		PREG_BAD_UTF8_ERROR => 'Malformed UTF-8 data',
+		PREG_BAD_UTF8_OFFSET_ERROR => 'Bad UTF-8 offset',
+		PREG_JIT_STACKLIMIT_ERROR => 'JIT stack limit exhausted'
+	];
 	/**
 	 * return the number of elements in the split list
 	 * 0 if nothing / invalid split
@@ -52,29 +64,42 @@ class Strings
 	 * Note a string LONGER then the maxium will be attached with the LAST
 	 * split character. In above exmaple
 	 * ABCD1234EFGHTOOLONG will be ABCD-1234-EFGH-TOOLONG
+	 * If the characters are NOT ASCII it will return the string as is
 	 *
-	 * @param  string $value            string value to split
+	 * @param  string $string           string value to split
 	 * @param  string $split_format     split format
-	 * @param  string $split_characters list of charcters with which we split
-	 *                                  if not set uses dash ('-')
 	 * @return string                   split formatted string or original value if not chnaged
+	 * @throws \InvalidArgumentException for empty split format, invalid values, split characters or split format
 	 */
 	public static function splitFormatString(
-		string $value,
+		string $string,
 		string $split_format,
-		string $split_characters = '-'
 	): string {
-		if (
-			// abort if split format is empty
-			empty($split_format) ||
-			// if not in the valid ASCII character range for any of the strings
-			preg_match('/[^\x20-\x7e]/', $value) ||
-			// preg_match('/[^\x20-\x7e]/', $split_format) ||
-			preg_match('/[^\x20-\x7e]/', $split_characters) ||
-			// only numbers and split characters in split_format
-			!preg_match("/[0-9" . $split_characters . "]/", $split_format)
-		) {
-			return $value;
+		// skip if string or split format is empty is empty
+		if (empty($string) || empty($split_format)) {
+			return $string;
+		}
+		if (preg_match('/[^\x20-\x7e]/', $string)) {
+			throw new \InvalidArgumentException(
+				"The string to split can only be ascii characters: " . $string
+			);
+		}
+		// get the split characters that are not numerical and check they are ascii
+		$split_characters = self::removeDuplicates(preg_replace('/[0-9]/', '', $split_format) ?: '');
+		if (empty($split_characters)) {
+			throw new \InvalidArgumentException(
+				"A split character must exist in the format string: " . $split_format
+			);
+		}
+		if (preg_match('/[^\x20-\x7e]/', $split_characters)) {
+			throw new \InvalidArgumentException(
+				"The split character has to be a valid ascii character: " . $split_characters
+			);
+		}
+		if (!preg_match("/^[0-9" . $split_characters . "]+$/", $split_format)) {
+			throw new \InvalidArgumentException(
+				"The split format can only be numbers and the split characters: " . $split_format
+			);
 		}
 		// split format list
 		$split_list = preg_split(
@@ -86,14 +111,14 @@ class Strings
 		);
 		// if this is false, or only one array, abort split
 		if (!is_array($split_list) || count($split_list) == 1) {
-			return $value;
+			return $string;
 		}
 		$out = '';
 		$pos = 0;
 		$last_split = '';
 		foreach ($split_list as $offset) {
 			if (is_numeric($offset)) {
-				$_part = substr($value, $pos, (int)$offset);
+				$_part = substr($string, $pos, (int)$offset);
 				if (empty($_part)) {
 					break;
 				}
@@ -104,8 +129,8 @@ class Strings
 				$last_split = $offset;
 			}
 		}
-		if (!empty($out) && $pos < strlen($value)) {
-			$out .= $last_split . substr($value, $pos);
+		if (!empty($out) && $pos < strlen($string)) {
+			$out .= $last_split . substr($string, $pos);
 		}
 		// if last is not alphanumeric remove, remove
 		if (!strcspn(substr($out, -1, 1), $split_characters)) {
@@ -115,8 +140,47 @@ class Strings
 		if (!empty($out)) {
 			return $out;
 		} else {
-			return $value;
+			return $string;
 		}
+	}
+
+	/**
+	 * Split a string into n-length blocks with a split character inbetween
+	 * This is simplified version from splitFormatString that uses
+	 * fixed split length with a characters, this evenly splits the string out into the
+	 * given length
+	 * This works with non ASCII characters too
+	 *
+	 * @param  string $string           string to split
+	 * @param  int    $split_length     split length, must be smaller than string and larger than 0
+	 * @param  string $split_characters [default=-] the character to split, can be more than one
+	 * @return string
+	 * @throws \InvalidArgumentException Thrown if split length style is invalid
+	 */
+	public static function splitFormatStringFixed(
+		string $string,
+		int $split_length,
+		string $split_characters = '-'
+	): string {
+		// if empty string or if split lenght is 0 or empty split characters
+		// then we skip any splitting
+		if (empty($string) || $split_length == 0 || empty($split_characters)) {
+			return $string;
+		}
+		$return_string = '';
+		$string_length = mb_strlen($string);
+		// check that the length is not too short
+		if ($split_length < 1 || $split_length >= $string_length) {
+			throw new \InvalidArgumentException(
+				"The split length must be at least 1 character and less than the string length to split. "
+				. "Split length: " . $split_length . ", string length: " . $string_length
+			);
+		}
+		for ($i = 0; $i < $string_length; $i += $split_length) {
+			$return_string .= mb_substr($string, $i, $split_length) . $split_characters;
+		}
+		// remove last trailing character which is always the split char length
+		return mb_substr($return_string, 0, -1 * mb_strlen($split_characters));
 	}
 
 	/**
@@ -145,6 +209,116 @@ class Strings
 	public static function stripUTF8BomBytes(string $text): string
 	{
 		return trim($text, pack('H*', 'EFBBBF'));
+	}
+
+	/**
+	 * Make as string of characters unique
+	 *
+	 * @param  string $string
+	 * @return string
+	 */
+	public static function removeDuplicates(string $string): string
+	{
+		// combine again
+		$result = implode(
+			'',
+			// unique list
+			array_unique(
+				// split into array
+				mb_str_split($string)
+			)
+		);
+
+		return $result;
+	}
+
+	/**
+	 * check if all characters are in set
+	 *
+	 * @param  string $needle   Needle to search
+	 * @param  string $haystack Haystack to search in
+	 * @return bool             True on found, False if not in haystack
+	 */
+	public static function allCharsInSet(string $needle, string $haystack): bool
+	{
+		$input_length = strlen($needle);
+
+		for ($i = 0; $i < $input_length; $i++) {
+			if (strpos($haystack, $needle[$i]) === false) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * converts a list of arrays of strings into a string of unique entries
+	 * input arrays can be nested, only values are used
+	 *
+	 * @param  array<mixed> ...$char_lists
+	 * @return string
+	 */
+	public static function buildCharStringFromLists(array ...$char_lists): string
+	{
+		return implode('', array_unique(
+			ArrayHandler::flattenArray(
+				array_merge(...$char_lists)
+			)
+		));
+	}
+
+	/**
+	 * Check if a regex is valid. Does not return the detail regex parser error
+	 *
+	 * @param  string $pattern Any regex string
+	 * @return bool            False on invalid regex
+	 */
+	public static function isValidRegex(string $pattern): bool
+	{
+		preg_last_error();
+		try {
+			$var = '';
+			@preg_match($pattern, $var);
+			return preg_last_error() === PREG_NO_ERROR;
+		} catch (\Error $e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns the last preg error messages as string
+	 * all messages are defined in PREG_ERROR_MESSAGES
+	 *
+	 * @return string
+	 */
+	public static function getLastRegexErrorString(): string
+	{
+		return self::PREG_ERROR_MESSAGES[preg_last_error()] ?? 'Unknown error';
+	}
+
+	/**
+	 * check if a regex is invalid, returns array with flag and error string
+	 *
+	 * @param  string $pattern
+	 * @return array{valid:bool,preg_error:int,error:null|string,pcre_error:null|string}
+	 */
+	public static function validateRegex(string $pattern): array
+	{
+		// Clear any previous PCRE errors
+		preg_last_error();
+		$var = '';
+		if (@preg_match($pattern, $var) === false) {
+			$error = preg_last_error();
+			return [
+				'valid' => false,
+				'preg_error' => $error,
+				'error' => self::PREG_ERROR_MESSAGES[$error] ?? 'Unknown error',
+				'pcre_error' => preg_last_error_msg(),
+			];
+		}
+
+		return ['valid' => true, 'preg_error' => PREG_NO_ERROR, 'error' => null, 'pcre_error' => null];
 	}
 }
 

@@ -18,7 +18,7 @@ use CoreLibs\Logging\Logger\Flag;
 final class CoreLibsLoggingLoggingTest extends TestCase
 {
 	private const LOG_FOLDER = __DIR__ . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR;
-	private const REGEX_BASE = "\[[\d\-\s\.:]+\]\s{1}" // date
+	private const REGEX_BASE = "\[[\d\-\s\.:+T]+\]\s{1}" // date, just basic checks
 		. "\[[\w\.]+(:\d+)?\]\s{1}" // host:port
 		. "\[(phar:\/\/)?[\w\-\.\/]+:\d+\]\s{1}" // folder/file [note phar:// is for phpunit]
 		. "\[\w+\]\s{1}" // run id
@@ -249,7 +249,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 		$this->assertFalse(
 			$log->loggingLevelIsDebug()
 		);
-		// not set, should be debug]
+		// not set, should be debug
 		$log = new \CoreLibs\Logging\Logging([
 			'log_file_id' => 'testSetLoggingLevel',
 			'log_folder' => self::LOG_FOLDER,
@@ -295,6 +295,71 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 		$this->expectException(\Psr\Log\InvalidArgumentException::class);
 		$this->expectExceptionMessageMatches("/^Level \"NotGood\" is not defined, use one of: /");
 		$log->setLoggingLevel('NotGood');
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::setErrorLogWriteLevel
+	 * @covers ::getErrorLogWriteLevel
+	 * @testdox setErrorLogWriteLevel set/get checks
+	 *
+	 * @return void
+	 */
+	public function testSetErrorLogWriteLevel(): void
+	{
+		// valid that is not Debug
+		$log = new \CoreLibs\Logging\Logging([
+			'log_file_id' => 'testSetErrorLogWriteLevel',
+			'log_folder' => self::LOG_FOLDER,
+			'error_log_write_level' => Level::Error
+		]);
+		$this->assertEquals(
+			Level::Error,
+			$log->getErrorLogWriteLevel()
+		);
+		// not set on init
+		$log = new \CoreLibs\Logging\Logging([
+			'log_file_id' => 'testSetErrorLogWriteLevel',
+			'log_folder' => self::LOG_FOLDER,
+		]);
+		$this->assertEquals(
+			Level::Emergency,
+			$log->getErrorLogWriteLevel()
+		);
+		// invalid, should be Emergency, will throw excpetion too
+		$this->expectException(\InvalidArgumentException::class);
+		$this->expectExceptionMessage(
+			'Option: "error_log_write_level" is not of instance \CoreLibs\Logging\Logger\Level'
+		);
+		$log = new \CoreLibs\Logging\Logging([
+			'log_file_id' => 'testSetLoggingLevel',
+			'log_folder' => self::LOG_FOLDER,
+			'error_log_write_level' => 'I'
+		]);
+		$this->assertEquals(
+			Level::Emergency,
+			$log->getErrorLogWriteLevel()
+		);
+		// set valid then change
+		$log = new \CoreLibs\Logging\Logging([
+			'log_file_id' => 'testSetErrorLogWriteLevel',
+			'log_folder' => self::LOG_FOLDER,
+			'error_log_write_level' => Level::Error
+		]);
+		$this->assertEquals(
+			Level::Error,
+			$log->getErrorLogWriteLevel()
+		);
+		$log->setErrorLogWriteLevel(Level::Notice);
+		$this->assertEquals(
+			Level::Notice,
+			$log->getErrorLogWriteLevel()
+		);
+		// illegal logging level
+		$this->expectException(\Psr\Log\InvalidArgumentException::class);
+		$this->expectExceptionMessageMatches("/^Level \"NotGood\" is not defined, use one of: /");
+		$log->setErrorLogWriteLevel('NotGood');
 	}
 
 	// setLogFileId

@@ -74,9 +74,21 @@ foreach ($bytes as $byte) {
 	print '<div style="width: 35%; text-align: right; padding-right: 2px;">';
 	print "(" . number_format($byte) . "/" . $byte . ") bytes :";
 	$_bytes = Byte::humanReadableByteFormat($byte);
-	print '</div><div style="width: 10%;">' . $_bytes;
-	print '</div><div style="width: 10%;">';
-	print Byte::stringByteFormat($_bytes);
+	print '</div>';
+	print '<div style="width: 10%;">' . $_bytes . '</div>';
+	print '<div style="width: 40%;">';
+	try {
+		print Byte::stringByteFormat($_bytes);
+	} catch (\LengthException $e) {
+		print "LengthException 1: " . $e->getMessage();
+		try {
+			print "<br>S: " . Byte::stringByteFormat($_bytes, Byte::RETURN_AS_STRING);
+		} catch (\LengthException $e) {
+			print "LengthException 2: " . $e->getMessage();
+		} catch (\RuntimeException $e) {
+			print "RuntimeException 1: " . $e->getMessage();
+		}
+	}
 	print "</div>";
 	//
 	print "</div>";
@@ -87,13 +99,85 @@ foreach ($bytes as $byte) {
 	print "bytes [si]:";
 	$_bytes = Byte::humanReadableByteFormat($byte, Byte::BYTE_FORMAT_SI);
 	print '</div><div style="width: 10%;">' . $_bytes;
-	print '</div><div style="width: 10%;">';
-	print Byte::stringByteFormat($_bytes);
+	print '</div><div style="width: 40%;">';
+	try {
+		print Byte::stringByteFormat($_bytes);
+	} catch (\LengthException $e) {
+		print "LengthException A: " . $e->getMessage();
+		try {
+			print "<br>Ssi: " . Byte::stringByteFormat($_bytes, Byte::RETURN_AS_STRING | Byte::BYTE_FORMAT_SI);
+		} catch (\LengthException $e) {
+			print "LengthException B: " . $e->getMessage();
+		} catch (\RuntimeException $e) {
+			print "RuntimeException A: " . $e->getMessage();
+		}
+	}
 	print "</div>";
 	//
 	print "</div>";
 }
 
+$string_bytes = [
+	'-117.42 MB',
+	'242.98 MB',
+	'254.78 MiB',
+	'1 EiB',
+	'8 EB',
+	'867.36EB',
+	'1000EB',
+	'10000EB',
+];
+print "<b>BYTE STRING TO BYTES TESTS</b><br>";
+foreach ($string_bytes as $string) {
+	print '<div style="display: flex; border-bottom: 1px dashed gray;">';
+	//
+	print '<div style="width: 35%; text-align: right; padding-right: 2px;">';
+	print "string byte ($string) to bytes :";
+	try {
+		$_bytes = Byte::stringByteFormat($string);
+	} catch (\LengthException $e) {
+		print "<br>LengthException A: " . $e->getMessage();
+		$_bytes = 0;
+	}
+	try {
+		$_bytes_string = Byte::stringByteFormat($string, Byte::RETURN_AS_STRING);
+	} catch (\LengthException $e) {
+		print "<br>LengthException B: " . $e->getMessage();
+		$_bytes_string = '';
+	} catch (\RuntimeException $e) {
+		print "<br>RuntimeException: " . $e->getMessage();
+		$_bytes_string = '';
+	}
+	try {
+		$_bytes_si = Byte::stringByteFormat($string, Byte::BYTE_FORMAT_SI);
+	} catch (\LengthException $e) {
+		print "<br>LengthException A: " . $e->getMessage();
+		$_bytes_si = 0;
+	}
+	try {
+		$_bytes_string_si = Byte::stringByteFormat($string, Byte::RETURN_AS_STRING | Byte::BYTE_FORMAT_SI);
+	} catch (\LengthException $e) {
+		print "<br>LengthException B: " . $e->getMessage();
+		$_bytes_string_si = '';
+	} catch (\RuntimeException $e) {
+		print "<br>RuntimeException: " . $e->getMessage();
+		$_bytes_string_si = '';
+	}
+	print '</div>';
+	print '<div style="width: 20%;">'
+		. "F:" . number_format((int)$_bytes)
+		. '<br>B: ' . $_bytes
+		. '<br>S: ' . $_bytes_string
+		. "<br>Fsi:" . number_format((int)$_bytes_si)
+		. '<br>Bsi: ' . $_bytes_si
+		. '<br>Ssi: ' . $_bytes_string_si;
+	print '</div>';
+	print '<div style="width: 10%;">';
+	print "B: " . Byte::humanReadableByteFormat($_bytes) . "<br>";
+	print "Bsi: " . Byte::humanReadableByteFormat($_bytes_si, Byte::BYTE_FORMAT_SI);
+	print "</div>";
+	print "</div>";
+}
 print "</body></html>";
 
 // __END__

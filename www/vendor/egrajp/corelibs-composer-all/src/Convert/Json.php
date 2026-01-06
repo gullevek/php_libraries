@@ -55,10 +55,10 @@ class Json
 	 * Deos not throw errors
 	 *
 	 * @param  array<mixed> $data
-	 * @param  int          $flags json_encode flags as is
+	 * @param  int          $flags [JSON_UNESCAPED_UNICODE] json_encode flags as is
 	 * @return string              JSON string or '{}' if false
 	 */
-	public static function jsonConvertArrayTo(array $data, int $flags = 0): string
+	public static function jsonConvertArrayTo(array $data, int $flags = JSON_UNESCAPED_UNICODE): string
 	{
 		$json_string = json_encode($data, $flags) ?: '{}';
 		self::$json_last_error = json_last_error();
@@ -118,6 +118,23 @@ class Json
 				break;
 		}
 		return $return_string === true ? $json_error_string : self::$json_last_error;
+	}
+
+	/**
+	 * wrapper to call convert array to json with pretty print
+	 *
+	 * @param  array<mixed>  $data
+	 * @return string
+	 */
+	public static function jsonPrettyPrint(array $data): string
+	{
+		return self::jsonConvertArrayTo(
+			$data,
+			JSON_PRETTY_PRINT |
+			JSON_UNESCAPED_LINE_TERMINATORS |
+			JSON_UNESCAPED_SLASHES |
+			JSON_UNESCAPED_UNICODE
+		);
 	}
 }
 

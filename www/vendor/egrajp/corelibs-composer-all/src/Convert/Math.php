@@ -62,10 +62,15 @@ class Math
 	 *
 	 * @param  float $number Number to cubic root
 	 * @return float         Calculated value
+	 * @throws \InvalidArgumentException if $number is negative
 	 */
 	public static function cbrt(float|int $number): float
 	{
-		return pow((float)$number, 1.0 / 3);
+		$value = pow((float)$number, 1.0 / 3);
+		if (is_nan($value)) {
+			throw new \InvalidArgumentException('cube root from this number is not supported: ' . $number);
+		}
+		return $value;
 	}
 
 	/**
@@ -199,15 +204,17 @@ class Math
 				callback: fn ($col) => is_array($row) ?
 					array_reduce(
 						array: $row,
-						callback: fn ($a, $v, $i = null) => $a + $v * (
+						// TODO check that v is not an array
+						callback: fn ($a, $v, $i = null) => $a + $v * ( /** @phpstan-ignore-line Possible array + int */
 							// if last entry missing for full copy add a 0 to it
-							$col[$i ?? array_search($v, $row, true)] ?? 0 /** @phpstan-ignore-line */
+							$col[$i ?? array_search($v, $row, true)] ?? 0
 						),
 						initial: 0,
 					) :
 					array_reduce(
 						array: $col,
-						callback: fn ($a, $v) => $a + $v * $row,
+						// TODO check that v is not an array
+						callback: fn ($a, $v) => $a + $v * $row, /** @phpstan-ignore-line Possible array + int */
 						initial: 0,
 					),
 				array: $bCols,

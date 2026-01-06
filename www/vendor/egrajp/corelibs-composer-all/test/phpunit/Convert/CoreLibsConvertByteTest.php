@@ -126,47 +126,6 @@ final class CoreLibsConvertByteTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
-	 */
-	public function byteStringProvider(): array
-	{
-		return [
-			'negative number' => [
-				0 => '-117.42 MB',
-				1 => -123123794,
-				2 => -117420000,
-			],
-			'megabyte' => [
-				0 => '242.98 MB',
-				1 => 254782996,
-				2 => 242980000
-			],
-			'megabyte si' => [
-				0 => '254.78 MiB',
-				1 => 267156193,
-				2 => 254780000
-			],
-			'petabyte' => [
-				0 => '1 EiB',
-				1 => 1152921504606846976,
-				2 => 1000000000000000000,
-			],
-			'max int' => [
-				0 => '8 EB',
-				1 => -9223372036854775807 - 1,
-				2 => 8000000000000000000,
-			],
-			'exabyte, overflow' => [
-				0 => '867.36EB',
-				1 => 3873816255479021568,
-				2 => 363028535651074048,
-			]
-		];
-	}
-
-	/**
-	 * Undocumented function
-	 *
 	 * @covers ::humanReadableByteFormat
 	 * @dataProvider byteProvider
 	 * @testdox humanReadableByteFormat $input will be $expected, $expected_si SI, $expected_no_space no space, $expected_adjust adjust, $expected_si_no_space SI/no space [$_dataName]
@@ -180,7 +139,7 @@ final class CoreLibsConvertByteTest extends TestCase
 	 * @return void
 	 */
 	public function testHumanReadableByteFormat(
-		$input,
+		string|int|float $input,
 		string $expected,
 		string $expected_si,
 		string $expected_no_space,
@@ -220,6 +179,73 @@ final class CoreLibsConvertByteTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
+	 * @return array
+	 */
+	public function byteStringProvider(): array
+	{
+		return [
+			'negative number' => [
+				0 => '-117.42 MB',
+				1 => -123123794,
+				2 => -117420000,
+				3 => "-123123793",
+				4 => "-117420000",
+				5 => null,
+			],
+			'megabyte' => [
+				0 => '242.98 MB',
+				1 => 254782996,
+				2 => 242980000,
+				3 => "254782996",
+				4 => "242980000",
+				5 => null,
+			],
+			'megabyte si' => [
+				0 => '254.78 MiB',
+				1 => 267156193,
+				2 => 254780000,
+				3 => "267156193",
+				4 => "254780000",
+				5 => null,
+			],
+			'petabyte' => [
+				0 => '1 EiB',
+				1 => 1152921504606846976,
+				2 => 1000000000000000000,
+				3 => "1152921504606846976",
+				4 => "1000000000000000000",
+				5 => null,
+			],
+			'max int' => [
+				0 => '8 EB',
+				1 => 0,
+				2 => 0,
+				3 => "9223372036854775808",
+				4 => "8000000000000000000",
+				5 => \LengthException::class,
+			],
+			'exabyte, overflow' => [
+				0 => '867.36EB',
+				1 => 0,
+				2 => 0,
+				3 => "999997996235794808832",
+				4 => "867360000000000000000",
+				5 => \LengthException::class,
+			],
+			'huge exabyte, overflow' => [
+				0 => '1000EB',
+				1 => 0,
+				2 => 0,
+				3 => "1152921504606846976000",
+				4 => "1000000000000000000000",
+				5 => \LengthException::class,
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
 	 * @covers ::stringByteFormat
 	 * @dataProvider byteStringProvider
 	 * @testdox stringByteFormat $input will be $expected and $expected_si SI [$_dataName]
@@ -227,10 +253,22 @@ final class CoreLibsConvertByteTest extends TestCase
 	 * @param string|int|float $input
 	 * @param string|int|float $expected
 	 * @param string|int|float $expected_si
+	 * @param string|int|float $expected_string
+	 * @param string|int|float $expected_string_si
+	 * @param ?string          $exception
 	 * @return void
 	 */
-	public function testStringByteFormat($input, $expected, $expected_si): void
-	{
+	public function testStringByteFormat(
+		string|int|float $input,
+		string|int|float $expected,
+		string|int|float $expected_si,
+		string|int|float $expected_string,
+		string|int|float $expected_string_si,
+		?string $exception
+	): void {
+		if ($exception !== null) {
+			$this->expectException($exception);
+		}
 		$this->assertEquals(
 			$expected,
 			\CoreLibs\Convert\Byte::stringByteFormat($input)
@@ -238,6 +276,17 @@ final class CoreLibsConvertByteTest extends TestCase
 		$this->assertEquals(
 			$expected_si,
 			\CoreLibs\Convert\Byte::stringByteFormat($input, \CoreLibs\Convert\Byte::BYTE_FORMAT_SI)
+		);
+		$this->assertEquals(
+			$expected_string,
+			\CoreLibs\Convert\Byte::stringByteFormat($input, \CoreLibs\Convert\Byte::RETURN_AS_STRING)
+		);
+		$this->assertEquals(
+			$expected_string_si,
+			\CoreLibs\Convert\Byte::stringByteFormat(
+				$input,
+				\CoreLibs\Convert\Byte::BYTE_FORMAT_SI | \CoreLibs\Convert\Byte::RETURN_AS_STRING
+			)
 		);
 	}
 

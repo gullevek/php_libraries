@@ -121,6 +121,12 @@ Class TestP
 	public function test(): void
 	{
 		$this->log->info('TestL::test call');
+		$this->subCall();
+	}
+
+	public function subCall(): void
+	{
+		$this->log->info('TestL::sub_call call');
 	}
 }
 

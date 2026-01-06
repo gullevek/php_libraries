@@ -40,6 +40,8 @@ print "Log ERROR: " . $log->prAr($em->getFlagLogError()) . "<br>";
 print "FN: " . ml::fromName('Affe')->name . "<br>";
 print "NU: " . ml::fromValue(100)->name . "<br>";
 print "NU: " . ml::fromValue(1000)->name . "<br>";
+print "OK.: " . ml::ok->name . "<br>";
+print "OK^: " . ml::fromName('OK')->name . "<br>";
 
 $em->setErrorMsg('123', 'error', 'msg this is bad, auto logged if debug');
 $em->setErrorMsg('123', 'error', 'msg this is bad, auto logged if debug', 'target-id', 'other-style');
@@ -55,6 +57,14 @@ $em->setErrorMsg('100-1', 'error', 'Input wring', jump_target:['target' => 'foo-
 $em->setErrorMsg('100-2', 'error', 'Input wring', jump_target:['target' => 'foo-123', 'info' => 'Jump Target 456']);
 $em->setMessage('error', 'I have no id set', jump_target:['target' => 'bar-123', 'info' => 'Jump Bar']);
 $em->setMessage('error', 'Jump empty', jump_target:['target' => 'bar-empty']);
+
+function inLine(\CoreLibs\Logging\ErrorMessage $em): void
+{
+	$em->log->error('Direct log before from ', context:['function' => __FUNCTION__]);
+	$em->setMessage('error', 'Inline call', context:['test' => 'inLine Function']);
+	$em->log->error('Direct log from ', context:['function' => __FUNCTION__]);
+}
+inLine($em);
 
 print "ErrorsLast: <pre>" . $log->prAr($em->getLastErrorMsg()) . "</pre>";
 print "ErrorsIds: <pre>" . $log->prAr($em->getErrorIds()) . "</pre>";

@@ -13,6 +13,7 @@ namespace CoreLibs\Logging\Logger;
 
 enum MessageLevel: int
 {
+	case noset = 0;
 	case ok = 100;
 	case success = 150; // special for file uploads
 	case info = 200;
