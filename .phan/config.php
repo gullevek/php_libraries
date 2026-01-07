@@ -26,7 +26,6 @@
 use Phan\Config;
 
 return [
-	"color_issue_messages_if_supported" => true,
 	// "target_php_version" => "8.3",
 	"minimum_target_php_version" => "8.3",
 	// turn color on (-C)
