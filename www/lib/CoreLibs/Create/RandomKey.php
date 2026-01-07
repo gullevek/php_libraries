@@ -27,7 +27,7 @@ class RandomKey
 	/** @var int character count in they key character range */
 	private static int $key_character_range_length = 0;
 	/** @var int default key lenghth */
-	/** @deprecated Will be removed */
+	/** @deprecated Will be removed, as setting has moved to randomKeyGen */
 	private static int $key_length = 4;
 
 	/**
@@ -107,7 +107,7 @@ class RandomKey
 	 * @param  int  $key_length key length
 	 * @return bool             true for valid, false for invalid length
 	 */
-	private static function validateRandomKeyLenght(int $key_length): bool
+	private static function validateRandomKeyLength(int $key_length): bool
 	{
 		if (
 			$key_length > 0 &&
@@ -125,12 +125,12 @@ class RandomKey
 	 *
 	 * @param  int  $key_length key length
 	 * @return bool             true/false for set status
-	 * @deprecated This function does no longer set the key length, the randomKeyGen parameter has to b used
+	 * @deprecated This function does no longer set the key length, the randomKeyGen parameter has to be used
 	 */
 	public static function setRandomKeyLength(int $key_length): bool
 	{
 		// only if valid int key with valid length
-		if (self::validateRandomKeyLenght($key_length) === true) {
+		if (self::validateRandomKeyLength($key_length) === true) {
 			self::$key_length = $key_length;
 			return true;
 		} else {
@@ -176,7 +176,7 @@ class RandomKey
 			$key_character_range_length = self::getRandomKeyDataLength();
 		}
 		// if not valid key length, fallback to default
-		if (!self::validateRandomKeyLenght($key_length)) {
+		if (!self::validateRandomKeyLength($key_length)) {
 			$key_length = self::KEY_LENGTH_DEFAULT;
 		}
 		// create random string
