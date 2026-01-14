@@ -49,7 +49,7 @@ class RandomKey
 	private static function validateRandomKeyData(array ...$key_range): string
 	{
 		$key_character_range = Strings::buildCharStringFromLists(...$key_range);
-		if (strlen(self::$key_character_range) <= 1) {
+		if (strlen($key_character_range) <= 1) {
 			return '';
 		}
 		return $key_character_range;
