@@ -225,6 +225,36 @@ foreach ($intervals as $interval) {
 	print "STRINGTOTIME: $reverse_interval: " . DateTime::stringToTime($reverse_interval) . "<br>";
 }
 print "<hr>";
+$interval_strings = [
+	'10d 5h 30m 15s 123456ms',
+	'18999d 0h 38m 10s 1235ms',
+	'18999 d 0 h 38 m 10s 1235ms',
+	'-2h 15m 5s',
+	'45s 500ms',
+	'0s',
+	'0ms',
+	'1s 5ms',
+	'1s 50ms',
+	'1s 500ms',
+	'1s 5000ms',
+	'10day 5hour 30min 15sec 123456millis',
+	'10day 5hour 30min 15sec 123456millisec',
+	'10day 5hour 30min 15sec 123456msec',
+	'-2days 3hours 15minutes 30seconds 250milliseconds',
+	'',
+	' ',
+	'invalid',
+];
+foreach ($interval_strings as $interval_string) {
+	print "STRINGTOTIME: $interval_string: " . DateTime::stringToTime($interval_string) . "<br>";
+	try {
+		// test exception
+		DateTime::stringToTime($interval_string, throw_exception:true);
+	} catch (\InvalidArgumentException $e) {
+		print "ERROR: " . $e->getMessage() . "<br><pre>" . $e . "</pre><br>";
+	}
+}
+print "<hr>";
 $check_dates = [
 	'2021-05-01',
 	'2021-05-40'

@@ -490,11 +490,11 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 			],
 			'micro interval with microtime' => [
 				'18999d 0h 38m 10s 1235ms',
-				1641515890.1235,
+				1641515891.235,
 			],
 			'micro interval with microtime' => [
 				'18999d 0h 38m 10s 1234567890ms',
-				1641515890.1234567,
+				1642750457.89,
 			],
 			'negative interval no microtime' => [
 				'-18999d 0h 38m 10s',
@@ -503,23 +503,246 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 			// short for mini tests
 			'microtime only' => [
 				'0s 1235ms',
-				0.1235,
+				1.235,
 			],
 			'seconds only' => [
 				'30s 1235ms',
-				30.1235,
+				31.235,
 			],
 			'minutes only' => [
 				'1m 30s 1235ms',
-				90.1235,
+				91.235,
 			],
 			'hours only' => [
 				'1h 1m 30s 1235ms',
-				3690.1235,
+				3691.235,
 			],
 			'days only' => [
 				'1d 1h 1m 30s 1235ms',
-				90090.1235,
+				90091.235,
+			],
+			'days only with long name' => [
+				'1day 1hour 1min 30second 1235millisecond',
+				90091.235,
+			],
+			// Test day variations
+			'day singular' => [
+				'5day',
+				432000,
+			],
+			'days plural' => [
+				'3days',
+				259200,
+			],
+			'days with space' => [
+				'2days 5h',
+				190800,
+			],
+			'day without space' => [
+				'1day1h',
+				90000,
+			],
+			// Test hour variations
+			'hour singular' => [
+				'2hour',
+				7200,
+			],
+			'hours plural' => [
+				'4hours',
+				14400,
+			],
+			'hours with space' => [
+				'3hours 30m',
+				12600,
+			],
+			'hour without space' => [
+				'1hour30m',
+				5400,
+			],
+			// Test minute variations
+			'min short' => [
+				'45min',
+				2700,
+			],
+			'minute singular' => [
+				'1minute',
+				60,
+			],
+			'minutes plural' => [
+				'10minutes',
+				600,
+			],
+			'minutes with space' => [
+				'5minutes 20s',
+				320,
+			],
+			'min without space' => [
+				'2min30s',
+				150,
+			],
+			// Test second variations
+			'sec short' => [
+				'30sec',
+				30,
+			],
+			'second singular' => [
+				'1second',
+				1,
+			],
+			'seconds plural' => [
+				'45seconds',
+				45,
+			],
+			'seconds with space' => [
+				'15seconds 500ms',
+				15.5,
+			],
+			'sec without space' => [
+				'10sec250ms',
+				10.25,
+			],
+			// Test millisecond variations
+			'ms short' => [
+				'500ms',
+				0.5,
+			],
+			'millis short' => [
+				'250millis',
+				0.25,
+			],
+			'millisec medium singular' => [
+				'250millisec',
+				0.25,
+			],
+			'millisecs medium plural' => [
+				'250millisecs',
+				0.25,
+			],
+			'misec medium singular' => [
+				'250millisec',
+				0.25,
+			],
+			'msecs medium plural' => [
+				'250millisecs',
+				0.25,
+			],
+			'millisecond long singular' => [
+				'1millisecond',
+				0.001,
+			],
+			'milliseconds long plural' => [
+				'999milliseconds',
+				0.999,
+			],
+			// Test negative values
+			'negative days' => [
+				'-5d',
+				-432000,
+			],
+			'negative hours' => [
+				'-3h',
+				-10800,
+			],
+			'negative minutes' => [
+				'-45m',
+				-2700,
+			],
+			'negative seconds' => [
+				'-30s',
+				-30,
+			],
+			'negative milliseconds' => [
+				'-500ms',
+				-0.5,
+			],
+			'negative complex' => [
+				'-2days 3hours 15minutes 30seconds 250milliseconds',
+				-184530.25,
+			],
+			// Test combined formats
+			'all components short' => [
+				'1d 2h 3m 4s 5ms',
+				93784.005,
+			],
+			'all components long' => [
+				'2days 3hours 4minutes 5seconds 678milliseconds',
+				183845.678,
+			],
+			'mixed short and long' => [
+				'1day 2h 3minutes 4sec 100ms',
+				93784.1,
+			],
+			'no spaces between components' => [
+				'1d2h3m4s5ms',
+				93784.005,
+			],
+			'only days and milliseconds' => [
+				'5d 123ms',
+				432000.123,
+			],
+			'only hours and seconds' => [
+				'2h 45s',
+				7245,
+			],
+			'only minutes and milliseconds' => [
+				'30m 500ms',
+				1800.5,
+			],
+			// Test zero values
+			'zero seconds' => [
+				'0s',
+				0,
+			],
+			'zero with milliseconds' => [
+				'0s 123ms',
+				0.123,
+			],
+			// Test large values
+			'large days' => [
+				'365days',
+				31536000,
+			],
+			'large hours' => [
+				'48hours',
+				172800,
+			],
+			'large minutes' => [
+				'1440minutes',
+				86400,
+			],
+			'large seconds' => [
+				'86400seconds',
+				86400,
+			],
+			// Test edge cases with spaces
+			'extra spaces' => [
+				'1d 2h 3m 4s 5ms',
+				93784.005,
+			],
+			'mixed spaces and no spaces' => [
+				'1d 2h3m 4s5ms',
+				93784.005,
+			],
+			// Test single component each
+			'only days short' => [
+				'7d',
+				604800,
+			],
+			'only hours short' => [
+				'12h',
+				43200,
+			],
+			'only minutes short' => [
+				'90m',
+				5400,
+			],
+			'only seconds short' => [
+				'120s',
+				120,
+			],
+			'only milliseconds short' => [
+				'1500ms',
+				1.5,
 			],
 			'already set' => [
 				1641515890,
@@ -529,10 +752,18 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 				'xyz',
 				'xyz',
 			],
+			'empty data' => [
+				' ',
+				' ',
+			],
 			'out of bound data' => [
 				'99999999999999999999d',
 				8.64E+24
 			],
+			'spaces inbetween' => [
+				'  -       9 d 2h 58minutes 35    seconds     123     ms          ',
+				-788315.123,
+			]
 		];
 	}
 
@@ -553,6 +784,36 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 			$expected,
 			\CoreLibs\Combined\DateTime::stringToTime($input)
 		);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::stringToTime
+	 * @testdox stringToTime invalid input will throw exception if requested
+	 *
+	 * @return void
+	 */
+	public function testStringToTimeException(): void
+	{
+		$this->expectException(\InvalidArgumentException::class);
+		$this->expectExceptionMessageMatches("/^Invalid time string format, cannot parse: /");
+		\CoreLibs\Combined\DateTime::stringToTime('1x 2y 3z', true);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::stringToTime
+	 * @testdox stringToTime empty input will throw exception if requested
+	 *
+	 * @return void
+	 */
+	public function testStringToTimeExceptionEmpty(): void
+	{
+		$this->expectException(\InvalidArgumentException::class);
+		$this->expectExceptionMessageMatches("/^Invalid time string format, no interval value found: /");
+		\CoreLibs\Combined\DateTime::stringToTime(' ', true);
 	}
 
 	/**

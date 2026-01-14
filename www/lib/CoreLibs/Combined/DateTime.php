@@ -395,39 +395,68 @@ class DateTime
 	 * does a reverse of the timeStringFormat and converts the string from
 	 * xd xh xm xs xms to a timestamp.microtime format
 	 *
-	 * @param  string|int|float $timestring formatted interval
-	 * @return string|int|float             converted float interval, or string as is
+	 * @param  string|int|float $timestring      formatted interval
+	 * @param  bool             $throw_exception [default=false] if set to true will throw exception
+	 *                                                           instead of returning input value as is
+	 * @return string|int|float                  converted float interval, or string as is
 	 */
-	public static function stringToTime(string|int|float $timestring): string|int|float
-	{
+	public static function stringToTime(
+		string|int|float $timestring,
+		bool $throw_exception = false
+	): string|int|float {
 		$timestamp = 0;
-		if (!preg_match("/(d|h|m|s|ms)/", (string)$timestring)) {
-			return $timestring;
-		}
-		$timestring = (string)$timestring;
-		// pos for preg match read + multiply factor
-		$timegroups = [2 => 86400, 4 => 3600, 6 => 60, 8 => 1];
 		$matches = [];
-		// if start with -, strip and set negative
-		$negative = false;
-		if (preg_match("/^-/", $timestring)) {
-			$negative = true;
-			$timestring = substr($timestring, 1);
-		}
 		// preg match: 0: full string
 		// 2, 4, 6, 8 are the to need values
-		preg_match("/^((\d+)d ?)?((\d+)h ?)?((\d+)m ?)?((\d+)s ?)?((\d+)ms)?$/", $timestring, $matches);
+		if (
+			!preg_match(
+				"/^\s*(-)?\s*"
+				. "((\d+)\s*d(?:ay(?:s)?)?)?\s*"
+				. "((\d+)\s*h(?:our(?:s)?)?)?\s*"
+				. "((\d+)\s*m(?:in(?:ute)?(?:s)?)?)?\s*"
+				. "((\d+)\s*s(?:ec(?:ond)?(?:s)?)?)?\s*"
+				. "((\d+)\s*m(?:illi)?s(?:ec(?:ond)?(?:s)?)?)?\s*"
+				. "$/",
+				(string)$timestring,
+				$matches
+			)
+		) {
+			if ($throw_exception) {
+				throw new \InvalidArgumentException(
+					'Invalid time string format, cannot parse: "' . (string)$timestring . '"',
+					1
+				);
+			}
+			return $timestring;
+		}
+		if (count($matches) < 2) {
+			if ($throw_exception) {
+				throw new \InvalidArgumentException(
+					'Invalid time string format, no interval value found: "' . (string)$timestring . '"',
+					2
+				);
+			}
+			return $timestring;
+		}
+		// pos for preg match read + multiply factor
+		$timegroups = [3 => 86400, 5 => 3600, 7 => 60, 9 => 1];
+		// if start with -, strip and set negative
+		$negative = false;
+		if (!empty($matches[1])) {
+			$negative = true;
+		}
 		// multiply the returned matches and sum them up. the last one (ms) is added with .
 		foreach ($timegroups as $i => $time_multiply) {
 			if (isset($matches[$i]) && is_numeric($matches[$i])) {
 				$timestamp += (float)$matches[$i] * $time_multiply;
 			}
 		}
-		if (isset($matches[10]) && is_numeric($matches[10])) {
-			$timestamp .= '.' . $matches[10];
+		if (isset($matches[11]) && is_numeric($matches[11])) {
+			// for milliseconds, we need to divide by 1000 and add them
+			$timestamp += (float)($matches[11] / 1000);
 		}
 		if ($negative) {
-			// cast to flaot so we can do a negative multiplication
+			// cast to float so we can do a negative multiplication
 			$timestamp = (float)$timestamp * -1;
 		}
 		return $timestamp;
