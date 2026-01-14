@@ -287,6 +287,10 @@ class Strings
 		// Remove all spaces
 		$input = str_replace(' ', '', $input);
 		$result = [];
+		// if there is no - inside, return unique characters as array
+		if (strpos($input, '-') === false) {
+			return array_unique(mb_str_split($input));
+		}
 		// Find all patterns like "A-Z" (character-dash-character)
 		preg_match_all('/(.)-(.)/u', $input, $matches, PREG_SET_ORDER);
 		foreach ($matches as $match) {

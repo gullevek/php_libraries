@@ -141,6 +141,7 @@ print "[B] LAST PREGE ERROR: " . preg_last_error() . " -> "
 	. Strings::getLastRegexErrorString() . " -> " . preg_last_error_msg() . "<br>";
 
 $base_strings = [
+	'abcddfff',
 	'A-Z',
 	'a-z',
 	'A-Za-z',

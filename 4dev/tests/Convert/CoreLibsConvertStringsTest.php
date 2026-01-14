@@ -743,6 +743,11 @@ final class CoreLibsConvertStringsTest extends TestCase
 				'abcdefghijklmnopqrstuvwxyz0123',
 				null,
 			],
+			'range without dashes' => [
+				['abcddfff'],
+				'abcdf',
+				null,
+			],
 			'invalid ranges' => [
 				['a-あ', 'A-あ', '0-あ'],
 				'',
