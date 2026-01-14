@@ -698,6 +698,84 @@ final class CoreLibsConvertStringsTest extends TestCase
 			'Cannot match last preg error string'
 		);
 	}
+
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
+	public function parseCharacterRangesProvider(): array
+	{
+		return [
+			'simple a-z' => [
+				['a-z'],
+				implode('', range('a', 'z')),
+				null,
+			],
+			'simple A-Z' => [
+				['A-Z'],
+				implode('', range('A', 'Z')),
+				null,
+			],
+			'simple 0-9' => [
+				['0-9'],
+				implode('', range('0', '9')),
+				null,
+			],
+			'mixed ranges' => [
+				['a-c', 'X-Z', '3-5'],
+				'abcXYZ345',
+				null,
+			],
+			'reverse ranges' => [
+				['z-a'],
+				'abcdefghijklmnopqrstuvwxyz',
+				null,
+			],
+			'overlapping ranges' => [
+				['a-f', 'd-j'],
+				'abcdefghij',
+				null,
+			],
+			'mixed valid and overlap ranges' => [
+				['a-f', 'z-a', '0-3'],
+				'abcdefghijklmnopqrstuvwxyz0123',
+				null,
+			],
+			'invalid ranges' => [
+				['a-あ', 'A-あ', '0-あ'],
+				'',
+				\InvalidArgumentException::class,
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::parseCharacterRanges
+	 * @dataProvider parseCharacterRangesProvider
+	 * @testdox parseCharacterRanges $input to $expected [$_dataName]
+	 *
+	 * @param  array       $input
+	 * @param  string      $expected
+	 * @param  string|null $expected_exception
+	 * @return void
+	 */
+	public function testParseCharacterRanges(
+		array $input,
+		string $expected,
+		?string $expected_exception
+	): void {
+		if ($expected_exception !== null) {
+			$this->expectException($expected_exception);
+		}
+		$this->assertEquals(
+			$expected,
+			implode('', \CoreLibs\Convert\Strings::parseCharacterRanges(implode('', $input)))
+		);
+	}
 }
 
 // __END__

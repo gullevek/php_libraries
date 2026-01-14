@@ -269,6 +269,51 @@ class Strings
 	}
 
 	/**
+	 * Split up character ranges in format A-Z, a-z, 0-9
+	 *
+	 * @param  string $input
+	 * @return string[]
+	 */
+	public static function parseCharacterRanges(string $input): array
+	{
+		// if not alphanumeric, throw value error
+		if (!preg_match("/^[A-Za-z0-9\-\s]+$/u", $input)) {
+			throw new \InvalidArgumentException(
+				"The input string contains invalid characters, "
+				. "only alphanumeric, dash (-), space and 'or' are allowed: "
+				. $input
+			);
+		}
+		// Remove all spaces
+		$input = str_replace(' ', '', $input);
+		$result = [];
+		// Find all patterns like "A-Z" (character-dash-character)
+		preg_match_all('/(.)-(.)/u', $input, $matches, PREG_SET_ORDER);
+		foreach ($matches as $match) {
+			$start = $match[1];
+			$end = $match[2];
+			// Get ASCII/Unicode values
+			$startOrd = ord($start[0]);
+			$endOrd = ord($end[0]);
+			// make sure start is before end
+			if ($startOrd > $endOrd) {
+				[$startOrd, $endOrd] = [$endOrd, $startOrd];
+			}
+
+			// Generate range of characters
+			for ($i = $startOrd; $i <= $endOrd; $i++) {
+				$char = chr($i);
+				if (!in_array($char, $result)) {
+					$result[] = $char;
+				}
+			}
+		}
+		// make the result unique
+		$result = array_unique($result);
+		return $result;
+	}
+
+	/**
 	 * Check if a regex is valid. Does not return the detail regex parser error
 	 *
 	 * @param  string $pattern Any regex string

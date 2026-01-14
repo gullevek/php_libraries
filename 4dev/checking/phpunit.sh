@@ -6,7 +6,7 @@ function error() {
 
 usage() {
 	cat <<EOF
-Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-t] [-v] [-p VERSION]
+Usage: $(basename "${BASH_SOURCE[0]}") [-h | --help] [-p | --php VERSION] [-c | --composer] [-t | --testdox] [-v | --verbose]
 
 Runs all the PHP unit tests.
 

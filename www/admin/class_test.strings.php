@@ -140,6 +140,27 @@ $preg_error = Strings::isValidRegex($regex_string);
 print "[B] LAST PREGE ERROR: " . preg_last_error() . " -> "
 	. Strings::getLastRegexErrorString() . " -> " . preg_last_error_msg() . "<br>";
 
+$base_strings = [
+	'A-Z',
+	'a-z',
+	'A-Za-z',
+	'A-Df-g',
+	'A-D0-9',
+	'D-A7-0',
+	'A-FB-G',
+	'0-9',
+	'あ-お',
+	'ア-オ',
+];
+foreach ($base_strings as $string) {
+	try {
+		$parsed = Strings::parseCharacterRanges($string);
+		print "Parsed ranges for '$string': " . DgS::printAr($parsed) . "<br>";
+	} catch (\InvalidArgumentException $e) {
+		print "Error parsing ranges for '$string': " . $e->getMessage() . "<br>";
+	}
+}
+
 print "</body></html>";
 
 // __END__

@@ -6,7 +6,7 @@ function error() {
 
 usage() {
 	cat <<EOF
-Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-p VERSION]
+Usage: $(basename "${BASH_SOURCE[0]}") [-h | --help] [-p | --php VERSION] [-c | --composer]
 
 Runs phan static analyzer.
 
