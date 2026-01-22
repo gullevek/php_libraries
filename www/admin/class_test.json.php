@@ -46,6 +46,7 @@ $json = '["f: {b"""ar}]';
 $output = Json::jsonConvertToArray($json);
 print "S::E-JSON: $json: " . DgS::printAr($output) . "<br>";
 print "S::E-JSON ERROR: " . Json::jsonGetLastError() . ": " . Json::jsonGetLastError(true) . "<br>";
+print "S::E Validate: " . Json::jsonValidate($json) . ": " . Json::jsonGetLastError(true) . "<br>";
 
 // direct
 $json = '{"direct": "static function call"}';

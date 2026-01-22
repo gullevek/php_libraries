@@ -27,10 +27,14 @@ class Json
 	 *                               set original value as array
 	 * @return array<mixed>          returns an array from the json values
 	 */
-	public static function jsonConvertToArray(?string $json, bool $override = false): array
+	public static function jsonConvertToArray(?string $json, bool $override = false, int $flags = 0): array
 	{
 		if ($json !== null) {
-			$_json = json_decode($json, true);
+			// if flags has JSON_THROW_ON_ERROR remove it
+			if ($flags & JSON_THROW_ON_ERROR) {
+				$flags = $flags & ~JSON_THROW_ON_ERROR;
+			}
+			$_json = json_decode($json, true, flags:$flags);
 			if (self::$json_last_error = json_last_error()) {
 				if ($override == true) {
 					// init return as array with original as element
@@ -63,6 +67,21 @@ class Json
 		$json_string = json_encode($data, $flags) ?: '{}';
 		self::$json_last_error = json_last_error();
 		return (string)$json_string;
+	}
+
+	/**
+	 * Validate if a json string could be decoded.
+	 * Weill set the internval last error state and info can be read with jsonGetLastError
+	 *
+	 * @param  string $json
+	 * @param  int    $flags only JSON_INVALID_UTF8_IGNORE is currently allowed
+	 * @return bool
+	 */
+	public static function jsonValidate(string $json, int $flags = 0): bool
+	{
+		$json_valid = json_validate($json, flags:$flags);
+		self::$json_last_error = json_last_error();
+		return $json_valid;
 	}
 
 	/**

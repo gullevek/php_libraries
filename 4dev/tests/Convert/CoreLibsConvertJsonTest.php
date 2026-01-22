@@ -165,6 +165,48 @@ final class CoreLibsConvertJsonTest extends TestCase
 	}
 
 	/**
+	 * test with flags
+	 *
+	 * @covers ::jsonConvertToArray
+	 * @testdox jsonConvertToArray flag test, if flag is used
+	 *
+	 * @return void
+	 */
+	public function testJsonConvertToArrayWithFlags(): void
+	{
+		$input = '{"valid":"json","invalid":"\xB1\x31"}';
+		$expected_without_flag = [
+			'valid' => 'json'
+		];
+		$expected_with_flag = [
+			'valid' => 'json',
+			'invalid' => "\xB1\x31"
+		];
+		$this->assertEquals(
+			$expected_without_flag,
+			\CoreLibs\Convert\Json::jsonConvertToArray($input)
+		);
+		$this->assertEquals(
+			$expected_with_flag,
+			\CoreLibs\Convert\Json::jsonConvertToArray($input, false, JSON_INVALID_UTF8_IGNORE)
+		);
+	}
+
+	public function testJsonConvertToArrayRemoveThrowFlag(): void
+	{
+		$input = '{"valid":"json","invalid":"\xB1\x31"}';
+		// show NOT throw an exception
+		try {
+			$this->assertEquals(
+				[],
+				\CoreLibs\Convert\Json::jsonConvertToArray($input, flags:JSON_THROW_ON_ERROR)
+			);
+		} catch (\Exception $e) {
+			$this->fail('Exception was thrown despite flag removal');
+		}
+	}
+
+	/**
 	 * test json error states
 	 *
 	 * @covers ::jsonGetLastError
@@ -186,6 +228,49 @@ final class CoreLibsConvertJsonTest extends TestCase
 		$this->assertEquals(
 			$expected_s,
 			\CoreLibs\Convert\Json::jsonGetLastError(true)
+		);
+	}
+
+	/**
+	 * test json error states
+	 *
+	 * @covers ::jsonValidate
+	 * @dataProvider jsonErrorProvider
+	 * @testdox jsonValidate $input will be $expected_i/$expected_s [$_dataName]
+	 *
+	 * @param string|null $input
+	 * @param int $expected_i
+	 * @param string $expected_s
+	 * @return void
+	 */
+	public function testJsonValidateGetLastError(?string $input, int $expected_i, string $expected_s): void
+	{
+		\CoreLibs\Convert\Json::jsonValidate($input);
+		$this->assertEquals(
+			$expected_i,
+			\CoreLibs\Convert\Json::jsonGetLastError()
+		);
+		$this->assertEquals(
+			$expected_s,
+			\CoreLibs\Convert\Json::jsonGetLastError(true)
+		);
+	}
+
+	/**
+	 * test json validation
+	 *
+	 * @covers ::jsonValidate
+	 * @testdox jsonValidate test valid and invalid json
+	 *
+	 * @return void
+	 */
+	public function testJsonValidate(): void
+	{
+		$this->assertTrue(
+			\CoreLibs\Convert\Json::jsonValidate('{"valid": "json"}')
+		);
+		$this->assertFalse(
+			\CoreLibs\Convert\Json::jsonValidate('not valid json')
 		);
 	}
 
