@@ -62,9 +62,9 @@ fi;
 php_bin="${PHP_BIN_PATH}${php_version}";
 echo "Use PHP Version: ${php_version}";
 if [ "${use_composer}" -eq 1 ]; then
-	echo "Use composer installed phan";
+	echo "Use composer installed";
 else
-	echo "Use phan installed via phives";
+	echo "Use phive installed";
 fi;
 
 if [ ! -f "${php_bin}" ]; then
