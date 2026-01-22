@@ -59,6 +59,22 @@ $output = $json_class::jsonConvertToArray($json);
 print "J/S::E-JSON: $json: " . DgS::printAr($output) . "<br>";
 print "J/S::E-JSON ERROR: " . $json_class::jsonGetLastError() . ": " . $json_class::jsonGetLastError(true) . "<br>";
 
+$json = '{"valid":"json","invalid":"\xB1\x31"}';
+$json = '{"valid":"json","invalid":"abc\x80def"}';
+$output_no_flag = Json::jsonConvertToArray($json);
+print "No Flag JSON: $json: " . DgS::printAr($output_no_flag) . "<br>";
+print "No Flag JSON ERROR: " . Json::jsonGetLastError() . ": " . Json::jsonGetLastError(true) . "<br>";
+$output_flag = Json::jsonConvertToArray($json, flags:JSON_INVALID_UTF8_IGNORE);
+print "No Flag JSON: $json: " . DgS::printAr($output_flag) . "<br>";
+print "No Flag JSON ERROR: " . Json::jsonGetLastError() . ": " . Json::jsonGetLastError(true) . "<br>";
+$output_raw = json_decode($json, true, flags:JSON_INVALID_UTF8_IGNORE);
+print "No Flag JSON RAW (F-1): $json: " . DgS::printAr($output_raw) . "<br>";
+$output_raw = json_decode($json, true, flags:JSON_INVALID_UTF8_SUBSTITUTE);
+print "No Flag JSON RAW (F-2): $json: " . DgS::printAr($output_raw) . "<br>";
+$output_raw = json_decode($json, true);
+print "No Flag JSON RAW: $json: " . DgS::printAr($output_raw) . "<br>";
+
+
 // $json = '{"foo": "bar"}';
 // $output = Jason::jsonConvertToArray($json);
 // print "S::JSON: $json: " . DgS::printAr($output) . "<br>";
