@@ -59,6 +59,7 @@ $output = $json_class::jsonConvertToArray($json);
 print "J/S::E-JSON: $json: " . DgS::printAr($output) . "<br>";
 print "J/S::E-JSON ERROR: " . $json_class::jsonGetLastError() . ": " . $json_class::jsonGetLastError(true) . "<br>";
 
+echo "<hr>";
 $json = '{"valid":"json","invalid":"\xB1\x31"}';
 $json = '{"valid":"json","invalid":"abc\x80def"}';
 $output_no_flag = Json::jsonConvertToArray($json);
@@ -73,6 +74,7 @@ $output_raw = json_decode($json, true, flags:JSON_INVALID_UTF8_SUBSTITUTE);
 print "No Flag JSON RAW (F-2): $json: " . DgS::printAr($output_raw) . "<br>";
 $output_raw = json_decode($json, true);
 print "No Flag JSON RAW: $json: " . DgS::printAr($output_raw) . "<br>";
+echo "<hr>";
 
 
 // $json = '{"foo": "bar"}';
