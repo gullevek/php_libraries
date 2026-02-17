@@ -61,7 +61,7 @@ print "J/S::E-JSON ERROR: " . $json_class::jsonGetLastError() . ": " . $json_cla
 
 echo "<hr>";
 $json = '{"valid":"json","invalid":"\xB1\x31"}';
-$json = '{"valid":"json","invalid":"abc\x80def"}';
+// $json = '{"valid":"json","invalid":"abc\x80def"}';
 $output_no_flag = Json::jsonConvertToArray($json);
 print "No Flag JSON: $json: " . DgS::printAr($output_no_flag) . "<br>";
 print "No Flag JSON ERROR: " . Json::jsonGetLastError() . ": " . Json::jsonGetLastError(true) . "<br>";

@@ -134,8 +134,8 @@ class Support
 	 * Convert bool value to string value. Short name alias for printBool
 	 *
 	 * @param  bool   $bool  Bool value to be transformed
-	 * @param  string $true  [='true'] Override default string 'true'
-	 * @param  string $false [=false'] Override default string 'false'
+	 * @param  string $true  [=true] Override default string 'true'
+	 * @param  string $false [=false] Override default string 'false'
 	 * @return string        $true or $false string for true/false bool
 	 */
 	public static function prBl(
