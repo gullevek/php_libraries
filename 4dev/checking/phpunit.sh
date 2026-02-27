@@ -19,6 +19,7 @@ Available options:
 -v, --verbose     Enable verbose output for PHPunit
 -c, --composer    Use composer version and not the default phives bundle
 -p, --php VERSION Chose PHP version in the form of "N.N", if not found will exit
+-C, --coverage     Generate code coverage report in text format (default: disabled)
 EOF
 	exit
 }
@@ -47,6 +48,7 @@ opt_verbose="";
 php_version="";
 no_php_version=0;
 use_composer=0;
+opt_generate_coverage="";
 while [ -n "${1-}" ]; do
 	case "${1}" in
 		-t | --testdox)
@@ -57,6 +59,10 @@ while [ -n "${1-}" ]; do
 			;;
 		-c | --composer)
 			use_composer=1;
+			shift
+			;;
+		-C | --coverage)
+			opt_generate_coverage="--coverage-text";
 			shift
 			;;
 		-p | --php)
@@ -100,9 +106,14 @@ if [ "${use_composer}" -eq 1 ]; then
 else
 	PHPUNIT_CALL+=("${BASE_PATH}tools/phpunit");
 fi;
+if [ -n "${opt_generate_coverage}" ]; then
+	echo "Will run coverage report";
+	export XDEBUG_MODE=coverage
+fi;
 PHPUNIT_CALL+=(
 	"${opt_testdox}"
 	"${opt_verbose}"
+	"${opt_generate_coverage}"
 	"-c" "${PHPUNIT_CONFIG}"
 	"${BASE_PATH}4dev/tests/"
 );

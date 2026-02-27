@@ -17,7 +17,7 @@
     "repositories": {
         "git.egplusww.jp.Composer": {
             "type": "composer",
-            "url": "https://git.egplusww.jp/api/packages/Composer/composer"
+            "url": "https://packages.omnicomproduction.jp/api/packages/Composer/composer"
         }
     },
     "require": {

@@ -45,7 +45,6 @@ use CoreLibs\DB\Support\ConvertPlaceholder;
  * Test class for DB\IO + DB\SQL\PgSQL
  * This will only test the PgSQL parts
  * @coversDefaultClass \CoreLibs\DB\IO
- * @coversDefaultClass \CoreLibs\DB\SQL\PgSQL
  * @testdox \CoreLibs\DB\IO method tests for SQL\PgSQL
  */
 final class CoreLibsDBIOTest extends TestCase

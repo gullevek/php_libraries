@@ -10,4 +10,14 @@
 			<directory>4dev/tests</directory>
 		</testsuite>
 	</testsuites>
+	<coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./www/lib/CoreLibs</directory>
+        </include>
+    </coverage>
+	<!-- <source>
+		<include>
+			<directory>./www/lib/CoreLibs</directory>
+		</include>
+	</source> -->
 </phpunit>
