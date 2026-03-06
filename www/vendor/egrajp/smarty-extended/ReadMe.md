@@ -14,11 +14,8 @@ For local install only
 Setup from gitea internal servers
 
 ```sh
-composer config repositories.git.egplusww.jp.Composer composer https://git.egplusww.jp/api/packages/Composer/composer
+composer config repositories.packages.omnicomproduction.jp.Composer composer https://packages.omnicomproduction.jp/api/packages/Composer/composer
 ```
-
-Alternative setup composer local zip file repot:
-`composer config repositories.composer.egplusww.jp composer http://composer.egplusww.jp`
 
 ## Install package
 
@@ -28,8 +25,8 @@ Alternative setup composer local zip file repot:
 
 1) update the original composer for ^4.3
 2) copy over the src/sysplugins and all base files in src/
-3) check either function.html_checkboxes.php and function.html_options.php have changed
-4) copy src/plugins except the above two files, be sure to keep the block.t.php and function_popup*.php
+3) check either `function_checkboxes.php` and `function_options.php` have changed
+4) copy src/plugins except the above two files, be sure to keep the `block.t.php` and `function_popup*.php`
 5) Create new release version as official relase number
 
 ## Updated files (different from master)

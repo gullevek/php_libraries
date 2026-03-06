@@ -1,5 +1,6 @@
 .libs
 node_modules/
-composer.lock
-vendor/
+**/composer.lock
+**/vendor/
 tools/
+**/.env
