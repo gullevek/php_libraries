@@ -811,6 +811,87 @@ class ArrayHandler
 		);
 		return $in_array;
 	}
+
+	/**
+	 * TODO: move to CoreLibs ArrayCombined
+	 * return one random entry from an array (value)
+	 * the return entry is null if the incoming array is empty
+	 * the array can also be an array of arrays
+	 *
+	 * @param  array<mixed> $array
+	 * @return string|int|float|bool|array<mixed>|null
+	 */
+	public static function getRandomEntryFromArray(array $array): string|int|float|bool|array|null
+	{
+		if (empty($array)) {
+			return null;
+		}
+		$random_index = array_rand($array);
+		return $array[$random_index];
+	}
+
+	/**
+	 * TODO: move to CoreLibs ArrayCombined
+	 * find and remove one value
+	 * on default removes only the first entry
+	 * on default does not strict compare
+	 *
+	 * @param  array<mixed>                       $array
+	 * @param  string|int|float|bool|array<mixed> $value
+	 * @param  bool                               $strict [false]
+	 * @return array<mixed>
+	 */
+	public static function removeArrayEntryByValue(
+		array $array,
+		string|int|float|bool|array $value,
+		bool $strict = false,
+	): array {
+		return array_filter($array, function ($element) use ($value, $strict) {
+			return $strict ?
+				$element !== $value :
+				$element != $value;
+		});
+	}
+
+	/**
+	 * TODO: move to CoreLibs ArrayCombined
+	 * add a string to each element in an array, default is at the end of the value,
+	 * can be switched with the prefix flag
+	 *
+	 * @param  array<string> $array
+	 * @param  string $string_to_add
+	 * @param  bool $prefix [false]
+	 * @return array<string>
+	 */
+	public static function addStringToEachValueInArray(array $array, string $string_to_add, bool $prefix = false): array
+	{
+		return array_map(function ($value) use ($string_to_add, $prefix) {
+			return $prefix ?
+				$string_to_add . $value :
+				$value . $string_to_add;
+		}, $array);
+	}
+
+	/**
+	 * sort by key any array, even if it is nested
+	 *
+	 * @param  array<mixed> $data
+	 * @return array<mixed>
+	 */
+	public static function createSortedArrayByKey(array $data): array
+	{
+		// Sort by keys
+		ksort($data);
+
+		// Recursively sort nested arrays
+		foreach ($data as $key => $value) {
+			if (is_array($value)) {
+				$data[$key] = self::createSortedArrayByKey($value);
+			}
+		}
+
+		return $data;
+	}
 }
 
 // __END__
