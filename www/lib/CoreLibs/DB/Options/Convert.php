@@ -51,7 +51,7 @@ enum Convert: int
 	/**
 	 * Get internal name from int value
 	 *
-	 * @param  int  $value
+	 * @param  int $value
 	 * @return self
 	 */
 	public static function fromValue(int $value): self

@@ -49,6 +49,7 @@ php_version="";
 no_php_version=0;
 use_composer=0;
 opt_generate_coverage="";
+opt_generate_coverage_html="";
 while [ -n "${1-}" ]; do
 	case "${1}" in
 		-t | --testdox)
@@ -63,6 +64,10 @@ while [ -n "${1-}" ]; do
 			;;
 		-C | --coverage)
 			opt_generate_coverage="--coverage-text";
+			shift
+			;;
+		--coverage-report)
+			opt_generate_coverage_html="--coverage-html build/coverage-report";
 			shift
 			;;
 		-p | --php)
@@ -114,6 +119,7 @@ PHPUNIT_CALL+=(
 	"${opt_testdox}"
 	"${opt_verbose}"
 	"${opt_generate_coverage}"
+	"${opt_generate_coverage_html}"
 	"-c" "${PHPUNIT_CONFIG}"
 	"${BASE_PATH}4dev/tests/"
 );
