@@ -38,6 +38,11 @@ print "GETFILENAMEENDING: $file: " . File::getFilenameEnding($file) . "<br>";
 $file = getcwd() . DIRECTORY_SEPARATOR . 'class_test.file.php';
 print "GETLINESFROMFILE: $file: " . File::getLinesFromFile($file) . "<br>";
 print "MIMEINFO: $file: " . File::getMimeType($file) . "<br>";
+try {
+	print "MIMEINFO: $file: " . File::getMimeType("does_not_exists.txt") . "<br>";
+} catch (\Exception $e) {
+	print "Error: " . get_class($e) . ": " . $e->getMessage() . "<br>";
+}
 
 print "</body></html>";
 

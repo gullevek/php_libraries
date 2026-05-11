@@ -58,15 +58,21 @@ class File
 	 * else returns '' for any other finfo read problem
 	 *
 	 * @param  string $read_file File to read, relative or absolute path
-	 * @return string
+	 * @return string mime type
+	 * @throws \UnexpectedValueException if file cannot be read or is not a file
+	 * @throws \RangeException if we cannot get a mime type and throw exception is on
 	 */
 	public static function getMimeType(string $read_file): string
 	{
 		$finfo = new \finfo(FILEINFO_MIME_TYPE);
-		if (!is_file($read_file)) {
+		if (!is_file($read_file) || !is_readable($read_file)) {
 			throw new \UnexpectedValueException('[getMimeType] File not found: ' . $read_file);
 		}
-		return $finfo->file($read_file) ?: '';
+		$mime_type = $finfo->file($read_file);
+		if ($mime_type === false) {
+			throw new \RangeException('[getMimeType] Cannot get mime type for: ' . $read_file);
+		}
+		return $mime_type;
 	}
 }
 
