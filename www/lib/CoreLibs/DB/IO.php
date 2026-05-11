@@ -2562,21 +2562,27 @@ class IO
 				// set field names
 				$this->cursor_ext[$query_hash]['field_names'] = [];
 				for ($i = 0; $i < $this->cursor_ext[$query_hash]['num_fields']; $i++) {
-					$this->cursor_ext[$query_hash]['field_names'][] =
-						$this->db_functions->__dbFieldName(
+					if (
+						($field_name = $this->db_functions->__dbFieldName(
 							$this->cursor_ext[$query_hash]['cursor'],
 							$i
-						);
+						)) !== false
+					) {
+						$this->cursor_ext[$query_hash]['field_names'][] = $field_name;
+					}
 				}
 				$this->field_names = $this->cursor_ext[$query_hash]['field_names'];
 				// field types
 				$this->cursor_ext[$query_hash]['field_types'] = [];
 				for ($i = 0; $i < $this->cursor_ext[$query_hash]['num_fields']; $i++) {
-					$this->cursor_ext[$query_hash]['field_types'][] =
-						$this->db_functions->__dbFieldType(
+					if (
+						($field_type = $this->db_functions->__dbFieldType(
 							$this->cursor_ext[$query_hash]['cursor'],
 							$i
-						);
+						)) !== false
+					) {
+						$this->cursor_ext[$query_hash]['field_types'][] = $field_type;
+					}
 				}
 				$this->field_types = $this->cursor_ext[$query_hash]['field_types'];
 				// combined name => type

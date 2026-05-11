@@ -154,7 +154,7 @@ class Byte
 		if (!empty($matches[1])) {
 			$number_negative = true;
 		}
-		if (isset($matches[2]) && isset($matches[3])) {
+		if (isset($matches[2])) {
 			// remove all non valid characters from the number
 			$number = preg_replace('/[^0-9\.]/', '', $matches[2]);
 			// final clean up and convert to float

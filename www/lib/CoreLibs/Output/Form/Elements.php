@@ -178,11 +178,11 @@ class Elements
 			"/(href=\")?(\>)?\b($protRegex)([\w\.\-?&=+%#~,;\/]+)\b([\.\-?&=+%#~,;\/]*)(\|([^\||^#]+)(#([^\|]+))?\|)?/",
 			function ($matches) {
 				return self::createUrl(
-					$matches[1] ?? '',
-					$matches[2] ?? '',
-					$matches[3] ?? '',
-					$matches[4] ?? '',
-					$matches[5] ?? '',
+					$matches[1],
+					$matches[2],
+					$matches[3],
+					$matches[4],
+					$matches[5],
 					$matches[7] ?? '',
 					$matches[9] ?? ''
 				);
