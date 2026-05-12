@@ -146,7 +146,7 @@ class L10n
 	 * @param string $locale language name, if not set, try previous set
 	 * @param string $domain set name for mo file, if not set, try previous set
 	 * @param string $path path, if not set try to get from paths array, else self
-	 * @param string $override_encoding if locale does not env encoding set, use this one
+	 * @param string $override_encoding if locale does not have encoding set, use this one
 	 * @return GetTextReader the main gettext reader object
 	 */
 	public function getTranslator(
