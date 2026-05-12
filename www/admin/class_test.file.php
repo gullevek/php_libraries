@@ -39,9 +39,23 @@ $file = getcwd() . DIRECTORY_SEPARATOR . 'class_test.file.php';
 print "GETLINESFROMFILE: $file: " . File::getLinesFromFile($file) . "<br>";
 print "MIMEINFO: $file: " . File::getMimeType($file) . "<br>";
 try {
-	print "MIMEINFO: $file: " . File::getMimeType("does_not_exists.txt") . "<br>";
+	print "MIMEINFO: does_not_exists.txt " . File::getMimeType("does_not_exists.txt") . "<br>";
 } catch (\Exception $e) {
 	print "Error: " . get_class($e) . ": " . $e->getMessage() . "<br>";
+}
+
+$files = [
+	'layout/css/edit.css',
+	'layout/javascript/edit.jq.js',
+	'class_test.file.php',
+	getcwd() . DIRECTORY_SEPARATOR . 'class_test.file.php',
+];
+foreach ($files as $file) {
+	try {
+		print "MIMEINFO: $file: " . File::getMimeType($file) . "<br>";
+	} catch (\Exception $e) {
+		print "Error: " . get_class($e) . ": " . $e->getMessage() . "<br>";
+	}
 }
 
 print "</body></html>";

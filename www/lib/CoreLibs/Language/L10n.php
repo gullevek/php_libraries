@@ -301,7 +301,7 @@ class L10n
 	 * Get the local as array same to the GetLocale::setLocale return
 	 * This does not set from outside, but only what is set in the l10n class
 	 *
-	 * @return array{locale: string, lang: string, lang_short: string, domain: string, encoding: string, path: string}
+	 * @return array{locale:string,lang:string,lang_short:string,domain:string,encoding:string,path:string}
 	 */
 	public function getLocaleAsArray(): array
 	{
@@ -321,7 +321,7 @@ class L10n
 	 * parse the locale string for further processing
 	 *
 	 * @param  string $locale Locale to parse
-	 * @return array<string,string|null> array with lang, country, charset, modifier
+	 * @return array{lang:string|null,country:string|null,charset:string|null,modifier:string|null} parsed locale
 	 */
 	public static function parseLocale(string $locale = ''): array
 	{
