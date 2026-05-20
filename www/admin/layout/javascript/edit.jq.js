@@ -1598,4 +1598,16 @@ function createNavMenu(nav_menu, header_id = 'mainHeader') // eslint-disable-lin
 	}
 }
 
+/**
+ * HTML decode &something; entrie
+ * @param {string} str
+ * @returns string
+ */
+function decodeHtmlEntities(str) // eslint-disable-line no-unused-vars
+{
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(str, 'text/html');
+	return doc.documentElement.textContent;
+}
+
 /* END */
