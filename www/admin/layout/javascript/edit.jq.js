@@ -1602,6 +1602,7 @@ function createNavMenu(nav_menu, header_id = 'mainHeader') // eslint-disable-lin
  * HTML decode &something; entrie
  * @param {string} str
  * @returns string
+ * @deprecated use utils.js
  */
 function decodeHtmlEntities(str) // eslint-disable-line no-unused-vars
 {

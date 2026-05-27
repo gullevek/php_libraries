@@ -43,70 +43,69 @@ class Byte
 	public static function humanReadableByteFormat(string|int|float $bytes, int $flags = 0): string
 	{
 		// if not numeric, return as is
-		if (is_numeric($bytes)) {
-			// flags bit wise check
-			// remove space between number and suffix
-			if ($flags & self::BYTE_FORMAT_NOSPACE) {
-				$space = false;
-			} else {
-				$space = true;
-			}
-			// use sprintf instead of round
-			if ($flags & self::BYTE_FORMAT_ADJUST) {
-				$adjust = true;
-			} else {
-				$adjust = false;
-			}
-			// use SI 1000 mod and not 1024 mod
-			if ($flags & self::BYTE_FORMAT_SI) {
-				$si = true;
-			} else {
-				$si = false;
-			}
-			if ($flags > 7) {
-				throw new \InvalidArgumentException("Invalid flags parameter: $flags", 1);
-			}
-
-			// si or normal
-			$unit = $si ? 1000 : 1024;
-			// always positive
-			$abs_bytes = $bytes == PHP_INT_MIN ? PHP_INT_MAX : abs((float)$bytes);
-			// smaller than unit is always B
-			if ($abs_bytes < $unit) {
-				return $bytes . 'B';
-			}
-			// labels in order of size [Y, Z]
-			$labels = ['', 'K', 'M', 'G', 'T', 'P', 'E'];
-			// exp position calculation
-			$exp = (int)floor(log($abs_bytes, $unit));
-			// avoid printing out anything larger than max labels
-			if ($exp >= count($labels)) {
-				$exp = count($labels) - 1;
-			}
-			// deviation calculation
-			$dev = pow($unit, $exp) * ($unit - 0.05);
-			// shift the exp +1 for on the border units
-			if (
-				$exp < 6 &&
-				$abs_bytes > ($dev - (((int)$dev & 0xfff) == 0xd00 ? 52 : 0))
-			) {
-				$exp++;
-			}
-			// label name, including leading space if flagged
-			$pre = ($space ? ' ' : '') . ($labels[$exp] ?? '>E') . ($si ? 'i' : '') . 'B';
-			$bytes_calc = $abs_bytes / pow($unit, $exp);
-			// if original is negative, reverse
-			if ($bytes < 0) {
-				$bytes_calc *= -1;
-			}
-			if ($adjust) {
-				return sprintf("%.2f%s", $bytes_calc, $pre);
-			} else {
-				return round($bytes_calc, 2) . $pre;
-			}
-		} else {
+		if (!is_numeric($bytes)) {
 			// if anything other return as string
 			return (string)$bytes;
+		}
+		// flags bit wise check
+		// remove space between number and suffix
+		if ($flags & self::BYTE_FORMAT_NOSPACE) {
+			$space = false;
+		} else {
+			$space = true;
+		}
+		// use sprintf instead of round
+		if ($flags & self::BYTE_FORMAT_ADJUST) {
+			$adjust = true;
+		} else {
+			$adjust = false;
+		}
+		// use SI 1000 mod and not 1024 mod
+		if ($flags & self::BYTE_FORMAT_SI) {
+			$si = true;
+		} else {
+			$si = false;
+		}
+		if ($flags > 7) {
+			throw new \InvalidArgumentException("Invalid flags parameter: $flags", 1);
+		}
+
+		// si or normal
+		$unit = $si ? 1000 : 1024;
+		// always positive
+		$abs_bytes = $bytes == PHP_INT_MIN ? PHP_INT_MAX : abs((float)$bytes);
+		// smaller than unit is always B
+		if ($abs_bytes < $unit) {
+			return $bytes . 'B';
+		}
+		// labels in order of size [Y, Z]
+		$labels = ['', 'K', 'M', 'G', 'T', 'P', 'E'];
+		// exp position calculation
+		$exp = (int)floor(log($abs_bytes, $unit));
+		// avoid printing out anything larger than max labels
+		if ($exp >= count($labels)) {
+			$exp = count($labels) - 1;
+		}
+		// deviation calculation
+		$dev = pow($unit, $exp) * ($unit - 0.05);
+		// shift the exp +1 for on the border units
+		if (
+			$exp < 6 &&
+			$abs_bytes > ($dev - (((int)$dev & 0xfff) == 0xd00 ? 52 : 0))
+		) {
+			$exp++;
+		}
+		// label name, including leading space if flagged
+		$pre = ($space ? ' ' : '') . ($labels[$exp] ?? '>E') . ($si ? 'i' : '') . 'B';
+		$bytes_calc = $abs_bytes / pow($unit, $exp);
+		// if original is negative, reverse
+		if ($bytes < 0) {
+			$bytes_calc *= -1;
+		}
+		if ($adjust) {
+			return sprintf("%.2f%s", $bytes_calc, $pre);
+		} else {
+			return round($bytes_calc, 2) . $pre;
 		}
 	}
 
