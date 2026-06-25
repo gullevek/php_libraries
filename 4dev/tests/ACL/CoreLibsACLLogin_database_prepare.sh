@@ -15,6 +15,12 @@ if [ ! -f "${load_sql}" ]; then
 	echo 1;
 	exit 1;
 fi;
+# if we have no dropdb, createdb, psql, exit with 6
+if ! command -v dropdb &> /dev/null || ! command -v createdb &> /dev/null || ! command -v psql &> /dev/null; then
+	echo 6;
+	exit 6;
+fi;
+
 db_user="${2}";
 db_name="${3}";
 db_host="${4}";
@@ -25,13 +31,13 @@ if [ -z "${db_user}" ] || [ -z "${db_name}" ] || [ -z "${db_host}" ]; then
 fi;
 # drop database, on error exit with 3
 dropdb -U "${db_user}" -h "${db_host}" "${db_name}" 2>&1;
-if ! $?; then
+if [ ! $? ]; then
 	echo 3;
 	exit 3;
 fi;
 # create database, on error exit with 4
 createdb -U "${db_user}" -O "${db_user}" -h "${db_host}" -E utf8 "${db_name}" 2>&1;
-if ! $?; then
+if [ ! $? ]; then
 	echo 4;
 	exit 4;
 fi;
@@ -42,7 +48,7 @@ else
 	# load data (redirect ALL error to null), on error exit with 5
 	psql -U "${db_user}" -h "${db_host}" -f "${load_sql}" "${db_name}" 2>&1 1>/dev/null 2>/dev/null;
 fi;
-if ! $?; then
+if [ ! $? ]; then
 	echo 5;
 	exit 5;
 fi;

@@ -32,11 +32,11 @@ class FileWriter
 		if (!is_writeable($folder)) {
 			return false;
 		}
-		// if last is not / then add
-		if (substr($folder, -1, 1) != DIRECTORY_SEPARATOR) {
-			$folder .= DIRECTORY_SEPARATOR;
+		if (!is_dir($folder)) {
+			return false;
 		}
-		self::$debug_folder = $folder;
+		// if last is not / then add
+		self::$debug_folder = rtrim($folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 		return true;
 	}
 
