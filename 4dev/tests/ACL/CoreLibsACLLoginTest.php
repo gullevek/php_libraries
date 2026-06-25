@@ -80,21 +80,27 @@ final class CoreLibsACLLoginTest extends TestCase
 			'log_file_id' => 'CoreLibs-ACL-Login-Test',
 		]);
 		// test database we need to connect do, if not possible this test is skipped
-		self::$db = new \CoreLibs\DB\IO(
-			[
-				'db_name' => $db_name,
-				'db_user' => $db_user,
-				'db_pass' => $db_password,
-				'db_host' => $db_host,
-				'db_port' => 5432,
-				'db_schema' => 'public',
-				'db_type' => 'pgsql',
-				'db_encoding' => '',
-				'db_ssl' => 'allow', // allow, disable, require, prefer
-				'db_debug' => true,
-			],
-			self::$log
-		);
+		try {
+			self::$db = new \CoreLibs\DB\IO(
+				[
+					'db_name' => $db_name,
+					'db_user' => $db_user,
+					'db_pass' => $db_password,
+					'db_host' => $db_host,
+					'db_port' => 5432,
+					'db_schema' => 'public',
+					'db_type' => 'pgsql',
+					'db_encoding' => '',
+					'db_ssl' => 'allow', // allow, disable, require, prefer
+					'db_debug' => true,
+				],
+				self::$log
+			);
+		} catch (\Exception $e) {
+			self::markTestSkipped(
+				'Cannot connect to valid Test DB for ACL\Login test: ' . $e->getMessage()
+			);
+		}
 		// ALWAYS drop DB and RECREATE DB
 		// dropdb -U corelibs_acl_login_test -h localhost corelibs_acl_login_test
 		// createdb -U corelibs_acl_login_test -O corelibs_acl_login_test -E utf8 corelibs_acl_login_test;

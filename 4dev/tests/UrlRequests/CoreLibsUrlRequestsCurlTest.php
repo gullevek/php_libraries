@@ -58,6 +58,10 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			if ($handle === false) {
 				continue;
 			}
+			$status = curl_exec($handle);
+			if ($status === false) {
+				continue;
+			}
 			$this->url_basic = $url;
 			// print "Open: $url\n";
 			break;
