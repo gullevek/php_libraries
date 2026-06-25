@@ -1266,7 +1266,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::arrayGetPrevKey, ::arrayGetNextKey
+	 * @covers ::arrayGetPrevKey
+	 * @covers ::arrayGetNextKey
 	 * @dataProvider providerArrayGetNextPrevKey
 	 * @testdox arrayGetNextPrevKey get next/prev key for $search wtih $expected_prev/$expected_next [$_dataName]
 	 *

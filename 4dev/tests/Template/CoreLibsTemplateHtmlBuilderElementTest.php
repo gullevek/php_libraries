@@ -42,7 +42,6 @@ final class CoreLibsTemplateHtmlBuilderElementTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::Element
 	 * @covers ::buildHtml
 	 * @covers ::getTag
 	 * @covers ::getId

@@ -78,7 +78,6 @@ final class CoreLibsCreateSessionTest extends TestCase
 	/**
 	 * Test session start
 	 *
-	 * @covers ::startSession
 	 * @dataProvider sessionProvider
 	 * @testdox startSession $input name for $type will be $expected (error: $expected_error) [$_dataName]
 	 *

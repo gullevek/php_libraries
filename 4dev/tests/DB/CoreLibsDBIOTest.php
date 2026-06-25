@@ -549,8 +549,6 @@ final class CoreLibsDBIOTest extends TestCase
 	/**
 	 * Test dbSetDbug, dbGetDebug
 	 *
-	 * @covers ::dbGetDbug
-	 * @covers ::dbSetDebug
 	 * @testdox Set and Get Debug flag
 	 *
 	 * @return void
@@ -3027,8 +3025,6 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @covers ::dbReturnParams
 	 * @covers ::dbCacheReset
 	 * @covers ::dbGetCursorExt
-	 * @covers ::dbCursorPos
-	 * @covers ::dbCursorNumRows
 	 * @dataProvider dbReturnProvider
 	 * @testdox dbReturn Read First $read_first_only only and cache $flag_cache and assoc $flag_assoc with (Warning: $warning/Error: $error) [$_dataName]
 	 *

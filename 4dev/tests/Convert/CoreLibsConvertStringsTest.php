@@ -671,7 +671,7 @@ final class CoreLibsConvertStringsTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::isValidRegexSimple
+	 * @covers ::isValidRegex
 	 * @dataProvider isValidRegexSimpleProvider
 	 * @testdox isValidRegexSimple make $input unqiue to $expected [$_dataName]
 	 *

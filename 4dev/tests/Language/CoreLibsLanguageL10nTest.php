@@ -442,7 +442,6 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * init check and connected change translation
 	 *
 	 * @covers ::getTranslator
-	 * @covers ::l10nReloadMOfile
 	 * @dataProvider getTranslatorProvider
 	 * @testdox change locale from $locale and domain $domain to locale $locale_new and domain $domain_new [$_dataName]
 	 *
@@ -639,7 +638,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * plural and plural context
 	 *
 	 * @covers ::__n
-	 * @covers ::__pn
+	 * @covers ::__np
 	 * @dataProvider ngettextProvider
 	 * @testdox plural string test for locale $locale and domain $domain with $context [$_dataName]
 	 *
@@ -865,6 +864,7 @@ final class CoreLibsLanguageL10nTest extends TestCase
 		string $value,
 		string $expected
 	): void {
+		$old_value = null;
 		switch ($type) {
 			case 'global':
 				$GLOBALS[$var] = $value;
@@ -1101,11 +1101,11 @@ final class CoreLibsLanguageL10nTest extends TestCase
 	 * fuctions check
 	 * TODO: others d/dn/dp/dnp gettext functions
 	 *
-	 * @covers __setlocale
-	 * @covers __bindtextdomain
-	 * @covers __bind_textdomain_codeset
-	 * @covers __textdomain
-	 * @covers __gettext
+	 * @covers _setlocale
+	 * @covers _bindtextdomain
+	 * @covers _bind_textdomain_codeset
+	 * @covers _textdomain
+	 * @covers _gettext
 	 * @covers __
 	 * @dataProvider functionsProvider
 	 * @testdox check functions with locale $locale and domain $domain [$_dataName]

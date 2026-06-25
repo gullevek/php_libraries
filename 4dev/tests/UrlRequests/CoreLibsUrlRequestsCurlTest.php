@@ -464,10 +464,9 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	/**
 	 * set setup + header, base uri change
 	 *
-	 * @covers ::Curl
 	 * @covers ::setBaseUri
-	 * @covers ::addHeader
-	 * @covers ::removeHEader
+	 * @covers ::setHeaders
+	 * @covers ::removeHeaders
 	 * @dataProvider providerUrlRequestsCurlSetup
 	 * @testdox UrlRequests\Curl Class setup tasks [$_dataName]
 	 *

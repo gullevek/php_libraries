@@ -334,7 +334,6 @@ final class CoreLibsSecurityAsymmetricAnonymousEncryptionTest extends TestCase
 	/**
 	 * test encrypt/decrypt produce correct output
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptDecryptSuccess
@@ -370,7 +369,6 @@ final class CoreLibsSecurityAsymmetricAnonymousEncryptionTest extends TestCase
 	/**
 	 * test encrypt/decrypt produce correct output
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptDecryptSuccess
@@ -397,7 +395,6 @@ final class CoreLibsSecurityAsymmetricAnonymousEncryptionTest extends TestCase
 	/**
 	 * test encrypt/decrypt produce correct output
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptDecryptSuccess
@@ -424,7 +421,6 @@ final class CoreLibsSecurityAsymmetricAnonymousEncryptionTest extends TestCase
 	/**
 	 * test encrypt/decrypt produce correct output
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptDecryptSuccess
@@ -469,7 +465,6 @@ final class CoreLibsSecurityAsymmetricAnonymousEncryptionTest extends TestCase
 	/**
 	 * Test decryption with wrong key
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptFailed
@@ -496,7 +491,6 @@ final class CoreLibsSecurityAsymmetricAnonymousEncryptionTest extends TestCase
 	/**
 	 * Test decryption with wrong key
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptFailed
@@ -521,7 +515,6 @@ final class CoreLibsSecurityAsymmetricAnonymousEncryptionTest extends TestCase
 	/**
 	 * Test decryption with wrong key
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptFailed
