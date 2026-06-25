@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable Generic.Files.LineLength
 
 declare(strict_types=1);
 
@@ -71,15 +71,16 @@ final class CoreLibsCombinedDateTimeTest extends TestCase
 	 *
 	 * @covers ::dateStringFormat
 	 * @dataProvider timestampProvider
-	 * @testdox dateStringFormat $input (microtime $flag) will be $expected [$_dataName]
+	 * @testdox dateStringFormat $input (mt $flag_show_micro, float mt $flag_micro_as_float) will be $expected [$_dataName]
 	 *
 	 * @param int|float $input
-	 * @param bool      $flag
+	 * @param bool      $flag_show_micro
+	 * @param bool      $flag_micro_as_float
 	 * @param string    $expected
 	 * @return void
 	 */
 	public function testDateStringFormat(
-		$input,
+		int|float $input,
 		bool $flag_show_micro,
 		bool $flag_micro_as_float,
 		string $expected

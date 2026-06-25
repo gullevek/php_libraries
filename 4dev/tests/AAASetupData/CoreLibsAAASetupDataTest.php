@@ -12,6 +12,8 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsAAASetupDataTest extends TestCase
 {
+	public const TIME_ZONE = 'Asia/Tokyo';
+
 	/**
 	 * Covers nothing
 	 *
@@ -34,6 +36,9 @@ final class CoreLibsAAASetupDataTest extends TestCase
 			BASE,
 			'BASE Path set check'
 		);
+
+		// if time zone is not set, errors can happen
+		ini_set('date.timezone', self::TIME_ZONE);
 	}
 }
 

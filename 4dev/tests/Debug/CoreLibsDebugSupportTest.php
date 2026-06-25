@@ -48,8 +48,8 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 * @dataProvider printTimeProvider
 	 * @testdox printTime test with $microtime and match to regex [$_dataName]
 	 *
-	 * @param int|null $mircrotime
-	 * @param string $expected
+	 * @param ?int $microtime
+	 * @param string $regex
 	 * @return void
 	 */
 	public function testPrintTime(?int $microtime, string $regex): void
@@ -460,10 +460,8 @@ final class CoreLibsDebugSupportTest extends TestCase
 	 * Undocumented function
 	 *
 	 * @cover ::getCallerFileLine
-	 * @testWith ["vendor/phpunit/phpunit/src/Framework/TestCase.php:6434","phar:///home/clemens/.phive/phars/phpunit-9.6.13.phar/phpunit/Framework/TestCase.php:6434"]
 	 * @testdox getCallerFileLine check based on regex .../Framework/TestCase.php:\d+ [$_dataName]
 	 *
-	 * @param  string $expected
 	 * @return void
 	 */
 	public function testGetCallerFileLine(): void
@@ -471,15 +469,19 @@ final class CoreLibsDebugSupportTest extends TestCase
 		// regex prefix with path "/../" and then fixed vendor + \d+
 		// or phar start if phiev installed
 		// phar:///home/clemens/.phive/phars/phpunit-9.6.13.phar/phpunit/Framework/TestCase.php
+		// phar:///usr/local/bin/phpunit/phpunit/Framework/TestCase.php
 		$regex = "/^("
 			. "\/.*\/vendor\/phpunit\/phpunit\/src"
 			. "|"
 			. "phar:\/\/\/.*\.phive\/phars\/phpunit-\d+\.\d+\.\d+\.phar\/phpunit"
+			. "|"
+			. "phar:\/\/\/usr\/local\/bin\/phpunit\/phpunit"
 			. ")"
 			. "\/Framework\/TestCase.php:\d+$/";
 		$this->assertMatchesRegularExpression(
 			$regex,
-			Support::getCallerFileLine()
+			Support::getCallerFileLine(),
+			'Failed for: ' . Support::getCallerFileLine()
 		);
 	}
 
@@ -522,7 +524,7 @@ final class CoreLibsDebugSupportTest extends TestCase
 				$this->assertEquals(
 					$expected,
 					$compare,
-					'assert expected 10'
+					'assert expected 10: ' . print_r($compare, true)
 				);
 				break;
 			case 11:
@@ -545,7 +547,7 @@ final class CoreLibsDebugSupportTest extends TestCase
 				$this->assertEquals(
 					$expected,
 					$compare,
-					'assert expected 11'
+					'assert expected 11: ' . print_r($compare, true)
 				);
 				break;
 			case 12:
@@ -565,7 +567,7 @@ final class CoreLibsDebugSupportTest extends TestCase
 				$this->assertEquals(
 					$expected,
 					$compare,
-					'assert expected 12'
+					'assert expected 12: ' . print_r($compare, true)
 				);
 				break;
 			default:
@@ -589,7 +591,7 @@ final class CoreLibsDebugSupportTest extends TestCase
 		if ($call_stack < 8) {
 			$this->assertFalse(true, 'getCallStack too low: 8');
 		} else {
-			$this->assertTrue(true, 'getCallSteck ok');
+			$this->assertTrue(true, 'getCallStack ok');
 		}
 		// just test top entry
 		$first = array_shift($call_stack);
