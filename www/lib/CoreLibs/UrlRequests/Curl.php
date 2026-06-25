@@ -954,11 +954,10 @@ class Curl implements Interface\RequestsInterface
 				)
 			) {
 				unset($this->config['headers'][$header_key]);
-				unset($this->headers_named[$header_key]);
+				unset($this->headers_named[strtolower($header_key)]);
 			} elseif (
-				// string value, array keys = in
-				// or both array and not a full match in the one before
-				(is_string($value) || is_array($value)) &&
+				// right side is array, and value is anything string or array
+				// if right side is string, and we give value array, we do nothing
 				is_array($this->config['headers'][$header_key])
 			) {
 				// part remove of key, value must be array
@@ -966,10 +965,14 @@ class Curl implements Interface\RequestsInterface
 					$value = [$value];
 				}
 				// array values so we rewrite the key pos
-				$this->config['headers'][$header_key] = array_values(array_diff(
-					$this->config['headers'][$header_key],
-					$value
-				));
+				/** @var array<int|string,string> $headers */
+				$headers = $this->config['headers'][$header_key];
+				$this->config['headers'][$header_key] = array_values(
+					array_diff(
+						$headers,
+						$value
+					)
+				);
 			}
 		}
 	}

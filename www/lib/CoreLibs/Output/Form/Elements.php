@@ -232,8 +232,15 @@ class Elements
 	 * @param  string $class style sheet
 	 * @return string        correct string for url href process
 	 */
-	private static function createUrl($href, $atag, $_1, $_2, $_3, $name, $class): string
-	{
+	private static function createUrl(
+		string $href,
+		string $atag,
+		string $_1,
+		string $_2,
+		string $_3,
+		string $name,
+		string $class
+	): string {
 		// $this->debug('URL', "1: $_1 - 2: $_2 - $_3 - atag: $atag - name: $name - class: $class");
 		// if $_1 ends with //, then we strip $_1 complete & target is also blanked (its an internal link)
 		if (preg_match("/\/\/$/", $_1) && preg_match("/^\//", $_2)) {
@@ -250,11 +257,8 @@ class Elements
 				. "##GT##" . ($name ? $name : $_2 . $_3) . "##LT##/a##GT##";
 		} elseif ($href && !$atag) {
 			return "href=##QUOT##$_1$_2$_3##QUOT##";
-		} elseif ($atag) {
-			return $atag . $_2 . $_3;
-		} else {
-			return $href;
 		}
+		return $atag . $_2 . $_3;
 	}
 
 	/**
@@ -269,8 +273,15 @@ class Elements
 	 * @param  string $class  style sheet
 	 * @return string         created html email a href string
 	 */
-	private static function createEmail($mailto, $atag, $_1, $_2, $_3, $title, $class)
-	{
+	private static function createEmail(
+		string $mailto,
+		string $atag,
+		string $_1,
+		string $_2,
+		string $_3,
+		string $title,
+		string $class
+	): string {
 		$email = $_1 . "@" . $_2 . "." . $_3;
 		if (!$mailto && !$atag) {
 			return "##LT##a href=##QUOT##mailto:" . $email . "##QUOT##"
@@ -278,12 +289,8 @@ class Elements
 				. "##GT##" . ($title ? $title : $email) . "##LT##/a##GT##";
 		} elseif ($mailto && !$atag) {
 			return "mailto:" . $email;
-		} elseif ($atag) {
-			return $atag . $email;
-		} else {
-			// else just return email as is
-			return $email;
 		}
+		return $atag . $email;
 	}
 }
 

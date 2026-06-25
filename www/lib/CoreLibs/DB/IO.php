@@ -2232,9 +2232,9 @@ class IO
 		$milliseconds = $matches[13] ?? '';
 
 		// clean up, hide entries that have 00 in the time group
-		$hour = $hour != '00' ? preg_replace('/^0/', '', $hour) : '';
-		$minutes = $minutes != '00' ? preg_replace('/^0/', '', $minutes) : '';
-		$seconds = $seconds != '00' ? preg_replace('/^0/', '', $seconds) : '';
+		$hour = !empty($hour) ? preg_replace('/^0/', '', $hour) : '';
+		$minutes = !empty($minutes) ? preg_replace('/^0/', '', $minutes) : '';
+		$seconds = !empty($seconds) ? preg_replace('/^0/', '', $seconds) : '';
 
 		// strip any leading or trailing spaces
 		$time_string = trim(
