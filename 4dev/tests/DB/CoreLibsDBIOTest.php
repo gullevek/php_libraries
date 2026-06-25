@@ -123,10 +123,16 @@ final class CoreLibsDBIOTest extends TestCase
 			'log_file_id' => 'CoreLibs-DB-IO-Test',
 		]);
 		// will be true, default logging is true
-		$db = new \CoreLibs\DB\IO(
-			self::$db_config['valid'],
-			self::$log
-		);
+		try {
+			$db = new \CoreLibs\DB\IO(
+				self::$db_config['valid'],
+				self::$log
+			);
+		} catch (\Exception $e) {
+			self::markTestSkipped(
+				'Cannot connect to Test DB for DB\IO test: ' . $e->getMessage()
+			);
+		}
 		if (!$db->dbGetConnectionStatus()) {
 			self::markTestSkipped(
 				'Cannot connect to valid Test DB for DB\IO test.'

@@ -98,7 +98,7 @@ final class CoreLibsACLLoginTest extends TestCase
 			);
 		} catch (\Exception $e) {
 			self::markTestSkipped(
-				'Cannot connect to valid Test DB for ACL\Login test: ' . $e->getMessage()
+				'Cannot connect to Test DB for ACL\Login test: ' . $e->getMessage()
 			);
 		}
 		// ALWAYS drop DB and RECREATE DB

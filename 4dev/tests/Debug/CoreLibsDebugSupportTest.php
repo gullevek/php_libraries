@@ -551,19 +551,30 @@ final class CoreLibsDebugSupportTest extends TestCase
 				);
 				break;
 			case 12:
-				// add two "run" before "runBare"
-				array_splice(
-					$expected,
-					7,
-					0,
-					['run']
-				);
-				array_splice(
-					$expected,
-					0,
-					0,
-					['include']
-				);
+				// if compare starts with "main"
+				if ($compare[0] == 'main') {
+					// add two more run after main
+					array_splice(
+						$expected,
+						1,
+						0,
+						['run', 'run']
+					);
+				} else {
+					// add two "run" before "runBare"
+					array_splice(
+						$expected,
+						7,
+						0,
+						['run']
+					);
+					array_splice(
+						$expected,
+						0,
+						0,
+						['include']
+					);
+				}
 				$this->assertEquals(
 					$expected,
 					$compare,

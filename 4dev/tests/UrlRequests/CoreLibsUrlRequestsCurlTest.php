@@ -58,6 +58,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			if ($handle === false) {
 				continue;
 			}
+			curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 			$status = curl_exec($handle);
 			if ($status === false) {
 				continue;
@@ -470,13 +471,13 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	 * @dataProvider providerUrlRequestsCurlSetup
 	 * @testdox UrlRequests\Curl Class setup tasks [$_dataName]
 	 *
-	 * @param  null|array  $config
-	 * @param  array       $expected
-	 * @param  null|string $new_base_uri
-	 * @param  null|array  $set_header
-	 * @param  null|bool   $set_header_add
-	 * @param  null|array  $remove_header
-	 * @param  null|array  $expected_change
+	 * @param  null|array          $config
+	 * @param  array<string,mixed> $expected_set
+	 * @param  null|string         $new_base_uri
+	 * @param  null|array          $set_header
+	 * @param  null|bool           $set_header_add
+	 * @param  null|array          $remove_header
+	 * @param  null|array          $expected_change
 	 * @return void
 	 */
 	public function testUrlRequestsCurlSetupConfig(
@@ -496,10 +497,18 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		};
 		// if ($new_base_uri === null && $set_header === null && $remove_header === null) {
 		// }
-		$this->assertEquals($expected_set, $curl->getConfig(), 'Class setup config mismatch');
+		$this->assertEquals(
+			$expected_set,
+			$curl->getConfig(),
+			'Class setup config mismatch'
+		);
 		if ($new_base_uri !== null) {
 			$curl->setBaseUri($new_base_uri);
-			$this->assertEquals($expected_change, $curl->getConfig(), 'new base_uri not matching');
+			$this->assertEquals(
+				$expected_change,
+				$curl->getConfig(),
+				'new base_uri not matching'
+			);
 		}
 		if ($set_header !== null) {
 			if ($set_header_add !== null) {
@@ -507,11 +516,19 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 			} else {
 				$curl->setHeaders($set_header);
 			}
-			$this->assertEquals($expected_change, $curl->getConfig(), 'new headers not matching');
+			$this->assertEquals(
+				$expected_change,
+				$curl->getConfig(),
+				'new headers not matching'
+			);
 		}
 		if ($remove_header !== null) {
 			$curl->removeHeaders($remove_header);
-			$this->assertEquals($expected_change, $curl->getConfig(), 'removed headers not matching');
+			$this->assertEquals(
+				$expected_change,
+				$curl->getConfig(),
+				'removed headers not matching'
+			);
 		}
 	}
 
@@ -881,7 +898,7 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 		string $return_content
 	) {
 		if (!$this->url_basic) {
-			$this->markTestSkipped('No backend interface setup for testing: GET');
+			$this->markTestSkipped('No backend interface setup for testing');
 		}
 		$curl = new \CoreLibs\UrlRequests\Curl();
 		// options
@@ -964,6 +981,9 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	 */
 	public function testUrlRequestsCurlRequestMultiple()
 	{
+		if (!$this->url_basic) {
+			$this->markTestSkipped('No backend interface setup for testing');
+		}
 		$curl = new \CoreLibs\UrlRequests\Curl();
 		// get
 		$response = $curl->get($this->url_basic, [
@@ -1055,6 +1075,9 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	 */
 	public function testUrlRequestsCurlAuthHeader()
 	{
+		if (!$this->url_basic) {
+			$this->markTestSkipped('No backend interface setup for testing');
+		}
 		$curl = new \CoreLibs\UrlRequests\Curl([
 			"auth" => ["user", "pass", "basic"],
 			"http_errors" => false,
@@ -1121,6 +1144,9 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	 */
 	public function testExceptionInvalidHeaderKey(): void
 	{
+		if (!$this->url_basic) {
+			$this->markTestSkipped('No backend interface setup for testing');
+		}
 		$curl = new \CoreLibs\UrlRequests\Curl();
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessageMatches("/InvalidHeaderKey/");
@@ -1141,6 +1167,9 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	 */
 	public function testExceptionInvalidHeaderValue(): void
 	{
+		if (!$this->url_basic) {
+			$this->markTestSkipped('No backend interface setup for testing');
+		}
 		$curl = new \CoreLibs\UrlRequests\Curl();
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessageMatches("/InvalidHeaderValue/");
@@ -1190,6 +1219,9 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	 */
 	public function testExceptionBadRequest(): void
 	{
+		if (!$this->url_basic) {
+			$this->markTestSkipped('No backend interface setup for testing');
+		}
 		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => true]);
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessageMatches("/ClientError/");
@@ -1211,6 +1243,9 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	 */
 	public function testExceptionBadRequestEnable(): void
 	{
+		if (!$this->url_basic) {
+			$this->markTestSkipped('No backend interface setup for testing');
+		}
 		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => false]);
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessageMatches("/ClientError/");
@@ -1233,6 +1268,9 @@ final class CoreLibsUrlRequestsCurlTest extends TestCase
 	 */
 	public function testExceptionBadRequestUnset(): void
 	{
+		if (!$this->url_basic) {
+			$this->markTestSkipped('No backend interface setup for testing');
+		}
 		// if true, with false it has to be off
 		$curl = new \CoreLibs\UrlRequests\Curl(["http_errors" => true]);
 		$response = $curl->request('get', $this->url_basic, [
