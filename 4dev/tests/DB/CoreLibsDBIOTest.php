@@ -1007,6 +1007,59 @@ final class CoreLibsDBIOTest extends TestCase
 		$db->dbClose();
 	}
 
+	// MARK: stripAssocOnly
+
+	/**
+	 * Data provider for stripAssocOnly tests
+	 *
+	 * @return array<mixed>
+	 */
+	public function stripAssocOnlyProvider(): array
+	{
+		return [
+			'empty' => [
+				[],
+				[]
+			],
+			'int only' => [
+				[0 => 'foo', 1 => 'bar'],
+				[],
+			],
+			'mixed' => [
+				[0 => 'foo', 'col_a' => 'foo', 1 => 'bar', 'col_b' => 'bar'],
+				['col_a' => 'foo', 'col_b' => 'bar'],
+			],
+			'key only' => [
+				['col_a' => 'foo', 'col_b' => 'bar'],
+				['col_a' => 'foo', 'col_b' => 'bar'],
+			]
+		];
+	}
+
+	/**
+	 * Test for stripAssocOnly function
+	 *
+	 * @covers ::stripAssocOnly
+	 * @dataProvider stripAssocOnlyProvider
+	 * @testdox strip assoc non string entries from return [$_dataName]
+	 *
+	 * @param array<mixed> $input
+	 * @param array<string,mixed> $expected
+	 * @return void
+	 */
+	public function testStripAssocOnly(array $input, array $expected): void
+	{
+		$db = new \CoreLibs\DB\IO(
+			self::$db_config['valid'],
+			self::$log
+		);
+		$this->assertEquals(
+			$expected,
+			$db->stripAssocOnly($input)
+		);
+		$db->dbClose();
+	}
+
 	// - string escape tests
 	//   dbEscapeString, dbEscapeLiteral, dbEscapeIdentifier,
 

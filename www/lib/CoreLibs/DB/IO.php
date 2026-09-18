@@ -520,7 +520,7 @@ class IO
 	}
 
 	// *************************************************************
-	// PRIVATE METHODS
+	// MARK: PRIVATE METHODS
 	// *************************************************************
 
 	/**
@@ -1703,11 +1703,11 @@ class IO
 	}
 
 	// *************************************************************
-	// PUBLIC METHODS
+	// MARK: PUBLIC METHODS
 	// *************************************************************
 
 	// ***************************
-	// CLOSE, STATUS, SETTINGS VARIABLE READ
+	// MARK: CLOSE, STATUS, SETTINGS VARIABLE READ
 	// ***************************
 
 	/**
@@ -1950,7 +1950,7 @@ class IO
 	}
 
 	// ***************************
-	// DEBUG DATA DUMP
+	// MARK: DEBUG DATA DUMP
 	// ***************************
 
 	/**
@@ -1978,7 +1978,7 @@ class IO
 	}
 
 	// ***************************
-	// CHECK QUERY TYPE
+	// MARK: CHECK QUERY TYPE
 	// ***************************
 
 	/**
@@ -2035,7 +2035,7 @@ class IO
 	}
 
 	// ***************************
-	// DATA WRITE CONVERSION
+	// MARK: DATA WRITE CONVERSION
 	// ***************************
 
 	/**
@@ -2156,7 +2156,7 @@ class IO
 	}
 
 	// ***************************
-	// DATA READ/WRITE CONVERSION
+	// MARK: DATA READ/WRITE CONVERSION
 	// ***************************
 
 	/**
@@ -2194,7 +2194,7 @@ class IO
 	}
 
 	// ***************************
-	// DATA READ CONVERSION
+	// MARK: DATA READ CONVERSION
 	// ***************************
 
 	/**
@@ -2263,8 +2263,22 @@ class IO
 		return is_array($__db_array_parse) ? $__db_array_parse : [];
 	}
 
+	/**
+	 * Will strip all single numberic entries from the array.
+	 * This is for database return
+	 *
+	 * @param  array<mixed> $res
+	 * @return array<string,mixed>
+	 */
+	public function stripAssocOnly(array $res): array
+	{
+		return array_filter($res, function ($key) {
+			return !is_numeric($key);
+		}, ARRAY_FILTER_USE_KEY);
+	}
+
 	// ***************************
-	// TABLE META DATA READ
+	// MARK: TABLE META DATA READ
 	// ***************************
 
 	/**
@@ -2290,7 +2304,7 @@ class IO
 	}
 
 	// ***************************
-	// QUERY EXECUSION AND DATA READ
+	// MARK: QUERY EXECUSION AND DATA READ
 	// ***************************
 
 	/**
@@ -2927,7 +2941,7 @@ class IO
 	}
 
 	// ***************************
-	// CURSOR RETURN
+	// MARK: CURSOR RETURN
 	// ***************************
 
 	/**
@@ -2941,7 +2955,7 @@ class IO
 	}
 
 	// ***************************
-	// CURSOR EXT CACHE RESET
+	// MARK: CURSOR EXT CACHE RESET
 	// ***************************
 
 	/**
@@ -2971,7 +2985,7 @@ class IO
 	}
 
 	// ***************************
-	// CURSOR EXT DATA CHECK
+	// MARK: CURSOR EXT DATA CHECK
 	// ***************************
 
 	/**
@@ -3066,7 +3080,7 @@ class IO
 	}
 
 	// ***************************
-	// MAXIMUM QUERY EXECUTION CHECK HELPERS
+	// MARK: MAXIMUM QUERY EXECUTION CHECK HELPERS
 	// ***************************
 
 	/**
@@ -3102,7 +3116,7 @@ class IO
 	}
 
 	// ***************************
-	// PREPARED QUERY WORK
+	// MARK: PREPARED QUERY WORK
 	// ***************************
 
 	/**
@@ -3379,7 +3393,7 @@ class IO
 	}
 
 	// ***************************
-	// ASYNCHRONUS EXECUTION/CHECK
+	// MARK: ASYNCHRONUS EXECUTION/CHECK
 	// ***************************
 
 	/**
@@ -3539,7 +3553,7 @@ class IO
 	}
 
 	// ***************************
-	// COMPLEX WRITE WITH CONFIG ARRAYS
+	// MARK: COMPLEX WRITE WITH CONFIG ARRAYS
 	// ***************************
 
 	// ** REMARK **
@@ -3720,7 +3734,7 @@ class IO
 	}
 
 	// ***************************
-	// INTERNAL SETTINGS READ/CHANGE
+	// MARK: INTERNAL SETTINGS READ/CHANGE
 	// ***************************
 
 	/**
@@ -4048,7 +4062,7 @@ class IO
 	}
 
 	// ***************************
-	// QUERY DATA AND DB HANDLER
+	// MARK: QUERY DATA AND DB HANDLER
 	// ***************************
 
 	/**
@@ -4151,7 +4165,7 @@ class IO
 	}
 
 	// ***************************
-	// INTERNAL VARIABLES READ POST QUERY RUN
+	// MARK: INTERNAL VARIABLES READ POST QUERY RUN
 	// ***************************
 
 	/**
@@ -4442,7 +4456,7 @@ class IO
 	}
 
 	// ***************************
-	// ERROR AND WARNING DATA
+	// MARK: ERROR AND WARNING DATA
 	// ***************************
 
 	/**
@@ -4499,7 +4513,7 @@ class IO
 	}
 
 	// ***************************
-	// DEPEREACTED CALLS
+	// MARK: DEPEREACTED CALLS
 	// all call below are no longer in use and throw deprecated errors
 	// ***************************
 
