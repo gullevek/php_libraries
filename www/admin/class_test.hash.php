@@ -113,6 +113,7 @@ $tests = [
 ];
 foreach ($tests as $test) {
 	print "IMMUTABLE HASH FOR ARRAY: " . Hash::generateImmutableHashForArray($test) . "<br>";
+	print "IMMUTABLE HASH FOR ARRAY: " . Hash::generateImmutableHashForArray($test, sort_keys:false) . "<br>";
 	print "SERIALIZED HASH FOR ARRAY: " . hash(Hash::DEFAULT_HASH, serialize($test)) . "<br>";
 }
 

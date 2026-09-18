@@ -434,26 +434,47 @@ final class CoreLibsCreateHashTest extends TestCase
 		return [
 			'Empty array' => [
 				[],
+				null,
 				'064f01fe',
 			],
 			'Simple array' => [
 				['key' => 'value'],
+				null,
 				'78f40899',
 			],
 			'flat array a' => [
 				[0, 1, 'b', 'c', 'a'],
+				null,
 				'ccec0f5b',
 			],
 			'flat array b' => [
 				['b', 'c', 'a', 1, 0],
+				null,
+				'c6040f5b',
+			],
+			'flat array b, not sorted' => [
+				['b', 'c', 'a', 1, 0],
+				false,
 				'c6040f5b',
 			],
 			'key array a' => [
 				['A' => 0, 'F' => 1, 'C' => 'b', 'K' => 'c', 'B' => 'a'],
+				null,
 				'01f11355',
+			],
+			'key array a, not sorted' => [
+				['A' => 0, 'F' => 1, 'C' => 'b', 'K' => 'c', 'B' => 'a'],
+				false,
+				'04911355',
 			],
 			'key array b' => [
 				['A' => 0, 'B' => 'a', 'C' => 'b', 'F' => 1, 'K' => 'c'],
+				null,
+				'01f11355',
+			],
+			'key array b, not sorted' => [
+				['A' => 0, 'B' => 'a', 'C' => 'b', 'F' => 1, 'K' => 'c'],
+				false,
 				'01f11355',
 			],
 			'complex nested array' => [
@@ -464,6 +485,7 @@ final class CoreLibsCreateHashTest extends TestCase
 						]
 					]
 				],
+				null,
 				'd8de1565',
 			]
 		];
@@ -479,12 +501,19 @@ final class CoreLibsCreateHashTest extends TestCase
 	 * @param array<mixed> $input
 	 * @param string $expected
 	 */
-	public function testGenerateImmutableHashForArray(array $input, string $expected): void
+	public function testGenerateImmutableHashForArray(array $input, ?bool $sort_keys, string $expected): void
 	{
-		$this->assertEquals(
-			$expected,
-			\CoreLibs\Create\Hash::generateImmutableHashForArray($input)
-		);
+		if ($sort_keys === null) {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Create\Hash::generateImmutableHashForArray($input)
+			);
+		} else {
+			$this->assertEquals(
+				$expected,
+				\CoreLibs\Create\Hash::generateImmutableHashForArray($input, $sort_keys)
+			);
+		}
 	}
 }
 

@@ -215,17 +215,22 @@ class Hash
 
 	/**
 	 * generate a hash over any array data
+	 * optional will not sort keys and so create hashes based on the original data.
+	 * for correct array comapre it is recommended to keep sort keys on
 	 *
 	 * @param  array<mixed> $data
+	 * @param  bool $sort_keys [true] Whether to sort the array keys before hashing
 	 * @return string
 	 */
-	public static function generateImmutableHashForArray(array $data): string
+	public static function generateImmutableHashForArray(array $data, bool $sort_keys = true): string
 	{
 		// Create a sorted copy to ensure consistent hashing
 		// Generate hash using serialize for better accuracy
 		return hash(
 			self::DEFAULT_HASH,
-			serialize(ArrayHandler::createSortedArrayByKey($data))
+			serialize(
+				$sort_keys ? ArrayHandler::createSortedArrayByKey($data) : $data
+			)
 		);
 	}
 }
