@@ -103,6 +103,19 @@ foreach ($hash_types as $hash_type) {
 // print "UNIQU ID SHORT : " . Hash::__uniqId() . "<br>";
 // print "UNIQU ID LONG : " . Hash::__uniqIdLong() . "<br>";
 
+$tests = [
+	// array diff
+	[0, 1, 'b', 'c', 'a'],
+	['b', 'c', 'a', 1, 0],
+	// key set arrays DO NOT diff
+	['A' => 0, 'F' => 1, 'C' => 'b', 'K' => 'c', 'B' => 'a'],
+	['A' => 0, 'B' => 'a', 'C' => 'b', 'F' => 1, 'K' => 'c'],
+];
+foreach ($tests as $test) {
+	print "IMMUTABLE HASH FOR ARRAY: " . Hash::generateImmutableHashForArray($test) . "<br>";
+	print "SERIALIZED HASH FOR ARRAY: " . hash(Hash::DEFAULT_HASH, serialize($test)) . "<br>";
+}
+
 print "</body></html>";
 
 // __END__

@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace CoreLibs\Create;
 
+use  CoreLibs\Combined\ArrayHandler;
+
 class Hash
 {
 	/** @var string default short hash -> deprecated use STANDARD_HASH_SHORT */
@@ -209,6 +211,22 @@ class Hash
 	public static function hashStd(string $string): string
 	{
 		return self::hash($string, self::STANDARD_HASH);
+	}
+
+	/**
+	 * generate a hash over any array data
+	 *
+	 * @param  array<mixed> $data
+	 * @return string
+	 */
+	public static function generateImmutableHashForArray(array $data): string
+	{
+		// Create a sorted copy to ensure consistent hashing
+		// Generate hash using serialize for better accuracy
+		return hash(
+			self::DEFAULT_HASH,
+			serialize(ArrayHandler::createSortedArrayByKey($data))
+		);
 	}
 }
 

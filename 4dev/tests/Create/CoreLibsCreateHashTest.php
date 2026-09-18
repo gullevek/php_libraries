@@ -421,6 +421,71 @@ final class CoreLibsCreateHashTest extends TestCase
 			'hash hmac valid'
 		);
 	}
+
+	// MARK: generateImmutableHashForArray
+
+	/**
+	 * Data provider for testGenerateImmutableHashForArray.
+	 *
+	 * @return array
+	 */
+	public function generateImmutableHashForArrayProvider(): array
+	{
+		return [
+			'Empty array' => [
+				[],
+				'064f01fe',
+			],
+			'Simple array' => [
+				['key' => 'value'],
+				'78f40899',
+			],
+			'flat array a' => [
+				[0, 1, 'b', 'c', 'a'],
+				'ccec0f5b',
+			],
+			'flat array b' => [
+				['b', 'c', 'a', 1, 0],
+				'c6040f5b',
+			],
+			'key array a' => [
+				['A' => 0, 'F' => 1, 'C' => 'b', 'K' => 'c', 'B' => 'a'],
+				'01f11355',
+			],
+			'key array b' => [
+				['A' => 0, 'B' => 'a', 'C' => 'b', 'F' => 1, 'K' => 'c'],
+				'01f11355',
+			],
+			'complex nested array' => [
+				[
+					'level1' => [
+						'level2' => [
+							'level3' => 'value'
+						]
+					]
+				],
+				'd8de1565',
+			]
+		];
+	}
+
+	/**
+	 * Test for generating an immutable hash from an array.
+	 *
+	 * @covers ::generateImmutableHashForArray
+	 * @dataProvider generateImmutableHashForArrayProvider
+	 * @testdox generate immutable hash for array with result $expected [$_dataName]
+	 *
+	 * @param array<mixed> $input
+	 * @param string $expected
+	 */
+	public function testGenerateImmutableHashForArray(array $input, string $expected): void
+	{
+		$this->assertEquals(
+			$expected,
+			\CoreLibs\Create\Hash::generateImmutableHashForArray($input)
+		);
+	}
 }
 
 // __END__
