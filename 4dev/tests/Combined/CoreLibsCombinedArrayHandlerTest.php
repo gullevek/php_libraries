@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsCombinedArrayHandlerTest extends TestCase
 {
-	// we use that for all
+	/** @var array<mixed> we use that for all */
 	public static $array = [
 		'a' => [
 			'b' => 'bar',
@@ -51,7 +51,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function arraySearchRecursiveProvider(): array
 	{
@@ -110,7 +110,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function arraySearchRecursiveAllProvider(): array
 	{
@@ -182,7 +182,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function arraySearchSimpleProvider(): array
 	{
@@ -383,7 +383,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function arraySearchKeyProvider(): array
 	{
@@ -565,7 +565,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * provides array listing for the merge test
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function arrayMergeRecursiveProvider(): array
 	{
@@ -602,7 +602,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * for warning checks
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function arrayMergeRecursiveProviderWarning(): array
 	{
@@ -634,7 +634,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function arrayCompareProvider(): array
 	{
@@ -665,7 +665,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function inArrayAnyProvider(): array
 	{
@@ -688,6 +688,11 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		];
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return array<mixed>
+	 */
 	public function genAssocArrayProvider(): array
 	{
 		return [
@@ -764,7 +769,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function flattenArrayProvider(): array
 	{
@@ -808,7 +813,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * use the flattenArrayProvider and replace 1 with 2 array pos
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function flattenArrayKeyProvider(): array
 	{
@@ -825,7 +830,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * use the flattenArrayProvider and replace 1 with ３ array pos
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function flattenArrayKeyLeavesOnlyProvider(): array
 	{
@@ -842,7 +847,7 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function arrayFlatForKeyProvider(): array
 	{
@@ -906,6 +911,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		];
 	}
 
+	// MARK: arraySearchRecursive
+
 	/**
 	 * Undocumented function
 	 *
@@ -925,6 +932,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			\CoreLibs\Combined\ArrayHandler::arraySearchRecursive($needle, $input, $key_search_for)
 		);
 	}
+
+	// MARK: arraySearchRecursiveAll
 
 	/**
 	 * Undocumented function
@@ -947,6 +956,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		);
 	}
 
+	// MARK: arraySearchSimple
+
 	/**
 	 * Undocumented function
 	 *
@@ -968,6 +979,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			\CoreLibs\Combined\ArrayHandler::arraySearchSimple($input, $key, $value, $strict)
 		);
 	}
+
+	// MARK: arraySearchKey
 
 	/**
 	 * Undocumented function
@@ -1007,6 +1020,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		);
 	}
 
+	// MARK: arrayMergeRecursive
+
 	/**
 	 * Undocumented function
 	 *
@@ -1030,6 +1045,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			$output
 		);
 	}
+
+	// MARK: arrayMergeRecursive
 
 	/**
 	 * Undocumented function
@@ -1063,6 +1080,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		restore_error_handler();
 	}
 
+	// MARK: arrayDiff
+
 	/**
 	 * Undocumented function
 	 *
@@ -1083,6 +1102,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		);
 	}
 
+	// MARK: inArrayAny
+
 	/**
 	 * Undocumented function
 	 *
@@ -1102,6 +1123,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			\CoreLibs\Combined\ArrayHandler::inArrayAny($input_a, $input_b)
 		);
 	}
+
+	// MARK: genAssocArray
 
 	/**
 	 * Undocumented function
@@ -1125,6 +1148,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		);
 	}
 
+	// MARK: flattenArray
+
 	/**
 	 * Undocumented function
 	 *
@@ -1143,6 +1168,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			\CoreLibs\Combined\ArrayHandler::flattenArray($input)
 		);
 	}
+
+	// MARK: flattenArrayKey
 
 	/**
 	 * Undocumented function
@@ -1163,6 +1190,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		);
 	}
 
+	// MARK: flattenArrayKeyLeavesOnly
+
 	/**
 	 * Undocumented function
 	 *
@@ -1181,6 +1210,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			\CoreLibs\Combined\ArrayHandler::flattenArrayKeyLeavesOnly($input)
 		);
 	}
+
+	// MARK: arrayFlatForKey
 
 	/**
 	 * Undocumented function
@@ -1201,6 +1232,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			\CoreLibs\Combined\ArrayHandler::arrayFlatForKey($input, $search)
 		);
 	}
+
+	// MARK: arrayGetPrevKey, arrayGetNextKey
 
 	/**
 	 * Undocumented function
@@ -1295,6 +1328,13 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		);
 	}
 
+	// MARK: arrayReturnMatchingKeyOnly
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return array
+	 */
 	public function providerReturnMatchingKeyOnley(): array
 	{
 		return [
@@ -1379,6 +1419,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			)
 		);
 	}
+
+	// MARK: arrayModifyKey
 
 	/**
 	 * provider for arrayModifyKey
@@ -1491,6 +1533,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			\CoreLibs\Combined\ArrayHandler::arrayModifyKey($in_array, $key_mod_prefix, $key_mod_suffix)
 		);
 	}
+
+	// MARK: sortArray
 
 	/**
 	 * sort
@@ -1711,7 +1755,9 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 		}
 	}
 
-/**
+	// MARK: ksortArray
+
+	/**
 	 * sort
 	 *
 	 * @return array
@@ -1866,6 +1912,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			);
 		}
 	}
+
+	// MARK: findArraysMissingKey
 
 	/**
 	 * Undocumented function
@@ -2033,6 +2081,8 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			$result
 		);
 	}
+
+	// MARK: selectArrayFromOption
 
 	/**
 	 * Undocumented function
@@ -2378,6 +2428,316 @@ final class CoreLibsCombinedArrayHandlerTest extends TestCase
 			$expected,
 			$result
 		);
+	}
+
+	// MARK: getRandomEntryFromArrayProvider
+
+	/**
+	 * Get random entry from array provider
+	 *
+	 * @return array<mixed>
+	 */
+	public function getRandomEntryFromArrayProvider(): array
+	{
+		return [
+			'empty array' => [
+				[],
+			],
+			'single element array' => [
+				['only'],
+			],
+			'multiple elements array' => [
+				['first', 'second', 'third'],
+			],
+		];
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @covers ::getRandomEntryFromArray
+	 * @dataProvider getRandomEntryFromArrayProvider
+	 * @testdox getRandomEntryFromArray get random value from array [$_dataName]
+	 *
+	 * @param  array $input
+	 * @return void
+	 */
+	public function testGetRandomEntryFromArray(array $input): void
+	{
+		$result = \CoreLibs\Combined\ArrayHandler::getRandomEntryFromArray($input);
+		if (empty($input)) {
+			$this->assertNull($result);
+		} else {
+			$this->assertContains($result, $input);
+		}
+	}
+
+	// MARK: removeArrayEntryByValue
+
+	/**
+	 * Remove array entry by value provider
+	 *
+	 * @return array<mixed>
+	 */
+	public function removeArrayEntryByValueProvider(): array
+	{
+		return [
+			'empty array' => [
+				[],
+				'',
+				null,
+				[],
+			],
+			'single element array' => [
+				['only'],
+				'only',
+				null,
+				[]
+			],
+			'single element array, not found' => [
+				['only'],
+				'foo',
+				null,
+				['only']
+			],
+			'multiple elements array' => [
+				['first', 'second', 'third'],
+				'second',
+				null,
+				['first', 'third'],
+			],
+			'array with multiple identical elements' => [
+				['first', 'second', 'first', 'third'],
+				'first',
+				null,
+				['second', 'third'],
+			],
+			'array with multiple identical elements, other remove' => [
+				['first', 'second', 'first', 'third'],
+				'second',
+				null,
+				['first', 'first', 'third'],
+			],
+			'array with key value entries' => [
+				[
+					'key1' => 'value1',
+					'key2' => 'value2',
+					'key3' => 'value3',
+				],
+				'value2',
+				null,
+				[
+					'key1' => 'value1',
+					'key3' => 'value3',
+				]
+			],
+			'nested array, array match' => [
+				[
+					['first', 'second'],
+					['third', 'fourth'],
+				],
+				['third', 'fourth'],
+				null,
+				[
+					['first', 'second'],
+				],
+			],
+			'strict test, off' => [
+				['3', 3,],
+				'3',
+				null,
+				[],
+			],
+			'strict test, on' => [
+				['3', 3,],
+				'3',
+				true,
+				[3,],
+			],
+			'strict test bool, off' => [
+				['false', false, 0],
+				false,
+				null,
+				['false'],
+			],
+			'strict test bool, on' => [
+				['false', false, 0],
+				false,
+				true,
+				['false', 0],
+			],
+			'strict test float, off' => [
+				['3.14', 3.14],
+				3.14,
+				null,
+				[],
+			],
+			'strict test float, on' => [
+				['3.14', 3.14],
+				3.14,
+				true,
+				['3.14'],
+			],
+			'stric test float and int, off' => [
+				['1.0', '1', 1.0, 1],
+				1,
+				null,
+				[],
+			],
+			'stric test float and int, on' => [
+				['1.0', '1', 1.0, 1],
+				1,
+				true,
+				['1.0', '1', 1.0],
+			],
+		];
+	}
+
+	/**
+	 * Test for removeArrayEntryByValue function
+	 *
+	 * @covers ::removeArrayEntryByValue
+	 * @dataProvider removeArrayEntryByValueProvider
+	 * @testdox removeArrayEntryByValue Remove $value from array $input, with $strict [$_dataName]
+	 *
+	 * @param  array                       $input
+	 * @param  string|int|float|bool|array $value
+	 * @param  bool|null                   $strict
+	 * @param  array                       $expected
+	 * @return void
+	 */
+	public function testRemoveArrayEntryByValue(
+		array $input,
+		string|int|float|bool|array $value,
+		?bool $strict,
+		array $expected
+	): void {
+		if ($strict !== null) {
+			$result = \CoreLibs\Combined\ArrayHandler::removeArrayEntryByValue($input, $value, $strict);
+		} else {
+			$result = \CoreLibs\Combined\ArrayHandler::removeArrayEntryByValue($input, $value);
+		}
+		$this->assertEquals(array_values($expected), array_values($result));
+	}
+
+	// MARK: addStringToEachValueInArray
+
+	/**
+	 * Data provider for addStringToEachValueInArray tests.
+	 *
+	 * @return array
+	 */
+	public function addStringToEachValueInArrayProvider(): array
+	{
+		return [
+			'empty array' => [
+				[],
+				'string',
+				null,
+				[],
+			],
+			'empty string to add' => [
+				['a', 'b'],
+				'',
+				null,
+				['a', 'b'],
+			],
+			'prefix true' => [
+				['a', 'b'],
+				'pre_',
+				true,
+				['pre_a', 'pre_b'],
+			],
+			'prefix false' => [
+				['a', 'b'],
+				'_suf',
+				false,
+				['a_suf', 'b_suf'],
+			],
+			'mixed values' => [
+				['a', 'b', 'c', 5, 6],
+				'X',
+				true,
+				['Xa', 'Xb', 'Xc', 'X5', 'X6'],
+			]
+		];
+	}
+
+	/**
+	 * Test for addStringToEachValueInArray function
+	 *
+	 * @covers ::addStringToEachValueInArray
+	 * @dataProvider addStringToEachValueInArrayProvider
+	 * @testdox addStringToEachValueInArray Add $string_to_add to each value in $array, with $prefix [$_dataName]
+	 *
+	 * @param  array      $array
+	 * @param  string     $string_to_add
+	 * @param  bool|null  $prefix
+	 * @param  array|null $expected
+	 * @return void
+	 */
+	public function testAddStringToEachValueInArray(
+		array $array,
+		string $string_to_add,
+		?bool $prefix,
+		?array $expected
+	) {
+		if ($prefix == null) {
+			$result = \CoreLibs\Combined\ArrayHandler::addStringToEachValueInArray($array, $string_to_add);
+		} else {
+			$result = \CoreLibs\Combined\ArrayHandler::addStringToEachValueInArray($array, $string_to_add, $prefix);
+		}
+		$this->assertEquals($expected, $result);
+	}
+
+	// MARK: createSortedArrayByKey
+
+	/**
+	 * Data provider for createSortedArrayByKey tests.
+	 *
+	 * @return array
+	 */
+	public function createSortedArrayByKeyProvider(): array
+	{
+		return [
+			'empty' => [
+				[],
+				[],
+			],
+			'flat array' => [
+				['b' => 2, 'a' => 1, 'c' => 3],
+				['a' => 1, 'b' => 2, 'c' => 3],
+			],
+			'nested array' => [
+				['b' => 2, 'a' => 1, 'c' => ['d' => 4, 'b' => 2]],
+				['a' => 1, 'b' => 2, 'c' => ['b' => 2, 'd' => 4]],
+			],
+			'deeply nested array' => [
+				['b' => 2, 'a' => 1, 'c' => ['d' => 4, 'b' => 2, 'e' => ['g' => 7, 'f' => 6]]],
+				['a' => 1, 'b' => 2, 'c' => ['b' => 2, 'd' => 4, 'e' => ['f' => 6, 'g' => 7]]],
+			],
+			'mixed key type' => [
+				['b' => 2, 1 => 'one', 'a' => 1],
+				[1 => 'one', 'a' => 1, 'b' => 2],
+			],
+		];
+	}
+
+	/**
+	 * Test for createSortedArrayByKey function
+	 *
+	 * @covers ::createSortedArrayByKey
+	 * @dataProvider createSortedArrayByKeyProvider
+	 * @testdox createSortedArrayByKey Sort the array by keys recursively [$_dataName]
+	 *
+	 * @param  array $input
+	 * @param  array $expected
+	 * @return void
+	 */
+	public function testCreateSortedArrayByKey(array $input, array $expected): void
+	{
+		$result = \CoreLibs\Combined\ArrayHandler::createSortedArrayByKey($input);
+		$this->assertEquals($expected, $result);
 	}
 }
 

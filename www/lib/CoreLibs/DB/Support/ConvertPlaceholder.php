@@ -290,7 +290,7 @@ class ConvertPlaceholder
 						}
 						$match = $matches[self::MATCHING_POS];
 						// only count pos up for actual replacements we will do
-						if (!empty($match)) {
+						if (strlen((string)$match) > 0) {
 							$pos++;
 							$params_lookup[] = '$' . $pos;
 						}

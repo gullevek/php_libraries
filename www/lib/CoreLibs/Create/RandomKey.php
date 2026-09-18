@@ -154,11 +154,11 @@ class RandomKey
 	 * if override key length is set, it will check on valid key and use this
 	 * this will not set the class key length variable
 	 *
-	 * @param  int           $key_length [default=-1] key length override,
-	 *                                   if not set use default [LEGACY]
-	 * @param  array<string> $key_range  a list of key ranges as array,
-	 *                                   if not set use previous set data
-	 * @return string                    random key
+	 * @param  int              $key_length [default=-1] key length override,
+	 *                                      if not set use default [LEGACY]
+	 * @param  array<string> ...$key_range  a list of key ranges as array,
+	 *                                      if not set use previous set data
+	 * @return string                       random key
 	 */
 	public static function randomKeyGen(
 		int $key_length = self::KEY_LENGTH_DEFAULT,

@@ -475,8 +475,7 @@ class ArrayHandler
 			throw new \ArgumentCountError(__FUNCTION__ . ' needs two or more array arguments');
 		}
 		$merged = [];
-		while ($in_arrays) {
-			$in_array = array_shift($in_arrays);
+		foreach ($in_arrays as $in_array) {
 			if (!is_array($in_array)) {
 				throw new \TypeError(__FUNCTION__ . ' encountered a non array argument');
 			}
@@ -813,7 +812,6 @@ class ArrayHandler
 	}
 
 	/**
-	 * TODO: move to CoreLibs ArrayCombined
 	 * return one random entry from an array (value)
 	 * the return entry is null if the incoming array is empty
 	 * the array can also be an array of arrays
@@ -831,9 +829,7 @@ class ArrayHandler
 	}
 
 	/**
-	 * TODO: move to CoreLibs ArrayCombined
 	 * find and remove one value
-	 * on default removes only the first entry
 	 * on default does not strict compare
 	 *
 	 * @param  array<mixed>                       $array
@@ -846,6 +842,9 @@ class ArrayHandler
 		string|int|float|bool|array $value,
 		bool $strict = false,
 	): array {
+		if (empty($array)) {
+			return $array;
+		}
 		return array_filter($array, function ($element) use ($value, $strict) {
 			return $strict ?
 				$element !== $value :
@@ -854,7 +853,6 @@ class ArrayHandler
 	}
 
 	/**
-	 * TODO: move to CoreLibs ArrayCombined
 	 * add a string to each element in an array, default is at the end of the value,
 	 * can be switched with the prefix flag
 	 *
@@ -865,6 +863,10 @@ class ArrayHandler
 	 */
 	public static function addStringToEachValueInArray(array $array, string $string_to_add, bool $prefix = false): array
 	{
+		// nothing set, skip
+		if (empty($string_to_add) || empty($array)) {
+			return $array;
+		}
 		return array_map(function ($value) use ($string_to_add, $prefix) {
 			return $prefix ?
 				$string_to_add . $value :
@@ -880,6 +882,9 @@ class ArrayHandler
 	 */
 	public static function createSortedArrayByKey(array $data): array
 	{
+		if (empty($data)) {
+			return $data;
+		}
 		// Sort by keys
 		ksort($data);
 
