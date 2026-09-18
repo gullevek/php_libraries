@@ -2232,9 +2232,9 @@ class IO
 		$milliseconds = $matches[13] ?? '';
 
 		// clean up, hide entries that have 00 in the time group
-		$hour = $hour != '00' ? preg_replace('/^0/', '', $hour) : '';
-		$minutes = $minutes != '00' ? preg_replace('/^0/', '', $minutes) : '';
-		$seconds = $seconds != '00' ? preg_replace('/^0/', '', $seconds) : '';
+		$hour = !empty($hour) ? preg_replace('/^0/', '', $hour) : '';
+		$minutes = !empty($minutes) ? preg_replace('/^0/', '', $minutes) : '';
+		$seconds = !empty($seconds) ? preg_replace('/^0/', '', $seconds) : '';
 
 		// strip any leading or trailing spaces
 		$time_string = trim(
@@ -2562,21 +2562,27 @@ class IO
 				// set field names
 				$this->cursor_ext[$query_hash]['field_names'] = [];
 				for ($i = 0; $i < $this->cursor_ext[$query_hash]['num_fields']; $i++) {
-					$this->cursor_ext[$query_hash]['field_names'][] =
-						$this->db_functions->__dbFieldName(
+					if (
+						($field_name = $this->db_functions->__dbFieldName(
 							$this->cursor_ext[$query_hash]['cursor'],
 							$i
-						);
+						)) !== false
+					) {
+						$this->cursor_ext[$query_hash]['field_names'][] = $field_name;
+					}
 				}
 				$this->field_names = $this->cursor_ext[$query_hash]['field_names'];
 				// field types
 				$this->cursor_ext[$query_hash]['field_types'] = [];
 				for ($i = 0; $i < $this->cursor_ext[$query_hash]['num_fields']; $i++) {
-					$this->cursor_ext[$query_hash]['field_types'][] =
-						$this->db_functions->__dbFieldType(
+					if (
+						($field_type = $this->db_functions->__dbFieldType(
 							$this->cursor_ext[$query_hash]['cursor'],
 							$i
-						);
+						)) !== false
+					) {
+						$this->cursor_ext[$query_hash]['field_types'][] = $field_type;
+					}
 				}
 				$this->field_types = $this->cursor_ext[$query_hash]['field_types'];
 				// combined name => type

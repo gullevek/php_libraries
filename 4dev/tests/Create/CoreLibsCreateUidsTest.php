@@ -121,7 +121,6 @@ final class CoreLibsCreateUidsTest extends TestCase
 	 * must match 7e78fe0d-59b8-4637-af7f-e88d221a7d1e
 	 *
 	 * @covers ::uuidv4
-	 * @covers ::validateUuidv4
 	 * @testdox uuidv4 check that return is matching regex [$_dataName]
 	 *
 	 * @return void

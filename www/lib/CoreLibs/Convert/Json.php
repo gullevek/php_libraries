@@ -74,11 +74,15 @@ class Json
 	 * Weill set the internval last error state and info can be read with jsonGetLastError
 	 *
 	 * @param  string $json
-	 * @param  int    $flags only JSON_INVALID_UTF8_IGNORE is currently allowed
+	 * @param  int $flags only JSON_INVALID_UTF8_IGNORE is currently allowed
 	 * @return bool
+	 * @throws \InvalidArgumentException if flags is invalid
 	 */
 	public static function jsonValidate(string $json, int $flags = 0): bool
 	{
+		if ($flags != 0 && $flags != JSON_INVALID_UTF8_IGNORE) {
+			throw new \InvalidArgumentException("For flag only 0 or JSON_INVALID_UTF8_IGNORE is allwed: " . $flags);
+		}
 		$json_valid = json_validate($json, flags:$flags);
 		self::$json_last_error = json_last_error();
 		return $json_valid;

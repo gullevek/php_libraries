@@ -87,7 +87,7 @@ final class CoreLibsCreateRandomKeyTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::randomKeyGeyn
+	 * @covers ::randomKeyGen
 	 * @dataProvider randomKeyGenProvider
 	 * @testdox randomKeyGen use $input key length $expected [$_dataName]
 	 *

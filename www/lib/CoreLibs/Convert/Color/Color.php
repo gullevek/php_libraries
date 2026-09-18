@@ -957,9 +957,9 @@ class Color
 	 * Undocumented function
 	 *
 	 * @param  HWB $hwb
-	 * @return Lch
+	 * @return LCH
 	 */
-	public static function hwbToLch(HWB $hwb): Lch
+	public static function hwbToLch(HWB $hwb): LCH
 	{
 		return self::rgbToLch(
 			self::hwbToRgb($hwb)
@@ -1078,10 +1078,10 @@ class Color
 	/**
 	 * OkLab to Lch (CIE)
 	 *
-	 * @param  LAB $lab
+	 * @param  Lab $lab
 	 * @return LCH
 	 */
-	public static function okLabToLch(LAB $lab): LCH
+	public static function okLabToLch(Lab $lab): LCH
 	{
 		return self::labToLch(
 			self::okLabToLab($lab)
@@ -1092,9 +1092,9 @@ class Color
 	 * Lch (CIE) to OkLab
 	 *
 	 * @param  LCH $lch
-	 * @return LAB
+	 * @return Lab
 	 */
-	public static function lchToOkLab(LCH $lch): LAB
+	public static function lchToOkLab(LCH $lch): Lab
 	{
 		return self::labToOkLab(
 			self::lchToLab($lch)

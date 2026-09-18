@@ -18,29 +18,6 @@ final class CoreLibsDebugFileWriterTest extends TestCase
 	 *
 	 * @return array
 	 */
-	public function fsetFolderProvider(): array
-	{
-		return [
-			'valid log folder name' => [
-				0 => '/tmp/',
-				1 => true,
-			],
-			'invalid log folder name' => [
-				0 => 'some name',
-				1 => false,
-			],
-			'not writeable log folder name' => [
-				0 => '/opt',
-				1 => false,
-			]
-		];
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @return array
-	 */
 	public function fsetFilenameProvider(): array
 	{
 		return [
@@ -85,18 +62,59 @@ final class CoreLibsDebugFileWriterTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @dataProvider fsetFolderProvider
-	 * @testdox fsetFolder $input will match $expected [$_dataName]
+	 * @testdox fsetFolder test correct return code
 	 *
-	 * @param string $input
-	 * @param boolean $expected
 	 * @return void
 	 */
-	public function testFsetFolder(string $input, bool $expected): void
+	public function testFsetFolder(): void
 	{
+		// check the following
+		// - valid folder, writeable
+		// - valid folder, not writeable
+		// - invalid folder (eg file)
+		// - invalid folder name (eg contains spaces), must match ^[\w\-\/]+
+
+		// if we have no /tmp/ folder, we cannot test this, so skip the test
+		if (!is_dir('/tmp')) {
+			$this->markTestSkipped('No /tmp folder found, cannot test fsetFolder');
+		}
+		// TEST 3:
+		// create a file in /tmp/ to test invalid folder (eg file)
+		$test_file = '/tmp/somefile.txt';
+		if (!is_file($test_file)) {
+			touch($test_file);
+		}
 		$this->assertEquals(
-			$expected,
-			\CoreLibs\Debug\FileWriter::fsetFolder($input)
+			false,
+			\CoreLibs\Debug\FileWriter::fsetFolder($test_file)
+		);
+		// TEST 4:
+		// test invalid folder name (eg contains spaces), must match ^[\w\-\/]+
+		$this->assertEquals(
+			false,
+			\CoreLibs\Debug\FileWriter::fsetFolder('some name')
+		);
+		// TEST 1:
+		// create a folder in /tmp/ to test valid folder, writeable
+		$test_folder = '/tmp/somefolder';
+		if (!is_dir($test_folder)) {
+			mkdir($test_folder);
+		}
+		$this->assertEquals(
+			true,
+			\CoreLibs\Debug\FileWriter::fsetFolder($test_folder)
+		);
+		// TEST 2:
+		// create a folder in /tmp/ to test valid folder, not writeable
+		$test_folder = '/tmp/somefolder2';
+		if (!is_dir($test_folder)) {
+			mkdir($test_folder);
+		}
+		// remove all write permissions for the folder
+		chmod($test_folder, 0555);
+		$this->assertEquals(
+			false,
+			\CoreLibs\Debug\FileWriter::fsetFolder($test_folder)
 		);
 	}
 

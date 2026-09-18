@@ -3,7 +3,7 @@ node_modules/
 **/composer.lock
 **/vendor/
 tools/
-**/.env
+**/configs/.env
 **/.target
 package-lock.json
 build/

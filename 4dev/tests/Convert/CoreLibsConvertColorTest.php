@@ -101,7 +101,7 @@ final class CoreLibsConvertColorTest extends TestCase
 	 * @covers ::rgbToHwb
 	 * @covers ::hsbToRgb
 	 * @covers ::hslToRgb
-	 * @covers ::hwebToRgb
+	 * @covers ::hwbToRgb
 	 * @testdox Convert from and to RGB via HSL, HWB, HSB/V
 	 *
 	 * @return void
@@ -298,7 +298,6 @@ final class CoreLibsConvertColorTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::returnAsHex()
 	 * @testdox Convert from and to RGB via hex
 	 *
 	 * @return void
@@ -342,8 +341,6 @@ final class CoreLibsConvertColorTest extends TestCase
 	/**
 	 * linear RGB conversion tests
 	 *
-	 * @covers ::fromLinear
-	 * @covers ::toLinear
 	 * @testdox Convert from and to RGB linear conversion check
 	 *
 	 * @return void
@@ -933,7 +930,6 @@ final class CoreLibsConvertColorTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::__get
 	 * @testdox Exception handling for RGB general calls
 	 *
 	 * @return void
@@ -958,7 +954,6 @@ final class CoreLibsConvertColorTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::setFromHex
 	 * @testdox Exception handling for RGB setFromHex failues
 	 *
 	 * @return void
@@ -1086,7 +1081,6 @@ final class CoreLibsConvertColorTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::__get
 	 * @testdox Exception handling for Lab general calls
 	 *
 	 * @return void
@@ -1120,7 +1114,6 @@ final class CoreLibsConvertColorTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::__get
 	 * @testdox Exception handling for LCH general calls
 	 *
 	 * @return void
@@ -1155,7 +1148,6 @@ final class CoreLibsConvertColorTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers ::__get
 	 * @testdox Exception handling for XYZ general calls
 	 *
 	 * @return void

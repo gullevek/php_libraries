@@ -23,4 +23,10 @@
 			<directory>./www/lib/CoreLibs</directory>
 		</include>
 	</source> -->
+	<logging>
+        <!-- JUnit XML log (Most Common for CI/CD) -->
+        <junit outputFile="build/logs/junit.xml"/>
+		<!-- TestDox HTML log -->
+        <testdoxHtml outputFile="build/testdox.html"/>
+	</logging>
 </phpunit>

@@ -9,9 +9,9 @@
 	"license": "",
 	"description": "Core Libraries",
 	"devDependencies": {
-		"@eslint/js": "^9.20.0",
-		"esbuild": "^0.25.0",
-		"eslint": "^9.20.1",
-		"globals": "^15.15.0"
+		"@eslint/js": "^10.0.1",
+		"esbuild": "^0.28.1",
+		"eslint": "^10.5.0",
+		"globals": "^17.7.0"
 	}
 }

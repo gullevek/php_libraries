@@ -135,7 +135,7 @@ var HtmlElementCreator = class {
    * @param  {String} tag          must set tag (div, span, etc)
    * @param  {String} [id='']      optional set for id, if input, select will be used for name
    * @param  {String} [content=''] text content inside, is skipped if sub elements exist
-   * @param  {Array}  [css=[]]     array for css tags
+   * @param  {Array<String>}  [css=[]]     array for css tags
    * @param  {Object} [options={}] anything else (value, placeholder, OnClick, style)
    * @return {Object}              created element as an object
    */
@@ -509,6 +509,11 @@ function numberWithCommas(number) {
 function convertLBtoBR(string) {
   return string.replace(/(?:\r\n|\r|\n)/g, "<br>");
 }
+function decodeHtmlEntities(str) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(str, "text/html");
+  return doc.documentElement.textContent;
+}
 
 // src/utils/DateTimeHelpers.mjs
 function getTimestamp() {
@@ -660,18 +665,19 @@ function getQueryStringParam(search = "", query = "", single = false) {
   if (search) {
     let _params = url.searchParams.getAll(search);
     if (_params.length == 1 || single === true) {
-      param = _params[0];
+      return _params[0];
     } else if (_params.length > 1) {
-      param = _params;
+      return _params;
     }
   } else {
-    param = {};
+    let param2 = {};
     for (const [key] of url.searchParams.entries()) {
-      if (typeof param[key] === "undefined") {
+      if (typeof param2[key] === "undefined") {
         let _params = url.searchParams.getAll(key);
-        param[key] = _params.length < 2 || single === true ? _params[0] : _params;
+        param2[key] = _params.length < 2 || single === true ? _params[0] : _params;
       }
     }
+    return param2;
   }
   return param;
 }
@@ -1425,6 +1431,9 @@ function numberWithCommas2(x) {
 function convertLBtoBR2(string) {
   return convertLBtoBR(string);
 }
+function decodeHtmlEntities2(string) {
+  return decodeHtmlEntities(string);
+}
 function getTimestamp2() {
   return getTimestamp();
 }
@@ -1549,7 +1558,7 @@ function acssel(_element, css) {
   return hec.acssel(_element, css);
 }
 function scssel(_element, rcss, acss) {
-  hec.scssel(_element, rcss, acss);
+  return hec.scssel(_element, rcss, acss);
 }
 function phfo(tree) {
   return hec.phfo(tree);

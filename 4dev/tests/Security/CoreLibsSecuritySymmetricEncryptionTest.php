@@ -104,7 +104,6 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	/**
 	 * test encrypt/decrypt produce correct output
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptDecryptSuccess
@@ -132,7 +131,6 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	/**
 	 * test encrypt/decrypt produce correct output
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptDecryptSuccess
@@ -158,7 +156,6 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	/**
 	 * test encrypt/decrypt produce correct output
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encryptKey
 	 * @covers ::decryptKey
 	 * @dataProvider providerEncryptDecryptSuccess
@@ -202,7 +199,6 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	/**
 	 * Test decryption with wrong key
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptFailed
@@ -228,7 +224,6 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	/**
 	 * Test decryption with wrong key
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encrypt
 	 * @covers ::decrypt
 	 * @dataProvider providerEncryptFailed
@@ -252,7 +247,6 @@ final class CoreLibsSecuritySymmetricEncryptionTest extends TestCase
 	/**
 	 * Test decryption with wrong key
 	 *
-	 * @covers ::generateRandomKey
 	 * @covers ::encryptKey
 	 * @covers ::decryptKey
 	 * @dataProvider providerEncryptFailed

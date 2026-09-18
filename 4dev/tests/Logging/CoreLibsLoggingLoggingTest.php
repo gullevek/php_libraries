@@ -514,7 +514,6 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 	/**
 	 * Undocumented function
 	 *
-	 * @covers Logger\Flag
 	 * @testdox Logger\Flag enum test
 	 *
 	 * @return void
@@ -828,6 +827,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 		// clean all data in folder first
 		array_map('unlink', glob($log->getLogFolder() . $log->getLogFileId() . '*.log'));
 
+		$log_status = false;
 		switch ($level->value) {
 			case 200:
 				$log_status = $log->info($message);
@@ -851,7 +851,7 @@ final class CoreLibsLoggingLoggingTest extends TestCase
 				$log_status = $log->emergency($message);
 				break;
 		}
-		$this->assertTrue($log_status, 'log write successful');
+		$this->assertTrue($log_status, 'log write unsuccessful for level: ' . $level->getName());
 		$file_content = file_get_contents(
 			$log->getLogFolder() . $log->getLogFile()
 		) ?: '';

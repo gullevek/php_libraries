@@ -278,6 +278,38 @@ final class CoreLibsConvertJsonTest extends TestCase
 	}
 
 	/**
+	 * Check if invalid flag throws exception
+	 *
+	 * @covers ::jsonValidate
+	 * @testdox jsonValidate test exception thrown on invalid flag
+	 *
+	 * @return void
+	 */
+	public function testJsonValidateInvalidFlag(): void
+	{
+		$this->expectException("\InvalidArgumentException");
+		\CoreLibs\Convert\Json::jsonValidate('{"valid": "json"}', 5);
+	}
+
+	/**
+	 * Check if valid flag throws no exception
+	 *
+	 * @covers ::jsonValidate
+	 * @testdox jsonValidate test no exception on valid flag
+	 *
+	 * @return void
+	 */
+	public function testJsonValidateValidflag(): void
+	{
+		$this->assertTrue(
+			\CoreLibs\Convert\Json::jsonValidate('{"valid": "json"}', 0)
+		);
+		$this->assertTrue(
+			\CoreLibs\Convert\Json::jsonValidate('{"valid": "json"}', JSON_INVALID_UTF8_IGNORE)
+		);
+	}
+
+	/**
 	 * Undocumented function
 	 *
 	 * @covers ::jsonConvertArrayTo

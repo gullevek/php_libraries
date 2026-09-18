@@ -133,7 +133,7 @@ class DateTime
 		} else {
 			for ($i = 0, $iMax = count($timegroups); $i < $iMax; $i++) {
 				$output = floor((float)$timestamp / $timegroups[$i]);
-				$timestamp = (float)$timestamp % $timegroups[$i];
+				$timestamp = $timestamp % $timegroups[$i];
 				// output has days|hours|min|sec
 				if ($output || $time_string) {
 					$time_string .= $output . $labels[$i] . (($i + 1) != count($timegroups) ? ' ' : '');
@@ -453,7 +453,7 @@ class DateTime
 		}
 		if (isset($matches[11]) && is_numeric($matches[11])) {
 			// for milliseconds, we need to divide by 1000 and add them
-			$timestamp += (float)($matches[11] / 1000);
+			$timestamp += ((float)$matches[11] / 1000);
 		}
 		if ($negative) {
 			// cast to float so we can do a negative multiplication

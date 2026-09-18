@@ -123,10 +123,16 @@ final class CoreLibsDBIOTest extends TestCase
 			'log_file_id' => 'CoreLibs-DB-IO-Test',
 		]);
 		// will be true, default logging is true
-		$db = new \CoreLibs\DB\IO(
-			self::$db_config['valid'],
-			self::$log
-		);
+		try {
+			$db = new \CoreLibs\DB\IO(
+				self::$db_config['valid'],
+				self::$log
+			);
+		} catch (\Exception $e) {
+			self::markTestSkipped(
+				'Cannot connect to Test DB for DB\IO test: ' . $e->getMessage()
+			);
+		}
 		if (!$db->dbGetConnectionStatus()) {
 			self::markTestSkipped(
 				'Cannot connect to valid Test DB for DB\IO test.'
@@ -543,8 +549,6 @@ final class CoreLibsDBIOTest extends TestCase
 	/**
 	 * Test dbSetDbug, dbGetDebug
 	 *
-	 * @covers ::dbGetDbug
-	 * @covers ::dbSetDebug
 	 * @testdox Set and Get Debug flag
 	 *
 	 * @return void
@@ -3021,8 +3025,6 @@ final class CoreLibsDBIOTest extends TestCase
 	 * @covers ::dbReturnParams
 	 * @covers ::dbCacheReset
 	 * @covers ::dbGetCursorExt
-	 * @covers ::dbCursorPos
-	 * @covers ::dbCursorNumRows
 	 * @dataProvider dbReturnProvider
 	 * @testdox dbReturn Read First $read_first_only only and cache $flag_cache and assoc $flag_assoc with (Warning: $warning/Error: $error) [$_dataName]
 	 *

@@ -536,7 +536,7 @@ class PgSQL implements Interface\SqlFunctions
 			$connection_string[] = 'sslmode=' . $db_ssl;
 		}
 		// connect
-		$this->dbh = pg_connect(join(' ', $connection_string));
+		$this->dbh = @pg_connect(join(' ', $connection_string));
 		return $this->dbh;
 	}
 
