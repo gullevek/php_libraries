@@ -18,6 +18,10 @@ export default [
 		globals: {
 			...globals.browser,
 			...globals.jquery
+		},
+		parserOptions: {
+			ecmaVersion: 2022,
+			sourceType: "script",
 		}
 	}},
 	pluginJs.configs.recommended,

@@ -124,3 +124,11 @@ The development for those files is located in a different repository
 General: <https://[service]/CodeBlocks/JavaScript.utils>
 
 Org: <https://[serverice]/[org]/Code-Blocks.JavaScript.utils>
+
+### Update NPM packages
+
+```sh
+npm-check-updates
+ncu -u
+npm install
+```

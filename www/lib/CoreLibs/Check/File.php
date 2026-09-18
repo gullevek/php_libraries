@@ -60,7 +60,7 @@ class File
 	 * @param  string $read_file File to read, relative or absolute path
 	 * @return string mime type
 	 * @throws \UnexpectedValueException if file cannot be read or is not a file
-	 * @throws \RangeException if we cannot get a mime type and throw exception is on
+	 * @throws \RangeException if we cannot get a mime type
 	 */
 	public static function getMimeType(string $read_file): string
 	{
