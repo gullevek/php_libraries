@@ -343,38 +343,6 @@ print "(ksort): " . DgS::printAr(ArrayHandler::ksortArray($nested)) . "<br>";
 print "<hr>";
 
 $search_array = [
-	'table_lookup' => [
-		'match' => [
-			['param' => 'access_d_cd', 'data' => 'a_cd', 'time_validation' => 'on_load',],
-			['param' => 'other_block', 'data' => 'b_cd'],
-			['pflaume' => 'other_block', 'data' => 'c_cd'],
-			['param' => 'third_block', 'data' => 'd_cd', 'time_validation' => 'cool'],
-			['special' => 'other_block', 'data' => 'e_cd', 'time_validation' => 'other'],
-		]
-	]
-];
-print "Search: " . DgS::printAr($search_array) . "<br>";
-print "Result (all): " . Dgs::printAr(ArrayHandler::findArraysMissingKey(
-	$search_array,
-	'other_block',
-	'time_validation'
-)) . "<br>";
-print "Result (key): " . Dgs::printAr(ArrayHandler::findArraysMissingKey(
-	$search_array,
-	'other_block',
-	'time_validation',
-	'pflaume'
-)) . "<br>";
-print "Result (key): " . Dgs::printAr(ArrayHandler::findArraysMissingKey(
-	$search_array,
-	'other_block',
-	['data', 'time_validation'],
-	'pflaume'
-)) . "<br>";
-
-print "<hr>";
-
-$search_array = [
 	'a' => [
 		'lookup' => 1,
 		'value' => 'Foo',
@@ -527,6 +495,45 @@ $result = ArrayHandler::selectArrayFromOption(
 	'|'         // custom separator
 );
 print "*2*Result: " . DgS::printAr($result) . "<br>";
+
+print "<hr>";
+
+$search_array = [
+	'table_lookup' => [
+		'match' => [
+			['param' => 'access_d_cd', 'data' => 'a_cd', 'time_validation' => 'on_load',],
+			['param' => 'other_block', 'data' => 'b_cd'],
+			['pflaume' => 'other_block', 'data' => 'c_cd'],
+			['param' => 'third_block', 'data' => 'd_cd', 'time_validation' => 'cool'],
+			['special' => 'other_block', 'data' => 'e_cd', 'time_validation' => 'other'],
+		]
+	]
+];
+print "Search: " . DgS::printAr($search_array) . "<br>";
+print "Result (all, search single): " . DgS::printAr(ArrayHandler::findArraysMissingKey(
+	$search_array,
+	'other_block',
+	'time_validation'
+)) . "<br>";
+print "Result (key limit): " . DgS::printAr(ArrayHandler::findArraysMissingKey(
+	$search_array,
+	'other_block',
+	'time_validation',
+	'pflaume'
+)) . "<br>";
+print "Result (all, search array): " . DgS::printAr(ArrayHandler::findArraysMissingKey(
+	$search_array,
+	'other_block',
+	['data', 'time_validation'],
+)) . "<br>";
+print "Result (key limit, search array): " . DgS::printAr(ArrayHandler::findArraysMissingKey(
+	$search_array,
+	'other_block',
+	['data', 'time_validation'],
+	'pflaume'
+)) . "<br>";
+
+print "<hr>";
 
 print "</body></html>";
 

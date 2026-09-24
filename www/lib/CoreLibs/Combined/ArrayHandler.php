@@ -248,12 +248,15 @@ class ArrayHandler
 	 * If not found return an array with the array block there the required key is missing,
 	 * the path as string with seperator block set and the missing key entry
 	 *
-	 * @param  array<mixed>          $in_array
-	 * @param  string|int|float|bool $search_value
-	 * @param  string|array<string>  $required_key
-	 * @param  ?string               $search_key [null]
-	 * @param  string                $path_separator [DATA_SEPARATOR]
-	 * @param  string                $current_path
+	 * alternate to findArraysWithMissingKey (single missing key)
+	 *
+	 * @param  array<mixed>          $in_array          Array to search in
+	 * @param  string|int|float|bool $search_value      Value that must be set in any
+	 *                                                  (or with search_key in one entry of the array)
+	 * @param  string|array<string>  $required_key      Key or Keys that must be set
+	 * @param  ?string               $search_key [null] limit search_value check to this key
+	 * @param  string                $path_separator [DATA_SEPARATOR] For the path string separator
+	 * @param  string                $current_path [''] Current path in the array (used for recursion)
 	 * @return array<array{content?:array<mixed>,path?:string,missing_key?:array<string>}>
 	 */
 	public static function findArraysMissingKey(
@@ -272,14 +275,14 @@ class ArrayHandler
 				// Check if this array contains the search value
 				// either any value match or with key
 				if ($search_key === null) {
-					$containsValue = in_array($search_value, $value, true);
+					$contains_value = in_array($search_value, $value, true);
 				} else {
-					$containsValue = array_key_exists($search_key, $value) && $value[$search_key] === $search_value;
+					$contains_value = array_key_exists($search_key, $value) && $value[$search_key] === $search_value;
 				}
 
 				// If it contains the value but doesn't have the required key
 				if (
-					$containsValue &&
+					$contains_value &&
 					(
 						(
 							is_string($required_key) &&
