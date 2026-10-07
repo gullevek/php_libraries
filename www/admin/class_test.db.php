@@ -683,42 +683,48 @@ echo "<hr>";
 
 // NOTE: try to replacate connection still exists if script is run a second time
 // open pg bouncer connection
-$db_pgb = new CoreLibs\DB\IO($DB_CONFIG['test_pgbouncer'] ?? [], $log);
-print "[PGB] DBINFO: " . $db_pgb->dbInfo() . "<br>";
-if ($db->dbPrepare('pgb_sel_test_foo', $q_prep) === false) {
-	print "[PGB] [1] Warning in pgb_sel_test_foo prepare<br>";
-} else {
-	print "[PGB] [1] pgb_sel_test_foo prepare OK<br>";
-}
-// second prepare
-if ($db->dbPrepare('pgb_sel_test_foo', $q_prep) === false) {
-	print "[PGB] [2] Warning in pgb_sel_test_foo prepare<br>";
-} else {
-	print "[PGB] [2] pgb_sel_test_foo prepare OK<br>";
-}
-// same statment name, different query
-if (
-	$db->dbPrepare('pgb_sel_test_foo', <<<SQL
-	SELECT * FROM test_foo WHERE test = $1
-	ORDER BY test_foo_id DESC LIMIT 5
-	SQL) === false
-) {
-	print "[PGB] [3] Error in pgb_sel_test_foo prepare<br>";
-} else {
-	print "[PGB] [3] pgb_sel_test_foo prepare OK<br>";
-}
-$stm_status = $db->dbPreparedCursorStatus('');
-print "[PGB] Empty statement name: " . $log->prAr($stm_status) . "<br>";
-$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foobar');
-print "[PGB] Prepared name not match status: $stm_status<br>";
-$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo');
-print "[PGB] Prepared name match status: $stm_status<br>";
-$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', $q_prep);
-print "[PGB] prepared exists and query match status: $stm_status<br>";
-$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', "SELECT * FROM test_foo");
-print "[PGB] prepared exists and query not match status: $stm_status<br>";
+try {
+	$db_pgb = new CoreLibs\DB\IO($DB_CONFIG['test_pgbouncer'] ?? [], $log);
+	print "[PGB] DBINFO: " . $db_pgb->dbInfo() . "<br>";
+	if ($db->dbPrepare('pgb_sel_test_foo', $q_prep) === false) {
+		print "[PGB] [1] Warning in pgb_sel_test_foo prepare<br>";
+	} else {
+		print "[PGB] [1] pgb_sel_test_foo prepare OK<br>";
+	}
+	// second prepare
+	if ($db->dbPrepare('pgb_sel_test_foo', $q_prep) === false) {
+		print "[PGB] [2] Warning in pgb_sel_test_foo prepare<br>";
+	} else {
+		print "[PGB] [2] pgb_sel_test_foo prepare OK<br>";
+	}
+	// same statment name, different query
+	if (
+		$db->dbPrepare('pgb_sel_test_foo', <<<SQL
+		SELECT * FROM test_foo WHERE test = $1
+		ORDER BY test_foo_id DESC LIMIT 5
+		SQL) === false
+	) {
+		print "[PGB] [3] Error in pgb_sel_test_foo prepare<br>";
+	} else {
+		print "[PGB] [3] pgb_sel_test_foo prepare OK<br>";
+	}
+	$stm_status = $db->dbPreparedCursorStatus('');
+	print "[PGB] Empty statement name: " . $log->prAr($stm_status) . "<br>";
+	$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foobar');
+	print "[PGB] Prepared name not match status: $stm_status<br>";
+	$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo');
+	print "[PGB] Prepared name match status: $stm_status<br>";
+	$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', $q_prep);
+	print "[PGB] prepared exists and query match status: $stm_status<br>";
+	$stm_status = $db->dbPreparedCursorStatus('pgb_sel_test_foo', "SELECT * FROM test_foo");
+	print "[PGB] prepared exists and query not match status: $stm_status<br>";
 
-$db_pgb->dbClose();
+	$db_pgb->dbClose();
+} catch (\Exception $e) {
+	print "<font color='red'>";
+	print "[PGB] Exception caught: " . $e->getMessage() . "<br>";
+	print "</font>";
+}
 
 # db write class test
 $table = 'test_foo';
