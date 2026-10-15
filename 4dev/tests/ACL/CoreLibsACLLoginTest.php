@@ -46,7 +46,8 @@ final class CoreLibsACLLoginTest extends TestCase
 		// database/CoreLibsACLLogin_database_create_data.sql
 		$load_sql_file = __DIR__
 			. DIRECTORY_SEPARATOR
-			. 'database/CoreLibsACLLogin_database_create_data.sql';
+			. 'database' . DIRECTORY_SEPARATOR
+			. 'CoreLibsACLLogin_database_create_data.sql';
 		if (!is_file($load_sql_file)) {
 			self::markTestIncomplete(
 				'Missing ACL\Login database load SQL file'
@@ -63,6 +64,7 @@ final class CoreLibsACLLoginTest extends TestCase
 			. "CoreLibsACLLogin_database_prepare.sh "
 			. "$load_sql_file "
 			. "$db_user "
+			. "$db_password "
 			. "$db_name "
 			. "$db_host ";
 		exec($command, $ouput, $result);
