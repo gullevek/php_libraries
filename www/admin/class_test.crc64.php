@@ -38,6 +38,7 @@ print '<div><h1>' . $PAGE_NAME . '</h1></div>';
 $file = getcwd() . DIRECTORY_SEPARATOR . 'class_test.file.php';
 print "CRC64: $file: " . Crc64::crc64($file) . "<br>";
 print "CRC64HEX: $file: " . Crc64::crc64hex($file) . "<br>";
+print "<hr>";
 
 // big file check including speed
 $base_path = __DIR__ . DIRECTORY_SEPARATOR
@@ -57,16 +58,14 @@ if (!empty($files)) {
 			print "Skipping large file: $file<br>";
 			continue;
 		}
-		RunningTime::runningTime();
+		RunningTime::hrRunningTime();
 		print "CRC64: $file: " . Crc64::crc64($file) . "<br>";
-		RunningTime::runningTime();
-		print "Running Time: $file: " . RunningTime::runningTimeString() . "<br>";
 		print "Running Time: $file: " . RunningTime::hrRunningTime() . "<br>";
+		print "<hr>";
 		print "CRC64HEX: $file: " . Crc64::crc64hex($file) . "<br>";
-		RunningTime::runningTime();
-		print "Running Time: $file: " . RunningTime::runningTimeString() . "<br>";
 		print "Running Time: $file: " . RunningTime::hrRunningTime() . "<br>";
 		RunningTime::hrRunningTimeReset();
+		print "<hr>";
 	}
 } else {
 	print "No files found in base path: $base_path<br>";
