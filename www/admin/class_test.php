@@ -120,6 +120,7 @@ $test_files = [
 	'class_test.datetime.php' => 'Class Test: DATE/TIME',
 	'class_test.array.php' => 'Class Test: ARRAY HANDLER',
 	'class_test.file.php' => 'Class Test: FILE',
+	'class_test.crc64.php' => 'Class Test: CRC64',
 	'class_test.randomkey.php' => 'Class Test: RANDOM KEY',
 	'class_test.system.php' => 'Class Test: SYSTEM',
 	'class_test.readenvfile.php' => 'Class Test: READ ENV FILE',
