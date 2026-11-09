@@ -11,7 +11,7 @@
         "phpstan/phpstan": "^2.0",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/extension-installer": "^1.4",
-        "phan/phan": "^5.4",
+        "phan/phan": "^6.0",
         "phpunit/phpunit": "^9",
         "yamadashy/phpstan-friendly-formatter": "^1.1"
     },
@@ -19,5 +19,13 @@
         "allow-plugins": {
             "phpstan/extension-installer": true
         }
+    },
+    "scripts": {
+        "test": "@php -d xdebug.mode=coverage vendor/bin/phpunit",
+        "phpstan": "vendor/bin/phpstan analyze",
+        "phan": [
+            "@putenv PHAN_DISABLE_XDEBUG_WARN=1",
+            "vendor/bin/phan --progress-bar -C --analyze-twice"
+        ]
     }
 }
