@@ -6,6 +6,7 @@ update:
 	composer update
 	cd www && composer update
 	cd www && composer dump-autoload
+	cd www && composer audit --no-dev --no-scripts --no-plugins --no-interaction
 
 all: update format-check lint test
 
