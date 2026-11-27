@@ -26,8 +26,10 @@ class RandomKey
 	private static string $key_character_range = '';
 	/** @var int character count in they key character range */
 	private static int $key_character_range_length = 0;
-	/** @var int default key lenghth */
-	/** @deprecated Will be removed, as setting has moved to randomKeyGen */
+	/**
+	 * @var int default key lenghth
+	 * @deprecated Will be removed, as setting has moved to randomKeyGen
+	 */
 	private static int $key_length = 4;
 
 	/**
@@ -126,6 +128,7 @@ class RandomKey
 	 * @param  int  $key_length key length
 	 * @return bool             true/false for set status
 	 * @deprecated This function does no longer set the key length, the randomKeyGen parameter has to be used
+	 * @suppress PhanDeprecatedProperty
 	 */
 	public static function setRandomKeyLength(int $key_length): bool
 	{
@@ -142,7 +145,8 @@ class RandomKey
 	 * get the current set random key length
 	 *
 	 * @return int Current set key length
-	 * @deprecated Key length is set during randomKeyGen call, this nethid is deprecated
+	 * @deprecated Key length is set during randomKeyGen call, this method is deprecated
+	 * @suppress PhanDeprecatedProperty
 	 */
 	public static function getRandomKeyLength(): int
 	{

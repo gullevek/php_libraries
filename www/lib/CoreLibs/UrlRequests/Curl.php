@@ -70,8 +70,8 @@ class Curl implements Interface\RequestsInterface
 		'base_uri' => '',
 		'query' => [],
 		'headers' => [],
-		'timeout' => 0,
-		'connection_timeout' => 300,
+		'timeout' => 0.0,
+		'connection_timeout' => 300.0,
 	];
 	/** @var array{scheme?:string,user?:string,host?:string,port?:string,path?:string,query?:string,fragment?:string,pass?:string} parsed base_uri */
 	private array $parsed_base_uri = [];
@@ -118,14 +118,6 @@ class Curl implements Interface\RequestsInterface
 	 */
 	private function setConfiguration(array $config)
 	{
-		$default_config = [
-			'http_errors' => true,
-			'base_uri' => '',
-			'query' => [],
-			'headers' => [],
-			'timeout' => 0,
-			'connection_timeout' => 300,
-		];
 		// auth string is array of 0: user, 1: password, 2: auth type
 		if (!empty($config['auth']) && is_array($config['auth'])) {
 			$auth_data = $this->authParser($config['auth']);
@@ -157,14 +149,26 @@ class Curl implements Interface\RequestsInterface
 			}
 		}
 		// timeout (must be numeric)
-		if (!empty($config['timeout']) && !is_numeric($config['timeout'])) {
-			$config['timeout'] = 0;
+		$timeout = 0.0;
+		if (!empty($config['timeout']) && is_numeric($config['timeout'])) {
+			$timeout = (float)$config['timeout'];
 		}
-		if (!empty($config['connection_timeout']) && !is_numeric($config['connection_timeout'])) {
-			$config['connection_timeout'] = 300;
+		$connection_timeout = 300.0;
+		if (!empty($config['connection_timeout']) && is_numeric($config['connection_timeout'])) {
+			$connection_timeout = (float)$config['connection_timeout'];
 		}
 
-		$this->config = array_merge($default_config, $config);
+		$this->config = [
+			'http_errors' => $config['http_errors'],
+			'base_uri' => $config['base_uri'] ?? '',
+			'query' => $config['query'] ?? [],
+			'headers' => $config['headers'] ?? [],
+			'timeout' => $timeout,
+			'connection_timeout' => $connection_timeout,
+		];
+		if (!empty($config['auth']) && is_array($config['auth'])) {
+			$this->config['auth'] = $config['auth'];
+		}
 	}
 
 	// MARK: auth parser

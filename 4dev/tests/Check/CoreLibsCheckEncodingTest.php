@@ -25,7 +25,8 @@ final class CoreLibsCheckEncodingTest extends TestCase
 			// 1: source encoding
 			// 2: target encoding
 			// 3: substitue character
-			// 4: false for ok, array with error list
+			// 4: false for ok, array with error list,
+			//    or exception class name if setErrorChar must throw
 			'valid test UTF-8 to SJIS (default)' => [
 				'日本語',
 				'UTF-8',
@@ -68,6 +69,34 @@ final class CoreLibsCheckEncodingTest extends TestCase
 				'entity',
 				['❶']
 			],
+			'invalid error char (code point above 0x10FFFF)' => [
+				'❶',
+				'UTF-8',
+				'SJIS',
+				0x110000,
+				\InvalidArgumentException::class
+			],
+			'invalid error char (negative code point)' => [
+				'❶',
+				'UTF-8',
+				'SJIS',
+				-1,
+				\InvalidArgumentException::class
+			],
+			'invalid error char (more than one character)' => [
+				'❶',
+				'UTF-8',
+				'SJIS',
+				'ab',
+				\InvalidArgumentException::class
+			],
+			'invalid error char (surrogate code point)' => [
+				'❶',
+				'UTF-8',
+				'SJIS',
+				0xD800,
+				\InvalidArgumentException::class
+			],
 		];
 	}
 
@@ -82,17 +111,20 @@ final class CoreLibsCheckEncodingTest extends TestCase
 	 * @param  string          $from_encoding
 	 * @param  string          $to_encoding
 	 * @param  string|int|null $error_char
-	 * @param  array|bool      $expected
+	 * @param  array|bool|string $expected
 	 * @return void
 	 */
 	public function testCheckConvertEncoding(
 		string $input,
 		string $from_encoding,
 		string $to_encoding,
-		$error_char,
-		$expected
+		string|int|null $error_char,
+		array|bool|string $expected
 	): void {
 		$current_subsitute_character = mb_substitute_character();
+		if (is_string($expected)) {
+			$this->expectException($expected);
+		}
 		if ($error_char !== null) {
 			\CoreLibs\Check\Encoding::setErrorChar($error_char);
 			if (!in_array($error_char, ['none', 'long', 'entity'])) {

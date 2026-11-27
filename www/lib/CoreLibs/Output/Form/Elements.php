@@ -63,7 +63,7 @@ class Elements
 		// max days in selected month
 		$days_in_month = date(
 			't',
-			strtotime($year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':0') ?: null
+			strtotime($year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':0') ?: time()
 		);
 		$string = '';
 		// from now to ?
@@ -98,7 +98,7 @@ class Elements
 			// set weekday text based on current month ($month) and year ($year)
 			$string .= '<option value="' . ($i < 10 ? '0' . $i : $i) . '" '
 				. ($day == $i ? 'selected' : '') . '>' . $i
-				. ' (' . date('D', mktime(0, 0, 0, (int)$month, $i, (int)$year) ?: null) . ')</option>';
+				. ' (' . date('D', mktime(0, 0, 0, (int)$month, $i, (int)$year) ?: time()) . ')</option>';
 		}
 		$string .= '</select> ';
 		if ($name_pos_back === true) {

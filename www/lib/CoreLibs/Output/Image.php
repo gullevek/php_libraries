@@ -317,17 +317,12 @@ class Image
 						imagealphablending($thumb, false);
 						imagesavealpha($thumb, true);
 					}
-					$source = null;
-					switch ($img_type) {
-						case IMAGETYPE_JPEG:
-							$source = imagecreatefromjpeg($filename);
-							break;
-						case IMAGETYPE_PNG:
-							$source = imagecreatefrompng($filename);
-							break;
-					}
+					$source = match ($img_type) {
+						IMAGETYPE_JPEG => imagecreatefromjpeg($filename),
+						IMAGETYPE_PNG => imagecreatefrompng($filename),
+					};
 					// check that we have a source image resource
-					if ($source !== null && $source !== false) {
+					if ($source !== false) {
 						// resize no shift
 						if ($high_quality === true) {
 							imagecopyresized(
@@ -357,13 +352,15 @@ class Image
 							);
 						}
 						// write file
-						switch ($img_type) {
-							case IMAGETYPE_JPEG:
-								imagejpeg($thumb, $thumbnail_write_path . $thumbnail, $jpeg_quality);
-								break;
-							case IMAGETYPE_PNG:
-								imagepng($thumb, $thumbnail_write_path . $thumbnail);
-								break;
+						$write_success = match ($img_type) {
+							IMAGETYPE_JPEG => imagejpeg($thumb, $thumbnail_write_path . $thumbnail, $jpeg_quality),
+							IMAGETYPE_PNG => imagepng($thumb, $thumbnail_write_path . $thumbnail),
+						};
+						if ($write_success === false) {
+							throw new \RuntimeException(
+								'Failed to write thumbnail: ' . $thumbnail . ', ' . $filename,
+								4
+							);
 						}
 					} else {
 						throw new \RuntimeException(

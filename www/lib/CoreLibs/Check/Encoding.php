@@ -10,8 +10,8 @@ namespace CoreLibs\Check;
 
 class Encoding
 {
-	/** @var int<min, -1>|int<1, max>|string */
-	private static int|string $mb_error_char = '';
+	/** @var string error character, or none/long/entity */
+	private static string $mb_error_char = '';
 
 	/**
 	 * set error char
@@ -24,6 +24,7 @@ class Encoding
 	 *                                 default character is ? (63)
 	 *                                 if null is set then "none"
 	 * @return void
+	 * @throws \InvalidArgumentException if the character or code point is not valid
 	 */
 	public static function setErrorChar(string|int|null $string): void
 	{
@@ -31,17 +32,32 @@ class Encoding
 			$string = 'none';
 		}
 		// if not special string or char but code point
-		if (in_array($string, ['none', 'long', 'entity'])) {
-			self::$mb_error_char = $string;
+		if (in_array($string, ['none', 'long', 'entity'], true)) {
+			$error_char = $string;
+			$substitute = $string;
 		} else {
-			// always convert to char for internal use
-			self::$mb_error_char = \IntlChar::chr($string);
-			// if string convert to code point
-			if (is_string($string)) {
-				$string = \IntlChar::ord($string);
+			// always convert to char for internal use, null on invalid code point/char
+			$error_char = \IntlChar::chr($string);
+			// mb_substitute_character needs the code point
+			$substitute = is_string($string) ? \IntlChar::ord($string) : $string;
+			if ($error_char === null || $substitute === null) {
+				throw new \InvalidArgumentException(
+					'Invalid error character or code point: ' . $string
+				);
 			}
 		}
-		mb_substitute_character($string);
+		try {
+			mb_substitute_character($substitute);
+		} catch (\ValueError $e) {
+			// eg surrogate code points like 0xD800
+			throw new \InvalidArgumentException(
+				'Invalid error character or code point: ' . $string,
+				0,
+				$e
+			);
+		}
+		// only set after mb_substitute_character accepted it
+		self::$mb_error_char = $error_char;
 	}
 
 	/**
