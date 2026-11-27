@@ -1,29 +1,36 @@
 default:
 
-all: format-check lint test
+# always run composer update on self and www
+# www uses a classmap on lib/, dump-autoload picks up new classes
+update:
+	composer update
+	cd www && composer update
+	cd www && composer dump-autoload
 
-format-check:
+all: update format-check lint test
+
+format-check: update
 	composer run-script format-check
 
-format:
+format: update
 	composer run-script format
 
-lint:
+lint: update
 	composer run-script phan
 	composer run-script phpstan
 
-lint-phan:
+lint-phan: update
 	composer run-script phan
 
-lint-phpstan:
+lint-phpstan: update
 	composer run-script phpstan
 
 # Tests
-test:
+test: update
 	composer test
 
 # copy to composer build folder
 copy: all
 	4dev/composer/sync-to-composer-all-folder.sh go
 
-.PHONY: all format-check format lint lint-phan lint-phpstan test copy
+.PHONY: update all format-check format lint lint-phan lint-phpstan test copy
