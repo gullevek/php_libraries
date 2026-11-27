@@ -972,7 +972,7 @@ class Color
 	 * @param  LCH $lch
 	 * @return HWB
 	 */
-	public static function lchToHweb(LCH $lch): HWB
+	public static function lchToHwb(LCH $lch): HWB
 	{
 		return self::rgbToHwb(
 			self::lchToRgb($lch)

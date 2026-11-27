@@ -13,6 +13,29 @@ use PHPUnit\Framework\TestCase;
  */
 final class CoreLibsGetSystemTest extends TestCase
 {
+	/** @var array<string,mixed> backup of $_SERVER, restored after each test */
+	private array $server_backup = [];
+
+	/**
+	 * backup $_SERVER, tests in here change it
+	 *
+	 * @return void
+	 */
+	protected function setUp(): void
+	{
+		$this->server_backup = $_SERVER;
+	}
+
+	/**
+	 * restore $_SERVER
+	 *
+	 * @return void
+	 */
+	protected function tearDown(): void
+	{
+		$_SERVER = $this->server_backup;
+	}
+
 	/**
 	 * Undocumented function
 	 *
@@ -218,26 +241,113 @@ final class CoreLibsGetSystemTest extends TestCase
 	}
 
 	/**
+	 * Provider for getIpAddresses
+	 * CLI has no REMOTE_ADDR, so the $_SERVER values are faked
+	 *
+	 * @return array<string,array{0:array<string,string>,1:array<string,string|array<string>>}>
+	 */
+	public function getIpAddressesProvider(): array
+	{
+		return [
+			// 0: $_SERVER entries to set
+			// 1: expected return
+			'nothing set' => [
+				[],
+				[],
+			],
+			'only REMOTE_ADDR' => [
+				['REMOTE_ADDR' => '192.168.0.10'],
+				['REMOTE_ADDR' => '192.168.0.10'],
+			],
+			'only HTTP_X_FORWARDED_FOR' => [
+				['HTTP_X_FORWARDED_FOR' => '10.0.0.1'],
+				['HTTP_X_FORWARDED_FOR' => '10.0.0.1'],
+			],
+			'only CLIENT_IP' => [
+				['CLIENT_IP' => '172.16.0.5'],
+				['CLIENT_IP' => '172.16.0.5'],
+			],
+			'IPv6 REMOTE_ADDR' => [
+				['REMOTE_ADDR' => '2001:db8::1'],
+				['REMOTE_ADDR' => '2001:db8::1'],
+			],
+			'all set, return order is fixed' => [
+				[
+					'CLIENT_IP' => '172.16.0.5',
+					'HTTP_X_FORWARDED_FOR' => '10.0.0.1',
+					'REMOTE_ADDR' => '192.168.0.10',
+				],
+				[
+					'REMOTE_ADDR' => '192.168.0.10',
+					'HTTP_X_FORWARDED_FOR' => '10.0.0.1',
+					'CLIENT_IP' => '172.16.0.5',
+				],
+			],
+			'forwarded for list adds -array entry' => [
+				[
+					'REMOTE_ADDR' => '192.168.0.10',
+					'HTTP_X_FORWARDED_FOR' => '10.0.0.1,10.0.0.2,10.0.0.3',
+				],
+				[
+					'REMOTE_ADDR' => '192.168.0.10',
+					'HTTP_X_FORWARDED_FOR' => '10.0.0.1,10.0.0.2,10.0.0.3',
+					'HTTP_X_FORWARDED_FOR-array' => ['10.0.0.1', '10.0.0.2', '10.0.0.3'],
+				],
+			],
+			'list with spaces is not trimmed' => [
+				['HTTP_X_FORWARDED_FOR' => '10.0.0.1, 10.0.0.2'],
+				[
+					'HTTP_X_FORWARDED_FOR' => '10.0.0.1, 10.0.0.2',
+					'HTTP_X_FORWARDED_FOR-array' => ['10.0.0.1', ' 10.0.0.2'],
+				],
+			],
+			'empty values are skipped' => [
+				[
+					'REMOTE_ADDR' => '',
+					'HTTP_X_FORWARDED_FOR' => '',
+					'CLIENT_IP' => '172.16.0.5',
+				],
+				['CLIENT_IP' => '172.16.0.5'],
+			],
+			'other $_SERVER keys are ignored' => [
+				[
+					'REMOTE_ADDR' => '192.168.0.10',
+					'HTTP_CLIENT_IP' => '1.2.3.4',
+					'HTTP_X_REAL_IP' => '5.6.7.8',
+				],
+				['REMOTE_ADDR' => '192.168.0.10'],
+			],
+		];
+	}
+
+	/**
 	 * Undocumented function
 	 *
 	 * @covers ::getIpAddresses
-	 * @testdox getIpAddresses check
+	 * @dataProvider getIpAddressesProvider
+	 * @testdox getIpAddresses check [$_dataName]
 	 *
+	 * @param  array<string,string>                $server   $_SERVER entries to set
+	 * @param  array<string,string|array<string>> $expected expected return
 	 * @return void
 	 */
-	public function testGetIpAddresses()
+	public function testGetIpAddresses(array $server, array $expected): void
 	{
-		// response must have "REMOTE_ADDR" entry, others are optional
-		// NOTE: we have no IP addresses on command line
-		$this->assertTrue(
-			true,
-			"We do not have REMOTE_ADDR on command line"
+		// CLI has no REMOTE_ADDR, start clean and fake the entries
+		unset(
+			$_SERVER['REMOTE_ADDR'],
+			$_SERVER['HTTP_X_FORWARDED_FOR'],
+			$_SERVER['CLIENT_IP']
 		);
-		// $this->assertContains(
-		// 	'REMOTE_ADDR',
-		// 	array_keys(\CoreLibs\Get\System::getIpAddresses()),
-		// 	'failed REMOTE_ADDR assert'
-		// );
+		foreach ($server as $key => $value) {
+			$_SERVER[$key] = $value;
+		}
+		// assertSame so key order and types are checked too
+		$this->assertSame(
+			$expected,
+			\CoreLibs\Get\System::getIpAddresses(),
+			'failed getIpAddresses assert'
+		);
 	}
 }
 

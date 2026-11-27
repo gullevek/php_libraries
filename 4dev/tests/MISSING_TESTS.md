@@ -24,7 +24,7 @@ These test files exist but only call `markTestSkipped`/`markTestIncomplete`, so 
 
 ### `Admin/EditBase.php`
 
-- Test file: `Admin/CoreLibsAdminEditPageTest.php (file is named EditPage, class is EditBase)`
+- Test file: `Admin/CoreLibsAdminEditBaseTest.php`
 - Missing (2): `__construct`, `editBaseRun`
 
 ### `DB/Extended/ArrayIO.php`
@@ -97,7 +97,7 @@ These test files exist but only call `markTestSkipped`/`markTestIncomplete`, so 
 | `ACL/Login.php` | 29 / 44 | `__construct`, `writeLog`, `loginGetLocale`, `loginGetHeaderColor`, `loginGetPages`, `loginGetPageLookupList`, `loginPageAccessAllowed`, `loginGetEuid`, `loginGetEuCuid`, `loginGetEcuuid`, `loginGetEuCuuid`, `loginLogoutUser`, `loginGetPermissionOkay`, `loginGetEditAccessCuidFromId`, `loginGetEditAccessIdFromCuid` |
 | `Check/Email.php` | 6 / 7 | `getEmailRegexCheck` |
 | `Combined/ArrayHandler.php` | 24 / 25 | `arrayRemoveEntry` |
-| `Convert/Color/Color.php` | 24 / 56 | `hslToOkLab`, `okLabToHsl`, `hslToOkLch`, `okLchToHsl`, `hsbToOkLab`, `okLabToHsb`, `hsbToOkLch`, `okLchToHsb`, `hwbToOkLab`, `okLabToHwb`, `hwbToOkLch`, `okLchToHwb`, `hslToLab`, `labToHsl`, `hslToLch`, `lchToHsl`, `hsbToLab`, `labToHsb`, `hsbToLch`, `lchToHsb`, `hwbToLab`, `labToHwb`, `hwbToLch`, `lchToHweb`, `okLabToLab`, `labToOkLab`, `okLchToLab`, `labToOkLch`, `okLchToLch`, `lchToOkLch`, `okLabToLch`, `lchToOkLab` |
+| `Convert/Color/Color.php` | 24 / 56 | `hslToOkLab`, `okLabToHsl`, `hslToOkLch`, `okLchToHsl`, `hsbToOkLab`, `okLabToHsb`, `hsbToOkLch`, `okLchToHsb`, `hwbToOkLab`, `okLabToHwb`, `hwbToOkLch`, `okLchToHwb`, `hslToLab`, `labToHsl`, `hslToLch`, `lchToHsl`, `hsbToLab`, `labToHsb`, `hsbToLch`, `lchToHsb`, `hwbToLab`, `labToHwb`, `hwbToLch`, `lchToHwb`, `okLabToLab`, `labToOkLab`, `okLchToLab`, `labToOkLch`, `okLchToLch`, `lchToOkLch`, `okLabToLch`, `lchToOkLab` |
 | `Convert/Color/Coordinates/HSB.php` | 3 / 5 | `create`, `toCssString` |
 | `Convert/Color/Coordinates/HSL.php` | 3 / 5 | `create`, `toCssString` |
 | `Convert/Color/Coordinates/HWB.php` | 3 / 5 | `create`, `toCssString` |
@@ -113,7 +113,7 @@ These test files exist but only call `markTestSkipped`/`markTestIncomplete`, so 
 | `DB/Support/ConvertPlaceholder.php` | 1 / 2 | `updateParamList` |
 | `Debug/LoggingLegacy.php` | 18 / 23 | `basicSetLogId`, `debugFor`, `resetErrorMsg`, `getErrorMsg`, `mergeErrors` |
 | `Debug/Support.php` | 17 / 18 | `printIsoTime` |
-| `Get/System.php` | 4 / 6 | `getPageNameArray`, `getIpAddresses` |
+| `Get/System.php` | 5 / 6 | `getPageNameArray` |
 | `Language/L10n.php` | 22 / 32 | `setOverrideEncoding`, `getOverrideEncoding`, `getEncoding`, `__getLang`, `getMoFile`, `__getMoFile`, `getBaseLocalePath`, `getBaseContentPath`, `__e`, `ngettext` |
 | `Language/l10n_functions.php` | 6 / 13 | `_ngettext`, `_pgettext`, `_npgettext`, `_dgettext`, `_dngettext`, `_dpgettext`, `_dnpgettext` |
 | `Logging/ErrorMessage.php` | 8 / 12 | `setFlagLogError`, `getFlagLogError`, `setFlagLogWarning`, `getFlagLogWarning` |
@@ -129,11 +129,10 @@ These test files exist but only call `markTestSkipped`/`markTestIncomplete`, so 
 Notes:
 
 - `ACL/Login.php`: the constructor is only used via `getMockBuilder`; the test file header already lists part of these as "Not yet covered"
-- `Convert/Color/Color.php`: round trips tested: rgb/hsl/hsb/hwb among each other, rgb<->lab, rgb<->okLab, lab<->lch, okLab<->okLch. Note: `lchToHweb` looks like a typo for `lchToHwb`
+- `Convert/Color/Color.php`: round trips tested: rgb/hsl/hsb/hwb among each other, rgb<->lab, rgb<->okLab, lab<->lch, okLab<->okLch
 - `Convert/MimeAppName.php`: only the static methods are tested, the class is never instantiated
 - `Create/RandomKey.php`: only `randomKeyGen` is tested, the instance/key range API is not
 - `Debug/LoggingLegacy.php`: TODO in test: setLogUniqueId/getLogUniqueId, setLogPer log file name pattern
-- `Get/System.php`: `getIpAddresses` has a test, but it only does `assertTrue(true)` (no REMOTE_ADDR in CLI)
 - `Language/L10n.php`: TODO in test: domain based gettext functions
 - `Logging/Logging.php`: TODO in test: setLogPer log file name pattern
 - `Template/HtmlBuilder/Block.php`: the test file lists the missing methods as comments
