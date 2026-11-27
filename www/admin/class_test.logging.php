@@ -1,8 +1,4 @@
-<?php // phpcs:ignore PSR1.Files.SideEffects
-
-/**
- * @phan-file-suppress PhanTypeSuspiciousStringExpression
- */
+<?php
 
 declare(strict_types=1);
 
@@ -14,6 +10,8 @@ ob_start();
 define('USE_DATABASE', false);
 // sample config
 require 'config.php';
+require 'testLibs/TestP.php';
+use Admin\TestLibs\TestP;
 // set session name
 $GLOBALS['SET_SESSION_NAME'] = EDIT_SESSION_NAME;
 // define log file id
@@ -106,29 +104,6 @@ try {
 	'log_file_id' => 'a',
 	'log_file_id' => 'a',
 ]); */
-
-// @codingStandardsIgnoreLine
-Class TestP
-{
-	/** @var \CoreLibs\Logging\Logging */
-	public $log;
-	public function __construct(
-		\CoreLibs\Logging\Logging $log
-	) {
-		$this->log = $log;
-	}
-
-	public function test(): void
-	{
-		$this->log->info('TestL::test call');
-		$this->subCall();
-	}
-
-	public function subCall(): void
-	{
-		$this->log->info('TestL::sub_call call');
-	}
-}
 
 $tl = new TestP($log);
 $tl->test();

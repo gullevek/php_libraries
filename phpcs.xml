@@ -20,6 +20,7 @@
 	<exclude-pattern>*/www/log/*</exclude-pattern>
 	<exclude-pattern>*/www/media/*</exclude-pattern>
 	<exclude-pattern>*/www/layout/*</exclude-pattern>
+	<exclude-pattern>*/www/lib/FileUpload/*</exclude-pattern>
 
 	<rule ref="PSR1"/>
 	<rule ref="PSR12">

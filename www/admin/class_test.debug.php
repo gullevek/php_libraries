@@ -20,6 +20,12 @@ ob_start();
 define('USE_DATABASE', false);
 // sample config
 require 'config.php';
+require 'testLibs/TestL.php';
+require 'testLibs/TestR.php';
+require 'testLibs/AttachOutside.php';
+use Admin\TestLibs\TestL;
+use Admin\TestLibs\TestR;
+use Admin\TestLibs\AttachOutside;
 // set session name
 $GLOBALS['SET_SESSION_NAME'] = EDIT_SESSION_NAME;
 // define log file id
@@ -156,62 +162,6 @@ print "LOG LEVEL: " .  DebugSupport::printAr(\CoreLibs\Convert\SetVarType::setAr
 
 echo "<b>CLASS DEBUG CALL LEGACY</b><br>";
 
-// @codingStandardsIgnoreLine
-class TestL
-{
-	/** @var \CoreLibs\Debug\LoggingLegacy */
-	public $log;
-	public function __construct()
-	{
-		$this->log = new CoreLibs\Debug\LoggingLegacy([
-			'log_folder' => '../log/',
-			'file_id' => 'DebugTestTestLLogger',
-		]);
-	}
-	/**
-	 * Undocumented function
-	 *
-	 * @param  string|null $ts
-	 * @return bool
-	 */
-	public function test(?string $ts = null): bool
-	{
-		print "* GETCALLERCLASS(INSIDE CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
-		print "* GETCALLERTOPCLASS(INSIDE CLASS): " . \CoreLibs\Debug\Support::getCallerTopLevelClass() . "<br>";
-		print "* GETCALLSTACK(INSIDE CLASS): <pre>"
-			. DebugSupport::prAr(\CoreLibs\Debug\Support::getCallStack()) . "</pre><br>";
-		$this->log->debug('TESTL', 'Logging in class testL' . ($ts !== null ? ': ' . $ts : ''));
-		$this->log->debug('TESTL', 'Some other message');
-		return true;
-	}
-}
-// @codingStandardsIgnoreLine
-class TestR extends TestL
-{
-	/** @var string */
-	public $foo;
-	public function __construct()
-	{
-		parent::__construct();
-	}
-	/**
-	 * Undocumented function
-	 *
-	 * @return bool
-	 */
-	public function subTest(): bool
-	{
-		print "** GETCALLERCLASS(INSIDE EXTND CLASS): " . \CoreLibs\Debug\Support::getCallerClass() . "<br>";
-		print "** GETCALLERTOPCLASS(INSIDE EXTND CLASS): " . \CoreLibs\Debug\Support::getCallerTopLevelClass() . "<br>";
-		print "** GETCALLSTACK(INSIDE EXTND CLASS): <pre>"
-			. DebugSupport::prAr(\CoreLibs\Debug\Support::getCallStack()) . "</pre><br>";
-		$this->log->debug('TESTR', 'Logging in class testR (extends testL)');
-		$this->test('TESTR INSIDE');
-		$this->log->debug('TESTR', 'Array: '
-			. $this->log->prAr(['a', 'b']) . ', Other: ' . $this->log->prAr(['a', 'b']));
-		return true;
-	}
-}
 $tl = new TestL();
 print "CLASS: LOG ECHO: " . (string)$tl->log->getLogLevelAll('echo') . "<br>";
 print "CLASS: DEBUG: " . $tl->test() . "<br>";
@@ -224,25 +174,7 @@ print "CLASS EXTEND: PRINTERRORMSG: <br>" . $tr->log->printErrorMsg() . "<br>";
 
 // test attaching a logger from outside
 // @codingStandardsIgnoreLine
-class AttachOutside
-{
-	/** @var \CoreLibs\Debug\LoggingLegacy */
-	public $log;
-	public function __construct(\CoreLibs\Debug\LoggingLegacy $logger_class)
-	{
-		$this->log = $logger_class;
-	}
-	/**
-	 * Undocumented function
-	 *
-	 * @return string
-	 */
-	public function test(): string
-	{
-		$this->log->debug('ATTACHOUTSIDE', 'A test');
-		return get_class($this);
-	}
-}
+
 $ao = new AttachOutside($debug);
 print "AO-CLASS: DEBUG: " . $ao->test() . "<br>";
 
