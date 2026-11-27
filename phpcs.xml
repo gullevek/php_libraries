@@ -2,6 +2,25 @@
 <ruleset name="MyStandard">
 	<description>PSR12 override rules (strict, standard). Switch spaces indent to tab.</description>
 	<arg name="tab-width" value="4"/>
+	<!-- only check php files, show progress, colors and sniff codes -->
+	<arg name="extensions" value="php"/>
+	<arg value="psn"/>
+	<arg name="colors"/>
+	<!-- shorter file paths in the report -->
+	<arg name="basepath" value="."/>
+
+	<!-- default folder to scan if no file/folder is given on the command line -->
+	<file>www</file>
+
+	<!-- folders to skip (regex style patterns matched against the full path) -->
+	<exclude-pattern>*/www/vendor/*</exclude-pattern>
+	<exclude-pattern>*/www/templates_c/*</exclude-pattern>
+	<exclude-pattern>*/www/cache/*</exclude-pattern>
+	<exclude-pattern>*/www/tmp/*</exclude-pattern>
+	<exclude-pattern>*/www/log/*</exclude-pattern>
+	<exclude-pattern>*/www/media/*</exclude-pattern>
+	<exclude-pattern>*/www/layout/*</exclude-pattern>
+
 	<rule ref="PSR1"/>
 	<rule ref="PSR12">
 		<!-- turn off white space check for tab -->

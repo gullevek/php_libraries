@@ -1,6 +1,6 @@
 {
 	"name": "core-libraries",
-	"version": "9.26.8",
+	"version": "9.43.1",
 	"main": "",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
